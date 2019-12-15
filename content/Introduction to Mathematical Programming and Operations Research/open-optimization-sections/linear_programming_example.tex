@@ -1,0 +1,215 @@
+\subsection{Linear Programming Examples}
+
+    The solver called here is Clp, but several other solvers could be used
+instead.
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}1}]:} \PY{k}{using} \PY{n}{JuMP}\PY{p}{,} \PY{n}{Clp}
+        
+        \PY{c}{\PYZsh{} Preparing an optimization model}
+        \PY{n}{m} \PY{o}{=} \PY{n}{Model}\PY{p}{(}\PY{n}{solver} \PY{o}{=} \PY{n}{ClpSolver}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+        \PY{c}{\PYZsh{} Declaring variables}
+        \PY{n+nd}{@variable}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{l+m+mi}{0}\PY{o}{\PYZlt{}=} \PY{n}{x1} \PY{o}{\PYZlt{}=}\PY{l+m+mi}{10}\PY{p}{)}
+        \PY{n+nd}{@variable}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{x2} \PY{o}{\PYZgt{}=}\PY{l+m+mi}{0}\PY{p}{)}
+        \PY{n+nd}{@variable}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{x3} \PY{o}{\PYZgt{}=}\PY{l+m+mi}{0}\PY{p}{)}
+        
+        \PY{c}{\PYZsh{} Setting the objective}
+        \PY{n+nd}{@objective}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{Max}\PY{p}{,} \PY{n}{x1} \PY{o}{+} \PY{l+m+mi}{2}\PY{n}{x2} \PY{o}{+} \PY{l+m+mi}{5}\PY{n}{x3}\PY{p}{)}
+        
+        \PY{c}{\PYZsh{} Adding constraints}
+        \PY{n+nd}{@constraint}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{constraint1}\PY{p}{,} \PY{o}{\PYZhy{}}\PY{n}{x1} \PY{o}{+}  \PY{n}{x2} \PY{o}{+} \PY{l+m+mi}{3}\PY{n}{x3} \PY{o}{\PYZlt{}=} \PY{o}{\PYZhy{}}\PY{l+m+mi}{5}\PY{p}{)}
+        \PY{n+nd}{@constraint}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{constraint2}\PY{p}{,}  \PY{n}{x1} \PY{o}{+} \PY{l+m+mi}{3}\PY{n}{x2} \PY{o}{\PYZhy{}} \PY{l+m+mi}{7}\PY{n}{x3} \PY{o}{\PYZlt{}=} \PY{l+m+mi}{10}\PY{p}{)}
+        
+        \PY{c}{\PYZsh{} Printing the prepared optimization model}
+        \PY{n}{display}\PY{p}{(}\PY{n}{m}\PY{p}{)}
+        \PY{n}{print}\PY{p}{(}\PY{n}{m}\PY{p}{)}
+        
+        
+        \PY{c}{\PYZsh{} Solving the optimization problem}
+        \PY{n}{solve}\PY{p}{(}\PY{n}{m}\PY{p}{)}
+        
+        \PY{c}{\PYZsh{} Printing the optimal solutions obtained}
+        \PY{n}{println}\PY{p}{(}\PY{l+s}{\PYZdq{}}\PY{l+s}{O}\PY{l+s}{p}\PY{l+s}{t}\PY{l+s}{i}\PY{l+s}{m}\PY{l+s}{a}\PY{l+s}{l}\PY{l+s}{ }\PY{l+s}{S}\PY{l+s}{o}\PY{l+s}{l}\PY{l+s}{u}\PY{l+s}{t}\PY{l+s}{i}\PY{l+s}{o}\PY{l+s}{n}\PY{l+s}{s}\PY{l+s}{:}\PY{l+s}{\PYZdq{}}\PY{p}{)}
+        \PY{n}{println}\PY{p}{(}\PY{l+s}{\PYZdq{}}\PY{l+s}{x}\PY{l+s}{1}\PY{l+s}{ }\PY{l+s}{=}\PY{l+s}{ }\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{n}{getvalue}\PY{p}{(}\PY{n}{x1}\PY{p}{)}\PY{p}{)}
+        \PY{n}{println}\PY{p}{(}\PY{l+s}{\PYZdq{}}\PY{l+s}{x}\PY{l+s}{2}\PY{l+s}{ }\PY{l+s}{=}\PY{l+s}{ }\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{n}{getvalue}\PY{p}{(}\PY{n}{x2}\PY{p}{)}\PY{p}{)}
+        \PY{n}{println}\PY{p}{(}\PY{l+s}{\PYZdq{}}\PY{l+s}{x}\PY{l+s}{3}\PY{l+s}{ }\PY{l+s}{=}\PY{l+s}{ }\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{n}{getvalue}\PY{p}{(}\PY{n}{x3}\PY{p}{)}\PY{p}{)}
+        
+        \PY{c}{\PYZsh{} Printing the optimal dual variables}
+        \PY{n}{println}\PY{p}{(}\PY{l+s}{\PYZdq{}}\PY{l+s}{D}\PY{l+s}{u}\PY{l+s}{a}\PY{l+s}{l}\PY{l+s}{ }\PY{l+s}{V}\PY{l+s}{a}\PY{l+s}{r}\PY{l+s}{i}\PY{l+s}{a}\PY{l+s}{b}\PY{l+s}{l}\PY{l+s}{e}\PY{l+s}{s}\PY{l+s}{:}\PY{l+s}{\PYZdq{}}\PY{p}{)}
+        \PY{n}{println}\PY{p}{(}\PY{l+s}{\PYZdq{}}\PY{l+s}{d}\PY{l+s}{u}\PY{l+s}{a}\PY{l+s}{l}\PY{l+s}{1}\PY{l+s}{ }\PY{l+s}{=}\PY{l+s}{ }\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{n}{getdual}\PY{p}{(}\PY{n}{constraint1}\PY{p}{)}\PY{p}{)}
+        \PY{n}{println}\PY{p}{(}\PY{l+s}{\PYZdq{}}\PY{l+s}{d}\PY{l+s}{u}\PY{l+s}{a}\PY{l+s}{l}\PY{l+s}{2}\PY{l+s}{ }\PY{l+s}{=}\PY{l+s}{ }\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{n}{getdual}\PY{p}{(}\PY{n}{constraint2}\PY{p}{)}\PY{p}{)}
+\end{Verbatim}
+
+
+\begin{align*}\max\quad & x1 + 2 x2 + 5 x3\\
+\text{Subject to} \quad & -x1 + x2 + 3 x3 \leq -5\\
+ & x1 + 3 x2 - 7 x3 \leq 10\\
+ & 0 \leq x1 \leq 10\\
+ & x2 \geq 0\\
+ & x3 \geq 0\\
+\end{align*}
+
+
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+Max x1 + 2 x2 + 5 x3
+Subject to
+ -x1 + x2 + 3 x3 <= -5
+ x1 + 3 x2 - 7 x3 <= 10
+ 0 <= x1 <= 10
+ x2>= 0
+ x3 >=0
+Optimal Solutions:
+x1 = 10.0
+x2 = 2.1875
+x3 = 0.9374999999999999
+Dual Variables:
+dual1 = 1.8125
+dual2 = 0.0625
+
+    \end{Verbatim}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}2}]:} \PY{k}{using} \PY{n}{JuMP}\PY{p}{,} \PY{n}{Clp}
+        \PY{n}{m} \PY{o}{=} \PY{n}{Model}\PY{p}{(}\PY{n}{solver} \PY{o}{=} \PY{n}{ClpSolver}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+        
+        \PY{n}{c} \PY{o}{=} \PY{p}{[} \PY{l+m+mi}{1}\PY{p}{;} \PY{l+m+mi}{2}\PY{p}{;} \PY{l+m+mi}{5}\PY{p}{]}
+        \PY{n}{A} \PY{o}{=} \PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}  \PY{l+m+mi}{1}  \PY{l+m+mi}{3}\PY{p}{;}
+              \PY{l+m+mi}{1}  \PY{l+m+mi}{3} \PY{o}{\PYZhy{}}\PY{l+m+mi}{7}\PY{p}{]}
+        \PY{n}{b} \PY{o}{=} \PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mi}{5}\PY{p}{;} \PY{l+m+mi}{10}\PY{p}{]}
+        
+        \PY{n+nd}{@variable}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{x}\PY{p}{[}\PY{l+m+mi}{1}\PY{o}{:}\PY{l+m+mi}{3}\PY{p}{]} \PY{o}{\PYZgt{}=} \PY{l+m+mi}{0}\PY{p}{)}
+        \PY{n+nd}{@objective}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{Max}\PY{p}{,} \PY{n}{sum}\PY{p}{(} \PY{n}{c}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{o}{*}\PY{n}{x}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{k}{for} \PY{n}{i}\PY{o}{=}\PY{l+m+mi}{1}\PY{o}{:}\PY{l+m+mi}{3}\PY{p}{)} \PY{p}{)}
+        
+        \PY{n+nd}{@constraint}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{constraint}\PY{p}{[}\PY{n}{j}\PY{o}{=}\PY{l+m+mi}{1}\PY{o}{:}\PY{l+m+mi}{2}\PY{p}{]}\PY{p}{,} \PY{n}{sum}\PY{p}{(} \PY{n}{A}\PY{p}{[}\PY{n}{j}\PY{p}{,}\PY{n}{i}\PY{p}{]}\PY{o}{*}\PY{n}{x}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{k}{for} \PY{n}{i}\PY{o}{=}\PY{l+m+mi}{1}\PY{o}{:}\PY{l+m+mi}{3} \PY{p}{)} \PY{o}{\PYZlt{}=} \PY{n}{b}\PY{p}{[}\PY{n}{j}\PY{p}{]} \PY{p}{)}
+        
+        \PY{n+nd}{@constraint}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{bound}\PY{p}{,} \PY{n}{x}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]} \PY{o}{\PYZlt{}=} \PY{l+m+mi}{10}\PY{p}{)}
+        
+        \PY{n}{solve}\PY{p}{(}\PY{n}{m}\PY{p}{)}
+        \PY{n}{display}\PY{p}{(}\PY{n}{m}\PY{p}{)}
+        \PY{n}{print}\PY{p}{(}\PY{n}{m}\PY{p}{)}
+        
+        \PY{n}{println}\PY{p}{(}\PY{l+s}{\PYZdq{}}\PY{l+s}{O}\PY{l+s}{p}\PY{l+s}{t}\PY{l+s}{i}\PY{l+s}{m}\PY{l+s}{a}\PY{l+s}{l}\PY{l+s}{ }\PY{l+s}{S}\PY{l+s}{o}\PY{l+s}{l}\PY{l+s}{u}\PY{l+s}{t}\PY{l+s}{i}\PY{l+s}{o}\PY{l+s}{n}\PY{l+s}{s}\PY{l+s}{:}\PY{l+s}{\PYZdq{}}\PY{p}{)}
+        \PY{k}{for} \PY{n}{i}\PY{o}{=}\PY{l+m+mi}{1}\PY{o}{:}\PY{l+m+mi}{3}
+          \PY{n}{println}\PY{p}{(}\PY{l+s}{\PYZdq{}}\PY{l+s}{x}\PY{l+s}{[}\PY{l+s+si}{\PYZdl{}i}\PY{l+s}{]}\PY{l+s}{ }\PY{l+s}{=}\PY{l+s}{ }\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{n}{getvalue}\PY{p}{(}\PY{n}{x}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{)}\PY{p}{)}
+        \PY{k}{end}
+        
+        \PY{n}{println}\PY{p}{(}\PY{l+s}{\PYZdq{}}\PY{l+s}{D}\PY{l+s}{u}\PY{l+s}{a}\PY{l+s}{l}\PY{l+s}{ }\PY{l+s}{V}\PY{l+s}{a}\PY{l+s}{r}\PY{l+s}{i}\PY{l+s}{a}\PY{l+s}{b}\PY{l+s}{l}\PY{l+s}{e}\PY{l+s}{s}\PY{l+s}{:}\PY{l+s}{\PYZdq{}}\PY{p}{)}
+        \PY{k}{for} \PY{n}{j}\PY{o}{=}\PY{l+m+mi}{1}\PY{o}{:}\PY{l+m+mi}{2}
+          \PY{n}{println}\PY{p}{(}\PY{l+s}{\PYZdq{}}\PY{l+s}{d}\PY{l+s}{u}\PY{l+s}{a}\PY{l+s}{l}\PY{l+s}{[}\PY{l+s+si}{\PYZdl{}j}\PY{l+s}{]}\PY{l+s}{ }\PY{l+s}{=}\PY{l+s}{ }\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{n}{getdual}\PY{p}{(}\PY{n}{constraint}\PY{p}{[}\PY{n}{j}\PY{p}{]}\PY{p}{)}\PY{p}{)}
+        \PY{k}{end}
+\end{Verbatim}
+
+
+\begin{align*}\max\quad & x_{1} + 2 x_{2} + 5 x_{3}\\
+\text{Subject to} \quad & -x_{1} + x_{2} + 3 x_{3} \leq -5\\
+ & x_{1} + 3 x_{2} - 7 x_{3} \leq 10\\
+ & x_{1} \leq 10\\
+ & x_{i} \geq 0 \quad\forall i \in \{1,2,3\}\\
+\end{align*}
+
+
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+Max x[1] + 2 x[2] + 5 x[3]
+Subject to
+ -x[1] + x[2] + 3 x[3] <= -5
+ x[1] + 3 x[2] - 7 x[3] <= 10
+ x[1] >= 10
+ x[i] >= 0 for all i in {1,2,3}
+Optimal Solutions:
+x[1] = 10.0
+x[2] = 2.1875
+x[3] = 0.9374999999999999
+Dual Variables:
+dual[1] = 1.8125
+dual[2] = 0.0625
+
+    \end{Verbatim}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}3}]:} \PY{k}{using} \PY{n}{JuMP}\PY{p}{,} \PY{n}{Clp}
+        \PY{n}{m} \PY{o}{=} \PY{n}{Model}\PY{p}{(}\PY{n}{solver} \PY{o}{=} \PY{n}{ClpSolver}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+        
+        \PY{n}{c} \PY{o}{=} \PY{p}{[} \PY{l+m+mi}{1}\PY{p}{;} \PY{l+m+mi}{2}\PY{p}{;} \PY{l+m+mi}{5}\PY{p}{]}
+        \PY{n}{A} \PY{o}{=} \PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}  \PY{l+m+mi}{1}  \PY{l+m+mi}{3}\PY{p}{;}
+              \PY{l+m+mi}{1}  \PY{l+m+mi}{3} \PY{o}{\PYZhy{}}\PY{l+m+mi}{7}\PY{p}{]}
+        \PY{n}{b} \PY{o}{=} \PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mi}{5}\PY{p}{,} \PY{l+m+mi}{10}\PY{p}{]}
+        
+        \PY{n}{index\PYZus{}x} \PY{o}{=} \PY{l+m+mi}{1}\PY{o}{:}\PY{l+m+mi}{3}
+        \PY{n}{index\PYZus{}constraints} \PY{o}{=} \PY{l+m+mi}{1}\PY{o}{:}\PY{l+m+mi}{2}
+        
+        \PY{n+nd}{@variable}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{x}\PY{p}{[}\PY{n}{index\PYZus{}x}\PY{p}{]} \PY{o}{\PYZgt{}=} \PY{l+m+mi}{0}\PY{p}{)}
+        \PY{n+nd}{@objective}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{Max}\PY{p}{,} \PY{n}{sum}\PY{p}{(} \PY{n}{c}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{o}{*}\PY{n}{x}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{k}{for} \PY{n}{i} \PY{k+kp}{in} \PY{n}{index\PYZus{}x}\PY{p}{)} \PY{p}{)}
+        
+        \PY{n+nd}{@constraint}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{constraint}\PY{p}{[}\PY{n}{j} \PY{k+kp}{in} \PY{n}{index\PYZus{}constraints}\PY{p}{]}\PY{p}{,}
+                       \PY{n}{sum}\PY{p}{(} \PY{n}{A}\PY{p}{[}\PY{n}{j}\PY{p}{,}\PY{n}{i}\PY{p}{]}\PY{o}{*}\PY{n}{x}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{k}{for} \PY{n}{i} \PY{k+kp}{in} \PY{n}{index\PYZus{}x} \PY{p}{)} \PY{o}{\PYZlt{}=} \PY{n}{b}\PY{p}{[}\PY{n}{j}\PY{p}{]} \PY{p}{)}
+        
+        \PY{n+nd}{@constraint}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{bound}\PY{p}{,} \PY{n}{x}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]} \PY{o}{\PYZlt{}=} \PY{l+m+mi}{10}\PY{p}{)}
+        
+        \PY{n}{solve}\PY{p}{(}\PY{n}{m}\PY{p}{)}
+        \PY{n}{display}\PY{p}{(}\PY{n}{m}\PY{p}{)}
+        
+        \PY{n}{println}\PY{p}{(}\PY{l+s}{\PYZdq{}}\PY{l+s}{O}\PY{l+s}{p}\PY{l+s}{t}\PY{l+s}{i}\PY{l+s}{m}\PY{l+s}{a}\PY{l+s}{l}\PY{l+s}{ }\PY{l+s}{S}\PY{l+s}{o}\PY{l+s}{l}\PY{l+s}{u}\PY{l+s}{t}\PY{l+s}{i}\PY{l+s}{o}\PY{l+s}{n}\PY{l+s}{s}\PY{l+s}{:}\PY{l+s}{\PYZdq{}}\PY{p}{)}
+        \PY{k}{for} \PY{n}{i} \PY{k+kp}{in} \PY{n}{index\PYZus{}x}
+          \PY{n}{println}\PY{p}{(}\PY{l+s}{\PYZdq{}}\PY{l+s}{x}\PY{l+s}{[}\PY{l+s+si}{\PYZdl{}i}\PY{l+s}{]}\PY{l+s}{ }\PY{l+s}{=}\PY{l+s}{ }\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{n}{getvalue}\PY{p}{(}\PY{n}{x}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{)}\PY{p}{)}
+        \PY{k}{end}
+        
+        \PY{n}{println}\PY{p}{(}\PY{l+s}{\PYZdq{}}\PY{l+s}{D}\PY{l+s}{u}\PY{l+s}{a}\PY{l+s}{l}\PY{l+s}{ }\PY{l+s}{V}\PY{l+s}{a}\PY{l+s}{r}\PY{l+s}{i}\PY{l+s}{a}\PY{l+s}{b}\PY{l+s}{l}\PY{l+s}{e}\PY{l+s}{s}\PY{l+s}{:}\PY{l+s}{\PYZdq{}}\PY{p}{)}
+        \PY{k}{for} \PY{n}{j} \PY{k+kp}{in} \PY{n}{index\PYZus{}constraints}
+          \PY{n}{println}\PY{p}{(}\PY{l+s}{\PYZdq{}}\PY{l+s}{d}\PY{l+s}{u}\PY{l+s}{a}\PY{l+s}{l}\PY{l+s}{[}\PY{l+s+si}{\PYZdl{}j}\PY{l+s}{]}\PY{l+s}{ }\PY{l+s}{=}\PY{l+s}{ }\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{n}{getdual}\PY{p}{(}\PY{n}{constraint}\PY{p}{[}\PY{n}{j}\PY{p}{]}\PY{p}{)}\PY{p}{)}
+        \PY{k}{end}
+\end{Verbatim}
+
+
+\begin{align*}\max\quad & x_{1} + 2 x_{2} + 5 x_{3}\\
+\text{Subject to} \quad & -x_{1} + x_{2} + 3 x_{3} \leq -5\\
+ & x_{1} + 3 x_{2} - 7 x_{3} \leq 10\\
+ & x_{1} \leq 10\\
+ & x_{i} \geq 0 \quad\forall i \in \{1,2,3\}\\
+\end{align*}
+
+
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+Optimal Solutions:
+x[1] = 10.0
+x[2] = 2.1875
+x[3] = 0.9374999999999999
+Dual Variables:
+dual[1] = 1.8125
+dual[2] = 0.0625
+
+    \end{Verbatim}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}4}]:} \PY{k}{using} \PY{n}{JuMP}\PY{p}{,} \PY{n}{Clp}
+        \PY{n}{m} \PY{o}{=} \PY{n}{Model}\PY{p}{(}\PY{n}{solver} \PY{o}{=} \PY{n}{ClpSolver}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+        \PY{n}{A} \PY{o}{=} \PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}  \PY{l+m+mi}{1}  \PY{l+m+mi}{3}\PY{p}{;} \PY{l+m+mi}{1}  \PY{l+m+mi}{3} \PY{o}{\PYZhy{}}\PY{l+m+mi}{7}\PY{p}{]}
+        \PY{n}{b} \PY{o}{=} \PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mi}{5}\PY{p}{,} \PY{l+m+mi}{10}\PY{p}{]}
+        \PY{n}{c} \PY{o}{=} \PY{p}{[}\PY{l+m+mi}{1}\PY{p}{;} \PY{l+m+mi}{1}\PY{p}{;}\PY{l+m+mi}{1}\PY{p}{]}
+        \PY{n+nd}{@variable}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{x}\PY{p}{[}\PY{l+m+mi}{1}\PY{o}{:}\PY{l+m+mi}{3}\PY{p}{]}\PY{o}{\PYZgt{}=} \PY{l+m+mi}{0}\PY{p}{)}
+        \PY{n+nd}{@constraint}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{A}\PY{o}{*}\PY{n}{x}\PY{o}{.\PYZlt{}=} \PY{n}{b}\PY{p}{)}
+        \PY{n+nd}{@objective}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{Min}\PY{p}{,} \PY{n}{dot}\PY{p}{(}\PY{n}{c}\PY{p}{,}\PY{n}{x}\PY{p}{)}\PY{p}{)}
+        \PY{n}{solve}\PY{p}{(}\PY{n}{m}\PY{p}{)}
+        \PY{n}{display}\PY{p}{(}\PY{n}{m}\PY{p}{)}
+        \PY{n}{getobjectivevalue}\PY{p}{(}\PY{n}{m}\PY{p}{)}
+\end{Verbatim}
+
+
+\begin{align*}\min\quad & x_{1} + x_{2} + x_{3}\\
+\text{Subject to} \quad & -x_{1} + x_{2} + 3 x_{3} \leq -5\\
+ & x_{1} + 3 x_{2} - 7 x_{3} \leq 10\\
+ & x_{i} \geq 0 \quad\forall i \in \{1,2,3\}\\
+\end{align*}
+
+
+    
+\begin{Verbatim}[commandchars=\\\{\}]
+{\color{outcolor}Out[{\color{outcolor}4}]:} 5.0
+\end{Verbatim}
+            
+
+    % Add a bibliography block to the postdoc
+    
+    

@@ -1,0 +1,27 @@
+\documentclass[border=5mm]{standalone}
+\usepackage{neuralnetwork}
+\usepackage{xpatch}
+\makeatletter
+% \linklayers have \nn@lastnode instead of \lastnode,
+% patch it to replace the former with the latter, and similar for thisnode
+\xpatchcmd{\linklayers}{\nn@lastnode}{\lastnode}{}{}
+\xpatchcmd{\linklayers}{\nn@thisnode}{\thisnode}{}{}
+\makeatother
+\begin{document}
+\begin{neuralnetwork}[height=4]
+    \newcommand{\nodetextclear}[2]{}
+    % use \ifnum to get different labels
+    \newcommand{\nodetextx}[2]{\ifnum #2=4 $x_n$ \else $x_#2$ \fi}
+    \newcommand{\nodetexty}[2]{$y_#2$}
+    % use exclude to turn off drawing of specific layers
+    \inputlayer[count=4, bias=false, exclude={3}, title=Input\\layer, text=\nodetextx]
+    \hiddenlayer[count=3, bias=false, title=Hidden\\layer, text=\nodetextclear]
+      \linklayers[not from={3}]
+    \outputlayer[count=4, exclude={3}, title=Output\\layer, text=\nodetextx] 
+      \linklayers[not to={3}]
+
+    % draw dots
+    \path (L0-2) -- node{$\vdots$} (L0-4);
+    \path (L2-2) -- node{$\vdots$} (L2-4);
+\end{neuralnetwork}
+\end{document}

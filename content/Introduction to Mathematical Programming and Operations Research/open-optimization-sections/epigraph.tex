@@ -1,0 +1,121 @@
+\documentclass[border=3pt]{standalone}
+\usepackage{amsmath}
+\usepackage{pgfplots}
+\usepgfplotslibrary{fillbetween}
+\usetikzlibrary{arrows.meta}
+\tikzset{>=latex}
+
+\DeclareMathOperator{\dom}{dom}
+
+\pgfmathdeclarefunction{cubic}{1}{%
+  \pgfmathparse{-2*(#1+2)*(#1+2)*(#1-2)+40}%
+}
+
+\pgfmathdeclarefunction{bicuadratic}{1}{%
+  \pgfmathparse{(#1-1)*(#1-1)*(#1-1)*(#1-1)+10}%
+}
+
+\pgfmathdeclarefunction{cuadratic}{1}{%
+    \pgfmathparse{(-(2*#1)^2)+70}%
+}
+
+\begin{document}        
+
+\begin{tikzpicture}
+\begin{axis}[
+  axis lines=middle,
+  xlabel={$x$},
+  ylabel={$f(x)$},
+  xtick={\empty},
+  ytick={\empty},
+  domain=-3.5:2.5,
+  ymin=-1,
+  xmin=-4,
+  xmax=3,
+  clip=false,
+] 
+%% The curve
+\addplot [black,name path=B,samples=100] plot {cubic(x)};
+%% The line
+\addplot [no marks,draw=white,name path=C] coordinates 
+  {(-3.5,{cubic(-3.5)+15}) (2.5,{cubic(-3.5)+5})};
+\makeatother
+%% filling
+\addplot[draw=white,top color=gray!80!black!05,bottom color=gray!90!black!80] 
+  fill between[of=B and C,
+  soft clip={domain=-3.5:2.5}
+  ];
+
+\node[pin={120:Epigraph}] at (axis cs:-1,{cubic(-3.5)+7}) {};
+\draw[dashed]
+  (axis cs:-3.5,0) -- (axis cs:-3.5,{cubic(-3.5)});
+\draw[dashed]
+  (axis cs:2.5,0) -- (axis cs:2.5,{cubic(2.5)});
+\draw[|<->|]
+  (axis cs:-3.5,-10) -- node[fill=white] {$\dom(f)$} (axis cs:2.5,-10);
+\end{axis}
+\end{tikzpicture}\qquad
+
+\begin{tikzpicture}
+\begin{axis}[
+  axis lines=middle,
+  xlabel={$x$},
+  ylabel={$f(x)$},
+  xtick={\empty},
+  ytick={\empty},
+  domain=-1.2:3.5,
+  ymin=-10,
+  xmin=-3,
+  xmax=5,
+  clip=false,
+] 
+%% The curve
+\addplot [no marks,black,name path=B,samples=100] plot {bicuadratic(x)};
+%% The line
+\addplot [no marks,draw=white,name path=C] coordinates 
+  {(-1.2,{bicuadratic(-1.2)+20}) (3.5,{bicuadratic(3.5)+20})};
+%% filling
+\addplot[draw=white,top color=gray!80!black!05,bottom color=gray!90!black!80] 
+  fill between[of=B and C,soft clip={domain=-1.5:3.5}];
+\node[pin={90:Epigraph}] at (axis cs:2,{bicuadratic(3.35)+17}) {};
+\draw[dashed]
+  (axis cs:-1.2,0) -- (axis cs:-1.2,{bicuadratic(-1.2)});
+\draw[dashed]
+  (axis cs:3.5,0) -- (axis cs:3.5,{bicuadratic(3.5)});
+\draw[|<->|]
+  (axis cs:-1.2,-5) -- node[fill=white] {$\dom(f)$} (axis cs:3.5,-5);
+\end{axis}
+\end{tikzpicture}\qquad
+
+\begin{tikzpicture}
+\begin{axis}[
+  axis lines=middle,
+  xlabel={$x$},
+  ylabel={$f(x)$},
+  xtick={\empty},
+  ytick={\empty},
+  domain=-3:3,
+  ymin=-10,
+  xmin=-3.5,
+  xmax=3.5,
+  clip=false,
+] 
+%% The curve
+\addplot [no marks,black,name path=B,samples=100] plot {cuadratic(x)};
+%% The line
+\addplot [no marks,draw=white,name path=C] coordinates 
+  {(-3,{cuadratic(0)+3}) (3,{cuadratic(0)+7})};
+%% filling
+\addplot[draw=white,top color=gray!80!black!05,bottom color=gray!90!black!80] 
+  fill between[of=B and C,soft clip={domain=-3:3}];
+\node[pin={90:Epigraph}] at (axis cs:2,{cuadratic(0)+1}) {};
+\draw[dashed]
+  (axis cs:-3,0) -- (axis cs:-3,{cuadratic(-3)});
+\draw[dashed]
+  (axis cs:3,0) -- (axis cs:3,{cuadratic(3)});
+\draw[|<->|]
+  (axis cs:-3,-8) -- node[fill=white] {$\dom(f)$} (axis cs:3,-8);
+\end{axis}
+\end{tikzpicture}
+
+\end{document}
