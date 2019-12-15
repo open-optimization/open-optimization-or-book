@@ -2,6 +2,11 @@
 ![](content/figures/figures-static/open-optimization-logo-crop.png)
 
 # Open Optimization (Prototype)
+
+- Open education resources
+- Commercial use is allowed - discuss why this choice is made.
+- "Code" MIT license - for code examples...
+
 Welcome to Open Optimization - an ecosystem for open-source materials for teaching optimization and operations research.  This ecosystem is being formed to host open-source lecture notes, lecture slides, examples, code, figures, and textbooks on material and courses related to optimization.  
 
 All material other than code will be licensed under Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0) that permits free reuse and alteration of the material provided the proper attribution is given.  All material posted will be not just open-source, but open-source code as well - including LaTeX, tikz, and other means of generating content.  This allows those interested in reusing material an easy way to change and adapt the material as needed.
