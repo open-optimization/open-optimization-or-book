@@ -47,7 +47,7 @@ This memorandum of understanding (MOU) lays out the contributor expectations, li
 In this section, write out any expectations for specific kinds of contributors, e.g. authors, reviewers, lead editors, etc.
 
 ## Content Licensing
-All content (writing, images, charts, videos, etc.) created for inclusion in this project, as well as ancillary materials (slide decks, assignments, in-class exercises etc. with the exception of question banks), are to be licensed under a Creative Commons Attribution 4.0 International License (CC BY 4.0). In accordance, all authors and other creators retain the copyright to their contributions, and by signing below, grant a CC-BY 4.0 license to all content created for this project.
+All content (writing, images, charts, videos, etc.) created for inclusion in this project, as well as ancillary materials (slide decks, assignments, in-class exercises etc. with the exception of question banks), are to be licensed under a Creative Commons Attribution 4.0 International License (CC BY-SA 4.0). In accordance, all authors and other creators retain the copyright to their contributions, and by signing below, grant a CC BY-SA 4.0 license to all content created for this project.
 
 ## Code Licensing
 All code (e.g., Julia, Python, AMPL, GAMS, MatLab, etc.) on this repository will be licensed freely under the MIT License.  This is in an effort to make code simple and easy to reuse.  In accordance, all authors and other creators retain the copyright to their contributions, and by signing below, grant a MIT License to all code created for this project.
@@ -72,7 +72,7 @@ Not fulfilling their agreed-upon obligations in a timely manner
 Failing to treat other members of the team with respect
 Otherwise disrupting or negatively impacting the success of the project and team
 
-If a team member is asked to leave the project, any submitted work may be retained and completed/expanded by another contributor in accordance with the conditions of the CC-BY 4.0 license. In this instance, the original creator will still be credited in the final text unless they request to have their name removed.
+If a team member is asked to leave the project, any submitted work may be retained and completed/expanded by another contributor in accordance with the conditions of the CC BY-SA 4.0 license. In this instance, the original creator will still be credited in the final text unless they request to have their name removed.
 
 Contributor agreement
 
