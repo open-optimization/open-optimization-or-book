@@ -1,5 +1,5 @@
 
-![](figures/open-optimization-logo-crop.png)
+![](content/figures/figures-static/open-optimization-logo-crop.png)
 
 # Open Optimization (Prototype)
 Welcome to Open Optimization - an ecosystem for open-source materials for teaching optimization and operations research.  This ecosystem is being formed to host open-source lecture notes, lecture slides, examples, code, figures, and textbooks on material and courses related to optimization.  
