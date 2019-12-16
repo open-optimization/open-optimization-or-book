@@ -1,0 +1,65 @@
+
+% Default to the notebook output style
+
+    
+
+
+% Inherit from the specified cell style.
+
+
+
+
+    
+%\documentclass[11pt]{article}
+
+%\input{preamble.tex}
+   % \begin{document}
+   
+   \subsection{Vertex Cover}
+\label{code:vertex-cover}
+This code is for \nameref{example:vertex-cover}.
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}1}]:} \PY{k}{using} \PY{n}{JuMP}\PY{p}{,} \PY{n}{Gurobi}
+        \PY{n}{V} \PY{o}{=} \PY{p}{[}\PY{l+s}{\PYZdq{}}\PY{l+s}{Y}\PY{l+s}{o}\PY{l+s}{u}\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{l+s}{\PYZdq{}}\PY{l+s}{G}\PY{l+s}{i}\PY{l+s}{n}\PY{l+s}{g}\PY{l+s}{e}\PY{l+s}{r}\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{l+s}{\PYZdq{}}\PY{l+s}{J}\PY{l+s}{u}\PY{l+s}{a}\PY{l+s}{n}\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{l+s}{\PYZdq{}}\PY{l+s}{J}\PY{l+s}{a}\PY{l+s}{m}\PY{l+s}{e}\PY{l+s}{i}\PY{l+s}{s}\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{l+s}{\PYZdq{}}\PY{l+s}{B}\PY{l+s}{o}\PY{l+s}{b}\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{l+s}{\PYZdq{}}\PY{l+s}{G}\PY{l+s}{e}\PY{l+s}{o}\PY{l+s}{f}\PY{l+s}{f}\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{l+s}{\PYZdq{}}\PY{l+s}{J}\PY{l+s}{a}\PY{l+s}{n}\PY{l+s}{e}\PY{l+s}{\PYZdq{}}\PY{p}{]}
+        \PY{n}{E} \PY{o}{=} \PY{p}{[}\PY{p}{[}\PY{l+s}{\PYZdq{}}\PY{l+s}{Y}\PY{l+s}{o}\PY{l+s}{u}\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{l+s}{\PYZdq{}}\PY{l+s}{G}\PY{l+s}{i}\PY{l+s}{n}\PY{l+s}{g}\PY{l+s}{e}\PY{l+s}{r}\PY{l+s}{\PYZdq{}}\PY{p}{]}\PY{p}{,}
+             \PY{p}{[}\PY{l+s}{\PYZdq{}}\PY{l+s}{Y}\PY{l+s}{o}\PY{l+s}{u}\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{l+s}{\PYZdq{}}\PY{l+s}{J}\PY{l+s}{u}\PY{l+s}{a}\PY{l+s}{n}\PY{l+s}{\PYZdq{}}\PY{p}{]}\PY{p}{,} 
+             \PY{p}{[}\PY{l+s}{\PYZdq{}}\PY{l+s}{Y}\PY{l+s}{o}\PY{l+s}{u}\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{l+s}{\PYZdq{}}\PY{l+s}{J}\PY{l+s}{a}\PY{l+s}{m}\PY{l+s}{e}\PY{l+s}{i}\PY{l+s}{s}\PY{l+s}{\PYZdq{}}\PY{p}{]}\PY{p}{,}
+             \PY{p}{[}\PY{l+s}{\PYZdq{}}\PY{l+s}{Y}\PY{l+s}{o}\PY{l+s}{u}\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{l+s}{\PYZdq{}}\PY{l+s}{B}\PY{l+s}{o}\PY{l+s}{b}\PY{l+s}{\PYZdq{}}\PY{p}{]}\PY{p}{,}
+             \PY{p}{[}\PY{l+s}{\PYZdq{}}\PY{l+s}{Y}\PY{l+s}{o}\PY{l+s}{u}\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{l+s}{\PYZdq{}}\PY{l+s}{J}\PY{l+s}{a}\PY{l+s}{n}\PY{l+s}{e}\PY{l+s}{\PYZdq{}}\PY{p}{]}\PY{p}{,}
+             \PY{p}{[}\PY{l+s}{\PYZdq{}}\PY{l+s}{Y}\PY{l+s}{o}\PY{l+s}{u}\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{l+s}{\PYZdq{}}\PY{l+s}{G}\PY{l+s}{e}\PY{l+s}{o}\PY{l+s}{f}\PY{l+s}{f}\PY{l+s}{\PYZdq{}}\PY{p}{]}\PY{p}{,}
+             \PY{p}{[}\PY{l+s}{\PYZdq{}}\PY{l+s}{G}\PY{l+s}{i}\PY{l+s}{n}\PY{l+s}{g}\PY{l+s}{e}\PY{l+s}{r}\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{l+s}{\PYZdq{}}\PY{l+s}{J}\PY{l+s}{a}\PY{l+s}{m}\PY{l+s}{e}\PY{l+s}{i}\PY{l+s}{s}\PY{l+s}{\PYZdq{}}\PY{p}{]}\PY{p}{,}
+             \PY{p}{[}\PY{l+s}{\PYZdq{}}\PY{l+s}{J}\PY{l+s}{a}\PY{l+s}{m}\PY{l+s}{e}\PY{l+s}{i}\PY{l+s}{s}\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{l+s}{\PYZdq{}}\PY{l+s}{B}\PY{l+s}{o}\PY{l+s}{b}\PY{l+s}{\PYZdq{}}\PY{p}{]}\PY{p}{,}
+             \PY{p}{[}\PY{l+s}{\PYZdq{}}\PY{l+s}{B}\PY{l+s}{o}\PY{l+s}{b}\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{l+s}{\PYZdq{}}\PY{l+s}{J}\PY{l+s}{a}\PY{l+s}{n}\PY{l+s}{e}\PY{l+s}{\PYZdq{}}\PY{p}{]}\PY{p}{,}
+             \PY{p}{[}\PY{l+s}{\PYZdq{}}\PY{l+s}{B}\PY{l+s}{o}\PY{l+s}{b}\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{l+s}{\PYZdq{}}\PY{l+s}{G}\PY{l+s}{e}\PY{l+s}{o}\PY{l+s}{f}\PY{l+s}{f}\PY{l+s}{\PYZdq{}}\PY{p}{]}\PY{p}{,}
+             \PY{p}{[}\PY{l+s}{\PYZdq{}}\PY{l+s}{G}\PY{l+s}{e}\PY{l+s}{o}\PY{l+s}{f}\PY{l+s}{f}\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{l+s}{\PYZdq{}}\PY{l+s}{J}\PY{l+s}{a}\PY{l+s}{n}\PY{l+s}{e}\PY{l+s}{\PYZdq{}}\PY{p}{]}\PY{p}{]}
+        \PY{n}{m} \PY{o}{=} \PY{n}{Model}\PY{p}{(} \PY{n}{solver} \PY{o}{=} \PY{n}{GurobiSolver}\PY{p}{(}\PY{n}{OutputFlag} \PY{o}{=} \PY{l+m+mi}{0}\PY{p}{)}\PY{p}{)}
+        \PY{n+nd}{@variable}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{x}\PY{p}{[}\PY{n}{V}\PY{p}{]} \PY{o}{\PYZlt{}=} \PY{l+m+mi}{1}\PY{p}{,} \PY{n}{Bin}\PY{p}{)}
+        \PY{n+nd}{@constraint}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{constraint}\PY{p}{[}\PY{n+nb}{e} \PY{k+kp}{in} \PY{n}{E}\PY{p}{]}\PY{p}{,} \PY{n}{x}\PY{p}{[}\PY{n+nb}{e}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{]} \PY{o}{+} \PY{n}{x}\PY{p}{[}\PY{n+nb}{e}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{]}\PY{p}{]} \PY{o}{\PYZgt{}=} \PY{l+m+mi}{1}\PY{p}{)}
+        \PY{n+nd}{@objective}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{Min}\PY{p}{,} \PY{n}{sum}\PY{p}{(}\PY{n}{x}\PY{p}{)}\PY{p}{)}
+        \PY{n}{solve}\PY{p}{(}\PY{n}{m}\PY{p}{)}
+	\PY{n}{println}\PY{p}{(}\PY{n}{getobjectivevalue}\PY{p}{(}\PY{n}{m}\PY{p}{)}\PY{p}{)}
+        \PY{n}{println}\PY{p}{(}\PY{n}{getvalue}\PY{p}{(}\PY{n}{x}\PY{p}{)}\PY{p}{)}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+Objective = 4.0
+x: 1 dimensions:
+[   You] = 1.0
+[Ginger] = -0.0
+[  Juan] = 0.0
+[Jameis] = 1.0
+[   Bob] = 1.0
+[ Geoff] = 1.0
+[  Jane] = -0.0
+    \end{Verbatim}
+
+
+
+
+    % Add a bibliography block to the postdoc
+    
+    
+    
+  %  \end{document}

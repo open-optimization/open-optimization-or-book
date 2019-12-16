@@ -2,7 +2,8 @@
 
 \begin{document}
 
-
+\chapter{Integer Programming Formulations}
+\label{sec:IP-formulations}
 \section{Knapsack Problem}
 Knapsack problem can take different forms depending on if the variables are binary or integer.  The binary version means that there is only one item of each item type that can be taken.
 \begin{general}{Binary Knapsack Problem}{\npcomplete}
@@ -147,61 +148,12 @@ This problem can be modeled as
 \end{alignat*}
 \end{examplewithcode}
 
-\begin{examplewithcode}{Southwestern Airways\footnotemark}{code:southwestern-airways}
-\label{example:southwestern-airways}
-Southwestern Airways needs to assign its crews to cover all its upcoming flights.  We will focus on the problem of assigning three crews based in San Francisco to the flights listed in the first column of the below table.  The other 12 columns show feasible sequences of flights for a crew.  (The numbers in each column indicate the order of the flights: 1 = first stop, 2 = second stop, 3 = third stop...etc.) Exactly three of the sequences need to be chosen (one per crew) in such a way that every flight is covered. (It is permissible to have more than one crew on a flight, where extra crews would fly as passengers, but union contracts require that the extra crews would still need to be paid for their time as if they were working.) The cost of assigning a crew to a particular sequence of flights is given (in thousands of dollars) in the bottom row of the table.  The objective is to minimize the total cost of the three crew assignments that cover all the flights.
 
-\includegraphics[scale = 0.2]{flightcrew.jpg}\footnotemark
 
-\paragraph{Sets}
-Let $I = \{1,\dots, 12\}$ denote flight sequences
-Let $F = \{1, \dots, 11\}$ denote the flights.
-For each flight $i$, let $F_i \subseteq I$ be the set of flight sequences that intersects flight $i$.
-\paragraph{Variables}
-Let $x_i = 1$ if flight sequence $i$ is chosen and $0$ otherwise
-\paragraph{Model}
-The model is to minimize cost while respecting that flights are covered.  This can be modeled as 
-\begin{align*}
-\min \ \ & c^\top x\\
-\text{s.t.} \ \ &  \sum_{j \in F_i} x_j \geq 1 & \text{ for all } i=1, \dots, 11\\
-& x_j \in \{0,1\}  & \text{ for all } j=1, \dots, 12
-\end{align*}
+\input{../open-optimization-examples/example-flight-crew-scheduling.tex}
+\input{../open-optimization-examples/example-set-covering.tex}
 
-Plugging in the data creates the following integer program:
-\begin{align*}\min\quad & 2 x_{1} + 3 x_{2} + 4 x_{3} + 6 x_{4} + 7 x_{5} + 5 x_{6} + 7 x_{7} + 8 x_{8} + 9 x_{9} + 9 x_{10} + 8 x_{11} + 9 x_{12}\\
-\text{Subject to} \quad & x_{1} + x_{4} + x_{7} + x_{10} \geq 1\\
- & x_{2} + x_{5} + x_{8} + x_{11} \geq 1\\
- & x_{3} + x_{6} + x_{9} + x_{12} \geq 1\\
- & x_{4} + x_{7} + x_{9} + x_{10} + x_{12} \geq 1\\
- & x_{1} + x_{6} + x_{10} + x_{11} \geq 1\\
- & x_{4} + x_{5} + x_{9} \geq 1\\
- & x_{7} + x_{8} + x_{10} + x_{11} + x_{12} \geq 1\\
- & x_{2} + x_{4} + x_{5} + x_{9} \geq 1\\
- & x_{5} + x_{8} + x_{11} \geq 1\\
- & x_{3} + x_{7} + x_{8} + x_{12} \geq 1\\
- & x_{6} + x_{9} + x_{10} + x_{11} + x_{12} \geq 1\\
- & x_{1} + x_{2} + x_{3} + x_{4} + x_{5} + x_{6} + x_{7} + x_{8} + x_{9} + x_{10} + x_{11} + x_{12} = 3\\
- & x_{i} \in \{0,1\} \quad\forall i \in \{1,2,\dots,11,12\}\\
-\end{align*}
 
-\end{examplewithcode}
-\footnotetext{This example was taken from Hillier and Lieberman}
-\footnotetext{This image table was taken from Hillier and Lieberman}
-
-\begin{general}{Set Covering - Matrix description}{\npcomplete}
-\label{general:set-covering-alternate}
-Given a non-negative matrix $A \in \{0,1\}^{m \times n}$, a non-negative vector, and an objective vector $c \in \R^n$, the set cover problem is
-\begin{equation}
-\begin{split}
-\max \ \ & c^\top x\\
-\text{s.t.}. \ \ & Ax \geq \one \\
-& x \in \{0,1\}^n.
-\end{split}
-\end{equation}
-\end{general}
-\begin{examplewithcode}{Vertex Cover with matrix}{code:vertex-cover-matrix}
-An alternate way to solve \nameref{example:vertex-cover} is to define the adjacency matrix $A$ of the graph.  The adjacency matrix is a $|E| \times |V|$ matrix with $\{0,1\}$ entries.  The each row corresponds to an edge $e$ and each column corresponds to a node $v$.  For an edge $e = (u,v)$, the corresponding row has a $1$ in columns corresponding to the nodes $u$ and $v$, and a 0 everywhere else.  Hence, there are exactly two 1's per row.  Applying the formulation above in \nameref{general:set-covering-alternate} solves the problem.
-\end{examplewithcode}
 
 
 \subsubsection{General Set Covering}
@@ -218,75 +170,7 @@ Given a non-negative matrix $A \in \Z_+^{m \times n}$, a non-negative vector $b 
 \end{equation}
 \end{general}
 
-\begin{example}{Nurse Scheduling}{--- Adapted from "Applied Integer Programming". exercise 2.6 and 2.7}
-\end{example}
-Nurses in large hospitals usually work 3 days a week. Daily demand for nurses is summarized in Table 2.4. Determine the number of nurses required per schedule type so that the total wage cost is minimized.
-\begin{enumerate}
-\item  Use the numbers (not symbols) in the table to model this problem instance.
-\item Solve this instance and submit the code.
-\item Let $S$ denote the set of schedule types.  How many variables of each type (continuous, binary, integer) does your model have in terms of the number of schedules $|S|$?
-\item If part-time nurses are hired at the rate of $\$175$/day, formulate the problem to minimize the total cost. 
-\item If part-time nurses must be accompanied by at least three full-time nurses, how would you formulate this constraint?
-\end{enumerate}
-\begin{table}[h]
-\begin{center}
-\begin{tabular}{l|ccccc|c}
-\hline
-\hline
-& & & Schedule Type & & \\
-\hline
-Day & 1 & 2 & 3 & 4 & 5 & Nurses Required\\
-\hline
-Monday & X & & X & & & 20\\
-Tuesday & X & &  &  & X & 25\\
-Wednesday & & & X & X & & 26\\
-Thursday& & X & & & X& 26\\
-Friday & & X & & X & X & 30\\
-Saturday& & X& & X& & 30\\
-Sunday& X& & X & && 35\\
-\hline
-Weekly wage& 525 & 470 & 550 & 500 & 425\\
-\hline 
-\hline
-\end{tabular}
-\end{center}
-\end{table}
-
-\begin{itemize}
-		\item Let 
-		$$
-		x_i = \textrm{The number of nurses to assign to schedule } i\ \forall\ i \in \left\lbrace 1,2,...,5 \right\rbrace.
-		$$
-\end{itemize}	
-		\vspace{.25in}
-		The model is
-		\begin{align*}
-		\textrm{Minimize}	\hspace{.25in}	525x_1+470x_2+550x_3+500x_4+425x_5&&&&
-		\end{align*}
-		\vspace{-.43in}
-		\begin{align*}
-		\textrm{s.t.} 		\hspace{.6in}	x_1+x_3 &\geq 20							\\
-											x_1+x_5 &\geq 25							\\
-											x_3+x_4 &\geq 26							\\
-											x_2+x_5 &\geq 26							\\
-										x_2+x_4+x_5 &\geq 30							\\
-											x_2+x_4 &\geq 30							\\
-											x_1+x_3 &\geq 35							\\
-												x_i &\in \mathbb{Z}_+ & &\forall\ i \in \left\lbrace 1,2,...,5 \right\rbrace
-		\end{align*}
-		
-		The table tells us which schedule types contribute to each day's staff; i.e. Mondays are staffed entirely by nurses assigned to schedule types 1 and 3, Tuesdays by those assigned to type 1 and 5, and so on. At least 20 nurses are required to be on duty on Mondays; so the number of nurses assigned to schedules 1 and 3 should be at least 20. That is,
-			$$
-			x_1+x_3 \geq 20.
-			$$
-		Extending this logic to each day gives us all seven constraints. \\
-		
-		Alternately, by replacing the X's in the table with 1's we are left with a constraint matrix $S$. Let $\vec{x}^\top = [x_1,x_2,x_3,x_4,x_5]$ be the decision variables and $\vec{r}^\top=[20,25,26,26,30,30,35]$ describe the nurses required for each day, so that
-			$$
-			S\ \vec{x} \geq \vec{r}
-			$$
-		describes all seven constraints. 
-		%This is the approach taken in the sample code below.
+\input{../open-optimization-examples/example-nurse-scheduling.tex}
 
 \section{Machine Assignment}
 
@@ -302,7 +186,8 @@ Example Model: Machine assignment\\
 	\end{itemize}
 \end{minipage}
 \begin{minipage}{0.3\textwidth}
-\includegraphics[scale = 0.5]{assignment}
+\textbf{To Include picture}
+%\includegraphics[scale = 0.5]{assignment}
 \end{minipage}
 
 
@@ -311,7 +196,7 @@ Here is a model....  \textbf{To be added....}
 \section{Facility Location}
 \url{https://en.wikipedia.org/wiki/Facility_location_problem}
 
-\includegraphics[scale = 0.5]{facility-location}
+
 
 \subsection{Capacitated Facility Location}
 \begin{equation}
@@ -337,44 +222,10 @@ Here is a model....  \textbf{To be added....}
 
 
 \section{Capital Budgeting}
-	\textcolor{blue}{A firm has $n$ projects it could undertake to maximize revenue, but budget limitations require that not all can be completed.}\\
-	\textcolor{blue}{Project $j$ expects to produce revenue $c_j$\\
-		Project $j$ requires investment $a_{ij}$ in time period $i$ for $i = 1,\ldots,m$\\
-		In time period $i$, capital $b_i$ is available}
-		
-		Let $x_i$ be a binary variable such that $x_i = 1$ if we choose investment $i$ and $x_i = 0$ otherwise.  The the model can be given as:
-	\begin{align*}
-	\max ~~~& \sum_{j = 1}^n c_jx_j\\
-	s.t. ~~~&\sum_{j = 1}^n a_{ij}x_j\leq b_i, ~~~i = 1,\ldots m\\
-	& x_j \in \{0,1\} , \ j = 1,\ldots,n
-	\end{align*}
 
 
-Consider the example given in the following table.
-	\begin{table}[h]
-		\centering
-		\resizebox{\columnwidth}{!}{%
-			\begin{tabular}{|c|c|c|c|}%[<+->]
-				\hline
-				Project & $\mathbb{E}$[Revenue] & Resources required in week 1 & Resources required in week 2\\\hline
-				\rowcolor{bluegreen} 1 & 10 & 3 & 4\\
-				\hline
-				2 & 8 & 1 & 2\\\hline
-				\rowcolor{bluegreen} 3 & 6 & 2 & 1\\
-				\hline
-				Resources available & & 5 & 6\\
-				\hline
-		\end{tabular}}
-	\end{table}
-	$$
-	\max~~~~~ 10x_1+8x_2+6x_3
-	$$
-	subject to
-	\begin{align*}
-	3x_1+1x_2+2x_3\leq5\\
-	4x_1+2x_2+1x_3\leq6\\
-	x_j \in \{0,1\},\  j = 1,2,3
-	\end{align*}
+\input{../open-optimization-examples/example-capital-budgeting.tex}
+
 
 
 
@@ -679,18 +530,6 @@ Practical guidelines for solving difficult MILPs
 \subsection{From AIMMS}
  \url{https://download.aimms.com/aimms/download/manuals/AIMMS3OM_FormulatingOptimizationModels.pdf}
 
-%\includegraphics[scale = 0.7, page = 3, trim= 3cm 0 0 3cm]{sections/AIMMS3OM-IntegerProgrammingTricks.pdf}
-%\includegraphics[scale = 0.7, page = 4, trim= 3cm 0 0 3cm]{sections/AIMMS3OM-IntegerProgrammingTricks.pdf}
-%\includegraphics[scale = 0.7, page = 5, trim= 3cm 0 0 3cm]{sections/AIMMS3OM-IntegerProgrammingTricks.pdf}
-%\includegraphics[scale = 0.7, page = 6, trim= 3cm 0 0 3cm]{sections/AIMMS3OM-IntegerProgrammingTricks.pdf}
-%\includegraphics[scale = 0.7, page = 7, trim= 3cm 0 0 3cm]{sections/AIMMS3OM-IntegerProgrammingTricks.pdf}
-%\includegraphics[scale = 0.7, page = 8, trim= 3cm 0 0 3cm]{sections/AIMMS3OM-IntegerProgrammingTricks.pdf}
-%\includegraphics[scale = 0.7, page = 9, trim= 3cm 0 0 3cm]{sections/AIMMS3OM-IntegerProgrammingTricks.pdf}
-%\includegraphics[scale = 0.7, page = 10, trim= 3cm 0 0 3cm]{sections/AIMMS3OM-IntegerProgrammingTricks.pdf}
-%\includegraphics[scale = 0.7, page = 11, trim= 3cm 0 0 3cm]{sections/AIMMS3OM-IntegerProgrammingTricks.pdf}
-%\includegraphics[scale = 0.7, page = 12, trim= 3cm 0 0 3cm]{sections/AIMMS3OM-IntegerProgrammingTricks.pdf}
-%\includegraphics[scale = 0.7, page = 13, trim= 3cm 0 0 3cm]{sections/AIMMS3OM-IntegerProgrammingTricks.pdf}
-%\includegraphics[scale = 0.7, page = 14, trim= 3cm 0 0 3cm]{sections/AIMMS3OM-IntegerProgrammingTricks.pdf}
 \subsubsection{Linear Programming}
 Practical guidelines for solving difficult linear programs
 \url{https://pdfs.semanticscholar.org/b01f/ad44c20c372fdda95cbfb980c0d37302de07.pdf}

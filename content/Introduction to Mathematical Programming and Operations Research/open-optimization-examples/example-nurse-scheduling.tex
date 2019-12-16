@@ -1,0 +1,72 @@
+% Copywrite Robert Hildeband 2019
+
+
+\begin{example}{Nurse Scheduling}{--- Adapted from "Applied Integer Programming". exercise 2.6 and 2.7}
+\end{example}
+Nurses in large hospitals usually work 3 days a week. Daily demand for nurses is summarized in Table 2.4. Determine the number of nurses required per schedule type so that the total wage cost is minimized.
+\begin{enumerate}
+\item  Use the numbers (not symbols) in the table to model this problem instance.
+\item Solve this instance and submit the code.
+\item Let $S$ denote the set of schedule types.  How many variables of each type (continuous, binary, integer) does your model have in terms of the number of schedules $|S|$?
+\item If part-time nurses are hired at the rate of $\$175$/day, formulate the problem to minimize the total cost. 
+\item If part-time nurses must be accompanied by at least three full-time nurses, how would you formulate this constraint?
+\end{enumerate}
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{l|ccccc|c}
+\hline
+\hline
+& & & Schedule Type & & \\
+\hline
+Day & 1 & 2 & 3 & 4 & 5 & Nurses Required\\
+\hline
+Monday & X & & X & & & 20\\
+Tuesday & X & &  &  & X & 25\\
+Wednesday & & & X & X & & 26\\
+Thursday& & X & & & X& 26\\
+Friday & & X & & X & X & 30\\
+Saturday& & X& & X& & 30\\
+Sunday& X& & X & && 35\\
+\hline
+Weekly wage& 525 & 470 & 550 & 500 & 425\\
+\hline 
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{itemize}
+		\item Let 
+		$$
+		x_i = \textrm{The number of nurses to assign to schedule } i\ \forall\ i \in \left\lbrace 1,2,...,5 \right\rbrace.
+		$$
+\end{itemize}	
+		\vspace{.25in}
+		The model is
+		\begin{align*}
+		\textrm{Minimize}	\hspace{.25in}	525x_1+470x_2+550x_3+500x_4+425x_5&&&&
+		\end{align*}
+		\vspace{-.43in}
+		\begin{align*}
+		\textrm{s.t.} 		\hspace{.6in}	x_1+x_3 &\geq 20							\\
+											x_1+x_5 &\geq 25							\\
+											x_3+x_4 &\geq 26							\\
+											x_2+x_5 &\geq 26							\\
+										x_2+x_4+x_5 &\geq 30							\\
+											x_2+x_4 &\geq 30							\\
+											x_1+x_3 &\geq 35							\\
+												x_i &\in \mathbb{Z}_+ & &\forall\ i \in \left\lbrace 1,2,...,5 \right\rbrace
+		\end{align*}
+		
+		The table tells us which schedule types contribute to each day's staff; i.e. Mondays are staffed entirely by nurses assigned to schedule types 1 and 3, Tuesdays by those assigned to type 1 and 5, and so on. At least 20 nurses are required to be on duty on Mondays; so the number of nurses assigned to schedules 1 and 3 should be at least 20. That is,
+			$$
+			x_1+x_3 \geq 20.
+			$$
+		Extending this logic to each day gives us all seven constraints. \\
+		
+		Alternately, by replacing the X's in the table with 1's we are left with a constraint matrix $S$. Let $\vec{x}^\top = [x_1,x_2,x_3,x_4,x_5]$ be the decision variables and $\vec{r}^\top=[20,25,26,26,30,30,35]$ describe the nurses required for each day, so that
+			$$
+			S\ \vec{x} \geq \vec{r}
+			$$
+		describes all seven constraints. 
+		%This is the approach taken in the sample code below.
