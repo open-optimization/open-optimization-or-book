@@ -21,3 +21,6 @@ Further information:
 - https://tex.stackexchange.com/questions/37233/having-several-keys-refer-to-the-same-bibliography-entry/292361
 - https://tex.stackexchange.com/questions/25701/bibtex-vs-biber-and-biblatex-vs-natbib
 - http://tug.ctan.org/info/biblatex-cheatsheet/biblatex-cheatsheet.pdf
+- http://mirrors.ibiblio.org/CTAN/macros/latex/contrib/biblatex/doc/biblatex.pdf
+- http://mirror.utexas.edu/ctan/macros/latex/contrib/biblatex-contrib/biblatex-ext/biblatex-ext.pdf
+- https://github.com/PaulStanley/biblatex-tutorial/releases (2017 tutorial)
