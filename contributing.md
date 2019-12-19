@@ -84,7 +84,9 @@ Although we will have many illustrative examples and exercises contained in this
 
 ### Working with git submodules
 
+### Random advice
 
+If you develop on macOS, file names are case-insensitive. Our testing and deployment infrastructure, however, runs on a case-sensitive file system, so please make sure that you are include files by their exact filename.
 
 # IGNORE ANYTHING BELOW
 
