@@ -6,7 +6,26 @@
 \DeclareBibliographyCategory{figures}
 \addbibresource{../../figures/figures-static/00_METADATA.bib}
 
+\DeclareRobustCommand\footnotetextmetadata[1]{%
+  \footnotetext{\citetitle*{#1}, \citeauthor{#1}, \citedate{#1}, \citeurl{#1},
+    \citeurldate{#1}}.}
 
+\usepackage{xargs}
+\newcommandx\refincludefigurestatic[3][1=\relax,2={width=.\linewidth}]{%
+  \begin{figure}[t]%
+    \centering%
+    \includegraphics[#2]{../../figures/figures-static/#3}%
+    \caption{%
+      \ifx#1\relax % Caption from TITLE field in .bib
+      \citetitle*{#2}
+      \else        % Caption provided as an argument to the macro
+      #1%
+      \fi%
+      \protect\footnotemark}%
+    \label{fig:#3}%
+  \end{figure}%
+  \autoref{fig:#3}\footnotetextmetadata{#3}%
+}
 
 %%% Local Variables:
 %%% mode: latex
