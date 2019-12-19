@@ -1,3 +1,4 @@
+
 name: CI-check-latex
 
 on: [push]
@@ -9,6 +10,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
+    - name: Checkout submodules
+      run: |
+        auth_header="$(git config --local --get http.https://github.com/.extraheader)"
+        git submodule sync --recursive
+        git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive
     - name: install texlive
       run: sudo DEBIAN_FRONTEND=noninteractive apt-get install texlive latexmk texlive-latex-extra texlive-science texlive-fonts-extra texlive-extra-utils
     - name: pdflatex
