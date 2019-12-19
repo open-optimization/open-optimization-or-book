@@ -1,0 +1,19 @@
+name: Push product to GitHub releases
+
+jobs:
+  generate:
+    name: Create release-artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@master
+      - name: Generate the artifacts
+        uses: skx/github-action-build@master
+        with:
+          builder: make
+      - name: Upload the artifacts
+        uses: skx/github-action-publish-binaries@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: `make list-products`

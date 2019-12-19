@@ -13,8 +13,9 @@ all: open-optimization.pdf
 
 .PHONY: open-optimization.pdf version.txt
 
+# This target makes the version string. It is also used in the deployment scripts.
 version.txt:
-	-git describe --all --tags --dirty > $@
+	-echo `git describe --tags --dirty`-`git log -1 --date=format:"%Y-%m-%d" --format="%ad"` > $@
 
 open-optimization.pdf: version.txt
 	$(LATEXMK) $(LATEXMK_OPTIONS) open-optimization
