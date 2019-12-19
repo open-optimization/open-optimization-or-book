@@ -1,0 +1,15 @@
+name: CI-check-latex
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: install texlive
+      run: sudo DEBIAN_FRONTEND=noninteractive apt-get install texlive latexmk texlive-latex-extra texlive-science texlive-fonts-extra texlive-extra-utils
+    - name: pdflatex
+      run: (cd "content/Introduction to Mathematical Programming and Operations Research/open-optimization" && latexmk -pdf -f -pdflatex="pdflatex --interaction=nonstopmode" open-optimization)
