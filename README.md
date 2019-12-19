@@ -1,5 +1,5 @@
 
-![](logo-open-optimization-oer-wide.png)
+![](open-optimization-common/logos/logo-open-optimization-oer-wide.png)
 
 # Open Optimization (Prototype)
 
