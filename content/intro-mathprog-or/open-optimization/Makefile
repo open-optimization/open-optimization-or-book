@@ -11,7 +11,10 @@ LATEXMK_OPTIONS = -pdf -g -f
 
 all: open-optimization.pdf
 
-.PHONY: open-optimization.pdf
+.PHONY: open-optimization.pdf version.txt
 
-open-optimization.pdf:
+version.txt:
+	-git describe --all --tags --dirty > $@
+
+open-optimization.pdf: version.txt
 	$(LATEXMK) $(LATEXMK_OPTIONS) open-optimization
