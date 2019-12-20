@@ -1,5 +1,5 @@
 all:
-	$(MAKE) --print-directory --directory=content/intro-mathprog-or/open-optimization open-optimization.pdf
+	$(MAKE) --print-directory --directory=content/intro-mathprog-or/open-optimization
 	@echo "############################"
 	@echo "#### Available products ####"
 	@echo "############################"

@@ -1,5 +1,5 @@
 
-![](open-optimization-common/logos/logo-open-optimization-oer-wide.png)
+![](content/intro-mathprog-or/open-optimization/titlecard.png)
 
 # Open Optimization (Prototype)
 
