@@ -6,6 +6,34 @@
 \addbibresource{../../../open-optimization-bibliography/bib/references.bib}
 \addbibresource{../../figures/figures-static/00_METADATA.bib}
 
+% print url only if no doi.  https://tex.stackexchange.com/questions/424774/print-url-only-if-doi-not-present
+%% \renewbibmacro*{doi+eprint+url}{%
+%%     \printfield{doi}%
+%%     \newunit\newblock%
+%%     \iftoggle{bbx:eprint}{%
+%%         \usebibmacro{eprint}%
+%%     }{}%
+%%     \newunit\newblock%
+%%     \iffieldundef{doi}{%
+%%         \usebibmacro{url+urldate}}%
+%%         {}%
+%%     }
+% print url&eprint only if no doi. Adapted from above.
+\renewbibmacro*{doi+eprint+url}{%
+    \printfield{doi}%
+    \newunit\newblock%
+    \iffieldundef{doi}{%
+      \iftoggle{bbx:eprint}{%
+        \usebibmacro{eprint}%
+      }{}%
+    }{}%
+    \newunit\newblock%
+    \iffieldundef{doi}{%
+        \usebibmacro{url+urldate}}%
+        {}%
+    }
+
+
 \DeclareRobustCommand\footnotetextmetadata[1]{%
   \footnotetext{\citetitle*{#1}, from \citeurl{#1}.
     \citeauthor{#1}, \citedate{#1}.
