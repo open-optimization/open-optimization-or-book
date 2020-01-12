@@ -1,11 +1,21 @@
-\documentclass[../open-optimization/open-optimization.tex]{subfiles}
+% Copyright 2020 by Robert Hildebrand
+%This work is licensed under a
+%Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0)
+%See http://creativecommons.org/licenses/by-sa/4.0/% 
 
+
+
+\documentclass[../open-optimization/open-optimization.tex]{subfiles}
+ 
 \begin{document}
 
 \chapter{Integer Programming Formulations}
-\label{sec:IP-formulations}
+\label{sec:IP-formulations} 
 \section{Knapsack Problem}
-Knapsack problem can take different forms depending on if the variables are binary or integer.  The binary version means that there is only one item of each item type that can be taken.
+Knapsack problem can take different forms depending on if the variables are binary or integer.  The binary version means that there is only one item of each item type that can be taken.  This is typically illustrated as a backpack (knapsack) and some items to put into it (see  \autoref{fig:wiki/File/knapsack}), but has applications in many contexts.  
+
+ \includefigurestatic[Knapsack Problem: which items should we choose take in the knapsack that maximizes the value while respecting the 15kg weight limit?][width=.4\linewidth][h]{wiki/File/knapsack}
+
 \begin{general}{Binary Knapsack Problem}{\npcomplete}
 Given an non-negative weight vector $a \in \Q^n_+$, a capacity $b \in \Q_+$, and objective coefficients $c \in \Q^n$, 
 \begin{equation}
@@ -16,18 +26,23 @@ Given an non-negative weight vector $a \in \Q^n_+$, a capacity $b \in \Q_+$, and
 \end{split}
 \end{equation}
 \end{general}
-\begin{figure}[H]
-\begin{center}
-\includegraphics[scale = 0.2]{knapsack}\footnotemark \end{center}
-\label{fig:knapsack}
-\caption{Knapsack Problem: which items should we choose take in the knapsack that maximizes the value while respecting the 15kg weight limit?}
-\end{figure}
-\footnotetext{\url{https://en.wikipedia.org/wiki/Knapsack_problem}}
+ 
+
+
+ 
+%\begin{figure}[H]
+%\begin{center}
+%\includegraphics[scale = 0.2]{knapsack}\footnotemark 
+%\end{center}
+%\label{fig:knapsack}
+%\caption{Knapsack Problem: which items should we choose take in the knapsack that maximizes the value while respecting the 15kg weight limit?}
+%\end{figure}
+%\footnotetext{\url{https://en.wikipedia.org/wiki/Knapsack_problem}}
 
 \begin{examplewithcode}{Knapsack}{code:knapsack}
 \label{example:knapsack}
 You have a knapsack (bag) that can only hold W = 15 kgs.  There are 5 items that you could possibly put into your knapsack.  The items (weight, value) are given as:
-(12 kg, $\$$4), (2 kg, $\$$2), (1kg, $\$$2), (1kg, $\$$1), (4kg, $\$$10).  Which items should you take to maximize your value in the knapsack?\\
+(12 kg, $\$$4), (2 kg, $\$$2), (1kg, $\$$2), (1kg, $\$$1), (4kg, $\$$10).  Which items should you take to maximize your value in the knapsack? See \autoref{fig:wiki/File/knapsack}.\\
 
 \noindent \textbf{Variables:}
 \begin{itemize}
@@ -97,6 +112,12 @@ The set cover problem can be modeled as
 \end{equation}
 where $x_v$ is a 0/1 variable that takes the value $1$ if we include item $j$ in set $S$ and $0$ if we do not include it in the set $S$.  
 \end{general}
+
+\begin{todo}
+Add flight crew scheduling example and images.
+\end{todo}
+
+One specific type of set cover problem is the \emph{vertex cover} problem.
 \begin{general}{Vertex Cover}{\npcomplete}
 Given a graph $G = (V,E)$ of vertices and edges, we want to find a smallest size subset $S \subseteq V$ such that every for every $e = (v,u) \in E$, either $u$ or $v$ is in $S$.   
 
@@ -109,48 +130,13 @@ We can write this as a mathematical program in the form:
 \end{split}
 \end{equation}
 \end{general}
-\begin{examplewithcode}{Vertex Cover}{code:vertex-cover}
-\label{example:vertex-cover}
-Consider the graph with nodes
-\begin{equation}
-V = \text{["You", "Ginger", "Juan", "Jameis", "Bob", "Geoff", "Jane"]}
-\end{equation}
-and edges
-\begin{align}E = \text{[["You", "Ginger"],
-     ["You", "Juan"], 
-     ["You", "Jameis"],
-     ["You", "Bob"],}\\
-     \text{["You", "Jane"],
-     ["You", "Geoff"],
-     ["Ginger", "Jameis"],
-     ["Jameis", "Bob"],}\\
-     \text{
-     ["Bob", "Jane"],
-     ["Bob", "Geoff"],
-     ["Geoff", "Jane"]]}
-  \end{align}
-%  \includegraphics{}
-  
-This problem can be modeled as
-\begin{alignat*}{1}\min\quad & x_{\text{You}} + x_{\text{Ginger}} + x_{\text{Juan}} + x_{\text{Jameis}} + x_{\text{Bob}} + x_{\text{Geoff}} + x_{\text{Jane}}\\
-\text{Subject to} \quad & x_{\text{You}} + x_{\text{Ginger}} \geq 1\\
- & x_{\text{You}} + x_{\text{Juan}} \geq 1\\
- & x_{\text{You}} + x_{\text{Jameis}} \geq 1\\
- & x_{\text{You}} + x_{\text{Bob}} \geq 1\\
- & x_{\text{You}} + x_{\text{Jane}} \geq 1\\
- & x_{\text{You}} + x_{\text{Geoff}} \geq 1\\
- & x_{\text{Ginger}} + x_{\text{Jameis}} \geq 1\\
- & x_{\text{Jameis}} + x_{\text{Bob}} \geq 1\\
- & x_{\text{Bob}} + x_{\text{Jane}} \geq 1\\
- & x_{\text{Bob}} + x_{\text{Geoff}} \geq 1\\
- & x_{\text{Geoff}} + x_{\text{Jane}} \geq 1\\
- & x_{i} \in \{0,1\} \quad\forall i \in \{\text{You,Ginger,\dots,Geoff,Jane}\}\\
-\end{alignat*}
-\end{examplewithcode}
+
+\begin{todo}
+Add fire station cover example.
+\end{todo}
 
 
 
-\input{../open-optimization-examples/example-flight-crew-scheduling.tex}
 \input{../open-optimization-examples/example-set-covering.tex}
 
 
@@ -170,7 +156,13 @@ Given a non-negative matrix $A \in \Z_+^{m \times n}$, a non-negative vector $b 
 \end{equation}
 \end{general}
 
-\input{../open-optimization-examples/example-nurse-scheduling.tex}
+\begin{todo}
+ Add Nurse scheduling problem.
+\end{todo}
+
+\begin{examplewithcode}{Nurse Scheduling}{code:nurse-scheduling}
+
+\end{examplewithcode}
 
 \section{Machine Assignment}
 
@@ -186,7 +178,9 @@ Example Model: Machine assignment\\
 	\end{itemize}
 \end{minipage}
 \begin{minipage}{0.3\textwidth}
-\textbf{To Include picture}
+\begin{todo}
+Include picture
+\end{todo}
 %\includegraphics[scale = 0.5]{assignment}
 \end{minipage}
 
@@ -194,11 +188,18 @@ Example Model: Machine assignment\\
 Here is a model....  \textbf{To be added....}
 
 \section{Facility Location}
-\url{https://en.wikipedia.org/wiki/Facility_location_problem}
+
+\begin{todo}
+Add discussion on Facility Location Problems and pictures.
+\end{todo}
+\href{https://en.wikipedia.org/wiki/Facility_location_problem}{Wikipedia - Facility Location Problem}
 
 
 
 \subsection{Capacitated Facility Location}
+
+\begin{general}{Capacitated Facility Location}{\npcomplete}
+Given costs connections $c_{ij}$ and fixed building costs $f_i$, demands $d_j$ and capacities $u_i$, the capacitated facility location problem is 
 \begin{equation}
 \begin{array}{rl}
 \min & \displaystyle\sum_{i=1}^n\sum_{j=1}^mc_{ij}y_{ij}+\sum_{i=1}^nf_ix_i \\
@@ -208,8 +209,13 @@ Here is a model....  \textbf{To be added....}
 &x_i\in\{0,1\}\text{ for all } i=1,\dots,n
 \end{array}
 \end{equation}
+Here $M$ is a large number and can be chosen as $M = m$, but could be refined smaller if more context is known.
+\end{general}
 
 \subsection{Uncapacitated Facility Location}
+
+\begin{general}{Uncapacitated Facility Location}{\npcomplete}
+Given costs connections $c_{ij}$ and fixed building costs $f_i$, the uncapacitated facility location problem is 
 \begin{equation}
 \begin{array}{rl}
 \min & \displaystyle\sum_{i=1}^n\sum_{j=1}^mc_{ij}z_{ij}+\sum_{i=1}^nf_ix_i \\
@@ -219,6 +225,8 @@ Here is a model....  \textbf{To be added....}
 &x_i\in\{0,1\}\text{ for all } i=1,\dots,n
 \end{array}
 \end{equation}
+Here $M$ is a large number and can be chosen as $M = m$, but could be refined smaller if more context is known.
+\end{general}
 
 
 \section{Capital Budgeting}
@@ -230,10 +238,27 @@ Here is a model....  \textbf{To be added....}
 
 
 \section{Network Flow}
+\begin{todo}
+Add discussion of network flow problem and picture.
+\end{todo}
 
 \section{Transportation Problem}
-\url{https://www.youtube.com/watch?v=Jr7LI-sUEmo}
-\subsection{Modeling Tricks}
+\begin{todo}
+Add discussion of transportation problem and picture.
+\end{todo}
+
+\href{https://www.youtube.com/watch?v=Jr7LI-sUEmo}{Youtube! - TRANSPORTATION PROBLEM with PuLP in PYTHON}
+
+\section{Makespan Minimization}
+\begin{todo}
+ Add discussion of some makespan minimization problems.
+ \end{todo}
+
+\section{Other examples}
+\begin{itemize}
+\item \href{https://www.juliaopt.org/notebooks/JuMP-Sudoku.html}{Sudoku}
+\end{itemize}
+\section{Modeling Tricks}
 In this section, we describe ways to model a variety of constraints that commonly appear in practice.  The goal is changing constraints described in words to constraints defined by math.
 \subsection{Either Or Constraints}
 \emph{``At least one of these constraints holds"} is what we would like to model.  Equivalently, we can phrase this as an \emph{inclusive or} constraint.  
@@ -342,11 +367,48 @@ This is accomplished with right hand side $\epsilon (1-\delta) + m\delta$.
 Many other combinations of if then statements are summarized in the following table:
 \begin{table}
 \begin{center}
-\includegraphics[scale = 0.4]{table-if-then}\footnotemark
+\begin{tabular}{|c|c|}
+\hline
+\textbf{Implication} & \textbf{Constraint}\\
+\hline
+If $\delta = 0$, then $a^\top x \leq b$ & $a^\top x \leq b + M \delta$\\
+If $a^\top x \leq b$, then $\delta = 1$ & $a^\top x \geq m \delta + \epsilon(1-\delta)$\\
+\hline
+\end{tabular}
 \end{center}
-\caption{If/then models with a constraint and a binary variable.}
+\caption{Short list: If/then models with a constraint and a binary variable.  Here $M$ and $m$ are upper and lower bounds on $a^\top x - b$ and $\epsilon$ is a small number such that if $a^\top x > b$, then $a^\top x \geq b + \epsilon$.}
 \end{table}
-\footnotetext{This table was taken from notes by Laurent Lassard.}
+These two implications can be used to derive the following longer list of implications.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{|c|c|}
+\hline
+\textbf{Implication} & \textbf{Constraint}\\
+\hline
+If $\delta = 0$, then $a^\top x \leq b$ & $a^\top x \leq b + M \delta$\\
+If $\delta = 0$, then $a^\top x \geq b$ & $a^\top x \geq b + m \delta$\\
+If $\delta = 1$, then $a^\top x \leq b$ & $a^\top x \leq b + M (1-\delta)$\\
+If $\delta = 1$, then $a^\top x \geq b$ & a$^\top x \geq b + m (1-\delta)$\\
+If $a^\top x \leq b$, then $\delta = 1$ & $a^\top x \geq b + m \delta + \epsilon(1-\delta)$\\
+If $a^\top x \geq b$, then $\delta = 1$ & $a^\top x \leq b + M \delta - \epsilon(1-\delta)$\\
+If $a^\top x \leq b$, then $\delta = 0$ & $a^\top x \geq b + m (1-\delta) + \epsilon \delta$\\
+If $a^\top x \geq b$, then $\delta = 0$ & $a^\top x \geq b + m (1-\delta) - \epsilon \delta$\\
+\hline
+\end{tabular}
+\end{center}
+\caption{Long list: If/then models with a constraint and a binary variable.  Here $M$ and $m$ are upper and lower bounds on $a^\top x - b$ and $\epsilon$ is a small number such that if $a^\top x > b$, then $a^\top x \geq b + \epsilon$.}
+\end{table}
+Lastly, if you insist on having exact correspondance, that is, "$\delta = 0 $ if and only if $a^\top x \leq b$" you can simply include both constraints for "if $\delta = 0 $, then $a^\top x \leq b$" and if "$a^\top x \leq b$, then $\delta = 0 $".  Although many problems may be phrased in a way that suggests you need "if and only if", it is often not necessary to use both constraints due to the objectives in the problem that naturally prevent one of these from happening.  
+
+For example, if we want to add a binary variable $\delta$ that means
+$$
+\begin{cases}
+\delta = 0 \text{ implies }  a^\top x \leq b\\
+\delta = 1  \text{ Otherwise}
+\end{cases}
+$$
+If $\delta = 1$ does not effect the rest of the optimization problem, then adding the constraint regarding $\delta = 1$ is not necessary.  Hence, typically, in this scenario, we only need to add the constraint $a^\top x \leq b + M \delta$.
 
 \subsection{Binary reformulation of integer variables}
 If an integer variable has small upper and lower bounds, it can sometimes be advantageous to recast it as a sequence of binary variables - for either modeling, the solver, or both.   Although there are technically many ways to do this, here are the two most common ways.
@@ -434,13 +496,8 @@ We will use integer programming to describe this function.  We will fix $x = a$ 
 \text{Subject to} \quad & x - 5 z_{2} - 10 z_{3} - 15 z_{4} = 0\\
  & y - 125 z_{2} - 225 z_{3} - 300 z_{4} = 0\\
  & z_{1} + z_{2} + z_{3} + z_{4} = 1\\
- & z_{1} - w_{1} \leq 0\\
- & z_{2} - w_{2} \leq 0\\
- & z_{3} - w_{3} \leq 0\\
- & z_{4} - w_{4} \leq 0\\
- & SOS2: \{w_1, w_2, w_3, w_4\}\\
+ & SOS2: \{z_1, z_2, z_3, z_4\}\\
  & 0 \leq z_{i} \leq 1 \quad\forall i \in \{1,2,3,4\}\\
- & w_{i} \in \{0,1\} \quad\forall i \in \{1,2,3,4\}\\
  & x = a\\
 \end{align*}
 
@@ -468,18 +525,13 @@ Given the piecewise linear, we can model the whole problem explicitly as a mixed
 \text{Subject to} \quad & x - 5 z_{2} - 10 z_{3} - 15 z_{4} = 0\\
  & y - 125 z_{2} - 225 z_{3} - 300 z_{4} = 0\\
  & z_{1} + z_{2} + z_{3} + z_{4} = 1\\
- & z_{1} - w_{1} \leq 0\\
- & z_{2} - w_{2} \leq 0\\
- & z_{3} - w_{3} \leq 0\\
- & z_{4} - w_{4} \leq 0\\
  & X_{1,1} + X_{1,2} - x \leq 5\\
  & X_{2,1} + X_{2,2} \leq 10\\
  & 0.5 X_{1,1} - 0.5 X_{2,1} \geq 0\\
  & 0.4 X_{1,2} - 0.6 X_{2,2} \geq 0\\
- & SOS2: \{w_1, w_2, w_3, w_4\}\\
+ & SOS2: \{z_1, z_2, z_3, z_4\}\\
  & X_{i,j} \geq 0 \quad\forall i \in \{1,2\}, j \in \{1,2\}\\
  & 0 \leq z_{i} \leq 1 \quad\forall i \in \{1,2,3,4\}\\
- & w_{i} \in \{0,1\} \quad\forall i \in \{1,2,3,4\}\\
  & 0 \leq x \leq 15\\
  & y\\
 \end{align*}
@@ -520,24 +572,21 @@ There are a number of scenarios where the constraints can be relaxed without sac
 
 
 \section{Notes from AIMMS modeling book.}
-\subsection{Guidelines for Integer Programming Modeling}
-Practical guidelines for solving difficult MILPs
-\url{http://inside.mines.edu/~anewman/MIP_practice120212.pdf}
+\begin{itemize}
 
-\subsection{Linear Programming Modeling}
-\url{https://download.aimms.com/aimms/download/manuals/AIMMS3OM_LinearProgrammingTricks.pdf}
+\item \href{http://inside.mines.edu/~anewman/MIP_practice120212.pdf}{AIMMS - Practical guidelines for solving difficult MILPs}
 
-\subsection{From AIMMS}
- \url{https://download.aimms.com/aimms/download/manuals/AIMMS3OM_FormulatingOptimizationModels.pdf}
+\item \href{https://download.aimms.com/aimms/download/manuals/AIMMS3OM_LinearProgrammingTricks.pdf}{AIMMS - Linear Programming Tricks}
 
-\subsubsection{Linear Programming}
-Practical guidelines for solving difficult linear programs
-\url{https://pdfs.semanticscholar.org/b01f/ad44c20c372fdda95cbfb980c0d37302de07.pdf}
 
+\item  \href{https://download.aimms.com/aimms/download/manuals/AIMMS3OM_FormulatingOptimizationModels.pdf}{AIMMS - Formulating Optimization Models}
+
+
+\item \href{https://pdfs.semanticscholar.org/b01f/ad44c20c372fdda95cbfb980c0d37302de07.pdf}{AIMMS - Practical guidelines for solving difficult linear programs}
+\end{itemize}
 \subsection{Further Topics}
-
-\subsubsection{Precedence Constraints}
-\url{https://or.stackexchange.com/questions/1319/best-model-for-precedence-constraints-within-scheduling-problem}
-
+\begin{itemize}
+\item \href{https://or.stackexchange.com/questions/1319/best-model-for-precedence-constraints-within-scheduling-problem}{Precedence Constraints}
+\end{itemize}
 
 \end{document}

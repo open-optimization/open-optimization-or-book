@@ -1,3 +1,8 @@
+% Copyright 2020 by Robert Hildebrand
+%This work is licensed under a
+%Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0)
+%See http://creativecommons.org/licenses/by-sa/4.0/
+
 \documentclass[../open-optimization/open-optimization.tex]{subfiles}
 
 \begin{document}
@@ -16,7 +21,7 @@ $$
 \end{array}
 $$
 
-\begin{theorem}
+\begin{theorem}[LP Bounds]
 It always holds that 
 \begin{equation}
 z^*_{IP} \leq z^*_{LP}.
@@ -83,15 +88,16 @@ Consider the problem
   Now only could it produce a poor solution, it is not always clear how to round to a feasible solution.  
   
 \subsection{Fractional Knapsack}
-The fractional knapsack problem has an exact greedy algorothm.
+The fractional knapsack problem has an exact greedy algorithm.
 
-\url{https://www.youtube.com/watch?time_continue=424&v=m1p-eWxrt6g}
-
-\url{https://www.geeksforgeeks.org/fractional-knapsack-problem/}
+\begin{itemize}
+\item \href{https://www.youtube.com/watch?time_continue=424&v=m1p-eWxrt6g}{Youtube!}
+\item \href{https://www.geeksforgeeks.org/fractional-knapsack-problem/}{Blog}
+\end{itemize}
 
 \section{Branch and Bound}
 
-See \url{http://web.tecnico.ulisboa.pt/mcasquilho/compute/_linpro/TaylorB_module_c.pdf} for some nice notes on branch and bound.
+See \href{http://web.tecnico.ulisboa.pt/mcasquilho/compute/_linpro/TaylorB_module_c.pdf}{Module by Miguel Casquilho} for some nice notes on branch and bound.
 
 
 \subsection{Algorithm}
@@ -129,33 +135,8 @@ See \url{http://web.tecnico.ulisboa.pt/mcasquilho/compute/_linpro/TaylorB_module
 
 
 
-\subsection{General Branching}
+Here is an example of branching on general integer variables.
 
-\begin{example}{}{}
-See Example 9 in Chapter 9 of the textbook (Winston  - Operations Research Applications and Algorithms).\\
-
-
-
-\textbf{$x =  [3.75, 2.25]$,  $obj =  41.25$}\\
-\includegraphics[scale = 0.5]{bnb1}\\
-
-\textbf{$x =  [3, 3]$ $obj =  39.0$}\\
-\textbf{$x =  [4,  1.8],$,  $obj =  41.0$}\\
-\includegraphics[scale = 0.5]{bnb2}\\
-
-\textbf{$x =  [3, 3]$,  $obj =  39.0$}\\
-\textbf{$x =  [4.44,  1       ]$  $obj =  40.55$.}\\
-\textbf{Infeasible Region}\\
-\includegraphics[scale = 0.5]{bnb3}
-
-\textbf{$x =  [3, 3]$,  $obj =  39.0$}\\
-\textbf{$x =  [4, 1]$,  $obj =  37.0$}\\
-\textbf{$x =  [5, 0]$,  $obj =  40.0$}\\
-\textbf{Infeasible Region}\\
-\includegraphics[scale = 0.5]{bnb4}\\
-
-\end{example}
-\newpage
 \begin{example}{}{}
 Consider the two variable example with
  
@@ -192,9 +173,8 @@ Consider the problem
 & x_i \in \{0,1\} \ \ i=1,2,3,4
 \end{align*}
 
-\textbf{What is the optimal solution if we remove the binary constraints?}
+\textbf{Question: What is the optimal solution if we remove the binary constraints?}
 
-\newpage
 
 
 
@@ -204,9 +184,8 @@ Consider the problem
 & 0 \leq x_i \leq 1 \ \ i=1,2,3,4\\
 \end{align*}
 
-\textbf{How do I find the solution to this problem?}
+\textbf{Question: How do I find the solution to this problem?}
 
-\newpage
 
 \begin{align*}
 \max \quad & c_1 x_1 + c_2 x_2 + c_3 x_3 + c_4 x_4\\
@@ -214,9 +193,8 @@ Consider the problem
 & 0 \leq x_i \leq m_i \ \ i=1,2,3,4\\
 \end{align*}
 
-\textbf{How do I find the solution to this problem?}
+\textbf{Question: How do I find the solution to this problem?}
 
-\newpage
 
 
 Consider the problem 
@@ -250,6 +228,10 @@ Solve the following problem with branch and bound.
 
 \subsection{Traveling Salesman Problem solution via Branching}
 
+
+\begin{todo}
+Describe solving TSP via a generalized branching method that removes subtours (instead of adding constraints).
+\end{todo}
 
 
 
@@ -287,11 +269,42 @@ In practice, this procedure is integrated in some with with branch and bound and
 \centering\begin{tabular}{>{\centering\arraybackslash}m{5cm}>{\centering\arraybackslash}m{10cm}}
  \hline
 \textbf{Model} & \textbf{LP Solution} \\\hline \hline
- \includegraphics[scale = 0.5]{cutting-plane-1-equation} &
+
+$$
+\begin{array}{lrl}
+\max \ & x_1 + x_2\\
+\text{subject to  } &  -2x_1 + x_2 &\leq 0.5\\
+& x_1 + 2x_2 &\leq 10.5\\
+& x_1 - x_2 &\leq 0.5\\
+& - 2x_1 - x_2 &\leq -2
+\end{array} 
+$$
+&
 \includegraphics[scale = 0.5]{cutting-plane-1-picture}\\
-\includegraphics[scale = 0.5]{cutting-plane-2-equation} &
+$$
+\begin{array}{lrl}
+\max \ & x_1 + x_2\\
+\text{subject to  } &  -2x_1 + x_2 &\leq 0.5\\
+& x_1 + 2x_2 &\leq 10.5\\
+& x_1 - x_2 &\leq 0.5\\
+& - 2x_1 - x_2 &\leq -2\\
+& \tred{x_1} &\tred{\leq 3}
+\end{array} 
+$$
+&
 \includegraphics[scale = 0.5]{cutting-plane-2-picture}\\
-\includegraphics[scale = 0.5]{cutting-plane-3-equation} &
+$$
+\begin{array}{lrl}
+\max \ & x_1 + x_2\\
+\text{subject to  } &  -2x_1 + x_2 &\leq 0.5\\
+& x_1 + 2x_2 &\leq 10.5\\
+& x_1 - x_2 &\leq 0.5\\
+& - 2x_1 - x_2 &\leq -2\\
+& \tred{x_1} & \tred{\leq 3}\\
+& \tred{x_1 + x_2} & \tred{\leq 6}
+\end{array} 
+$$
+&
 \includegraphics[scale = 0.5]{cutting-plane-3-picture}\\
 \hline
  \end{tabular}
@@ -520,11 +533,12 @@ There is a few clever ideas out there on how to choose which variables to branch
 
 At each note in the branch and bound tree, we want to bound the objective value.  One way to get a a good bound can be using the Lagrangian. 
 
-See~\cite{Fisher2004} for a description of this.
+See~\cite{Fisher2004}  \href{https://my.eng.utah.edu/~kalla/phy_des/lagrange-relax-tutorial-fisher.pdf}{(link)} for a description of this.
 
-For a great tutorial, see this: 
- \url{https://my.eng.utah.edu/~kalla/phy_des/lagrange-relax-tutorial-fisher.pdf}
 
+
+\section{Benders Decomposition}
+\href{https://www.juliaopt.org/notebooks/Shuvomoy%20-%20Benders%20decomposition.html}{Benders Decomposition - Julia Opt}
 
 \section{Literature}
 
