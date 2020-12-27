@@ -1,0 +1,128 @@
+\subsubsection{The Cholesky Factorization}
+
+Another important theorem is the existence of a specific factorization of positive definite matrices. It is called the Cholesky Factorization and factors the matrix into the product of an upper triangular matrix and its transpose.
+
+\index{Cholesky factorization!positive definite}
+\index{positive definite!Cholesky factorization} 
+\begin{theorem}{Cholesky Factorization}{choleskyfactorization}
+Let $A$ be a positive definite matrix. Then
+there exists an upper triangular matrix $U$ whose main diagonal entries are positive, such that $A$ can be written
+
+\begin{equation*}
+A=
+U^TU
+\end{equation*}
+This factorization is unique.
+\end{theorem}
+
+The process for finding such a matrix $U$ relies on simple row operations.
+
+\begin{procedure}{Finding the Cholesky Factorization}{findingcholesky}
+Let $A$ be a positive definite matrix. The matrix $U$ that creates the Cholesky Factorization can be found through two steps.
+\begin{enumerate}
+\item Using only type $3$ elementary row operations (multiples of rows added to other rows) put $A$ in upper triangular form. Call this matrix $\hat{U}$. Then $\hat{U}$ has positive entries on the main diagonal. 
+\item Divide each row of $\hat{U}$ by the square root of the diagonal entry in that row. The result is the matrix $U$. 
+\end{enumerate}
+\end{procedure}
+
+Of course you can always verify that your factorization is correct by multiplying $U$ and $U^T$ to ensure the result is the original matrix $A$. 
+
+Consider the following example.
+
+\begin{example}{Cholesky Factorization}{cholesky}
+Show that
+$A=\leftB\begin{array}{rrr}
+9 & -6 & 3 \\ -6 & 5 & -3 \\ 3 & -3 & 6 
+\end{array}\rightB$ 
+is positive definite, and find the Cholesky factorization of $A$.
+\end{example}
+
+\begin{solution}
+First we show that $A$ is positive definite. By Theorem \ref{thm:positivematrixdeterminantAk} it suffices to show that the determinant of each submatrix is positive. 
+\[ A_{1}=\leftB\begin{array}{c} 9 \end{array}\rightB
+\mbox{ and }
+A_{2}=\leftB\begin{array}{rr} 9 & -6 \\ -6 & 5 \end{array}\rightB,\]
+so $\det(A_{1})=9$ and $\det(A_{2})=9$.
+Since $\det(A)=36$, it follows that $A$ is positive definite.
+
+Now we use Procedure \ref{proc:findingcholesky} to find the Cholesky Factorization. Row reduce (using only type $3$ row operations) until an upper triangular matrix is obtained. 
+\[ \leftB\begin{array}{rrr}
+9 & -6 & 3 \\ -6 & 5 & -3 \\ 3 & -3 & 6
+\end{array}\rightB
+\rightarrow
+\leftB\begin{array}{rrr}
+9 & -6 & 3 \\ 0 & 1 & -1 \\ 0 & -1 & 5
+\end{array}\rightB
+\rightarrow
+\leftB\begin{array}{rrr}
+9 & -6 & 3 \\ 0 & 1 & -1 \\ 0 & 0 & 4
+\end{array}\rightB
+\]
+
+Now divide the entries in each row by the square root of the diagonal
+entry in that row, to give
+
+\[ U=\leftB\begin{array}{rrr}
+3 & -2 & 1 \\ 0 & 1 & -1 \\ 0 & 0 & 2
+\end{array}\rightB
+\]
+
+You can verify that $U^TU = A$.
+\end{solution}
+
+\begin{example}{Cholesky Factorization}{cholesky}
+Let $A$ be a positive definite matrix given by 
+\begin{equation*}
+\leftB
+\begin{array}{ccc}
+3 & 1 & 1 \\ 
+1 & 4 & 2 \\ 
+1 & 2 & 5
+\end{array}
+\rightB
+\end{equation*}
+Determine its Cholesky factorization.
+\end{example}
+
+\begin{solution}
+You can verify that $A$ is in fact positive definite. 
+
+To find the Cholesky factorization we first row reduce to an upper triangular matrix. 
+\[
+\leftB
+\begin{array}{ccc}
+3 & 1 & 1 \\ 
+1 & 4 & 2 \\ 
+1 & 2 & 5
+\end{array}
+\rightB
+\rightarrow
+\leftB 
+\begin{array}{ccc}
+3 & 1 & 1 \\ 
+0 & \vspace{0.05in}\frac{11}{3} & \vspace{0.05in}\frac{5}{3} \\ 
+0 & \vspace{0.05in}\frac{5}{3}  & \vspace{0.05in}\frac{14}{5}
+\end{array}
+\rightB
+\rightarrow
+\leftB 
+\begin{array}{ccc}
+3 & 1 & 1 \\ 
+0 & \vspace{0.05in}\frac{11}{3} & \vspace{0.05in}\frac{5}{3} \\ 
+0 & 0 & \vspace{0.05in}\frac{43}{11}
+\end{array}
+\rightB
+\]
+
+Now divide the entries in each row by the square root of the diagonal entry in that row and simplify.
+\[
+U = \leftB 
+\begin{array}{ccc}
+\sqrt{3} & \vspace{0.05in}\frac{1}{3}\sqrt{3} & \vspace{0.05in}\frac{1}{3}\sqrt{3}  \\ 
+0  & \vspace{0.05in}\frac{1}{3}\sqrt{3}\sqrt{11} &  \vspace{0.05in}\frac{5}{33}\sqrt{3}\sqrt{11} \\ 
+
+0  & 0 & \vspace{0.05in}\frac{1}{11}\sqrt{11}\sqrt{43}
+\end{array}
+\rightB
+\]
+\end{solution}

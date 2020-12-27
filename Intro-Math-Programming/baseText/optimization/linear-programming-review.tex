@@ -1,0 +1,1128 @@
+% Copyright 2020 by Robert Hildebrand
+%This work is licensed under a
+%Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0)
+%See http://creativecommons.org/licenses/by-sa/4.0/
+
+\chapter{Linear Programming Notes - Hildebrand}
+
+
+
+\begin{tikzpicture}
+    \draw[gray!50, thin, step=0.5] (-1,-3) grid (5,4);
+    \draw[very thick,->] (-1,0) -- (5.2,0) node[right] {$x_1$};
+    \draw[very thick,->] (0,-3) -- (0,4.2) node[above] {$x_2$};
+
+    \foreach \x in {-1,...,5} \draw (\x,0.05) -- (\x,-0.05) node[below] {\tiny\x};
+    \foreach \y in {-3,...,4} \draw (-0.05,\y) -- (0.05,\y) node[right] {\tiny\y};
+
+    \fill[blue!50!cyan,opacity=0.3] (8/3,1/3) -- (1,2) -- (13/3,11/3) -- cycle;
+
+    \draw (-1,4) -- node[below,sloped] {\tiny$x_1+x_2\geq3$} (5,-2);
+    \draw (1,-3) -- (3,1) -- node[below left,sloped] {\tiny$2x_1-x_2\leq5$} (4.5,4);
+    \draw (-1,1) -- node[above,sloped] {\tiny$-x_1+2x_2\leq3$} (5,4);
+
+\end{tikzpicture}\footnote{
+\url{https://tex.stackexchange.com/questions/75933/how-to-draw-the-region-of-inequality}
+}
+
+%   \begin{tikzpicture}
+%\begin{axis}[
+%    domain=0:150,
+%    xmin=-10, xmax=150,
+%    ymin=-5, ymax=150,
+%    samples=400,
+%    axis y line=center,
+%    axis x line=middle,
+%]
+%    \addplot+[mark=none,blue] {120-x} node[pin=180:{$4x^2-5$}]{};
+%            \addplot+[mark=none,black] {(1/3)*(180-x)};
+%            \addplot+[mark=none,purple] {80-x};
+%            \addplot+[mark=none,red] {(1/8)*12*x}; 
+%            \addplot+[mark=none,green] {(1/4)*(290-3*x)};
+%            \addplot+[mark=none,style=dashed,green] {(1/4)*(100-3*x)};
+%            \addplot+[mark=none,style=dashed,green] {(1/4)*(350-3*x)};
+%\end{axis}
+%\end{tikzpicture}
+%
+%
+%Decision variables:
+%\begin{description}
+%    \item[$x_{1}$] 
+%    \item[$x_{2}$] 
+%\end{description}
+%Maximaize
+%\[ 3 x_{1} + 4 x_{2} \]
+%Restrictions
+%\begin{equation*}
+%    \begin{cases}
+%        2x_1 + 1x_2 \leq 120 \\
+%        1x_1 + 3x_2 \leq 180  \\
+%        1x_1 + 1x_2 \leq 80 \\
+%        x_1 \geq 0, x_2 \geq 0                          
+%    \end{cases}
+%\label{eq:restricties}
+%\end{equation*}
+%
+
+
+%%\usepackage{pgfplots}
+%\usetikzlibrary{intersections}
+%\usetikzlibrary{patterns}
+%
+%\foreach \m in{0.5,1,...,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5}{%
+%    \begin{tikzpicture}
+%        \begin{axis}[axis on top,smooth,
+%            axis line style=very thick,
+%            axis x line=bottom,
+%            axis y line=left,
+%            ymin=-1,ymax=6,xmin=-1,xmax=6,
+%            xlabel=$x_1$, ylabel=$x_2$,grid=major
+%            ]
+%            \addplot[name path global=firstline,very thick,red, domain=-10:10]{\m-x};
+%            \addplot[name path global=secondline,very thick, domain=-10:10]{-5+2*x};
+%            \addplot[name path global=thirdline,very thick, domain=-10:10]{3/2+x/2};
+%            \fill[name intersections={of=firstline and secondline,by=point1},
+%            name intersections={of=firstline and thirdline,by=point2},
+%            name intersections={of=secondline and thirdline,by=point3},
+%            ][very thick,draw=orange,pattern=crosshatch dots,pattern color=green!60!white](point1)--(point2)--(point3)--(point1);
+%        \end{axis}
+%    \end{tikzpicture}\\
+%    }
+%]
+
+\subsubsection{Simplex Tableau Pivoter}
+\url{http://www.tutor-homework.com/Simplex_Tableau_Homework_Help.html}
+
+\subsubsection{Videos}
+
+
+For some nice videos of doing simplex method with tableaus, I recommend:
+
+\url{https://www.youtube.com/watch?v=M8POtpPtQZc}
+
+LPP using simplex method [Minimization with 3 variables]: \url{https://youtu.be/SNc9NGCJmns}
+
+LPP using Dual simplex method : \url{https://youtu.be/KLHWtBpPbEc}
+
+LPP using TWO PHASE method: \url{https://youtu.be/zJhncZ5XUSU}
+
+LPP using BIG M method: \url{https://youtu.be/MZ843Vvia0A}
+
+[1] LPP using Graphical method [Maximization with 2 constraints]: \url{https://youtu.be/8IRrgDoV8Eo}
+
+[2] LPP using Graphical method [Minimization with 3 constraints]: \url{https://youtu.be/O6QO3J_85as}
+
+
+\section{Linear Programming Forms}
+
+\section{Linear Programming Dual}
+Consider the linear program in standard form.  The dual is the following problem
+
+\begin{general}{Dual of LP in Standard Form}{\polynomial}
+
+
+\begin{multicols}{2}
+\textbf{Primal}
+\begin{equation*}
+\begin{split}
+\max \quad & c^\top x\\
+\st \quad & A x = b\\
+& x \geq 0
+\end{split}
+\end{equation*}
+\break
+\textbf{Dual}
+\begin{equation}
+\begin{split}
+\min \quad & b^\top y\\
+\st \quad & A^\top y \geq c\\
+& y \text{ free }
+\end{split}
+\end{equation}
+\end{multicols}
+\end{general}
+
+\section{Weak and Strong Duality}
+\begin{theorem}{Weak Duality}{weak-duality}
+Let $x$ be feasible for the primal LP and $y$ feasible for the dual LP.  Then 
+\begin{equation}
+c^\top x \leq b^\top y.
+\end{equation}
+\end{theorem}
+
+\begin{theorem}{Strong Duality}{strong-duality}
+The primal LP is feasible and has a bounded objective value if and only if the dual LP is also feasible and has a bounded objective value.  In this case, the optimal values to both problems coincide.
+
+In particular, suppose $x^*$ is optimal for the primal LP and $y^*$ is optimal for the dual LP.
+
+Then 
+\begin{equation}
+c^\top x^* = b^\top y^*.
+\end{equation}
+\end{theorem}
+
+\subsection{Reduced Costs}
+Consider the LP in standard form \eqref{eq:standardLP} given by 
+\begin{equation}
+\begin{split}
+\max \quad & c^\top x\\
+\st  \quad & Ax = b\\
+& x \geq 0
+\end{split}
+\end{equation}
+ A basis $B$ is a subset of the columns of $A$ that form an invertible matrix.  The remaining columns for the matrix $N$, that is, $A = (A_B\, | \, A_N)$ (after permuting the columns of $A$).  
+ 
+ The \emph{basic variables} $x_B$ are the variables corresponding to the columns of $A_B$ and the \emph{non-basic variables} are those corresponding to the columns of $A_N$.  
+ 
+ Since $A_B$ is invertible we can convert the formulation by multiplying through by $A_B^{-1}$.  This produces
+ 
+  \begin{equation}
+\begin{split}
+\max \quad & c^\top x\\
+\st  \quad & A_B^{-1}Ax = A_B^{-1}b\\
+& x \geq 0
+\end{split}
+\end{equation}
+
+Since $A = (A_B \,|\, A_N)$, we have 
+
+  \begin{equation}
+\begin{split}
+\max \quad & c^\top x\\
+\st  \quad & (A_B^{-1}A_B, A_B^{-1} A_N) x = A_B^{-1}b\\
+& x \geq 0
+\end{split}
+\end{equation}
+which becomes 
+ \begin{equation}
+\begin{split}
+\max \quad & c^\top x\\
+\st  \quad &x_B +  A_B^{-1} A_N x_N = A_B^{-1}b\\
+& x \geq 0
+\end{split}
+\end{equation}
+$B^{-1}b \geq 0$, then $x_b = B^{-1}b, x_N = 0$ called a \emph{basic feasible solution}.  
+
+Manipulating the formulation again, we can multiply the equations by $c_B$ and substract that from the objective function.  This leaves us with
+
+ \begin{equation}
+\begin{split}
+\max \quad & c_N x_N - c_B A_B^{-1} A_N x_N + c_B A_B^{-1} b  \\
+\st  \quad &x_B +  A_B^{-1} A_N x_N = A_B^{-1}b\\
+& x \geq 0
+\end{split}
+\end{equation}
+combining terms creates 
+ \begin{equation}
+ \label{LP:basis-solution}
+\begin{split}
+\max \quad & (c_N  - c_B A_B^{-1} A_N) x_N + c_B A_B^{-1} b  \\
+\st  \quad &x_B +  A_B^{-1} A_N x_N = A_B^{-1}b\\
+& x \geq 0
+\end{split}
+\end{equation}
+Now clearly we see that if $A_B^{-1}b \geq 0$, then setting $x = (x_B, x_N) = (A_B^{-1}b, 0)$ is a feasible solution with objective value $c_BA_B^{-1} b$.
+
+We say that the quantity 
+$$
+\tilde c_N = c_N  - c_B A_B^{-1} A_N.
+$$
+are the \emph{reduced costs}.
+
+Notice that we can re-write the equation above as 
+ \begin{equation}
+ \label{LP:basis-solution}
+\begin{split}
+\max \quad & \tilde c_N x_N + c_B A_B^{-1} b  \\
+\st  \quad &x_B +  A_B^{-1} A_N x_N = A_B^{-1}b\\
+& x \geq 0
+\end{split}
+\end{equation}
+Hence, viewing this LP from the basis $B$ illuminates that change in objective function as we increase the non-basic variables from $0$.
+
+
+
+\subsection{Tableau Based Pivoting}
+In this section, we discuss how to solve a linear program using a \emph{tableau}.  A tableau is just a table to record calculations in a convenient way.
+
+
+\newcommand{\sss}[1]{\subsubsection*{#1}}
+\newcommand{\cm}{\hspace{1cm}}
+ \newtheorem*{prob7}{Theorem}
+ \newtheorem*{prob8}{Proposition}
+\renewcommand{\v}[1]{{\vec{x}_{#1}}^\text{*}}
+\newcommand{\vy}{{\vec{y}}}
+\newcommand{\ox}{\overline{x}}
+\renewcommand{\c}{{\bf{c}}}
+\renewcommand{\a}{{\bf{a}}}
+%\newcommand{\x}{{\bf{x}}}
+\newcommand{\A}{{\bf{A}}}
+\renewcommand{\O}{{\bf{0}}}
+
+
+
+% \begin{align*}
+%%\begin{array}{rrl}
+% \text{Minimize } Z = 2x_1 + 3x_2& \\
+% \text{s.t.}\hspace{1.5cm}		 	2x_1 + x_2 &\leq 16\\
+% 					x_1 + 3x_2 &\geq 20\\
+% 					x_1 + x_2 &= 10\\
+% 				 	x_1,x_2 &\geq 0
+%%\end{array}
+% \end{align*}
+
+% \begin{align*}
+%%\begin{array}{rrl}
+% \text{Maximize } -Z = -2x_1 - 3x_2 - M \ox_5 - M \ox_6& \\
+% \text{s.t.}\hspace{1.5cm}
+% 					2x_1 + x_2 + x_3&= 16\\
+% 					x_1 + 3x_2 - x_4 + \ox_5&= 20\\
+% 					x_1 + x_2 + \ox_6&= 10\\
+% 				 	x_1,x_2, x_3, x_4, \ox_5, \ox_6 &\geq 0
+%%\end{array}
+% \end{align*}
+
+% \begin{align*}
+%%\begin{array}{rrl}
+% \text{Maximize } 		  -Z +(2 - 2M)x_1 + (3-4M)x_2 + Mx_4& = -30M	\\
+% \text{s.t.}\hspace{1.5cm}
+
+% 					      2x_1 + x_2 + x_3				&= 16		\\
+% 					      x_1 + 3x_2 - x_4 + \ox_5 		&= 20		\\
+% 					      x_1 + x_2 + \ox_6 			&= 10 		\\
+% 					      
+% 				 	      x_1,x_2, x_3, x_4, \ox_5, \ox_6 &\geq 0
+%%\end{array}
+% \end{align*}
+% Let $x_2$ enter.  $\ox_5$ leaves.
+
+% \begin{align*}
+%%\begin{array}{rrl}
+% \text{Maximize } 		  -Z +(2 - 2M)x_1 + (3-4M)x_2 + Mx_4& = -30M	\\
+% \text{s.t.}\hspace{1.5cm}
+
+% 					      (5/3)x_1 + x_3  + (1/3)x_4 - (1/3) \ox_5		&= 28/3		\\
+% 					      (1/3)x_1 + x_2 - (1/3)x_4 + (1/3)\ox_5 		&= 20/3		\\
+% 					      (2/3)x_1 + + (1/3)x_4 - (1/3) \ox_5 + \ox_6 	&= 10/3 	\\
+% 					      
+% 				 	      x_1,x_2, x_3, x_4, \ox_5, \ox_6 &\geq 0
+%%\end{array}
+% \end{align*}
+\begin{example}{}{}
+Solve this linear program using a tabluea based approach.
+\begin{equation}
+\begin{array}{rl}
+\text{Minimize } Z = 2x_1 + 3x_2& \\
+\text{s.t.}\hspace{1.5cm}		 	2x_1 + x_2 &\leq 16\\
+					x_1 + 3x_2 &\geq 20\\
+					x_1 + x_2 &= 10\\
+				 	x_1,x_2 &\geq 0
+\end{array}
+\end{equation}
+\end{example}
+We will use the \emph{Big-M} method to solve this problem.  We begin by converting the problem into standard form.
+
+\begin{equation*}
+\begin{array}{rl}
+\text{Maximize } -Z = -2x_1 - 3x_2 - M \ox_5 - M \ox_6& \\
+\text{s.t.}\hspace{1.5cm}
+					2x_1 + x_2 + x_3&= 16\\
+					x_1 + 3x_2 - x_4 + \ox_5&= 20\\
+					x_1 + x_2 + \ox_6&= 10\\
+				 	x_1,x_2, x_3, x_4, \ox_5, \ox_6 &\geq 0
+\end{array}
+\end{equation*}
+
+\indent \text{Initial Set-up }\\
+
+
+\begin{tabular}{c|c|rrrrrr|c}
+Basic & \multicolumn{7}{|c|} {Coefficient of:} & Right\\
+Variable & Z & $x_1$ & $x_2$ & $x_3$ & $x_4$ & $\ox_5$ & $\ox_6$ & Side \\
+ \hline
+ Z & -1 & 2 & 3 & 0 & 0 & M & M & 0 \\
+ \hline
+ $x_3$ & 0 & 2 & 1 & 1 & 0 & 0 & 0 & 16 \\
+ $\ox_5$ & 0 & 1 & 3 & 0 & -1 & 1 & 0 & 20 \\
+ $\ox_6$ & 0 & 1 & 1 & 0 & 0 & 0 & 1 & 10
+\end{tabular}\\
+
+
+\text{Standard Form }\\
+
+
+\begin{tabular}{c|c|rrrrrr|c}
+Basic & \multicolumn{7}{|c|} {Coefficient of:} & Right\\
+Variable & Z & $x_1$ & $x_2$ & $x_3$ & $x_4$ & $\ox_5$ & $\ox_6$ & Side \\
+\hline
+ Z & -1 & 2 - 2 M & 3 - 4 M & 0 & M & 0 & 0 & -30 M \\
+ \hline
+ $x_3$  & 0 & 2 & 1 & 1 & 0 & 0 & 0 & 16 \\
+ $\ox_5$  & 0 & 1 & 3 & 0 & -1 & 1 & 0 & 20 \\
+ $\ox_6$ &  0 & 1 & 1 & 0 & 0 & 0 & 1 & 10
+\end{tabular}\\
+
+
+\text{Iteration }1 - Let $x_2$ enter and $\ox_5$ leaves.\\
+
+
+\begin{tabular}{c|c|rrrrrr|c}
+Basic & \multicolumn{7}{|c|} {Coefficient of:} & Right\\
+Variable & Z & $x_1$ & $x_2$ & $x_3$ & $x_4$ & $\ox_5$ & $\ox_6$ & Side \\
+ \hline
+ Z & -1 & 1 - 2M/3 & 0 & 0 & 1 - M/3 & -1 + 4M/3 & 0 & -20 - 10M/3 \\
+ \hline
+ $x_3$ & 0 & 2/3 & 0 & 1 & 1/3 & -1/3 & 0 & -28/3 \\
+ $x_2$ & 0 & 1/3 & 1 & 0 & -1/3 & 1/3 & 0 & 20/3 \\
+ $\ox_6$ & 0 & 2/3 & 0 & 0 & 1/3 & -1/3 & 1 & 10/3
+\end{tabular}\\
+
+
+\text{Iteration }2 - Let $x_1$ enter and $\ox_6$ leaves.\\
+%  \begin{tabular}{c|c|cccccc|c}
+%   BV & Z & $x_1$ & $x_2$ & $x_3$ & $x_4$ & $\ox_5$ & $\ox_6$ & \text{RHS} \\
+% 	\hline
+%   Z & -1 & 0 & 0 & 0 & $\frac{1}{2}$& $-\frac{1}{2}+M$ & $-\frac{3}{2}+ M$ & $-25$\\
+%   $x_3$ & 0 & 0 & 0 & 1 & $-\frac{1}{2}$ & $\frac{1}{2}$ & $-\frac{5}{2}$ & 1 \\
+%   $x_2$ & 0 & 0 & 1 & 0 & $-\frac{1}{2}$ & $\frac{1}{2}$ & $-\frac{1}{2}$ & 5 \\
+%   $x_1$ & 0 & 1 & 0 & 0 & $\frac{1}{2}$ & $-\frac{1}{2}$ & $\frac{3}{2}$ & 5
+%  \end{tabular}\\
+
+\begin{tabular}{c|c|rrrrrr|c}
+Basic & \multicolumn{7}{|c|} {Coefficient of:} & Right\\
+Variable & Z & $x_1$ & $x_2$ & $x_3$ & $x_4$ & $\ox_5$ & $\ox_6$ & Side \\
+	\hline
+  Z & -1 & 0 & 0 & 0 & 1/2& -1/2 + M & -3/2 + M & -25\\
+  \hline
+  $x_3$ & 0 & 0 & 0 & 1 & -1/2 & 1/2 & -5/2 & 1 \\
+  $x_2$ & 0 & 0 & 1 & 0 & -1/2 & 1/2 & -1/2 & 5 \\
+  $x_1$ & 0 & 1 & 0 & 0 & 1/2 & -1/2 & 3/2 & 5
+ \end{tabular}\\
+ \newline
+We have reached an optimal solution since all coefficients in the objective function are positive.  Thus our solution to the initial minimization problem is
+\begin{equation*}
+x_1 = 5,\hspace{.5cm} x_2 = 5,  \hspace{.5cm}  Z(5,5) = 25 \hspace{1cm} \text{with slack } x_3 = 1 
+\end{equation*}
+
+
+\ifdefined\showothermaterial
+\sss{Problem 5}
+\begin{equation*}
+\begin{array}{lllllll}
+a.& c_1 =0  ,& c_2 = 1,&  a_1 = 3 ,& a_2= 2,& a_3 =4 ,& b= 5 \\
+b.& c_1 =-1,&  c_2 = -2,&  a_1 = 1 ,& a_2= 1,& a_3 =1 ,& b= -1 \\
+c.& c_1 =-1  ,& c_2 = 1,&  a_1 = 1 ,& a_2= 1,& a_3 =3 ,& b= 0 \\
+d.& c_1 =-1  ,& c_2 = -2,&  a_1 = -1 ,& a_2= 1,& a_3 =1 ,& b= 4 \\
+e.& c_1 =-2  ,& c_2 = -1,&  a_1 = 1 ,& a_2= 1,& a_3 =3 ,& b= 8
+\end{array}
+\end{equation*}
+\newpage
+\sss{Problem 6}
+\begin{center}
+\includegraphics[trim = .5in 5.5in 2in 1in, clip,scale = .7]{problem6graph.pdf}\\
+As apparent in the graph, the optimal solution is at $(x_1, x_2) = (1,6)$ with $Z(1,6) = 7$.\\
+\end{center}
+\sss{Problem 7}  Prove that if there are at least two optimal solutions then there are an infinite number of optimal solutions.
+
+\begin{prob7}
+Suppose $\v{1}$ and $\v{2}$ are two optimal solutions.  Let $\vy$ be a convex combination of $\v{1}$ and $\v{2}$, and thus $\vy = \lambda \v{1} + (1-\lambda) \v{2}$ with $\lambda \in (0,1) \subset \real$. Then $\vy$ is an optimal solution.
+\end{prob7}
+\begin{proof}
+From class, we proved that any convex combination of feasible solutions is also a feasible solution.  Thuus, $\vy$ is feasible.\\
+Now, we want to show that $Z(\vy) = Z(\v{1})$.
+% \begin{align*}
+% Z(\vy) 	&= Z(\lambda \v{1} + (1-\lambda) \v{2})\\
+% 		&= \lambda Z(\v{1}) + (1-\lambda) Z(\v{2}) & \text{By linearity}\\
+% 		&= \lambda Z(\v{1}) + (1-\lambda) Z(\v{1})\\
+% 		&= \big( \lambda  + (1-\lambda) \big) Z(\v{1})\\
+% 		&=Z(\v{1})\\
+% \end{align*}
+\begin{equation*}
+Z(\vy) 	= Z(\lambda \v{1} + (1-\lambda) \v{2})
+		= \lambda Z(\v{1}) + (1-\lambda) Z(\v{2}) 
+		= \lambda Z(\v{1}) + (1-\lambda) Z(\v{1})
+		= \big( \lambda  + (1-\lambda) \big) Z(\v{1})
+		=Z(\v{1})
+\end{equation*}
+\end{proof}
+Since there are an infinite unique choices of $\lambda$, we know that there are an infinte number of optimal solutions.\\
+
+\sss{Problem 8}
+Prove that if a linear programming problem has a unique optimal solution and a unique second-best corner-point feasible solution then the altter must be one pivot in the simplex algorithm away from the optimal solution.
+
+\begin{prob8}
+Suppose, for a specific linear programming problem, there exists a unique optimal solution $\v{1}$ and a unique second-best corner-point feasible solution $\v{2}$, then $\v{2}$ must be one pivot in the simplex algorithm away from $\v{1}$.
+\end{prob8}
+\begin{proof}
+Proof by contradiction.  Suppose that $\v{2}$ is not one pivot in the simplex algorithim away from $\v{1}$, then there exsits a corner point solution $\v{3}$ that is ``bewteen" pivots from $\v{2}$ to $\v{1}$.  But, in the simplex algorithim, whenever you pivot, you do not decrease the objective function (i.e. increase or stay constant).  Thus if $\v{3}$ is pivoted to after $\v{2}$, then $Z(\v{3}) \geq Z(\v{2})$, which is a contradiction.
+\end{proof} 
+
+\section{Exam 2}
+
+\sss{Problem 1}
+\begin{equation*}
+A = 
+\begin{bmatrix}
+ 3 & 2 & -3 & 1 \\
+ 3 & 3 & 1 & 3
+\end{bmatrix}
+\cm
+\vec{c} = 
+\begin{bmatrix}
+ 5 & 4 & 1 & 3
+\end{bmatrix}
+\cm
+\vec{b_0} = 
+\begin{bmatrix}
+ 24 \\
+ 36
+\end{bmatrix}
+\cm
+B_0^{-1} = 
+\begin{bmatrix}
+ 1 & 0 \\
+ 0 & 1
+\end{bmatrix}
+\end{equation*}
+\textbf{Iteration 1:}  Let $x_1$ enter and $x_5$ leave.
+\begin{align*}
+B_1^{-1} =  
+\begin{bmatrix}
+ \frac{1}{3} & 0 \\
+ -1 & 1
+\end{bmatrix}
+  B_0^{-1}=  
+\begin{bmatrix}
+ \frac{1}{3} & 0 \\
+ -1 & 1
+\end{bmatrix}
+\cm
+\vec{c}_B = 
+\begin{bmatrix}
+  5 & 0
+\end{bmatrix}
+\cm
+\vec{c}_B B_1^{-1} = 
+\begin{bmatrix}
+ \frac{5}{3} & 0
+\end{bmatrix}
+\\ %next line
+\vec{c}_B B_1^{-1} A - \vec{c} = 
+\begin{bmatrix}
+ 0 & -\frac{2}{3} & -4 & -\frac{4}{3}
+\end{bmatrix}
+\cm
+\vec{b}_1 = B_1^{-1}\vec{b}_0 = 
+\begin{bmatrix}
+ 8 \\
+ 12
+\end{bmatrix}
+\cm
+B_1^{-1}A = 
+\begin{bmatrix}
+ X & X & -1 & X \\
+ X & X & 4 & X
+\end{bmatrix}
+\end{align*}
+\textbf{Iteration 2:}  Let $x_3$ enter and $x_6$ leave.
+\begin{align*}
+B_2^{-1} =
+\begin{bmatrix}
+ 1 & \frac{1}{4} \\
+ 0 & \frac{1}{4}
+\end{bmatrix}
+B_1^{-1}=  
+\begin{bmatrix}
+ \frac{1}{12} & \frac{1}{4} \\
+ -\frac{1}{4} & \frac{1}{4}
+\end{bmatrix}
+\cm
+\vec{c}_B = 
+\begin{bmatrix}
+  5 & -1
+\end{bmatrix}
+\cm
+\vec{c}_B B_2^{-1} = 
+\begin{bmatrix}
+ \frac{2}{3} & 1
+\end{bmatrix}
+\\ %next line
+\vec{c}_B B_2^{-1} A - \vec{c} = 
+\begin{bmatrix}
+ 0 & \frac{1}{3} & 0 & \frac{2}{3}
+\end{bmatrix}
+\cm
+\vec{b}_2 = B_2^{-1}\vec{b}_0 = 
+\begin{bmatrix}
+ 11 \\
+ 3
+\end{bmatrix}
+\cm
+\vec{c}_B B_2^{-1} \vec{b} = 52
+\end{align*}
+We are at an optimal solution with basic variables $x_1 = 11$, $x_3 = 3$, and $Z^* = 52$, and non-basic variables $x_2, x_4,x_5, x_6$.
+
+
+\sss{Problem 2}
+\begin{center}
+\begin{tabular}{c|c|rrrrr|c}
+Basic & \multicolumn{6}{|c|} {Coefficient of:} & Right\\
+Variable & Z & $x_1$ & $x_2$ & $x_3$ & $x_4$ & $x_5$ & Side \\
+ \hline
+ \hline
+ Z & 1 & 0 & 2 & 0 & 2 & 1 & 19 \\
+ \hline
+ $x_1$ & 0 & 1 & 5 & 0 & 3 & -1 & 1 \\
+ $x_3$ & 0 & 0 & -7 & 1 & -5 & 2 & 2
+\end{tabular}\\
+\end{center}
+\sss{a.}
+Changing objective function to $Z = 6x_1 + 10x_2 + 4x_3$ changes $\vec{c}_B$ and $\vec{c}$ which only effect the objective function row in the final tablau.  The new objective function row is then 
+\begin{equation*}
+\big( \vec{c}_B B^{-1} A - \vec{c} \hspace{.3cm} | \hspace{.3cm} \vec{c}_B B^{-1} \big) = 
+\begin{bmatrix}
+ 0 & -8 & 0 & | & -2 & 2
+\end{bmatrix}
+\end{equation*}
+Thus, we are still feasible, but we are not optimal.  For this, we let $x_2$ enter the basis, which forces $x_1$ to leave.
+\begin{center}
+\begin{tabular}{c|c|rrrrr|c}
+Basic & \multicolumn{6}{|c|} {Coefficient of:} & Right\\
+Variable & Z & $x_1$ & $x_2$ & $x_3$ & $x_4$ & $x_5$ & Side \\
+ \hline
+ \hline
+ Z & 1	& 8/5 &	0	& 0	& 14/5	& 2/5	& 78/5\\
+ \hline
+ $x_2$ & 0	& 1/5 & 1 &0 & 3/5 & -1/5 & 1/5\\
+ $x_3$ & 0	& 7/5	& 0	& 1	& -4/5	& 3/5	&17/5
+\end{tabular}\\
+\end{center}
+This gives us a new optimal solution of $Z^* = 78/5, x_2 = 1/5, x_3 = 17/5$ and the other variables are non-basic.
+\sss{b.}
+Changing the coefficients of $x_1$ from $\begin{bmatrix}9\\2\\5 \end{bmatrix}$ to $\begin{bmatrix}8\\3\\2\end{bmatrix}$ should theoretically effect the entire tableau since $B^{-1}$ is dependant on the cofficients of the basic variables.  To remedy this change, we let
+$$
+\vec{c}_B = \begin{bmatrix} 9 & 5 \end{bmatrix}  \text{  and  } B^{-1} =  \begin{bmatrix} 3 & 1\\ 2 & 3 \end{bmatrix} ^{-1} = 
+\begin{bmatrix}
+ \frac{3}{7} & -\frac{1}{7} \\
+ -\frac{2}{7} & \frac{3}{7}
+\end{bmatrix}
+$$
+Oddly enough, this change doesn't effect the Z row in the final tableau at all, meaning the optimal value is still 19, but the optimal solution changes such that $x_1 = 1/7$ and $x_3 = 25/7$.
+\begin{center}
+\begin{tabular}{c|c|rrrrr|c}
+Basic & \multicolumn{6}{|c|} {Coefficient of:} & Right\\
+Variable & Z & $x_1$ & $x_2$ & $x_3$ & $x_4$ & $x_5$ & Side \\
+ \hline
+ \hline
+ Z & 1 & 0 & 2 & 0 & 2 & 1 & 19 \\
+ \hline
+ $x_1$ & 0&	1	&5/7&	0	&3/7&	-1/7&	1/7 \\
+ $x_3$ & 0	&0	&6/7&	1&	-2/7&	3/7&	25/7
+\end{tabular}\\
+\end{center}
+\sss{c.}
+Adding the new constraint $4x1 + x2 + 4x_3 \leq 4$ does makes the current solution infeasible and thus makes us do a dual pivot.  
+\begin{center}
+\begin{tabular}{c|c|rrrrrr|c}
+Basic & \multicolumn{7}{|c|} {Coefficient of:} & Right\\
+Variable & Z & $x_1$ & $x_2$ & $x_3$ & $x_4$ & $x_5$ & $x_6$ & Side \\
+ \hline
+ \hline
+ Z & 1 & 0 & 2 & 0 & 2 & 1 & 0 & 19 \\
+ \hline
+ $x_1$ & 0 & 1 & 5 & 0 & 3 & -1 & 0 & 1 \\
+ $x_3$ & 0 & 0 & -7 & 1 & -5 & 2 & 0 & 2 \\
+ $x_6$ & 0 & 0 & 9 & 0 & 8 & -4 & 1 & -8
+\end{tabular}\\
+\end{center}
+So we let $x_6$ leave and let $x_5$ enter.
+\begin{center}
+\begin{tabular}{c|c|rrrrrr|c}
+Basic & \multicolumn{7}{|c|} {Coefficient of:} & Right\\
+Variable & Z & $x_1$ & $x_2$ & $x_3$ & $x_4$ & $x_5$& $x_6$ & Side \\
+ \hline
+ \hline
+Z	&1	&0	&17/4&	0	&4	&0	&1/4&	17\\
+ \hline
+ $x_1$ & 0 & 1 & 11/4 & 0 & 1 & 0 & -1/4 & 3 \\
+ $x_3$ & 0 & 0 & -5/2 & 1 & -1 & 0 & 1/2 & -2 \\
+ $x_5$ & 0 & 0 & -9/4 & 0 & -2 & 1 & -1/4 & 2
+\end{tabular}\\
+\end{center}
+But now we have another infeasible solution, so we make one more dual pivot by letting $x_3$ leave and $x_2$ enter.
+\begin{center}
+\begin{tabular}{c|c|rrrrrr|c}
+Basic & \multicolumn{7}{|c|} {Coefficient of:} & Right\\
+Variable & Z & $x_1$ & $x_2$ & $x_3$ & $x_4$ & $x_5$ & $x_6$& Side \\
+ \hline
+ \hline
+ Z	&1	&0	&0	&17/10&	23/10	&0	&11/10&	68/5 \\
+ \hline
+ $x_1$ & 0 & 1 & 0 & 11/10 & -1/10 & 0 &
+   3/10 & 4/5 \\
+ $x_2$ & 0 & 0 & 1 & -2/5 & 2/5 & 0 & -1/5
+   & 4/5 \\
+ $x_5$ & 0 & 0 & 0 & -9/10 & -11/10 & 1 &
+   -7/10 & 19/5
+\end{tabular}\\
+\end{center}
+
+\sss{Problem 3}
+\begin{center}
+\begin{tabular}{c|c|rrrrrrr|c}
+Basic & \multicolumn{8}{|c|} {Coefficient of:} & Right\\
+Variable & Z & $x_1$ & $x_2$ & $x_3$ & $x_4$ & $x_5$ & $x_6$&$x_7$& Side \\
+ \hline
+ \hline
+ Z & 1 & -5 & -6 & -4 & -7 & 0 & 0 & 0 & 0 \\
+ \hline
+ $x_5$ & 0 & 3 & -2 & 1 & 3 & 1 & 0 & 0 & $135-2 \theta$  \\
+ $x_6$ & 0 & 2 & 4 & -1 & 2 & 0 & 1 & 0 & $78-\theta$  \\
+ $x_7$ & 0 & 1 & 2 & 1 & 2 & 0 & 0 & 1 & $\theta +30$
+\end{tabular}\\
+\end{center}
+Let $x_1$ enter and let $x_7$ leave.
+\begin{center}
+\begin{tabular}{c|c|rrrrrrr|c}
+Basic & \multicolumn{8}{|c|} {Coefficient of:} & Right\\
+Variable & Z & $x_1$ & $x_2$ & $x_3$ & $x_4$ & $x_5$ & $x_6$&$x_7$& Side \\
+ \hline
+ \hline
+ Z & 1 & 0 & 4 & 1 & 3 & 0 & 0 & 5 & $150 + 5 \theta$ \\
+ \hline
+ $x_5$ & 0 & 0 & -8 & -2 & -3 & 1 & 0 & -3 & $5(9 - \theta)$  \\
+ $x_6$ & 0 & 0 & 0 & -3 & -2 & 0 & 1 & -2 & $3(6- \theta)$  \\
+ $x_1$ & 0 & 1 & 2 & 1 & 2 & 0 & 0 & 1 & $30 + \theta$
+\end{tabular}\\
+\end{center}
+This solution is now optimal as long as it is feasible.  This solution is feasible for $-30 \leq \theta \leq 6$.\\
+Suppose $\theta$ is less than -30, then there are no feasible solutions because the bottom row has no negative coefficients in it.  Now suppose $\theta$ is greater than 6 but less than 9.  We will do a dual pivot and let $x_3$ enter and let $x_6$ leave.
+\begin{center}
+\begin{tabular}{c|c|rrrrrrr|c}
+Basic & \multicolumn{8}{|c|} {Coefficient of:} & Right\\
+Variable & Z & $x_1$ & $x_2$ & $x_3$ & $x_4$ & $x_5$ & $x_6$&$x_7$& Side \\
+ \hline
+ \hline
+ Z & 1	&0	&4	&0	&7/3	&0	&1/3	&13/3	&$156+4\theta$
+
+\\
+ \hline
+ $x_5$ & 0&	0	&-8&	0&	-5/3	&1	&-2/3&	-5/3&	$3(11- \theta)$ \\
+$x_3$	&0	&0	&0&	1	&2/3&	0	&-1/3	&2/3	&$-6+\theta$  \\
+ $x_1$& 0	&1	&2&	0&	4/3&	0&	1/3	&1/3&	36
+\end{tabular}\\
+\end{center}
+Unfortunately, this solution is only optimal for $6 \leq \theta \leq 11$.  We must do another pivot if $\theta$ is greater than 11.  Let $x_2$ leave and let $x_6$ enter.
+
+\begin{center}
+\begin{tabular}{c|c|rrrrrrr|c}
+Basic & \multicolumn{8}{|c|} {Coefficient of:} & Right\\
+Variable & Z & $x_1$ & $x_2$ & $x_3$ & $x_4$ & $x_5$ & $x_6$&$x_7$& Side \\
+ \hline
+ \hline
+ Z & 1	&0	&0	&0&	3/2&	1/2&	0&	7/2	&$172.5 + 2.5 \theta$\\
+ \hline
+ $x_6$ & 0	&0	&12	&0	&5/2	&-3/2	&1	&5/2	&$9/2 (-11+\theta)$\\
+$x_3$	&0	&0	&4	&1	&3/2	&-1/2	&0	&3/2	&$5/2 (-9+\theta )$  \\
+ $x_1$& 0	&1	&-2	&0&	1/2&	1/2	&0	&-1/2	&$3/2 (35-\theta)$
+\end{tabular}\\
+\end{center}
+Unfortunately, once again, this solution is not feasible if theta is greater than 35.  Thus, if so, we will do another pivot to let $x_1$ leave, and let $x_2$ enter. Conveniently though, this doesn't change the Z row at all.
+\begin{center}
+\begin{tabular}{c|c|rrrrrrr|c}
+Basic & \multicolumn{8}{|c|} {Coefficient of:} & Right\\
+Variable & Z & $x_1$ & $x_2$ & $x_3$ & $x_4$ & $x_5$ & $x_6$&$x_7$& Side \\
+ \hline
+ \hline
+ Z & 1	&0	&0	&0&	3/2&	1/2&	0&	7/2	&$172.5 + 2.5 \theta$\\
+ \hline
+ $x_6$ & 0	&6&	0&	0	&11/2&	3/2&	1&	-1/2	&$9/2 (59-\theta)$\\
+$x_3$	&0&	2	&0&	1	&5/2&	1/2	&0&	1/2	&$1/2(165-\theta)$\\
+ $x_2$& 0	&-1/2&	1	&0	&-1/4&	-1/4&	0	&1/4	&$3/4 (-35+\theta)$
+\end{tabular}\\
+\end{center}
+But, this is only feasible for $35 \leq \theta \leq 59$.  So pivot again with $x_6$ leaving and $x_7$ entering.
+% \begin{center}
+% \begin{tabular}{c|c|rrrrrrr|c}
+% Basic & \multicolumn{8}{|c|} {Coefficient of:} & Right\\
+% Variable & Z & $x_1$ & $x_2$ & $x_3$ & $x_4$ & $x_5$ & $x_6$&$x_7$& Side \\
+%  \hline
+%  \hline
+%  Z & 1	&0	&0	&0&	3/2&	1/2&	0&	7/2	&$172.5 + 2.5 \theta$\\
+%  \hline
+%  $x_5$ & 0	&6	&0&	0	&11/2&	3/2&	1&	-1/2	&$9/2 (59-\theta)$\\
+% $x_3$	&0&	2	&0&	1	&5/2&	1/2	&0&	1/2	&$1/2(165-\theta)$\\
+%  $x_2$& 0	&-1/2&	1	&0	&-1/4&	-1/4&	0	&1/4	&$3/4 (-35+\theta)$
+% \end{tabular}\\
+% \end{center}
+% hsoidnsodifnosidnfoinsdoffinsoidnfosidfoisndd
+\begin{center}
+\begin{tabular}{c|c|rrrrrrr|c}
+Basic & \multicolumn{8}{|c|} {Coefficient of:} & Right\\
+Variable & Z & $x_1$ & $x_2$ & $x_3$ & $x_4$ & $x_5$ & $x_6$&$x_7$& Side \\
+ \hline
+ \hline
+ Z & 1 & 42 & 0 & 0 & 40 & 11 & 7 & 0 & $2031-29 \theta$  \\
+ \hline
+ $x_7$ & 0 & -12 & 0 & 0 & -11 & -3 & -2 & 1 & $9 (\theta -59)$ \\
+ $x_3$ & 0 & 8 & 0 & 1 & 8 & 2 & 1 & 0 & $5 (69.6-\theta )$ \\
+ $x_2$ & 0 & 5/2 & 1 & 0 & 5/2 & 1/2 & 1/2 & 0 & $3/2 (71-\theta )$
+\end{tabular}\\
+\end{center}
+but, now if $\theta$ is greater than 69.6, we are again infeasible.  But, there is no pivot that we can do to make it feasible.  Thus we are done.  \\
+
+Here are the results.
+\begin{center}
+\begin{tabular}{rcl|lll|c}
+\multicolumn{3}{c|}{Range} & \multicolumn{3}{|c|}{Basic Variables} & $Z^*$\\
+\hline
+&$ \theta$&$<-30$ & \multicolumn{3}{c|}{Infeasible} & -- \\
+$-30\leq$ &$\theta$& $\leq 6$ & $x_1 = 30 + \theta$ & $x_5 = 5(9 - \theta)$& $x_6 = 3(6- \theta)$ & $150 + 5\theta$\\
+$6 \leq$ &$\theta$& $\leq 11$ & $x_1 = 36$ & $x_3 = 6 - \theta$ & $x_5 = 3(11- \theta)$ & $156 + 4\theta$\\
+$11\leq $ &$\theta$& $ \leq 35$ & $x_1 = 3/2(35 - \theta)$ & $x_3 = 5/2(-9 + \theta) $ & $x_6 = 9/2(-11 + \theta)$ & $172.5 + 2.5 \theta$\\
+$35 \leq $ &$\theta$& $ \leq 59$& $x_2 = 3/4(-35 + \theta)$& $x_3 = 1/2(165 - \theta)$& $x_6 = 9/2(59-\theta)$& $172.5 + 2.5 \theta$\\
+$59 \leq $ &$\theta$& $ \leq 69.6$& $x_2 = 3/2(71 - \theta)$& $x_3 = 5(69.6 - \theta)$ & $x_7 = 9(\theta - 59)$&$2031-29\theta$\\
+$69.6 < $&$\theta$& & \multicolumn{3}{c|}{Infeasible} & -- 
+\end{tabular}\\
+\end{center}
+Here is a plot of $Z^*$ vs. $\theta$ where infeasible regions are marked in red on the $\theta$ axis.\\  The maximum is $(\theta, Z^*) = (59,320)$.\\
+\includegraphics[trim = .5in 7.5in 2in 1in, clip,scale = .7]{problem3plot.pdf}\\
+\sss{Problem 4}
+Prove that $Z^*(\theta)$ is convex.
+\begin{proof}
+Let $Z^*, Z^*_1, Z^*_2$ be defined as follows.
+\begin{equation*}
+\begin{array}{lll}
+\begin{array}{rl}
+Z^* =& \text{Max} (\c + (\lambda \theta_1 + (1-\lambda)\theta_2))\a ) \x\\
+\text{s.t.  }&\A\x \leq \O\\
+&\x \geq \O
+\end{array}
+&
+\begin{array}{rl}
+Z^*_1 =& \text{Max} (\c + \theta_1 \a) \x\\
+\text{s.t.  }&\A\x \leq \O\\
+&\x \geq \O
+\end{array}
+&
+\begin{array}{rl}
+Z^*_2 =& \text{Max} (\c + \theta_2 \a) \x\\
+\text{s.t.  }&\A\x \leq \O\\
+&\x \geq \O
+\end{array}
+\end{array}
+\end{equation*}
+And let the solutions to these problems be $\x^*, \x_1^*, \x_2^*$, respectively.  We want to show that $Z^* \leq \lambda Z_1^* + (1-\lambda)Z_2^*$, and thus we will have shown convexity.  Note that $x^*$ is feasible for the other two problems, but it is not optimal.  Thus $(\c + \theta_1 \a)\x^*\leq (\c + \theta_1 \a)\x_1^*$and $ (\c +\theta_2 \a)\x^* \leq (\c +\theta_2 \a)\x_2^*$.  Observe:
+\begin{align*}
+Z^* &= \big(\c + (\lambda \theta_1 + (1-\lambda)\theta_2)\a \big)\x^*\\
+	&= \big(\c(\lambda + (1-\lambda)) + (\lambda \theta_1 + (1-\lambda)\theta_2)\a \big)\x^*\\
+	&= \big(\lambda(\c + \theta_1 \a) + (1-\lambda)(\c +\theta_2 \a)\big)\x^*\\
+	&= \lambda\big(\c + \theta_1 \a\big)\x^* + (1-\lambda)\big(\c +\theta_2 \a\big)\x^*\\
+	&\leq \lambda\big(\c + \theta_1 \a\big)\x_1^* + (1-\lambda)\big(\c +\theta_2 \a\big)\x_2^*\\
+	&= \lambda Z_1^* + (1-\lambda)Z_2^*
+\end{align*}
+{\footnotesize{(Note: All of the above manipulations hold due to the various properties of vectors and scalors)}}
+\end{proof}
+
+\sss{Problem 5}
+Having multiple optimal solutions in the primal problem implys that once the simplex method has found an optimal solution, there is a non-basic variable with a zero as a coefficient in the Z row of the tableau.  Potentially there are more than one of these non-basic variables.  When letting one of these non-basic variables enter the basis, the objective row is then unchanged after the pivot because of the zero value in the Z row, and thus the solution is still optimal.  But, the objective row not changing also means that the dual solution is left unchanged throughout that pivot because the shadow prices, i.e. the dual solution, have not changed.\\
+This means that there are many problems (specifically 2D), that have a primal with multiple optimal solutions and a dual with only one optimal solution.\\
+This is not to say though that the dual and the primal cannot both have multiple optimal solutions.  Since the right side is to the dual as the Z row is to the primal, if there is a zero in the right side of the final tabluea (excluding the resulting value of Z), then there exists multiple optimal solutions to the primal.\\
+In this light, knowing there are multiple optimal solutions to the primal only tells us that there exists an optimal solution to the dual, but tells us nothing about how many optimal solutions there are.\\
+
+\sss{Problem 6}
+We can solve this problem in two ways.  First, naturally, we can make 4 dual pivots, allowing each of the slack variables to enter the basis and have them be constrained by their corresponding constraints.  That is, let $x_7$ enter, and let it be constrained by the 4th constraint, forcing $x_4$ to leave the basis, followed by letting $x_6$ enter, constrained by the 3rd constraint, forcing $x_1$ to leave the basis, and then similarily let $x_5$ and then $x_4$ enter the basis.  \\
+An alternative approach would be to use the fundamental insight and recognize that since we can pick off $B^{-1}$ and the other resulting pieces, we can work backwards to obtain the original pieces using the inverse of $B^{-1}$ (i.e. $B$) to reverse the calculations.  Conveniently, we know what some of the original tableau should look like, such as a 4x4 identity matrix for the original $B^{-1}$, zeros for the objective function coeffients on the slack variables, and a zero for the initial solutoin for Z.  The rest we will compute.\\
+The final tabluea should look like\\
+\begin{center}
+\begin{tabular}{c|c|rrrrrrr|c}
+Basic & \multicolumn{8}{|c|} {Coefficient of:} & Right\\
+Variable & Z & $x_1$ & $x_2$ & $x_3$ & $x_4$ & $x_5$ & $x_6$&$x_7$& Side \\
+ \hline
+ \hline
+ Z & 1&\multicolumn{3}{|c}{${\bf{c}}_B{\bf{B}}^{-1}{\bf{A}} - {\bf{c}}$} & \multicolumn{4}{c|}{${\bf{c}}_B{\bf{B}}^{-1}$} & ${\bf{c}}_B{\bf{B}}^{-1}{\bf{b}}$ \\
+${\bf{\vec{x}_B}}$ & ${\bf{0}}$ & \multicolumn{3}{|c}{${\bf{B}}^{-1}{\bf{A}}$} & \multicolumn{4}{c|}{${\bf{B}}^{-1}$} & ${\bf{B}}^{-1}{\bf{b}}$  
+\end{tabular}\\
+\end{center}
+We pick off 
+$$
+B^{-1} = \begin{bmatrix} 
+ 0 & \frac{6}{29} & -\frac{5}{29} & \frac{8}{29} \\
+ 0 & \frac{8}{29} & \frac{3}{29} & \frac{1}{29} \\
+ 0 & -\frac{5}{29} & \frac{9}{29} & \frac{3}{29} \\
+ 1 & -\frac{21}{29} & \frac{3}{29} & -\frac{28}{29}
+ \end{bmatrix} \cm
+ \Rightarrow \cm
+ B = \begin{bmatrix}
+  3 & 1 & 1 & 1 \\
+ 0 & 3 & -1 & 0 \\
+ -1 & 2 & 2 & 0 \\
+ 3 & -1 & 2 & 0
+ \end{bmatrix}
+$$
+$$
+B^{-1}A = \begin{bmatrix}
+ 0 & 1 & 0 \\
+ 0 & 0 & 1 \\
+ 1 & 0 & 0 \\
+ 0 & 0 & 0
+ \end{bmatrix}
+ \cm \Rightarrow
+ A = BB^{-1}A = \begin{bmatrix}
+ 1 & 3 & 1 \\
+ -1 & 0 & 3 \\
+ 2 & -1 & 2 \\
+ 2 & 3 & -1
+ \end{bmatrix}
+$$
+$$
+B^{-1}b = \begin{bmatrix}
+ \frac{8}{29} \\
+ \frac{30}{29} \\
+ \frac{32}{29} \\
+ \frac{1}{29}
+\end{bmatrix}
+\cm \Rightarrow \cm b = BB^{-1}b = \begin{bmatrix}
+ 3 \\
+ 2 \\
+ 4 \\
+ 2
+\end{bmatrix}
+$$
+$$
+c_BB^{-1} = \begin{bmatrix}
+ 0 & 1 & 1 & 2
+\end{bmatrix}
+\cm \Rightarrow \cm c_B = c_BB^{-1}B = \begin{bmatrix}  5 & 3 & 5 & 0 \end{bmatrix}
+$$
+And finally, 
+$$
+c - c_B B^{-1}A = \begin{bmatrix} 
+0	&0	& 0
+\end{bmatrix}
+\cm \Rightarrow \cm c = c_B B^{-1}A = \begin{bmatrix} 5& 5& 3 \end{bmatrix}
+$$
+Thus, the original tableau looked like
+\begin{center}
+\begin{tabular}{c|c|rrrrrrr|c}
+Basic & \multicolumn{8}{|c|} {Coefficient of:} & Right\\
+Variable & Z & $x_1$ & $x_2$ & $x_3$ & $x_4$ & $x_5$ & $x_6$&$x_7$& Side \\
+ \hline
+ \hline
+ Z & 1 & -5 & -5 & -3 & 0 & 0 & 0 & 0 & 0 \\
+ \hline
+ $x_4$ & 0 & 1 & 3 & 1 & 1 & 0 & 0 & 0 & 3 \\
+ $x_5$ & 0 & -1 & 0 & 3 & 0 & 1 & 0 & 0 & 2 \\
+ $x_6$ & 0 & 2 & -1 & 2 & 0 & 0 & 1 & 0 & 4 \\
+ $x_7$ & 0 & 2 & 3 & -1 & 0 & 0 & 0 & 1 & 2
+\end{tabular}\\
+\end{center}
+
+\sss{Problem 7}
+We will make this pair of problems mostly symmetric, such that the primal and dual both have the same infeasible region.
+\begin{equation*}
+\begin{array}{ll}
+\begin{array}{rl}
+\text{Primal Problem} & \\
+\text{MAX } Z =&\  2x_1 + 2x_2\\
+&\ \ x_1 \ - \ x_2 \leq -2\\
+&-x_1 \ + \  x_2 \leq -2
+\end{array}
+&
+\begin{array}{rl}
+\text{Dual Problem} & \\
+\text{MIN } W =& -2y_1 -2y_2 \\
+&\ \ \ \ y_1 - \ \ y_2 \geq 2\\
+& \ \  -y_1 + \ \  y_2 \geq 2
+\end{array}
+\end{array}
+\end{equation*}\\
+\includegraphics[trim = .8in 7.5in .5in 1in, clip,scale = 1]{problem7plot.pdf}\\
+
+
+
+
+
+\subsection{Exam 1}
+\sss{Problem 1}
+\begin{equation*}
+A = \left(
+\begin{array}{llll}
+ 3 & 2 & -3 & 1 \\
+ 3 & 3 & 1 & 3
+\end{array}
+\right)
+\cm
+\vec{c} = \left(
+\begin{array}{llll}
+ 5 & 4 & 1 & 3
+\end{array}
+\right)
+\cm
+\vec{b_0} = \left(
+\begin{array}{l}
+ 24 \\
+ 36
+\end{array}
+\right)
+\cm
+B_0^{-1} = \left(
+\begin{array}{ll}
+ 1 & 0 \\
+ 0 & 1
+\end{array}
+\right)
+\end{equation*}
+\textbf{Iteration 1:}  Let $x_1$ enter and $x_5$ leave.
+\begin{align*}
+B_1^{-1} =  \left(
+\begin{array}{ll}
+ \frac{1}{3} & 0 \\
+ -1 & 1
+\end{array}
+\right)  B_0^{-1}=  \left(
+\begin{array}{ll}
+ \frac{1}{3} & 0 \\
+ -1 & 1
+\end{array}
+\right)
+\cm
+\vec{c}_B = \left(
+\begin{array}{ll}
+  5 & 0
+\end{array}
+\right)
+\cm
+\vec{c}_B B_1^{-1} = \left(
+\begin{array}{ll}
+ \frac{5}{3} & 0
+\end{array}
+\right)
+\\ %next line
+\vec{c}_B B_1^{-1} A - \vec{c} = \left(
+\begin{array}{llll}
+ 0 & -\frac{2}{3} & -4 & -\frac{4}{3}
+\end{array}
+\right)
+\cm
+\vec{b}_1 = B_1^{-1}\vec{b}_0 = \left(
+\begin{array}{l}
+ 8 \\
+ 12
+\end{array}
+\right)
+\cm
+B_1^{-1}A = \left(
+\begin{array}{llll}
+ X & X & -1 & X \\
+ X & X & 4 & X
+\end{array}
+\right)
+\end{align*}
+\textbf{Iteration 2:}  Let $x_3$ enter and $x_6$ leave.
+\begin{align*}
+B_2^{-1} =\left(
+\begin{array}{ll}
+ 1 & \frac{1}{4} \\
+ 0 & \frac{1}{4}
+\end{array}
+\right)B_1^{-1}=  \left(
+\begin{array}{ll}
+ \frac{1}{12} & \frac{1}{4} \\
+ -\frac{1}{4} & \frac{1}{4}
+\end{array}
+\right)
+\cm
+\vec{c}_B = \left(
+\begin{array}{ll}
+  5 & -1
+\end{array}
+\right)
+\cm
+\vec{c}_B B_2^{-1} = \left(
+\begin{array}{ll}
+ \frac{2}{3} & 1
+\end{array}
+\right)
+\\ %next line
+\vec{c}_B B_2^{-1} A - \vec{c} = \left(
+\begin{array}{llll}
+ 0 & \frac{1}{3} & 0 & \frac{2}{3}
+\end{array}
+\right)
+\cm
+\vec{b}_2 = B_2^{-1}\vec{b}_0 = \left(
+\begin{array}{l}
+ 11 \\
+ 3
+\end{array}
+\right)
+\cm
+\vec{c}_B B_2^{-1} \vec{b} = 52
+\end{align*}
+We are at an optimal solution with basic variables $x_1 = 11$, $x_3 = 3$, and $Z^* = 52$, and non-basic variables $x_2, x_4,x_5, x_6$.
+
+
+\sss{Problem 2}
+\begin{center}
+\begin{tabular}{c|c|rrrrr|c}
+Basic & \multicolumn{6}{|c|} {Coefficient of:} & Right\\
+Variable & Z & $x_1$ & $x_2$ & $x_3$ & $x_4$ & $x_5$ & Side \\
+ \hline
+ \hline
+ Z & 1 & 0 & 2 & 0 & 2 & 1 & 19 \\
+ \hline
+ $x_1$ & 0 & 1 & 5 & 0 & 3 & -1 & 1 \\
+ $x_3$ & 0 & 0 & -7 & 1 & -5 & 2 & 2
+\end{tabular}\\
+\end{center}
+\sss{a.}
+Changing objective function to $Z = 6x_1 + 10x_2 + 4x_3$ changes $\vec{c}_B$ and $\vec{c}$ which only effect the objective function row in the final tableau.  The new objective function row is then 
+\begin{equation*}
+\big( \vec{c}_B B^{-1} A - \vec{c} \hspace{.3cm} | \hspace{.3cm} \vec{c}_B B^{-1} \big) = \left(
+\begin{array}{llllll}
+ 0 & -8 & 0 & | & -2 & 2
+\end{array}
+\right)
+\end{equation*}
+Thus, we are still feasible, but we are not optimal.  For this, we let $x_2$ enter the basis, which forces $x_1$ to leave.
+\begin{center}
+\begin{tabular}{c|c|rrrrr|c}
+Basic & \multicolumn{6}{|c|} {Coefficient of:} & Right\\
+Variable & Z & $x_1$ & $x_2$ & $x_3$ & $x_4$ & $x_5$ & Side \\
+ \hline
+ \hline
+ Z & 1	& 8/5 &	0	& 0	& 14/5	& 2/5	& 78/5\\
+ \hline
+ $x_2$ & 0	& 1/5 & 1 &0 & 3/5 & -1/5 & 1/5\\
+ $x_3$ & 0	& 7/5	& 0	& 1	& -4/5	& 3/5	&17/5
+\end{tabular}\\
+\end{center}
+This gives us a new optimal solution of $Z^* = 78/5, x_2 = 1/5, x_3 = 17/5$ and the other variables are non-basic.
+\sss{b.}
+Changing the coefficients of $x_1$ from $\begin{bmatrix}9\\2\\5 \end{bmatrix}$ to $\begin{bmatrix}8\\3\\2\end{bmatrix}$ should theoretically effect the entire tableau since $B^{-1}$ is dependent on the coefficients of the basic variables.  To remedy this change, we let
+$$
+\vec{c}_B = \left( \begin{array}{ll} 9 & 5 \end{array}\right)  \text{  and  } B^{-1} = \left( \begin{array}{ll} 3 & 1\\ 2 & 3 \end{array} \right)^{-1} = \left(
+\begin{array}{ll}
+ \frac{3}{7} & -\frac{1}{7} \\
+ -\frac{2}{7} & \frac{3}{7}
+\end{array}
+\right) 
+$$
+Oddly enough, this change doesn't effect the Z row in the final tableau at all, meaning the optimal value is still 19, but the optimal solution changes such that $x_1 = 1/7$ and $x_3 = 25/7$.
+\begin{center}
+\begin{tabular}{c|c|rrrrr|c}
+Basic & \multicolumn{6}{|c|} {Coefficient of:} & Right\\
+Variable & Z & $x_1$ & $x_2$ & $x_3$ & $x_4$ & $x_5$ & Side \\
+ \hline
+ \hline
+ Z & 1 & 0 & 2 & 0 & 2 & 1 & 19 \\
+ \hline
+ $x_1$ & 0&	1	&5/7&	0	&3/7&	-1/7&	1/7 \\
+ $x_3$ & 0	&0	&6/7&	1&	-2/7&	3/7&	25/7
+\end{tabular}\\
+\end{center}
+
+\fi
+
+    

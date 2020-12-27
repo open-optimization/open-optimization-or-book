@@ -1,0 +1,375 @@
+%By Kevin Cheung
+%The book is licensed under the
+%\href{http://creativecommons.org/licenses/by-sa/4.0/}{Creative Commons
+%Attribution-ShareAlike 4.0 International License}.
+%
+%This file has been modified by Robert Hildebrand 2020.  
+%CC BY SA 4.0 licence still applies.
+
+\section{Farkas' Lemma}\label{farkas-lemma}
+
+A well-known result in linear algebra states that a system of linear
+equations \(\mm{A}\vec{x} = \vec{b}\), where
+\(\mm{A} \in \R^{m\times n},\) \(\vec{b}\in \R^m,\) and
+\(\vec{x} = \begin{bmatrix} x_1\\ \vdots \\ x_n\end{bmatrix}\) is a
+tuple of variables, has no solution if and only if there exists
+\(\vec{y} \in \R^m\) such that \(\vec{y}^\T\mm{A} = \vec{0}\) and
+\(\vec{y}^\T \vec{b} \neq 0\).
+
+It is easily seen that if such a \(\vec{y}\) exists, then the system
+\(\mm{A}\vec{x} = \vec{b}\) cannot have a solution. (Simply multiply
+both sides of \(\mm{A}\vec{x} = \vec{b}\) on the left by
+\(\vec{y}^\T\).) However, proving the converse requires a bit of work. A
+standard elementary proof involves using Gauss-Jordan elimination to
+reduce the original system to an equivalent system
+\(\mm{Q}\vec{x} = \vec{d}\) such that \(\mm{Q}\) has a row of zero, say
+in row \(i\), with \(\vec{d}_i \neq 0\). The process can be captured by
+a square matrix \(\mm{M}\) satisfying \(\mm{M}\mm{A} = \mm{Q}\). We can
+then take \(\vec{y}^\T\) to be the \(i\)th row of \(\mm{M}\).
+
+An analogous result holds for systems of linear inequalities. The
+following result is one of the many variants of a result known as the
+\textbf{Farkas' Lemma}:
+
+\begin{theorem}{}{}
+\protect\hypertarget{thm:farkas}{}{\label{thm:farkas}}With \(\mm{A}\),
+\(\vec{x}\), and \(\vec{b}\) as above, the system
+\(\mm{A}\vec{x} \geq \vec{b}\) has no solution if and only if there
+exists \(\vec{y} \in \R^m\) such that
+\[\vec{y} \geq \vec{0},~\vec{y}^\T \mm{A} = \vec{0},~
+\vec{y}^\T\vec{b} \gt 0.\]
+\end{theorem}
+
+In other words, the system \(\mm{A}\vec{x} \geq \vec{b}\) has no
+solution if and only if one can infer the inequality \(0 \geq \gamma\)
+for some \(\gamma \gt 0\) by taking a nonnegative linear combination of
+the inequalities.
+
+This result essentially says that there is always a certificate (the
+\(m\)-tuple \(\vec{y}\) with the prescribed properties) for the
+infeasibility of the system \(\mm{A}\vec{x} \geq \vec{b}\). This allows
+third parties to verify the claim of infeasibility without having to
+solve the system from scratch.
+
+\begin{example}{}{}
+\protect\hypertarget{ex:unnamed-chunk-2}{}{\label{ex:unnamed-chunk-2}} For
+the system
+\begin{align*}
+2x - y + z & \geq 2 \\
+-x + y - z & \geq 0 \\
+   - y + z & \geq 0,
+\end{align*}
+
+adding two times the second inequality and the third inequality to the
+first inequality gives \(0 \geq 2\). Hence,
+\(\vec{y} = \begin{bmatrix} 1\\ 2 \\ 1\end{bmatrix}\) is a certificate
+of infeasibility for this example.
+\end{example}
+
+We now give a proof of Theorem \ref{thm:farkas}. It is easy to see that
+if such a \(\vec{y}\) exists, then the system
+\(\mm{A}\vec{x} \geq \vec{b}\) has no solution.
+
+Conversely, suppose that the system \(\mm{A}\vec{x} \geq \vec{b}\) has
+no solution. It suffices to show that we can infer the inequality
+\(0 \geq \alpha\) for some postive \(\alpha\) by taking nonnegative
+linear combination of the inequalities in the system
+\(\mm{A}\vec{x} \geq \vec{b}\). If the system already contains an
+inequality \(0 \geq \alpha\) for some positive \(\alpha\), then we are
+done. Otherwise, we show by induction on \(n\) that we can infer such an
+inequality.
+
+\textbf{Base case}: The system \(\mm{A}\vec{x} \geq \vec{b}\) has only
+one variable.
+
+For the system to have no solution, there must exist two inequalites
+\(ax_1 \geq t\) and \(-a'x_1 \geq t'\) such that \(a, a' \gt 0\) and
+\(\frac{t}{a} \gt \frac{-t'}{a'}\). Adding \(\frac{1}{a}\) times the
+inequality \(ax_1 \geq t\) and \(\frac{1}{a'}\) times the inequality
+\(-a'x_1 \geq t'\) gives the inequality
+\(0 \geq \frac{t}{a} + \frac{t'}{a'}\) with a positive right-hand side.
+This establishes the base case.
+
+\textbf{Induction hypothesis}: Let \(n \geq 2\) be an integer. Assume
+that given any system of linear inequalities
+\(\mm{A}'\vec{x} \geq \vec{b}'\) in \(n-1\) variables having no
+solution, one can infer the inequality \(0 \geq \alpha'\) for some
+positive \(\alpha'\) by taking a nonnegative linear combination of the
+inequalities in the system \(\mm{P}\vec{x} \geq \vec{q}\).
+
+Apply Fourier-Motzkin elimination to eliminate \(x_n\) from
+\(\mm{A}\vec{x} \geq \vec{b}\) to obtain the system
+\(\mm{P}\vec{x} \geq \vec{q}\). As \(\mm{A}\vec{x}\geq \vec{b}\) has no
+solution, \(\mm{P}\vec{x} \geq \vec{q}\) also has no solution.
+
+By the induction hypothesis, one can infer the inequality
+\(0 \geq \alpha\) for some positive \(\alpha\) by taking a nonnegative
+linear combination of the inequalities in
+\(\mm{P}\vec{x} \geq \vec{q}\). However, each inequality in
+\(\mm{P}\vec{x} \geq \vec{q}\) can be obtained from a nonnegative linear
+combination of the inequalites in \(\mm{A}\vec{x} \geq \vec{b}\). Hence,
+one can infer the inequality \(0 \geq \alpha\) by taking a nonnegative
+linear combination of nonnegative linear cominbations of the
+inequalities in \(\mm{A}\vec{x}\geq \vec{b}\). Since a nonnegative
+linear combination of nonnegative linear cominbations of the
+inequalities in \(\mm{A}\vec{x}\geq \vec{b}\) is simply a nonnegative
+linear combination of the inequalities in \(\mm{A}\vec{x}\geq \vec{b}\),
+the result follows.
+
+\(\qed\)
+
+\textbf{Remark.} Notice that in the proof above, if \(\mm{A}\) and
+\(\vec{b}\) have only rational entries, then we can take \(\vec{y}\) to
+have only rational entries as well.
+
+\begin{corollary}{}{}
+\protect\hypertarget{cor:farkas-std-eq}{}{\label{cor:farkas-std-eq}} Let
+\(\mm{A} \in \R^{m\times n}\) and let \(\vec{b} \in \R^m\). The system
+\begin{align*}
+    \mm{A}\vec{x} & = \vec{b} \\
+    \vec{x} & \geq \vec{0}
+    \end{align*}
+
+has no solution if and only if there exists \(\vec{y} \in \R^m\) such
+that \(\vec{y}^\T \mm{A} \leq \vec{0}\) and \(\vec{y}^\T\vec{b} \gt 0\).
+Furthermore, if \(\mm{A}\) and \(\vec{b}\) are rational, \(\vec{y}\) can
+be taken to be rational.
+\end{corollary}
+
+\emph{Proof.} One can easily check that if such a \(\vec{y}\) exists,
+there is no soluton.
+
+We now prove the converse. The system
+\begin{align*}
+\mm{A}\vec{x} & = \vec{b} \\
+\vec{x} & \geq \vec{0}
+\end{align*}
+can be rewritten as
+\begin{align*}
+\begin{bmatrix}
+\mm{A} \\
+-\mm{A} \\
+\mm{I}
+\end{bmatrix}\vec{x} \geq 
+\begin{bmatrix}
+\vec{b} \\
+-\vec{b} \\
+\vec{0}
+\end{bmatrix}
+\end{align*}
+
+where \(\mm{I}\) is the \(n\times n\) identity matrix. Then by Theorem
+\ref{thm:farkas}, if this system has no solution, then there exist
+\(\vec{u}, \vec{v} \in \mathbb{R}^m\), \(\vec{w} \in \mathbb{R}^n\)
+satisfying
+
+\[\vec{u},\vec{v},\vec{w} \geq \vec{0},~
+\mathbf{u}^\T\mm{A} -
+\mathbf{v}^\T\mm{A} +
+\mathbf{w} = \mathbf{0},~
+\mathbf{u}^\T\mathbf{b} -
+\mathbf{v}^\T\mathbf{b} \gt 0.
+\] The result now follows from setting \(\vec{y} = \vec{u} - \vec{v}\).
+
+Rationality follows from the remark after the proof of Theorem
+\ref{thm:farkas}.
+
+\(\qed\)
+
+\subsection*{Exercises}\label{exercises-4}
+\addcontentsline{toc}{section}{Exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  You are given that the following system has no solution.
+
+  \begin{eqnarray*}
+  x_1 + x_2 + 2x_3& \geq & 1 \\
+  -x_1 + x_2 + x_3 & \geq & 2 \\
+  x_1-x_2 + x_3  & \geq & 1 \\
+  -x_2 - 3x_3 & \geq & 0.
+  \end{eqnarray*}
+
+  Obtain a certificate of infeasibility for the system.
+\end{enumerate}
+
+\subsection*{Solutions}\label{solutions-4}
+\addcontentsline{toc}{section}{Solutions}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  The system can be written as \(\mm{A}\vec{x} \geq \vec{b}\) with
+  \(\mm{A} = \begin{bmatrix} 1 & 1 & 2 \\ -1 & 1 & 1 \\ 1 & -1 & 1 \\ 0 & -1 & -3 \end{bmatrix}\)
+  and \(\vec{b} = \begin{bmatrix} 1 \\ 2 \\ 1 \\ 0\end{bmatrix}\). So we
+  need to find \(\vec{y} \geq 0\) such that
+  \(\vec{y}^\mathsf{T} \mm{A} = \vec{0}\) and
+  \(\vec{y}^\mathsf{T} \vec{b} \gt 0\). As the system of equations
+  \(\vec{y}^\mathsf{T} \mm{A} = \vec{0}\) is homogeneous, we could
+  without loss of generality fix \(\vec{y}^\mathsf{T} \vec{b} = 1\),
+  thus leading to the system
+
+  \begin{eqnarray*}
+  \vec{y}^\mathsf{T}\mm{A} = \vec{0} \\
+  \vec{y}^\mathsf{T}\vec{b} = 1 \\
+  \vec{y} \geq \vec{0}
+  \end{eqnarray*}
+
+  that we could attempt to solve directly. However, it is possible to
+  obtain a \(\vec{y}\) using the Fourier-Motzkin Elimination Method.
+
+  Let us first label the inequalities:
+
+  \begin{eqnarray*}
+  x_1 + x_2 + 2x_3& \geq & 1~~~~~(1) \\
+  -x_1 + x_2 + x_3 & \geq & 2~~~~~(2) \\
+  x_1-x_2 + x_3  & \geq & 1~~~~~(3) \\
+  -x_2 - 3x_3 & \geq & 0.~~~~(4)
+  \end{eqnarray*}
+
+  Eliminating \(x_1\) gives:
+
+  \begin{eqnarray*}
+  -x_2 - 3x_3 & \geq & 0~~~~~(4) \\
+  2x_2 + 3x_3& \geq & 3~~~~~(5) \\
+  2x_3  & \geq & 3.~~~~(6) \\
+  \end{eqnarray*}
+
+  Note that \((5)\) is obtained from \((1) + (2)\) and \((6)\) is
+  obtained from \((2) + (3)\).
+
+  Multiplying \((5)\) by \(\frac{1}{2}\) gives
+
+  \begin{eqnarray*}
+  -x_2 - 3x_3 & \geq & 0~~~~~~(4) \\
+  x_2 + \frac{3}{2}x_3& \geq & \frac{3}{2}~~~~(7) \\
+  2x_3  & \geq & 3.~~~~~(6) \\
+  \end{eqnarray*}
+
+  Eliminating \(x_2\) gives:
+
+  \begin{eqnarray*}
+  2x_3  & \geq & 3~~~~~~~(6) \\
+  - \frac{3}{2} x_3 & \geq & \frac{3}{2}~~~~~(8)
+  \end{eqnarray*}
+
+  where \((8)\) is obtained from \((4) + (7)\).
+
+  Now \(\frac{3}{4}\times (6) + (8)\) gives \(0 \geq \frac{15}{4}\), a
+  contradiction.
+
+  To obtain a certificate of infeasibility, we trace back the
+  computations. Note that \(\frac{3}{4} (6) + (8)\) is given by
+  \(\frac{3}{4} ((2)+(3)) + (4)+ (7)\), which in turn is given by
+  \(\frac{3}{4} ((2)+(3)) + (4)+ \frac{1}{2}(5)\), which in turn is
+  given by \(\frac{3}{4} ((2)+(3)) + (4)+ \frac{1}{2}((1) + (2))\).
+
+  Thus, we can obtain \(0 \geq \frac{15}{4}\) from the nonnegative
+  linear combination of the original inequalities as follows:
+  \(\frac{1}{2} (1) + \frac{5}{4} (2) + \frac{3}{4} (3) + (4)\).
+
+  Therefore,
+  \(\vec{y} = \begin{bmatrix} \frac{1}{2} \\ \frac{5}{4} \\ \frac{3}{4} \\ 1\end{bmatrix}\)
+  is a certificate of infeasibility.
+
+  (Check that \(\vec{y}^\mathsf{T}\mm{A} = \vec{0}\) and
+  \(\vec{y}^\mathsf{T} \vec{b} \gt 0\).
+\end{enumerate}
+
+\section{Solving linear programming problems}\label{fund-lp}
+
+\protect\hyperlink{fm}{Fourier-Motzkin elimination} can actually be used
+to solve a linear programming problem though the method is not efficient
+and is almost never used in practice. We illustrate the process with an
+example.
+
+Consider the following linear programming problem:
+
+\begin{equation}
+\begin{array}{rl}
+\min & x + y \\
+\text{s.t.}
+& x + 2y  \geq 2 \\
+& 3x + 2y  \geq 6.
+\end{array}\label{eq:LP}
+\end{equation}
+
+Observe that \eqref{eq:LP} is equivalent to
+
+\begin{equation}
+\begin{array}{rl}
+\min & z \\
+\text{s.t.}
+& z - x - y = 0 \\
+& x + 2y  \geq 2 \\
+& 3x + 2y  \geq 6.
+\end{array}\label{eq:LPprime}
+\end{equation}
+
+Note that the objective function is replaced with \(z\) and \(z\) is set
+to the original objective function in the first constraint of
+\eqref{eq:LPprime} since \(z = x+ y\) if and only if \(z-x-y=0\). Then,
+solving \eqref{eq:LPprime} is equivalent to finding among all the
+solutions to the following system a solution that minimizes \(z\), if it
+exists. \[
+\begin{array}{rl}
+ z - x - y \geq 0 & ~~~(1) \\
+-z + x + y \geq 0 & ~~~(2) \\
+ x + 2y  \geq 2 &~~~(3)\\
+ 3x + 2y  \geq 6 & ~~~(4)
+\end{array}
+\] Since we are interested in the minimum possible value for \(z\) we
+use Fourier-Motzking elimination to eliminate the variables \(x\) and
+\(y\).
+
+To eliminate \(x\), we first multiply \((4)\) by \(\frac{1}{3}\) to
+obtain: \[
+\begin{array}{rl}
+ z - x - y \geq 0 & ~~~(1) \\
+-z + x + y \geq 0 & ~~~(2) \\
+ x + 2y  \geq 2 &~~~(3)\\
+ x + \frac{2}{3}y  \geq 2 & ~~~(5)
+\end{array}
+\] Then eliminate \(x\) to obtain \[
+\begin{array}{rrl}
+(1) + (2):  & 0 \geq 0 \\
+(1) + (3):  & z + y \geq 2 & ~~~(6) \\
+(1) + (5):  & z - \frac{1}{3} y \geq 2 & ~~~(7) \\
+\end{array}
+\] Note that there is no need to keep the first inequality. To eliminate
+\(y\), we first multiply \((7)\) by \(3\) to obtain: \[
+\begin{array}{rl}
+  z + y \geq 2 & ~~~(6) \\
+  3z - y \geq 6 & ~~~(8) \\
+\end{array}
+\] Then eliminate \(y\) to obtain \[
+\begin{array}{rl}
+  4z \geq 8 & ~~~(9) \\
+\end{array}
+\] Multiplying \((9)\) by \(\frac{1}{4}\) gives \(z \geq 2\). Hence, the
+minimum possible value for \(z\) among all the solutions to the system
+is \(2\). So the optimal value of \eqref{eq:LPprime} is \(2\). To obtain
+an optimal solution, set \(z = 2\). Then we have no choice but to set
+\(y = 0\) and \(x = 2\). One can check that \((x,y) = (2,0)\) is a
+feasible solution with objective function value \(2\).
+
+We can obtain an independent proof that the optimal value is indeed
+\(2\) if we trace back the computations. Note that the inequality
+\(z \geq 2\) is given by
+
+\begin{eqnarray*}
+\frac{1}{4} (9) 
+& \Leftarrow & \frac{1}{4} (6) + \frac{1}{4} (8) \\
+& \Leftarrow & \frac{1}{4} (1)+\frac{1}{4}(3) + \frac{3}{4}(7) \\
+& \Leftarrow & \frac{1}{4} (1)+\frac{1}{4}(3) + \frac{3}{4}(1)+\frac{3}{4}(5) \\
+& \Leftarrow & (1)+ \frac{1}{4}(3) + \frac{1}{4} (4)  \\
+\end{eqnarray*}
+
+This shows that \(\frac{1}{4}(3) + \frac{1}{4} (4)\) gives the
+inequality \(x+y \geq 2\). Hence, no feasible solution to \eqref{eq:LP}
+can have objective function value less than \(2\). But we have found one
+feasible solution with objective function value \(2\). Hence, \(2\) is
+the optimal value.

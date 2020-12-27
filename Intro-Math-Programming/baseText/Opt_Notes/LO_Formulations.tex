@@ -1,0 +1,273 @@
+%By Douglas Bish
+%The text is licensed under the
+%\href{http://creativecommons.org/licenses/by-sa/4.0/}{Creative Commons
+%Attribution-ShareAlike 4.0 International License}.
+%
+%This file has been modified by Robert Hildebrand 2020.  
+%CC BY SA 4.0 licence still applies.
+
+
+Remember, for a linear program (LP), we want to maximize or minimize a linear {\bf objective function} of the continous decision variables, while considering linear constraints on the values of the decision variables.
+
+%\bigskip {\bf Definition:} 
+\begin{definition}{Linear Function}
+A function $f(x_1,x_2,\cdots,x_n)$ is \emph{linear} if, and only if, we have $f(x_1,x_2,\cdots,x_n) = c_1x_1 + c_2x_2 + \cdots + c_nx_n$, where the  $c_1,c_2,\cdots,c_n$ coefficients are constants.  
+\end{definition}
+
+\bigskip  \underline{\bf A Generic Linear Program (LP)}
+
+\medskip  \underline{Decision Variables:}\\
+$x_i$ : continuous variables ($x_i \in \mathcal{R}$, i.e., a real number), $\forall i = 1,\cdots,3$.
+
+\medskip \underline{Parameters (known input parameters):}\\
+$c_i$ : cost coefficients $\forall i = 1,\cdots,3$ \\
+$a_{ij}$ : constraint coefficients $\forall i = 1,\cdots,3,~ j = 1,\cdots,4$ \\
+$b_j$ : right hand side coefficient for constraint $j$, $j = 1,\cdots,4$
+
+\begin{align}
+\mbox{Min~~} & z = c_1x_1 + c_2x_2 + c_3x_3  \label{eq:OF1}\\
+\mbox{s.t.~~} & a_{11}x_1 + a_{12}x_2 + a_{13} x_3 \ge b_1 \label{eq:C1} \\
+& a_{21}x_1 + a_{22}x_2 + a_{23} x_3 \le b_2 \label{eq:C2} \\
+& a_{31}x_1 + a_{32}x_2 + a_{33} x_3 = b_3 \label{eq:C3}\\
+& a_{41}x_1 + a_{42}x_2 + a_{43} x_3 \ge b_4 \label{eq:C4}\\
+& x_1 \ge 0, x_2 \le 0, x_3~urs \label{eq:C5}.
+\end{align}
+
+Eq.~(\ref{eq:OF1}) is the objective function, (\ref{eq:C1})-(\ref{eq:C4}) are the functional constraints, while (\ref{eq:C5}) is the sign restrictions ({\it ur}s signifies that the variable is unrestricted). If we were to add any one of these following constraints $x_2 \in \{0, 1\}$ ($x_2$ is binary-valued) or $x_3 \in \mathcal{Z}$ ($x_3$ is integer-valued) we would have an Integer Program.  For the purposes of this class, an Integer Program (IP) is just an LP with added integer restrictions on (some) variables.
+
+While, in general, solvers will take any form of the LP, there are some special forms we use in analysis:\\
+
+\medskip \underline{\bf LP Standard Form}: The standard form has all constraints as equalities, and all variables as non-negative.  The generic LP is not in standard form, but any LP can be converted to standard form. \\
+
+Since $x_2$ is non-positive and $x_3$ unrestricted, perform the following substitutions $x_2=-\hat{x}_2$ and $x_3 = x_3^+ -x_3^-$, where $\hat{x}_2$, $x_3^+$, $x_3^- \ge 0$.   Eqs.~(\ref{eq:C1}) and (\ref{eq:C4}) are in the form left-hand side (LHS) $\ge$ right-hand side (RHS), so to make an equality, subtract a non-negative slack variable from the LHS ($s_1$ and $s_4$).  Eq.~(\ref{eq:C2}) is in the form LHS $\le$ RHS, so add a non-negative slack variable to the LHS.
+\begin{align*}
+\mbox{Min~~} & z = c_1x_1 - c_2\hat{x}_2 + c_3 (x_3^+ -x_3^-)  \\
+\mbox{s.t.~~} & a_{11}x_1 - a_{12}x_2 + a_{13} (x_3^+ -x_3^-) - s_1 = b_1 \\
+& a_{21}x_1 - a_{22}\hat{x}_2 + a_{23} (x_3^+ -x_3^-) + s_2 = b_2 \\
+&  a_{31}x_1 - a_{32}\hat{x}_2 + a_{33} (x_3^+ -x_3^-) = b_3 \\
+& a_{41}x_1 - a_{42}\hat{x}_2 + a_{43} x_3 - s_4 = b_4 \\
+& x_1, \hat{x}_2, x_3^+, x_3^-, s_1, s_2, s_4 \ge 0.
+\end{align*}
+
+\medskip \underline{\bf  LP Canonical Form}: For a minimization problem the canonical form of the LP has the LHS of each constraint greater than or equal to the the RHS, and a maximization the LHS less than or equal to the RHS, and non-negative variables.
+
+Next we consider some formulation examples:
+
+\bigskip  {\bf Production Problem:} You have 21 units of transparent aluminum alloy (TAA), LazWeld1, a joining robot leased for 23 hours, and CrumCut1, a cutting robot leased for 17 hours of aluminum cutting. You also have production code for a bookcase, desk, and cabinet, along with commitments to buy any of these you can produce for \$18,  \$16, and  \$10 apiece, respectively.  A bookcase requires 2 units of TAA, 3 hours of joining, and 1 hour of cutting, a desk requires 2 units of TAA, 2 hours of joining, and 2 hour of cutting, and a cabinet requires 1 unit of TAA, 2 hours of joining, and 1 hour of cutting. Formulate an LP to maximize your revenue given your current resources.
+
+\medskip \underline{Decision variables:} \\
+$x_i$ : number of units of product $i$ to produce, \\
+$\forall i = \{bookcase,~desk,~cabinet\}$.
+\begin{align*}
+\max~& z = 18x_1 + 16x_2 + 10x_3 :  \\
+& 2x_1 + 2x_2 + 1x_3 \le 21 & (TAA) \\
+& 3x_1 + 2x_2 + 2x_3 \le 23 & (LazWeld1) \\
+&  1x_1 + 2x_2 + 1x_3 \le 17 & (CrumCut1)  \\
+& x_1, x_2, x_3 \ge 0.
+\end{align*}
+
+
+
+
+
+\bigskip {\bf Work Scheduling Problem:} You are the manager of LP Burger. The following table shows the minimum number of employees required to staff the restaurant on each day of the week. Each employees must work for five consecutive days. Formulate an LP to find the minimum number of employees required to staff the restaurant.
+
+\begin{table}[h!] \begin{center} \begin{tabular} {|l|l|} 
+\hline Day of Week & Workers Required   \\ \hline
+\hline  1 = Monday & 6  \\
+\hline  2 = Tuesday & 4  \\
+\hline  3 = Wednesday & 5  \\
+\hline  4 = Thursday & 4  \\
+\hline  5 = Friday & 3  \\
+\hline  6 = Saturday & 7  \\
+\hline  7 = Sunday & 7  \\
+\hline \end{tabular} \end{center} \end{table}
+
+\underline{Decision variables:} \\
+$x_i$ : the number of workers that start 5 consecutive days of work on day $i$, $ i = 1,\cdots,7$ \\
+
+\begin{align*}
+\mbox{Min~~ } & z = x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7  \\
+\mbox{s.t.~~} & x_1 + x_4 + x_5 + x_6 + x_7 \ge 6 \\
+& x_2 + x_5 + x_6 + x_7 + x_1 \ge 4 \\
+& x_3 + x_6 + x_7 + x_1 + x_2 \ge 5 \\
+& x_4 + x_7 + x_1 + x_2 + x_3 \ge 4 \\
+& x_5 + x_1 + x_2 + x_3 + x_4 \ge 3 \\
+& x_6 + x_2 + x_3 + x_4 + x_5 \ge 7 \\
+& x_7 + x_3 + x_4 + x_5 + x_6 \ge 7 \\
+& x_1, x_2, x_3, x_4, x_5, x_6, x_7 \ge 0.
+\end{align*}
+
+The solution is as follows:
+\begin{table}[h!] \begin{center} \begin{tabular} {|l|l|}
+\hline   LP Solution        & IP Solution \\
+\hline  $z_{LP} = 7.333$    & $z_I = 8.0$ \\
+\hline  $x_1 = 0$           & $x_1 = 0$ \\
+\hline  $x_2 = 0.333$       & $x_2 = 0 $ \\
+\hline  $x_3 = 1$           & $x_3 = 0$ \\
+\hline  $x_4 = 2.333$       & $x_4 = 3$ \\
+\hline  $x_5 = 0$           & $x_5 = 0 $ \\
+\hline  $x_6 = 3.333$       & $x_6 = 4 $ \\
+\hline  $x_7 = 0.333$       & $x_7 = 1 $ \\
+\hline
+\end{tabular} \end{center} \end{table}
+
+\medskip  LP Burger has changed it's policy, and allows, at most, two part time workers, who work for two consecutive days in a week.  Formulate this problem.
+
+\underline{Decision variables:} \\
+$x_i$ : the number of workers that start 5 consecutive days of work on day $i$, $ i = 1,\cdots,7$ \\
+$y_i$ : the number of workers that start 2 consecutive days of work on day $i$, $ i = 1,\cdots,7$.
+
+\begin{align*}
+\mbox{Min~~ } & z = 5(x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7) \\
+& + 2(y_1 + y_2 + y_3 + y_4 + y_5 + y_6 + y_7) \nonumber \\
+\mbox{s.t.~~} & x_1 + x_4 + x_5 + x_6 + x_7 + y_1 + y_7 \ge 6 \\
+& x_2 + x_5 + x_6 + x_7 + x_1 + y_2 + y_1 \ge 4 \\
+&           x_3 + x_6 + x_7 + x_1 + x_2 + y_3 + y_2 \ge 5 \\
+&           x_4 + x_7 + x_1 + x_2 + x_3 + y_4 + y_3 \ge 4 \\
+&           x_5 + x_1 + x_2 + x_3 + x_4 + y_5 + y_4 \ge 3 \\
+&           x_6 + x_2 + x_3 + x_4 + x_5 + y_6 + y_5 \ge 7 \\
+&           x_7 + x_3 + x_4 + x_5 + x_6 + y_7 + y_6 \ge 7 \\
+&           y_1 + y_2 + y_3 + y_4 + y_5 + y_6 + y_7 \le 2 \\
+&           x_i \ge 0, y_i \ge 0, \forall i = 1,\cdots,7.
+\end{align*}
+
+\bigskip  {\bf The Diet Problem:} In the future (as envisioned in a bad 70's science fiction film) all food is in tablet form, and there are four types, green, blue, yellow, and red. A balanced, futuristic diet requires, at least 20 units of Iron, 25 units of Vitamin B, 30 units of Vitamin C, and 15 units of Vitamin D. Formulate an LP that ensures a balanced diet at the minimum possible cost.
+
+\begin{table}[h!] \begin{center} \begin{tabular} {|c|c|c|c|c|c|}
+\hline Tablet  & Iron &  B &  C  &  D & Cost (\$) \\ \hline
+\hline  green (1)  & 6    & 6  & 7          & 4        &  1.25 \\
+\hline  blue (2)  & 4    & 5  & 4          & 9        &  1.05 \\
+\hline  yellow (3) & 5    & 2  & 5          & 6        &  0.85 \\
+\hline  red (4)   & 3    & 6  & 3          & 2        &  0.65 \\ \hline
+\end{tabular} \end{center} \end{table}
+
+Now we formulate the problem:
+
+\smallskip  \underline{Decision variables:} \\
+$x_i$ : number of tablet of type $i$ to include in the diet, $\forall i \in \{1,2,3,4\}$.
+\begin{align*}
+\mbox{Min~~ } & z = 1.25x_1 + 1.05x_2 + 0.85x_3 + 0.65x_4 \\
+\mbox{s.t.~~} &  6x_1 + 4x_2 + 5x_3 + 3x_4 \ge 20  \\
+& 6x_1 + 5x_2 + 2x_3 + 6x_4 \ge 25 \\
+& 7x_1 + 4x_2 + 5x_3 + 3x_4 \ge 30 \\
+& 4x_1 + 9x_2 + 6x_3 + 2x_4 \ge 15  \\
+& x_1, x_2, x_3, x_4 \ge 0. 
+\end{align*}
+
+%The optimal diet costs \$5.35, and consists of 4.0625 green tablets and 0.3125 blue tablets.
+
+\bigskip  {\bf The Next Diet Problem:} Progress is important, and our last problem had too many tablets, so we are going to produce a single, purple, 10 gram tablet for our futuristic diet requires, which are at least 20 units of Iron, 25 units of Vitamin B, 30 units of Vitamin C, and 15 units of Vitamin D, and 2000 calories. The tablet is made from blending 4 nutritious chemicals; the following table shows the units of our nutrients per, and cost of, grams of each chemical.
+\begin{table}[h!] \begin{center} \begin{tabular} {|c|c|c|c|c|c|c|}
+\hline Tablet  & Iron  &  B &  C &  D & Calories & Cost (\$) \\ \hline
+\hline  Chem 1  & 6    & 6         & 7         & 4         &  1000    & 1.25 \\
+\hline  Chem 2  & 4    & 5         & 4         & 9         &  250     & 1.05 \\
+\hline  Chem 3  & 5    & 2         & 5         & 6         &  850     & 0.85 \\
+\hline  Chem 4  & 3    & 6         & 3         & 2         &  750     & 0.65 \\
+\hline
+\end{tabular} \end{center} \end{table}
+Formulate an LP that ensures a balanced diet at the minimum possible cost.
+
+\smallskip \underline{Decision variables:} \\
+$x_i$ : grams of chemical $i$ to include in the purple tablet, $\forall i = 1,2,3,4$.
+\begin{align*}
+\mbox{Min} & z = 1.25x_1 + 1.05x_2 + 0.85x_3 + 0.65x_4 \\
+\mbox{s.t.~~} &  6x_1 + 4x_2 + 5x_3 + 3x_4 \ge 20 \\
+& 6x_1 + 5x_2 + 2x_3 + 6x_4 \ge 25  \\
+& 7x_1 + 4x_2 + 5x_3 + 3x_4 \ge 30  \\
+& 4x_1 + 9x_2 + 6x_3 + 2x_4 \ge 15  \\
+& 1000x_1 + 250x_2 + 850x_3 + 750x_4 \ge 2000 \\
+& x_1 + x_2 + x_3 + x_4 = 10  \\
+& x_1, x_2, x_3, x_4 \ge 0. 
+\end{align*}
+
+\bigskip {\bf The Assignment Problem:} Consider the assignment of $n$ teams to $n$ projects, where each team ranks the projects, where their favorite project is given a rank of $n$, their next favorite $n-1$, and their least favorite project is given a rank of 1.  The assignment problem is formulated as follows (we denote ranks using the $R$-parameter):
+
+\smallskip \underline{Variables:} \\
+$x_{ij}$ : 1 if project $i$ assigned to team $j$, else 0.
+\begin{align*}
+\mbox{Max~}   & z = \sum_{i=1}^{n}\sum_{j=1}^{n} R_{ij} x_{ij}  \\
+\mbox{s.t.~}& \sum_{i=1}^{n} x_{ij} = 1,~~ \forall j = 1,\cdots,n  \\
+& \sum_{j=1}^{n} x_{ij} = 1,~~ \forall i = 1,\cdots,n  \\
+& x_{ij} \ge 0,~~ \forall i = 1,\cdots,n, j = 1,\cdots,n. 
+\end{align*}
+The assignment problem has an integrality property, such that if we remove the binary restriction on the $x$ variables (now just non-negative, i.e., $x_{ij} \ge 0$) then we still get binary assignments, despite the fact that it is now an LP.  This property is very interesting and useful. Of course, the objective function might not quite what we want, we might be interested ensuring that the team with the worst assignment is as good as possible (a fairness criteria). One way of doing this is to modify the assignment problem using a max-min objective:
+
+\medskip {\bf Max-min Assignment-like Formulation} \\
+\begin{eqnarray}
+& Max  & z  \nonumber \\
+& s.t. & \sum_{i=1}^{n} x_{ij} = 1,~~ \forall j = 1,\cdots,n \nonumber \\
+&      & \sum_{j=1}^{n} x_{ij} = 1,~~ \forall i = 1,\cdots,n \nonumber \\
+&      & x_{ij} \ge 0,~~ \forall i = 1,\cdots,n, J = 1,\cdots,n \nonumber \\
+&      & z \le \sum_{i=1}^{n} R_{ij} x_{ij},~~ \forall j = 1,\cdots,n. \nonumber
+\end{eqnarray}
+Does this formulation have the integrality property (it is not an assignment problem)?  Consider a very simple example where two teams are to be assigned to two projects and the teams give the projects the following rankings:
+\begin{table}[h!] \begin{center} \begin{tabular} {|c||c|c|}
+\hline           & Project~1 & Project~2 \\ \hline \hline
+\hline Team 1    & 2  & 1  \\
+\hline Team 2    & 2  & 1 \\ \hline
+\end{tabular} \end{center} \end{table}
+Both teams prefer Project 2.  For both problems, if we remove the binary restriction on the
+$x$-variable, they can take values between (and including) zero and one. For the assignment problem the optimal solution will have $z=3$, and fractional $x$-values will not improve $z$. For the max-min assignment problem this is not the case, the optimal solution will have $z=1.5$, which occurs when each team is assigned half of each project (i.e., for Team 1 we have $x_{11} = 0.5$ and $x_{21} = 0.5$).
+
+
+\newpage \bigskip  {\bf Linear Data Models:} Consider a data set that consists of $n$ data points $(x_i,y_i)$.  We want to fit the best line to this data, such that given an $x$-value, we can predict the associated $y$-value.  Thus, the form is $y_ i = \alpha x_i + \beta$ and we want to choose the $\alpha$ and $\beta$ values such that we minimize the error for our $n$ data points.
+
+\smallskip  \underline{\bf Variables:}\\
+$e_i$ : error for data point $i$, $i = 1,\cdots,n$. \\
+$\alpha$ : slope of fitted line. \\
+$\beta$ : intercept of fitted line.
+\begin{eqnarray}
+& Min   & \sum_{i=1}^n |e_i|  \nonumber \\
+& s.t.  & \alpha x_i + \beta - y_i = e_i,~~ i=1,\cdots,n \nonumber \\
+&       & e_i, \alpha, \beta ~ urs \nonumber.
+\end{eqnarray}
+
+Of course, absolute values are not linear function, so we can linearize as follows:
+
+\smallskip  \underline{\bf Decision variables:}\\
+$e_i^+$ : positive error for data point $i$, $i = 1,\cdots,n$. \\
+$e_i^-$ : negative error for data point $i$, $i = 1,\cdots,n$. \\
+$\alpha$ : slope of fitted line. \\
+$\beta$ : intercept of fitted line.
+\begin{eqnarray}
+& Min   & \sum_{i=1}^n e_i^+ +e_i^- \nonumber \\
+& s.t.  & \alpha x_i + \beta - y_i = e_i^+-e_i^-,~~ i=1,\cdots,n \nonumber \\
+&       & e_i^+, e_i^- \ge 0, \alpha, \beta ~ urs \nonumber.
+\end{eqnarray}
+ 
+\bigskip {\bf Two-Person Zero-Sum Games:} Consider a game with two players, $\mathcal{A}$ and $\mathcal{B}$. In each round of the game, $\mathcal{A}$ chooses one out of $m$ possible actions, while $\mathcal{B}$ chooses one out of $n$ actions.  If $\mathcal{A}$ takes action $j$ while $\mathcal{B}$ takes action $i$, then $c_{ij}$ is the payoff for $\mathcal{A}$ , if $c_{ij} > 0$, $\mathcal{A}$ ``wins" $c_{ij}$ (and $\mathcal{B}$ losses that amount), and if $c_{ij} < 0$ if $\mathcal{B}$ ``wins" $-c_{ij}$ (and $\mathcal{A}$ losses that amount).  This is a two-person zero-sum game.
+
+\smallskip Rock, Paper, Scissors is a two-person zero-sum game, with the following payoff matrix.
+\begin{center} \begin{tabular}{c|c|c|c|c|}
+\multicolumn{5}{ c }{~~~~$\mathcal{A}$} \\ \cline{2-5}
+              &         & {\bf R} & {\bf P} & {\bf S} \\ \cline{2-5}
+              & {\bf R} & 0       & 1       & -1      \\ \cline{2-5}
+$\mathcal{B}$ & {\bf P} & -1      & 0       & 1       \\ \cline{2-5}
+              & {\bf S} & 1       & -1      & 0       \\ \cline{2-5}
+\end{tabular} \end{center}
+
+\smallskip  We can have a similar game, but with a different payoff matrix, as follows:
+\begin{center} \begin{tabular}{c|c|c|c|c|}
+\multicolumn{5}{ c }{~~~~$\mathcal{A}$} \\ \cline{2-5}
+              &         & {\bf R} & {\bf P} & {\bf S} \\ \cline{2-5}
+              & {\bf R} & 4       & -1      & -1 \\ \cline{2-5}
+$\mathcal{B}$ & {\bf P} & -2      & 4       & -2 \\ \cline{2-5}
+              & {\bf S} & -3      & -3      & 4 \\ \cline{2-5}
+\end{tabular} \end{center}
+
+\medskip What is the optimal strategy for $\mathcal{A}$ (for either game)? We define $x_j$ as the probability that $\mathcal{A}$ takes action $j$ (related to the columns).  Then the payoff for $\mathcal{A}$, if $\mathcal{B}$ takes action $i$ is $\sum_{j=1}^m c_{ij}x_{j}$. Of course, $\mathcal{A}$ does not know what action $\mathcal{B}$ will take, so let's find a strategy that maximizes the minimum expected winnings of $\mathcal{A}$ given any random strategy of $\mathcal{B}$, which we can formulate as follows:
+\begin{eqnarray}
+& Max  & (min_{i=1,\cdots,n} \sum_{j=1}^m  c_{ij}x_i) \nonumber \\
+& s.t. & \sum_{j=1}^m x_j = 1 \nonumber \\
+&      & x_j \ge 0,~~ i = 1,\cdots,m, \nonumber
+\end{eqnarray}
+which can be linearized as follows:
+\begin{eqnarray}
+& Max  & z \nonumber \\
+& s.t. & z \le \sum_{j=1}^m  c_{ij}x_j,~~ i = 1,\cdots,n \nonumber \\
+&      & \sum_{j=1}^m x_j = 1 \nonumber \\
+&      & x_j \ge 0,~~ i = 1,\cdots,m. \nonumber
+\end{eqnarray}
+
+The last two constraints ensure the that $x_i$-variables are valid probabilities. If you solved this LP for the first game (i.e., payoff matrix) you find the best strategy is $x_1 = 1/3$, $x_2 = 1/3$, and $x_3 = 1/3$ and there is no expected gain for player $\mathcal{A}$.  For the second game, the best strategy is $x_1 = 23/107$, $x_2 = 37/107$, and $x_3 = 47/107$, with $\mathcal{A}$ gaining, on average, $8/107$ per round.

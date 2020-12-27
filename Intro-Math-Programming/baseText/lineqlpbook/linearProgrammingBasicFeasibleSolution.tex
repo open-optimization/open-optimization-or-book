@@ -1,0 +1,265 @@
+%By Kevin Cheung
+%The book is licensed under the
+%\href{http://creativecommons.org/licenses/by-sa/4.0/}{Creative Commons
+%Attribution-ShareAlike 4.0 International License}.
+%
+%This file has been modified by Robert Hildebrand 2020.  
+%CC BY SA 4.0 licence still applies.
+
+
+\section{Basic feasible solution}\label{basic-feasible-solution}
+
+For a linear constraint \(\vec{a}^\T \vec{x} \sqcup \gamma\) where
+\(\sqcup\) is \(\geq\), \(\leq\), or \(=\), we call \(\vec{a}^\T\) the
+\textbf{coefficient row-vector} of the constraint.
+
+Let \(S\) denote a system of linear constraints with \(n\) variables and
+\(m\) constraints given by \({\vec{a}^{(i)}}^\T \vec{x} \sqcup_i b_i\)
+where \(\sqcup_i\) is \(\geq\), \(\leq\), or \(=\) for
+\(i = 1,\ldots, m\).
+
+For \(\vec{x}' \in \R^n\), let \(J(S,\vec{x}')\) denote the set
+\(\{ i \ssep {\vec{a}^{(i)}}^\T \vec{x}' = b_i\}\) and define
+\(\mm{A}_{S,\vec{x}'}\) to be the matrix whose rows are precisely the
+coefficient row-vectors of the constraints indexed by \(J(S,\vec{x}')\).
+
+\begin{example}{}{}
+\protect\hypertarget{ex:bfs-ex}{}{\label{ex:bfs-ex}} Suppose that \(S\) is
+the system
+\begin{align*}
+  x_1 + x_2 - x_3 \geq 2 \\
+ 3x_1 - x_2 + x_3 = 2 \\
+ 2x_1 - x_2  \leq 1 \\
+\end{align*}
+
+If \(\vec{x}' = \begin{bmatrix} 1 \\ 3 \\ 2\end{bmatrix}\), then
+\(J(S,\vec{x}') = \{1,2\}\) since \(\vec{x}'\) satisfies the first two
+constraints with equality but not the third. Hence,
+\(\mm{A}_{S,\vec{x}'} = \begin{bmatrix} 1 & 1 & -1 \\ 3 & -1 & 1 \end{bmatrix}\).
+\end{example}
+
+\begin{definition}{}{}
+\protect\hypertarget{def:unnamed-chunk-4}{}{\label{def:unnamed-chunk-4}}A
+solution \(\vec{x}^*\) to \(S\) is called a \textbf{basic feasible
+solution} if the rank of \(\mm{A}_{S,\vec{x}^*}\) is \(n\).
+\end{definition}
+
+A basic feasible solution to the system in Example \ref{ex:bfs-ex} is
+\(\begin{bmatrix} 1 \\ 1\\ 0\end{bmatrix}.\)
+
+It is not difficult to see that in two dimensions, basic feasible
+solutions correspond to ``corner points'' of the set of all solutions.
+Therefore, the notion of a basic feasible solution generalizes the idea
+of a corner point to higher dimensions.
+
+The following result is the basis for what is commonly known as the
+\textbf{corner method} for solving linear programming problems in two
+variables.
+
+\begin{theorem}{Basic Feasible Optimal Solution}{corner}
+\protect\hypertarget{thm:corner}{}{\label{thm:corner}}Let (P) be a linear
+programming problem. Suppose that (P) has an optimal solution and there
+exists a basic feasible solution to its constraints. Then there exists
+an optimal solution that is a basic feasible solution.
+\end{theorem}
+
+We first state the following simple fact from linear algebra:
+
+\begin{lemma}{}{}
+\protect\hypertarget{lem:orth-rank}{}{\label{lem:orth-rank}}Let
+\(\mm{A} \in \R^{m\times n}\) and \(\vec{d} \in \R^n\) be such that
+\(\mm{A} \vec{d} = \vec{0}\). If \(\vec{q}\in\R^n\) satisfies
+\(\vec{q}^\T \vec{d} \neq 0\) then \(\vec{q}^T\) is not in the row space
+of \(\mm{A}\).
+\end{lemma}
+
+\begin{proof}
+
+\emph{Proof of} Theorem \ref{thm:corner}.\\
+Suppose that the system of constraints in (P), call it \(S\), has \(m\)
+constraints and \(n\) variables. Let the objective function be
+\(\vec{c}^\T \vec{x}\). Let \(v\) denote the optimal value.
+
+Let \(\vec{x}^*\) be an optimal solution to (P) such that the rank of
+\(\mm{A}_{S,\vec{x}^*}\) is as large as possible. We claim that
+\(\vec{x}^*\) must be a basic feasible solution.
+
+To ease notation, let \(J = J(S,\vec{x}^*)\). Let
+\(N = \{1,\ldots,m\} \backslash J\).
+
+Suppose to the contrary that the rank of \(\mm{A}_{S,\vec{x}^*}\) is
+less than \(n\). Let \(\mm{P}\vec{x} = \vec{q}\) denote the system of
+equations obtained by setting the constraints indexed by \(J\) to
+equalities. Then \(\mm{P}\vec{x} = \mm{A}_{S,\vec{x}^*}\). Since
+\(\mm{P}\) has \(n\) columns and its rank is less than \(n\), there
+exists a nonzero \(\vec{d}\) such that \(\mm{P} \vec{d} = \vec{0}\).
+
+As \(\vec{x}^*\) satisfies each constraint indexed by \(N\) strictly,
+for a sufficiently small \(\epsilon \gt 0\),
+\(\vec{x}^* + \epsilon \vec{d}\) and \(\vec{x}^* - \epsilon \vec{d}\)
+are solutions to \(S\) and therefore are feasible to (P). Thus,
+\begin{align}
+\begin{split}
+\vec{c}^\T (\vec{x}^* + \epsilon \vec{d}) & \geq v \\
+\vec{c}^\T (\vec{x}^* - \epsilon \vec{d}) & \geq v.
+\end{split}\label{eq:twoway}
+\end{align}
+
+Since \(\vec{x}^*\) is an optimal solution, we have
+\(\vec{c}^\T\vec{x}^* = v\). Hence, \eqref{eq:twoway} simplifies to
+\begin{align*}
+\epsilon \vec{c}^\T \vec{d} & \geq 0 \\
+-\epsilon \vec{c}^\T \vec{d} & \geq 0,
+\end{align*}
+
+giving us \(\vec{c}^\T\vec{d} = 0\) since \(\epsilon \gt 0\).
+
+Without loss of generality, assume that the constraints indexed by \(N\)
+are \(\mm{Q}\vec{x} \geq \vec{r}\). As (P) does have a basic feasible
+solution, implying that the rank of
+\(\begin{bmatrix} \mm{P} \\ \mm{Q}\end{bmatrix}\) is \(n\), at least one
+row of \(\mm{Q}\), which we denote by \(\vec{t}^\T\), must satisfy
+\(\vec{t}^\T\vec{d}\neq 0\). Without loss of generality, we may assume
+that \(\vec{t}^\T\vec{d} \gt 0\), replacing \(\vec{d}\) with
+\(-\vec{d}\) if necessary.
+
+Consider the linear programming problem
+
+\begin{equation*}
+\begin{array}{rl}
+ \min & \lambda \\
+\text{s.t.} & \mm{Q}(\vec{x}^*+\lambda \vec{d}) \geq \vec{p}
+\end{array}
+\end{equation*}
+
+Since at least one entry of \(\mm{Q}\vec{d}\) is positive (namely,
+\(\vec{t}^\T\vec{d}\)), this problem must have an optimal solution, say
+\(\lambda'\). Setting \(\vec{x}' = \vec{x}^* + \lambda'\), we have that
+\(\vec{x}'\) is an optimal solution since \(\vec{c}^\T\vec{x}' = v\).
+
+Now, \(\vec{x}'\) must satisfy at least one constraint in
+\(\mm{Q} \geq \vec{p}\) with equality. Let \(\vec{q}^\T\) be the
+coefficient row-vector of one such constraint. Then the rows of
+\(\mm{A}_{S,\vec{x}'}\) must have all the rows of
+\(\mm{A}_{S,\vec{x}^*}\) and \(\vec{q}^\T\). Since
+\(\vec{q}^\T\vec{d} \neq 0,\) by Lemma \ref{lem:orth-rank}, the rank of
+\(\mm{A}_{S,\vec{x}'}\) is larger than rank the rank of
+\(\mm{A}_{S,\vec{x}^*}\), contradicting our choice of \(\vec{x}^*\).
+Thus, \(\vec{x}^*\) must be a basic feasible solution.
+\end{proof}
+
+\subsection*{Exercises}\label{exercises-8}
+\addcontentsline{toc}{section}{Exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  Find all basic feasible solutions to
+  \begin{align*}
+    x_1 + 2x_2 - x_3 & \geq 1\\ 
+    x_2 + 2x_3 & \geq 3 \\ 
+    -x_1 + 2x_2 + x_3 & \geq 3 \\ 
+   - x_1 + x_2 + x_3 & \geq 0.\end{align*}
+\item
+  A set \(S \subset \R^n\) is said to be bounded if there exists a real
+  number \(M \gt 0\) such that for every \(\vec{x} \in S\),
+  \(|x_i| \lt M\) for all \(i = 1,\ldots, n\). Let
+  \(\mm{A} \in\R^{m\times n}\) and \(\vec{b}\in \R^m\). Prove that if
+  \(\{ \vec{x} \ssep \mm{A} \vec{x} \geq \vec{b}\}\) is nonempty and
+  bounded, then there is a basic feasible solution to
+  \(\mm{A} \vec{x} \geq \vec{b}\).
+\item
+  Let \(\mm{A} \in \R^{m \times n}\) and \(\vec{b} \in \R^m\) where
+  \(m\) and \(n\) are positive integers with \(m \leq n\). Suppose that
+  the rank of \(\mm{A}\) is \(m\) and \(\vec{x}'\) is a basic feasible
+  solution to
+  \begin{align*}
+    \mm{A}\vec{x} & = \vec{b} \\
+    \vec{x} & \geq \vec{0}.
+     \end{align*}
+
+  Let \(J = \{ i \ssep x'_i \gt 0\}\). Prove that the columns of
+  \(\mm{A}\) indexed by \(J\) are linearly independent.
+\end{enumerate}
+
+\subsection*{Solutions}\label{solutions-8}
+\addcontentsline{toc}{section}{Solutions}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  To obtain all the basic feasible solutions, it suffices to enumerate
+  all subsystems \(\mm{A}' \vec{x} \geq \vec{b}'\) of the given system
+  such that the rank of \(\mm{A}'\) is three and solve
+  \(\mm{A}' \vec{x} = \vec{b}'\) for \(\vec{x}\) and see if is a
+  solution to the system, in which case it is a basic feasible solution.
+  Observe that every basic feasible solution can be discovered in this
+  manner.
+
+  We have at most four subsystems to consider.
+
+  Setting the first three inequalities to equality gives the unique
+  solution \(\begin{bmatrix} 0 \\ 1 \\ 1 \end{bmatrix}\) which satisfies
+  the given system.. Hence,
+  \(\begin{bmatrix} 0 \\ 1 \\ 1 \end{bmatrix}\) is a basic feasible
+  solution.
+
+  Setting the first, second, and fourth inequalities to equality gives
+  the unique solution
+  \(\begin{bmatrix} \frac{5}{3} \\ \frac{1}{3} \\ \frac{4}{3} \end{bmatrix}\)
+  which violates the third inequality of the given system.
+
+  Setting the first, third, and fourth inequalities to equality leads to
+  no solution. (In fact, the coefficient matrix of the system does not
+  have rank 3 and therefore this case can be ignored.)
+
+  Setting the last three inequalities to equality gives the unique
+  solution \(\begin{bmatrix} 3 \\ 3 \\ 0 \end{bmatrix}\) which satisfies
+  the given system. Hence, \(\begin{bmatrix} 3 \\ 3 \\ 0 \end{bmatrix}\)
+  is a basic feasible solution.
+
+  Thus, \(\begin{bmatrix} 0 \\ 1 \\ 1 \end{bmatrix}\) and
+  \(\begin{bmatrix} 3 \\ 3 \\ 0 \end{bmatrix}\) are the only basic
+  feasible solutions.
+\item
+  Let \(S\) denote the system \(\mm{A}\vec{x} \geq \vec{b}\). Let
+  \(\vec{x}'\) be a solution to \(S\) such that the rank of
+  \(\mm{A}_{S,\vec{x}'}\) is as large as possible. If the rank is \(n\),
+  then we are done. Otherwise, there exists nonzero
+  \(\vec{d} \in \R^n\) such \(\mm{A}_{S,\vec{x}'}\vec{d} = \vec{0}\).
+  Since the set of solutions to \(S\) is a bounded set, at least one of
+  the following values is finite:
+
+  \begin{itemize}
+  \item
+    \(\max \{ \lambda \ssep \mm{A} (\vec{x}'+\lambda\vec{d}) \geq\vec{b}\}\)
+  \item
+    \(\min \{ \lambda \ssep \mm{A} (\vec{x}'+\lambda\vec{d}) \geq\vec{b}\}\)
+  \end{itemize}
+
+  Without loss of generality, assume that the maximum is finite and is
+  equal to \(\lambda^*\). Setting \(\vec{x}^*\) to
+  \(\vec{x}'+\lambda^* \vec{d}\), we have that the rows of
+  \(\mm{A}_{S,\vec{x}^*}\) contains all the rows of
+  \(\mm{A}_{S,\vec{x}'}\) plus at least one additional row, say
+  \(\vec{q}^\T\). Since \(\vec{q}^\T \vec{d} \neq 0\), by Lemma
+  \ref{lem:orth-rank}, the rank of \(\mm{A}_{S,\vec{x}^*}\) is larger
+  than the rank of \(\mm{A}_{S,\vec{x}'}\), contradicting our choice of
+  \(\vec{x}'\).
+\item
+  The system of equations obtained from taking all the constraints
+  satisfied with equality by \(\vec{x}'\) is
+
+  \begin{align}
+     \begin{split}
+       \mm{A}\vec{x} & = \vec{b} \\
+       x_j & = 0 ~~j\notin J.
+     \end{split}\label{eq:J-system}
+  \end{align}
+
+  Note that the coefficient matrix of this system has rank \(n\) if and
+  only if it has a unique solution. Now, \eqref{eq:J-system} simplifies to
+  \[ \sum_{j \in J} x_j \mm{A}_j = \vec{b},
+  \] which has a unique solution if and only if the columns of
+  \(\mm{A}\) indexed by \(J\) are linearly independent.
+\end{enumerate}

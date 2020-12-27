@@ -1,0 +1,32 @@
+% Copyright 2020 by Robert Hildebrand
+%This work is licensed under a
+%Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0)
+%See http://creativecommons.org/licenses/by-sa/4.0/
+
+   Implementing the SOS2 constraint.
+\begin{codeCell}
+\label{code:SOS2}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}10}]:} \PY{c}{\PYZsh{} using SOS2 constraint}
+         
+         \PY{k}{using} \PY{n}{JuMP}\PY{p}{,} \PY{n}{Cbc}
+         \PY{n}{m} \PY{o}{=} \PY{n}{Model}\PY{p}{(}\PY{n}{solver} \PY{o}{=} \PY{n}{CbcSolver}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+         \PY{n+nd}{@variable}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{x}\PY{p}{[}\PY{l+m+mi}{1}\PY{o}{:}\PY{l+m+mi}{4}\PY{p}{]} \PY{o}{\PYZlt{}=} \PY{l+m+mi}{5}\PY{p}{)}
+         \PY{n}{addSOS2}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{x}\PY{p}{)}
+         \PY{n+nd}{@objective}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{Max}\PY{p}{,} \PY{l+m+mi}{3}\PY{n}{x}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{o}{+}\PY{l+m+mi}{4}\PY{n}{x}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{]}\PY{o}{+}\PY{l+m+mi}{1}\PY{n}{x}\PY{p}{[}\PY{l+m+mi}{3}\PY{p}{]}\PY{o}{+}\PY{l+m+mi}{5}\PY{n}{x}\PY{p}{[}\PY{l+m+mi}{4}\PY{p}{]}\PY{p}{)}
+         
+         \PY{n}{solve}\PY{p}{(}\PY{n}{m}\PY{p}{)}
+         \PY{n}{getvalue}\PY{p}{(}\PY{n}{x}\PY{p}{)}
+\end{Verbatim}
+
+
+\begin{Verbatim}[commandchars=\\\{\}]
+{\color{outcolor}Out[{\color{outcolor}10}]:} 4-element Array\{Float64,1\}:
+          5.0
+          5.0
+          0.0
+          0.0
+\end{Verbatim}
+                
+    \end{codeCell}

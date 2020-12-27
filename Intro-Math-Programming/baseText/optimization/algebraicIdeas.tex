@@ -1,0 +1,333 @@
+% Copyright 2020 by Robert Hildebrand
+%This work is licensed under a
+%Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0)
+%See http://creativecommons.org/licenses/by-sa/4.0/
+
+\chapter{Algebraic and Geometric Ideas}
+
+Here we will discuss one more important application of Gr\"obner bases.  We've seen how to solve polynomial equations, and now we're going to use Gr\"obner bases for integer programming.  We consider the problem
+
+$$
+\begin{array}{ll}
+\min & c \cdot x\\
+\text{subject to} & Ax = b\\
+& x \geq 0, x\in \mathbb{Z}^n
+\end{array}
+$$
+where $A \in {\mathbb{Z}}^{m\times n}$ and $b \in {\mathbb{Z}}^m$.
+
+
+Roughly speaking, the first goal is to understand the vectors in the kernel of $A$ that are integer. That is to say, we want to analyze the set $\text{ker}(A) \cap {\mathbb{Z}}^n = \{ x \mid Ax = 0, x \in {\mathbb{Z}}^n\}$. For that purpose, we define the main object here, the \textit{toric map} or \textit{toric ideal}.
+\begin{definition}
+The map $\pi_A : {\mathbb{N}}^n \rightarrow {\mathbb{Z}}^m$ is defined by $u \mapsto Au$.
+\end{definition}
+We will be interested in the following extension $\widehat{\pi_A}$ of the map $\pi_A$. The map is defined 
+\[
+\widehat{\pi_A} : K[x_1,\ldots,x_n] \rightarrow K[t_1^\pm, \ldots, t_m^\pm].
+\]
+Every variable may appear with a positive or negative exponent. It's not the usual way to think of rings of polynomials. Here we have Laurent polynomials. For instance, we may have 
+$$
+\frac{t_1}{t_2^2} - \frac{7 t^2}{t_1^7} - 3 t_1 t_2^7.
+$$
+ Laurent polynomials can be thought of as regular polynomials that are using variables of the form $t_1$ and $1/t_1$. We can now define a map by simply showing what happens to each variable $x_i$. The map $\widehat{\pi_A}$ maps
+\[
+x_i \mapsto t_1^{a_{i_1}}t_2^{a_{i_2}}\cdots t_m^{a_{i_m}}
+\]
+Here, $a_i$ denotes the $i$th column of $A$. Suppose you have an arbitrary polynomial $f = \sum c_\alpha x^\alpha$. The map $\widehat{\pi_A}$ is linear, so 
+\[\widehat{\pi_A}(\sum c_\alpha x^\alpha) = \sum c_\alpha \widehat{\pi_A}(x^\alpha) = \sum c_\alpha (\widehat{\pi_A}(x_1)^{\alpha_1}
+\widehat{\pi_A}(x_2)^{\alpha_2}
+\cdots
+\widehat{\pi_A}(x_n)^{\alpha_n}).
+\]
+
+
+\begin{example}
+Let $A$ be the matrix
+\[ A = \left[
+\begin{array}{cccc}
+1 & 1& 1& 1\\ 0 & 1& 2& 3
+\end{array}
+\right].\]
+
+Note that we could also write an example with some negative entries. Here the map is defined with spaces
+\[ K[x_1,\ldots,x_4] \rightarrow K[t_1,t_2]. \]
+Suppose that the polynomial $f$ is $7 x_1^3 + x_2 x_3 - 7 x_4^3$.
+What is $\widehat{\pi_A}(x_1)$? It's just $t_1$.
+What is $\widehat{\pi_A}(x_2)$? It's just $t_1t_2$, by looking at the second column of $A$.
+What is $\widehat{\pi_A}(x_3)$? It's just $t_1t_2^2$.
+Finally, $\widehat{\pi_A}(x_4)$ is $t_1t_2^3$.
+
+So when applied to $f$, we obtain $7 t_1^3 + (t_1t_2)(t_1t_2^2) - 7(t_1t_2^3)^3$ which simplifies to $7 t_1^3 + t_1^2 t_2^3 - 7 t_1^3 t_2^9$.
+\end{example}
+This map is going to tell us everything we want to know about the elements of the kernel of $A$ that are integer. Once we understand the kernel of $A$, if we somehow obtain a single feasible solution, we can use the kernel of $A$ as candidates for feasible directions to move in.  Much like in the simplex method, we will pivot into feasible directions and attempt to find a more optimal value. The directions are found by the strange map. We will look at the kernel of the map $\widehat{\pi_A}$.
+
+The question is, what is $\text{ker}(\widehat{\pi_A})$? That is, which polynomials map to zero under the projection $\widehat{\pi_A}$? The first fact we need to see is that this kernel is an ideal.
+\begin{lemma}{}{}
+The set $\text{ker}(\widehat{\pi_A})$ is an ideal inside the polynomial ring $K[x_1,\ldots,x_n]$.
+\end{lemma}
+This ideal is called the \textit{toric ideal}, which we will denote from now on by $I_A$. (The name of this ideal is unfortunately not suggestive/descriptive. There are mathematical reasons why these are called \emph{toric}. The name comes from a torus action.) By the Hilbert Basis Theorem, there must be finitely many polynomials that generate this ideal. Our job is to compute these polynomials. Here is an example: The polynomial $f$ earlier is not in the kernel of the map. Let's look at an example of a polynomial that does get mapped to zero.
+\begin{example}{}{}
+Let $f$ be the polynomial $x_1 x_3 - x_2^2$. When you apply the map $\widehat{\pi_A}$, we get $t_1(t_1 t_2^2) - (t_1^2 t_2^2) = 0$. So the polynomial $f$ belongs to the kernel of the map $\widehat{\pi_A}$.
+\end{example}
+The point is that we should find all of the polynomials that are in the kernel. Here is the second observation: since $I_A$ is an ideal,
+\begin{lemma}{}{}
+There exist finitely many polynomials $f_1, \ldots, f_s$ so that $I_A = \langle f_1,\ldots, f_s \rangle$.
+\end{lemma}
+The polynomials $f_i$ will actually end up being binomials: you're not going to believe it!
+
+The following is the main theorem.
+\begin{theorem}{}{}
+For the toric ideal $I_A$ associated to the matrix $A$, the following are true:
+\begin{enumerate}
+\item[(a)] The ideal $I_A$ is generated by finitely many binomials, i.e., by elements of the form
+\[ x_1^{u_1}x_2^{u_2} \cdots x_n^{u_n} - x_1^{v_1}x_2^{v_2} \cdots x_n^{v_n}, \]
+which we abbreviate by $x^u - x^v$, such that $Au = Av$.
+\item[(b)] For every monomial order $\succ$, there exists a Gr\"obner basis $G$ of the ideal $I_A$ which is composed only of binomials.
+\end{enumerate}
+\end{theorem}
+
+Continuing the running example,
+\begin{example}
+Remember the four columns of $A$ are labeled by $x_1,\ldots, x_4$ and the rows are indexed $t_1$ and $t_2$. Then, the ideal $I_A$ is generated as follows:
+\[ I_A = \langle x_1x_3 - x_2^2 , x_2x_4 - x_3^2, x_1x_4 - x_2x_3, x_1^2x_4 -x_2^3, x_1x_4^2 - x_3^3 \rangle\]
+The binomials belong in $I_A$, but they actually generate this ideal! We can show how to do this in {\tt Macaulay2}.
+\end{example}
+For optimization, you might be thinking: how am I going to reconcile this with what I need to do to optimize? This is simple: you should think of this as a vector. For example, the square-free polynomial in the previous example should be associated with the vector $(1,-1,-1,1)$. Notice that this vector is in the integer kernel of $A$. Similarly, the next binomial in the list is associated to the vector $(2,-3,0,1)$. We should think of these as oriented vectors.
+
+The beautiful thing here is that these are integer kernels. In linear algebra, you compute real kernels. Before we prove the next theorem, we need the following lemma:
+\begin{lemma}{}{toricgenerated}\label{lemma:toricgenerated}
+The toric ideal $I_A$ associated to the matrix $A$ is a $K$-vector space generated by all binomials of the form $x^u - x^v$ such that $Au = Av$. In other words, every polynomial $f \in I_A$ can be written as a linear combination of the form
+\begin{equation}\label{equation:happyface}
+\sum c_{uv}(x^u - x^v),
+\end{equation}
+where $c_{uv} \in K$ and $x^u - x^v \in I_A$.
+\end{lemma}
+In our example, the rank of the matrix $A$ is two, but this is the dimension of the real kernel, in the sense of linear algebra. But, I'm not talking about that space. I need to make a basis for the integer points in the null space, which makes it much more difficult. What I'm saying is that, if you give me a vector in the integral kernel of the matrix $A$, I will write it as the integer linear combination of the five vectors associated to the binomials above.
+
+Let's prove Lemma~\ref{lem:toricgenerated}.
+
+\begin{proof}
+Note that $x^u - x^v \in I_A$ if and only if $Au = Av$. When you apply the map $\widehat{\pi_A}$, this is the same as doing $t^{Au} - t^{Av}$, which is $0$. This follows from the definition of $\widehat(\pi_A)$.
+
+We will prove this by contradiction. Suppose there is a polynomial $f \in I_A$ so that it cannot be written in the from \eqref{equation:happyface}. Using a monomial order $\succ$, assume that $f$ is minimal in the sense that $LM_\succ(f)$ is the smallest possible. (We know this exists by the well-ordering property.) Our goal will be to find polynomial that is even ``smaller'' than $f$.
+
+Now, we know that $f \in I_A$, which means that $\widehat{\pi_A}(f) = 0$. But that means that $f(t^{a_1}, t^{a_2}, \ldots, t^{a_n}) = 0$.
+
+Let $x^u$ be the leading monomial of $f$ with respect to $\succ$. 
+So, $\widehat{\pi_A}(x^u) = t^{Au}$.
+The only way to become zero is: There exists $x^v$ term inside $f$ that cancels with $x^u$.
+In other words, $t^{Av} = t^{Au}$.
+Remember that $x^u$ was the leading term.
+But $x^u = LM_\succ(f) \succ x^v$. Define $f'$ to be the polynomial $f - \text{coefficient } x^u \text{ in } f (x^u - x^v)$.
+
+By the earlier observation, the binomial $x^u - x^v$ belongs to $I_A$, by the observation $t^{Av} = t^{Au}$. By the property of ideals, $f'$ is in $I_A$. Here is our contradiction, $f'$ has a smaller leading term than $f$ does.
+\end{proof}
+
+If you want, you can actually obtain your contradiction in several ways. Example: since you can write $f'$ in the form \eqref{happyface}, then you get a contradiction for $f$. Therefore, $f'$ cannot be written in the form of \eqref{happyface}.
+
+Now, we are ready to prove the main theorem.
+Proving part (a) of the theorem is super easy. You guys are probably going to laugh.
+
+\begin{proof}[Proof of the theorem]
+To prove part (a), by Hilbert's Basis Theorem, there exist polynomials $f_1,\ldots, f_s$ in $I_A$ such that $I_A = \langle f_1, \ldots, f_s \rangle$. Recall here, that the coefficients are polynomials. But, by Lemma~\ref{lemma:toricgenerated}, each polynomial $f_i$ is of the form
+\[
+f_i = \sum_{Au = Av} c_{uv}(x^u - x^v).
+\]
+Moreover, each sum above is finite. Take for each $i$ the binomials $x^u - x^v$ in the above expressions. That's the proof of part (a). The proof of (b) is not that much harder. The proof requires Buchberger's Algorithm.
+
+How do you compute a Gr\"obner basis? By part (a), we know that the toric ideal $I_A$ can be written as
+\[ I_A = \langle x^u - x^v \rangle, \]
+where the generation is over finitely-many pairs of vectors satisfying $Au = Av$ (or, that is, $A(u-v) =0$). How did Buchberger's Alogrithm go? We needed to compute S-pairs. Let's remind ourselves about S-pairs. What happens when you take the S-pair of two binomials  $x^u - x^v$ and $x^\alpha - x^\beta$?
+
+Let's assume that both binomials here are written in order, so that the leading monomials are first. 
+Recall $S_\succ x^u - x^v,x^\alpha - x^\beta) = \frac{\text{lcm}(x^u,x^\alpha)}{x^u}(x^u - x^v) - \frac{\text{lcm}(x^u,x^\alpha)}{x^\alpha}(x^\alpha- x^\beta)$.
+But, we note that the inner terms here are going to cancel. 
+That is, we get $\frac{\text{lcm}(x^u,x^\alpha)}{x^u}(x^v) + \frac{\text{lcm}(x^u,x^\alpha)}{x^\alpha}(x^\beta)$. 
+In particular, this expression is a binomial. (Note that this does not happen for general S-pairs. The punchline/moral of the story is that: S-pairs of binomials are themselves binomials.)
+
+Now, when you do the Buchberger Algorithm, you need to divide the binomial by other binomials. When you divide binomials by binomials, you either get zero or another binomial. Therefore, when you apply the Buchberger Algorithm to the original set of binomials, you get a Gr\"obner basis that consists only of binomials. Therefore, there is a Gr\"obner basis that consists only of binomials.
+\end{proof}
+
+The moral of the story is that the vectors of $\text{ker}(A) \cap Z^n$ precisely correspond to binomials in the toric ideal $I_A$. Thus, the Gr\"obner basis $G$ of $I_A$ is enough to express \emph{any} vector in $\text{ker}(A) \cap \mathbb{Z}^n$ as an integer linear combination of the elements of $G$.
+
+
+\begin{example}{}{}
+Consider the set of all $2 \times 3$ matrices whose entries are all non-negative integers with the property that each row adds to $6$ and each column adds to $4$. An example of such a matrix is
+\[
+\left[
+\begin{array}{ccc}
+2&2&2\\2&2&2
+\end{array}
+\right]
+.\]
+Another example is
+\[
+\left[
+\begin{array}{ccc}
+1&2&3 \\ 3 & 2&1
+\end{array}
+\right]
+.\]
+Finally, another is
+\[
+\left[
+\begin{array}{ccc}
+4&2&0\\0&2&4
+\end{array}
+\right]
+.\]
+\end{example}
+How many of them are there? There are $19$. If you want to know which matrix is ``cheapest'' with respect to a cost vector, we're going to find out how to do that. 
+
+With toric ideals $I_A$, we will answer the following three fundamental questions for applications:
+\begin{enumerate}
+\item How many integer solutions are there for $\{ x \mid Ax = b, x \in \mathbb{Z}^n, x \geq 0 \}$?
+\item Important for statistics: Can you find one such solution uniformly at random?
+\item The question relevant to this class: Given a cost vector $c$, I wish to compute $x=\overline{x}$ in the set above that minimizes $c \cdot \overline{x}$.
+\end{enumerate}
+
+Those questions depend on the previous theorem, but they also depend on the following definition and theorem.
+\begin{definition}{}{}
+Given a set of vectors $\mathcal{F} \subseteq \text{ker}(A) \cap \mathbb{Z}^n$ and given
+ the \textit{$b$-fiber} $P_A(b) = \{\overline{x} \mid A\overline{x} = b, x \geq 0, x \in \mathbb{Z}^n\}$,
+  I can define a graph $G_{\mathcal{F}}(P_A(b))$ as follows:
+\begin{itemize}
+\item The vertices of the graph are exactly the elements of the fiber $P_A(b)$.
+\item Two elements $u, v$ in the $b$-fiber $P_A(b)$ are connected by an edge exactly when $u-v \in \mathcal{F}$ or $v-u \in \mathcal{F}$.
+\end{itemize}
+\end{definition}
+Let's look at an example of this graph. Let's do the example of the $2 \times 3$ matrices from before:
+\begin{example}
+The set $\mathcal{F}$ should consist of matrices that are in the kernel of the $5 \times 6$ matrix $A$ of $2 \times 3$ transportation polytopes.
+
+Recall that we had feasible points
+\[
+\left[
+\begin{array}{ccc}
+1&2&3 \\ 3 & 2&1
+\end{array}
+\right]
+\text{ and }
+\left[
+\begin{array}{ccc}
+4&2&0\\0&2&4
+\end{array}
+\right]
+.\]
+Consider a vector such that the row and column sums are zero.  Using a vector like this, we  get from the first matrix above to the second matrix above. Here is an example:
+\[ \left[
+\begin{array}{ccc}
+-1&1&0\\1&-1&0
+\end{array}
+\right]
+\]
+By adding this matrix to the the feasible solution on the left above, we obtain
+\[
+\left[
+\begin{array}{ccc}
+3&3&0\\1&1&4
+\end{array}
+\right]
+.\]
+
+There are  more steps to get from the matrix on the left to the matrix on the right. The goal is to have a set $\mathcal{F}$ of vectors that allows us to move between all feasible solutions via addition and subtraction.
+\end{example}
+
+For this problem, there are 3 basic moves.  The moves are:
+$$
+ \pm \left[
+\begin{array}{ccc}
+-1&1&0\\1&-1&0
+\end{array}
+\right],
+\pm \left[
+\begin{array}{ccc}
+-1 & 0 & 1 \\ 1 & 0 & -1
+\end{array}
+\right]
+\text{ and  } 
+\pm \left[
+\begin{array}{ccc}
+0&-1&1\\0&1&-1
+\end{array}
+\right]
+.
+$$
+Let the positive versions of each of these be $a$, $b$, and $c$.
+
+As mentioned, there are $19$ tables, and here is a picture of the graph:
+
+
+\begin{center}
+\begin{picture}(240,270)
+%\caption{The graph $G_\mathcal{F}(P_A(b))$}
+%\label{figure:graphGFPAb}
+
+%horizontal lines
+\put(60,0){\line(1,0){120}}
+\put(60,240){\line(1,0){120}}
+\put(30,60){\line(1,0){180}}
+\put(30,180){\line(1,0){180}}
+\put(0,120){\line(1,0){240}}
+
+%diagonals
+\put(60,0){\line(1,2 ){120}}
+\put(120,0){\line(1,2){90}}
+\put(180,0){\line(1,2){60}}
+
+\put(60,0){\line(-1,2 ){60}}
+\put(120,0){\line(-1,2){90}}
+\put(180,0){\line(-1,2){120}}
+
+
+\put(0,120){\line(1,2){60}}
+\put(240,120){\line(-1,2){60}}
+\put(30,60){\line(1,2){90}}
+\put(210,60){\line(-1,2){90}}
+
+
+%vectors (arrows)
+\thicklines
+\put(60,0){\vector(1,0){60}}
+\put(60,0){\vector(-1,2){30}}
+\put(60,0){\vector(1,2){30}}
+
+%labeling vectors
+\put(38,28){\makebox(0,0)[b]{$a$}}
+\put(70,30){\makebox(0,0)[b]{$b$}}
+\put(90,5){\makebox(0,0)[b]{$c$}}
+
+%bottom 3
+\put(50,-20){\makebox(0,0)[b] {$\begin{bmatrix} 4 & 2 & 0 \\ 0 & 2 & 4 \end{bmatrix}$}}
+\put(120,-20){\makebox(0,0)[b]{$\begin{bmatrix} 4 & 1 & 1 \\ 0 & 3 & 3 \end{bmatrix}$}}
+\put(190,-20){\makebox(0,0)[b]{$\begin{bmatrix} 4 & 0 & 2 \\ 0 & 4 & 2 \end{bmatrix}$}}
+
+
+%next 2 up
+\put(0,55){\makebox(0,0)[b]   {$\begin{bmatrix} 3 & 3 & 0 \\ 1 & 1 & 4 \end{bmatrix}$}}
+\put(240 ,55){\makebox(0,0)[b]{$\begin{bmatrix} 3 & 0 & 3 \\ 1 & 4 & 1 \end{bmatrix}$}}
+
+
+%middle 2
+\put(-25 ,115){\makebox(0,0)[b]{$\begin{bmatrix} 2 & 4 & 0 \\ 2 & 0 & 4 \end{bmatrix}$}}
+\put(265 ,115){\makebox(0,0)[b]{$\begin{bmatrix} 2 & 0 & 4 \\ 2 & 4 & 0 \end{bmatrix}$}}
+
+
+%2nd to top 2
+\put(0,175){\makebox(0,0)[b]   {$\begin{bmatrix} 1 & 4 & 1 \\ 3 & 0 & 3 \end{bmatrix}$}}
+\put(240 ,175){\makebox(0,0)[b]{$\begin{bmatrix} 1 & 1 & 4 \\ 3 & 3 & 0 \end{bmatrix}$}}
+
+
+%top 3
+\put(50,255){\makebox(0,0)[b] {$\begin{bmatrix} 0 & 4 & 2 \\ 4 & 0 & 2 \end{bmatrix}$}}
+\put(120,255){\makebox(0,0)[b]{$\begin{bmatrix} 0 & 3 & 3 \\ 4 & 1 & 1 \end{bmatrix}$}}
+\put(190,255){\makebox(0,0)[b]{$\begin{bmatrix} 0 & 2 & 4 \\ 4 & 2 & 0 \end{bmatrix}$}}
+
+
+
+
+\end{picture}
+
+\vspace{.5in}
+
+\end{center}

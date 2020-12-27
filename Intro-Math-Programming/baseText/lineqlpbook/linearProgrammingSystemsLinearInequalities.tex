@@ -1,0 +1,298 @@
+%By Kevin Cheung
+%The book is licensed under the
+%\href{http://creativecommons.org/licenses/by-sa/4.0/}{Creative Commons
+%Attribution-ShareAlike 4.0 International License}.
+%
+%This file has been modified by Robert Hildebrand 2020.  
+%CC BY SA 4.0 licence still applies.
+
+\section{Solving systems of linear
+inequalities}\label{solving-systems-of-linear-inequalities}
+
+Before we can solve a linear programming problem, we should be able to
+solve the seemingly simpler problem of finding a feasible solution. We
+will now consider how one can determine if a system of linear
+inequalities has a solution.
+
+For the sake of illustrating the principles involved, we limit ourselves
+to systems consisting of only \(\geq\)-inequalities. Extending the
+method to work with any systems of linear constraints is left as an
+exercise.
+
+Suppose that we want to determine if there exist \(x,y\in\mathbb{R}\)
+satisfying
+\begin{align*}
+x + y & \geq 0 \\
+2x + y & \geq 2 \\
+-x + y  & \geq 1 \\
+-x + 2y & \geq -1.
+\end{align*}
+
+The key is to take one of the variables and see how it is constrained by
+the remaining variables. We ``isolate'' \(x\) by rewriting the system to
+the equivalent system
+\begin{align*}
+x & \geq -y  \\
+x & \geq 1 - \frac{1}{2}y \\
+x & \leq -1 +y \\
+x & \leq 1 + 2y.
+\end{align*}
+
+Hence, \(x\) is constrained by the lower bounds \(-y\) and
+\(1 - \frac{1}{2}y\) and the upper bounds \(-1 +y\) and \(1 + 2y\).
+Therefore, we can find a value for \(x\) satisfying these bounds if and
+only if each of the upper bounds is at least each of the lower bounds;
+that is,
+\begin{align*}
+-1 + y & \geq -y \\
+-1 + y & \geq 1 - \frac{1}{2}y \\
+1 + 2y & \geq -y \\
+1 + 2y & \geq 1 - \frac{1}{2}y.
+\end{align*}
+
+Simplifying this system gives
+\begin{align*}
+2y & \geq 1 \\
+\frac{3}{2}y & \geq 2  \\
+3y & \geq -1 \\
+\frac{5}{2}y & \geq 0,
+\end{align*}
+
+or more simply,
+\begin{align*}
+y & \geq \frac{1}{2} \\
+y & \geq \frac{4}{3}  \\
+y & \geq -\frac{1}{3} \\
+y & \geq 0.
+\end{align*}
+
+Note that this system does not contain the variable \(x\) and it has a
+solution if and only if \(y \geq \frac{4}{3}\). Hence, the original
+system has a solution if and only if \(y \geq \frac{4}{3}\). If we set
+\(y = 2\), for example, then \(x\) must satisfy
+\begin{align*}
+x & \geq - 2  \\
+x & \geq 0 \\
+x & \leq 1 \\
+x & \leq 5.
+\end{align*}
+
+Thus, we can pick \(x\) to be any value in the closed interval
+\([0,1]\). In particular,
+\(\begin{bmatrix} x\\ y\end{bmatrix} = \begin{bmatrix} 0 \\ 2\end{bmatrix}\)
+is \emph{one} solution to the given system of linear inequalities. There
+could be other solutions.
+
+The above example illustrates the process of solving a system of linear
+inequaltiies by constructing a system that has a reduced number of
+variables. As the number of variables is finite, the process can be
+repeated until we obtain a system whose solvability is apparent (as in
+the one-variable case).
+
+Observe that the pairing of an upper bound constraint of the form
+\(x \leq q\) and a lower bound constraint of the form \(x \geq p\) to
+obtain \(q \geq p\) is equivalent to adding the inequalities
+\(-x \geq -q\) and \(x \geq p\). This observation leads to the
+following:
+
+\hypertarget{fm}{\subsection{Fourier-Motzkin Elimination}\label{fm}}
+
+Given: A system of linear inequalities
+\[ \sum_{j=1}^n a_{ij} x_j \geq b_i,~~~i = 1,\ldots,m\] where
+\(a_{ij}, b_i \in \mathbb{R}\) for \(i = 1,\ldots,m\) and
+\(j = 1,\ldots,n\),
+
+Eliminate \(x_k\) for some \(k \in \{1,\ldots,n\}\) using the following
+steps:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  For each \(j \in \{1,\ldots m\}\),
+
+  \begin{itemize}
+  \tightlist
+  \item
+    if \(a_{jk} \gt 0\), multiply the \(j\)th inequality by
+    \(\frac{1}{a_{jk}}\),
+  \item
+    if \(a_{jk} \lt 0\), multiply the \(j\)th inequality by
+    \(-\frac{1}{a_{jk}}\)
+  \end{itemize}
+\item
+  Form a new system of inequalities as follows:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    copy down all the inequalities in which the coefficient of \(x_k\)
+    is 0
+  \item
+    for each inequality in which \(x_k\) has positive coefficent and for
+    each inequality in which \(x_k\) has negative coefficient, obtain a
+    new inequality by adding them together.
+  \end{itemize}
+\end{enumerate}
+
+\textbf{Remarks.}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  Step 1 is to ensure that all the nonzero coefficients of \(x_k\) are
+  \(1\) or \(-1\).
+\item
+  The new system formed in Step 2 will not contain the variable \(x_k\).
+  Furthermore, if \(x_1^*,\ldots, x_n^*\) is a solution to the original
+  system, then \(x_1^*,\ldots,x_{k-1}^*, x_{k+1}^*,\ldots, x_n^*\) is a
+  solution to the new system. And if
+  \(x_1^*,\ldots,x_{k-1}^*, x_{k+1}^*,\ldots, x_n^*\) is a solution to
+  the new system, then there exists \(x_k^*\) such that
+  \(x_1^*,\ldots, x_n^*\) is a solution to the original system. (Why?)
+  Hence, the original system has a solution if and only if the new
+  system does.
+\end{enumerate}
+
+Now, if we apply Fourier-Motzkin elimination repeatedly, we obtain a
+system with at most one variable such that it has a solution if and only
+if the original system does. Since solving systems of linear
+inequalities with at most one variable is easy, we can conclude whether
+or not the original system has a solution.
+
+Note that if the coefficients are all rational, the system obtained
+after eliminating one variable using Fourier-Motzkin elimination will
+also have only rational coefficients.
+
+\begin{example}{}{}
+\protect\hypertarget{ex:unnamed-chunk-1}{}{\label{ex:unnamed-chunk-1}}Determine
+if the following system of inequalities has a solution:
+\begin{align*}
+x_1 + x_2 - 2x_3 & \geq 2 ~~~~~~(1)\\
+-x_1 - 3x_2 + x_3 & \geq 0~~~~~~(2) \\
+x_2 + x_3 & \geq 1~~~~~~(3) 
+\end{align*}
+
+We first eliminate \(x_1\). The new system is
+
+\(\begin{array}{rrl} (1) + (2): & -2x_2 - x_3 \geq 2 & ~~~(4) \\  & x_2 + x_3 \geq 1 & ~~~(3) \end{array}\)
+
+We then eliminate \(x_2\). We first normalize the coefficients of
+\(x_2\):
+
+\(\begin{array}{rrl} \frac{1}{2}\times (4) & -x_2 - \frac{1}{2}x_3 \geq 1 & ~~~(5) \\  & x_2 + x_3 \geq 1 & ~~~(3) \end{array} \)
+
+So the new system is:
+
+\(\begin{array}{rl} (5)+(3): & \frac{1}{2} x_3 \geq 2 \end{array} \)
+
+So there is a solution. In particular, we can set \(x_3 = 4\). Then we
+must have \(x_2 = -3\) and \(x_1 = 13\).
+\end{example}
+
+\textbf{Remark.} Note that setting \(x_3\) to another value larger than
+\(4\) will lead to different solutions to the system. Since there are
+infinitely many different values that we can set \(x_3\) to, there are
+infinitely many solutions.
+
+\section*{Exercises}\label{exercises-3}
+\addcontentsline{toc}{section}{Exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Use Fourier-Motzkin elimination to determine if there exist
+  \(x,y,z\in\mathbb{R}\) satisfying
+
+  \begin{eqnarray*}
+  x + y + 2z& \geq & 1 \\
+  -x + y + z & \geq & 2 \\
+  x-y + z  & \geq & 1 \\
+  -y - 3z & \geq & 0.
+  \end{eqnarray*}
+\item
+  Let \(\mathbf{a}^1,\ldots, \mathbf{a}^m \in \mathbb{R}^n\). Let
+  \(\beta_1,\ldots, \beta_m \in\mathbb{R}\). Let
+  \(\lambda_1,\ldots, \lambda_m \geq 0\). Then the inequality
+  \(\displaystyle \left(\sum_{i = 1}^{m} \lambda_i {\mathbf{a}^{i}}\right)^\mathsf{T}\mathbf{x} \geq \sum_{i=1}^{m} \lambda_i \beta_i\)
+  is called a nonnegative linear combination of the inequalities
+  \({\mathbf{a}^{i}}^\mathsf{T} \mathbf{x} \geq \beta_i\),
+  \(i = 1,\ldots, m\). Show that any new inequality created by
+  Fourier-Motzkin Elimination is a nonnegative linear combination of the
+  original inequalities.
+\end{enumerate}
+
+\section*{Solutions}\label{solutions-3}
+\addcontentsline{toc}{section}{Solutions}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  We use Fourier-Motzkin elimination to eliminate \(x\). We first copy
+  down the inequality \(-y-3z\geq 0\) and then form one new inequality
+  by adding the first two inequalities and another by adding the second
+  and third inequalities. The resulting system is
+
+  \begin{eqnarray*}
+  -y - 3z & \geq & 0 \\
+   2y + 3z& \geq & 3 \\
+  2z & \geq & 3.
+  \end{eqnarray*}
+
+  Note that this system has a solution if and only if the original
+  system does.
+
+  We now use Fourier-Motzkin elimination to eliminate \(y\). First we
+  multiply the second inequality by \(\frac{1}{2}\) to obtain
+
+  \begin{eqnarray*}
+  -y - 3z & \geq & 0 \\
+   y + \frac{3}{2}z& \geq & \frac{3}{2} \\
+  2z & \geq & 3.
+  \end{eqnarray*}
+
+  Eliminating \(y\) gives
+
+  \begin{eqnarray*}
+  2z & \geq & 3 \\
+   - \frac{3}{2}z& \geq & \frac{3}{2},
+  \end{eqnarray*}
+
+  or equivalently,
+
+  \begin{eqnarray*}
+  z & \geq & \frac{3}{2} \\
+   z& \leq & -1,
+  \end{eqnarray*}
+
+  which clearly has no solution. Hence, there is no \(x,y,z\) satisfying
+  the original system.
+\item
+  First of all, observe that a nonnegative linear combination of
+  \(\geq\)-inequalites that are themselves nonnegative linear
+  combination of the inequalites in
+  \(\mathbf{A}\mathbf{x}\geq \mathbf{b}\) is again a nonnegative linear
+  combination of inequalities in
+  \(\mathbf{A}\mathbf{x}\geq \mathbf{b}\).
+
+  It is easy to see that in Step 1 of Fourier-Motzkin Elimination all
+  inequalities are nonnegative linear combinations of the original
+  inequalities. For instance, multiplying
+  \({\mathbf{a}^{i'}}^\mathsf{T}\mathbf{x} \geq \beta_{i'}\) by
+  \(\alpha \gt 0\) is the same as taking the nonnegative linear
+  combination
+  \(\displaystyle \left(\sum_{i = 1}^m \lambda_i {\mathbf{a}^{i}}\right)^\mathsf{T}\mathbf{x} \geq \sum_{i=1}^m \lambda_i \beta_i\)
+  with \(\lambda_i = 0\) for all \(i \neq i'\) and
+  \(\lambda_{i'} = \alpha\).
+
+  In Step 2, new inequalities are formed by adding two inequalities from
+  Step 1. Hence, they are nonnegative linear combinations of the
+  inequalities from Step 1. By the observation at the beginning, they
+  are nonnegative linear combinations of the original system.
+
+  \textbf{Remark.} By the observation at the beginning and this result,
+  we see that after repeated applications of Fourier-Motzkin
+  Elimination, all resulting inequalities are nonnegative linear
+  combinations of the original inequalities. This is an important fact
+  that will be exploited later.
+\end{enumerate}

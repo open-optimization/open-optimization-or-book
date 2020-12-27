@@ -1,0 +1,479 @@
+\subsection{Cutting Stock}
+\label{code:cutting-pipe}
+This code is for \nameref{example:cutting-pipe}.
+   
+
+A plumber stocks standard lengths of pipe, all of length 19 m. An order
+arrives for:
+
+\begin{itemize}
+\tightlist
+\item
+  12 lengths of 4m
+\item
+  15 lengths of 5m
+\item
+  22 lengths of 6m
+\end{itemize}
+
+How should these lengths be cut from standard stock pipes so as to
+minimize the number of standard pipes used?
+
+\(\textit{Example By Laurant Lessard}\)
+
+    \hypertarget{first-model}{%
+\subsubsection{First model}\label{first-model}}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}225}]:} \PY{k}{using} \PY{n}{JuMP}\PY{p}{,} \PY{n}{Gurobi}\PY{p}{,} \PY{n}{Cbc}\PY{p}{,} \PY{n}{Clp}
+          
+          \PY{n}{scale} \PY{o}{=} \PY{l+m+mi}{1}
+          
+          \PY{n}{N} \PY{o}{=} \PY{l+m+mi}{16}\PY{o}{*}\PY{n}{scale}  \PY{c}{\PYZsh{} upper bound on number of pipes needed}
+          
+          \PY{n}{m} \PY{o}{=} \PY{n}{Model}\PY{p}{(}\PY{n}{solver} \PY{o}{=} \PY{n}{CbcSolver}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+          \PY{c}{\PYZsh{}m = Model(solver = GurobiSolver(OutputFlag=0))}
+          
+          \PY{n+nd}{@variable}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{x}\PY{p}{[}\PY{l+m+mi}{1}\PY{o}{:}\PY{l+m+mi}{3}\PY{p}{,}\PY{l+m+mi}{1}\PY{o}{:}\PY{n}{N}\PY{p}{]} \PY{o}{\PYZgt{}=} \PY{l+m+mi}{0}\PY{p}{,} \PY{k+kt}{Int}\PY{p}{)}
+          \PY{n+nd}{@variable}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{z}\PY{p}{[}\PY{l+m+mi}{1}\PY{o}{:}\PY{n}{N}\PY{p}{]}\PY{p}{,} \PY{n}{Bin}\PY{p}{)}
+          \PY{k}{for} \PY{n}{j} \PY{o}{=} \PY{l+m+mi}{1}\PY{o}{:}\PY{n}{N}
+              \PY{n+nd}{@constraint}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{l+m+mi}{4}\PY{n}{x}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{,}\PY{n}{j}\PY{p}{]} \PY{o}{+} \PY{l+m+mi}{5}\PY{n}{x}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{,}\PY{n}{j}\PY{p}{]} \PY{o}{+} \PY{l+m+mi}{6}\PY{n}{x}\PY{p}{[}\PY{l+m+mi}{3}\PY{p}{,}\PY{n}{j}\PY{p}{]} \PY{o}{\PYZlt{}=} \PY{l+m+mi}{19}\PY{p}{)}
+          \PY{k}{end}
+          \PY{n+nd}{@constraint}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{sum}\PY{p}{(}\PY{n}{x}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{,}\PY{n}{j}\PY{p}{]} \PY{k}{for} \PY{n}{j}\PY{o}{=}\PY{l+m+mi}{1}\PY{o}{:}\PY{n}{N}\PY{p}{)} \PY{o}{\PYZgt{}=} \PY{l+m+mi}{12}\PY{o}{*}\PY{n}{scale}\PY{p}{)}
+          \PY{n+nd}{@constraint}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{sum}\PY{p}{(}\PY{n}{x}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{,}\PY{n}{j}\PY{p}{]} \PY{k}{for} \PY{n}{j}\PY{o}{=}\PY{l+m+mi}{1}\PY{o}{:}\PY{n}{N}\PY{p}{)} \PY{o}{\PYZgt{}=} \PY{l+m+mi}{15}\PY{o}{*}\PY{n}{scale}\PY{p}{)}
+          \PY{n+nd}{@constraint}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{sum}\PY{p}{(}\PY{n}{x}\PY{p}{[}\PY{l+m+mi}{3}\PY{p}{,}\PY{n}{j}\PY{p}{]} \PY{k}{for} \PY{n}{j}\PY{o}{=}\PY{l+m+mi}{1}\PY{o}{:}\PY{n}{N}\PY{p}{)} \PY{o}{\PYZgt{}=} \PY{l+m+mi}{22}\PY{o}{*}\PY{n}{scale}\PY{p}{)}
+          \PY{k}{for} \PY{n}{j} \PY{o}{=} \PY{l+m+mi}{1}\PY{o}{:}\PY{n}{N}
+              \PY{n+nd}{@constraint}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{x}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{,}\PY{n}{j}\PY{p}{]} \PY{o}{\PYZlt{}=} \PY{l+m+mi}{4}\PY{n}{z}\PY{p}{[}\PY{n}{j}\PY{p}{]}\PY{p}{)}
+              \PY{n+nd}{@constraint}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{x}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{,}\PY{n}{j}\PY{p}{]} \PY{o}{\PYZlt{}=} \PY{l+m+mi}{3}\PY{n}{z}\PY{p}{[}\PY{n}{j}\PY{p}{]}\PY{p}{)}
+              \PY{n+nd}{@constraint}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{x}\PY{p}{[}\PY{l+m+mi}{3}\PY{p}{,}\PY{n}{j}\PY{p}{]} \PY{o}{\PYZlt{}=} \PY{l+m+mi}{3}\PY{n}{z}\PY{p}{[}\PY{n}{j}\PY{p}{]}\PY{p}{)}
+          \PY{k}{end}
+          
+          \PY{c}{\PYZsh{} symmetry\PYZhy{}breaking}
+          \PY{k}{for} \PY{n}{j} \PY{o}{=} \PY{l+m+mi}{1}\PY{o}{:}\PY{n}{N}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}
+              \PY{n+nd}{@constraint}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{z}\PY{p}{[}\PY{n}{j}\PY{p}{]} \PY{o}{\PYZgt{}=} \PY{n}{z}\PY{p}{[}\PY{n}{j}\PY{o}{+}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}
+          \PY{k}{end}
+          
+          \PY{n+nd}{@objective}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{Min}\PY{p}{,} \PY{n}{sum}\PY{p}{(}\PY{n}{z}\PY{p}{[}\PY{n}{j}\PY{p}{]} \PY{k}{for} \PY{n}{j}\PY{o}{=}\PY{l+m+mi}{1}\PY{o}{:}\PY{n}{N}\PY{p}{)}\PY{p}{)}
+          
+          \PY{n+nd}{@time}\PY{p}{(}\PY{n}{solve}\PY{p}{(}\PY{n}{m}\PY{p}{)}\PY{p}{)}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+  0.024234 seconds (78 allocations: 29.141 KiB)
+
+    \end{Verbatim}
+
+\begin{Verbatim}[commandchars=\\\{\}]
+{\color{outcolor}Out[{\color{outcolor}225}]:} :Optimal
+\end{Verbatim}
+           
+
+
+    \hypertarget{second-model-column-enumeration}{%
+\subsubsection{Second model (column
+enumeration)}\label{second-model-column-enumeration}}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}227}]:} \PY{c}{\PYZsh{} all the columns:}
+          \PY{n}{A} \PY{o}{=} \PY{p}{[} \PY{l+m+mi}{0} \PY{l+m+mi}{0} \PY{l+m+mi}{1} \PY{l+m+mi}{0} \PY{l+m+mi}{2} \PY{l+m+mi}{1} \PY{l+m+mi}{2} \PY{l+m+mi}{3} \PY{l+m+mi}{4} \PY{l+m+mi}{3} \PY{l+m+mi}{1} \PY{l+m+mi}{0}
+                \PY{l+m+mi}{0} \PY{l+m+mi}{1} \PY{l+m+mi}{0} \PY{l+m+mi}{2} \PY{l+m+mi}{1} \PY{l+m+mi}{2} \PY{l+m+mi}{2} \PY{l+m+mi}{1} \PY{l+m+mi}{0} \PY{l+m+mi}{0} \PY{l+m+mi}{3} \PY{l+m+mi}{3}
+                \PY{l+m+mi}{3} \PY{l+m+mi}{2} \PY{l+m+mi}{2} \PY{l+m+mi}{1} \PY{l+m+mi}{1} \PY{l+m+mi}{0} \PY{l+m+mi}{0} \PY{l+m+mi}{0} \PY{l+m+mi}{0} \PY{l+m+mi}{1} \PY{l+m+mi}{0} \PY{l+m+mi}{0} \PY{p}{]}
+          \PY{n}{scale} \PY{o}{=} \PY{l+m+mi}{100}
+          \PY{n}{display}\PY{p}{(}\PY{n}{A}\PY{p}{)}
+          \PY{n}{m} \PY{o}{=} \PY{n}{Model}\PY{p}{(}\PY{n}{solver} \PY{o}{=} \PY{n}{CbcSolver}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+          \PY{c}{\PYZsh{}m = Model(solver = GurobiSolver(OutputFlag=0))}
+          \PY{n+nd}{@variable}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{x}\PY{p}{[}\PY{l+m+mi}{1}\PY{o}{:}\PY{l+m+mi}{12}\PY{p}{]} \PY{o}{\PYZgt{}=} \PY{l+m+mi}{0}\PY{p}{,} \PY{k+kt}{Int}\PY{p}{)}
+          \PY{n+nd}{@constraint}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{A}\PY{o}{*}\PY{n}{x} \PY{o}{.\PYZgt{}=} \PY{p}{[}\PY{l+m+mi}{12}\PY{p}{;}\PY{l+m+mi}{15}\PY{p}{;}\PY{l+m+mi}{22}\PY{p}{]}\PY{o}{*}\PY{n}{scale}\PY{p}{)}
+          \PY{n+nd}{@objective}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{Min}\PY{p}{,} \PY{n}{sum}\PY{p}{(}\PY{n}{x}\PY{p}{)}\PY{p}{)}
+          \PY{n}{display}\PY{p}{(}\PY{n}{m}\PY{p}{)}
+          \PY{n+nd}{@time}\PY{p}{(}\PY{n}{solve}\PY{p}{(}\PY{n}{m}\PY{p}{)}\PY{p}{)}
+          \PY{n}{println}\PY{p}{(}\PY{l+s}{\PYZdq{}}\PY{l+s}{N}\PY{l+s}{u}\PY{l+s}{m}\PY{l+s}{b}\PY{l+s}{e}\PY{l+s}{r}\PY{l+s}{ }\PY{l+s}{o}\PY{l+s}{f}\PY{l+s}{ }\PY{l+s}{B}\PY{l+s}{o}\PY{l+s}{a}\PY{l+s}{r}\PY{l+s}{d}\PY{l+s}{s}\PY{l+s}{ }\PY{l+s}{u}\PY{l+s}{s}\PY{l+s}{e}\PY{l+s}{d}\PY{l+s}{:}\PY{l+s}{ }\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{n}{getobjectivevalue}\PY{p}{(}\PY{n}{m}\PY{p}{)}\PY{p}{)}
+          \PY{n}{println}\PY{p}{(}\PY{l+s}{\PYZdq{}}\PY{l+s}{x}\PY{l+s}{ }\PY{l+s}{=}\PY{l+s}{ }\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{n}{getvalue}\PY{p}{(}\PY{n}{x}\PY{p}{)}\PY{p}{)}
+\end{Verbatim}
+
+
+    
+    \begin{verbatim}
+ 0  0  1  0  2  1  2  3  4  3  1  0
+ 0  1  0  2  1  2  2  1  0  0  3  3
+ 3  2  2  1  1  0  0  0  0  1  0  0
+    \end{verbatim}
+
+    
+\begin{equation*}
+\begin{split}
+     \min\quad & x_{1} + x_{2} + x_{3} + x_{4} + x_{5} + x_{6} + x_{7} + x_{8} + x_{9} + x_{10} + x_{11} + x_{12}\\
+\text{Subject to} \quad & x_{3} + 2 x_{5} + x_{6} + 2 x_{7} + 3 x_{8} + 4 x_{9} + 3 x_{10} + x_{11} \geq 1200\\
+ & x_{2} + 2 x_{4} + x_{5} + 2 x_{6} + 2 x_{7} + x_{8} + 3 x_{11} + 3 x_{12} \geq 1500\\
+ & 3 x_{1} + 2 x_{2} + 2 x_{3} + x_{4} + x_{5} + x_{10} \geq 2200\\
+ & x_{i} \geq 0, \in \mathbb{Z}, \quad\forall i \in \{1,2,\dots,11,12\}
+\end{split}
+\end{equation*}
+
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+  0.003384 seconds (75 allocations: 8.250 KiB)
+Number of Boards used: 1374.0
+x = [594.0, 0.0, 0.0, 0.0, 420.0, 0.0, 0.0, 0.0, 0.0, 0.0, 360.0, 0.0]
+
+    \end{Verbatim}
+
+    \hypertarget{how-different-is-the-lp-solution}{%
+\subsubsection{1. How different is the LP
+solution?}\label{how-different-is-the-lp-solution}}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}228}]:} \PY{c}{\PYZsh{} all the columns:}
+          \PY{n}{A} \PY{o}{=} \PY{p}{[} \PY{l+m+mi}{0} \PY{l+m+mi}{0} \PY{l+m+mi}{1} \PY{l+m+mi}{0} \PY{l+m+mi}{2} \PY{l+m+mi}{1} \PY{l+m+mi}{2} \PY{l+m+mi}{3} \PY{l+m+mi}{4} \PY{l+m+mi}{3} \PY{l+m+mi}{1} \PY{l+m+mi}{0}
+                \PY{l+m+mi}{0} \PY{l+m+mi}{1} \PY{l+m+mi}{0} \PY{l+m+mi}{2} \PY{l+m+mi}{1} \PY{l+m+mi}{2} \PY{l+m+mi}{2} \PY{l+m+mi}{1} \PY{l+m+mi}{0} \PY{l+m+mi}{0} \PY{l+m+mi}{3} \PY{l+m+mi}{3}
+                \PY{l+m+mi}{3} \PY{l+m+mi}{2} \PY{l+m+mi}{2} \PY{l+m+mi}{1} \PY{l+m+mi}{1} \PY{l+m+mi}{0} \PY{l+m+mi}{0} \PY{l+m+mi}{0} \PY{l+m+mi}{0} \PY{l+m+mi}{1} \PY{l+m+mi}{0} \PY{l+m+mi}{0} \PY{p}{]}
+          \PY{n}{scale} \PY{o}{=} \PY{l+m+mi}{100}
+          
+          \PY{n}{m} \PY{o}{=} \PY{n}{Model}\PY{p}{(}\PY{n}{solver} \PY{o}{=} \PY{n}{CbcSolver}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+          \PY{c}{\PYZsh{}m = Model(solver = GurobiSolver(OutputFlag=0))}
+          
+          \PY{n+nd}{@variable}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{x}\PY{p}{[}\PY{l+m+mi}{1}\PY{o}{:}\PY{l+m+mi}{12}\PY{p}{]} \PY{o}{\PYZgt{}=} \PY{l+m+mi}{0}\PY{p}{,} \PY{n}{Cont}\PY{p}{)}
+          \PY{n+nd}{@constraint}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{A}\PY{o}{*}\PY{n}{x} \PY{o}{.\PYZgt{}=} \PY{p}{[}\PY{l+m+mi}{12}\PY{p}{;}\PY{l+m+mi}{15}\PY{p}{;}\PY{l+m+mi}{22}\PY{p}{]}\PY{o}{*}\PY{n}{scale}\PY{p}{)}
+          \PY{n+nd}{@objective}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{Min}\PY{p}{,} \PY{n}{sum}\PY{p}{(}\PY{n}{x}\PY{p}{)}\PY{p}{)}
+          \PY{n}{display}\PY{p}{(}\PY{n}{m}\PY{p}{)}
+          \PY{n+nd}{@time}\PY{p}{(}\PY{n}{solve}\PY{p}{(}\PY{n}{m}\PY{p}{)}\PY{p}{)}
+          \PY{n}{println}\PY{p}{(}\PY{l+s}{\PYZdq{}}\PY{l+s}{N}\PY{l+s}{u}\PY{l+s}{m}\PY{l+s}{b}\PY{l+s}{e}\PY{l+s}{r}\PY{l+s}{ }\PY{l+s}{o}\PY{l+s}{f}\PY{l+s}{ }\PY{l+s}{p}\PY{l+s}{i}\PY{l+s}{p}\PY{l+s}{e}\PY{l+s}{s}\PY{l+s}{ }\PY{l+s}{u}\PY{l+s}{s}\PY{l+s}{e}\PY{l+s}{d}\PY{l+s}{:}\PY{l+s}{ }\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{n}{getobjectivevalue}\PY{p}{(}\PY{n}{m}\PY{p}{)}\PY{p}{)}
+          \PY{n}{println}\PY{p}{(}\PY{l+s}{\PYZdq{}}\PY{l+s}{x}\PY{l+s}{ }\PY{l+s}{=}\PY{l+s}{ }\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{n}{getvalue}\PY{p}{(}\PY{n}{x}\PY{p}{)}\PY{p}{)}
+\end{Verbatim}
+
+
+\begin{equation*}\begin{split}\min\quad & x_{1} + x_{2} + x_{3} + x_{4} + x_{5} + x_{6} + x_{7} + x_{8} + x_{9} + x_{10} + x_{11} + x_{12}\\
+\text{Subject to} \quad & x_{3} + 2 x_{5} + x_{6} + 2 x_{7} + 3 x_{8} + 4 x_{9} + 3 x_{10} + x_{11} \geq 1200\\
+ & x_{2} + 2 x_{4} + x_{5} + 2 x_{6} + 2 x_{7} + x_{8} + 3 x_{11} + 3 x_{12} \geq 1500\\
+ & 3 x_{1} + 2 x_{2} + 2 x_{3} + x_{4} + x_{5} + x_{10} \geq 2200\\
+ & x_{i} \geq 0 \quad\forall i \in \{1,2,\dots,11,12\}\\
+\end{split}
+\end{equation*}
+
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+  0.001256 seconds (79 allocations: 8.344 KiB)
+Number of pipes used: 1373.3333333333333
+x = [593.333, 0.0, 0.0, 0.0, 420.0, 0.0, 0.0, 0.0, 0.0, 0.0, 360.0, 0.0]
+
+    \end{Verbatim}
+
+    \hypertarget{column-generation-initial-columns}{%
+\subsubsection{2. Third model: Column Generation: Initial
+columns}\label{column-generation-initial-columns}}
+
+What to do if we didn't know all of the columns.\\
+Suppose we start with only 3 columns (patterns). Let's see if the
+solution on 3 patterns is good enough.
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}229}]:} \PY{k}{using} \PY{n}{Clp}
+          \PY{c}{\PYZsh{} all the columns:}
+          
+          \PY{c}{\PYZsh{} Choose columns 1,2,3}
+          \PY{n}{B} \PY{o}{=} \PY{n}{A}\PY{p}{[}\PY{o}{:}\PY{p}{,}\PY{p}{[}\PY{l+m+mi}{4}\PY{p}{,}\PY{l+m+mi}{5}\PY{p}{,}\PY{l+m+mi}{11}\PY{p}{]}\PY{p}{]}
+          \PY{n}{E} \PY{o}{=} \PY{o}{\PYZhy{}}\PY{n}{eye}\PY{p}{(}\PY{l+m+mi}{3}\PY{p}{)}
+          \PY{n}{display}\PY{p}{(}\PY{n}{B}\PY{p}{)}
+          
+          \PY{n}{scale} \PY{o}{=} \PY{l+m+mi}{100}
+          
+          \PY{n}{m} \PY{o}{=} \PY{n}{Model}\PY{p}{(}\PY{n}{solver} \PY{o}{=} \PY{n}{ClpSolver}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+          \PY{c}{\PYZsh{}m = Model(solver = GurobiSolver(OutputFlag=0))}
+          
+          \PY{n+nd}{@variable}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{x}\PY{p}{[}\PY{l+m+mi}{1}\PY{o}{:}\PY{l+m+mi}{3}\PY{p}{]} \PY{o}{\PYZgt{}=} \PY{l+m+mi}{0}\PY{p}{)}
+          \PY{n+nd}{@variable}\PY{p}{(}\PY{n}{m}\PY{p}{,}\PY{n}{s}\PY{p}{[}\PY{l+m+mi}{1}\PY{o}{:}\PY{l+m+mi}{3}\PY{p}{]}\PY{o}{\PYZgt{}=} \PY{l+m+mi}{0}\PY{p}{)}
+          
+          \PY{c}{\PYZsh{}converted to standard form by adding slack variables}
+          \PY{n+nd}{@constraint}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{B}\PY{o}{*}\PY{n}{x} \PY{o}{+} \PY{n}{E}\PY{o}{*}\PY{n}{s}\PY{o}{.==} \PY{p}{[}\PY{l+m+mi}{12}\PY{p}{;}\PY{l+m+mi}{15}\PY{p}{;}\PY{l+m+mi}{22}\PY{p}{]}\PY{o}{*}\PY{n}{scale}\PY{p}{)} 
+          \PY{n+nd}{@objective}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{Min}\PY{p}{,} \PY{n}{sum}\PY{p}{(}\PY{n}{x}\PY{p}{)}\PY{p}{)}
+          \PY{n}{display}\PY{p}{(}\PY{n}{m}\PY{p}{)}
+          
+          \PY{n+nd}{@time}\PY{p}{(}\PY{n}{solve}\PY{p}{(}\PY{n}{m}\PY{p}{)}\PY{p}{)}
+          \PY{n}{println}\PY{p}{(}\PY{l+s}{\PYZdq{}}\PY{l+s}{N}\PY{l+s}{u}\PY{l+s}{m}\PY{l+s}{b}\PY{l+s}{e}\PY{l+s}{r}\PY{l+s}{ }\PY{l+s}{o}\PY{l+s}{f}\PY{l+s}{ }\PY{l+s}{p}\PY{l+s}{i}\PY{l+s}{p}\PY{l+s}{e}\PY{l+s}{s}\PY{l+s}{ }\PY{l+s}{u}\PY{l+s}{s}\PY{l+s}{e}\PY{l+s}{d}\PY{l+s}{:}\PY{l+s}{ }\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{n}{getobjectivevalue}\PY{p}{(}\PY{n}{m}\PY{p}{)}\PY{p}{)}
+          \PY{n}{println}\PY{p}{(}\PY{l+s}{\PYZdq{}}\PY{l+s}{x}\PY{l+s}{ }\PY{l+s}{=}\PY{l+s}{ }\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{n}{getvalue}\PY{p}{(}\PY{n}{x}\PY{p}{)}\PY{p}{)}
+          \PY{n}{println}\PY{p}{(}\PY{l+s}{\PYZdq{}}\PY{l+s}{s}\PY{l+s}{ }\PY{l+s}{=}\PY{l+s}{ }\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{n}{getvalue}\PY{p}{(}\PY{n}{s}\PY{p}{)}\PY{p}{)}
+\end{Verbatim}
+
+
+    
+    \begin{verbatim}
+3×3 Array{Int64,2}:
+ 0  2  1
+ 2  1  3
+ 1  1  0
+    \end{verbatim}
+
+    
+\begin{equation} \begin{split}{1}\min\quad & x_{1} + x_{2} + x_{3}\\
+\text{Subject to} \quad & 2 x_{2} + x_{3} - s_{1} = 1200\\
+ & 2 x_{1} + x_{2} + 3 x_{3} - s_{2} = 1500\\
+ & x_{1} + x_{2} - s_{3} = 2200\\
+ & x_{i} \geq 0 \quad\forall i \in \{1,2,3\}\\
+ & s_{i} \geq 0 \quad\forall i \in \{1,2,3\}\\
+\end{split}
+\end{equation}
+
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+  0.000667 seconds (70 allocations: 6.125 KiB)
+Number of pipes used: 2200.0
+x = [1600.0, 600.0, 0.0]
+s = [0.0, 2300.0, 0.0]
+
+    \end{Verbatim}
+
+    \hypertarget{how-can-we-choose-another-pattern-to-add-to-the-problem}{%
+\subsubsection{3. How can we choose another pattern to add to the
+problem?}\label{how-can-we-choose-another-pattern-to-add-to-the-problem}}
+
+    \hypertarget{a.-what-is-the-set-of-all-possible-patterns}{%
+\paragraph{3a. What is the set of all possible
+patterns?}\label{a.-what-is-the-set-of-all-possible-patterns}}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}230}]:} \PY{n}{patterns} \PY{o}{=} \PY{n}{Model}\PY{p}{(}\PY{n}{solver} \PY{o}{=} \PY{n}{GurobiSolver}\PY{p}{(}\PY{n}{OutputFlag} \PY{o}{=} \PY{l+m+mi}{0}\PY{p}{)}\PY{p}{)}
+          \PY{n+nd}{@variable}\PY{p}{(}\PY{n}{patterns}\PY{p}{,}\PY{n}{a}\PY{p}{[}\PY{l+m+mi}{1}\PY{o}{:}\PY{l+m+mi}{3}\PY{p}{]}\PY{o}{\PYZgt{}=} \PY{l+m+mi}{0}\PY{p}{,} \PY{k+kt}{Int}\PY{p}{)}
+          \PY{n+nd}{@constraint}\PY{p}{(}\PY{n}{patterns}\PY{p}{,}\PY{l+m+mi}{4}\PY{n}{a}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]} \PY{o}{+} \PY{l+m+mi}{5}\PY{n}{a}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{]} \PY{o}{+} \PY{l+m+mi}{6}\PY{n}{a}\PY{p}{[}\PY{l+m+mi}{3}\PY{p}{]} \PY{o}{\PYZlt{}=} \PY{l+m+mi}{19}\PY{p}{)}
+          \PY{n+nd}{@objective}\PY{p}{(}\PY{n}{patterns}\PY{p}{,} \PY{n}{Max}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{)}
+          \PY{n}{solve}\PY{p}{(}\PY{n}{patterns}\PY{p}{)}
+          \PY{n}{display}\PY{p}{(}\PY{n}{patterns}\PY{p}{)}
+          \PY{n}{println}\PY{p}{(}\PY{n}{getvalue}\PY{p}{(}\PY{n}{a}\PY{p}{)}\PY{p}{)}
+\end{Verbatim}
+
+
+\begin{equation} \begin{split}\max\quad & 0\\
+\text{Subject to} \quad & 4 a_{1} + 5 a_{2} + 6 a_{3} \leq 19\\
+ & a_{i} \geq 0, \in \mathbb{Z}, \quad\forall i \in \{1,2,3\}\\
+\end{split}
+\end{equation}
+
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+Academic license - for non-commercial use only
+[-0.0, -0.0, -0.0]
+
+    \end{Verbatim}
+
+    \hypertarget{b.-what-is-the-right-objective-vector-to-choose}{%
+\subsubsection{3b. What is the right objective vector to
+choose?}\label{b.-what-is-the-right-objective-vector-to-choose}}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}231}]:} \PY{c}{\PYZsh{} Compute the basis matrix.  The current basis is \PYZob{}x\PYZus{}1, x\PYZus{}2, s\PYZus{}2\PYZcb{}.}
+          \PY{c}{\PYZsh{} Thus, we grab columns 1 and 2 from the B matrix and then column 2}
+          \PY{c}{\PYZsh{} from the E matrix.}
+          \PY{n}{C} \PY{o}{=} \PY{p}{[}\PY{n}{B}\PY{p}{[}\PY{o}{:}\PY{p}{,}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{2}\PY{p}{]}\PY{p}{]}\PY{o}{\PYZsq{}}\PY{p}{;}\PY{n}{E}\PY{p}{[}\PY{o}{:}\PY{p}{,}\PY{l+m+mi}{2}\PY{p}{]}\PY{l+s+sc}{\PYZsq{}]\PYZsq{}}
+\end{Verbatim}
+
+
+\begin{Verbatim}[commandchars=\\\{\}]
+{\color{outcolor}Out[{\color{outcolor}231}]:} 3×3 Array\{Float64,2\}:
+           0.0  2.0  -0.0
+           2.0  1.0  -1.0
+           1.0  1.0  -0.0
+\end{Verbatim}
+            
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}232}]:} \PY{n}{inv}\PY{p}{(}\PY{n}{C}\PY{p}{)}
+\end{Verbatim}
+
+
+\begin{Verbatim}[commandchars=\\\{\}]
+{\color{outcolor}Out[{\color{outcolor}232}]:} 3×3 Array\{Float64,2\}:
+           -0.5   0.0  1.0
+            0.5   0.0  0.0
+           -0.5  -1.0  2.0
+\end{Verbatim}
+            
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}233}]:} \PY{n}{c} \PY{o}{=} \PY{n}{ones}\PY{p}{(}\PY{l+m+mi}{3}\PY{p}{)} \PY{c}{\PYZsh{}objective coefficients from primal problem}
+\end{Verbatim}
+
+
+\begin{Verbatim}[commandchars=\\\{\}]
+{\color{outcolor}Out[{\color{outcolor}233}]:} 3-element Array\{Float64,1\}:
+           1.0
+           1.0
+           1.0
+\end{Verbatim}
+            
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}234}]:} \PY{n}{r} \PY{o}{=} \PY{n}{c}\PY{o}{\PYZsq{}}\PY{o}{*}\PY{n}{inv}\PY{p}{(}\PY{n}{C}\PY{p}{)}  \PY{c}{\PYZsh{} use this as the objective direction}
+\end{Verbatim}
+
+
+\begin{Verbatim}[commandchars=\\\{\}]
+{\color{outcolor}Out[{\color{outcolor}234}]:} 1×3 RowVector\{Float64,Array\{Float64,1\}\}:
+           -0.5  -1.0  3.0
+\end{Verbatim}
+            
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}235}]:} \PY{c}{\PYZsh{} add the objective to the problem patterns}
+          \PY{n+nd}{@objective}\PY{p}{(}\PY{n}{patterns}\PY{p}{,} \PY{n}{Max}\PY{p}{,} \PY{n}{sum}\PY{p}{(}\PY{p}{[}\PY{n}{r}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{o}{*}\PY{n}{a}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{k}{for} \PY{n}{i} \PY{k+kp}{in} \PY{l+m+mi}{1}\PY{o}{:}\PY{l+m+mi}{3}\PY{p}{]}\PY{p}{)}\PY{p}{)}
+\end{Verbatim}
+
+\texttt{\color{outcolor}Out[{\color{outcolor}235}]:}
+    
+    $$ -0.5 a_{1} - a_{2} + 3 a_{3} $$
+
+    
+
+    \hypertarget{c.-solve-the-pricing-problem-to-determine-a-new-pattern-to-use}{%
+\paragraph{3c. Solve the ``pricing problem'' to determine a new
+pattern to
+use}\label{c.-solve-the-pricing-problem-to-determine-a-new-pattern-to-use}}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}236}]:} \PY{c}{\PYZsh{} solve the problem patterns and output the new pattern to use and the objective value}
+          \PY{n}{solve}\PY{p}{(}\PY{n}{patterns}\PY{p}{)}
+          \PY{n}{display}\PY{p}{(}\PY{n}{patterns}\PY{p}{)}
+          \PY{n}{println}\PY{p}{(}\PY{n}{getvalue}\PY{p}{(}\PY{n}{a}\PY{p}{)}\PY{p}{)}
+          \PY{n}{println}\PY{p}{(}\PY{n}{getobjectivevalue}\PY{p}{(}\PY{n}{patterns}\PY{p}{)}\PY{p}{)}
+\end{Verbatim}
+
+
+\begin{equation} \begin{split}{1}\max\quad & -0.5 a_{1} - a_{2} + 3 a_{3}\\
+\text{Subject to} \quad & 4 a_{1} + 5 a_{2} + 6 a_{3} \leq 19\\
+ & a_{i} \geq 0, \in \mathbb{Z}, \quad\forall i \in \{1,2,3\}\\
+\end{split}
+\end{equation}
+
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+[-0.0, -0.0, 3.0]
+9.0
+
+    \end{Verbatim}
+
+    \hypertarget{add-new-pattern-to-the-master-problem}{%
+\subsubsection{4. Add new pattern to the ``master
+problem''}\label{add-new-pattern-to-the-master-problem}}
+
+\hypertarget{objective-value-is-bigger-than-1}{%
+\paragraph{Objective value is bigger than
+1!}\label{objective-value-is-bigger-than-1}}
+
+Since the objective value is bigger than 1, adding the new pattern to
+the problem will improve the objective of the Linear Program m.
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}237}]:} \PY{c}{\PYZsh{} New ineqaulity matrix for the model m to use.}
+          \PY{n}{B} \PY{o}{=} \PY{n}{A}\PY{p}{[}\PY{o}{:}\PY{p}{,}\PY{p}{[}\PY{l+m+mi}{4}\PY{p}{,}\PY{l+m+mi}{5}\PY{p}{,}\PY{l+m+mi}{11}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{]}
+\end{Verbatim}
+
+
+\begin{Verbatim}[commandchars=\\\{\}]
+{\color{outcolor}Out[{\color{outcolor}237}]:} 3×4 Array\{Int64,2\}:
+           0  2  1  0
+           2  1  3  0
+           1  1  0  3
+\end{Verbatim}
+            
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}238}]:} \PY{n}{scale} \PY{o}{=} \PY{l+m+mi}{100}
+          
+          \PY{n}{m} \PY{o}{=} \PY{n}{Model}\PY{p}{(}\PY{n}{solver} \PY{o}{=} \PY{n}{ClpSolver}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+          \PY{c}{\PYZsh{}m = Model(solver = GurobiSolver(OutputFlag=0))}
+          
+          \PY{n+nd}{@variable}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{x}\PY{p}{[}\PY{l+m+mi}{1}\PY{o}{:}\PY{l+m+mi}{4}\PY{p}{]} \PY{o}{\PYZgt{}=} \PY{l+m+mi}{0}\PY{p}{)}
+          \PY{n+nd}{@variable}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{s}\PY{p}{[}\PY{l+m+mi}{1}\PY{o}{:}\PY{l+m+mi}{3}\PY{p}{]} \PY{o}{\PYZgt{}=} \PY{l+m+mi}{0}\PY{p}{)}
+          \PY{n+nd}{@constraint}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{B}\PY{o}{*}\PY{n}{x} \PY{o}{+} \PY{n}{E}\PY{o}{*}\PY{n}{s}\PY{o}{.\PYZgt{}=} \PY{p}{[}\PY{l+m+mi}{12}\PY{p}{;}\PY{l+m+mi}{15}\PY{p}{;}\PY{l+m+mi}{22}\PY{p}{]}\PY{o}{*}\PY{n}{scale}\PY{p}{)}
+          \PY{n+nd}{@objective}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{Min}\PY{p}{,} \PY{n}{sum}\PY{p}{(}\PY{n}{x}\PY{p}{)}\PY{p}{)}
+          \PY{n}{display}\PY{p}{(}\PY{n}{m}\PY{p}{)}
+          
+          \PY{n+nd}{@time}\PY{p}{(}\PY{n}{solve}\PY{p}{(}\PY{n}{m}\PY{p}{)}\PY{p}{)}
+          \PY{n}{println}\PY{p}{(}\PY{l+s}{\PYZdq{}}\PY{l+s}{N}\PY{l+s}{u}\PY{l+s}{m}\PY{l+s}{b}\PY{l+s}{e}\PY{l+s}{r}\PY{l+s}{ }\PY{l+s}{o}\PY{l+s}{f}\PY{l+s}{ }\PY{l+s}{p}\PY{l+s}{i}\PY{l+s}{p}\PY{l+s}{e}\PY{l+s}{s}\PY{l+s}{ }\PY{l+s}{u}\PY{l+s}{s}\PY{l+s}{e}\PY{l+s}{d}\PY{l+s}{:}\PY{l+s}{ }\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{n}{getobjectivevalue}\PY{p}{(}\PY{n}{m}\PY{p}{)}\PY{p}{)}
+          \PY{n}{println}\PY{p}{(}\PY{l+s}{\PYZdq{}}\PY{l+s}{x}\PY{l+s}{ }\PY{l+s}{=}\PY{l+s}{ }\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{n}{getvalue}\PY{p}{(}\PY{n}{x}\PY{p}{)}\PY{p}{)}
+          \PY{n}{println}\PY{p}{(}\PY{l+s}{\PYZdq{}}\PY{l+s}{s}\PY{l+s}{ }\PY{l+s}{=}\PY{l+s}{ }\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{n}{getvalue}\PY{p}{(}\PY{n}{s}\PY{p}{)}\PY{p}{)}
+\end{Verbatim}
+
+
+\begin{equation} \begin{split}\min\quad & x_{1} + x_{2} + x_{3} + x_{4}\\
+\text{Subject to} \quad & 2 x_{2} + x_{3} - s_{1} \geq 1200\\
+ & 2 x_{1} + x_{2} + 3 x_{3} - s_{2} \geq 1500\\
+ & x_{1} + x_{2} + 3 x_{4} - s_{3} \geq 2200\\
+ & x_{i} \geq 0 \quad\forall i \in \{1,2,3,4\}\\
+ & s_{i} \geq 0 \quad\forall i \in \{1,2,3\}\\
+\end{split}
+\end{equation}
+
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+  0.000459 seconds (70 allocations: 6.500 KiB)
+Number of pipes used: 1373.3333333333333
+x = [0.0, 420.0, 360.0, 593.333]
+s = [0.0, 0.0, 0.0]
+
+    \end{Verbatim}
+
+    \hypertarget{resolve-the-pricing-problem-with-a-new-objective-direction}{%
+\subsubsection{5. Resolve the ``pricing problem'' with a new objective
+direction}\label{resolve-the-pricing-problem-with-a-new-objective-direction}}
+
+    First, determine a new objective direction. Let's assume that variables
+1,3,4 are basic.
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}239}]:} \PY{n}{C} \PY{o}{=} \PY{n}{B}\PY{p}{[}\PY{o}{:}\PY{p}{,}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{3}\PY{p}{,}\PY{l+m+mi}{4}\PY{p}{]}\PY{p}{]}
+\end{Verbatim}
+
+
+\begin{Verbatim}[commandchars=\\\{\}]
+{\color{outcolor}Out[{\color{outcolor}239}]:} 3×3 Array\{Int64,2\}:
+           0  1  0
+           2  3  0
+           1  0  3
+\end{Verbatim}
+            
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}240}]:} \PY{n}{r} \PY{o}{=} \PY{n}{c}\PY{o}{\PYZsq{}}\PY{o}{*}\PY{n}{inv}\PY{p}{(}\PY{n}{C}\PY{p}{)}
+\end{Verbatim}
+
+
+\begin{Verbatim}[commandchars=\\\{\}]
+{\color{outcolor}Out[{\color{outcolor}240}]:} 1×3 RowVector\{Float64,Array\{Float64,1\}\}:
+           0.0  0.333333  0.333333
+\end{Verbatim}
+            
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}241}]:} \PY{n+nd}{@objective}\PY{p}{(}\PY{n}{patterns}\PY{p}{,} \PY{n}{Max}\PY{p}{,} \PY{n}{sum}\PY{p}{(}\PY{p}{[}\PY{n}{r}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{o}{*}\PY{n}{a}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{k}{for} \PY{n}{i} \PY{k+kp}{in} \PY{l+m+mi}{1}\PY{o}{:}\PY{l+m+mi}{3}\PY{p}{]}\PY{p}{)}\PY{p}{)}
+\end{Verbatim}
+
+\texttt{\color{outcolor}Out[{\color{outcolor}241}]:}
+    
+    $$ 0.33333333333333337 a_{2} + 0.3333333333333333 a_{3} $$
+
+    
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}242}]:} \PY{n}{solve}\PY{p}{(}\PY{n}{patterns}\PY{p}{)}
+          \PY{n}{display}\PY{p}{(}\PY{n}{patterns}\PY{p}{)}
+          \PY{n}{println}\PY{p}{(}\PY{n}{getvalue}\PY{p}{(}\PY{n}{a}\PY{p}{)}\PY{p}{)}
+          \PY{n}{println}\PY{p}{(}\PY{n}{getobjectivevalue}\PY{p}{(}\PY{n}{patterns}\PY{p}{)}\PY{p}{)}
+\end{Verbatim}
+
+
+  \begin{equation} \begin{split}\max\quad & 0.33333333333333337 a_{2} + 0.3333333333333333 a_{3}\\
+\text{Subject to} \quad & 4 a_{1} + 5 a_{2} + 6 a_{3} \leq 19\\
+ & a_{i} \geq 0, \in \mathbb{Z}, \quad\forall i \in \{1,2,3\}\\
+\end{split}
+\end{equation}
+
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+[-0.0, 3.0, -0.0]
+1.0
+
+    \end{Verbatim}
+
+    \hypertarget{yay-objective-is-not-bigger-than-1}{%
+\subsubsection{Objective is not bigger than
+1!}\label{yay-objective-is-not-bigger-than-1}}
+
+This means that no other column will improve the LP solution. Round
+solution you have and stop here!
+
+
+    % Add a bibliography block to the postdoc
+    

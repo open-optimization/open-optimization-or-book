@@ -1,0 +1,460 @@
+%By Douglas Bish
+%The text is licensed under the
+%\href{http://creativecommons.org/licenses/by-sa/4.0/}{Creative Commons
+%Attribution-ShareAlike 4.0 International License}.
+%
+%This file has been modified by Robert Hildebrand 2020.  
+%CC BY SA 4.0 licence still applies.
+
+
+Consider an arbitrary LP, which we will call the primal ($P$): 
+$$(P):\max \{\mathbf{cx}: \mathbf{Ax} \le \mathbf{b}, \mathbf{x} \ge 0\},$$ 
+where $\mathbf{A}$ is an $m\times n$ matrix, and $\mathbf{x}$ is a $n$ element column vector.  Every prmal LP has a related LP, which we call the dual, the dual of ($P$) is:
+$$(D):\min \{\mathbf{wb}: \mathbf{wA} \ge \mathbf{c}, \mathbf{w} \ge 0\}.$$ 
+
+If an LP has a different form from $P$, we can convert it to the above form to find the dual, or use the rules in the following table:
+
+\begin{align*}
+\max~& {\bf cx}:~~~~~~~~~~~~			& \min~ & {\bf wb}:  \\
+&{\bf a_{1*}x} \le b_1~(w_1 \ge 0)   &     & {\bf wa_{*1}} \ge c_1~(x_1 \ge 0) \\ 
+&{\bf a_{2*}x} = b_2~(w_2~urs)       &     & {\bf wa_{*2}} = c_2~(x_2~urs) \\
+&{\bf a_{3*}x} \ge b_3~(w_3 \le 0) &        & {\bf wa_{*3}} \le c_3~(x_3 \le 0) \\
+&\vdots 							   &      & \vdots \\ 
+&x_1 \ge 0, x_2~urs, x_3 \le 0, \cdots &  	 & w_1 \ge 0, w_2~urs, w_3 \le 0,\cdots   
+\end{align*}
+
+Define $\mathbf{w}=\mathbf{c}_B\mathbf{B}^{-1}$ as the vector of {\it shadow prices}, where $w_i$ represents the change in the objective function value caused by a unit change to the associated $b_i$ parameter (i.e., increasing the amount of resource~$i$ by one unit, see dual objective function). \\
+
+Some observations:
+\begin{itemize}
+\item The dual of $D$ is $P$.
+\item Each primal constraint has an associated dual variable ($w_i$) and each dual constraint has an associated primal variable ($x_i$).
+\item When the primal is a maximization, the dual is a minimization, and vice versa.
+\end{itemize}
+
+
+
+\vspace{10mm} Consider the following primal tableau (where $z_p$ is the primal objective function value) for $(P):~Max~\{\mathbf{cx}: \mathbf{Ax} \le \mathbf{b}, \mathbf{x} \ge 0\}.$  
+
+\begin{center} \begin{tabular} {l|c|c|c|} \cline{2-4}
+		& $z_P$ 			& $x_i$	 						           & rhs \\ \cline{2-4}
+$z_P$ 	& 1	   				& $\mathbf{c_BB^{-1}a_i}-c_i$ 	 	& $\mathbf{c_BB^{-1}b}$ \\
+$BV$  	& $\mathbf{0}$ 	& $\mathbf{B^{-1}a_i}$   			& $\mathbf{B^{-1}b}$ \\\cline{2-4}
+\end{tabular} \end{center} 
+
+Observe that if a basis for $P$ is optimal, then the row zero coefficients for the variables are greater than, or equal to, zero, that is, $c_BB^{-1}a_i-c_i \ge 0$ for each $x_i$ (if the variable is a slack, this simplifies to $c_BB^{-1} \ge 0$). \\
+
+Substituting $w=c_BB^{-1}$ we get $\mathbf{wA} \ge \mathbf{c}, \mathbf{w} \ge 0$ which corresponds to dual feasibility.
+
+$$(D):\min \{\mathbf{wb}: \mathbf{wA} \ge \mathbf{c}, \mathbf{w} \ge 0\}.$$
+
+
+{\bf Weak Duality Property} \\
+If $\mathbf{x}$ and $\mathbf{w}$ are feasible solutions to $P$ and $D$, respectively, then $\mathbf{cx} \le \mathbf{wAx} \le \mathbf{wb}$.
+
+$$(P):\max \{\mathbf{cx}: \mathbf{Ax} \le \mathbf{b}, \mathbf{x} \ge 0\}.$$ 
+$$(D):\min \{\mathbf{wb}: \mathbf{wA} \ge \mathbf{c}, \mathbf{w} \ge 0\}.$$
+
+This implies that the objective function value for a feasible solution to $P$ is a lower bound on the objective function value for the optimal solution to $D$, and the objective function value for a feasible solution to $D$ is an upper bound on the objective function value for the optimal solution to $P$. \\
+
+Thus if the objective function values are equal, i.e., $\mathbf{cx} = \mathbf{wb}$, then the solutions $\mathbf{x}$ and $\mathbf{w}$ are optimal. \\
+
+%\vspace{6mm} {\bf Fundamental Theorem of Duality} \\
+\begin{theorem}{Fundamental Theorem of Duality}
+For problems $P$ and $D$ (i.e., any primal dual set) exactly one of the following is true:
+\begin{enumerate}
+\item Both have optimal solutions $\mathbf{x}$ and $\mathbf{w}$ where $\mathbf{cx} = \mathbf{wb}$.
+\item One problem is unbounded (i.e., the objective function value can become arbitrarily large for a maximization,  or arbitrarily small for a minimization), and the other is infeasible.
+\item Both are infeasible.
+\end{enumerate}
+\end{theorem}
+
+
+
+%\vspace{6mm} {\bf Fark\'as Lemma} \\
+\begin{theorem}{Fark\'as Lemma}
+Consider the following two systems:
+\begin{enumerate}
+\item $\mathbf{Ax} \ge \mathbf{0}$, $\mathbf{cx} < 0$.
+\item $\mathbf{wA} = \mathbf{c}$, $\mathbf{w} \ge 0$.
+\end{enumerate}
+Exactly one of these systems has a solution.
+\end{theorem}
+
+\vspace{3mm} {\bf Suppose system~1 has $\mathbf{x}$ as a solution:}
+\begin{itemize}
+\item If $\mathbf{w}$ were a solution to system~2, then post-multiplying each side of $\mathbf{wA} = \mathbf{c}$ by $\mathbf{x}$ would yield $\mathbf{wAx} = \mathbf{cx}$.
+\item Since $\mathbf{Ax} \ge \mathbf{0}$ and $\mathbf{w} \ge 0$, this implies that $\mathbf{cx} \ge 0$, which violates $\mathbf{cx} < 0$.
+\item Thus we show that if system~1 has a solution, system~2 cannot have one.
+\end{itemize}
+
+\vspace{3mm} {\bf Suppose system~1 has no solution:}
+\begin{itemize}
+\item Consider the following LP: $\min\{\mathbf{cx}: \mathbf{Ax} \ge \mathbf{0}$\}.
+\item The optimal solution is $\mathbf{cx}=0$ and $\mathbf{x}=\mathbf{0}$.
+\item The LP in standard form (substitute $\mathbf{x} = \mathbf{x'}-\mathbf{x''}$,  $\mathbf{x'} \ge 0$ and $\mathbf{x''} \ge 0$ and add $\mathbf{x^s} \ge 0$) follows: \vspace{-3mm}
+$$\min\{\mathbf{cx' - cx''}: \mathbf{Ax'-Ax''-x^s} = \mathbf{0}, \mathbf{x'}, \mathbf{x''}, \mathbf{x^s} \ge 0 \}$$ 
+\item \vspace{-3mm} $\mathbf{x'}=\mathbf{0}$, $\mathbf{x''}=\mathbf{0}$, $\mathbf{x^s}=\mathbf{0}$ is an optimal extreme point solution.
+\item Using $\mathbf{x^s}$ as an initial feasible basis, solve with the simplex algorithm (with cycling prevention) to find a basis where $\mathbf{c_BB^{-1}a_i}-c_i \le 0$ for all variables. Define $\mathbf{w}=\mathbf{c_BB^{-1}}$. 
+\item This yields $\mathbf{wA}-\mathbf{c} \le \mathbf{0}$, $-\mathbf{wA}+\mathbf{c} \le \mathbf{0}$, $-\mathbf{w} \le 0 \}$, from the columns for variables  $\mathbf{x'}$, $\mathbf{x''}$, $\mathbf{x^s}$, respectively.  Thus, $\mathbf{w} \ge 0$ and $\mathbf{wA} = \mathbf{c}$, and system~2 has a solution.
+\end{itemize}
+
+
+\vspace{6mm}\underline{\bf Karush-Kuhn-Tucker (KKT) Conditions} \\
+$$(P):\max\{\mathbf{cx}: \mathbf{Ax} \le \mathbf{b}, \mathbf{x} \ge 0\}.$$ 
+$$(D):\min\{\mathbf{wb}: \mathbf{wA} \ge \mathbf{c}, \mathbf{w} \ge 0\}.$$
+
+\vspace{3mm} For problems $P$ and $D$, with solutions $\mathbf{x}$ and $\mathbf{w}$, respectively, we have the following conditions, which for LPs are necessary and sufficient conditions for optimality:
+\begin{enumerate}
+\item $\mathbf{Ax} \le \mathbf{b}$,  $\mathbf{x} \ge \mathbf{0}$ (primal feasibility).
+\item $\mathbf{wA} \ge \mathbf{c}$, $\mathbf{w} \ge \mathbf{0}$  (dual feasibility).
+\item $\mathbf{w}(\mathbf{Ax}-\mathbf{b}) = 0$ and $\mathbf{x}(\mathbf{c}- \mathbf{wA}) = 0$ (complementary slackness).
+\end{enumerate}
+Note we can rewrite the third condition as $\mathbf{w}(\mathbf{Ax}-\mathbf{b}) = \mathbf{w}\mathbf{x^s} = 0$ and $\mathbf{x}(c- \mathbf{wA}) = \mathbf{x}\mathbf{w^s} = 0$, where $\mathbf{x^s}$ and $\mathbf{w^s}$ are the slack variables for the primal and dual problems, respectively. \\
+
+{\bf Why do the KKT conditions hold?}
+
+\vspace{3mm}
+Suppose that the LP $\min\{\mathbf{cx}: \mathbf{Ax} \ge \mathbf{b}, \mathbf{x} \ge 0\}$ has an optimal solution ${\bf x^*}$ (the dual is $\max\{{\bf wb}: {\bf wA} \le {\bf c}, {\bf w} \ge {\bf 0}\}$).
+
+\begin{itemize}
+\item Since $\mathbf{x^*}$ is optimal there is no direction $\mathbf{d}$ such that $\mathbf{c(x^* + \lambda d)} < \mathbf{cx^*}$, $\mathbf{A(x^*+ \lambda d)} \ge \mathbf{b}$, and $\mathbf{x^*+ \lambda d} \ge \mathbf{0}$ for $\lambda > 0$.
+\item Let ${\bf Gx } \ge {\bf g}$ be the binding inequalities in $\mathbf{Ax} \ge \mathbf{b}$ and $\mathbf{x} \ge 0$ for solution ${\bf x^*}$ that is, ${\bf Gx^*} = {\bf g}$. 
+\item Based on the optimality of ${\bf x^*}$, there is no direction $\mathbf{d}$ at ${\bf x^*}$ such that ${\bf cd} < {\bf 0}$ and ${\bf Gd} \ge {\bf 0}$ (else we could improve the solution).
+\item Based on Farka's Lemma, if the system ${\bf cd} < {\bf 0}$, ${\bf Gd} \ge {\bf 0}$ does not have a solution, the system ${\bf wG} = {\bf c}$, ${\bf w} \ge {\bf 0}$ must have a solution.
+\item ${\bf G}$ is composed of rows from ${\bf A}$  where ${\bf a_{i*}x^*}=b_i$ and vectors ${\bf e_{i}}$ for any $x^*_i = 0$.
+\item We can divide the ${\bf w}$ into two sets:
+\begin{itemize}
+\item  $\{w_i,~ i:{\bf a_{i*}x^*}=b_i\}$ - those corresponding to the binding functional constraints in the primal.
+\item  $\{w^s_i,~ j:x^*_i=0\}$ - those corresponding to the binding non-negativity constraints in the primal.
+\end{itemize}
+\item Thus ${\bf G}$ has the columns ${\bf a_{i*}^T}$ for $w_i$ and $e_{i}^T$ for $w^s_i$.
+\item Since  ${\bf wG} = {\bf c}$, ${\bf w} \ge {\bf 0}$ must have a solution, this solution is feasible for ${\bf wA} \le {\bf c}, {\bf w} \ge {\bf 0}$ where $w^s_i$ are added slacks. Thus,  ${\bf G}$ is missing some columns from ${\bf A}$ (and thus some $w$ variables) and some slack variables if ${\bf wA} \le {\bf c}, {\bf w} \ge {\bf 0}$ were put into standard form, but those are not needed for feasibility based on the result, and thus can be thought of as set to zero, giving us complementary slackness.
+\end{itemize}
+
+
+
+
+
+
+%${\bf a_{i*}}$ - row $i$ of the matrix ${\bf A} $ 
+%${\bf e_{i}}$ is a vector of all zeros, except for a 1 in the $i$ position.
+
+%Let $\mathbf{\bar{x}}$ be a feasible solution to the LP having $\mathbf{Gx \ge g}$ as the binding inequalities in $\mathbf{Ax} \ge \mathbf{b}$ and \mathbf{x} \ge 0, that is, $\mathbf{G\bar{x} = g}$. We  
+
+
+%If $\mathbf{\bar{x}}$ were optimal, then there is no direction $\mathbf{d}$ at $\mathbf{\bar{x}}$ such that $\mathbf{cd} < 0$ and $\mathbf{Gd \ge 0}$, if so we could improve the solution. Thus based on Farka's Lemma, since the system $\mathbf{cd} < 0$ and $\mathbf{Gd \ge 0}$ does not have a solution, the system $\mathbf{wG} = \mathbf{c}$, $\mathbf{w} \ge 0$ must have a solution.
+
+
+
+
+
+
+\newpage{\bf Example:} 
+\begin{example}{Production LP}{productionLP}
+Consider a production LP (the primal $P$) where the variables represent the amount of three products to produce, using three resources, represented by the functional constraints.   In standard form $P$ and $D$ have $x^s_4$, $x^s_5$, $x^s_6$ and $w^s_4$, $w^s_5$, $w^s_6$ as slack variables, respectively. % (see ClassNotes(5405).xlsx under tab P-D). \\
+\end{example}
+\begin{solution}
+\vspace{3mm}\underline{Decision variables:} \\
+$x_i$ : number of units of product $i$ to produce, $\forall i = \{1,~2,~3\}$.
+\begin{align*}
+(P): \max~~  & z_P = 18x_1 + 16x_2 + 10x_3 \\
+{s.t.}~~& 2x_1 + 2x_2 + 1x_3  +x^{s}_4 = 21~~ (w_1) \\
+& 3x_1 + 2x_2 + 2x_3 + x^{s}_5 = 23~~ (w_2)  \\
+&  1x_1 + 2x_2 + 1x_3  + x^{s}_6 = 17~~ (w_3) \\
+& x_1, x_2, x_3, x^{s}_4, x^{s}_5, x^{s}_6 \ge 0.
+\end{align*} 
+
+\begin{align*}
+(D): \min~~ & z_D =21w_1 +23w_2 +17w_3  \\
+{s.t.}~~ & 2w_1 +3w_2 + 1w_3 \ge 18 ~~ (x_1) \\
+& 2w_1 +2w_2 + 2w_3 \ge 16 ~~ (x_2)\\
+& 1w_1 +2w_2 + 1w_3 \ge 10 ~~ (x_3)\\
+& 1w_1 \ge 0 \\
+& 1w_2 \ge 0 \\
+& 1w_3 \ge 0 \\
+& w_1, w_2, w_3~urs.
+\end{align*}
+
+\underline{Decision variables:} \\
+$w_i$ : unit selling price for resource $i$, $\forall i = \{1,~2,~3\}$.
+\begin{align*}
+(D): \min~~ & z_D =21w_1 +23w_2 +17w_3:  \\
+& 2w_1 +3w_2 + 1w_3 - w^{s}_4 = 18 ~~ (x_1) \\
+& 2w_1 +2w_2 + 2w_3 - w^{s}_5 = 16 ~~ (x_2)\\
+& 1w_1 +2w_2 + 1w_3 - w^{s}_6 = 10 ~~ (x_3)\\
+& w_1, w_2, w_3, w^{s}_4, w^{s}_5, w^{s}_6 \ge 0. 
+\end{align*}
+
+The initial basic feasible tableau for the primal, i.e., having the slack variables form the basis, follows:
+
+\begin{center} \begin{tabular} {r|c|c|c|c|c|c|c|c|} \cline{2-9} 
+$P:\max$ & $z_P$ & $x_1$ & $x_2$ & $x_3$ & $x^s_4$ & $x^s_5$ & $x^s_6$ & rhs  \\ \cline{2-9}\cline{2-9} 
+$z_P$	& 1  	& -18   & -16   & -10   & 0    	  & 0      	& 0       & 0   \\ \cline{2-9}  
+$x^s_4$	& 0  	& 2     & 2     & 1     & 1    	  & 0      	& 0       & 21   \\ \cline{2-9} 
+$x^s_5$	& 0  	& 3     & 2     & 2     & 0    	  & 1      	& 0       & 23   \\ \cline{2-9} 
+$x^s_6$	& 0  	& 1     & 2     & 1     & 0    	  & 0      	& 1       & 17   \\ \cline{2-9}
+\end{tabular} \\ \vspace{3mm} 
+{$x_1, x_2, x_3=0$, $x^s_4=21$, $x^s_5=23$, $x^s_6=17$  $z_P=0$} \\ \end{center}
+\vspace{4mm} The following dual tableau {\bf conforms with the primal tableau through complementary slackness}.\\
+\begin{center} \begin{tabular} {c|c|c|c|c|c|c|c|c|} \cline{2-9} 
+$D:\min$	& $z_D$ & $w_1$ & $w_2$ & $w_3$ & $w^s_4$ & $w^s_5$ & $w^s_6$ & rhs \\ \cline{2-9}\cline{2-9}  
+$z_D$	& 1     & -21   & -23   & -17     	& 0    	& 0    	& 0     	& 0   	\\ \cline{2-9}  
+$w^s_4$	& 0    	& -2    & -3    & -1     	& 1  		& 0  		& 0     	& -18   \\ \cline{2-9}   
+$w^s_5$ & 0    	& -2    & -2    & -2     	& 0  		& 1   		& 0     	& -16   \\ \cline{2-9}   
+$w^s_6$	& 0    	& -1    & -2    & -1   	& 0   		& 0  		& 1     	& -10    \\ \cline{2-9} 
+\end{tabular} \\ \vspace{3mm} 
+{$w_1, w_2, w_3=0$, $w^s_4=-18$, $w^s_5=-16$, $w^s_6=-10$  $z_D=0$} \\ \end{center}
+
+{\color{red} \bf Complementary slackness:} $w_1 x^s_4=0$, $w_2 x^s_5=0$, $w_3 x^s_6=0$, $x_1 w^s_4=0$,  $x_2 w^s_5=0$, $x_3 w^s_6=0$. \\
+\vspace{-2mm}\begin{itemize}
+\item If a primal variable is basic, then its corresponding dual variable must be nonbasic, and vise versa.   
+\item The primal is suboptimal, and the dual tableau has a basic infeasible solution.
+\item Row~0 of the primal tableau has dual variable values in the corresponding primal variable columns. 
+\end{itemize}
+
+The primal basis is not optimal, so enter $x_1$ into the basis, and remove $x^s_5$, which yields:  
+
+\begin{center} \begin{tabular} {r|c|c|c|c|c|c|c|c|} \cline{2-9} 
+P: Max & $z_P$ 	& $x_1$ 	& $x_2$ 	& $x_3$ 	& $x^{s}_4$ 	& $x^{s}_5$ 	& $x^{s}_6$ 	& rhs   \\ \cline{2-9}  
+$z_P$	& 1  		& 0   		& -4   	& 2   		& 0    	& 6      	& 0     	& 138   \\ \cline{2-9}  
+$x^{s}_4$	& 0  		& 0     & 2/3   	& -1/3    	& 1    	& -2/3     & 0     	& 17/3  \\ \cline{2-9} 
+$x_1$	& 0  		& 1     	& 2/3    	& 2/3     	& 0    	& 1/3     	& 0     	& 23/3  \\ \cline{2-9} 
+$x^{s}_6$ 	& 0  		& 0     	& 4/3     	& 1/3    	& 0    	& -1/3      & 1     	& 28/3   \\ \cline{2-9}
+%\end{tabular} \end{center}
+\multicolumn{9}{c}{ } \\ \cline{2-9}
+%\begin{center} \begin{tabular} {c|c|c|c|c|c|c|c|c|} \cline{2-9} 
+D: Min& $z_D$ 	& $w_1$ 	& $w_2$ 	& $w_3$ 	& $w^{s}_4$ 	& $w^{s}_5$ 	& $w^{s}_6$ 	& rhs   \\ \cline{2-9}   
+$z_D$	& 1    	& -17/3  	& 0     	& -28/3   & -23/3   & 0    		& 0     	& 138   	\\ \cline{2-9}  
+$w_2$	& 0    	& 2/3   	& 1     	& 1/3    	& -1/3 	& 0  		& 0     	& 6   \\ \cline{2-9}   
+$w^{s}_5$ 	& 0    	& -2/3   	& 0    & -4/3    	& -2/3  	& 1   		& 0     	& -4   \\ \cline{2-9}   
+$w^{s}_6$	& 0    	& 1/3   	& 0    & -1/3  	& -2/3  	& 0  		& 1     	& 2    \\ \cline{2-9} 
+\end{tabular} \end{center}
+
+The primal tableau does not represent an optimal basic solution, and the dual tableau does not represent a feasible basic solution. \\
+
+Using Dantzig's rule, we enter $x_2$ into the basis, and using the ratio test we find that $x^s_6$ leaves the basis. This change in basis yields the following tableau:
+
+\begin{center} \begin{tabular} {r|c|c|c|c|c|c|c|c|} \cline{2-9}  
+P: Max&$z_P$ 	& $x_1$ 	& $x_2$ 	& $x_3$ 	& $x^{s}_4$	& $x^{s}_5$ 	& $x^{s}_6$ 	& rhs  \\ \cline{2-9}  \cline{2-9}   
+$z_P$ 	& 1  		& 0     	& 0     	& 3      	& 0    	& 5     	& 3     	& 166  \\ \cline{2-9}  
+$x^{s}_4$	& 0  		& 0     	& 0     	& -1/2   	& 1    	& -1/2  	& -1/2  	& 1   	\\ \cline{2-9} 
+$x_1$	& 0  		& 1     	& 0     	& 1/2    	& 0    	& 1/2   	& -1/2  	& 3    \\ \cline{2-9}  
+$x_2$	& 0  		& 0     	& 1     	& 1/4    	& 0    	& -1/4  	& 3/4   	& 7    \\ \cline{2-9} 
+\multicolumn{9}{c}{ } \\ \cline{2-9}
+D: Min& $z_D$ 	& $w_1$ 	& $w_2$ 	& $w_3$ 	& $w^{s}_4$ 	& $w^{s}_5$ 	& $w^{s}_6$ 	& rhs   \\ \cline{2-9} \cline{2-9}  
+$z_D$ 	& 1    	& -1    	& 0     	& 0     	& -3    	& -7    	& 0     	& 166   \\ \cline{2-9}  
+$w_2$	& 0    	& 1/2   	& 1     	& 0     	& -1/2  	& 1/4  	& 0     	& 5     \\ \cline{2-9}   
+$w_3$ 	& 0    	& 1/2   	& 0     	& 1     	& 1/2  	& -3/4   	& 0     	& 3    \\ \cline{2-9}   
+$w^{s}_6$	& 0    	& 1/2   	& 0     	& 0     	& -1/2   	& -1/4  	& 1     	& 3     \\ \cline{2-9} 
+\end{tabular} \end{center}
+
+\vspace{3mm}\underline{Decision variables:} \\
+$x_i$ : number of units of product $i$ to produce, $\forall i = \{1,~2,~3\}$.
+\begin{align*}
+(P): \max~~  & z_P = 18x_1 + 16x_2 + 10x_3: \\
+& 2x_1 + 2x_2 + 1x_3  +x^{s}_4 = 21~~ (w_1) \\
+& 3x_1 + 2x_2 + 2x_3 + x^{s}_5 = 23~~ (w_2)  \\
+&  1x_1 + 2x_2 + 1x_3  + x^{s}_6 = 17~~ (w_3) \\
+& x_1, x_2, x_3, x^{s}_4, x^{s}_5, x^{s}_6 \ge 0.
+\end{align*} 
+\end{solution}
+
+The LP $\max\{\mathbf{cx}: \mathbf{Ax} \le \mathbf{b}, \mathbf{x} \ge 0\}$ has an optimal solution ${\bf x^*}$ (the dual is $\min\{{\bf wb}: {\bf wA} \ge {\bf c}, {\bf w} \ge {\bf 0}\}$).
+
+
+
+\begin{itemize}
+\item Since $\mathbf{x^*}$ is optimal there is no direction $\mathbf{d}$ such that $\mathbf{c(x^* + \lambda d)} > \mathbf{cx^*}$, $\mathbf{A(x^*+ \lambda d)} \le \mathbf{b}$, and $\mathbf{x^*+ \lambda d} \ge \mathbf{0}$ for $\lambda > 0$.
+\item Let ${\bf Gx } \le {\bf g}$ be the binding inequalities in $\mathbf{Ax} \le {\bf b}$ and ${\bf x} \ge 0$ for solution ${\bf x^*}$, that is, ${\bf Gx^*} = {\bf g}$. \\
+
+For our example, 
+
+${\bf G|g} = \left[ \begin{array}{ccc|c}
+ 3 & 2 & 2  & 23\\
+ 1 &  2&  1 & 17\\
+ 0 &  0 &  -1 & 0\\
+
+\end{array} \right]$
+
+
+
+\item Based on the optimality of ${\bf x^*}$, there is no direction $\mathbf{d}$ at ${\bf x^*}$ such that ${\bf cd} > {\bf 0}$ and ${\bf Gd} \le {\bf 0}$ (this includes ${\bf d} \le {\bf 0}$) (else we could improve the solution).
+\item From Farka's Lemma, if the system ${\bf cd} > {\bf 0}$, ${\bf Gd} \le {\bf 0}$ does not have a solution, the system ${\bf wG} = {\bf c}$, ${\bf w} \ge {\bf 0}$ must have a solution.
+
+\begin{align*}
+& 3w_2 + 1w_3 = 18 ~~ (x_1) \\
+& 2w_2 + 2w_3 = 16 ~~ (x_2)\\
+& 2w_2 + 1w_3 - w^{s}_6 = 10 ~~ (x_3)\\
+&  w_2, w_3, w^{s}_6, \ge 0. 
+\end{align*}
+
+\begin{center} \begin{tabular} {r|c|c|c|c|c|c|c|c|} \cline{2-9}  
+D: Min& $z_D$ 	& $w_1$ 	& $w_2$ 	& $w_3$ 	& $w^{s}_4$ 	& $w^{s}_5$ 	& $w^{s}_6$ 	& rhs   \\ \cline{2-9} \cline{2-9}  
+$z_D$ 	& 1    	& -1    	& 0     	& 0     	& -3    	& -7    	& 0     	& 166   \\ \cline{2-9}  
+$w_2$	& 0    	& 1/2   	& 1     	& 0     	& -1/2  	& 1/4  	& 0     	& 5     \\ \cline{2-9}   
+$w_3$ 	& 0    	& 1/2   	& 0     	& 1     	& 1/2  	& -3/4   	& 0     	& 3    \\ \cline{2-9}   
+$w^{s}_6$	& 0    	& 1/2   	& 0     	& 0     	& -1/2   	& -1/4  	& 1     	& 3     \\ \cline{2-9} 
+\end{tabular} \end{center}
+
+\end{itemize}
+
+
+
+
+
+
+
+
+
+
+
+\newpage \fbox{\begin{minipage}{28em} {\bf Challenge~1:} Solve the following LP (as represented in the tableau), using the given tableau as a starting point. Provide the details of the algorithm to do so, and make it valid for both maximization and minimization problems. \end{minipage}}
+
+\begin{center} \begin{tabular} {r|c|c|c|c|c|c|c|c|} \cline{2-9} 
+$D:\min$& $z_D$ & $w_1$ & $w_2$ & $w_3$ & $w^s_4$ & $w^s_5$ & $w^s_6$ & rhs \\ \cline{2-9}\cline{2-9}  
+$z_D$	& 1     & -21   & -23   & -17     	& 0    	& 0    	& 0     	& 0   	\\ \cline{2-9}  
+$w^s_4$	& 0    	& -2    & -3    & -1     	& 1  		& 0  		& 0     	& -18   \\ \cline{2-9}   
+$w^s_5$ & 0    	& -2    & -2    & -2     	& 0  		& 1   		& 0     	& -16   \\ \cline{2-9}   
+$w^s_6$	& 0    	& -1    & -2    & -1   	& 0   		& 0  		& 1     	& -10    \\ \cline{2-9} 
+\end{tabular}  \end{center} 
+
+
+\vspace{10mm} \fbox{\begin{minipage}{28em} {\bf Challenge~2:} Given the following optimal tableau to our production LP, we can buy 12 units of resource 2 for \$4 a unit.  Should we, please provide the analysis needed to make this decision. \end{minipage}}
+
+\begin{center} \begin{tabular} {r|c|c|c|c|c|c|c|c|} \cline{2-9}  
+$P:\max$&$z_P$ & $x_1$ & $x_2$ & $x_3$ 	& $x^{s}_4$	& $x^{s}_5$ & $x^{s}_6$ & rhs  \\ \cline{2-9}  \cline{2-9}   
+$z_P$ 	& 1  		& 0     	& 0     	& 3      	& 0    	& 5     	& 3     	& 166  \\ \cline{2-9}  
+$x^{s}_4$	& 0  		& 0     	& 0     	& -1/2   	& 1    	& -1/2  	& -1/2  	& 1   	\\ \cline{2-9} 
+$x_1$	& 0  		& 1     	& 0     	& 1/2    	& 0    	& 1/2   	& -1/2  	& 3    \\ \cline{2-9}  
+$x_2$	& 0  	& 0     	& 1     	& 1/4    	& 0    	& -1/4  	& 3/4   	& 7    \\ \cline{2-9} 
+\end{tabular}  \end{center} 
+
+
+
+
+
+\begin{comment}
+These tableaus represent optimal, feasible solutions. The optimal basis has $BV= (x^{s}_4, x_1, x_2)$, $\mathbf{B} = \left[\begin{array}{ccc}
+    1 & 2 & 2 \\
+    0 & 3 & 2 \\
+    0 & 1 & 2 \\
+\end{array} \right]$, and $\mathbf{c_B} = [0,~18,~16]$. Note that in the dual tableau the row zero does does not have the right signs for the primal variable values.  The formula is $\mathbf{c_B}\mathbf{B^{-1}}\mathbf{a_i}-c_i$, for the columns of the slack variables, this reduces to $\mathbf{c_B}\mathbf{B^{-1}}\mathbf{a_i}$ and $\mathbf{a_i}$ is all zeros except one element of $-1$.  Consider the columns for the non-slack variables ($w_1, w_2, w_3$), here $\mathbf{c_B}\mathbf{B^{-1}}\mathbf{a_i}$ represents the amount of resource used minus the number of resources (the $c_i$ in this case), which will always be non-positive in an optimal solution (and represents the negative of the corresponding slack variable).\\
+
+Given this, the Simplex algorithm can be thought of in terns of the KKT conditions, it always satisfies two of those conditions, primal feasibility and complementary slackness (based on our definition of the dual variables, i.e., $w=c_BB^{-1}$.  The algorithm them moves towards dual feasibility (our optimality check), thus the row-zero optimality conditions only hold because the other two optimality conditions are always satisfied.  Given this, we can look at other algorithms.
+\end{comment}
+
+
+
+
+
+
+
+
+
+\bigskip  \underline{\bf Buying more of a resource:} In the example problem,we currently have 23 units of the second resource, $b_2 = 23$. We want to know the range of $b_2$-values for which the current basis remains feasible. The formula ${\bf B^{-1}b}$ shows us the impact of changing $b_2$ (which only changes the {\it rhs} column of the tableau). So, we set ${\bf B^{-1}b} \ge 0$ replacing 23 with unknown $b_2$, and solve.
+
+$$\left[\begin{array}{ccc} 1 & -1/2 & -1/2 \\  0 & 1/2 & -1/2 \\  0 & -1/4 & 3/4 \\
+\end{array}\right] \left[\begin{array}{c} 21 \\  b_2 \\  17  \\ \end{array} \right] \ge \vec{0} \Rightarrow 17 \le b_2 \le 25.$$ \\
+
+\begin{center} \begin{tabular} {r|c|c|c|c|c|c|c|c|} \cline{2-9}  
+$P:\max$&$z_P$ & $x_1$ & $x_2$ & $x_3$ 	& $x^{s}_4$	& $x^{s}_5$ & $x^{s}_6$ & rhs \\ \cline{2-9}  \cline{2-9}   
+$z_P$ 	& 1   & 0      & 0     & 3      	& 0    	& 5     	& 3     	& 166  \\ \cline{2-9}  
+$x^{s}_4$	& 0  	& 0     	& 0     	& -1/2   	& 1    	& -1/2  	& -1/2  	& 1   	\\ \cline{2-9} 
+$x_1$	& 0  & 1     & 0     & 1/2    	& 0    	& 1/2   	& -1/2  	& 3    \\ \cline{2-9}  
+$x_2$	& 0  & 0     	& 1     	& 1/4    	& 0    	& -1/4  & 3/4   	& 7    \\ \cline{2-9} 
+\end{tabular}  \end{center} 
+
+
+
+\medskip If $17 \le b_2 \le 25$, then the current basis remains feasible (and optimal). The {\it shadow price} for this resource is 5, thus 10 is the break-even price for the two additional units of resource~2. If 4 units of resource 2 were for sale, what is the break-even price?  \\
+
+If we add these additional resources, and recalculate the tableau, we get the following:
+\begin{center} \begin{tabular} {|c|c|c|c|c|c|c|c|}
+\hline $z$ & $x_1$ & $x_2$ & $x_3$ & $x^s_4$ & $x^s_5$ & $x^s_6$ & rhs   \\ \hline
+\hline  1  & 0     & 0     & 3      & 0    & 5     & 3     & 186   \\
+\hline  0  & 0     & 0     & -1/2   & 1    & -1/2  & -1/2  & -1     \\
+\hline  0  & 1     & 0     & 1/2    & 0    & 1/2   & -1/2  & 5    \\
+\hline  0  & 0     & 1     & 1/4    & 0    & -1/4  & 3/4   & 6     \\ \hline
+\end{tabular} \end{center} 
+This tableau looks optimal (see row zero), but the basis is infeasible.  We can find a new basis that is feasible and still looks optimal using the {\it Dual Simplex Method}. \\
+
+Here we find the current basic variable with the smallest negative {\it rhs} coefficient, in this case there is only one negative coefficient, and that is for $x^s_4$.  This is the leaving variable.  \\
+
+To find the entering variable, use the ration test and pivot.  Note that in this case either $x_3$ or $x^s_6$ can enter (they tie in the ratio test), and either route leads to an optimal solution (there are multiple optimal solutions here).  If we enter $x_3$ into the basis we get the following tableau: 
+
+\begin{center} \begin{tabular} {|c|c|c|c|c|c|c|c|} \hline 
+$z$ 	& $x_1$ 	& $x_2$ 	& $x_3$ 	& $x^{s}_4$ 	& $x^{s}_5$ & $x^{s}_6$ & rhs   \\ \hline \hline 
+  1  	& 0     		& 0     		& 0     		& 6     				& 2     			& 0     & 180   \\ \hline  
+  0  	& 0     		& 0     		& 1     		& -2    				& 1     & 1     & 2     \\ \hline  
+  0   	& 1     		& 0    	 	& 0     		& 1     				& 0     & -1    & 4    \\ \hline  
+  0  	& 0     		& 1     		& 0     		& 1/2   				& -1/2  & 1/2   & 11/2     \\ \hline
+\end{tabular} \end{center}
+Thus, the break-even price for the 4 units of resource~2 is 14.
+
+
+\bigskip  \underline{\bf Adding a new constraint:}
+Given an optimal basis (i.e., tableau), what does adding a new constraint do? Consider a new resource having the following constraint: $$3/2 x_1 + 3/2x_2 + 3/2x_3 \le 14.$$
+We can enter this into the current optimal tableau:
+\begin{center} \begin{tabular} {|c|c|c|c|c|c|c|c|c|} \hline $z$ & $x_1$ & $x_2$ & $x_3$ & $x^{s}_4$ & $x^{s}_5$ & $x^{s}_6$ &  $x^{s}_7$  & rhs   \\ \hline
+\hline  1  & 0     & 0     & 3      & 0    & 5     & 3     & 0       & 166   \\
+\hline  0  & 0     & 0     & -1/2   & 1    & -1/2  & -1/2  & 0       & 1     \\
+\hline  0  & 1     & 0     & 1/2    & 0    & 1/2   & -1/2  & 0       & 3    \\
+\hline  0  & 0     & 1     & 1/4    & 0    & -1/4  & 3/4   & 0       & 7     \\
+\hline  0  & 3/2   & 3/2   & 3/2    & 0    & 0     & 0     & 1       & 14   \\ \hline
+\end{tabular} \end{center}
+This tableau no longer looks like one having a basic solution, so using elementary row operations, we get the following:
+\begin{center} \begin{tabular} {|c|c|c|c|c|c|c|c|c|} \hline 
+$z$ & $x_1$ & $x_2$ & $x_3$ & $x^s_4$ & $x^s_5$ & $x^s_6$ &  $x^s_7$  & rhs   \\ \hline
+\hline  1  & 0     & 0     & 3      & 0    & 5     & 3     & 0       & 166   \\
+\hline  0  & 0     & 0     & -1/2   & 1    & -1/2  & -1/2  & 0       & 1     \\
+\hline  0  & 1     & 0     & 1/2    & 0    & 1/2   & -1/2  & 0       & 3    \\
+\hline  0  & 0     & 1     & 1/4    & 0    & -1/4  & 3/4   & 0       & 7     \\
+\hline  0  & 0     & 0     & 3/8    & 0    & -3/8  & -3/8  & 1       & -1 \\ \hline
+\end{tabular} \end{center}
+This tableau is no longer feasible, so using dual simplex we obtain the following ($x^s_7$ leaves the basis and $x^s_6$ enters).
+
+\begin{center} \begin{tabular} {|c|c|c|c|c|c|c|c|c|} \hline  
+$z$ & $x_1$ & $x_2$ & $x_3$ & $x^s_4$ & $x^s_5$ & $x^s_6$ &  $x^s_7$  & rhs   \\ \hline
+\hline  1  & 0     & 0     & 6      & 0    & 2     & 0     & 8       & 158   \\
+\hline  0  & 0     & 0     & -1   & 1    & 0  & 0     & -4/3       & 7/3     \\
+\hline  0  & 1     & 0     & 0    & 0    & 1   & 0     & -4/3     & 13/3    \\
+\hline  0  & 0     & 1     & 1    & 0    & -1   & 0     & 2       & 5     \\
+\hline  0  & 0     & 0     & -1    & 0    & 1  & 1     & -8/3    & 8/3  \\ \hline
+\end{tabular} \end{center}
+
+What if the constraint was $$3/2 x_1 + 3/2x_2 + 3/2x_3 = 14.$$
+
+
+\medskip What if the constraint was $$3/2 x_1 + 3/2x_2 + 3/2x_3 = 18.$$ Using $x_7$ as an artificial variable, we get the following tableau (an additional row labeled $z_a$ is added for the phase~1 problem).
+\begin{center} \begin{tabular} {|c|c|c|c|c|c|c|c|c|c|}
+\hline       & $z$ & $x_1$ & $x_2$ & $x_3$ & $x^s_4$ & $x^s_5$ & $x^s_6$ &  $x^a_7$  & RHS \\ \hline
+\hline $z$   & 1  & 0     & 0     & 3      & 0    & 5     & 3     & 0       & 166  \\
+\hline $z_a$ & 0  & 0     & 0     & 0      & 0    & 0     & 0     & -1      & 0    \\
+\hline $x_4$ & 0  & 0     & 0     & -1/2   & 1    & -1/2  & -1/2  & 0       & 1    \\
+\hline $x_1$ & 0  & 1     & 0     & 1/2    & 0    & 1/2   & -1/2  & 0       & 3    \\
+\hline $x_2$  & 0  & 0     & 1     & 1/4    & 0    & -1/4  & 3/4   & 0       & 7    \\
+\hline $x_7$ & 0  & 0     & 0     & 3/8    & 0    & -3/8  & -3/8  & 1       & 3    \\ \hline
+\end{tabular} \end{center}
+Adjusting this tableau to represent the initial, artificial, basis yields:
+\begin{center} \begin{tabular} {|c|c|c|c|c|c|c|c|c|c|}
+\hline       & $z$ & $x_1$ & $x_2$ & $x_3$ & $x^s_4$ & $x^s_5$ & $x^s_6$ &  $x^a_7$  & RHS \\ \hline
+\hline $z$   & 1  & 0     & 0     & 3      & 0    & 5     & 3     & 0       & 166  \\
+\hline $z_a$ & 0  & 0     & 0     & 3/8      & 0    & -3/8     & -3/8     & 0      & 3    \\
+\hline $x_4$ & 0  & 0     & 0     & -1/2   & 1    & -1/2  & -1/2  & 0       & 1    \\
+\hline $x_1$ & 0  & 1     & 0     & 1/2    & 0    & 1/2   & -1/2  & 0       & 3    \\
+\hline $x_2$  & 0  & 0     & 1     & 1/4    & 0    & -1/4  & 3/4   & 0       & 7    \\
+\hline $x_7$ & 0  & 0     & 0     & 3/8    & 0    & -3/8  & -3/8  & 1       & 3    \\ \hline
+\end{tabular} \end{center}
+Since the phase~1 problem is a minimization, we  enter $x_3$ into the basis, and remove $x_1$, this yields an optimal solution to the phase 1 problem having the artificial variable $x_7$ in the basis, thus with the new constraint, the LP is infeasible. 
+
+\bigskip \underline{\bf Adding a new variable:}
+Consider the following tableau, to which a new column has been added (corresponding to $x_7$), given this column, please find the original data for this variable, i.e., the values of $c_7$ and ${\bf a_7}$.
+\begin{center} \begin{tabular} {|c|c|c|c|c|c|c|c|c|}
+\hline $z$ & $x_1$ & $x_2$ & $x_3$ & $x^s_4$ & $x^s_5$ & $x^s_6$  & $x_7$ & RHS   \\ \hline
+\hline  1  & 0     & 0     & 3      & 0    & 5     & 3      & -1 & 166   \\
+\hline  0  & 0     & 0     & -1/2   & 1    & -1/2  & -1/2  & 0   & 1     \\
+\hline  0  & 1     & 0     & 1/2    & 0    & 1/2   & -1/2  & 0   & 3    \\
+\hline  0  & 0     & 1     & 1/4    & 0    & -1/4  & 3/4   & 1/2 & 7     \\ \hline
+\end{tabular} \end{center}
+

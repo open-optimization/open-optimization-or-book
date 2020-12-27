@@ -1,0 +1,322 @@
+%By Kevin Cheung
+%The book is licensed under the
+%\href{http://creativecommons.org/licenses/by-sa/4.0/}{Creative Commons
+%Attribution-ShareAlike 4.0 International License}.
+%
+%This file has been modified by Robert Hildebrand 2020.  
+%CC BY SA 4.0 licence still applies.
+\section{Complementary slackness}\label{complementary-slackness}
+
+\begin{theorem}{Weak Duality}{weak-duality-cs}
+\protect\hypertarget{thm:weak-duality-cs}{}{\label{thm:weak-duality-cs}}Let
+(P) and (D) denote a primal-dual pair of linear programming problems in
+generic form as defined \protect\hyperlink{primal-dual}{previously}. Let
+\(\vec{x}^*\) be a feasible solution to \((P)\) and \(\vec{y}^*\) is a
+feasible solution to (D). Then the following hold:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \(\vec{c}^\T\vec{x}^* \geq \vec{y^*}^\T\vec{b}\).
+\item
+  \(\vec{x}^*\) and \(\vec{y}^*\) are optimal solutions to the
+  respective problems if and only if the following conditions (known as
+  the \textbf{complementary slackness conditions}) hold: \[
+  \begin{array}{rcll}
+  x^*_j = 0 & \text{ or } & \vec{y^*}^\T \mm{A}_j = c_j & \text{ for }
+  j = 1,\ldots, n \\
+  y^*_i = 0 & \text{ or } & {\vec{a}^{(i)}}^\T 
+  \vec{x^*} = b_i & \text{ for } i = 1,\ldots, m
+  \end{array}
+  \]
+\end{enumerate}
+\end{theorem}
+
+Part 1 of the theorem is known as \textbf{weak duality}. Part 2 of the
+theorem is often called the \textbf{Complementary Slackness Theorem}.
+
+\begin{proof}[\emph{Proof} of Theorem \ref{thm:weak-duality-cs}]
+
+Note that if \(x^*_j\) is constrained to be nonnegative, its
+corresponding dual constraint is \(\vec{y^*}^\T \mm{A}_j \leq c_j\).
+Hence, \((c_j - \vec{y^*}^\T \mm{A}_j)x^*_j \geq 0\) with equality if
+and only if \(x^*_j = 0\) or \(\vec{y^*}^\T \mm{A}_j = c_j\) (or both).
+
+If \(x^*_j\) is constrained to be nonpositive, its corresponding dual
+constraint is \(\vec{y^*}^\T \mm{A}_j \geq c_j\). Hence,
+\((c_j - \vec{y^*}^\T \mm{A}_j)x^*_j \geq 0\) with equality if and only
+if \(x^*_j = 0\) or \(\vec{y^*}^\T \mm{A}_j = c_j\) (or both).
+
+If \(x^*_j\) is free, its corresponding dual constraint is
+\(\vec{y^*}^\T \mm{A}_j = c_j\). Hence,
+\((c_j - \vec{y^*}^\T \mm{A}_j)x^*_j = 0\).
+
+We can combine these three cases and obtain that
+\((\vec{c}^\T - \vec{y^*}^\T \mm{A})\vec{x^*} = \displaystyle\sum_{j = 1}^n (c_j - \vec{y^*}^\T \mm{A}_j) x^*_j \geq 0\)
+with equality if and only if for each \(j = 1,\ldots, n\),
+\[x^*_j = 0 \text{ or } \vec{y^*}^\T \mm{A}_j = c_j.\] (Here, the usage
+of ``or'' is not exclusive.)
+
+Similarly,
+\(\vec{y^*}^\T(\mm{A}\vec{x^*} - \vec{b}) = \displaystyle\sum_{i = 1}^n y^*_i({\vec{a}^{(i)}}^\T \vec{x^*} - b_i) \geq 0\)
+with equality if and only if for each \(i = 1,\ldots, n\),
+\[y^*_i = 0 \text{ or } {\vec{a}^{(i)}}^\T \vec{x^*} = b_i.\] (Again,
+the usage of ``or'' is not exclusive.)
+
+Adding the inequalities
+\((\vec{c}^\T - \vec{y^*}^\T \mm{A})\vec{x^*} \geq 0\) and
+\(\vec{y^*}^\T(\mm{A}\vec{x^*} - \vec{b}) \geq 0\), we obtain
+\(\vec{c}^\T\vec{x}^* - \vec{y^*}^\T\vec{b} \geq 0\) with equality if
+and only if the complementary slackness conditions hold. By strong
+duality, \(\vec{x}^*\) is optimal (P) and \(\vec{y}^*\) is optimal for
+(D) if and only if \(\vec{c}^\T \vec{x}^* = \vec{y^*}^\T\vec{b}.\) The
+result now follows.
+
+\end{proof}
+
+The complementary slackness conditions give a characterization of
+optimality which can be useful in solving certain problems as
+illustrated by the following example.
+
+\begin{example}{Checking Optimality}{unnamed-chunk-3}
+\protect\hypertarget{ex:unnamed-chunk-3}{}{\label{ex:unnamed-chunk-3}} Let
+(P) denote the following linear programming problem:
+\[\begin{array}{rrcrcrlll}
+\mbox{min} & 2 x_1 & +& 4x_2  & + & 2x_3  \\
+\mbox{s.t.} 
+&  x_1 & + &  x_2 & + & 3x_3  & \leq & 1  \\
+& -x_1 & + & 2x_2 & + &  x_3  & \geq & 1  \\
+&      &   & 3x_2 & - & 6x_3  & = & 0  \\
+&  x_1 & , &     &    & x_3  & \geq & 0 \\
+&      &   & x_2  &   &      &    & \mbox{free.}
+\end{array}\] Is
+\(\vec{x}^* =\left[\begin{array}{c} 0\\\frac{2}{5}\\ \frac{1}{5} \end{array}\right]\)
+an optimal solution to (P)?
+\end{example}
+
+\begin{solution}
+One could answer this question by solving (P) and then see if the
+objective function value of \(\vec{x}^*\), assuming that its feasibiilty
+has already been verified, is equal to the optimal value. However, there
+is a way to make use of the given information to save some work.
+
+Let (D) denote the dual problem of (P): \[\begin{array}{rrcrcrlll}
+\max & y_1 & +& y_2  &   &       \\
+\mbox{s.t.} 
+&  y_1 & - &  y_2 &   &       & \leq & 2  \\
+&  y_1 & + & 2y_2 & + & 3y_3  & = & 4  \\
+& 3y_1 & + &  y_2 & - & 6y_3  & \leq & 2  \\
+&  y_1 &   &     &    &      & \leq & 0 \\
+&      &   & y_2  &   &      & \geq   &  0 \\
+&      &   &     &    & y_3  &    & \mbox{free.}
+\end{array}\]
+
+One can check that \(\vec{x}^*\) is a feasible solution to (P). If
+\(\vec{x}^*\) is optimal, then there must exist a feasible solution
+\(\vec{y}^*\) to (D) satisfying together with \(\vec{x}^*\) the
+complementary slackness conditions: \[
+\begin{array}{llr}
+ y_1^* = 0 & \mbox{ or } &  x_1^* + x_2^* + 3x_3^* = 1 \\
+ y_2^* = 0 & \mbox{ or } & -x_1^* + 2x_2^* + x_3^* = 1 \\
+ y_3^* = 0 & \mbox{ or } &   3x_2^* - 6x_3^*  = 0 \\
+ x_1^* = 0 & \mbox{ or } &  y_1^* -  y_2^*  =  2 \\
+ x_2^* = 0 & \mbox{ or } &  y_1^*  + 2y_2^* + 3y_3^*  =  4 \\
+ x_3^* = 0 & \mbox{ or } & 3y_1^*  + y_2^* - 6y_3^*  =  2. \\
+\end{array}
+\] As \(x_2^*, x_3^* \gt 0\), satisfying the above conditions require
+that
+\begin{align*} 
+  y_1^*  + 2y_2^* + 3y_3^* &= 4  \\
+  3y_1^*  + y_2^* - 6y_3^* &=  2.
+\end{align*}
+
+Solving for \(y_2^*\) and \(y_3^*\) in terms of \(y_1^*\) gives
+\(y_2^* = 2 - y_1^*\), \(y_3^* = \frac{1}{3}y_1^*\). To make
+\(\vec{y}^*\) feasible to (D), we can set \(y_1^* = 0\) to obtain the
+feasible solution \(y_1^* = 0, y_2^* = 2\), \(y_3^* = 0\). We can check
+that this \(\vec{y}^*\) satisfies the complementary slackness conditions
+with \(\vec{x}^*\). Hence, \(\vec{x}^*\) is an optimal solution to (P)
+by Theorem \ref{thm:weak-duality-cs}, part 2.
+\end{solution}
+
+\subsection*{Exercises}\label{exercises-7}
+\addcontentsline{toc}{section}{Exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  Let (P) and (D) denote a primal-dual pair of linear programming
+  problems. Prove that if (P) is not infeasible and (D) is infeasible,
+  then (P) is unbounded.
+\item
+  Let (P) denote the following linear programming problem:
+  \[\begin{array}{rrcrcrll}
+  \min & &  & 4x_2  & + & 2x_3  \\
+  \text{s.t.} 
+   & x_1 & + &  x_2 & + & 3x_3  & \leq & 1  \\
+   & x_1 & - & 2x_2 & + &  x_3  & \geq & 1  \\
+   & x_1 & + & 3x_2 & - & 6x_3  & = & 0  \\
+   & x_1 & , &     &    & x_3  & \geq & 0 \\
+   &     &   & x_2  &   &      &    & \text{free.}
+  \end{array}\] Determine if
+  \(\begin{bmatrix} x_1\\x_2\\x_3 \end{bmatrix} =\begin{bmatrix} \frac{3}{5} \\ -\frac{1}{5}\\ 0 \end{bmatrix}\)
+  is an optimal solution to (P).
+\item
+  Let (P) denote the following linear programming problem:
+  \[\begin{array}{rrcrcrlll}
+  \min & x_1 & + & 2x_2  & - & 3x_3  \\
+  \text{s.t.} 
+  &  x_1 & + & 2 x_2 & + & 2x_3  & = & 2  \\
+  &  -x_1 & + &  x_2 & + & x_3  & = & 1  \\
+  &  -x_1 & + & x_2 & - & x_3  & \geq & 0  \\
+  &  x_1 & , & x_2 & , & x_3  & \geq & 0 
+  \end{array}\] Determine if
+  \(\begin{bmatrix} x_1\\x_2\\x_3 \end{bmatrix} =\begin{bmatrix} 0 \\ 1\\ 0 \end{bmatrix}\)
+  is an optimal solution to (P).
+\item
+  Let \(m\) and \(n\) be positive integers. Let
+  \(\mm{A}\in \mathbb{R}^{m\times n}\). Let
+  \(\vec{b}\in \mathbb{R}^{m}\). Let \(\vec{c}\in \mathbb{R}^{n}\). Let
+  (P) denote the linear programming problem \[\begin{array}{rl}
+  \min & \vec{c}^\mathsf{T} \vec{x} \\
+  \text{s.t.} & \mm{A} \vec{x} = \vec{b} \\
+  & \vec{x} \geq \vec{0}.
+  \end{array}
+  \] Let (D) denote the dual problem of (P): \[\begin{array}{rl}
+  \max & \vec{y}^\mathsf{T} \vec{b} \\
+  \text{s.t.} & \vec{y}^\T \mm{A} \leq
+  \vec{c}^\mathsf{T}.
+  \end{array}
+  \] Suppose that \(\mm{A}\) has rank \(m\) and that (P) has at least
+  one optimal solution. Prove that if \(x^*_j = 0\) for \emph{every}
+  optimal solution \(\mm{x}^*\) to (P), then there exists an optimal
+  solution \(\vec{y}^*\) to (D) such that
+  \({\vec{y}^*}^\T\mm{A}_j \lt c_i\) where \(\mm{A}_j\) denotes the
+  \(j\)th column of \(\mathbf{A}\).
+\end{enumerate}
+
+\subsection*{Solutions}\label{solutions-7}
+\addcontentsline{toc}{section}{Solutions}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  By the Fundamental Theorem of Linear Programming, (P) either is
+  unbounded or has an optimal solution. If it is the latter, then by
+  strong duality, \((D)\) has an optimal solution, which contradicts
+  that \((D)\) is infeasible. Hence, (P) must be unbounded.
+\item
+  We show that it is not an optimal solution to (P). First, note that
+  the dual problem of (P) is \[\begin{array}{rrcrcrlll}
+  \max & y_1 & +& y_2  &   &       \\
+  \mbox{s.t.} 
+  &  y_1 & + &  y_2 & + &  y_3 & \leq & 0  \\
+  &  y_1 & - & 2y_2 & + & 3y_3  & = & 4  \\
+  & 3y_1 & + &  y_2 & - & 6y_3  & \leq & 2  \\
+  &  y_1 &   &     &    &      & \leq & 0 \\
+  &      &   & y_2  &   &      & \geq   &  0 \\
+  &      &   &     &    & y_3  &    & \mbox{free.} \\
+  \end{array}\]
+
+  \textbackslash{}end\{bmatrix\}) were an optimal solution, there would
+  exist \(\vec{y^*}\) feasible to \((D)\) satisfying the complementary
+  slackness conditions with \(\vec{x}^*\):
+
+  \begin{eqnarray*}
+   y_1^* = 0 & \mbox{ or } &  ~x_1^* + ~x_2^* + 3x_3^* = 1 \\
+   y_2^* = 0 & \mbox{ or } &  ~x_1^* - 2x_2^* +~x_3^* = 1 \\
+   y_3^* = 0 & \mbox{ or } &  ~x_1^* + 3x_2^* - 6x_3^* = 0 \\
+   x_1^* = 0 & \mbox{ or } &  ~y_1^* + ~~y_2^* + ~y_3^* = 0 \\
+   x_2^* = 0 & \mbox{ or } &  ~y_1^*  - 2y_2^* + 3y_3^* =  4 \\
+   x_3^* = 0 & \mbox{ or } &  3y_1^*  + ~y_2^* - 6y_3^* =  2. \\
+  \end{eqnarray*}
+
+  Since \(x^*_1 + x_2^* + 3x_3^* \lt 1\), we must have \(y_1^* = 0\).
+  Also, \(x_1^*, x_2^*\) are both nonzero. Hence,
+
+  \begin{eqnarray*}
+  y_1^* + y_2^* + y_3^* = 0~ \\
+  y_1^* - 2y_2^* + 3y_3^* = 4,
+  \end{eqnarray*}
+
+  implying that
+
+  \begin{eqnarray*}
+   y_2^* + y_3^* = 0~ \\ 
+  - 2y_2^* + 3y_3^* = 4.
+  \end{eqnarray*}
+
+  Solving gives \(y_2^* = -\frac{4}{5}\) and \(y_3^* = \frac{4}{5}\).
+  But this implies that \(y^*\) is not a feasible solution to the dual
+  problem since we need \(y_2^* \geq 0\). Hence, \(\vec{x}^*\) is not an
+  optimal solution to (P).
+\item
+  We show that it is not an optimal solution to (P). First, note that
+  the dual problem of (P) is \[\begin{array}{rrcrcrlll}
+  \max & 2y_1 & +& y_2  &   &       \\
+  \mbox{s.t.} 
+  &  y_1 & - &  y_2 & - &  y_3 & \leq & 1  \\
+  & 2 y_1 & + & y_2 & + & y_3  & \leq & 2  \\
+  & 2 y_1 & + & y_2 & - & y_3  & \leq & -3  \\
+  &  y_1 & , & y_2  &   &      &  & \mbox{free.} \\
+  &      &   &      &   & y_3  & \geq  & 0
+  \end{array}\]
+
+  Note that \(\vec{x}^* = \begin{bmatrix} 0 \\ 1 \\ 0 \end{bmatrix}\) is
+  a feasible solution to (P). If it were an optimal solution to (P),
+  there would exist \(\vec{y^*}\) feasible to the dual problem (D)
+  satisfying the complementary slackness conditions with \(\vec{x}^*\):
+
+  \begin{eqnarray*}
+   y_1^* = 0 & \mbox{ or } &  ~x_1^* + 2x_2^* + 2x_3^* = 2 \\
+   y_2^* = 0 & \mbox{ or } &  -x_1^* + ~x_2^* + ~x_3^* = 1 \\
+   y_3^* = 0 & \mbox{ or } &  -x_1^* + ~x_2^* - ~x_3^* = 0 \\
+   x_1^* = 0 & \mbox{ or } &  ~y_1^* - y_2^* - y_3^* = 1 \\
+   x_2^* = 0 & \mbox{ or } &  2y_1^*  + y_2^* + y_3^* =  2 \\
+   x_3^* = 0 & \mbox{ or } &  2y_1^*  + y_2^* - y_3^* = -3. \\
+  \end{eqnarray*}
+
+  Since \(-x^*_1 + x_2^* - x_3^* \gt 0\), we must have \(y_3^* = 0\).
+  Also, \(x_2^* \gt 0\) implies that \(2y_1^* + y_2^* + y_3^* = 2\).
+  Simplifying gives \(y_2^* = 2 -2y_1^*\).
+
+  Hence, for \(y^*\) to be feasible to the dual problem, it needs to
+  satisfy the third constraint, \(2y_1^* + (2 - 2y_1^*) \leq -3\), which
+  simplifies to the absurdity \(2 \leq -3\). Hence, \(\vec{x}^*\) is not
+  an optimal solution to (P).
+\item
+  Let \(v\) denote the optimal value of (P). Let (P') denote the problem
+  \[\begin{array}{rl}
+  \min & -x_i \\
+  \text{s.t.} & \mm{A}\vec{x} = \vec{b} \\
+  & \vec{c}^\T \vec{x} \leq v \\
+  & \vec{x} \geq \vec{0}
+  \end{array}\] Note that \(x^*\) is a feasible solution to (P') if and
+  only if it is an optimal solution to (P). Since \(x_i^* = 0\) for
+  every optimal solution to (P), we see that the optimal value of (P')
+  is 0.
+
+  Let (D') denote the dual problem of (P'): \[\begin{array}{rl}
+  \max & \vec{y}^\T \vec{b} + v u \\
+  \text{s.t.} &
+  \vec{y}^\T \mm{A}_p + c_p u \leq 0~~\text{ for all } p \neq i \\
+  & \vec{y}^\mathsf{T} \mm{A}_i + c_i u \leq -1 \\
+  & u \leq 0.
+  \end{array}
+  \] Suppose that an optimal solution to (D') is given by
+  \(\vec{y}', u'\). Let \(\bar{\vec{y}}\) be an optimal solution to (D).
+  We consider two cases.
+
+  \textbf{Case 1:} \(u' = 0\).
+
+  Then \({\vec{y}'}^\T\vec{b} = 0\). Hence,
+  \(\vec{y}^* = \bar{\vec{y}} + \vec{y}'\) is an optimal solution to (D)
+  with \({\vec{y}^*}^\T \mm{A}_i \lt c_i\).
+
+  \textbf{Case 2:} \(u' \lt 0\).
+
+  Then \({\vec{y}'}^\T\vec{b} + vu'= 0\), implying that
+  \(\frac{1}{|u'|} {\vec{y}'}^\T\vec{b} = v\). Let
+  \(\vec{y}^* = \frac{1}{|u|}\vec{y}'\). Then \({\vec{y}^*}\) is an
+  optimal solution to (D) with \({\vec{y}^*}^\T \mm{A}_i \lt c_i\).
+\end{enumerate}

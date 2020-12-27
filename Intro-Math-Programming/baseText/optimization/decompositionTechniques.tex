@@ -1,0 +1,189 @@
+
+% Copyright 2020 by Robert Hildebrand - Contributed by Diego Moran
+%This work is licensed under a
+%Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0)
+%See http://creativecommons.org/licenses/by-sa/4.0/
+
+%\documentclass[../open-optimization/open-optimization.tex]{subfiles}
+%
+%\begin{document}
+\chapter{Reformulation and Decomposition Techniques}
+
+\section{Lagrangean relaxation}
+
+Consider the MIP problem
+$$z_{IP}=\max \{ c^Tx\tq A^1x\leq b^1,\ A^2x\leq b^2,\ x\in\Z^n\},\qquad (1)$$
+where $A^i\in\R^{m_i\times n}$ and $b^i\in\R^{m_i}$, for $i=1,2$. Denote $X=\{x\in\R^n\tq A^2x\leq b^2,\ x\in\Z^n\}$.
+
+\begin{definition}{Lagrangean relaxation}{lagrangeanRelaxation} Given $u\in\R^{m_1}_+$, the Lagrangean relaxation is the following MIP
+$$v(u)=\max \{c^Tx+ u^T(b^1-A^1x)\tq x\in X\}.$$
+\end{definition}
+
+\begin{remark}{}{}
+Observe that we have  we have $v(u)\geq z_{IP}$ for all $u\in\R^{m_1}_+$.
+\end{remark}
+
+\begin{definition}{Lagrangean dual}{lagrangeanDual} The Lagrangean dual is the following optimization  problem
+$$v_{LD}=\min\{v(u)\tq u\in\R^{m_1}_+\}.$$
+\end{definition}
+
+\begin{remark}{}{}
+$v_{LD}$ is the `best possible value' for the upper bound $v(u)$.
+\end{remark}
+
+\begin{theorem}{}{} Denote $z_{LP}$ the optimal value of the continuous relaxation of the MIP problem (1). Then
+\begin{enumerate}
+\item  Consider the following linear program
+	$$w_{LD}=\max\{c^Tx\tq A^1x\leq b^1,\ x\in\conv(X)\}.$$
+	Then $v_{LD}=w_{LD}$. 
+	\item We have that $z_{IP}\leq v_{LD} \leq z_{LP}$.
+\end{enumerate}
+\end{theorem}
+
+\todo[inline]{
+Describe subgradient algorithm of optimization the Lagrangian Dual.  
+}
+
+\todo[inline]{
+Add example and connect this to code.  Show that using the lagrangian dual is faster than solving the original problem.  Example might be chosen to have an efficiently solvable lagrangian dual, such as TU constraints.
+}
+\section{Column generation}
+\begin{resource}
+\begin{itemize}
+\item \href{http://yetanothermathprogrammingconsultant.blogspot.com/2017/01/employee-scheduling-ii-column-generation.html}{Employee Scheduling with Column Generation}
+\item \href{https://www.math.u-bordeaux.fr/~rsadykov/slides/Sadykov_INOC19slides.pdf}{Branch Cut and Price for Vehicle Routing Problems}
+\end{itemize}
+\end{resource}
+\subsection{The master problem and the pricing subproblem}
+Let $A\in\R^{m\times n}$, $b\in\R^m$ and $c\in\R^n$. Consider the following linear program
+$$z_{LP}=\min\big\{c^Tx\tq \sum_{i=1}^nA^ix_i=b, x\geq0\big\}\qquad (LP).$$
+
+\begin{definition}{Master problem}{masterProblem}
+Given $I\subseteq \{1,\dots, n\}$,  consider the following restriction of the above LP:
+$$z_{LP}(I)=\min\big\{c^Tx\tq \sum_{i\in I}A^ix_i=b\, x_i\geq0,\ \text{for all}\ i\in I\big\}\qquad (MLP).$$
+\end{definition}
+
+Let $\bar x_i,i\in I$ be an optimal solution to (MLP) and let $\bar y\in\R^m$ be an optimal solution to its dual. Then $\bar x_i,i\in I,\ \bar x_i:=0,i\notin I$ is an optimal solution to (LP) if and only if
+$$c_i-\bar y^TA^i\geq 0,\ \text{for all}\ i=1,\dots,n.$$ 
+(that is, if and only if $\bar y$ is also a feasible solution to the dual of (LP).)
+
+\begin{definition}{The pricing subproblem}{pricing-subproblem} Let $\bar y\in\R^m$ be an optimal solution to the dual of (MLP). Consider the following optimization problem
+$$w_{SP}=\min\{c_i-\bar y^TA^i\tq i=1,\dots, n\}.$$
+\end{definition}
+
+\begin{theorem}{}{} Let $\bar x_i,i\in I$ be an optimal solution to (MLP) and let $\bar y\in\R^m$ be an optimal solution to its dual.
+\begin{enumerate}
+\item  If $w_{SP}\geq 0$, then $\bar x_i,i\in I,\ \bar x_i:=0,i\notin I$ is an optimal solution to (LP). Thus, we can solve (LP) by solving the restricted problem (MLP).
+\item  If $w_{SP}< 0$, in order to solve solve (LP) by solving the restricted problem (MLP), we need to add more columns to (MLP).
+\end{enumerate}
+\end{theorem}
+
+\todo[inline]{
+Connect this to example in first part of book (or rewrite this).  Create or find code example to connect this to and show column generation version is faster.
+}
+
+\subsection{Dantzig-Wolf decomposition}
+
+Consider the following MIP
+$$z_{IP}=\max \big\{\sum_{k=1}^K(c^k)^Tx^k\tq A^1+\dots+A^K=b,\ x^k\in X^k,\ \text{for all}\ k=1,\dots,K\big\},\qquad (2)$$
+where $X^k=\{x\in\Z^{n_k}\tq D^kx^k\leq d^k\}$, for $k=1,\dots,K$.
+
+Assume that the sets $X^k,\ k=1,\dots,K$ are bounded. Consequently, for each $k=1,\dots,K$, we can write 
+$$X^k=\{x^{k,t}\tq t=1,\dots, T_k\}.$$
+
+\begin{definition}{Dantzig-Wolf reformulation}{dantzig-wolfe} The following MIP is the Dantzig-Wolf reformulation of (2)
+\begin{align*}
+z_{DW}= \max &\sum_{k=1}^K\sum_{t=1}^{T_k}(c^k)^Tx^{k,t}\\
+&\sum_{k=1}^K\sum_{t=1}^{T_k}A^kx^{k,t}\lambda_{kt}=b\\
+&\sum_{t=1}^{T_k}\lambda_{kt}=1,\qquad \text{for all}\ k=1,\dots,K\\
+& \lambda_{kt}\in\{0,1\}\qquad \text{for all}\ k=1,\dots,K,\ t=1,\dots, T_k. 
+\end{align*}
+\end{definition}
+\begin{remark}{}{}
+Clearly, $z_{IP}=z_{DW}$.
+\end{remark}
+
+The continuous relaxation of the above MIP can be solved by using the column generation approach.
+
+
+
+\todo[inline]{
+Elaborate and sonnect this to example in first part of book (or rewrite this).  Create or find code example to connect this to and show decomposition  version is faster.
+}
+
+
+
+\includefiguresource{tikz/dantzig-wolfe-decomposition/dantzig-wolfe-decomposition.pdf}
+\section{Extended formulations}
+
+Let $P=\{x\in\R^n\tq Ax\leq b\}$ be a polyhedron. 
+
+\begin{definition}{Extended formulation}{extended-formulation} An extended formulation for $P$ is a polyhedron 
+$$Q=\{(x,y)\in\R^n\times\R^m\tq Ex+Fy=g,y\geq0\},$$
+with the property that $x\in P$ if and only if exists $y\in \R^m$ such that $(x,y)\in Q$.
+\end{definition}
+
+
+
+\begin{definition}{Extension complexity}{extension-complexity} The \index{extension complexity} of $P$ is the minimum $m$ such that there exists an extended formulation $Q\subseteq \R^n\times \R^m$ of $P$.
+\end{definition}
+
+\begin{theorem}{}{} Let $P$ be the $TSP$ polytope (that is, $P$ is the convex hull of the 0-1 vectors that represent valid tours). Then the extension complexity of $P$ is at least $2^{\Omega(n^{1/2})}$.
+\end{theorem}
+
+\begin{remark}{}{}
+This result implies that there is no {\bf ideal} formulation for the TSP problem such that the formulation is of polynomial size. Conversely, if we have a formulation for the TSP problem that is of polynomial size, the this formulation cannot be ideal.
+\end{remark}
+
+
+\todo[inline]{
+Add bib references for these figures (Created by Robert Hildebrand).
+}
+
+\includefiguresource{tikz/extended-formulation}
+
+\includefiguresource{tikz/extended-formulation2}
+
+\includefiguresource{tikz/extended-formulation3}
+
+\begin{resource}
+SI: 4OR Surveys
+Published: 22 September 2015
+Deriving compact extended formulations via LP-based separation techniques
+Giuseppe Lancia \& Paolo Serafini 
+\href{https://doi-org.ezproxy.lib.vt.edu/10.1007/s10479-015-2012-4}{Survey}
+\end{resource}
+
+\section{Benders decomposition} 
+
+In \index{Benders Decomposition}, we try projecting out some variales.  This creates new inequalities that we must generate on the fly in a cutting plane scheme.
+
+
+
+
+
+
+
+
+From Wikipedia, the free encyclopedia:\\
+
+{\bf Benders' decomposition} (alternatively, Benders's decomposition; named after Jacques F. Benders) is a technique in mathematical programming that allows the solution of very large linear programming problems that have a special block structure. This structure often occurs in applications such as stochastic programming.
+
+As it progresses towards a solution, Benders' decomposition adds new constraints, so the approach is called ``row generation''. In contrast, Dantzig-Wolfe decomposition uses ``column generation''.
+
+See more information in the next section.
+
+\chapter{Stochastic Programming}
+
+\begin{resource}
+\href{https://github.com/Argonne-National-Laboratory/DSP}{Argonnne DSP solver for two stage programs}
+\end{resource}
+
+
+\chapter{Constraint Programming}
+
+\todo[inline]{Create chapter on consrtraint programming.}
+
+%
+%
+%\end{document}

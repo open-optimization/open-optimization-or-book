@@ -1,0 +1,883 @@
+% Copyright 2020 by Robert Hildebrand
+%This work is licensed under a
+%Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0)
+%See http://creativecommons.org/licenses/by-sa/4.0/
+
+%\documentclass[../open-optimization/open-optimization.tex]{subfiles}
+%
+%\begin{document}
+
+\chapter{Exponential Size Formulations}
+\label{sec:exponential-IP-forumulations}
+
+Although typically models need to be a reasonable size in order for us to code them and send them to a solver, there are some ways that we can allow having models of exponential size.  The first example here is the cutting stock problem, where we will model with exponentially many variables.  The second example is the traveling salesman problem, where we will model with exponentially many constraints.  We will also look at some other models for the traveling salesman problem.  
+\section{Cutting Stock}
+This is a classic problem that works excellent for a technique called \emph{column generation}.
+We will discuss two versions of the model and then show how we can use column generation to solve the second version more efficiently.  First, let's describe the problem.
+
+\begin{general}{Cutting Stock}{}
+You run a company that sells of pipes of different lengths.  These lengths are $L_1, \dots, L_k$.  To produce these pipes, you have one machine that produces pipes of length $L$, and then cuts them into a collection of shorter pipes as needed.  
+
+\begin{center}
+\includegraphics[scale = 0.2]{pipes}\footnote{
+\url{https://www.pinclipart.com/pindetail/TihJbb_stacks-of-pipe-steel-casing-pipe-clipart/}}
+\end{center}
+
+You have an order come in for $d_i$ pipes of length $i$ for $i=1, \dots, k$.  How can you fill the order while cutting up the fewest number of pipes?
+\end{general}
+\begin{example}{Cutting stock with pipes}{cuttingStockPipe}
+A plumber stocks standard lengths of pipe, all of length 19 m. An order arrives for:
+\begin{itemize}
+\item  12 lengths of 4m
+\item 15 lengths of 5m
+\item 22 lengths of 6m
+\end{itemize}
+How should these lengths be cut from standard stock pipes so as to minimize
+the number of standard pipes used?
+\end{example}
+\begin{center}
+%\includegraphics[scale = 0.1]{pipes}
+%https://www.freeimages.com/search/sawing-pipe
+\end{center}
+
+An initial model for this problem could be constructed as follows:  
+\begin{itemize}
+\item Let $N$ be an upper bound on the number of pipes that we may need.
+\item Let $z_j = 1$ if we use pipe $i$ and $z_j = 0$ if we do not use pipe $j$, for $j=1, \dots, N$.
+\item Let $x_{ij}$ be the number of cuts of length $L_i$ in pipe $j$ that we use.
+\end{itemize}
+Then we have the following model
+\begin{equation}
+\begin{split}
+\min\ \  & \sum_{j=1}^N z_j\\
+\st \ \  & \sum_{i=1}^k  L_i x_{ij} \leq Lz_j \ \text{ for } j=1,\dots, N\\
+& \sum_{j=1}^N x_{ij} \geq d_i \ \text{ for } i=1, \dots, k\\
+& z_j \in \{0,1\} \text{ for } j=1, \dots, N\\
+& x_{ij} \in \Z_+ \text{ for } i=1, \dots, k,\, j=1, \dots, N
+\end{split}
+\end{equation}
+\begin{exercise}{Show Bound}{}
+In the example above, show that we can choose $N=16$.
+\end{exercise}
+For our example above, using $N=16$, we have
+\begin{equation}
+\begin{split}
+\min\ \  & \sum_{j=1}^{16} z_j\\
+\st \ \  &  4 x_{1j} + 5 x_{2j} + 6 x_{3j} \leq 19 z_j\\
+& \sum_{j=1}^{16} x_{1j} \geq 12\\
+& \sum_{j=1}^{16} x_{2j} \geq 15\\
+& \sum_{j=1}^{16} x_{3j} \geq 22\\
+& z_j \in \{0,1\} \text{ for } j=1, \dots, 16\\
+& x_{ij} \in \Z_+ \text{ for } i=1, \dots, 3,\, j=1, \dots, 16
+\end{split}
+\end{equation}
+Additionally, we could break the symmetry in the problem.  That is, suppose the solution uses 10 of the 16 pipes.  The current formulation does not restrict which 10 pipes are used.  Thus, there are many possible solutions.  To reduce this complexity, we can state that we only use the first 10 pipes.  We can write a constraint that says \emph{if we don't use pipe $j$, then we also will not use any subsequent pipes}.  Hence, by not using pipe 11, we enforce that pipes $11, 12, 13, 14,15,16$ are not used.  This can be done by adding the constraints
+\begin{equation}
+z_1 \geq z_2 \geq z_3 \geq \dots \geq z_N.
+\end{equation}
+
+See \nameref{code:cutting-pipe} for code for this formulation.
+
+Unfortunately, this formulation is slow and does not scale well with demand.  In particular, the number of variables is $N + kN$ and the number of constraints is $N$ (plus integrality and non-negativity constraints on the variables).  
+The solution times for this model are summarized in the following table:
+\begin{center}
+\textbf{INPUT TABLE OF COMPUTATIONS}
+%\includegraphics[scale = 0.25]{table-solver-cutting-pipe-bad}\footnotemark
+\end{center}
+
+
+\subsection{Pattern formulation}
+We could instead list all patterns that are possible to cut each pipe.   A pattern is an vector $a \in \Z^k_+$ such that for each $i$, $a_i$ lengths of $L_i$ can be cut from a pipe of length $L$.  That is
+\begin{equation}
+\begin{split}
+\sum_{i=1}^k &L_i a_i \leq L\\
+a_i &\in \Z_+ \ \text{for all } i=1, \dots, k
+\end{split}
+\end{equation}
+In our running example, we have 
+\begin{equation}
+\begin{split}
+4 &a_1 + 5 a_2 + 6 a_3 \leq 19\\
+&a_i \in \Z_+ \ \text{for all } i=1, \dots, 3
+\end{split}
+\end{equation}
+
+
+For visualization purposes, consider the patterns where $a_3 = 0$.  That is, only patterns with cuts of length 4m or 5m.  All patterns of this type are represented by an integer point in the polytope 
+\begin{equation}
+P = \{(a_1,a_2) : 4a_1 + 5 a_2 \leq 19, a_1\geq 0, a_2 \geq 0\}
+\end{equation}
+which we can see here:
+\begin{center}
+\includegraphicstatic[scale = 0.4]{knapsack_fig.pdf}
+\end{center}
+where $P$ is the blue triangle and each integer point represents a pattern.  Feasible patterns lie inside the polytope $P$.  Note that we only need patterns that are maximal with respect to number of each type we cut.  Pictorially, we only need the patterns that are integer points represented as yellow dots in the picture below.
+\begin{center}
+\includegraphicstatic[scale = 0.4]{knapsack_fig_maximal.pdf}
+\end{center}
+For example, the pattern $[3,0,0]$ is not needed (only cut 3 of length 4m) since we could also use the patten $[4,0,0]$ (cut 4 of  length 4m) or we could even use the pattern $[3,1,0]$  (cut 3 of length 4m and 1 of length 5m).
+
+\begin{example}{Pattern Formulation}{}
+Let's list all the possible patterns for the cutting stock problem:
+
+\begin{center}
+\begin{tabular}{l|c|c|c|c|c|c|c|c|c|c}
+& \multicolumn{7}{c}{Patterns}\\
+\hline
+Cuts of length 4m &0 &0 &1 &0 &2 &1 &2 &3 &4 & 1\\
+ Cuts of length 5m   &    0 &1 &0 &2 &1 &2& 2& 1 &0&3 \\
+ Cuts of length 6m   &    3& 2 &2 &1 &1 &0& 0& 0 &0 &0\\
+ \hline
+\end{tabular}
+\end{center}
+
+We can organize these patterns into a matrix.
+\begin{equation}
+A = 
+\begin{pmatrix}
+0 &0 &1 &0 &2 &1 &2 &3 &4 & 1\\
+        0 &1 &0 &2 &1 &2& 2& 1 &0&3 \\
+        3& 2 &2 &1 &1 &0& 0& 0 &0 &0
+\end{pmatrix}
+ \end{equation}
+ 
+ Let $p$ be the number of patterns that we have.  We  create variables $x_1, \dots, x_p \in \Z_+$ that denote the number of times we use each pattern.
+
+Now, we can recast the optimization problem as
+
+\begin{align}
+\min \ \ & \sum_{i=1}^p x_i \\
+\text{such that} \ \ & Ax \geq \begin{bmatrix} 12 \\ 15 \\ 22\end{bmatrix}\\
+& x \in \Z^p_+
+\end{align}
+ 
+\end{example}
+
+
+\subsection{Column Generation}
+Consider the linear program\eqref{LP:basis-solution}, but in this case we are instead minimizing.  
+
+
+Thus we can write it as 
+ \begin{equation}
+ \label{LP:basis-solution2}
+\begin{split}
+\min \quad & (c_N  - c_B A_B^{-1} A_N) x_N + c_B A_B^{-1} b  \\
+\st  \quad &x_B +  A_B^{-1} A_N x_N = A_B^{-1}b\\
+& x \geq 0
+\end{split}
+\end{equation}
+In our LP we have $c = \one$, that is, $c_i =1$ for all $i=1, \dots, k$.  Hence, we can write it as 
+ \begin{equation}
+ \label{LP:basis-solution3}
+\begin{split}
+\min \quad & (\one_N  - \one_B A_B^{-1} N) x_N + \one_B A_B^{-1} b  \\
+\st  \quad &x_B +  A_B^{-1} A_N x_N = A_B^{-1}b\\
+& x \geq 0
+\end{split}
+\end{equation}
+Now, if there exists a non-basic variable that could enter the basis and improve the objective, then there is one with a reduced cost that is negative.  For a particular non-basic variable, the coefficient on it is
+\begin{equation}
+\left( 1 -  \one_B A_B^{-1} A_N^i\right) x_i
+\end{equation}
+where $A_N^i$ is the $i$-th column of the matrix $A_N$.  Thus, we want to look for a column $a$ of $A_N$ such that 
+\begin{equation}
+1 -  \one_B A_B^{-1} a < 0 \ \  \Rightarrow \ \   1 < \one_B A_B^{-1} a
+\end{equation}
+\begin{general}{Pricing Problem}{(knapsack problem!)}
+Given a current basis $B$ of the \emph{master} linear program, there exists a new column to add to the basis that improves the LP objective if and only if the following problem has an objective value strictly larger than 1.
+\begin{equation}
+\begin{split}
+\max\quad  &\one_B A_B^{-1} a\\
+\st \quad & \sum_{i=1}^k L_i a_i \leq L\\
+& a_i \in \Z_+ \text{ for } i=1, \dots, k
+\end{split}
+\end{equation}
+\end{general}
+
+\begin{example}{Pricing Problem}{(knapsack problem!)}
+Let's make the initial choice of columns easy.  We will do this by selecting columns 
+
+\begin{center}
+\begin{tabular}{l|c|c|c|c|c|c|c|c|c|c}
+& \multicolumn{3}{c}{Patterns}\\
+\hline
+Cuts of length 4m &4 & 0 & 0  \\ %&1 &0 &2 &1 &2 &3 &4 & 1\\
+ Cuts of length 5m   & 0 &  3 &   0  \\%&1 &0 &2 &1 &2& 2& 1 &0&3 \\
+ Cuts of length 6m   & 0 &  0 &  3 \\% & 2 &2 &1 &1 &0& 0& 0 &0 &0\\
+ \hline
+\end{tabular}
+\end{center}
+
+So our initial $A$ matrix is
+
+\begin{equation}
+A = 
+\begin{pmatrix}
+4 & 0 & 0 \\
+          0 &  3 &   0 \\
+         0 &  0 &  3 
+\end{pmatrix}
+ \end{equation}
+ 
+ Notice that there are enough patterns in the initial $A$ matrix to produce feasible solution.  Let's also append an arbitrary column to the $A$ matrix as a potential new pattern.
+ 
+ \begin{equation}
+A = 
+\begin{pmatrix}
+4 & 0 & 0 & a_1 \\
+          0 &  3 &   0  & a_2\\
+        0 &  0 &  3  & a_3
+\end{pmatrix}
+ \end{equation}
+ 
+ Now, let's solve the linear relaxation and compute the tabluea.
+ 
+ 
+ 
+ 
+ 
+
+ 
+
+
+\begin{equation}
+\begin{split}
+\max\quad  & .......a\\
+\st \quad & 4 a_1 + 5 a_2 + 6 a_3 \leq 19\\
+& a_i \in \Z_+ \text{ for } i=1, \dots, k
+\end{split}
+\end{equation}
+\end{example}
+\subsection{Cutting Stock - Multiple widths}
+\begin{resource}
+Gurobi has as excellent demonstration application to look at:
+\href{https://demos.gurobi.com/cutstock/}{Gurobi - Cutting Stock Demo}
+\href{https://www.gurobi.com/cutting-stock-problem-with-multiple-master-rolls/}{Gurobi - Multiple Master Rolls}
+\end{resource}
+
+
+Here are some solutions:
+\begin{itemize}
+\item  \url{https://github.com/fzsun/cutstock-gurobi}.
+\item \url{http://www.dcc.fc.up.pt/~jpp/mpa/cutstock.py}
+\end{itemize}
+
+
+Here is an AIMMS description of the problem: 
+\href{https://download.aimms.com/aimms/download/manuals/AIMMS3OM_CuttingStock.pdf}{AIMMS Cutting Stock}
+
+% \beign{bmatrix} 1 \\ 1 \\ 1\end{bmatrix}
+
+
+\section{Spanning Trees}
+\label{sec:spanning-tree-models}
+
+%\includegraphics[scale = 0.6]{minimum-weight-spanning-tree}
+%~\cite{MARTIN1991119}
+%
+%
+%\includegraphics[scale = 0.5]{minimum-spanning-tree-ip-model}
+%
+%\includegraphics[scale = 0.5]{minimum-spanning-tree-model-comparison}
+%
+%\includegraphics[scale = 0.5]{minimum-spanning-tree-list-of-models}
+\begin{resource}
+See~\cite{Abdelmaguid2018} for a list of 11 models for the minimum spanning tree and a comparison using CPLEX.
+\end{resource}
+
+\section{Traveling Salesman Problem}
+\label{sec:tsp-models}
+\begin{resource}
+See \href{http://www.math.uwaterloo.ca/tsp/index.html}{math.waterloo.ca} for excellent material on the TSP.\\
+See also this chapter \href{https://www.math.uwaterloo.ca/~bico/papers/comp_chapter1.pdf}{A Practical Guide to Discrete
+Optimization}.
+
+Also, watch this excellent talk by Bill Cook "Postcards from the Edge of Possibility":
+\href{https://m.youtube.com/watch?v=5VjphFYQKj8}{Youtube!}
+\end{resource}
+
+
+\href{https://www.google.com/maps/dir/(38.2222341,+-85.75750389999999)/(39.0972041,+-84.52636389999999)/(38.0493956,+-84.4940986)/(37.1967465,+-80.4296817)/(37.2049884,+-79.9237747)/(37.5110489,+-77.40769019999999)/(35.2019605,+-80.81365720000001)/(36.1303318,+-86.78998039999999)/(38.2222341,+-85.75750389999999)/@36.8110947,-84.2113181,7.02z/data=!4m37!4m36!1m3!2m2!1d-85.7575039!2d38.2222341!1m3!2m2!1d-84.5263639!2d39.0972041!1m3!2m2!1d-84.4940986!2d38.0493956!1m3!2m2!1d-80.4296817!2d37.1967465!1m3!2m2!1d-79.9237747!2d37.2049884!1m3!2m2!1d-77.4076902!2d37.5110489!1m3!2m2!1d-80.8136572!2d35.2019605!1m3!2m2!1d-86.7899804!2d36.1303318!1m3!2m2!1d-85.7575039!2d38.2222341}{Google Maps!}
+
+\begin{figure}
+\includegraphics[scale = 0.5]{optimization/figures/figures-static/tsp-optimal-route}
+\caption{Optimal tour through 8 cities.  Generated by \href{https://www.gebweb.net/optimap/}{Gebweb - Optimap}.  See it also on \href{https://www.google.com/maps/dir/(38.2222341,+-85.75750389999999)/(39.0972041,+-84.52636389999999)/(38.0493956,+-84.4940986)/(37.1967465,+-80.4296817)/(37.2049884,+-79.9237747)/(37.5110489,+-77.40769019999999)/(35.2019605,+-80.81365720000001)/(36.1303318,+-86.78998039999999)/(38.2222341,+-85.75750389999999)/@36.8110947,-84.2113181,7.02z/data=!4m37!4m36!1m3!2m2!1d-85.7575039!2d38.2222341!1m3!2m2!1d-84.5263639!2d39.0972041!1m3!2m2!1d-84.4940986!2d38.0493956!1m3!2m2!1d-80.4296817!2d37.1967465!1m3!2m2!1d-79.9237747!2d37.2049884!1m3!2m2!1d-77.4076902!2d37.5110489!1m3!2m2!1d-80.8136572!2d35.2019605!1m3!2m2!1d-86.7899804!2d36.1303318!1m3!2m2!1d-85.7575039!2d38.2222341}{Google Maps!}.}
+\end{figure}
+
+
+We consider a directed graph, graph $G = (N,A)$ of nodes $N$ and arcs $A$.   Arcs are directed edges.  Hence the arc $(i,j)$ is the directed path $i \to j$.
+
+A \emph{tour}, or Hamiltonian cycle (see \refincludefigurestatic{wiki/File/William_Rowan_Hamilton_painting.jpg}), is a cycle that visits all the nodes in $N$ exactly once and returns back to the starting node.
+
+
+Given costs $c_{ij}$ for each arc $(i,j) \in A$, the goal is to find a minimum cost tour.
+
+
+\begin{general}{Traveling Salesman Problem}{\nphard}
+Given a directed graph $G = (N,A)$ and costs $c_{ij}$ for all $(i,j) \in A$, find a tour of minimum cost.
+\end{general}
+\begin{center}
+\textbf{ADD TSP FIGURE}
+%\includegraphics[scale = 0.4]{tsp-solution}\footnotemark
+\end{center}
+In the figure, the nodes $N$ are the cities and the arcs $A$ are the directed paths $\text{city} i \to \text{city} j$.
+
+\paragraph{Models}
+When constructing an integer programming model for TSP, we define variables $x_{ij}$ for all $(i,j) \in A$ as 
+$$
+x_{ij } = 1 \text{ if the arc $(i,j)$ is used  and   }  x_{ij} = 0 \text{   otherwise.}
+$$
+
+We want the model to satisfy the fact that each node should have exactly one incoming arc and one leaving arc.  Furthermore, we want to prevent self loops.  Thus, we need the constraints:
+
+\begin{align}
+\label{eq:tsp-part-model}
+\sum_{j\in N} x_{ij} &= 1 & \text{ for all } i \in N \ \ \text{ [outgoing arc]}\\
+\sum_{i \in N} x_{ij} &= 1 & \text{ for all } j \in N \ \ \text{ [incoming arc]}\\
+\label{eq:tsp-part-model3}
+x_{ii} &= 0 & \text{ for all } i \in N \ \ \text{ [no self loops]} 
+\end{align}
+
+Unfortunately, these constraints are not enough to completely describe the problem.  The issue is that \emph{subtours} may arise.  For instance
+\begin{center}
+\textbf{ADD SUBTOURS FIGURE}
+%\includegraphics[scale = 0.4]{tsp-subtours}\footnotemark
+\end{center}
+\subsection{Miller Tucker Zemlin (MTZ) Model}
+The Miller-Tucker-Zemlin (MTZ) model for the TSP uses varibles to mark the order for which cities are visited.  This model introduce general integer variables to do so, but in the process, creates a formulation that has few inequalities to describe.
+
+Some feature of this model:
+\begin{itemize}
+\item This model adds variables $u_i \in \Z$ with $1 \leq u_i \leq n$ that decide the order in which nodes are visited.
+\item We set $u_1 = 1$ to set a starting place.
+\item Crucially, this model relies on the following fact\\
+\begin{center}
+\emph{
+Let  $x$ be a solution to \eqref{eq:tsp-part-model}-\eqref{eq:tsp-part-model3} with $x_{ij} \in \{0,1\}$.  If there exists a subtour in this solution that contains the node $1$, then there also exists a subtour that does not contain the node $1$.}
+\end{center}
+\end{itemize}
+
+The following model adds constraints
+\begin{equation}
+\text{ If } x_{ij} = 1, \ \ \text{then} \ \ u_i + 1 \leq u_j.
+\end{equation}
+This if-then statement can be modeled with a big-M, choosing $M = n$ is a sufficient upper bound.  Thus, it can be written as 
+\begin{equation}
+\label{mtz-constraint}
+u_i + 1 \leq u_j + n(1-x_{ij})
+\end{equation}
+Setting these constraints to be active enforces the order $u_i < u_j$.    
+
+Consider a subtour now  $2 \to 5 \to 3 \to 2$.  Thus, $x_{25} = x_{53} = x_{32} = 1$.  Then using the constraints from \eqref{mtz-constraint}, we have that 
+\begin{equation}
+u_2 < u_5 < u_3 < u_2,
+\end{equation}
+but this is infeasible since we cannot have $u_2 < u_2$.  
+
+As stated above, if there is a subtour containing the node $1$, then there is also a subtour not containing the node $1$.  Thus, we can enforce these constraints to only prevent subtours that don't contain the node $1$.  Thus, the full tour that contains the node $1$ will still be feasible.
+
+This is summarized in the following model:
+\begin{general}{Traveling Salesman Problem - MTZ Model}{}
+\begin{align}
+\min \sum_{i,j \in N} c_{ij} x_{ij}\\
+\sum_{j\in N} x_{ij} &= 1 & \text{ for all } i \in N \ \ \text{ [outgoing arc]}\\
+\sum_{i \in N} x_{ij} &= 1 & \text{ for all } j \in N \ \ \text{ [incoming arc]}\\
+x_{ii} &= 0 & \text{ for all } i \in N \ \ \text{ [no self loops]} \\
+u_i + 1 & \leq u_j + n(1-x_{ij})  & \text{ for all } i,j \in N, i,j \neq 1 \ \ \text{[prevents subtours]}\\
+u_1 &= 1\\
+2 \leq & u_i \leq n & \text{ for all } i \in N, i \neq 1\\
+& u_i \in \Z & \text{ for all } i \in N\\
+& x_{ij} \in \{0,1\} & \text{ for all } i,j \in N
+\end{align}
+\end{general}
+
+
+\begin{example}{TSP with 4 nodes}{TSP4node}
+
+%\begin{center}
+%\tikz[nodes={draw, circle}]
+%\graph { subgraph K_n [n=4,clockwise,radius=3cm] };
+%\end{center}
+Distance Matrix:
+\begin{verbatim}
+A \ B | 1  2  3  4
+----------------------
+1     | 0  1  2  3
+2     | 1  0  1  2
+3     | 2  1  0  4
+4     | 3  2  4  0
+\end{verbatim}
+\end{example}
+
+\begin{example}{MTZ model for TSP with 4 nodes}{}
+Here is the full MTZ model:
+\begin{align*}\min\quad & x_{1,2} + 2 x_{1,3} + 3 x_{1,4} + x_{2,1} + x_{2,3} + 2 x_{2,4} + \\ &2 x_{3,1} + x_{3,2} + 4 x_{3,4} + 3 x_{4,1} + 2 x_{4,2} + 4 x_{4,3}
+\end{align*}
+\begin{align*}
+\text{Subject to} \quad \\
+ & x_{1,1} + x_{1,2} + x_{1,3} + x_{1,4} = 1& \text{ outgoing from node 1}\\
+  & x_{2,1} + x_{2,2} + x_{2,3} + x_{2,4} = 1& \text{ outgoing from node 2}\\
+ & x_{3,1} + x_{3,2} + x_{3,3} + x_{3,4} = 1& \text{ outgoing from node 3}\\
+ & x_{4,1} + x_{4,2} + x_{4,3} + x_{4,4} = 1& \text{ outgoing from node 4}\\
+ \\
+  & x_{1,1} + x_{2,1} + x_{3,1} + x_{4,1} = 1& \text{ incoming to node 1}\\
+ & x_{1,2} + x_{2,2} + x_{3,2} + x_{4,2} = 1& \text{ incoming to node 2}\\
+ & x_{1,3} + x_{2,3} + x_{3,3} + x_{4,3} = 1& \text{ incoming to node 3}\\ 
+ & x_{1,4} + x_{2,4} + x_{3,4} + x_{4,4} = 1& \text{ incoming to node 4}\\
+ \\
+ & x_{1,1} = 0 & \text{No self loop with node 1}\\
+ & x_{2,2} = 0& \text{No self loop with node 2}\\
+ & x_{3,3} = 0& \text{No self loop with node 3}\\
+ & x_{4,4} = 0& \text{No self loop with node 4}\\
+ \\
+ & u_{1} = 1 & \text{Start at node 1}\\
+  &2  \leq u_{i} \leq 4, \quad\forall i \in \{2,3,4\}\\
+ & u_{2} +1 \leq  u_{3} + 4 (1-x_{2,3})\\
+ & u_{2} +1 \leq u_{4} + 4 (1-x_{2,4}) \leq 3\\
+ & u_{3} +1 \leq u_{2} + 4 (1-x_{3,2}) \leq 3\\
+ & u_{3} +1 \leq u_{4} + 4 (1-x_{3,4}) \leq 3\\
+ & u_{4} +1 \leq u_{2} + 4 (1-x_{4,2}) \leq 3\\
+ & u_{4} +1 \leq u_{3} + 4 (1-x_{4,3}) \leq 3\\
+ & x_{i,j} \in \{0,1\} \quad\forall i\in \{1,2,3,4\}, j \in \{1,2,3,4\}\\
+ & u_{i} \in \mathbb{Z}, \quad\forall i \in \{1,2,3,4\}\\
+\end{align*}
+\end{example}
+
+
+\begin{example}{MTZ model for TSP with 5 nodes}{TSP5node}
+
+\begin{align*}\min\quad & x_{1,2} + 2 x_{1,3} + 3 x_{1,4} + 4 x_{1,5} + x_{2,1} + x_{2,3} + 2 x_{2,4} + 2 x_{2,5} + 2 x_{3,1} + \\&x_{3,2} + 4 x_{3,4} + x_{3,5} + 3 x_{4,1} + 2 x_{4,2} + 4 x_{4,3} + 2 x_{4,5} + \\&4 x_{5,1} + 2 x_{5,2} + x_{5,3} + 2 x_{5,4}\\
+\text{Subject to} \quad  
+ & x_{1,1} + x_{1,2} + x_{1,3} + x_{1,4} + x_{1,5} = 1\\
+ & x_{2,1} + x_{2,2} + x_{2,3} + x_{2,4} + x_{2,5} = 1\\
+ & x_{3,1} + x_{3,2} + x_{3,3} + x_{3,4} + x_{3,5} = 1\\
+ & x_{4,1} + x_{4,2} + x_{4,3} + x_{4,4} + x_{4,5} = 1\\
+ & x_{5,1} + x_{5,2} + x_{5,3} + x_{5,4} + x_{5,5} = 1\\
+ \\
+&x_{1,1} + x_{2,1} + x_{3,1} + x_{4,1} + x_{5,1} = 1\\
+ & x_{1,2} + x_{2,2} + x_{3,2} + x_{4,2} + x_{5,2} = 1\\
+ & x_{1,3} + x_{2,3} + x_{3,3} + x_{4,3} + x_{5,3} = 1\\
+ & x_{1,4} + x_{2,4} + x_{3,4} + x_{4,4} + x_{5,4} = 1\\
+ & x_{1,5} + x_{2,5} + x_{3,5} + x_{4,5} + x_{5,5} = 1\\
+\\
+ & x_{1,1} = 0\\
+ & x_{2,2} = 0\\
+ & x_{3,3} = 0\\
+ & x_{4,4} = 0\\
+ & x_{5,5} = 0\\
+ \\
+ & u_{1} = 1\\
+ & 2 \leq u_{i} \leq 5 \quad\forall i \in \{1,2,3,4,5\}\\
+ & u_{2} +1 \leq u_{3} + 5 (1-x_{2,3})\\
+ & u_{2} +1 \leq u_{4} + 5  (1-x_{2,4})\\
+  & u_{2} +1 \leq  u_{5} + 5 (1-x_{2,5} )\\
+ & u_{3} +1 \leq u_{2} + 5  (1-x_{3,2})\\
+ & u_{3} +1 \leq u_{4} + 5  (1-x_{3,4})\\
+ & u_{4} +1 \leq u_{2} + 5  (1-x_{4,2})\\
+ & u_{4} +1 \leq u_{3} + 5  (1-x_{4,3})\\
+ & u_{3} +1 \leq  u_{5} + 5 (1-x_{3,5} )\\
+ & u_{4} +1 \leq  u_{5} + 5 (1-x_{4,5})\\
+ & u_{5} +1 \leq  u_{2} + 5 (1-x_{5,2} )\\
+ & u_{5}+1 \leq  u_{3} + 5 (1-x_{5,3} )\\
+ & u_{5} +1 \leq  u_{4} + 5 (1-x_{5,4} )\\
+ & x_{i,j} \in \{0,1\} \quad\forall i \in \{1,2,3,4,5\}, j \in \{1,2,3,4,5\}\\
+ & u_{i} \in \mathbb{Z}, \quad\forall i \in \{1,2,3,4,5\}
+\end{align*}
+\end{example}
+
+\paragraph{Pros of this model}
+\begin{itemize}
+\item Small description
+\item Easy to implement
+\end{itemize}
+\paragraph{Cons of this model}
+\begin{itemize}
+\item Linear relaxation is not very tight.  Thus, the solver may be slow when given this model.
+\end{itemize}
+
+\begin{example}{Subtour elimation constraints via MTZ model}{}
+Consider the subtour $2 \to 4 \to 5 \to 2$.   
+
+For this subtour to exist in a solution, we must have
+
+\begin{align*}
+x_{2,4} &= 1\\
+x_{4,5} &= 1\\
+x_{5,2} &= 1.
+\end{align*}
+Consider the three corresponding inequalities to these variables:
+
+\begin{align*}
+u_{2} +1 &\leq  u_{4} + 5 (1-x_{2,4} )\\
+u_{4} +1 &\leq  u_{5} + 5 (1-x_{4,5})\\
+u_{5} +1 &\leq  u_{2} + 5 (1-x_{5,2} ).
+\end{align*}
+Since $x_{2,4} = x_{4,5} = x_{5,2} = 1$, these reduce to 
+\begin{align*}
+u_{2} +1 &\leq  u_{5} \\
+u_{4} +1 &\leq  u_{5} \\
+u_{5} +1 &\leq  u_{2} .
+\end{align*}
+
+Now, lets add these inequalities together.  This produces the inequality
+
+$$
+u_2 + u_4 + u_5 + 3 \leq u_2 + u_4 + u_5,
+$$
+which reduces to
+$$
+3 \leq 0.
+$$
+This inequality is invalid, and hence no solution can have the values $x_{2,4} = x_{4,5} = x_{5,2} = 1$.
+\end{example}
+
+
+\begin{example}{Weak Model}{}
+Consider again the same tour in the last example, that is, the subtour $2 \to 4 \to 5 \to 2$.  
+We are interested to know how strong the inequalties of the problem description are if we allow the variables to be continuous variables.  That is, suppose we relax $x_{ij} \in \{0,1\}$ to be $x_{ij} \in [0,1]$.
+
+Consider the inequalities related to this tour:
+\begin{align*}
+u_{2} +1 &\leq  u_{4} + 5 (1-x_{2,4} )\\
+u_{4} +1 &\leq  u_{5} + 5 (1-x_{4,5})\\
+u_{5} +1 &\leq  u_{2} + 5 (1-x_{5,2} ).
+\end{align*}
+
+A valid solution to this is 
+\begin{align*}
+u_2 = 2\\
+u_4 = 3\\
+u_5 = 4\\
+\end{align*}
+
+
+\begin{align*}
+3 &\leq  3 + 5 (1-x_{2,4} )\\
+4 &\leq  4 + 5 (1-x_{4,5})\\
+5 &\leq  2 + 5 (1-x_{5,2} ).
+\end{align*}
+
+\begin{align*}
+0&\leq   1-x_{2,4} \\
+0&\leq   1-x_{4,5}\\
+3 /5&\leq 1-x_{5,2} .
+\end{align*}
+
+
+\begin{align*}
+2+1 &\leq  3 + 5 (1-x_{2,4} )\\
+3 +1 &\leq  4 + 5 (1-x_{4,5})\\
+4 +1 &\leq  2 + 5 (1-x_{5,2} ).
+\end{align*}
+
+
+
+\end{example}
+
+\begin{comment}
+
+\end{comment}
+
+
+\subsection{Dantzig-Fulkerson-Johnson (DFJ) Model}
+\begin{resource}
+\begin{itemize}
+\item \href{https://github.com/Gurobi/modeling-examples/tree/master/traveling_salesman}{Gurobi Modeling Example: TSP}
+\end{itemize}
+\end{resource}
+This model does not add new variables.  Instead, it adds constraints that conflict with the subtours.  For instance, consider a subtour
+\begin{equation}
+2 \to 5 \to 3 \to 2.
+\end{equation}
+We can prevent this subtour by adding the constraint
+\begin{equation}
+x_{25} + x_{53} + x_{32}  \leq 2
+\end{equation}
+meaning that at most 2 of those arcs are allowed to happen at the same time.  In general, for any subtour $S$, we can have the \emph{subtour elimination constraint}
+\begin{align}
+\sum_{(i,j) \in S} x_{ij} &\leq |S| - 1  & \text{ Subtour Elimination Constraint}.
+\end{align}
+In the previous example with $S = \{(2,5), (5,3), (3,2)\}$ we have $|S| = 3$, where $|S|$ denotes the size of the set $S$.
+
+This model suggests that we just add all of these subtour elimination constraints.
+
+\begin{general}{Traveling Salesman Problem - DFJ Model}{}
+\begin{align}
+\label{eq:tsp-DFJ-model}
+\min \sum_{i,j \in N} c_{ij} x_{ij}\\
+\sum_{j\in N} x_{ij} &= 1 & \text{ for all } i \in N \ \ \text{ [outgoing arc]}\\
+\sum_{i \in N} x_{ij} &= 1 & \text{ for all } j \in N \ \ \text{ [incoming arc]}\\
+x_{ii} &= 0 & \text{ for all } i \in N \ \ \text{ [no self loops]} \\
+\sum_{(i,j) \in S} x_{ij} &\leq |S| -1  & \text{ for all subtours } S \ \ \text{[prevents subtours]}\\
+& x_{ij} \in \{0,1\} & \text{ for all } i,j \in N
+\end{align}
+\end{general}
+
+
+Distance Matrix:
+\begin{center}
+\begin{verbatim}
+A \ B | 1  2  3  4
+----------------------
+1     | 0  1  2  3
+2     | 1  0  1  2
+3     | 2  1  0  4
+4     | 3  2  4  0
+\end{verbatim}
+\end{center}
+\begin{example}{DFJ Model for $n=4$ nodes}{}
+
+
+%\begin{center}
+%\tikz[nodes={draw, circle}]
+%\graph { subgraph K_n [n=4,clockwise,radius=3cm] };
+%\end{center}
+
+
+
+%\begin{align}\min\quad & x_{1,2} + 2 x_{1,3} + 3 x_{1,4} + x_{2,1} + x_{2,3} + 2 x_{2,4} + 2 x_{3,1} + x_{3,2} + 4 x_{3,4} + 3 x_{4,1} + 2 x_{4,2} + 4 x_{4,3}\\
+%\text{Subject to} \quad & x_{1,1} + x_{2,1} + x_{3,1} + x_{4,1} = 1\\
+% & x_{1,2} + x_{2,2} + x_{3,2} + x_{4,2} = 1\\
+% & x_{1,3} + x_{2,3} + x_{3,3} + x_{4,3} = 1\\
+% & x_{1,4} + x_{2,4} + x_{3,4} + x_{4,4} = 1\\
+% & x_{1,1} + x_{1,2} + x_{1,3} + x_{1,4} = 1\\
+% & x_{2,1} + x_{2,2} + x_{2,3} + x_{2,4} = 1\\
+% & x_{3,1} + x_{3,2} + x_{3,3} + x_{3,4} = 1\\
+% & x_{4,1} + x_{4,2} + x_{4,3} + x_{4,4} = 1\\
+% & x_{1,1} = 0\\
+% & x_{2,2} = 0\\
+% & x_{3,3} = 0\\
+% & x_{4,4} = 0\\
+% & x_{i,j} \in \{0,1\} \quad\forall i \in \{1,2,3,4\}, j \in \{1,2,3,4\}\\
+%\end{align}
+
+
+\begin{align*}\min\quad & x_{1,2} + 2 x_{1,3} + 3 x_{1,4} + x_{2,1} + x_{2,3} + 2 x_{2,4} \\& + 2 x_{3,1} + x_{3,2} + 4 x_{3,4} + 3 x_{4,1} + 2 x_{4,2} + 4 x_{4,3}\\
+\\
+\text{Subject to} \quad \\
+ & x_{1,1} + x_{1,2} + x_{1,3} + x_{1,4} = 1& \text{ outgoing from node 1}\\
+  & x_{2,1} + x_{2,2} + x_{2,3} + x_{2,4} = 1& \text{ outgoing from node 2}\\
+ & x_{3,1} + x_{3,2} + x_{3,3} + x_{3,4} = 1& \text{ outgoing from node 3}\\
+ & x_{4,1} + x_{4,2} + x_{4,3} + x_{4,4} = 1& \text{ outgoing from node 4}\\
+ \\
+  & x_{1,1} + x_{2,1} + x_{3,1} + x_{4,1} = 1& \text{ incoming to node 1}\\
+ & x_{1,2} + x_{2,2} + x_{3,2} + x_{4,2} = 1& \text{ incoming to node 2}\\
+ & x_{1,3} + x_{2,3} + x_{3,3} + x_{4,3} = 1& \text{ incoming to node 3}\\ 
+ & x_{1,4} + x_{2,4} + x_{3,4} + x_{4,4} = 1& \text{ incoming to node 4}\\
+ \\
+ & x_{1,1} = 0 & \text{No self loop with node 1}\\
+ & x_{2,2} = 0& \text{No self loop with node 2}\\
+ & x_{3,3} = 0& \text{No self loop with node 3}\\
+ & x_{4,4} = 0& \text{No self loop with node 4}\\
+ \\
+ & x_{1,2} + x_{2,1} \leq 1& S = [(1,2), (2,1)]\\
+ & x_{1,3} + x_{3,1} \leq 1& S = [(1,3), (3,1)]\\
+ & x_{1,4} + x_{4,1} \leq 1& S = [(1,4), (4,1)]\\
+ & x_{2,3} + x_{3,2} \leq 1& S = [(2,3), (3,2)]\\
+ & x_{2,4} + x_{4,2} \leq 1& S = [(2,4), (4,2)]\\
+ & x_{3,4} + x_{4,3} \leq 1& S = [(3,4), (4,3)]\\
+ & x_{2,1} + x_{1,3} + x_{3,2} \leq 2 & S = [(2,1), (1,3), (3,2)]\\
+ & x_{1,2} + x_{2,3} + x_{3,1} \leq 2& S = [(1,2), (2,3), (3,1)]\\
+ & x_{3,1} + x_{1,4} + x_{4,3} \leq 2& S = [(3,1), (1,4), (4,3))]\\
+ & x_{1,3} + x_{3,4} + x_{4,1} \leq 2& S = [(1,3),(3,4), (4,1)]\\
+ & x_{2,1} + x_{1,4} + x_{4,2} \leq 2& S = [(2,1), (1,4), (4,2)]\\
+ & x_{1,2} + x_{2,4} + x_{4,1} \leq 2& S = [(1,2), (2,4), (4,1)]\\
+ & x_{3,2} + x_{2,4} + x_{4,3} \leq 2& S = [(3,2), (2,4), (4,3)]\\
+ & x_{2,3} + x_{3,4} + x_{4,2} \leq 2& S = [(2,3), (3,4), (4,2)]\\
+ \\
+ & x_{i,j} \in \{0,1\} \quad\forall i \in \{1,2,3,4\}, j \in \{1,2,3,4\}\\
+\end{align*}
+%\includegraphics[scale = 0.5]{CompleteGraph4Nodes}
+
+
+
+%\includegraphics[scale = 0.5]{CompleteGraphCycles4-850}\footnotemark
+%\footnotetext{\url{http://mathworld.wolfram.com/CompleteGraph.html}}
+
+\end{example}
+
+
+\begin{example}{}{}
+
+Consider a graph on 5 nodes.
+
+%\begin{center}
+%\tikz[nodes={draw, circle}]
+%\graph { subgraph K_n [n=5,clockwise,radius=3cm] };
+%\end{center}
+
+Here are all the subtours of length at least 3 and also including the full length tours.
+
+
+Hence, there are many subtours to consider.
+\end{example}
+
+
+\paragraph{Pros of this model}
+\begin{itemize}
+\item Very tight linear relaxation
+\end{itemize}
+\paragraph{Cons of this model}
+\begin{itemize}
+\item Exponentially many subtours $S$ possible, hence this model is too large to write down.
+\end{itemize}
+
+\paragraph{Solution: Add subtour elimination constraints as needed.  We will discuss this in a future section on \emph{cutting planes}}.
+
+\subsection{Traveling Salesman Problem - Branching Solution}
+We will see in the next section
+\begin{enumerate}
+\item That the constraint \eqref{eq:tsp-part-model}-\eqref{eq:tsp-part-model3}  always produce integer solutions as solutions to the linear relaxation.
+\item A way to use branch and bound (the topic of the next section) in order to avoid subtours.
+\end{enumerate}
+
+
+\subsection{Traveling Salesman Problem Variants}
+
+\subsubsection{Many salespersons (m-TSP)}
+\begin{general}{m-Traveling Salesman Problem - DFJ Model}{}
+\begin{align}
+\label{eq:tsp-DFJ-model}
+\min \sum_{i,j \in N} c_{ij} x_{ij}\\
+\sum_{j\in N} x_{ij} &= 1 & \text{ for all } i \in N \ \ \text{ [outgoing arc]}\\
+\sum_{i \in N} x_{ij} &= 1 & \text{ for all } j \in N \ \ \text{ [incoming arc]}\\
+\sum_{j\in N} x_{Dj} &= m & \text{ for all } i \in N \ \ \text{ [outgoing arc]}\\
+\sum_{i \in N} x_{iD} &= m & \text{ for all } j \in N \ \ \text{ [incoming arc]}\\
+x_{ii} &= 0 & \text{ for all } i \in N\cup\{D\} \ \ \text{ [no self loops]} \\
+\sum_{(i,j) \in S} x_{ij} &\leq |S| -1  & \text{ for all subtours } S\subseteq N \ \ \text{[prevents subtours]}\\
+& x_{ij} \in \{0,1\} & \text{ for all } i,j \in N\cup\{D\}
+\end{align}
+\end{general}
+
+
+When using the MTZ model, you can also easily add in a constraint that restricts any subtour through the deopt to have at most $T$ stops on the tour.  This is done by restricting $u_i \leq T$.  
+This could also be done in the DFJ model above, but the algorithm for subtour elimination cuts would need to be modified.
+
+\begin{general}{m-Traveling Salesman Problem - MTZ Model - }{}
+\href{https://github.com/open-optimization/open-optimization-or-examples/blob/master/integer-programming/tsp-mtz/m_TSP_with_MTZ_Model.ipynb}{Python Code}
+\begin{align}
+\min \sum_{i,j \in N} c_{ij} x_{ij}\\
+\sum_{j\in N} x_{ij} &= 1 & \text{ for all } i \in N \ \ \text{ [outgoing arc]}\\
+\sum_{i \in N} x_{ij} &= 1 & \text{ for all } j \in N \ \ \text{ [incoming arc]}\\
+\sum_{j\in N} x_{Dj} &= m & \text{ for all } i \in N \ \ \text{ [outgoing arc]}\\
+\sum_{i \in N} x_{iD} &= m & \text{ for all } j \in N \ \ \text{ [incoming arc]}\\
+x_{ii} &= 0 & \text{ for all } i \in N\cup\{D\} \ \ \text{ [no self loops]} \\
+u_i + 1 & \leq u_j + n(1-x_{ij})  & \text{ for all } i,j \in N, i,j \neq 1 \ \ \text{[prevents subtours]}\\
+u_1 &= 1\\
+2 \leq & u_i \leq T & \text{ for all } i \in N, i \neq 1\\
+& u_i \in \Z & \text{ for all } i \in N\\
+& x_{ij} \in \{0,1\} & \text{ for all } i,j \in N\cup\{D\}
+\end{align}
+\end{general}
+
+\includegraphicstatic{m-tsp_solution}
+\href{https://github.com/open-optimization/open-optimization-or-examples/blob/master/integer-programming/tsp-mtz/houses_and_restaurants_assignment.html}{Image html}
+
+\subsubsection{TSP with order variants}
+Using the MTZ model, it is easy to provide order variants.  Such as, city 2 must come before city 3
+$$
+u_2 \leq u_3
+$$
+
+or city 2 must come directly before city 3
+$$
+u_2 + 1 = u_3.
+$$
+
+
+
+\section{Vehicle Routing Problem (VRP)}
+The VRP is a generlization of the TSP and comes in many many forms.  The major difference is now we may consider multiple vehicles visiting the around cities.
+Obvious examples are creating bus schedules and mail delivery routes.  
+
+Variations of this problem include
+\begin{itemize}
+\item Time windows (for when a city needs to be visited)
+\item Prize collecting (possibly not all cities need to be visited, but you gain a prize for visiting each city)
+\item Multi-depot vehicle routing problem (fueling or drop off stations)
+\item Vehicle rescheduling problem (When delays have been encountered, how do you adjust the routes)
+\item Inhomogeneous vehicles (vehicles have different abilities (speed, distance, capacity, etc.).
+\end{itemize}
+
+To read about the many variants, see:
+\href{https://doi-org.ezproxy.lib.vt.edu/10.1137/1.9781611973594}{
+Vehicle Routing: Problems, Methods, and Applications, Second Edition. 
+Editor(s): Paolo Toth and Daniele Vigo.  MOS-SIAM Series on Optimization.}
+
+
+For one example of a VRP model, see \href{https://github.com/Gurobi/modeling-examples/tree/master/technician_routing_scheduling}{GUROBI Modeling Examples - technician routing scheduling}.
+
+
+\subsection{Case Study: Bus Routing in Boston}
+Review this case study after studying algorihtms and heuristics for integer programming.
+
+
+
+\url{https://www.informs.org/Impact/O.R.-Analytics-Success-Stories/Optimized-school-bus-routing-helps-school-districts-design-better-policies}
+
+\url{https://pubsonline.informs.org/doi/abs/10.1287/inte.2019.1015}
+
+\url{https://www.informs.org/Resource-Center/Video-Library/Edelman-Competition-Videos/2019-Edelman-Competition-Videos/2019-Edelman-Finalist-Boston-Public-Schools}
+
+
+\url{https://www.youtube.com/watch?v=LFeeaNP_rbY}
+
+\section{Steiner Tree Problem}
+% GUROBI Vodafone talk
+
+
+Model 1
+\begin{align*}
+\min \ \ \ & \sum_{(u,v) \in E} w_{uv} x_{uv}\\
+\text{ such that }  \ \ \ \\
+x_t & = 1 & \forall t \in T \\
+2x_{uv} - x_u - x_v &\leq 0 &   \forall (u,v) \in E\\
+x_v - \sum_{(u,v) \in E} x_{uv} \leq 0 \forall v \in V\\
+\sum_{(u,v) \in \delta(S)} x_{uv} \geq x_w \forall S \subseteq V, \forall w \in S\\
+\end{align*}
+
+Model 2
+\begin{align*}
+\min &\sum_{(u,v) \in E} w_{uv} x_{uv}\\
+x_t &= 1 &\forall t \in T\\
+2x_{uv} - x_u - x_v &\leq 0 & \forall (u,v) \in E\\
+x_v - \sum_{(u,v) \in E} x_{uv} &\leq 0 &\forall v \in V\\
+x_{uv} + x_{vu} &\leq 1\\
+\sum_{v \in V} x_v - \sum_{(u,v) \in E} x_{uv} &=1&\\
+n x_{uv} + l_v - l_u &\geq 1 - n(1-x_{vu}) &\forall (u,v) \in E\\
+n x_{vu} + l_u - l_v &\geq 1 - n(1-x_{uv}) &\forall (u,v) \in E
+\end{align*}
+
+\begin{verbatim}
+Optimizing the shop footprint:
+Step 1: Machine learning model predicts effect of opening or closing shops
+Step 2: ILP Breaks down shop into manageable slusters
+Step 3:  ILP for optimal footprint planning
+\end{verbatim}
+
+
+
+
+\section{Literature and other notes}
+
+
+\begin{itemize}
+\item Gilmore-Gomory Cutting Stock~\cite{Gilmore-Gomory}
+\item \href{http://www.optimization-online.org/DB_HTML/2018/06/6648.html}{A Column Generation Algorithm for Vehicle Scheduling and Routing Problems}
+\item \href{http://www.optimization-online.org/DB_HTML/2018/06/6670.html}{The Integrated Last-Mile Transportation Problem}
+\item \url{http://www.optimization-online.org/DB_FILE/2017/11/6331.pdf}{A BRANCH-AND-PRICE ALGORITHM FOR CAPACITATED
+HYPERGRAPH VERTEX SEPARATION}
+\end{itemize}
+\subsection{Google maps data}
+\href{https://www.geeksforgeeks.org/python-calculate-distance-duration-two-places-using-google-distance-matrix-api/}{Blog - Python | Calculate distance and duration between two places using google distance matrix API}
+
+\subsection{TSP In Excel}
+
+\href{https://www.youtube.com/watch?v=UQYJvSjXE6I}{TSP with excel solver}
+
+%\end{document}
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../open-optimization/open-optimization"
+%%% End:

@@ -1,0 +1,48 @@
+% Copyright 2020 by Latex Draw  https://latexdraw.com/linear-regression-in-latex-using-tikz/
+%This work is licensed under a
+%Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0)
+%See http://creativecommons.org/licenses/by-sa/4.0/
+
+\documentclass{standalone}
+
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\pgfplotsset{compat = newest}
+
+\begin{document}
+    \begin{tikzpicture}
+        \begin{axis}[
+            xmin = 0, xmax = 11,
+            ymin = 0, ymax = 11,
+            width = \textwidth,
+            height = 0.75\textwidth,
+            xtick distance = 1,
+            ytick distance = 1,
+            grid = both,
+            minor tick num = 1,
+            major grid style = {lightgray},
+            minor grid style = {lightgray!25},
+            xlabel = {Time ($t$)},
+            ylabel = {Position ($r$)},
+            legend cell align = {left},
+            legend pos = north west
+        ]
+            \addplot[teal, only marks] table[x = t, y = r] {r_vs_t.dat};
+            \addplot[thick, orange] table[
+                x = t,
+                y = {create col/linear regression={y=r}}
+            ] {r_vs_t.dat};
+            \addlegendentry{Data}
+            \addlegendentry{
+                Linear regression:
+                $
+                r =
+                \pgfmathprintnumber{\pgfplotstableregressiona}
+                \cdot t
+                \pgfmathprintnumber[print sign]{\pgfplotstableregressionb}
+                $
+            };
+        \end{axis}
+    \end{tikzpicture}
+\end{document}

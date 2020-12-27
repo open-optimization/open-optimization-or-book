@@ -1,0 +1,55 @@
+% Copyright 2020 by Robert Hildebrand
+%This work is licensed under a
+%Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0)
+%See http://creativecommons.org/licenses/by-sa/4.0/
+
+\subsection{SOS2}
+
+
+This code is for \nameref{example:SOS2}.
+
+First, we show how to use binary variables to encode the SOS2 constraint.
+\begin{codeCell}
+\label{code:SOS2-binary}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}8}]:} \PY{c}{\PYZsh{} using binary constraint}
+        
+        \PY{k}{using} \PY{n}{JuMP}\PY{p}{,} \PY{n}{Cbc}
+        \PY{n}{m} \PY{o}{=} \PY{n}{Model}\PY{p}{(}\PY{n}{solver} \PY{o}{=} \PY{n}{CbcSolver}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+        \PY{n+nd}{@variable}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{x}\PY{p}{[}\PY{l+m+mi}{1}\PY{o}{:}\PY{l+m+mi}{4}\PY{p}{]} \PY{o}{\PYZlt{}=} \PY{l+m+mi}{5}\PY{p}{)}
+        \PY{n+nd}{@variable}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{z}\PY{p}{[}\PY{l+m+mi}{1}\PY{o}{:}\PY{l+m+mi}{3}\PY{p}{]} \PY{o}{\PYZgt{}=} \PY{l+m+mi}{0}\PY{p}{)}
+        \PY{n+nd}{@constraint}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{sum}\PY{p}{(}\PY{n}{z}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{k}{for} \PY{n}{i}\PY{o}{=}\PY{l+m+mi}{1}\PY{o}{:}\PY{l+m+mi}{3}\PY{p}{)} \PY{o}{==} \PY{l+m+mi}{1}\PY{p}{)}
+        \PY{n+nd}{@constraint}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{x}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]} \PY{o}{\PYZlt{}=} \PY{l+m+mi}{5}\PY{n}{z}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}
+        \PY{n+nd}{@constraint}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{x}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{]} \PY{o}{\PYZlt{}=} \PY{l+m+mi}{5}\PY{n}{z}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]} \PY{o}{+} \PY{l+m+mi}{5}\PY{n}{z}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{]}\PY{p}{)}
+        \PY{n+nd}{@constraint}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{x}\PY{p}{[}\PY{l+m+mi}{3}\PY{p}{]} \PY{o}{\PYZlt{}=} \PY{l+m+mi}{5}\PY{n}{z}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{]} \PY{o}{+} \PY{l+m+mi}{5}\PY{n}{z}\PY{p}{[}\PY{l+m+mi}{3}\PY{p}{]}\PY{p}{)}
+        \PY{n+nd}{@constraint}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{x}\PY{p}{[}\PY{l+m+mi}{4}\PY{p}{]} \PY{o}{\PYZlt{}=} \PY{l+m+mi}{5}\PY{n}{z}\PY{p}{[}\PY{l+m+mi}{3}\PY{p}{]}\PY{p}{)}
+        \PY{n+nd}{@objective}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{Max}\PY{p}{,} \PY{l+m+mi}{3}\PY{n}{x}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{o}{+}\PY{l+m+mi}{4}\PY{n}{x}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{]}\PY{o}{+}\PY{l+m+mi}{1}\PY{n}{x}\PY{p}{[}\PY{l+m+mi}{3}\PY{p}{]}\PY{o}{+}\PY{l+m+mi}{5}\PY{n}{x}\PY{p}{[}\PY{l+m+mi}{4}\PY{p}{]}\PY{p}{)}
+        
+        \PY{n}{solve}\PY{p}{(}\PY{n}{m}\PY{p}{)}
+        \PY{n}{getvalue}\PY{p}{(}\PY{n}{x}\PY{p}{)}
+\end{Verbatim}
+
+
+\begin{Verbatim}[commandchars=\\\{\}]
+{\color{outcolor}Out[{\color{outcolor}8}]:} 4-element Array\{Float64,1\}:
+         5.0
+         5.0
+         0.0
+         0.0
+\end{Verbatim}
+
+
+\textbf{Python - Gurobi}\\
+\url{https://www.gurobi.com/documentation/8.1/refman/py_model_addsos.html#pythonmethod:Model.addSOS}\\
+\url{https://www.gurobi.com/documentation/8.1/refman/py_sos.html}
+
+
+\begin{verbatim}
+model.addSOS(GRB.SOS_TYPE1, [x, y, z], [1, 2, 4])}
+\end{verbatim}
+
+
+\end{codeCell}
+
