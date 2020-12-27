@@ -5,7 +5,7 @@
 ## Modeling, Algorithms, and Complexity with Examples in Python and Julia
 Edited by: Robert Hildebrand
 
-The current release of this book can be found at [here](https://github.com/open-optimization/open-optimization-or-book/releases/download/v0.0.7/open-optimization.pdf).
+The current release of this book can be found at [here](https://github.com/open-optimization/open-optimization-or-book/blob/master/MathematicalProgrammingandOperationsResearch.pdf).
 
 This book was desigend originally for the undergraduete course ISE 3434 - "Deterministic Operations Research II" taught at Virginia Tech.  I will cover topics in linear programming, integer programming, and nonlinear programming along with basic understanding of complexity theory, many code examples, and various methods of solving problems.
 
