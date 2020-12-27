@@ -1,0 +1,414 @@
+%By Kevin Cheung
+%The book is licensed under the
+%\href{http://creativecommons.org/licenses/by-sa/4.0/}{Creative Commons
+%Attribution-ShareAlike 4.0 International License}.
+%
+%This file has been modified by Robert Hildebrand 2020.  
+%CC BY SA 4.0 licence still applies.
+
+\section{Other material for Integer Linear Programming}\label{integer-linear-programming}
+
+Recall the problem on lemonade and lemon juice from Chapter
+\ref{graphic}:
+
+\textbf{Problem.} Say you are a vendor of lemonade and lemon juice. Each
+unit of lemonade requires 1 lemon and 2 litres of water. Each unit of
+lemon juice requires 3 lemons and 1 litre of water. Each unit of
+lemonade gives a profit of \(\$ 3\). Each unit of lemon juice gives a
+profit of \(\$ 2\). You have 6 lemons and 4 litres of water available.
+How many units of lemonade and lemon juice should you make to maximize
+profit?
+
+Letting \(x\) denote the number of units of lemonade to be made and
+letting \(y\) denote the number of units of lemon juice to be made, the
+problem could be formulated as the following linear programming problem:
+
+\[\begin{array}{rrcrll}
+\max & 3x & + & 2y & \\
+\text{s.t.} 
+& x & + & 3y & \leq & 6 \\
+& 2x & +&  y & \leq & 4 \\
+& x &  & & \geq & 0 \\
+& & & y & \geq & 0. \\
+\end{array}\]
+
+The problem has a unique optimal solution at
+\(\begin{bmatrix} x \\ y\end{bmatrix} = \begin{bmatrix} 1.2 \\ 1.6\end{bmatrix}\)
+for a profit of \(6.8\). But this solution requires us to make
+fractional units of lemonade and lemon juice. What if we require the
+number of units to be integers? In other words, we want to solve
+\[\begin{array}{rrcrll}
+\max & 3x & + & 2y & \\
+\text{s.t.} 
+& x & + & 3y & \leq & 6 \\
+& 2x & +&  y & \leq & 4 \\
+& x &  & & \geq & 0 \\
+& & & y & \geq & 0 \\
+& x &,& y & \in  & \mathbb{Z}. \\
+\end{array}\] This problem is no longer a linear programming problem.
+But rather, it is an integer linear programming problem.
+
+A \textbf{mixed-integer linear programming problem} is a problem of
+minimizing or maximizing a linear function subject to finitely many
+linear constraints such that the number of variables are finite and at
+least one of which is required to take on integer values.
+
+If all the variables are required to take on integer values, the problem
+is called a \textbf{pure integer linear programming problem} or simply
+an \textbf{integer linear programming problem}. Normally, we assume the
+problem data to be rational numbers to rule out some pathological cases.
+
+Mixed-integer linear programming problems are in general difficult to
+solve yet they are too important to ignore because they have a wide
+range of applications (e.g.~transportation planning, crew scheduling,
+circuit design, resource management etc.) Many solution methods for
+these problems have been devised and some of them first solve the
+\textbf{linear programming relaxation} of the original problem, which is
+the problem obtained from the original problem by dropping all the
+integer requirements on the variables.
+
+\begin{example}{}{}
+\protect\hypertarget{ex:ilp-ex}{}{\label{ex:ilp-ex}} Let (MP) denote the
+following mixed-integer linear programming problem:
+\[\begin{array}{rrcrcrlll}
+\mbox{min} & x_1 &  &  & + & x_3  \\
+\text{s.t.} & -x_1 & + &  x_2 & + &  x_3  & \geq & 1 \\
+& -x_1 & - &  x_2 & + & 2x_3  & \geq & 0 \\
+& -x_1 & + & 5x_2 & - &  x_3  & = & 3 \\
+&  x_1 & , & x_2 & , & x_3 & \geq & 0 \\
+&      &   &     &   & x_3  & \in & \mathbb{Z}. 
+\end{array}\]
+
+The linear programming relaxation of (MP) is: \[\begin{array}{rrcrcrlll}
+\mbox{min} & x_1 &  &  & + & x_3  \\
+\text{s.t.} & -x_1 & + &  x_2 & + &  x_3  & \geq & 1 \\
+& -x_1 & - &  x_2 & + & 2x_3  & \geq & 0 \\
+& -x_1 & + & 5x_2 & - &  x_3  & = & 3 \\
+&  x_1 & , & x_2 & , & x_3 & \geq & 0.
+\end{array}\]
+\end{example}
+
+Let (P1) denote the linear programming relaxation of (MP). Observe that
+the optimal value of (P1) is a lower bound for the optimal value of (MP)
+since the feasible region of (P1) contains all the feasible solutions to
+(MP), thus making it possible to find a feasible solution to (P1) with
+objective function value better than the optimal value of (MP). Hence,
+if an optimal solution to the linear programming relaxation happens to
+be a feasible solution to the original problem, then it is also an
+optimal solution to the original problem. Otherwise, there is an integer
+variable having a nonintegral value \(v\). What we then do is to create
+two new subproblems as follows: one requiring the variable to be at most
+the greatest integer less than \(v\), the other requiring the variable
+to be at least the smallest integer greater than \(v\). This is the
+basic idea behind the \textbf{branch-and-bound method}. We now
+illustrate these ideas on (MP).
+
+Solving the linear programming relaxation (P1), we find that
+\(\vec{x}' = \begin{bmatrix}0\\ \frac{2}{3}\\ \frac{1}{3}\end{bmatrix}\)
+is an optimal solution to (P1). Note that \(\mathbf{x}'\) is not a
+feasible solution to (MP) because \(x'_3\) is not an integer. We now
+create two subproblems (P2) and (P3) such that (P2) is obtained from
+(P1) by adding the constraint \(x_3 \leq \lfloor x'_3\rfloor\) and (P3)
+is obtained from (P1) by adding the constraint
+\(x_3 \geq \lceil x'_3\rceil\). (For a number \(a\),
+\(\lfloor a \rfloor\) denotes the greatest integer at most \(a\) and
+\(\lceil a \rceil\) denotes the smallest integer at least \(a\).) Hence,
+(P2) is the problem \[\begin{array}{rrcrcrlll}
+\min & x_1 &  &  & + & x_3  \\
+\text{s.t.} & -x_1 & + &  x_2 & + &  x_3  & \geq & 1 \\
+ & -x_1 & - &  x_2 & + & 2x_3  & \geq & 0 \\
+ & -x_1 & + & 5x_2 & - &  x_3  & = & 3 \\
+ &      &   &      &   &  x_3  & \leq & 0 \\
+ &  x_1 & , & x_2 & , & x_3 & \geq & 0,
+\end{array}\] and (P3) is the problem \[\begin{array}{rrcrcrlll}
+\min & x_1 &  &  & + & x_3  \\
+\text{s.t.} & -x_1 & + &  x_2 & + &  x_3  & \geq & 1 \\
+ & -x_1 & - &  x_2 & + & 2x_3  & \geq & 0 \\
+ & -x_1 & + & 5x_2 & - &  x_3  & = & 3 \\
+ &      &   &      &   &  x_3  & \geq & 1 \\
+ &  x_1 & , & x_2 & , & x_3 & \geq & 0.
+\end{array}\] Note that any feasible solution to (MP) must be a feasible
+solution to either (P2) or (P3). Using the help of a solver, one sees
+that (P2) is infeasible. The problem (P3) has an optimal solution at
+\(\mathbf{x}^* = \begin{bmatrix}0\\ \frac{4}{5}\\ 1\end{bmatrix}\),
+which is also feasible to (MP). Hence,
+\(\mathbf{x}^* = \begin{bmatrix}0\\ \frac{4}{5}\\ 1\end{bmatrix}\) is an
+optimal solution to (MP).
+
+We now give a description of the method for a general mixed-integer
+linear programming problem (MIP). Suppose that (MIP) is a minimization
+problem and has \(n\) variables \(x_1,\ldots,x_n\). Let
+\({\cal I} \subseteq \{1,\ldots,n\}\) denote the set of indices \(i\)
+such that \(x_i\) is required to be an integer in (MIP).
+
+\textbf{Branch-and-bound method}
+
+\textbf{Input}: The problem (MIP).
+
+\textbf{Steps}:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  Set \texttt{bestbound} \(:= \infty\), \(\vec{x}^*_{\text{best}}:= \)
+  \texttt{N/A}, \texttt{activeproblems} \(:= \{ (LP) \}\) where \((LP)\)
+  denotes the linear programming relaxation of (MIP).
+\item
+  If there is no problem in \texttt{activeproblems}, then stop; if
+  \(\vec{x}^*_{\text{best}} \neq \) \texttt{N/A}, then
+  \(\vec{x}^*_{\text{best}}\) is an optimal solution; otherwise, (MIP)
+  has no optimal solution.
+\item
+  Select a problem \(P\) from \texttt{activeproblems} and remove it from
+  \texttt{activeproblems}.
+\item
+  Solve \(P\).
+\end{enumerate}
+
+\begin{itemize}
+\item
+  If \(P\) is unbounded, then stop and conclude that (MIP) does not have
+  an optimal solution.
+\item
+  If \(P\) is infeasible, go to step 2.
+\item
+  If \(P\) has an optimal solution \(\vec{x}^*\), then let \(z\) denote
+  the objective function value of \(\vec{x}^*\).
+\end{itemize}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{4}
+\item
+  If \(z \geq \) \texttt{bestbound}, go to step 2.
+\item
+  If \(x^*_i\) is not an integer for some \(i \in {\cal I}\), then
+  create two subproblems \(P_1\) and \(P_2\) such that \(P_1\) is the
+  problem obtained from \(P\) by adding the constraint
+  \(x_i \leq \lfloor x^*_i \rfloor\) and \(P_2\) is the problem obtained
+  from \(P\) by adding the constraint \(x_i \geq \lceil x^*_i \rceil\).
+  Add the problems \(P_1\) and \(P_2\) to \texttt{activeproblems} and go
+  to step 2.
+\item
+  Set \(\vec{x}^*_{\text{best}} = \vec{x}^*\), \texttt{bestbound} \(=z\)
+  and go to step 2.
+\end{enumerate}
+
+\textbf{Remarks.}
+
+\begin{itemize}
+\item
+  Throughout the algorithm, \texttt{activeproblems} is a set of
+  subproblems remained to be solved. Note that for each problem \(P\) in
+  \texttt{activeproblems}, \(P\) is a linear programming problem and
+  that any feasible solution to \(P\) satisfying the integrality
+  requirements is a feasible solution to (MIP).
+\item
+  \(x^*_{\text{best}}\) is the feasible solution to (MIP) that has the
+  best objective function value found so far and \texttt{bestbound} is
+  its objective function value. It is often called an
+  \textbf{incumbent}.
+\item
+  In practice, how a problem from \texttt{activeproblems} is selected in
+  step 3 has an impact on the overall performance. However, there is no
+  general rule for selection that guarantees good performance all the
+  time.
+\item
+  In step 5, the problem \(P\) is discarded since it cannot contain any
+  feasible solution to (MIP) having a better objective function value
+  than \(x^*_{\text{best}}\).
+\item
+  If step 7 is reached, then \(x^*\) is a feasible solution to (MIP)
+  having objective function value better than \texttt{bestbound}. So it
+  becomes the current best solution.
+\item
+  It is possible for the algorithm to never terminate. Below is an
+  example for which the algorithm will never stop:
+  \[\begin{array}{rrcrcrcl}
+  \min & x_1 \\
+  \text{s.t.} & x_1 & + &  2x_2&  -&  2x_3&  =&  1 \\
+  & x_1& , & x_2& , & x_3 & \geq & 0 \\
+  & x_1& ,&  x_2& , & x_3 & \in & \mathbb{Z}.
+  \end{array}
+  \] However, it is easy to see that
+  \(\vec{x}^* = \begin{bmatrix} 1 \\ 0 \\ 0\end{bmatrix}\) is an optimal
+  solution because there is no feasible solution with \(x_1=0\).
+\end{itemize}
+
+One way to keep track of the progress of the computations is to set up a
+progress chart with the following headings:
+
+\begin{longtable}[]{@{}ccccccc@{}}
+\toprule
+\begin{minipage}[b]{0.08\columnwidth}\centering\strut
+\textbf{Iter}\strut
+\end{minipage} & \begin{minipage}[b]{0.08\columnwidth}\centering\strut
+\textbf{solved}\strut
+\end{minipage} & \begin{minipage}[b]{0.09\columnwidth}\centering\strut
+\textbf{status}\strut
+\end{minipage} & \begin{minipage}[b]{0.08\columnwidth}\centering\strut
+\textbf{branching}\strut
+\end{minipage} & \begin{minipage}[b]{0.18\columnwidth}\centering\strut
+\texttt{activeproblems}\strut
+\end{minipage} & \begin{minipage}[b]{0.09\columnwidth}\centering\strut
+\(\mathbf{x}^*_{\text{best}}\)\strut
+\end{minipage} & \begin{minipage}[b]{0.12\columnwidth}\centering\strut
+\texttt{bestbound}\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\end{longtable}
+
+In a given iteration, the entry in the \textbf{solved} column denotes
+the subproblem that has been solved with the result in the
+\textbf{status} column. The \textbf{branching} column indicates the
+subproblems created from the solved subproblem with an optimal solution
+not feasible to (MIP). The entries in the remaining columns contain the
+latest information in the given iteration. For the example (MP) above,
+the chart could look like the following:
+
+\begin{longtable}[]{@{}ccccccc@{}}
+\toprule
+\begin{minipage}[b]{0.07\columnwidth}\centering\strut
+\textbf{Iter}\strut
+\end{minipage} & \begin{minipage}[b]{0.08\columnwidth}\centering\strut
+\textbf{solved}\strut
+\end{minipage} & \begin{minipage}[b]{0.09\columnwidth}\centering\strut
+\textbf{status}\strut
+\end{minipage} & \begin{minipage}[b]{0.18\columnwidth}\centering\strut
+\textbf{branching}\strut
+\end{minipage} & \begin{minipage}[b]{0.15\columnwidth}\centering\strut
+\texttt{activeproblems}\strut
+\end{minipage} & \begin{minipage}[b]{0.07\columnwidth}\centering\strut
+\(\mathbf{x}^*_{\text{best}}\)\strut
+\end{minipage} & \begin{minipage}[b]{0.11\columnwidth}\centering\strut
+\texttt{bestbound}\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.07\columnwidth}\centering\strut
+1\strut
+\end{minipage} & \begin{minipage}[t]{0.08\columnwidth}\centering\strut
+(P1)\strut
+\end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\centering\strut
+optimal
+\(\mathbf{x}^*=\begin{bmatrix}0\\ \frac{2}{3}\\ \frac{1}{3}\end{bmatrix}\)\strut
+\end{minipage} & \begin{minipage}[t]{0.18\columnwidth}\centering\strut
+(P2): \(x_3 \leq 0\),\\ (P3): \(x_3 \geq 1\)\strut
+\end{minipage} & \begin{minipage}[t]{0.15\columnwidth}\centering\strut
+(P2), (P3)\strut
+\end{minipage} & \begin{minipage}[t]{0.07\columnwidth}\centering\strut
+N/A\strut
+\end{minipage} & \begin{minipage}[t]{0.11\columnwidth}\centering\strut
+\(\infty\)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.07\columnwidth}\centering\strut
+2\strut
+\end{minipage} & \begin{minipage}[t]{0.08\columnwidth}\centering\strut
+(P2)\strut
+\end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\centering\strut
+infeasible\strut
+\end{minipage} & \begin{minipage}[t]{0.18\columnwidth}\centering\strut
+---\strut
+\end{minipage} & \begin{minipage}[t]{0.15\columnwidth}\centering\strut
+(P3)\strut
+\end{minipage} & \begin{minipage}[t]{0.07\columnwidth}\centering\strut
+N/A\strut
+\end{minipage} & \begin{minipage}[t]{0.11\columnwidth}\centering\strut
+\(\infty\)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.07\columnwidth}\centering\strut
+3\strut
+\end{minipage} & \begin{minipage}[t]{0.08\columnwidth}\centering\strut
+(P3)\strut
+\end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\centering\strut
+optimal
+\(\mathbf{x}^*=\begin{bmatrix}0\\ \frac{4}{5}\\ 1\end{bmatrix}\)\strut
+\end{minipage} & \begin{minipage}[t]{0.18\columnwidth}\centering\strut
+---\strut
+\end{minipage} & \begin{minipage}[t]{0.15\columnwidth}\centering\strut
+---\strut
+\end{minipage} & \begin{minipage}[t]{0.07\columnwidth}\centering\strut
+\(\begin{bmatrix}0\\ \frac{4}{5}\\ 1\end{bmatrix}\)\strut
+\end{minipage} & \begin{minipage}[t]{0.11\columnwidth}\centering\strut
+\(1\)\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+\subsection*{Exercises}\label{exercises-10}
+\addcontentsline{toc}{section}{Exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  Suppose that (MP) in Example \ref{ex:ilp-ex} above has \(x_2\)
+  required to be an integer as well. Continue with the computations and
+  determine an optimal solution to the modified problem.
+\item
+  With the help of a solver, determine the optimal value of
+  \[\begin{array}{rrcrll}
+  \max & 3x & + & 2y & \\
+  \text{s.t.} 
+  & x & + & 3y & \leq & 6 \\
+  & 2x & +&  y & \leq & 4 \\
+  & x & ,& y & \geq & 0 \\
+  & x &,& y & \in  & \Z. \\
+  \end{array}\]
+\item
+  Let \(\mm{A} \in \Q^{m\times n}\) and \(\vec{b} \in \Q^m\). Let
+  \(S\) denote the system
+  \begin{align*}
+    \mm{A} \vec{x} & \geq \vec{b}\\
+    \vec{x} & \in \Z^n
+  \end{align*}
+
+  \begin{enumerate}
+  \def\labelenumii{\alph{enumii}.}
+  \item
+    Suppose that \(\vec{d} \in \Q^m\) satisfies
+    \(\vec{d} \geq \vec{0}\) and \(\vec{d}^\T\mm{A} \in \Z^n\). Prove
+    that every \(\vec{x}\) satisfying \(S\) also satisfies
+    \(\vec{d}^T\mm{A} \vec{x} \geq \lceil \vec{d}^\T\vec{b}\rceil\).
+    (This inequality is known as a \textbf{Chvátal-Gomory cutting
+    plane.})
+  \item
+    Suppose that
+    \(\mm{A} = \begin{bmatrix} 2 & 3 \\ 5 & 3 \\ 7 & 6 \end{bmatrix}\)
+    and \(\vec{b} = \begin{bmatrix} 2 \\ 1 \\ 8\end{bmatrix}\). Show
+    that every \(\vec{x}\) satisfying \(S\) also satisfies
+    \(x_1 + x_2 \geq 2\).
+  \end{enumerate}
+\end{enumerate}
+
+\subsection*{Solutions}\label{solutions-10}
+\addcontentsline{toc}{section}{Solutions}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  An optimal solution to the modified problem is given by
+  \(x^* = \begin{bmatrix} 1\\1\\1 \end{bmatrix}\).
+\item
+  An optimal solution is
+  \(\begin{bmatrix} x\\y \end{bmatrix} = \begin{bmatrix} 2 \\ 0\end{bmatrix}\).
+  Thus, the optimal value is \(6\).
+\item
+  \begin{enumerate}
+  \def\labelenumii{\alph{enumii}.}
+  \item
+    Since \(\vec{d} \geq \vec{0}\) and \(\mm{A}\vec{x} \geq \vec{b}\),
+    we have \(\vec{d}^T\mm{A} \vec{x} \geq \vec{d}^\T\vec{b}\). If
+    \(\vec{d}^\T\vec{b}\) is an integer, the result follows immediately.
+    Otherwise, note that \(\vec{d}^\T\mm{A} \in \Z^n\) and
+    \(\vec{x}\in \Z^n\) imply that \(\vec{d}^T\mm{A} \vec{x}\) is an
+    integer. Thus, \(\vec{d}^T\mm{A} \vec{x}\) must be greater than or
+    equal to the least integer greater than \(\vec{d}^\T\vec{b}\).
+  \item
+    Take
+    \(\vec{d} = \begin{bmatrix} \frac{1}{9} \\ 0 \\ \frac{1}{9} \end{bmatrix}\)
+    and apply the result in the previous part.
+  \end{enumerate}
+\end{enumerate}
+
+

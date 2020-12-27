@@ -1,0 +1,133 @@
+%%% BibLaTeX setup --> see also
+%%% /open-optimization-bibliography/test/bibliography-biblatex.tex.
+
+\usepackage{csquotes}   % to work around a bug in pre-2018 biblatex, https://github.com/plk/biblatex/issues/737
+\usepackage[backend=biber,giveninits=true,maxnames=100,maxcitenames=5,sorting=nyt,backref=true]{biblatex}
+\addbibresource{../../../open-optimization-bibliography/bib/references.bib}
+\addbibresource{optimization/figures/figures-static/00_METADATA.bib}
+\addbibresource{optimization/figures/figures-source/00_METADATA.bib}
+
+% print url only if no doi.  https://tex.stackexchange.com/questions/424774/print-url-only-if-doi-not-present
+%% \renewbibmacro*{doi+eprint+url}{%
+%%     \printfield{doi}%
+%%     \newunit\newblock%
+%%     \iftoggle{bbx:eprint}{%
+%%         \usebibmacro{eprint}%
+%%     }{}%
+%%     \newunit\newblock%
+%%     \iffieldundef{doi}{%
+%%         \usebibmacro{url+urldate}}%
+%%         {}%
+%%     }
+% print url&eprint only if no doi. Adapted from above.
+\renewbibmacro*{doi+eprint+url}{%
+    \printfield{doi}%
+    \newunit\newblock%
+    \iffieldundef{doi}{%
+      \iftoggle{bbx:eprint}{%
+        \usebibmacro{eprint}%
+      }{}%
+    }{}%
+    \newunit\newblock%
+    \iffieldundef{doi}{%
+        \usebibmacro{url+urldate}}%
+        {}%
+    }
+
+
+\DeclareRobustCommand\footnotetextmetadata[1]{%
+  \footnotetext{\citetitle*{#1}, from \citeurl{#1}.
+    \citeauthor{#1}, \citedate{#1}.
+  }
+}
+
+\usepackage{xargs}
+
+% Adds graphic in figure environment and references it immediately.
+\newcommandx{\refincludefigurestatic}[4][1=\relax,2={width=.4\linewidth},3=t, usedefault]{%
+  \begin{figure}[#3]%
+    \centering%
+    \includegraphics[#2]{optimization/figures/figures-static/#4}\\
+\centerline{\scriptsize 
+\copyright~\citeauthor{#4}\protect\footnotemark}
+    \caption{%
+      \ifx#1\relax % Caption from TITLE field in .bib
+      \citetitle*{#4}%
+      \else        % Caption provided as an argument to the macro
+      #1%
+      \fi%
+      }%
+    \label{fig:#4}%
+  \end{figure}%
+  \autoref{fig:#4}\footnotetextmetadata{#4}%
+}
+
+% Adds graphic in a figure environment with proper credit and footnote
+\newcommandx{\includefigurestatic}[4][1=\relax,2={width=.4\linewidth},3=t, usedefault]{%
+  \begin{figure}[#3]%
+    \centering%
+    \includegraphics[#2]{optimization/figures/figures-static/#4}\\
+\centerline{\scriptsize 
+\copyright~\citeauthor{#4}\protect\footnotemark}
+    \caption{%
+      \ifx#1\relax % Caption from TITLE field in .bib
+      \citetitle*{#4}%
+      \else        % Caption provided as an argument to the macro
+      #1%
+      \fi%
+      }%
+    \label{fig:#4}%
+  \end{figure}%
+  \footnotetextmetadata{#4}%
+}
+
+% Includes the graphic but not in a figure environment.  Adds proper credit citation below with footnote.
+\newcommandx{\includegraphicstatic}[2][1={width=.4\linewidth}, usedefault]{%
+    \begin{center}
+    \includegraphics[#1]{optimization/figures/figures-static/#2}\\
+    \end{center}
+\centerline{\scriptsize 
+\copyright~\citeauthor{#2}\protect\footnotemark}
+  \footnotetextmetadata{#2}%
+}
+
+
+\newcommandx{\includegraphicsource}[2][1={width=.4\linewidth}, usedefault]{%
+    \begin{center}
+    \includegraphics[#1]{optimization/figures/figures-source/#2}\\
+    \end{center}
+\centerline{\scriptsize 
+\copyright~\citeauthor{#2}\protect\footnotemark}
+  \footnotetextmetadata{#2}%
+}
+
+
+\newcommandx{\includefiguresource}[4][1=\relax,2={width=.4\linewidth},3=t, usedefault]{%
+  \begin{figure}[#3]%
+    \centering%
+    \includegraphics[#2]{optimization/figures/figures-source/#4}\\
+\centerline{\scriptsize 
+\copyright~\citeauthor{#4}\protect\footnotemark}
+    \caption{%
+      \ifx#1\relax % Caption from TITLE field in .bib
+      \citetitle*{#4}%
+      \else        % Caption provided as an argument to the macro
+      #1%
+      \fi%
+      }%
+    \label{fig:#4}%
+  \end{figure}%
+  \footnotetextmetadata{#4}%
+}
+
+
+%% 
+% Might include a version of this that will be prepped to create a bibliography of figure references at the end of the chapter or book.  
+%%
+
+%\copyright~\hyperref[m0075_fEMS_Credit]{V.\ Blacus}  \href{https://creativecommons.org/licenses/by-sa/3.0/}{CC BY-SA 3.0} } 
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "open-optimization/open-optimization"
+%%% End:

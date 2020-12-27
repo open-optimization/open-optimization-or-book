@@ -1,0 +1,1007 @@
+\subsection{Gaussian Elimination}
+
+The work we did in the previous section will always find the solution to the system. In this section, we will explore a less cumbersome way to 
+find the solutions. First, we will represent a linear system with an \textbf{augmented matrix.} \index{matrix!augmented matrix}
+A \textbf{matrix} \index{matrix} is simply a rectangular array of numbers. The size or dimension of a matrix \index{matrix!dimension} is defined as $m\times n$ where $m$ is the
+number of rows and $n$ is the number of columns. In order to construct an augmented matrix
+from a linear system, we create a \textbf{coefficient matrix} \index{matrix!coefficient matrix}from the coefficients of the variables in the system, as well as a
+\textbf{constant matrix} from the constants. The coefficients from one equation of the system create one row of the augmented matrix. 
+
+For example, consider the linear system in Example \ref{exa:solvingasystemwithelementaryops}
+\begin{equation*}
+\begin{array}{c}
+x+3y+6z=25 \\
+2x+7y+14z=58 \\
+2y+5z=19
+\end{array}
+\end{equation*}
+This system can be written as an augmented matrix, as follows \:
+\begin{equation*}
+\leftB 
+\begin{array}{rrr|r}
+1 & 3 & 6 & 25 \\
+2 & 7 & 14 & 58 \\
+0 & 2 & 5 & 19
+\end{array}
+\rightB 
+\end{equation*}
+
+Notice that it has exactly the same information as the original system. Here it is
+understood that the first column contains the coefficients from $x$ in each equation, in order,   
+$\leftB
+\begin{array}{r}
+1 \\
+2 \\
+0
+\end{array}
+\rightB .$ Similarly, we create a column from the coefficients on $y$ in each equation, $\leftB
+\begin{array}{r}
+3 \\
+7 \\
+2
+\end{array}
+\rightB $ and a column from the coefficients on $z$ in each equation, $\leftB
+\begin{array}{r}
+6 \\
+14 \\
+5
+\end{array}
+\rightB .$ For a system of more than three variables, we would continue in this way constructing a column for each variable.
+Similarly, for a system of less than three variables, we simply construct a column for each variable. 
+
+Finally, we construct a column from the constants of the equations,
+$\leftB
+\begin{array}{r}
+25\\
+58\\
+19
+\end{array}
+\rightB .$ 
+
+The rows of the augmented matrix correspond to the equations in the system. For example, the top
+row in the augmented matrix, 
+$\leftB
+\begin{array}{rrrrr}
+1 & 3 & 6 & | & 25
+\end{array}
+\rightB$
+ corresponds to the equation
+\begin{equation*}
+x+3y+6z=25.
+\end{equation*}
+
+Consider the following definition. 
+
+\begin{definition}{Augmented Matrix of a Linear System}{augmentedmatrix}
+For a linear system of the form
+\begin{equation*}
+\begin{array}{c}
+a_{11}x_{1}+\cdots +a_{1n}x_{n}=b_{1} \\
+\vdots \\
+a_{m1}x_{1}+\cdots +a_{mn}x_{n}=b_{m}
+\end{array}
+\end{equation*}
+where the $x_{i}$ are variables and the $a_{ij}$ and $b_{i}$ are constants, 
+the augmented matrix \index{matrix!augmented matrix} of this system is given by 
+\begin{equation*}
+\leftB
+\begin{array}{rrr|r}
+a_{11} & \cdots & a_{1n} &  b_{1} \\
+\vdots &  & \vdots &  \vdots \\
+a_{m1} & \cdots & a_{mn} &  b_{m}
+\end{array}
+\rightB 
+\end{equation*}
+\end{definition}
+
+Now, consider elementary operations in the context of the augmented matrix. The elementary operations in Definition \ref{def:elementaryoperations}
+can be used on the rows just as we used them on equations previously. Changes to a system of equations in as a result of an
+elementary operation are equivalent to changes in the augmented matrix resulting from the corresponding row operation. Note that Theorem \ref{thm:elementaryoperationsandsolns} implies that
+any elementary row operations used on an augmented matrix will not change the solution to the corresponding system of equations.
+We now formally define elementary row operations. These are the {\em key tool \em}we will use to find solutions to systems of equations. 
+
+\begin{definition}{Elementary Row Operations}{rowoperations}
+The \textbf{elementary row operations} (also known as \textbf{row operations}) consist of the following \index{row operations} \index{elementary row operations}
+
+\begin{enumerate}
+\item Switch two rows.
+
+\item Multiply a row by a nonzero number.
+
+
+\item Replace a row by any multiple of another row added to it.
+\end{enumerate}
+\end{definition}
+
+Recall how we solved Example \ref{exa:solvingasystemwithelementaryops}. 
+We can do the exact same steps as above, except now in the context of an augmented matrix and using row operations. 
+The augmented matrix of this system is 
+\begin{equation*}
+\leftB 
+\begin{array}{rrr|r}
+1 & 3 & 6 &  25 \\
+2 & 7 & 14 &  58 \\
+0 & 2 & 5 &  19
+\end{array}
+\rightB 
+\end{equation*}
+Thus the first step in
+solving the system given by \ref{solvingasystem1} would be to take $\left( -2\right) $ times the first row
+of the augmented matrix and add it to the second row,
+\begin{equation*}
+\leftB
+\begin{array}{rrr|r}
+1 & 3 & 6 & 25 \\
+0 & 1 & 2 & 8 \\
+0 & 2 & 5 & 19
+\end{array}
+\rightB 
+\end{equation*}
+Note how this corresponds to \ref{solvingasystem2}. Next take $\left( -2\right) $
+times the second row and add to the third,
+\begin{equation*}
+\leftB 
+\begin{array}{rrr|r}
+1 & 3 & 6 & 25 \\
+0 & 1 & 2 & 8 \\
+0 & 0 & 1 & 3
+\end{array}
+\rightB
+\end{equation*}
+This augmented matrix corresponds to the system
+\begin{equation*}
+\begin{array}{c}
+x+3y+6z=25 \\
+y+2z=8 \\
+z=3
+\end{array}
+\end{equation*}
+which is the same as \ref{solvingasystem3}. By back substitution you obtain the solution
+$x=1,y=2,$ and $z=3.$
+
+Through a systematic
+procedure of row operations, we can simplify an augmented matrix and carry it to \textbf{\ef} or \textbf{\rref}, which we define next. These 
+forms are used to find the solutions of the system of equations corresponding to the augmented matrix.
+
+In the following definitions, the term
+\textbf{leading entry}
+\index{leading entry}refers to
+ the first nonzero entry of a row when scanning the row
+from left to right.
+
+\begin{definition}{\EF}{echelonform}
+An augmented matrix is
+\index{\ef} in \textbf{\ef} if
+
+\begin{enumerate}
+\item All nonzero rows are above any rows of zeros.
+
+\item Each leading entry of a row is in a column to the right of the leading entries of any row above it. 
+
+%%Definition using original Kuttler definition ends here
+
+%%Definition using Style B definition of \ref
+\item Each leading entry of a row is equal to $1$.
+
+\end{enumerate}
+\end{definition}
+
+%%For Style B:
+We also consider another reduced form of the augmented matrix which has one further condition. 
+
+%%For Original Kuttler:
+%% We also consider another reduced form of the augmented matrix which has further conditions.
+
+\begin{definition}{\RREF}{rref}
+An augmented 
+\index{\rref} matrix is in \textbf{\rref } if
+
+\begin{enumerate}
+\item All nonzero rows are above any rows of zeros.
+
+\item Each leading entry of a row is in a column to the right of the leading
+entries of any rows above it.
+
+\item Each leading entry of a row is equal to $1$.
+
+\item All entries in a column above and below a leading entry are zero.
+
+\end{enumerate}
+\end{definition}
+
+%%For Style B definition:
+Notice that the first three conditions on a \rref  \; matrix are the same as those for \ef. 
+
+
+%%For original Kuttler definition:
+%%Notice that the first two conditions on a \rref  \; matrix are the same as those for \ef.
+
+Hence, every \rref \;matrix is also in \ef. The converse is not necessarily true;
+ we cannot assume that every matrix in \ef \;is also in \rref. However, it often happens
+that the \ef \;is sufficient to provide information about the solution of a system.
+
+The following examples describe matrices in these various forms. As an exercise, take the time
+to carefully verify that they are in the specified form.
+
+\begin{example}{Not in \EF}{matricesnotechelon}
+The following augmented matrices are not in \ef \;(and therefore also not in \rref).
+
+\begin{equation*}
+\leftB
+\begin{array}{rrr|r}
+0 & 0 & 0 & 0 \\
+1 & 2 & 3 & 3 \\
+0 & 1 & 0 & 2 \\
+0 & 0 & 0 & 1 \\
+0 & 0 & 0 & 0
+\end{array}
+\rightB ,\leftB
+\begin{array}{rr|r}
+1 & 2 & 3 \\
+2 & 4 & -6 \\
+4 & 0 & 7
+\end{array}
+\rightB ,\leftB
+\begin{array}{rrr|r}
+0 & 2 & 3 & 3 \\
+1 & 5 & 0 & 2 \\
+7 & 5 & 0 & 1 \\
+0 & 0 & 1 & 0
+\end{array}
+\rightB 
+\end{equation*}
+\end{example}
+
+\begin{example}{Matrices in \EF}{matricesnotrref}
+
+%%For Original Kuttler definition, can change these matrices to not have leading 1s.
+
+The following augmented matrices are in \ef, but not in \rref.
+\begin{equation*}
+\leftB
+\begin{array}{rrrrr|r}
+1 & 0 & 6 & 5 & 8 & 2 \\
+0 & 0 & 1 & 2 & 7 & 3 \\
+0 & 0 & 0 & 0 & 1 & 1 \\
+0 & 0 & 0 & 0 & 0 & 0
+\end{array}
+\rightB ,\leftB
+\begin{array}{rrr|r}
+1 & 3 & 5 & 4 \\
+0 & 1 & 0 & 7 \\
+0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 1 \\
+0 & 0 & 0 & 0
+\end{array}
+\rightB, \leftB
+\begin{array}{rrr|r}
+1 & 0 & 6 & 0 \\
+0 & 1 & 4 & 0 \\
+0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 0
+\end{array}
+\rightB
+\end{equation*}
+\end{example}
+
+Notice that we could apply further row operations to these matrices to carry them to \rref. Take the time to try that on your own. 
+Consider the following matrices, which are in \rref. 
+
+\begin{example}{Matrices in\RREF}{rrefmatrices}
+The following augmented matrices are in \rref.
+\begin{equation*}
+\leftB
+\begin{array}{rrrrr|r}
+1 & 0 & 0 & 5 & 0 & 0 \\
+0 & 0 & 1 & 2 & 0 & 0 \\
+0 & 0 & 0 & 0 & 1 & 1 \\
+0 & 0 & 0 & 0 & 0 & 0
+\end{array}
+\rightB ,\leftB
+\begin{array}{rrr|r}
+1 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 \\
+0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 1 \\
+0 & 0 & 0 & 0
+\end{array}
+\rightB , \leftB
+\begin{array}{rrr|r}
+1 & 0 & 0 & 4 \\
+0 & 1 & 0 & 3 \\
+0 & 0 & 1 & 2 
+\end{array}
+\rightB
+\end{equation*}
+\end{example}
+
+One way in which the \ef \;of a matrix is useful is in identifying the pivot positions and pivot columns of the matrix.
+
+\begin{definition}{Pivot Position and Pivot Column}{pivotpositionandcolumn}
+A \textbf{pivot position}
+\index{pivot position}in a matrix is the location of a leading entry in the \ef of a matrix.
+A \textbf{pivot column}
+\index{pivot column} is a column that contains a pivot position.
+\end{definition}
+
+For example consider the following.
+
+\begin{example}{Pivot Position}{pivotposition}
+Let
+\begin{equation*}
+A=\leftB
+\begin{array}{rrr|r}
+1 & 2 & 3 & 4 \\
+3 & 2 & 1 & 6 \\
+4 & 4 & 4 & 10
+\end{array}
+\rightB
+\end{equation*}
+Where are the pivot positions
+and pivot columns of the augmented matrix $A$?
+\end{example}
+
+\begin{solution} 
+%%Solution as per Style B definition of row-echelon form
+The \ef \;of this matrix is
+\begin{equation*}
+\leftB
+\begin{array}{rrr|r}
+1 & 2 & 3 & 4 \\
+0 & 1 & 2 & \vspace{0.05in}\frac{3}{2} \\
+0 & 0 & 0 & 0
+\end{array}
+\rightB
+\end{equation*}
+
+
+%%Solution as per Kuttler's original definition of echelon form
+%% The \ef \;of this matrix is
+%%\begin{equation*}
+%%\leftB
+%%\begin{array}{rrr|r}
+%%1 & 2 & 3 & 4 \\
+%%0 & -4& -8 & -6 \\
+%%0 & 0 & 0 & 0
+%%\end{array}
+%%\rightB
+%%\end{equation*} 
+
+
+This is all we need in this example, but note that this matrix is not in \rref.
+
+In order to identify the pivot positions in the original matrix, we look for the leading entries in the \ef \hspace{0.5mm} of the matrix. 
+Here, the entry in the first row and first column, as well as the entry in the second row and second column 
+are the leading entries. Hence, these locations are the pivot positions. We identify the pivot positions in the original matrix, 
+as in the following:\
+\begin{equation*}
+\leftB
+\begin{array}{rrr|r}
+\fbox{1} & 2 & 3 & 4 \\
+3 & \fbox{2} & 1 & 6 \\
+4 & 4 & 4 & 10
+\end{array}
+\rightB
+\end{equation*}
+Thus the pivot columns in the matrix are the first two columns. 
+\end{solution}
+
+The following is an algorithm for carrying a matrix
+to \ef \;and \rref. You may wish to use this algorithm to carry the above matrix to \ef \;or \rref \;yourself for practice. 
+
+\begin{algorithm}{\RREF Algorithm}{rrefalgorithm}
+
+This algorithm provides a method for using row operations to take a matrix to 
+its \rref \index{\rref!algorithm}.
+We begin with the matrix in its original form. 
+
+\begin{enumerate}
+\item Starting from the left, find the first nonzero column. This is the first pivot
+column, and the position at the top of this column is the first pivot
+position. Switch rows if necessary to place a nonzero number in the first
+pivot position.
+
+\item Use row operations to make the entries below the first pivot
+position (in the first pivot column) equal to zero.
+
+%%Algorithm for the Style B definition of row-echelon form
+\item  Ignoring the row containing the first pivot position, repeat steps 1 and 2 with the remaining rows. 
+Repeat the process until there are no more rows
+to modify. 
+
+\item Divide each nonzero row by the value of the leading entry, so that the leading entry becomes $1$. The matrix will then be in \ef.
+
+\suspend{enumerate}
+The following step will carry the matrix from \ef \;to \rref. 
+
+\resume{enumerate}
+
+\item Moving from right to left, use row operations to create zeros in the entries of the pivot columns which are above the pivot positions. The result
+will be a matrix in \rref.
+\end{enumerate}
+
+%%Algorithm for the original Kuttler definition of echelon form
+%%\item Ignoring the row containing the first pivot position, repeat steps 1 and 2 with the remaining rows. Repeat the process until there 
+%% are not more rows to modify. The matrix will then be in \ef.
+%%\suspend{enumerate}
+%%The following steps will carry the matrix from \ef \;to \rref.
+%%\resume{enumerate}
+%%\item Moving from right to left, use row operations to create zeros in the entries of the pivot columns which are above the pivot positions.
+%%\item Divide each nonzero row by the value of the leading entry, so that the leading entry becomes $1$. The result will be 
+%% a matrix in \rref.
+%%\end{enumerate}
+\end{algorithm}
+
+Most often we will apply this algorithm to an augmented matrix in order to find the solution
+to a system of linear equations. However, we can use this algorithm to compute the \rref \;of any matrix which could be useful in other applications.
+
+Consider the following example of Algorithm \ref{algo:rrefalgorithm}.
+
+\begin{example}{Finding \EF and \\ \RREF of a Matrix}{findingechelonandrref}
+Let
+\begin{equation*}
+A = \leftB
+\begin{array}{rrr}
+0 & -5 & -4 \\
+1 & 4 & 3 \\
+5 & 10 & 7
+\end{array}
+\rightB
+\end{equation*}
+Find the \ef \;of $A$. Then complete
+the process until $A$ is in \rref.
+\end{example}
+
+\begin{solution} In working through this example, we will use the steps outlined in Algorithm \ref{algo:rrefalgorithm}.
+\begin{enumerate}
+
+\item The first pivot column is the first column of the matrix, as this is the first nonzero column from the left. 
+Hence the first pivot position is the one in the first row and first column. Switch the first two rows to 
+obtain a nonzero entry in the first pivot position, outlined in a box below.
+\begin{equation*}
+\leftB
+\begin{array}{rrr}
+\fbox{1} & 4 & 3 \\
+0 & -5 & -4 \\
+5 & 10 & 7 
+\end{array}
+\rightB
+\end{equation*}
+
+\item Step two involves creating zeros in the entries below the first pivot position. The first entry of the second row
+is already a zero. All we need to do is subtract $5$ times the first row from the third row. 
+The resulting matrix is 
+\begin{equation*}
+\leftB
+\begin{array}{rrr}
+1 & 4 & 3 \\
+0 & -5 & -4 \\
+0 & 10 & 8 
+\end{array}
+\rightB
+\end{equation*} 
+
+%%Solution using Style B definition of \ef
+
+\item Now ignore the top row.  Apply steps $1$ and $2$ to the smaller matrix
+\begin{equation*}
+\leftB
+\begin{array}{rr}
+-5 & -4\\
+10 & 8 
+\end{array}
+\rightB
+\end{equation*}
+In this matrix, the first column is a pivot column, and $-5$ is in the first pivot position. Therefore, we need to create a zero below it.
+To do this, add $2$ times the first row (of this matrix) to the second. The resulting matrix is
+\begin{equation*}
+\leftB
+\begin{array}{rr}
+-5 & -4\\
+0 & 0
+\end{array}
+\rightB
+\end{equation*}
+Our original matrix now looks like
+\begin{equation*}
+\leftB
+\begin{array}{rrr}
+1 & 4 & 3 \\
+0 & -5 & -4 \\
+0 & 0 & 0 
+\end{array}
+\rightB
+\end{equation*}
+We can see that there are no more rows to modify.
+
+\item Now, we need to create leading $1$s in each row. The first row already has a leading $1$ so no work is needed here.
+Divide the second row by $-5$ to create a leading $1$. The resulting matrix is
+\begin{equation*}
+\leftB
+\begin{array}{rrr}
+1 & 4 & 3 \\
+0 & 1 & \vspace{0.05in}\frac{4}{5} \\
+0 & 0 & 0
+\end{array}
+\rightB
+\end{equation*}
+This matrix is now in \ef.
+
+\item Now create zeros in the entries above pivot positions in each column, in order to carry this matrix all the way to \rref. 
+Notice that there is no pivot position in the third column so we do not need to create any zeros in this column! The column in which we 
+need to create zeros is the second. To do so, subtract $4$ times the second row from the first row. The resulting matrix is
+\begin{equation*}
+\leftB
+\begin{array}{rrr}
+1 & 0 & -\vspace{0.05in}\frac{1}{5} \\
+0 & 1 & \vspace{0.05in}\frac{4}{5} \\
+0 & 0 & 0
+\end{array}
+\rightB
+\end{equation*}
+\end{enumerate}
+This matrix is now in \rref.
+\end{solution}
+
+%%Solution using the original Kuttler definition of \ef
+%%\item Now ignore the top row.  Apply steps $1$ and $2$ to the smaller matrix
+%%\begin{equation*}
+%%\leftB
+%%\begin{array}{rr}
+%%-5 & -4\\
+%%10 & 8 
+%%\end{array}
+%%\rightB.
+%%\end{equation*}
+%%In this matrix, $-5$ is in the pivot position. Therefore, we need to create a zero below it.
+%%To do this, add $2$ times the first row (of this matrix) to the second. The resulting matrix is
+%%\begin{equation*}
+%%\leftB
+%%\begin{array}{rr}
+%%-5 & 4\\
+%%0 & 0
+%%\end{array}
+%%\rightB.
+%%\end{equation*}
+%%Our original matrix now looks like
+%%\begin{equation*}
+%%\leftB
+%%\begin{array}{rrr}
+%%1 & 4 & 3 \\
+%%0 & -5 & -4 \\
+%%0 & 0 & 0 
+%%\end{array}
+%%\rightB
+%%\end{equation*}
+%%We can see that there are no more rows to modify. Therefore, this matrix is in \ef.
+
+%%\item Now, we wish to continue carrying this matrix all the way to \rref.
+%%First, we want to create zeros in the entries above pivot positions in each column. 
+%%Notice that there is no pivot position in the third column so we do not need to create any zeros in this column! The column which we 
+%%need to create zeros in is the second. To do so, add $\frac{4}{5}$ times the second row from the first row. The resulting matrix is
+%%\begin{equation*}
+%%\leftB
+%%\begin{array}{rrr}
+%%1 & 0 & -\vspace{0.05in}\frac{1}{5} \\
+%%0 & -5 & -4 \\
+%%0 & 0 & 0
+%%\end{array}
+%%\rightB
+%%\end{equation*}
+
+%%\item Finally, we need to create leading $1$s in each row. The first row already has a leading $1$ so no work is needed here.
+%%Divide the second row by $-5$ to create a leading $1$. The resulting matrix is
+%%\begin{equation*}
+%%\leftB
+%%\begin{array}{rrr}
+%%1 & 0 & -\vspace{0.05in}\frac{1}{5} \\
+%%0 & 1 & \vspace{0.05in}\frac{4}{5} \\
+%%0 & 0 & 0
+%%\end{array}
+%%\rightB
+%%\end{equation*}
+%%\end{enumerate}
+%%This matrix is now in \rref.
+%% \end{solution}
+
+
+The above algorithm gives you a simple way to obtain the \ef \;and \rref \;of a matrix.
+The main idea is to do row operations in such a way as to end up with a
+matrix in \ef \;or \rref. This process is important because the resulting matrix will 
+allow you to describe the
+solutions to the corresponding linear system of equations in a meaningful way. 
+
+In the next example, we look at how to solve a system of equations using the corresponding augmented matrix.
+
+\begin{example}{Finding the Solution to a System}{systemwithnosoln}
+Give the complete solution to the following system of equations \:
+\begin{equation*}
+\begin{array}{c}
+2x+4y-3z=-1\\
+5x+10y-7z=-2\\
+3x+6y+5z=9
+\end{array}
+\end{equation*}
+\end{example}
+
+\begin{solution} The augmented matrix for this system is
+\begin{equation*}
+\leftB
+\begin{array}{rrr|r}
+2 & 4  & -3 & -1 \\
+5 & 10 & -7 & -2 \\
+3 & 6  &  5 &  9
+\end{array}
+\rightB
+\end{equation*}
+
+In order to find the solution to this system, we wish to carry the augmented matrix to \rref.
+We will do so using Algorithm \ref{algo:rrefalgorithm}. Notice that
+the first column is nonzero, so this is our first pivot column. The first entry in the first row, $2$, is the
+first leading entry and it is in the first pivot position. We will use row operations
+to create zeros in the entries below the $2$.  First, replace the second row with $-5$ times the first row plus $2$ times the second row. This yields
+\begin{equation*}
+\leftB
+\begin{array}{rrr|r}
+2 & 4 & -3 & -1 \\
+0 & 0 & 1 & 1 \\
+3 & 6 & 5 & 9
+\end{array}
+\rightB
+\end{equation*}
+Now, replace the third row with $-3$ times the first
+row plus to $2$ times the third row. This yields
+\begin{equation*}
+\leftB
+\begin{array}{rrr|r}
+2 & 4 & -3 &  -1 \\
+0 & 0 & 1 & 1 \\
+0 & 0 & 1 & 21
+\end{array}
+\rightB 
+\end{equation*}
+Now the entries in the first column below the pivot position are zeros. We now look for the second pivot column, which in this case is column three. 
+Here, the $1$ in the second row and third column is in the pivot position. 
+We need to do just one row operation to create a zero below the $1$. 
+
+Taking $-1$ times the second row and
+adding it to the third row yields
+\begin{equation*}
+\leftB
+\begin{array}{rrr|r}
+2 & 4 & -3 & -1 \\
+0 & 0 &  1 & 1 \\
+0 & 0 &  0 & 20
+\end{array}
+\rightB 
+\end{equation*}
+
+We could proceed with the algorithm to carry this matrix to \ef \; or \rref. However, remember that 
+we are looking for the solutions to the system of equations. Take another look at the third row of the matrix.
+Notice that it corresponds to 
+the equation
+\begin{equation*}
+0x+0y+0z=20
+\end{equation*}
+There is no solution to this equation because for all $x,y,z$, the left side will equal $0$ and $0\neq 20.$ This shows there is no
+solution to the given system of equations. In other words, this system is inconsistent.
+\end{solution}
+
+The following is another example of how to find the solution to a system of equations by carrying the corresponding
+augmented matrix to \rref. 
+
+\begin{example}{An Infinite Set of Solutions}{infinitesetofsoln}
+Give the complete solution to the system of equations \:
+\begin{equation}
+\begin{array}{c}
+3x-y-5z=9 \\
+y-10z=0 \\
+-2x+y=-6
+\end{array}
+\end{equation}
+\end{example}
+
+\begin{solution} The augmented matrix of this system is
+\begin{equation*}
+\leftB
+\begin{array}{rrr|r}
+ 3 & -1 &  -5 & 9 \\
+ 0 &  1 & -10 & 0 \\
+-2 &  1 &   0 & -6
+\end{array}
+\rightB
+\end{equation*}
+In order to find the solution to this system, we will carry the augmented matrix to \rref, using Algorithm \ref{algo:rrefalgorithm}.
+The first column is the first pivot column. We want to use row operations to create zeros beneath the first entry in this column, which is 
+in the first pivot position. 
+Replace the third row with $2$ times the first row added to $3$ times the
+third row. This gives
+\begin{equation*}
+\leftB
+\begin{array}{rrr|r}
+3 & -1 & -5 & 9 \\
+0 & 1 & -10 & 0 \\
+0 & 1 & -10 & 0
+\end{array}
+\rightB 
+\end{equation*}
+Now, we have created zeros beneath the $3$ in the first column, so we move on to the second pivot column (which is the second column) and repeat the procedure. 
+Take $-1$ times the second row and add to the third row.
+\begin{equation*}
+\leftB
+\begin{array}{rrr|r}
+3 & -1 &  -5 & 9 \\
+0 &  1 & -10 & 0 \\
+0 &  0 &   0 & 0
+\end{array}
+\rightB
+\end{equation*}
+The entry below the pivot position in the second column is now a zero. Notice that we have no more pivot columns because we 
+have only two leading entries. 
+
+
+%%Solution using Style B definition of row-echelon form
+At this stage, we also want the leading entries to be equal to one. To do so, divide the first row by $3$.
+\begin{equation*}
+\leftB
+\begin{array}{rrr|r}
+1 & -\vspace{0.05in}\frac{1}{3} &  -\vspace{0.05in}\frac{5}{3} & 3 \\
+0 &  1 & -10 & 0 \\
+0 &  0 &   0 & 0
+\end{array}
+\rightB
+\end{equation*}
+
+This matrix is now in \ef. 
+
+Let's continue with row operations until the matrix is in \rref. 
+This involves creating zeros above the pivot positions in each pivot column. 
+This requires only one step, which is to add $ \frac{1}{3}$ times the second row to the first row.
+\begin{equation*}
+\leftB
+\begin{array}{rrr|r}
+1 & 0 & -5 & 3 \\
+0 & 1 & -10 & 0 \\
+0 & 0 & 0 & 0
+\end{array}
+\rightB 
+\end{equation*}
+%end of Kuttler specific solution 
+
+%%Solution using original Kuttler definition of echelon form
+%%This matrix is now in \ef. We want to continue with row operations
+%%until the matrix is in \rref. Therefore, we can begin creating zeros above the
+%%pivot positions in each pivot column. This requires only one step, which
+%%is to take the second row and add it to the first row.
+%%At this stage, we also want the leading entries to be equal to one. 
+%%To do so, divide the first row by $3.$ These steps yield the matrix
+%%\begin{equation*}
+%%\leftB
+%%\begin{array}{rrr|r}
+%%1 & 0 & -5 & 3 \\
+%%0 & 1 & -10 & 0 \\
+%%0 & 0 & 0 & 0
+%%\end{array}
+%%\rightB 
+%%\end{equation*}
+
+This is in \rref, which you should verify using Definition \ref{def:rref}.
+ The equations corresponding to this \rref \;are
+\[
+\begin{array}{c}
+x - 5z=3 \\
+y - 10z = 0 
+\end{array}
+\]
+or
+\[
+\begin{array}{c}
+x=3+5z \\
+y = 10z
+\end{array}
+\]
+
+Observe that $z$ is not restrained by any equation. In fact,
+ $z$ can equal any number. For example, we can let $z = t$, where we can choose $t$ to be any number.
+In this context $t$ is called a \textbf{parameter} \index{parameter}. Therefore, the solution
+set of this system is 
+\[
+\begin{array}{c}
+x=3+5t \\
+y=10t \\
+z=t
+\end{array}
+\]
+where $t$ is arbitrary. The system has an infinite set of solutions which are given by these equations. For any value of $t$ we select,
+$x, y,$ and $z$ will be given by the above equations. For example, if we choose $t=4$ then the corresponding solution would be 
+\[
+\begin{array}{c}
+x = 3 + 5 (4) = 23\\
+y = 10(4)=40 \\
+z=4
+\end{array}
+\]
+\end{solution}
+
+In Example \ref{exa:infinitesetofsoln} the solution involved one parameter. It may happen that the solution
+to a system involves more than one parameter, as shown in the following example.
+
+\begin{example}{A Two Parameter Set of Solutions}{twoparametersetofsoln}
+Find the solution to the system
+\begin{equation*}
+\begin{array}{c}
+x+2y-z+w=3 \\
+x+y-z+w=1 \\
+x+3y-z+w=5
+\end{array}
+\end{equation*}
+\end{example}
+
+\begin{solution} The augmented matrix is
+\begin{equation*}
+\leftB
+\begin{array}{rrrr|r}
+1 & 2 & -1 & 1 & 3 \\
+1 & 1 & -1 & 1 & 1 \\
+1 & 3 & -1 & 1 & 5
+\end{array}
+\rightB 
+\end{equation*}
+We wish to carry this matrix to \ef. Here, we will outline the row operations used. However, make sure that you 
+understand the steps in terms of Algorithm \ref{algo:rrefalgorithm}.
+
+Take $-1$ times the first row and add to the second. Then take $-1$ times
+the first row and add to the third. This yields
+\begin{equation*}
+\leftB
+\begin{array}{rrrr|r}
+1 & 2 & -1 & 1 & 3 \\
+0 & -1 & 0 & 0 & -2 \\
+0 & 1 & 0 & 0 & 2
+\end{array}
+\rightB
+\end{equation*}
+
+%%Solution using Style B definition of row-echelon form
+Now add the second row to the third row and divide the second row by $-1$.
+\begin{equation}
+\leftB
+\begin{array}{rrrr|r}
+1 & 2 & -1 & 1 & 3 \\
+0 & 1 & 0 & 0 & 2 \\
+0 & 0 & 0 & 0 & 0
+\end{array}
+\rightB  \label{twoparameters1}
+\end{equation}
+
+%%Solution using original Kuttler definition of echelon form
+%%Now add the second row to the third row.
+%%\begin{equation}
+%%\leftB
+%%\begin{array}{rrrr|r}
+%%1 & 2 & -1 & 1 & 3 \\
+%%0 & -1 & 0 & 0 & -2 \\
+%%0 & 0 & 0 & 0 & 0
+%%\end{array}
+%%\rightB  \label{twoparameters1}
+%%\end{equation}
+
+
+This matrix is in \ef \;and we can see that $x$ and $y$ 
+correspond to pivot columns, while $z$ and $w$ do not. Therefore, we will assign parameters to the variables $z$ and $w$.
+Assign the parameter $s$ to $z$ and the parameter 
+$t$ to $w.$ Then the first row yields the equation $x+2y-s+t=3$, while the second row yields the 
+equation $y=2$. Since $y=2$, the first equation becomes  $x+4-s+t=3$
+showing that the solution is given by
+\begin{equation*}
+\begin{array}{c}
+x=-1+s-t \\
+y=2 \\
+z=s \\
+w=t
+\end{array}
+\end{equation*}
+It is customary to write this solution in
+the form
+\begin{equation}
+\leftB
+\begin{array}{c}
+x \\
+y \\
+z \\
+w
+\end{array}
+\rightB =\leftB
+\begin{array}{c}
+-1+s-t \\
+2 \\
+s \\
+t
+\end{array}
+\rightB   \label{twoparameters2}
+\end{equation}
+
+\end{solution}
+
+This example shows a system of equations with an infinite solution set which depends on two parameters. 
+It can be less confusing in the case of an infinite solution set to first
+place the augmented matrix in \rref \;rather than just
+\ef \;before seeking to write down the description of the solution.
+
+In the above steps, this means we don't stop with the \ef \;in equation \ref{twoparameters1}.
+Instead we first place it in \rref \;as follows.
+\begin{equation*}
+\leftB
+\begin{array}{rrrr|r}
+1 & 0 & -1 & 1 & -1 \\
+0 & 1 & 0 & 0 & 2 \\
+0 & 0 & 0 & 0 & 0
+\end{array}
+\rightB 
+\end{equation*}
+Then the solution is $y=2$ from the second row and $x=-1+z-w$ from the
+first. Thus letting $z=s$ and $w=t,$ the solution is given by \ref{twoparameters2}. 
+
+You can see here that there are two paths to the correct answer, which both yield the
+same answer. Hence, either approach may be used. The process which we first used in the above solution is called \textbf{Gaussian Elimination} 
+\index{Gaussian Elimination}
+This process involves carrying the matrix to \ef, converting back to equations, and using back substitution to find the solution. 
+When you do row operations until you obtain \rref, the process is
+called \textbf{Gauss-Jordan Elimination}. \index{Gauss-Jordan Elimination}
+
+We have now found solutions for systems of equations with no solution and infinitely many solutions, with one parameter as well as two parameters. 
+Recall the three types of solution sets which we discussed in the previous section; no solution, one solution, and infinitely many solutions. Each of these
+types of solutions could be identified from the graph of the system. It turns out that we can also identify the type of solution
+from the \rref \;of the augmented matrix.
+
+\begin{itemize}
+\item {\em No Solution: \em}
+In the case where the system of equations has no solution, the \ef \; of the augmented matrix will have a row of the form 
+\[
+\leftB
+\begin{array}{rrrrr}
+0 & 0 & 0 & | & 1
+\end{array}
+\rightB
+\]
+
+This row indicates that the system is inconsistent and has no solution.
+
+\item {\em One Solution: \em}
+In the case where the system of equations has one solution, every column
+of the coefficient matrix is a pivot column. 
+The following is an example of an augmented matrix in \rref \hspace{0.5mm} for a system of equations with one solution. 
+\begin{equation*}
+\leftB
+\begin{array}{rrr|r}
+1 & 0 & 0 & 5 \\
+0 & 1 & 0 & 0 \\ 
+0 & 0 & 1 & 2 
+\end{array}
+\rightB
+\end{equation*}
+
+\item {\em Infinitely Many Solutions: \em} 
+In the case where the system of equations has infinitely many solutions, the solution contains parameters. There
+will be columns of the coefficient matrix which are not pivot columns.
+The following are examples of augmented matrices in \rref \;for systems of equations with infinitely many solutions. 
+\begin{equation*}
+\leftB
+\begin{array}{rrr|r}
+1 & 0 & 0 & 5 \\
+0 & 1 & 2 & -3 \\ 
+0 & 0 & 0 & 0 
+\end{array}
+\rightB
+\end{equation*}
+or
+\begin{equation*}
+\leftB
+\begin{array}{rrr|r}
+1 & 0 & 0 & 5 \\
+0 & 1 & 0 & -3
+\end{array}
+\rightB
+\end{equation*}
+
+\end{itemize}

@@ -1,0 +1,720 @@
+% Copyright 2019 by Laurent Porrier
+%This work is licensed under a
+%Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0)
+%See http://creativecommons.org/licenses/by-sa/4.0/
+
+%\documentclass[letterpaper]{article}
+%\usepackage{graphicx}
+%\usepackage[utf8]{inputenc}
+%\usepackage{amsmath}
+%\usepackage{amsthm}
+%\usepackage{amssymb}
+%\usepackage{enumerate}
+%\usepackage{setspace}
+%\usepackage{bm}
+%\usepackage{float}
+%\usepackage{hyperref}
+%\usepackage{xcolor}
+%
+%\topmargin 0cm
+%\headheight 0cm
+%\headsep 0cm
+%\textheight 23cm
+%
+%\oddsidemargin -0.25cm
+%\evensidemargin -0.25cm
+%\textwidth 17.5cm
+%\marginparwidth 0cm
+%
+%\parskip \baselineskip
+%\parindent 0cm
+%
+%\onehalfspacing
+%
+%\theoremstyle{plain}
+%\newtheorem{lemma}{Lemma}
+%\newtheorem{theorem}{Theorem}
+%\newtheorem{corollary}{Corollary}
+%\newtheorem{claim}{Claim}
+%\newtheorem{proposition}{Proposition}
+%\newtheorem{conjecture}{Conjecture}
+%\theoremstyle{definition}
+%\newtheorem{notation}{Notation}
+%\newtheorem{definition}{Definition}
+%\newtheorem{assumption}{Assumption}
+%\newtheorem{algorithm}{Algorithm}
+%
+%\newfloat{Pseudocode}{tbhp}{Pseudocode}
+%
+%\newcommand{\Z}[0]{\mathbb{Z}}
+%\newcommand{\R}[0]{\mathbb{R}}
+%\newcommand{\e}[0]{\varepsilon}
+%
+%\newcommand{\B}[0]{\mathcal{B}}
+%\newcommand{\NL}[0]{\mathcal{L}}
+%\newcommand{\NU}[0]{\mathcal{U}}
+%
+%\newcommand{\mathfunc}[1]{\ensuremath{\mathop{\mathrm{#1}}}}
+%\newcommand{\conv}[0]{\mathfunc{conv}}
+%\newcommand{\cone}[0]{\mathfunc{cone}}
+%\newcommand{\lin}[0]{\mathfunc{lin}}
+%\newcommand{\spn}[0]{\mathfunc{span}}
+%\newcommand{\proj}[0]{\mathfunc{proj}}
+%\newcommand{\operp}[0]{\mathfunc{perp}}
+%\newcommand{\aff}[0]{\mathfunc{aff}}
+%\newcommand{\linsp}[0]{\mathfunc{lin.space}}
+%\newcommand{\recc}[0]{\mathfunc{recc}}
+%\newcommand{\interior}[0]{\mathfunc{interior}}
+%\newcommand{\st}[0]{\mathfunc{s.t.}}
+%\newcommand{\argmin}[0]{\mathfunc{argmin}}
+%
+%\newcommand{\floor}[1]{\lfloor #1 \rfloor}
+\newcommand{\ceil}[1]{\lceil #1 \rceil}
+%
+%\newcommand{\tab}[0]{\hspace{1cm}}
+%\newcommand{\halftab}[0]{\hspace{0.5cm}}
+%
+\newcommand{\vvec}[1]{\ensuremath{\left[ \begin{array}{c} #1 \end{array} \right]}}
+\newcommand{\vmat}[2]{\ensuremath{\left[ \begin{array}{#1} #2 \end{array} \right]}}
+%
+\newcommand{\ww}{\textcolor{white}{0}}
+%
+%\definecolor{titles}{HTML}{204A87}
+%\definecolor{header}{HTML}{008020}
+%\definecolor{body}{HTML}{002080}
+%
+%\thereissomecolumnmissinginthecuttingstockproblematsomepoint
+%
+%\begin{document}
+%
+%{
+%\centering
+%\LARGE
+%\textcolor{titles}{\textsf{Column generation}}
+%	\\[0.5cm]
+%}
+
+\section{Column Generation}
+Let a linear programming (LP) problem be
+\[
+\begin{array}{rrcl}
+\min & c^T x \\
+\st  & A x &   =  & b \\
+    &    x & \in  & \R^n_+.
+\end{array}
+\]
+Column generation (also called \emph{delayed} column generation), is a
+general approach for solving LP problems that have too many columns
+to consider them all (i.e., $n \gg m$).
+It procceeds as follows:
+
+\textbf{Step 1.}
+Consider an LP having only a subset of the columns.
+This is a restriction of the original LP since we are implicitly
+fixing all the variables associated to the missing columns to zero
+(and nonbasic). Optimize over this restricted LP.
+
+\textbf{Step 2.}
+Consider an optimal basis of the restricted LP.
+For that basis, in the original LP, find a column that is currently not in
+the restricted LP, but has a negative reduced cost:
+find $j$ such that $c_j - c_B B^{-1} A_j < 0$ where $A_j$ is the $j$th column
+of the original problem.
+In general, this would require enumerating all the columns of the original
+LP. However, it is often possible to express ``finding the minimum reduced
+cost'' as an optimization problem (called the \emph{pricing} problem).
+If there exists a column with a negative reduced cost, add it to the
+restricted LP, and repeat.
+Otherwise, the current basis is optimal for the original LP, and we are done.
+
+In order to perform column generation without enumerating all columns,
+one needs to express a pricing problem that finds the relevant columns.
+This pricing problem will depend on the original LP problem.
+Here, we give an example where the original LP is a formulation for
+the \emph{cutting-stock} problem.
+
+\subsection{The cutting-stock problem}
+
+\paragraph{Problem statement. }
+We are given an infinite supply of \emph{stocks} of a fixed size
+(stocks is a generic term that can represent any material,
+say, steel beams, or fabric sheets). We want to cut them ino a given
+number of \emph{pieces} of given sizes.
+Arrange the cuts so as to minimize the number of stocks required.
+
+% \begin{tabular}{lll}
+% input:  & \fbox{\rlap{\,17}\hspace{0.17\textwidth}} & $\infty \times$ \\[3mm]
+% output: & \fbox{\rlap{\,3}\hspace{0.03\textwidth}}  & $25 \times$ \\
+%         & \fbox{\rlap{\,5}\hspace{0.05\textwidth}}  & $20 \times$ \\
+%         & \fbox{\rlap{\,9}\hspace{0.09\textwidth}}  & $15 \times$ \\
+% \end{tabular}
+\begin{tabular}{rccccccccccccccccccr}
+\cline{2-18}
+input: & \multicolumn{17}{|c|}{17} & & $\infty \times$ \\
+\cline{2-18}
+ & \ww & \ww & \ww & \ww & \ww & \ww & \ww & \ww & \ww & \ww
+	& \ww & \ww & \ww & \ww & \ww & \ww & \ww & \ww \ww \\[-1mm]
+\cline{2-4}
+output: & \multicolumn{3}{|c|}{3} & \multicolumn{14}{c}{} & & $25 \times$ \\
+\cline{2-4}
+ & \\[-4mm]
+\cline{2-6}
+ & \multicolumn{5}{|c|}{5} & \multicolumn{12}{c}{} & & $20 \times$ \\
+\cline{2-6}
+ & \\[-4mm]
+\cline{2-10}
+ & \multicolumn{9}{|c|}{9} & \multicolumn{8}{c}{} & & $15 \times$ \\
+\cline{2-10}
+\end{tabular}
+
+\paragraph{Notation for data. } $ $ \\[2mm]
+\begin{tabular}{@{}l@{ }l@{ }l}
+$a_i$ & is the length & for pieces of type $i$, for $i = 1, 2, \ldots, m$, \\
+$d_i$ & is the demand & for pieces of type $i$, for $i = 1, 2, \ldots, m$, \\
+$b$ & \multicolumn{2}{@{}l}{is the length of a stock.} \\[2mm]
+\end{tabular} \\
+In our example, $b = 17$, $a = [ 3 \;\; 5 \;\; 9 ]^T$
+and $d = [ 25 \;\; 20 \;\; 15 ]^T$.
+
+\paragraph{Variables. } A \emph{pattern} is an arrangement of pieces that
+can be cut from a single stock. In our example, we can cut, from a single stock,
+2 pieces of size 3, 2 pieces of size 5, and 0 piece of size 9.
+This gives us the pattern $[ 2 \;\; 2 \;\; 0 ]^T$.
+Now, consider all possible patterns; we number them
+$p = 1, 2, \ldots$ and denote them
+\[
+Q_p = \left[ \begin{array}{c} q_{1p} \\ \vdots \\ q_{mp} \end{array} \right]
+\]
+where pattern $p$ contains $q_{ip}$ pieces of type $i$, for $i = 1, \ldots, m$.
+Remark that for all $p$, the pattern $Q_p$ will satisfy
+\[
+\sum_{i=1}^n q_{ip} a_i \leq b.
+\]
+Our variables will be $x_p$ the number of times we select pattern
+p, for all $p$.
+
+\paragraph{Formulation. }
+\[
+\begin{array}{rr@{\,}r@{\;}c@{\;}ll}
+\min & \displaystyle \sum_p &     x_p & & & \\[5mm]
+\st  & \displaystyle \sum_p & Q_p x_p & \geq &  d & \;\;\; \text{for all } p \\
+     &        &     x_p & \geq &  0 & \;\;\; \text{for all } p \\
+     &        &     x_p & \in  & \Z & \;\;\; \text{for all } p
+\end{array}
+\]
+In the example, some patterns are
+\[
+\begin{array}{l}
+Q_1 = [ 5 \;\; 0 \;\; 0 ]^T \\
+Q_2 = [ 0 \;\; 3 \;\; 0 ]^T \\
+Q_3 = [ 0 \;\; 0 \;\; 1 ]^T \\
+Q_4 = [ 2 \;\; 2 \;\; 0 ]^T \\
+\;\;\;\;\;\;\; \vdots
+\end{array}
+\]
+and the formulation becomes:
+\[
+\begin{array}{rrcrcrcrcrcll}
+\min & x_1 & + & x_2 & + & x_3 & + & x_4 & + & \cdots & & \\
+\st &
+	\vvec{5 \\ 0 \\ 0} x_1 & + &
+	\vvec{0 \\ 3 \\ 0} x_2 & + &
+	\vvec{0 \\ 0 \\ 1} x_3 & + &
+	\vvec{2 \\ 2 \\ 0} x_4 & + &
+	\cdots & \geq & \vvec{25 \\ 20 \\ 15} \\
+ & & &  & &  & &  & & x_p & \geq & 0 & \text{for all } p\\
+ & & &  & &  & &  & & x_p & \in & \Z & \text{for all } p \\
+\end{array}
+\tag{LP}
+\]
+which we can solve by branch-and-bound.
+
+\paragraph{Column generation for the cutting-stock problem. }
+In many cases, there are too many distinct patterns to enumerate them
+all, even just to solve the LP relaxation.
+Therefore, we apply column generation: we start with a small
+subset of the possible patterns. Typically, we first use the simplest
+patterns, those that use only pieces of a single type. In our example
+with $b = 17$ and $a = [ 3 \;\; 5 \;\; 9 ]^T$,
+those are
+\[
+\begin{array}{l}
+Q_1 = [ 5 \;\; 0 \;\; 0 ]^T \\
+Q_2 = [ 0 \;\; 3 \;\; 0 ]^T \\
+Q_3 = [ 0 \;\; 0 \;\; 1 ]^T
+\end{array}
+\]
+which give us the restricted LP relaxation
+\[
+\begin{array}{rrcrcrcl}
+\min & x_1 & + & x_2 & + & x_3 & & \\
+\st &
+	\vvec{5 \\ 0 \\ 0} x_1 & + &
+	\vvec{0 \\ 3 \\ 0} x_2 & + &
+	\vvec{0 \\ 0 \\ 1} x_3 & \geq &
+	\vvec{25 \\ 20 \\ 15} \\
+ & & & & & x & \in & \R^3_+.
+\end{array}
+\tag{R1}
+\]
+We can add ``slack'' variables to obtain equality constraints:
+\[
+\begin{array}{rrcrcrcrcrcrcl}
+\min & x_1 & + & x_2 & + & x_3 & & \\
+\st &
+	\vvec{5 \\ 0 \\ 0} x_1 & + &
+	\vvec{0 \\ 3 \\ 0} x_2 & + &
+	\vvec{0 \\ 0 \\ 1} x_3 & + &
+	\vvec{-1 \\ 0 \\ 0} s_1 & + &
+	\vvec{0 \\ -1 \\ 0} s_2 & + &
+	\vvec{0 \\ 0 \\ -1} s_3 & = &
+	\vvec{25 \\ 20 \\ 15} \\
+ & & & & & & & & & & & x & \in & \R^3_+ \\
+ & & & & & & & & & & & s & \in & \R^3_+
+\end{array}
+\]
+and solve the above with the simplex method. We get an optimal primal solution
+$x^* = [ 5 \;\; \frac{20}{3} \;\; 15 ]^T$, and an optimal dual solution
+$y^* = [ \frac{1}{5} \;\; \frac{1}{3} \;\; 1 ]^T$.
+Recall that $y^* = c_{\mathcal{B}} B^{-1}$ where $\mathcal{B}$ is the
+set of basic columns in the optimal basis, and $B$ is the corresponding
+basis matrix. Now, $x^*$ is feasible for both (R1) and (LP), and
+it is optimal for (R1), but is it also optimal for (LP)?
+In order to answer this question, we need to compute the 
+\emph{reduced costs} associated to the basis $\mathcal{B}$ in (LP).
+They are given by
+$\bar c = c - c_{\mathcal{B}} B^{-1} A = c - {y^*}^T A$, where $A$ is
+the matrix of the constraint coefficients,
+i.e., $A = [ \; Q_1 \;\; Q_2 \;\; \cdots \;\; -I ]$.
+We thus have $\bar c_p = c_p - {y^*}^T Q_p = 1 - y^* Q_p$ for all $p$.
+If $\bar c_p \geq 0$ for every pattern $p$ (including those
+not considered so far), then $\mathcal{B}$ is optimal not only for (R1)
+but also for (LP), and $x^*$ is an optimal solution to (LP).
+Otherwise, if $\bar c_p < 0$ for some $p$, then the column $Q_p$ must
+be added to (R1) in order for it to enter the basis.
+
+Note that answering ``$\exists p : \bar c_p < 0$?'' is equivalent
+to answering ``$\min_p \bar c_p < 0$?''. The latter asks whether
+there exist a pattern $Q_p$ that minimizes $\bar c_p = 1 - {y^*}^T Q_p$.
+This can be formulated as an optimization problem where the
+variables $q_1, \ldots, q_m$ will be the elements of $Q_p$, i.e.,
+the number of pieces of each type that we take in the pattern:
+\[
+\begin{array}[t]{rrcrcl}
+\min & 1 & - & \displaystyle \sum_{i=1}^m y^*_i q_i & & \\
+\st  &   &   & \displaystyle \sum_{i=1}^m   a_i q_i & \leq & b \\
+     &   &   &                                    q & \in  & \Z^m_+
+\end{array}
+\;\;\;\; = \;\;\;\;
+1 - \begin{array}[t]{crcl}
+\max & \displaystyle \sum_{i=1}^m y^*_i q_i & & \\
+\st  & \displaystyle \sum_{i=1}^m   a_i q_i & \leq & b \\
+     &                                    q & \in  & \Z^m_+.
+\end{array}
+\]
+This is the \emph{pricing} problem for our cutting-stock formulation.
+Observe that it is an integer knapsack.
+Going back to the example, we get
+\begin{eqnarray*}
+&   & 1 - \begin{array}[t]{rrcrcrcl}
+	\max & \frac{1}{5} q_1 & + & \frac{1}{3} q_2 & + &  1 q_3 & & \\
+	\st  &           3 q_1 & + &           5 q_2 & + &  9 q_3 & \leq & 17 \\
+	     &                 &   &                 &   &    q   & \in  & \Z^3_+
+	\end{array} \\
+& = & 1 - \frac{1}{15} \begin{array}[t]{rrcrcrcl}
+	\max &           3 q_1 & + &           5 q_2 & + & 15 q_3 & & \\
+	\st  &           3 q_1 & + &           5 q_2 & + &  9 q_3 & \leq & 17 \\
+	     &                 &   &                 &   &    q   & \in  & \Z^3_+.
+	\end{array} \\
+& = & 1 - \frac{1}{15} \; [ 3 \;\; 5 \;\; 15 ] \; [ 1 \;\; 1 \;\; 1 ]^T \\
+& = & 1 - \frac{23}{15} = - \frac{8}{15}
+\end{eqnarray*}
+where the optimal solution $[ 1 \;\; 1 \;\; 1 ]^T$ to the knapsack problem
+was found by dynamic programming.
+So the column $[ 1 \;\; 1 \;\; 1 ]^T$ has a negative reduced cost
+$- \frac{8}{15}$, and we add it to our restricted formulation, yielding
+\[
+\begin{array}{rrcrcrcrcl}
+\min & x_1 & + & x_2 & + & x_3 & + & x_4 & & \\
+\st &
+	\vvec{5 \\ 0 \\ 0} x_1 & + &
+	\vvec{0 \\ 3 \\ 0} x_2 & + &
+	\vvec{0 \\ 0 \\ 1} x_3 & + &
+	\vvec{1 \\ 1 \\ 1} x_4 & \geq &
+	\vvec{25 \\ 20 \\ 15} \\
+ & & & & & & & x & \in & \R^4_+.
+\end{array}
+\tag{R2}
+\]
+Applying the simplex method on (R2), we get an optimal primal solution
+$x^* = [ 2 \;\; \frac{5}{3} \;\; 0 \;\; 15 ]^T$, and an optimal dual
+solution $y^* = [ \frac{1}{5} \;\; \frac{1}{3} \;\; \frac{7}{15} ]^T$.
+The pricing problem is now
+\begin{eqnarray*}
+&   & 1 - \begin{array}[t]{rrcrcrcl}
+	\max & \frac{1}{5} q_1 & + & \frac{1}{3} q_2 & + & \frac{7}{15} q_3 & & \\
+	\st  &           3 q_1 & + &           5 q_2 & + &            9 q_3 & \leq & 17 \\
+	     &                 &   &                 &   &              q   & \in  & \Z^3_+
+	\end{array} \\
+& = & 1 - \frac{1}{15} \begin{array}[t]{rrcrcrcl}
+	\max &           3 q_1 & + &           5 q_2 & + &  7 q_3 & & \\
+	\st  &           3 q_1 & + &           5 q_2 & + &  9 q_3 & \leq & 17 \\
+	     &                 &   &                 &   &    q   & \in  & \Z^3_+.
+	\end{array} \\
+& = & 1 - \frac{1}{15} \; [ 3 \;\; 5 \;\; 7 ] \; [ 4 \;\; 1 \;\; 0 ]^T \\
+& = & 1 - \frac{17}{15} = - \frac{2}{15}
+\end{eqnarray*}
+where the optimal solution $[ 4 \;\; 1 \;\; 0 ]^T$ to the knapsack problem
+was found, again, by dynamic programming.
+So we still have a negative reduced cost $- \frac{2}{15}$ for the
+column $[ 4 \;\; 1 \;\; 0 ]^T$. We add that column, too, to our restricted
+formulation:
+\[
+\begin{array}{rrcrcrcrcrcl}
+\min & x_1 & + & x_2 & + & x_3 & + & x_4 & + & x_5 & & \\
+\st &
+	\vvec{5 \\ 0 \\ 0} x_1 & + &
+	\vvec{0 \\ 3 \\ 0} x_2 & + &
+	\vvec{0 \\ 0 \\ 1} x_3 & + &
+	\vvec{1 \\ 1 \\ 1} x_4 & + &
+	\vvec{4 \\ 1 \\ 0} x_5 & \geq &
+	\vvec{25 \\ 20 \\ 15} \\
+ & & & & & & & & & x & \in & \R^5_+.
+\end{array}
+\tag{R3}
+\]
+Applying the simplex method on (R3), we get an optimal primal solution
+$x^* = [ 0 \;\; \frac{5}{6} \;\; 0 \;\; 15 \;\; \frac{5}{2} ]^T$,
+and an optimal dual
+solution $y^* = [ \frac{1}{6} \;\; \frac{1}{3} \;\; \frac{1}{2} ]^T$.
+The pricing problem is now
+\begin{eqnarray*}
+&   & 1 - \begin{array}[t]{rrcrcrcl}
+	\max & \frac{1}{6} q_1 & + & \frac{1}{3} q_2 & + & \frac{1}{2} q_3 & & \\
+	\st  &           3 q_1 & + &           5 q_2 & + &            9 q_3 & \leq & 17 \\
+	     &                 &   &                 &   &              q   & \in  & \Z^3_+
+	\end{array} \\
+& = & 1 - \frac{1}{6} \begin{array}[t]{rrcrcrcl}
+	\max &           1 q_1 & + &           2 q_2 & + &  3 q_3 & & \\
+	\st  &           3 q_1 & + &           5 q_2 & + &  9 q_3 & \leq & 17 \\
+	     &                 &   &                 &   &    q   & \in  & \Z^3_+.
+	\end{array} \\
+& = & 1 - \frac{1}{6} \; [ 1 \;\; 2 \;\; 3 ] \; [ 4 \;\; 1 \;\; 0 ]^T \\
+& = & 1 - \frac{6}{6} = 0
+\end{eqnarray*}
+where the optimal solution $[ 4 \;\; 1 \;\; 0 ]^T$ to the knapsack problem
+was found, again, by dynamic programming.
+This time, since $\min_p \bar c_p \geq 0$, we now that $\bar c_p \geq 0$
+for all the reduced costs of (LP).
+Therefore, $x^* = [ 0 \;\; \frac{5}{6} \;\; 0 \;\; 15 \;\; \frac{5}{2} ]^T$
+is an optimal solution not only to (R3), but also to (LP).
+It has an objective function value of $\frac{55}{3} \approx 18.33$.
+We now have a solution to the LP relaxation of our formulation, and
+can proceed to perform branch-and-bound. However, it is not necessary
+in our particular example, as we will demonstrate.
+
+\paragraph{Observation 1. }
+Given an IP formulation in minimization form,
+if $z^{LP}$ is the optimal objective function value of the LP relaxation,
+then any integer solution will have cost $z^{IP} \geq z^{LP}$.
+In a cutting-stock problem, the objective function only has integer
+coefficients, so $z^{IP} \in \Z$, and we can write $z^{IP} \geq \ceil{z^{LP}}$.
+In our example, this means that $z^{IP} \geq \ceil{\frac{55}{3}} = 19$.
+
+\paragraph{Observation 2. }
+In a cutting-stock problem,
+all constraints are of the form ``$\geq$'' and $A_{ij} \geq 0$ for all
+$i, j$. Therefore, any solution $x'$ such that $x' \geq x^*$ is
+LP-feasible. In particular $x' := \ceil{x^*}$ is LP-feasible and integral,
+so it is IP-feasible. In the example,
+$x' = [ 0 \;\; 1 \;\; 0 \;\; 15 \;\; 3 ]^T$ has objective function value
+$19$, so it is optimal. Having found this integer solution $x'$ and
+having proven that it is optimal, there is no need to perform branch-and-bound.
+
+Our optimal solution corresponds to taking
+$x^*_2 = 1$ times the pattern $Q_2 = [ 0 \;\; 3 \;\; 0 ]^T$, 
+$x^*_4 = 15$ times the pattern $Q_4 = [ 1 \;\; 1 \;\; 1 ]^T$, and
+$x^*_5 = 3$ times the pattern $Q_5 = [ 4 \;\; 1 \;\; 0 ]^T$: \\[3mm]
+% $1 \times$ & \fbox{\rlap{\,5}\hspace{0.05\textwidth}}%
+\begin{tabular}{rccccccccccccccccc}
+\cline{2-18}
+$1 \times$ & \multicolumn{5}{|c}{5} & \multicolumn{5}{|c}{5}
+	& \multicolumn{5}{|c}{5} & \multicolumn{2}{|c|}{} \\
+\cline{2-18}
+ & \ww & \ww & \ww & \ww & \ww & \ww & \ww & \ww & \ww & \ww
+	& \ww & \ww & \ww & \ww & \ww & \ww & \ww \\[-4mm]
+\cline{2-18}
+$15 \times$ & \multicolumn{3}{|c}{3} & \multicolumn{5}{|c}{5}
+	& \multicolumn{9}{|c|}{9} \\
+\cline{2-18}
+ & \\[-4mm]
+\cline{2-18}
+$3 \times$ & \multicolumn{3}{|c}{3} & \multicolumn{3}{|c}{3}
+	& \multicolumn{3}{|c}{3} & \multicolumn{3}{|c}{3} & \multicolumn{5}{|c|}{5} \\
+\cline{2-18}
+\end{tabular} \\[3mm]
+giving: \\[2mm]
+\begin{tabular}{rlr}
+27 & pieces of length & 3, \\
+21 & pieces of length & 5, \\
+15 & pieces of length & 9, \\
+\end{tabular} \\[2mm]
+and some waste (length 2), using a total of 19 stocks.
+
+\subsection{Second example}
+We now consider a second, smaller example, that lets us solve all LPs
+and knapsacks by hand. The data are given by: \\[3mm]
+\begin{tabular}{rccccccccccccr}
+\cline{2-12}
+input: & \multicolumn{11}{|l|}{$b = 11$} & & \\
+\cline{2-12}
+ & \ww & \ww & \ww
+	& \ww & \ww & \ww & \ww & \ww & \ww & \ww & \ww \ww \\[-1mm]
+\cline{2-4}
+output: & \multicolumn{3}{|l|}{$a_1 = 3$} & \multicolumn{8}{c}{} & & $d_1 = 18$ \\
+\cline{2-4}
+ & \\[-4mm]
+\cline{2-5}
+ & \multicolumn{4}{|l|}{$a_2 = 4$} & \multicolumn{7}{c}{} & & $d_2 = 16$ \\
+\cline{2-5}
+\end{tabular}
+
+\paragraph{Iteration 1: LP. } We start with the two simple patterns
+$[3 \;\; 0]^T$ and $[0 \;\; 2]^T$.
+\[
+\begin{array}{rrcrcl}
+\min & x_1 & + & x_2 & & \\
+\st  & \vvec{3 \\ 0} x_1 & + & \vvec{0 \\ 2} x_2 & \geq & \vvec{18 \\ 16} \\
+     &                   &   &               x   & \in  & \R^2_+
+\end{array}
+\]
+The only way to satisfy the first constraint is to have $3 x_1 \geq 18$.
+Similarly, for the second, we need $2 x_2 \geq 16$. We thus immediately
+know the optimal solution $x^* = [ 6 \;\; 8 ]^T$.
+However, we still need a corresponding dual solution, so we
+write down our initial problem algebraically
+\[
+c = \vmat{cccc}{1 & 1 & 0 & 0}
+\]
+\[
+A = \vmat{cccc}{
+	3 & 0 & -1 & 0 \\
+	0 & 2 & 0 & -1 }
+	\;\;\;\;\;\;\;\;\;\;\;\;
+b = \vvec{18 \\ 16}
+\]
+and set our basis to $\mathcal{B} = \{ 1, 2 \}$. We get a basis
+matrix $B$ compute its inverse:
+\[
+B = \vmat{cc}{3 & 0 \\ 0 & 2}
+	\;\;\;\;\;\;\;\;\;\;\;\;
+B^{-1} = \vmat{cc}{1/3 & 0 \\ 0 & 1/2}
+\]
+Because we will need it later,
+we write the tableau corresponding to $\mathcal{B}$:
+\[
+\bar c = \vmat{cccc}{0 & 0 & 1/3 & 1/2}
+\]
+\[
+\bar A = \vmat{cccc}{
+	1 & 0 & -1/3 & 0 \\
+	0 & 1 & 0 & -1/2 }
+	\;\;\;\;\;\;\;\;\;\;\;\;
+\bar b = \vvec{6 \\ 8}
+\]
+Observe that the first two columns of $\bar A$ are an identity
+because $x_1$ and $x_2$ are basic. Furthermore, the two subsequent
+columns are $B^{-1} (-I) = -B^{-1}$.
+We can compute $\bar c$ after $\bar A$, so that we
+can use $\bar c_j = c_j - [ 1 \; \; 1 ] \bar A$.
+Again, $\bar c_0$ and $\bar c_1$ are zero because $x_1$ and $x_2$ are basic.
+Finally, we compute the dual solution
+\[
+{y^*}^T = c_{\mathcal{B}} B^{-1} = \vmat{cc}{ 1 & 1} \vmat{cc}{1/3 & 0 \\ 0 & 1/2}
+ = \vmat{cc}{1/3 & 1/2}.
+\]
+
+\paragraph{Iteration 1: pricing. } The pricing problem looks for
+$\bar c_p = c_p - y^* Q_p < 0$. It corresponds to the knapsack
+given below:
+\begin{eqnarray*}
+\min_p \bar c_p & = &
+\begin{array}[t]{rrcrcrcl}
+\min & 1 & - & \frac{1}{3} q_1 & - & \frac{1}{2} q_2 &      &    \\
+\st  &   &   &           3 q_1 & + &           9 q_2 & \leq & 11 \\
+     &   &   &                 &   &             q   & \in  & \Z^2_+
+\end{array} \\
+& = & 1 - \frac{1}{6}
+\begin{array}[t]{rrcrcl}
+\max & 2 q_1 & + & 3 q_2 &      &    \\
+\st  & 3 q_1 & + & 9 q_2 & \leq & 11 \\
+     &       &   &   q   & \in  & \Z^2_+
+\end{array}
+\end{eqnarray*}
+\[
+\begin{array}{r|rr}
+ & r=1 & r=2 \\
+\hline
+\lambda =
+ 0 & 0 & 0 \\
+ 1 & 0 & 0 \\
+ 2 & 0 & 0 \\
+ 3 & 2 & 2 \\
+ 4 & 2 & 3 \\
+ 5 & 2 & 3 \\
+ 6 & 4 & 4 \\
+ 7 & 4 & 5 \\
+ 8 & 4 & 6 \\
+ 9 & 6 & 6 \\
+ 10 & 6 & 7 \\
+ 11 & 6 & 8 \\
+\end{array}
+\]
+We find $\min_p \bar c_p = 1 - \frac{1}{6} 8 = -\frac{1}{3}$,
+with a pattern $q^* = [ 1 \;\; 2 ]^T$.
+
+\paragraph{Iteration 2: LP. }
+Once we add the pattern $[ 1 \;\; 2 ]^T$, we get the restricted LP
+\[
+\begin{array}{rrcrcrcl}
+\min & x_1 & + & x_2 & + & x_3 & & \\
+\st  & \vvec{3 \\ 0} x_1 & + & \vvec{0 \\ 2} x_2 & + & \vvec{1 \\ 2} x_3 & \geq & \vvec{18 \\ 16} \\
+     &                   &   &               x   & \in  & \R^3_+
+\end{array}
+\]
+which corresponds to adding a column to the algebraic representation
+\[
+c = \vmat{ccccc}{1 & 1 & \mathbf{1} & 0 & 0}
+\]
+\[
+A = \vmat{ccccc}{
+	3 & 0 & \mathbf{1} & -1 & 0 \\
+	0 & 2 & \mathbf{2} & 0 & -1 }
+	\;\;\;\;\;\;\;\;\;\;\;\;
+b = \vvec{18 \\ 16}
+\]
+If we reuse the basis $\mathcal{B} = \{ 1, 2 \}$
+that was optimal at iteration 1, we immediately get the tableau
+\[
+\bar c = \vmat{ccccc}{0 & 0 & \mathbf{-1/3} & 1/3 & 1/2}
+\]
+\[
+\bar A = \vmat{cccc}{
+	1 & 0 & \mathbf{-1/3} & 0 \\
+	0 & 1 & \mathbf{0} & -1/2 }
+	\;\;\;\;\;\;\;\;\;\;\;\;
+\bar b = \vvec{6 \\ 8}
+\]
+where $\bar c_3 = -\frac{1}{3}$ is given by the dynamic programming
+algorithm at the end of iteration 1, and
+$\bar A_3 = B^{-1} Q_3 = B^{-1} \vvec{1 \\ 2}$.
+Clearly, $x_3$ should enter the basis.
+Applying one pivot of the primal simplex method, $x_2$ leaves the
+basis, yielding $\mathcal{B} = \{ 1, 3 \}$ and
+\[
+B = \vmat{cc}{3 & 0 \\ 1 & 2}
+	\;\;\;\;\;\;\;\;\;\;\;\;
+B^{-1} = \vmat{cc}{1/3 & -1/6 \\ 0 & 1/2}.
+\]
+The corresponding tableau is computed as for the first iteration:
+\[
+\bar c = \vmat{ccccc}{0 & 1/3 & 0 & 1/3 & 1/3}
+\]
+\[
+\bar A = \vmat{ccccc}{
+	1 & -1/3 & 0 & -1/3 & -1/6 \\
+	0 & 1 & 1 & 0 & -1/2 }
+	\;\;\;\;\;\;\;\;\;\;\;\;
+\bar b = \vvec{10/3 \\ 8}
+\]
+and we now have an optimal solution (because $\bar c \geq 0$) to the
+restricted LP
+\[
+x^* = \vmat{ccc}{\frac{10}{3} & 0 & 8}^T
+\]
+with objective function value $\frac{34}{2} \approx 11.33$.
+We also have a dual solution
+\[
+{y^*}^T = c_{\mathcal{B}} B^{-1} = \vmat{cc}{ 1 & 1} \vmat{cc}{1/3 & -1/6 \\ 0 & 1/2}
+ = \vmat{cc}{1/3 & 1/3}.
+\]
+
+\paragraph{Iteration 2: pricing. }
+The pricing problem is the same as previously, only with
+a new value of $y^*$:
+\begin{eqnarray*}
+\min_p \bar c_p & = &
+\begin{array}[t]{rrcrcrcl}
+\min & 1 & - & \frac{1}{3} q_1 & - & \frac{1}{3} q_2 &      &    \\
+\st  &   &   &           3 q_1 & + &           9 q_2 & \leq & 11 \\
+     &   &   &                 &   &             q   & \in  & \Z^2_+
+\end{array} \\
+& = & 1 - \frac{1}{3}
+\begin{array}[t]{rrcrcl}
+\max &   q_1 & + &   q_2 &      &    \\
+\st  & 3 q_1 & + & 9 q_2 & \leq & 11 \\
+     &       &   &   q   & \in  & \Z^2_+
+\end{array}
+\end{eqnarray*}
+\[
+\begin{array}{r|rr}
+ & r=1 & r=2 \\
+\hline
+\lambda =
+ 0 & 0 & 0 \\
+ 1 & 0 & 0 \\
+ 2 & 0 & 0 \\
+ 3 & 1 & 1 \\
+ 4 & 1 & 1 \\
+ 5 & 1 & 1 \\
+ 6 & 2 & 2 \\
+ 7 & 2 & 2 \\
+ 8 & 2 & 2 \\
+ 9 & 3 & 3 \\
+ 10 & 3 & 3 \\
+ 11 & 3 & 3 \\
+\end{array}
+\]
+We find $\min_p \bar c_p = 1 - \frac{1}{3} 3 = -\frac{1}{3}$,
+with $q^* = [ 3 \;\; 0 ]^T$. We conclude that $\bar c_p \geq 0$
+for all patterns, including those not in the restricted LP.
+Our solution $x^* = \vmat{ccc}{\frac{10}{3} & 0 & 8}^T$
+is thus optimal for the original LP (the one that considers all
+possible patterns).
+
+\paragraph{Integer solution}
+Because the objective function value of $x^*$ is
+$\frac{34}{2} \approx 11.33$,
+any integer solution will have objective function value
+12 or more.
+We construct
+\[
+x' = \ceil{x^*} = \left\lceil \vmat{ccc}{\frac{10}{3} & 0 & 8}^T \right\rceil
+ = \vmat{ccc}{4 & 0 & 8}^T
+\]
+It is IP-feasible and has objective function value 12 so it is optimal.
+
+Our optimal solution corresponds to taking
+$x^*_1 = 4$ times the pattern $Q_1 = [ 3 \;\; 0 ]^T$, 
+$x^*_3 = 8$ times the pattern $Q_3 = [ 1 \;\; 2 ]^T$: \\[3mm]
+% $1 \times$ & \fbox{\rlap{\,5}\hspace{0.05\textwidth}}%
+\begin{tabular}{rccccccccccc}
+\cline{2-12}
+$4 \times$ & \multicolumn{3}{|c}{3} & \multicolumn{3}{|c}{3} & \multicolumn{3}{|c}{3} & \multicolumn{2}{|c|}{} \\
+\cline{2-12}
+ & \ww & \ww & \ww & \ww & \ww & \ww
+ & \ww & \ww & \ww & \ww & \ww \\[-4mm]
+\cline{2-12}
+$8 \times$ & \multicolumn{3}{|c}{3} & \multicolumn{4}{|c}{4} & \multicolumn{4}{|c|}{4} \\
+\cline{2-12}
+\end{tabular} \\[3mm]
+giving: \\[2mm]
+\begin{tabular}{rlr}
+20 & pieces of length & 3, \\
+16 & pieces of length & 4, \\
+\end{tabular} \\[2mm]
+and some waste (length 2), using a total of 12 stocks.
+
+
+%\end{document}
+

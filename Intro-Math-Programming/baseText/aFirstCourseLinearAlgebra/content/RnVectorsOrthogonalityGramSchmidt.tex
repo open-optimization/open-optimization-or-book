@@ -1,0 +1,194 @@
+\subsection{Gram-Schmidt Process}
+
+The Gram-Schmidt process is an algorithm to transform a set of vectors
+into an orthonormal set spanning the same subspace, that is generating
+the same collection of linear combinations (see Definition
+\ref{def:linearcombination}).
+
+The goal of the Gram-Schmidt process is to take a linearly
+independent set of vectors and transform it into an orthonormal set
+with the same span.  The first objective is to construct an orthogonal
+set of vectors with the same span, since from there an orthonormal set
+can be obtained by simply dividing each vector by its length.
+
+\begin{algorithm}{Gram-Schmidt Process}{gramschmidtalgorithm}
+Let $\{ \vect{u}_1,\cdots ,\vect{u}_n \} $ be a set of
+linearly independent vectors in $\mathbb{R}^{n}$.
+
+\textbf{I:} Construct a new set of vectors $\{ \vect{v}_1,\cdots ,\vect{v}_n \} $ as follows:
+\[ \begin{array}{ll}
+\vect{v}_1 & = \vect{u}_1 \\
+\vect{v}_{2} & = \vect{u}_{2} - \left(  \dfrac{ \vect{u}_2 \dotprod \vect{v}_1}{\vectlength \vect{v}_1 \vectlength^2} \right)  \vect{v}_1\\
+\vect{v}_{3} & = \vect{u}_{3} - \left(  \dfrac{\vect{u}_3 \dotprod \vect{v}_1}{\vectlength \vect{v}_1 \vectlength^2} \right)  \vect{v}_1
+	 - \left(  \dfrac{\vect{u}_3 \dotprod \vect{v}_2}{\vectlength \vect{v}_2 \vectlength^2} \right)  \vect{v}_2\\
+\vdots \\
+\vect{v}_{n} & = \vect{u}_{n} - \left(  \dfrac{\vect{u}_n \dotprod \vect{v}_1}{\vectlength \vect{v}_1 \vectlength^2} \right)  \vect{v}_1
+	 - \left(  \dfrac{\vect{u}_n \dotprod \vect{v}_2}{\vectlength \vect{v}_2 \vectlength^2}  \right) \vect{v}_2 - \cdots
+	 - \left(  \dfrac{\vect{u}_{n} \dotprod \vect{v}_{n-1}}{\vectlength \vect{v}_{n-1} \vectlength^2} \right) \vect{v}_{n-1} \\
+\end{array} \]
+
+\textbf{II:} Now let $\vect{w}_i = \dfrac{\vect{v}_i}{\vectlength\vect{v}_i\vectlength}$ for $i=1, \cdots ,n$.
+
+Then 
+\begin{enumerate}
+\item $\left\{ \vect{v}_1, \cdots, \vect{v}_n \right\}$ is an orthogonal set. 
+\item  $\left\{ \vect{w}_1,\cdots , \vect{w}_n  \right\} $ is an orthonormal set. 
+\item $\func{span}\left\{ \vect{u}_1,\cdots ,\vect{u}_n \right\} = \func{span} \left\{ \vect{v}_1, \cdots, \vect{v}_n \right\} = \func{span}\left\{ \vect{w}_1,\cdots ,\vect{w}_n \right\}$.
+\end{enumerate}
+\end{algorithm}
+
+\begin{proof}
+The full proof of this algorithm is beyond this material, however here is an indication of the arguments. 
+
+To show that  $\left\{ \vect{v}_1,\cdots , \vect{v}_n  \right\} $ is an orthogonal set, let 
+\[ a_2 =  \dfrac{ \vect{u}_2 \dotprod \vect{v}_1}{\vectlength \vect{v}_1 \vectlength^2} \]
+then: 
+\[
+\begin{array}{ll}
+ \vect{v}_1 \dotprod \vect{v}_2 &  =  \vect{v}_1 \dotprod \left( \vect{u}_2 - a_2 \vect{v}_1 \right)  \\
+ & = \vect{v}_1 \dotprod \vect{u}_2 - a_2 (\vect{v}_1 \dotprod \vect{v}_1  \\
+ & = \vect{v}_1 \dotprod \vect{u}_2 - \dfrac{ \vect{u}_2 \dotprod \vect{v}_1}{\vectlength \vect{v}_1 \vectlength^2} \vectlength \vect{v}_1 \vectlength^2 \\
+ & = ( \vect{v}_1 \dotprod \vect{u}_2 ) - ( \vect{u}_2 \dotprod \vect{v}_1 ) =0\\
+\end{array}
+\]
+Now that you have shown that $\{ \vect{v}_1, \vect{v}_2\}$ is orthogonal,  use the same method as above to show that 
+$\{ \vect{v}_1, \vect{v}_2, \vect{v}_3\}$ is also orthogonal,  and so on. 
+
+Then in a similar fashion you show that $\func{span}\left\{
+\vect{u}_1,\cdots ,\vect{u}_n \right\} = \func{span}\left\{
+\vect{v}_1,\cdots ,\vect{v}_n \right\}$.
+
+Finally defining $\vect{w}_i =
+\dfrac{\vect{v}_i}{\vectlength\vect{v}_i\vectlength}$ for $i=1, \cdots
+,n$ does not affect orthogonality and yields vectors of length 1,
+hence an orthonormal set. You can also observe that it does not affect
+the span either and the proof would be complete.
+\end{proof}
+
+Consider the following example.
+
+\begin{example}{Find Orthonormal Set with Same Span}{orthosamespan}
+Consider the set of vectors $\{\vect{u}_1, \vect{u}_2\}$ given as in Example \ref{exa:spanvectors}. That is  
+\[
+\vect{u}_1=\leftB 
+\begin{array}{r}
+1 \\
+1 \\
+0
+\end{array}
+\rightB, \vect{u}_2=\leftB 
+\begin{array}{r}
+3 \\
+2 \\
+0
+\end{array}
+\rightB \in \mathbb{R}^{3} 
+\]
+
+Use the Gram-Schmidt algorithm to find an orthonormal set of vectors $\{\vect{w}_1, \vect{w}_2\}$ having the same span.
+\end{example}
+
+\begin{solution}
+We already remarked that the set of vectors in $\{\vect{u}_1,
+\vect{u}_2\}$ is linearly independent, so we can proceed with the
+Gram-Schmidt algorithm:
+\begin{eqnarray*}
+\vect{v}_1 &=& \vect{u}_1 =  \leftB 
+\begin{array}{r}
+1 \\
+1 \\
+0
+\end{array}
+\rightB \\
+&& \\
+\vect{v}_{2} &=& \vect{u}_{2} - \left(  \dfrac{\vect{u}_2 \dotprod \vect{v}_1}{\vectlength \vect{v}_1 \vectlength^2} \right)  \vect{v}_1\\ 
+&& \\
+&=& \leftB 
+\begin{array}{r}
+3 \\
+2 \\
+0
+\end{array}
+\rightB
+- 
+\frac{5}{2} 
+ \leftB 
+\begin{array}{r}
+1 \\
+1 \\
+0
+\end{array}
+\rightB \\
+&&\\
+&=&  \leftB 
+\begin{array}{r}
+\vspace{0.05in}\frac{1}{2} \\
+-\vspace{0.05in}\frac{1}{2} \\
+0
+\end{array}
+\rightB 
+\end{eqnarray*}
+
+Now to normalize simply let 
+\begin{eqnarray*}
+\vect{w}_1  = \frac{\vect{v}_1}{\vectlength\vect{v}_1\vectlength}  = \leftB 
+\begin{array}{r}
+\vspace{0.05in}\frac{1}{\sqrt{2}}  \\
+\vspace{0.05in}\frac{1}{\sqrt{2}} \\
+0
+\end{array}
+\rightB \\
+\vect{w}_2  = \frac{\vect{v}_2}{\vectlength\vect{v}_2\vectlength}  = \leftB 
+\begin{array}{r}
+\vspace{0.05in}\frac{1}{\sqrt{2}}  \\
+-\vspace{0.05in}\frac{1}{\sqrt{2}} \\
+ 0
+\end{array}
+\rightB
+\end{eqnarray*}
+
+You can verify that $\{\vect{w}_1, \vect{w}_2\}$ is an orthonormal set of vectors  having the same span as
+$\{\vect{u}_1, \vect{u}_2\}$,  namely the $XY$-plane.
+\end{solution}
+
+In this example, we began with a linearly independent set and found an orthonormal set of vectors which had the same span. It turns out that if we start with a basis of a subspace and apply the Gram-Schmidt algorithm, the result will be an orthogonal basis of the same subspace. We examine this in the following example. 
+
+\begin{example}{Find a Corresponding Orthogonal Basis}{orthogonalbasis}
+Let
+\[ \vect{x}_1=\leftB\begin{array}{c} 1\\ 0\\ 1\\ 0 \end{array}\rightB,
+\vect{x}_2=\leftB\begin{array}{c} 1\\ 0\\ 1\\ 1 \end{array}\rightB,
+\mbox{ and }
+\vect{x}_3=\leftB\begin{array}{c} 1\\ 1\\ 0\\ 0 \end{array}\rightB,\]
+and let $U=\func{span}\{\vect{x}_1, \vect{x}_2,\vect{x}_3\}$. Use the Gram-Schmidt Process
+to construct an orthogonal basis $B$ of $U$. 
+\end{example}
+
+\begin{solution}
+First $\vect{f}_1=\vect{x}_1$. 
+
+Next,
+\[ \vect{f}_2=\leftB\begin{array}{c} 1\\ 0\\ 1\\ 1 \end{array}\rightB
+-\frac{2}{2}\leftB\begin{array}{c} 1\\ 0\\ 1\\ 0 \end{array}\rightB
+=\leftB\begin{array}{c} 0\\ 0\\ 0\\ 1 \end{array}\rightB.\]
+
+Finally,
+\[ \vect{f}_3=\leftB\begin{array}{c} 1\\ 1\\ 0\\ 0 \end{array}\rightB
+-\frac{1}{2}\leftB\begin{array}{c} 1\\ 0\\ 1\\ 0 \end{array}\rightB
+-\frac{0}{1}\leftB\begin{array}{c} 0\\ 0\\ 0\\ 1 \end{array}\rightB
+=\leftB\begin{array}{c} 1/2\\ 1\\ -1/2\\ 0 \end{array}\rightB.\]
+
+Therefore,
+\[ \left\{ 
+\leftB\begin{array}{c} 1\\ 0\\ 1\\ 0 \end{array}\rightB,
+\leftB\begin{array}{c} 0\\ 0\\ 0\\ 1 \end{array}\rightB,
+\leftB\begin{array}{c} 1/2\\ 1\\ -1/2\\ 0 \end{array}\rightB
+\right\}\]
+is an orthogonal basis of $U$.
+However, it is sometimes more convenient to deal with vectors
+having integer entries, in which case we take
+\[ B=\left\{ 
+\leftB\begin{array}{c} 1\\ 0\\ 1\\ 0 \end{array}\rightB,
+\leftB\begin{array}{c} 0\\ 0\\ 0\\ 1 \end{array}\rightB,
+\leftB\begin{array}{r} 1\\ 2\\ -1\\ 0 \end{array}\rightB
+\right\}.\]
+\end{solution}

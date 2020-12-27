@@ -1,0 +1,72 @@
+% Copyright 2020 by Robert Hildebrand
+%This work is licensed under a
+%Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0)
+%See http://creativecommons.org/licenses/by-sa/4.0/
+
+Implementing the SOS2 constraint.
+\begin{codeCell}
+\label{code:pwl-application}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}28}]:} \PY{c}{\PYZsh{} Describe the function y = c(x) using an IP}
+         \PY{k}{using} \PY{n}{JuMP}\PY{p}{,} \PY{n}{Gurobi}
+         
+         \PY{n}{m} \PY{o}{=} \PY{n}{Model}\PY{p}{(}\PY{n}{solver} \PY{o}{=} \PY{n}{GurobiSolver}\PY{p}{(}\PY{n}{OutputFlag} \PY{o}{=} \PY{l+m+mi}{0}\PY{p}{)}\PY{p}{)}
+         \PY{c}{\PYZsh{} Data:}
+         \PY{n+nb}{I} \PY{o}{=} \PY{n}{collect}\PY{p}{(}\PY{l+m+mi}{1}\PY{o}{:}\PY{l+m+mi}{2}\PY{p}{)}
+         \PY{n}{J} \PY{o}{=} \PY{n}{collect}\PY{p}{(}\PY{l+m+mi}{1}\PY{o}{:}\PY{l+m+mi}{2}\PY{p}{)}
+         \PY{n}{Xbreak} \PY{o}{=} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{5}\PY{p}{,} \PY{l+m+mi}{10}\PY{p}{,} \PY{l+m+mi}{15}\PY{p}{]}
+         \PY{n}{Ybreak} \PY{o}{=} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{125}\PY{p}{,} \PY{l+m+mi}{225}\PY{p}{,} \PY{l+m+mi}{300}\PY{p}{]}
+         \PY{n}{n} \PY{o}{=} \PY{n}{length}\PY{p}{(}\PY{n}{Xbreak}\PY{p}{)}
+    
+         \PY{c}{\PYZsh{} Add main variables X, x, and y:}
+         \PY{n+nd}{@variable}\PY{p}{(}\PY{n}{m}\PY{p}{,}\PY{n}{X}\PY{p}{[}\PY{n+nb}{I}\PY{p}{,}\PY{n}{J}\PY{p}{]}\PY{o}{\PYZgt{}=} \PY{l+m+mi}{0}\PY{p}{)}
+         \PY{n+nd}{@variable}\PY{p}{(}\PY{n}{m}\PY{p}{,}\PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{x} \PY{o}{\PYZlt{}=} \PY{l+m+mi}{15}\PY{p}{)}
+         \PY{n+nd}{@variable}\PY{p}{(}\PY{n}{m}\PY{p}{,}\PY{n}{y}\PY{p}{)}
+         
+         \PY{c}{\PYZsh{} Add constraints and variables for piecewise linear function}
+         \PY{n+nd}{@variable}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{z}\PY{p}{[}\PY{l+m+mi}{1}\PY{o}{:}\PY{n}{n}\PY{p}{]} \PY{o}{\PYZlt{}=} \PY{l+m+mi}{1}\PY{p}{)}
+         \PY{n+nd}{@variable}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{w}\PY{p}{[}\PY{l+m+mi}{1}\PY{o}{:}\PY{n}{n}\PY{p}{]}\PY{p}{,} \PY{n}{Bin}\PY{p}{)}
+         \PY{n+nd}{@constraint}\PY{p}{(}\PY{n}{m}\PY{p}{,}\PY{n}{x} \PY{o}{==} \PY{n}{sum}\PY{p}{(}\PY{p}{[}\PY{n}{Xbreak}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{o}{*}\PY{n}{z}\PY{p}{[}\PY{n}{k}\PY{p}{]} \PY{k}{for} \PY{n}{k} \PY{k+kp}{in} \PY{l+m+mi}{1}\PY{o}{:}\PY{n}{n}\PY{p}{]}\PY{p}{)}\PY{p}{)}
+         \PY{n+nd}{@constraint}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{y} \PY{o}{==} \PY{n}{sum}\PY{p}{(}\PY{p}{[}\PY{n}{Ybreak}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{o}{*}\PY{n}{z}\PY{p}{[}\PY{n}{k}\PY{p}{]} \PY{k}{for} \PY{n}{k} \PY{k+kp}{in} \PY{l+m+mi}{1}\PY{o}{:}\PY{n}{n}\PY{p}{]}\PY{p}{)}\PY{p}{)}
+         
+         \PY{c}{\PYZsh{}Now add constraints on z and variables}
+         \PY{n+nd}{@constraint}\PY{p}{(}\PY{n}{m}\PY{p}{,}\PY{n}{sum}\PY{p}{(}\PY{n}{z}\PY{p}{)} \PY{o}{==} \PY{l+m+mi}{1}\PY{p}{)}
+         \PY{n+nd}{@constraint}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{z}\PY{o}{.\PYZlt{}=} \PY{n}{w}\PY{p}{)}
+         \PY{n}{addSOS2}\PY{p}{(}\PY{n}{m}\PY{p}{,}\PY{n}{w}\PY{p}{)}
+         
+         \PY{c}{\PYZsh{} Add constraints connecting variables}
+         \PY{n+nd}{@constraint}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{X}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{]} \PY{o}{+} \PY{n}{X}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{2}\PY{p}{]} \PY{o}{\PYZlt{}=} \PY{n}{x} \PY{o}{+} \PY{l+m+mi}{5} \PY{p}{)}
+         \PY{n+nd}{@constraint}\PY{p}{(}\PY{n}{m}\PY{p}{,}\PY{n}{X}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{]} \PY{o}{+} \PY{n}{X}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{,}\PY{l+m+mi}{2}\PY{p}{]} \PY{o}{\PYZlt{}=} \PY{l+m+mi}{10}\PY{p}{)}
+         \PY{n+nd}{@constraint}\PY{p}{(}\PY{n}{m}\PY{p}{,}\PY{l+m+mf}{0.5}\PY{n}{X}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{]} \PY{o}{\PYZhy{}} \PY{l+m+mf}{0.5}\PY{n}{X}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{]} \PY{o}{\PYZgt{}=} \PY{l+m+mi}{0}\PY{p}{)}
+         \PY{n+nd}{@constraint}\PY{p}{(}\PY{n}{m}\PY{p}{,}\PY{l+m+mf}{0.4}\PY{n}{X}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{2}\PY{p}{]} \PY{o}{\PYZhy{}} \PY{l+m+mf}{0.6}\PY{n}{X}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{,}\PY{l+m+mi}{2}\PY{p}{]} \PY{o}{\PYZgt{}=} \PY{l+m+mi}{0}\PY{p}{)}
+         \PY{n+nd}{@objective}\PY{p}{(}\PY{n}{m}\PY{p}{,}\PY{n}{Max}\PY{p}{,} \PY{l+m+mi}{12}\PY{n}{X}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{]} \PY{o}{+} \PY{l+m+mi}{12}\PY{n}{X}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{]} \PY{o}{+} \PY{l+m+mi}{14}\PY{n}{X}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{2}\PY{p}{]} \PY{o}{+} \PY{l+m+mi}{14}\PY{n}{X}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{,}\PY{l+m+mi}{2}\PY{p}{]} \PY{o}{\PYZhy{}} \PY{n}{y}\PY{p}{)}
+         
+         \PY{n}{solve}\PY{p}{(}\PY{n}{m}\PY{p}{)}
+         \PY{n}{println}\PY{p}{(}\PY{l+s}{\PYZdq{}}\PY{l+s}{O}\PY{l+s}{b}\PY{l+s}{j}\PY{l+s}{e}\PY{l+s}{c}\PY{l+s}{t}\PY{l+s}{i}\PY{l+s}{v}\PY{l+s}{e}\PY{l+s}{ }\PY{l+s}{=}\PY{l+s}{ }\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{n}{getobjectivevalue}\PY{p}{(}\PY{n}{m}\PY{p}{)}\PY{p}{)}
+         \PY{n}{println}\PY{p}{(}\PY{l+s}{\PYZdq{}}\PY{l+s}{z}\PY{l+s}{=}\PY{l+s}{ }\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{n}{getvalue}\PY{p}{(}\PY{n}{z}\PY{p}{)}\PY{p}{)}
+         \PY{n}{println}\PY{p}{(}\PY{l+s}{\PYZdq{}}\PY{l+s}{w}\PY{l+s}{=}\PY{l+s}{ }\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{n}{getvalue}\PY{p}{(}\PY{n}{w}\PY{p}{)}\PY{p}{)}
+         \PY{n}{println}\PY{p}{(}\PY{l+s}{\PYZdq{}}\PY{l+s}{x}\PY{l+s}{=}\PY{l+s}{ }\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{n}{getvalue}\PY{p}{(}\PY{n}{x}\PY{p}{)}\PY{p}{)}
+         \PY{n}{println}\PY{p}{(}\PY{l+s}{\PYZdq{}}\PY{l+s}{X}\PY{l+s}{ }\PY{l+s}{=}\PY{l+s}{ }\PY{l+s}{\PYZdq{}}\PY{p}{,} \PY{n}{getvalue}\PY{p}{(}\PY{n}{X}\PY{p}{)}\PY{p}{)}
+\end{Verbatim}
+
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+Academic license - for non-commercial use only
+Objective = 125.0
+z= [0.0, 0.0, 1.0, 0.0]
+w= [-0.0, -0.0, 1.0, 1.0]
+x= 10.0
+X = X: 2 dimensions:
+[1,:]
+  [1,1] = 0.0
+  [1,2] = 15.0
+[2,:]
+  [2,1] = 0.0
+  [2,2] = 10.0
+
+    \end{Verbatim}
+
+
+\end{codeCell}

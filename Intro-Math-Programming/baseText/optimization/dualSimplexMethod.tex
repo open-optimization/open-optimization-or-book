@@ -1,0 +1,783 @@
+% Copyright 2020 by Laurent Porrier
+%This work is licensed under a
+%Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0)
+%See http://creativecommons.org/licenses/by-sa/4.0/
+
+%\documentclass[letterpaper]{article}
+%\usepackage{graphicx}
+%\usepackage[utf8]{inputenc}
+%\usepackage{amsmath}
+%\usepackage{amsthm}
+%\usepackage{amssymb}
+%\usepackage{enumerate}
+%\usepackage{setspace}
+%\usepackage{bm}
+%\usepackage{float}
+%\usepackage{hyperref}
+%\usepackage{xcolor}
+%
+%\topmargin 0cm
+%\headheight 0cm
+%\headsep 0cm
+%\textheight 23cm
+%
+%\oddsidemargin -0.25cm
+%\evensidemargin -0.25cm
+%\textwidth 17.5cm
+%\marginparwidth 0cm
+%
+%\parskip \baselineskip
+%\parindent 0cm
+%
+%\onehalfspacing
+%
+%\theoremstyle{plain}
+%\newtheorem{lemma}{Lemma}
+%\newtheorem{theorem}{Theorem}
+%\newtheorem{corollary}{Corollary}
+%\newtheorem{claim}{Claim}
+%\newtheorem{proposition}{Proposition}
+%\newtheorem{conjecture}{Conjecture}
+%\theoremstyle{definition}
+%\newtheorem{notation}{Notation}
+%\newtheorem{definition}{Definition}
+%\newtheorem{assumption}{Assumption}
+%\newtheorem{algorithm}{Algorithm}
+%
+%\newfloat{Pseudocode}{tbhp}{Pseudocode}
+%
+%\newcommand{\Z}[0]{\mathbb{Z}}
+%\newcommand{\R}[0]{\mathbb{R}}
+%\newcommand{\e}[0]{\varepsilon}
+%
+\newcommand{\B}[0]{\mathcal{B}}
+\newcommand{\NL}[0]{\mathcal{L}}
+\newcommand{\NU}[0]{\mathcal{U}}
+%
+%\newcommand{\mathfunc}[1]{\ensuremath{\mathop{\mathrm{#1}}}}
+%\newcommand{\conv}[0]{\mathfunc{conv}}
+%\newcommand{\cone}[0]{\mathfunc{cone}}
+%\newcommand{\lin}[0]{\mathfunc{lin}}
+%\newcommand{\spn}[0]{\mathfunc{span}}
+%\newcommand{\proj}[0]{\mathfunc{proj}}
+%\newcommand{\operp}[0]{\mathfunc{perp}}
+%\newcommand{\aff}[0]{\mathfunc{aff}}
+%\newcommand{\linsp}[0]{\mathfunc{lin.space}}
+%\newcommand{\recc}[0]{\mathfunc{recc}}
+%\newcommand{\interior}[0]{\mathfunc{interior}}
+%\newcommand{\st}[0]{\mathfunc{s.t.}}
+%\newcommand{\argmin}[0]{\mathfunc{argmin}}
+%
+%\newcommand{\floor}[1]{\lfloor #1 \rfloor}
+%\newcommand{\ceil}[1]{\lceil #1 \rceil}
+%
+\newcommand{\tab}[0]{\hspace{1cm}}
+%\newcommand{\halftab}[0]{\hspace{0.5cm}}
+%
+%\newcommand{\vvec}[1]{\ensuremath{\left[ \begin{array}{c} #1 \end{array} \right]}}
+%\newcommand{\vmat}[2]{\ensuremath{\left[ \begin{array}{#1} #2 \end{array} \right]}}
+%
+%\definecolor{titles}{HTML}{204A87}
+%\definecolor{header}{HTML}{00802
+%0}
+%\definecolor{body}{HTML}{002080}
+%
+%\begin{document}
+%
+%{
+%\centering
+%\Large
+%\textcolor{titles}{\textsf{The dual simplex method with bounds}}
+%	\\[0.5cm]
+%}
+
+\chapter{More LP Notes}
+%\section{The dual simplex method with bounds}
+\textbf{Contributed by Laurent Poirrier}
+
+\paragraph{Linear programming basis.}
+
+Let a linear programming problem be given by
+\begin{equation}
+\begin{array}{rl}
+\min & c^T x \\
+\st  & A x = b \\
+     & \ell \leq x \leq u \\
+     & x \in \R^n,
+\end{array}
+\tag{P}
+\label{eq:lp}
+\end{equation}
+where we assume $A \in \R^{m \times n}$ to be full row rank
+(we will see in the section ``Starting basis'' how to make
+sure that this assumption holds).
+We first introduce the concept of a basis:
+\begin{itemize}
+\item There are $n$ variables $x_j$ for $j = \{ 0, \ldots, n-1 \}$.
+\item A \emph{basis} of~\eqref{eq:lp} is a partition of
+$\{ 0, \ldots, n-1 \}$ into three disjoint index subsets
+$\B$, $\NL$ and $\NU$, such that
+if $B$ is the matrix formed by taking
+the columns of $A$ indexed by $\B$, then $B$ is square and
+invertible.
+\end{itemize}
+Thus, we always have $|\B| = m$, and there are at most
+$\left( \begin{smallmatrix} n \\ m \end{smallmatrix} \right)$ different
+bases, possibly less than that since some of the combinations
+may yield a singular $B$ matrix.
+Given a specific basis, we establish some notation: 
+\begin{itemize}
+\item For all $j \in \B$ the variable $x_j$ is called
+	a \emph{basic variable},
+	and the corresponding $j$th column of $A$ is called
+	a \emph{basic column}.
+
+\item For all $j \in \NL \cup \NU$ the variable $x_j$ is called
+	a \emph{nonbasic variable},
+	and the corresponding $j$th column of $A$ is called
+	a \emph{nonbasic column}.
+
+\item By convention, the vector formed by taking together all
+	the basic variables is denoted $x_{\B}$.
+	Similarly, $c_{\B}$, $\ell_{\B}$ and $u_{\B}$
+	are formed by taking together the same indices of
+	$c$, $\ell$ and $u$, respectively.
+	The same notation is also used for the indices in $\NL$ and $\NU$,
+	giving $c_{\NL}$, $c_{\NU}$,
+	$\ell_{\NL}$, $\ell_{\NU}$, $u_{\NL}$, and $u_{\NU}$.
+	We already defined $B$ as taking together the basic columns of $A$.
+	The remaining (nonbasic) columns form the
+	submatrices $L$ and $U$. Thus, there is a permutation
+	of the columns of $A$ that is given by
+	$[ B \; | \; L \; | \; U ]$.
+	For conciseness, we will write
+	$A = [ B \; | \; L \; | \; U ]$, although it is an abuse
+	of notation.
+
+\item $\B$, $\NL$ and $\NU$ are sets, so the order of the indices does
+	not matter. However, it must be consistent in the vectors
+	defined above. For example,
+	(i) $c_{\B1}$ must be the objective function
+	coefficient associated with the variable $x_{\B1}$,
+	(ii) $\ell_{\B1}$ and $u_{\B1}$ must be the bounds on that same
+	variable, and (iii) the first column of $B$ is the column of $A$
+	that corresponds to that same variable.
+\end{itemize}
+The concept of basis is useful because of the following construction:
+\begin{itemize}
+\item We construct a solution $\bar x$ of~\eqref{eq:lp} as follows.
+	Let us fix the components of $\bar x$ in $\NL$ or $\NU$
+	at their lower or upper bound, respectively:
+	$\bar x_{\NL} = \ell_{\NL}$ and
+	$\bar x_{\NU} = u_{\NU}$.
+	Given that these components are fixed,
+	we can now compute the unique value of $\bar x_{\B}$ such
+	that the equality constraints $A x = b$ of~\eqref{eq:lp}
+	are satisfied.
+	Indeed, using the abuse of notation described earlier,
+	we have
+\begin{eqnarray*}
+	[ B \; | \; L \; | \; U ] \; \bar x & = & b \\
+	B \bar x_{\B} + L \bar x_{\NL} + U \bar x_{\NU} & = & b \\
+	B \bar x_{\B} + L \ell_{\NL} + U u_{\NU} & = & b \\
+	B \bar x_{\B} & = & b - L \ell_{\NL} - U u_{\NU} \\
+	\bar x_{\B} & = & B^{-1}
+		\left( b - L \ell_{\NL} - U u_{\NU} \right). \\
+\end{eqnarray*}
+
+\item The solution $\bar x$ constructed above is uniquely
+	defined by the partition $\B, \NL, \NU$
+	(i.e., by the basis). We now see why $B$ was required
+	to be an invertible matrix.
+
+\item Any solution $x$ that can be constructed as above
+	for some partition $\B, \NL, \NU$ is called a \emph{basic} solution.
+
+\item If a basic solution $\bar x$ satisfies
+	$\ell \leq \bar x \leq u$, then it is called
+	a basic \emph{feasible} solution.
+	Indeed, it satisfies all the constraints
+	of~\eqref{eq:lp}.
+	Note that the bound constraints are automatically satisfied
+	for $\bar x_{\NL}$ and $\bar x_{\NU}$, so it is enough to
+	verify that $\ell_{\B} \leq \bar x_{\B} \leq u_{\B}$.
+
+\item The feasible region of~\eqref{eq:lp} is a polyhedron,
+	and it has been shown that $\bar x$ is a basic feasible solution
+	if and only if it is a vertex of that feasible region.
+	In other words, basic feasible solutions and vertices are
+	defined differently, but they are the same thing in the
+	context of linear programming.
+
+\item Clearly, vertices are only a subset of all the feasible
+	solutions to~\eqref{eq:lp}. However, in the context of
+	optimization, it sufficient to look at vertices because
+	of the following: If~\eqref{eq:lp} has an optimal solution,
+	then at least one optimal solution of~\eqref{eq:lp} is a vertex.
+\end{itemize}
+
+\paragraph{Tableau.}
+A tableau is an equivalent reformulation of~\eqref{eq:lp} that
+is determined by a given basis. It lets us easily assess the impact
+of changing the current basis (making a \emph{pivot}) on
+(a) the objective function value, and (b) primal or dual feasibility.
+
+\begin{itemize}
+\item A tableau is given by
+\[
+\begin{array}{rl}
+\min & \bar c^T x \\
+\st  & \bar A x = \bar b \\
+     & \ell \leq x \leq u \\
+     & x \in \R^n.
+\end{array}
+\]
+\item $\bar c^T := c^T - c_{\B}^T  B^{-1} A$ \;\;\; are called the
+	\emph{reduced costs} corresponding to the basis $\B, \NL, \NU$.
+	They have the property that $\bar c_{\B} = 0$, so $\bar c$
+	expresses the direction of the objective function only
+	in terms of the nonbasic variables.
+\item $\bar b := B^{-1} b$.
+\item $\bar A := B^{-1} A$. If we use the partition
+	$\bar A = [ \bar B \; | \; \bar L \; | \; \bar U ]$,
+	we have that $\bar B = B^{-1} B = I$. As a consequence,
+	the tableau can be written
+\[
+\begin{array}{rcrcrcrcl}
+\min & & & & \bar c_{\NL}^T x_{\NL} & + & c_{\NU}^T x_{\NU} \\
+\st  & & x_{\B} & + & \bar L x_{\NL} & + & \bar U x_{\NU} & = & \bar b \\
+     & & \multicolumn{5}{c}{\ell \leq x \leq u} \\
+     & & \multicolumn{5}{c}{x \in \R^n.}
+\end{array}
+\]
+
+\item We already saw above that the (primal) basic solution corresponding
+	to a basis (and hence to a tableau) is given by
+	$\bar x_{\B} =
+		B^{-1} \left( b - L \bar \ell_{\NL} - U \bar u_{\NU} \right)$.
+	It is feasible if $\ell_{\B} \leq \bar x_{\B} \leq u_{\B}$.
+	In that case, we say that the basis is primal feasible.
+
+\end{itemize}
+
+\paragraph{Duality.}
+
+\begin{itemize}
+\item The dual of~\eqref{eq:lp} is
+\begin{equation}
+\begin{array}{rcrcrcrcl}
+\min & & -b^T \pi & - & \ell^T \lambda & - & u^T \mu & & \\
+\st  & & A^T \pi & + & I \lambda & + & I \mu & = & c \\
+     & & \pi \text{ free} & & \lambda \geq 0, & &  \mu \leq 0. & & 
+\end{array}
+\tag{D}
+\label{eq:dual}
+\end{equation}
+
+\item A basis of~\eqref{eq:dual} is a partition
+	of $\{ 1, \ldots, 3n \}$.
+	However,~\eqref{eq:dual} has a special structure with two
+	identity matrices in the constraints and no bounds on $\pi$.
+	This yields a characterization of the bases of~\eqref{eq:dual}
+	that follows.
+
+\item A basis of~\eqref{eq:dual} needs $n$ basic variables,
+	as many as there are equality constraints in~\eqref{eq:dual}.
+	The $\pi$ variables do not have bounds, so they are always basic.
+	We now need to select $n - m$ basic variables among the $\lambda$
+	and $\mu$.
+
+\item For any given $j$, the variables $\lambda_j$ and $\mu_j$ cannot be
+	both basic, because if they were,
+	the basis matrix would contain twice the same identity
+	column, and thus would not be invertible
+	(see Figure~\ref{fig:dcm}). So we have the following:
+	Consider the $n$ possible indices $j \in \{ 0, \ldots, n-1 \}$.
+	For $n - m$ of them, either $\lambda_j$ or $\mu_j$ is
+	basic (but not both). For $m$ of them, neither $\lambda_j$
+	nor $\mu_j$ is basic.
+	
+\newcommand{\scd}[0]{\,\cdot\,}
+\newcommand{\blt}[0]{\bullet}
+\newcommand{\wdt}[0]{\textcolor{white}{\scd}}
+\newcommand{\dwa}[0]{\hspace{0.15mm}\downarrow\hspace{0.15mm}}
+\begin{figure}[h]
+\[
+\begin{array}{l}
+[ A^T \; | \; I \; | \; I ] \;\; = \\
+\; \\
+\; \\
+\end{array}
+\begin{array}{l}
+\left[
+\begin{array}{ccc|ccccc|ccccc}
+\scd & \scd & \scd & \scd &       &       &       &       & \scd &       &       &       &       \\
+\scd & \scd & \scd &       & \scd &       &       &       &       & \scd &       &       &       \\
+\scd & \scd & \scd &       &       & \scd &       &       &       &       & \scd &       &       \\
+\scd & \scd & \scd &       &       &       & \scd &       &       &       &       & \scd &       \\
+\scd & \scd & \scd &       &       &       &       & \scd &       &       &       &       & \scd \\
+\end{array}
+\right] \\
+\;\;\,
+\begin{array}{ccccccccccccc}
+\wdt & \wdt & \wdt & \wdt & \wdt & \dwa & \wdt & \wdt & \wdt & \wdt & \dwa & \wdt & \wdt \\
+\wdt & \wdt & \wdt & \wdt & \wdt &     j      & \wdt & \wdt & \wdt & \wdt &     j      & \wdt & \wdt \\
+\end{array}
+\end{array}
+\]
+\caption{The constraint matrix of~\eqref{eq:dual}}
+\label{fig:dcm}
+\end{figure}
+
+\begin{figure}[h]
+\[
+%\begin{array}{l}
+%[ A^T \; | \; I \; | \; I ] \;\; = \\
+%\; \\
+%\; \\
+%\end{array}
+\begin{array}{l}
+\left[
+\begin{array}{ccc|ccccc|ccccc}
+\scd & \scd & \scd & \scd &       &       &       &       & \scd &       &       &       &       \\
+\blt & \blt & \blt &       & \scd &       &       &       &       & \scd &       &       &       \\
+\scd & \scd & \scd &       &       & \scd &       &       &       &       & \scd &       &       \\
+\blt & \blt & \blt &       &       &       & \scd &       &       &       &       & \scd &       \\
+\blt & \blt & \blt &       &       &       &       & \scd &       &       &       &       & \scd \\
+\end{array}
+\right] \\
+\;\;\,
+\begin{array}{ccccccccccccc}
+\wdt & \wdt & \wdt & \wdt & \dwa & \wdt & \dwa      & \dwa & \wdt
+	& \dwa & \wdt & \dwa & \dwa \\
+\wdt & \wdt & \wdt & \wdt & \multicolumn{4}{c}{\text{\small nonbasic}}
+	& \wdt & \multicolumn{4}{c}{\text{\small nonbasic}} \\
+\end{array}
+\end{array}
+\begin{array}{l}
+\rightarrow \text{ basis matrix } \\
+\; \\
+\; \\
+\end{array}
+\begin{array}{l}
+\left[
+\begin{array}{ccc|c|c}
+\scd & \scd & \scd & \scd &      \\
+\blt & \blt & \blt &      &      \\
+\scd & \scd & \scd &      & \scd \\
+\blt & \blt & \blt &      &      \\
+\blt & \blt & \blt &      &      \\
+\end{array}
+\right] \\
+\;\;\,
+\begin{array}{ccccc}
+\wdt & \wdt & \wdt & \wdt & \wdt \\
+\wdt & \wdt & \wdt & \wdt & \wdt \\
+\end{array}
+\end{array}
+\]
+\caption{A basis of~\eqref{eq:dual}}
+\label{fig:db}
+\end{figure}
+
+\item Let use consider one of the latter values of $j$, i.e., one of the
+	$m$ values of $j$ such that neither $\lambda_j$ nor $\mu_j$ is basic.
+	Then, the only nonzeros in the $j$th row of the basis matrix
+	come from the $j$th row of $A^T$ (Figure~\ref{fig:db}).
+	Now, considering all the $m$
+	such value of $j$, they give a square submatrix of $A^T$.
+	That submatrix is also a submatrix of the
+	basis matrix, with only zeros to its right.
+	Since the basis matrix must be invertible, that square
+	$m \times m$ submatrix of $A^T$ must be invertible too.
+
+\item We now see that a basis of~\eqref{eq:dual} is uniquely defined by
+	a partition of $\{ 0, \ldots, n-1 \}$ into three disjoint
+	sets $\B$, $\NL$, $\NU$ such that $|\B| = m$ and
+	if $B^T$ is the matrix formed by taking
+	the rows of $A^T$ indexed by $\B$, then $B^T$ is invertible.
+	For every $j \in \NL$, $\lambda_j$ is basic,
+	and for every $j \in \NU$, $\mu_j$ is basic.
+	Observe that the conditions for
+	$\B, \NL, \NU$ to form a basis of~\eqref{eq:dual}
+	are exactly the same as the conditions for
+	$\B, \NL, \NU$ to form a basis of~\eqref{eq:lp}.
+
+\item In order to construct a basic solution of~\eqref{eq:dual},
+	we partition $A$ into $[ B \; | \; L \; | \; U ]$.
+	Knowing that $\lambda_j = 0$ for all $j \notin \NL$
+	and $\mu_j = 0$ for all $j \notin \NU$, we rewrite the constraints as
+\[
+\begin{array}{rcrcrcl}
+ B^T \pi & & & & & = & c_{\B} \\
+ L^T \pi & + & \lambda_{\NL} & & & = & c_{\NL} \\
+ U^T \pi & & & + & \mu_{\NU} & = & c_{\NU} \\
+ U^T \pi \text{ free} & & \lambda \geq 0, & &  \mu \leq 0. & & 
+\end{array}
+\]
+	The $\pi$ variables are all basic and their values can be computed
+	directly as $\bar \pi^T = c_{\B}^T B^{-1}$.
+	Then, the basic $\lambda$ variables have values
+	$\bar \lambda_{\NL}^T
+		= c_{\NL}^T - \pi^T L = c_{\NL}^T - c_{\B}^T B^{-1} L$
+	and the basic $\mu$ variables have values
+	$\bar \mu_{\NU}^T
+		= c_{\NU}^T - \pi^T U = c_{\NL}^T - c_{\B}^T B^{-1} U$.
+	For the basic solution $(\bar \pi^T, \bar \lambda^T, \bar \mu^T)$
+	to be \emph{feasible} in~\eqref{eq:dual}, we need
+	$\bar \lambda \geq 0$ and $\bar \mu \leq 0$.
+	The basis is then called \emph{dual feasible}.
+	Let $\bar c$ be the reduced costs in the corresponding primal
+	tableau, i.e., $\bar c^T := c^T - c_{\B}^T  B^{-1} A$.
+	It is easy to verify that $(\bar \pi^T, \bar \lambda^T, \bar \mu^T)$
+	is feasible if and only if $\bar c_j \geq 0$ for all $j \in \NL$
+	and $\bar c_j \leq 0$ for all $j \in \NU$. Observe that these
+	are the optimality condition of the simplex method on
+	the primal~\eqref{eq:lp}.
+
+\item To derive the reduced costs of~\eqref{eq:dual} for a given basis
+	$\B, \NL, \NU$, we need to express the objective function
+	in terms of $\lambda_{\B}, \lambda_{\NU}, \mu_{\B}, \mu_{\NL}$
+	only (the nonbasic variables). Let us write a partitioned
+	version of~\eqref{eq:dual} again, this time without discarding
+	the nonbasic variables:
+\[
+\begin{array}{rcrcrcrcrcrcrcrcl}
+\min & & -b^T \pi
+	& - & \ell_{\B}^T \lambda_{\B}
+	& - & \ell_{\NL}^T \lambda_{\NL}
+	& - & \ell_{\NU}^T \lambda_{\NU}
+	& - & u_{\B}^T \mu_{\B}
+	& - & u_{\NL}^T \mu_{\NL}
+	& - & u_{\NU}^T \mu_{\NU}
+	& & \\
+\st  & & B^T \pi & + & \lambda_{\B} & & & & & + & \mu_{\B} & & & & & = & c_{\B} \\
+     & & L^T \pi & & & + & \lambda_{\NL} & & & & & + & \mu_{\NL} & & & = & c_{\NL} \\
+     & & U^T \pi & & & & & + & \lambda_{\NU} & & & & & + & \mu_{\NU} & = & c_{\NU} \\
+     & & U^T \pi \text{ free} & & \lambda \geq 0, & &  \mu \leq 0. & & 
+\end{array}
+\]
+	This gives us
+\begin{eqnarray*}
+\pi & = & B^{-T} (c_{\B} - \lambda_{\B} - \mu_{\B}) = (B^{-T} c_{\B}) - B^{-T} (\lambda_{\B} + \mu_{\B}) \\
+\lambda_{\NL} & = & c_{\NL} - L^T \pi - \mu_{\NL}
+	\;\; = \;\; (c_{\NL} - L^T B^{-T} c_{\B}) + L^T B^{-T} (\lambda_{\B} + \mu_{\B}) - \mu_{\NL} \\
+\mu_{\NU} & = & c_{\NU} - U^T \pi - \lambda_{\NU}
+	\;\; = \;\; (c_{\NU} - U^T B^{-T} c_{\B}) + U^T B^{-T} (\lambda_{\B} + \mu_{\B}) - \lambda_{\NU}
+\end{eqnarray*}
+	where the first term of each right-hand side is constant and can be
+	ignored in an objective function. After rewriting the objective
+	function and simplifying the result, we get
+\[
+ \min \;\;\; 
+             (\bar x_{\B} - \ell_{\B}) \lambda_{\B} 
+ \;\; + \;\; (u_{\NU} - \ell_{\NU}) \lambda_{\NU}
+ \;\; - \;\; (u_{\B} - \bar x_{\B}) \mu_{\B}
+ \;\; - \;\; (u_{\NL} - \ell_{\NL}) \mu_{\NL}
+\]
+	where $\bar x_{\B} = B^{-1} (b - L \ell_{\NL} - U u_{\NU})$
+	corresponds to the primal basic solution associated
+	with $\B, \NL, \NU$.
+	The optimality conditions of the simplex method
+	in~\eqref{eq:dual} are that
+	the reduced costs for $\lambda$ must be nonnegative
+	and the reduced costs for $\mu$ must be nonpositive.
+	Observe that we can always assume $(u_{\NU} - \ell_{\NU}) \geq 0$
+	otherwise the problem is trivially infeasible.
+	The conditions become $\bar x_{\B} \geq \ell_{\B}$ and
+	$\bar x_{\B} \leq u_{\B}$. Observe that they correspond
+	exactly to the feasibility of the primal basic solution $\bar x$
+	associated with $\B, \NL, \NU$.
+\end{itemize}
+
+
+\paragraph{Pivoting.}
+
+\newcommand{\uj}[0]{\underline{j}}
+\newcommand{\uk}[0]{\underline{k}}
+
+We can now apply the simplex method to~\eqref{eq:dual}.
+We need to start (and maintain) a basis $\B, \NL, \NU$ that
+is dual feasible, so we need $B$ invertible,
+$\bar c_j \geq 0$ for all $j \in \NL$
+and $\bar c_j \leq 0$ for all $j \in \NU$.
+
+At the beginning of each iteration, we select a dual nonbasic
+variable $\lambda_{\B}$ or $\mu_{\B}$ with a negative reduced cost to
+become a basic variable.
+If no such variable can be found, then we have 
+reached optimality, and we can stop.
+Otherwise, let $\uj \in \B$ be the index of such
+a dual variable. Then at the next iteration, we will have
+either $\uj \in \NL'$ (if it was a component of $\lambda_{\B}$ with
+a negative reduced cost) or $\uj \in \NU'$
+(if it was a component of $\mu_{\B}$ with
+a negative reduced cost), i.e., that variable will
+be basic. That dual variable is said
+to \emph{enter} the dual basis.
+
+In a primal view, this corresponds to finding a component $\uj \in \B$
+of the primal basic solution $\bar x$ that is infeasible.
+At the next iteration, we will have $\uj \in \NL'$ or $\uj \in \NU'$.
+When adopting a primal view, the very same operation is described as
+the primal variable $x_{\uj}$ \emph{leaving} the primal basis.
+
+The next step is to choose a primal \emph{entering} variable.
+We will choose this variable carefully in order to
+to maintain an invertible $B$ matrix and reduced costs of the
+appropriate sign.
+
+Assume that the primal leaving variable $x_{\uj}$ is currently
+basic in row $i$ (it corresponds to the basic variable $x_{\B i}$).
+%and will leave to its lower bound (at the next iteration, we
+%will have $j \in \NL$).
+Let us consider the objective and $i$th row of the current tableau:
+\newcommand{\cb}[0]{\bar c}
+\newcommand{\ab}[0]{\bar a}
+\[
+\begin{array}{rclcrcrcrcrcl}
+     &&              &   & e \in \NL    &   & f \in \NL    &   & g \in \NU     &   & h \in \NU    &   & \\
+\min &&              &   & \cb_e x_e    & + & \cb_f x_f    & + & \cb_g x_g     & + & \cb_h x_h    &   & \\
+\st  && \hspace{2cm} &   &              &   &              & \vdots \\
+     && x_{\uj}      & + & \ab_{ie} x_e & + & \ab_{if} x_f & + & \ab_{ig} x_g  & + & \ab_{ih} x_h & = & \bar b_i \\
+     &&              &   &              &   &              & \vdots \\
+     & \multicolumn{10}{c}{\ell \leq x \leq u} \\
+     & \multicolumn{10}{c}{x \in \R^n}
+\end{array}
+\]
+where $\ab_{ie}, \ab_{ig} > 0$ and $\ab_{if}, \ab_{ih} < 0$.
+The four indices $e, f, g, h$ represent the four possible configurations:
+variable at upper or lower bound, and $\ab_{ik}$ positive or negative.
+We only use the notation $e, f, g, h$ for simplicity:
+there can be zero or more than one variable in each configuration.
+All variables in one given configuration are treated similarly.
+
+Any $\ab_{ik} = 0$ can be ignored. They do not interfere with the
+computations below, and it can be shown that the $B'$ matrix of
+the next iteration will be invertible if and only if we do not consider
+the corresponding columns as candidate entering columns.
+
+Since $e, f \in \NL$ and $g, h \in \NU$,
+we currently have $\cb_e, \cb_f \geq 0$
+and $\cb_g, \cb_h \leq 0$.
+
+\begin{itemize}
+\item If $x_{\uj}$ leaves to its lower bound, we will need $\cb_{\uj}' \geq 0$
+	at the next iteration, while maintaining zero reduced costs
+	for all other indices in $\B$.
+	Any such new objective function
+	can be achieved by \textbf{adding}
+	a nonnegative multiple $t$ of the $i$th
+	row of the tableau to the current objective function.
+	The multiplier $t$ will be called the \emph{dual step length}. \\
+	- We know that $\cb_e$ will become $\cb_e' = \cb_e + t \; \ab_{ie}$,
+	which is guaranteed to always
+	meet $\cb_e' \geq 0$ because $\ab_{ie} > 0$. \\
+	- Instead, since $\ab_{if} < 0$,
+	we will have $\cb_f' = \cb_f + t \; \ab_{if} \geq 0$
+	if and only if $t \leq \cb_f / (-\ab_{if})$. \\
+	- For $\cb_g' = \cb_g + t \; \ab_{ig} \leq 0$, we need
+	$t \leq -\cb_g / \ab_{ig}$. \\
+	- Finally, $\cb_h' = \cb_h + t \; \ab_{ih} \leq 0$ is guaranteed
+	to always be met.
+\item If $x_{\uj}$ leaves to its upper bound, we will need $\cb_{\uj}' \leq 0$
+	at the next iteration, while maintaining zero reduced costs
+	for all other indices in $\B$.
+	Any such new objective function
+	can be achieved by \textbf{subtracting}
+	a nonnegative multiple $t$ of the $i$th
+	row of the tableau to the current objective function. \\
+	- The condition $\cb_e' = \cb_e - t \; \ab_{ie} \geq 0$
+	requires $t \leq \cb_e / \ab_{if}$. \\
+	- The condition $\cb_f' = \cb_f - t \; \ab_{if} \geq 0$
+	is always satisfied. \\
+	- The condition $\cb_g' = \cb_g - t \; \ab_{ig} \leq 0$
+	is always satisfied. \\
+	- The condition $\cb_h' = \cb_h - t \; \ab_{ih} \leq 0$
+	requires $t \leq (-\cb_h) / (-\ab_{ih})$.
+\end{itemize}
+
+If the signs of the $\cb_k$ and $\ab_{ik}$ coefficients are such that
+no conditions are imposed on $t$, it can be shown that~\eqref{eq:dual}
+is unbounded, which corresponds to~\eqref{eq:lp} being \emph{infeasible}
+(note that, because of the finite bounds $\ell$ and $u$,~\eqref{eq:lp}
+is never unbounded).
+
+Each of the above conditions defines an upper bound $t_k$ on $t$,
+i.e., $t \leq t_k$ for all $k \in \NL \cup \NU$.
+The most restrictive condition
+can be selected by computing $\underline{t} = \min_k t_k$.
+If $\uk$ is
+a value of $k$ that yields the minimum, we will have
+$\cb_{\uk}' = 0$ and $\uk$ can be our
+\emph{entering} variable, i.e., we can set
+$\B' = \B \setminus \{ j \} \cup \{ \uk \}$.
+Finding $\uk$ is called the \emph{ratio test}.
+
+Figure~\ref{fig:ratiotest} summarizes how to compute $t_k$ depending
+on the signs of $\ab_{ik}$ and $\cb_k$.
+
+\begin{figure}[h]
+\bgroup
+\def\arraystretch{1.5}
+\[
+\begin{array}{|c|c|c|c|}
+\hline
+\uj \in \B                  & k \in \NL \cup \NU & \ab_{ik} & t_k                 \\
+\hline
+\hline
+                            & k \in \NL          & > 0      &                     \\
+\cline{3-4}
+\uj \in \NL'                &                    & < 0      & \cb_k / (-\ab_{ik}) \\
+\cline{2-4}
+(\bar x_{\uj} < \ell_{\uj}) & k \in \NU          & > 0      & (-\cb_k) / \ab_{ik} \\
+\cline{3-4}
+                            &                    & < 0      &                     \\
+\hline
+                            & k \in \NL          & > 0      & \cb_k / \ab_{ik} \\
+\cline{3-4}
+\uj \in \NU'                &                    & < 0      &                     \\
+\cline{2-4}
+(\bar x_{\uj} > u_{\uj})    & k \in \NU          & > 0      &                     \\
+\cline{3-4}
+                            &                    & < 0      & (-\cb_k) / (-\ab_{ik}) \\
+\hline
+\end{array}
+\]
+\egroup
+\caption{Computing the upper bounds $t_k$ on the dual step length $t$
+	in the ratio test.}
+\label{fig:ratiotest}
+\end{figure}
+
+
+\paragraph{Starting basis.}
+Before we can apply the dual simplex method, we need to have
+a dual feasible basis. First, this means that we need a set of
+column indices $\B$ such that $B$ is invertible.
+A simple way to obtain that is to add $m$ artificial variables
+$z$ fixed to zero, as demonstrated in~\eqref{eq:z}:
+\begin{equation}
+\begin{array}{rl}
+\min & c^T x + 0^T z \\
+\st  & A x + I z = b \\
+     & \ell \leq x \leq u \\
+     & 0 \leq z \leq 0 \\
+     & x \in \R^n, z \in \R^m
+\end{array}
+\tag{P+}
+\label{eq:z}
+\end{equation}
+We can do that as a very first step before
+starting the dual simplex method. Then, it is easier to let
+$n := n + m$,
+$c^T := [c^T \;\; 0^T]$,
+$\ell^T := [\ell^T \;\; 0^T]$,
+$u^T := [u^T \;\; 0^T]$
+and $A := [A \;\; I]$,
+so that you can forget about the $z$ variables and have a problem
+of the form~\eqref{eq:lp}, but with the guarantee that the last $m$
+columns of $A$ form an identity matrix (which is invertible: $I^{-1} = I$).
+Note that having an $m \times m$ identity in $A$ also ensures
+that $A$ is full row rank.
+
+Once we have $\B$, it is straightforward to construct $\NL$ and $\NU$
+such that $\B, \NL, \NU$ is dual feasible. Having $\B$ is enough
+to compute the reduced costs $\bar c^T = c^T - c_{\B}^T B^{-1} A$.
+For all $j \notin \B$, we can assign $j$ to $\NL$ if $\cb_j \geq 0$
+or to $\NU$ if $\cb_j \leq 0$. This way, $\cb_j$ will always have
+the appropriate sign to ensure dual feasibility.
+
+\paragraph{Summary.} We can now give, in Figure~\ref{fig:dsmb},
+a precise description of the operations in the dual simplex method with bounds.
+We can also make a few observation that will prove useful in implementing
+the dual simplex method.
+
+\begin{figure}[h]
+\begin{tabular}{l}
+\texttt{Initialization} \\
+\tab Add $m$ variables to the problem, fixed to zero by their bounds. \\
+\tab From now on, only consider the enlarged problem: \\
+\tab \tab $n := n + m$,
+		$c^T := [c^T \;\; 0^T]$,
+		$\ell^T := [\ell^T \;\; 0^T]$,
+		$u^T := [u^T \;\; 0^T]$
+		and $A := [A \;\; I]$, \\
+\tab \tab where $0^T$ is a row vector of size $m$ with all components set to zero. \\
+\tab Build the starting basis: \\
+\tab \tab Set $\B := \{ n, \ldots, n + m - 1 \}$. \\
+\tab \tab Form the corresponding basis matrix $B$. \\
+\tab \tab Compute $\bar c^T = c^T - c_{\B}^T B^{-1} A$. \\
+\tab \tab For all $j \in \{ 0, \ldots, n-1 \}$, \\
+\tab \tab \tab if $\bar c_j > 0$, set $j \in \NL$, \\
+\tab \tab \tab if $\bar c_j < 0$, set $j \in \NU$, \\
+\tab \tab \tab if $\bar c_j = 0$, we can arbitrarily
+	select either $j \in \NL$ or $j \in \NU$. \\
+\texttt{Step 1 (leaving variable)} \\
+\tab Form the basis matrix $B$ (from the columns of $A$ indexed by $\B$). \\
+\tab Compute $\bar c^T = c^T - c_{\B}^T B^{-1} A$. \\
+\tab Compute $\bar x_{\B} = B^{-1} (b - L \ell_{\NL} - U u_{\NU})$. \\
+\tab Find a component $i$ of $x_{\B}$ such that either
+	$\bar x_{\B i} < \ell_{\B i}$ or $\bar x_{\B i} > u_{\B i}$. \\
+\tab If no such $i$ exists, we reached optimality. \texttt{Stop.} \\
+\tab Let $\uj$ be such that $x_{\uj}$ corresponds to $x_{\B i}$. \\
+\texttt{Step 2 (entering variable)} \\
+\tab Compute the $i$th row of $B^{-1} A$. \\
+\tab Perform the ratio test: compute
+	$\uk = \argmin_{k \in \NL \cup \NU} \{ t_k \}$,
+		where $t_k$ is defined as in Figure~\ref{fig:ratiotest}. \\
+\tab If there is no bound $t_k$, the problem is infeasible. \texttt{Stop.} \\
+\texttt{Step 3 (pivoting)} \\
+\tab Leaving variable: \\
+\tab \tab $\B := \B \setminus \{ \uj \}$ \\
+\tab \tab If $\bar x_{\B i} < \ell_{\B i}$, then $\NL := \NL \cup \{ \uj \}$. \\
+\tab \tab If $\bar x_{\B i} > u_{\B i}$, then $\NU := \NU \cup \{ \uj \}$. \\
+\tab Entering variable: \\
+\tab \tab If $\uk \in \NL$, then $\NL := \NL \setminus \{ \uk \}$. \\
+\tab \tab If $\uk \in \NU$, then $\NU := \NU \setminus \{ \uk \}$. \\
+\tab \tab $\B := \B \cup \{ \uk \}$ \\
+\tab Go to \texttt{Step 1}.
+\end{tabular}
+\caption{Summary of the dual simplex method with bounds.}
+\label{fig:dsmb}
+\end{figure}
+
+At \texttt{Step 1}, in most cases, there will be multiple
+candidate values of $i$ such that $\bar x_{\B i}$ violates its bounds.
+Choosing one to become the leaving variable is called a \emph{pricing} rule.
+In theory, any candidate would work,
+but in practice it is a good idea to choose a candidate with
+a large bound violation, for example one with the largest violation.
+
+There are a few useful invariants in the dual simplex method
+that we can use to verify that our
+implementation is working as intended.
+First, we have
+the matrix $B$ formed with the columns of $A$ with indices in $\B$.
+This matrix must always stay invertible.
+If $B$ becomes singular, then the ratio test is not working properly.
+Specifically, we are choosing an entering variable $\uk$ such that
+the tableau element $\bar a_{i\uk}$ is zero.
+Second, there is dual feasibility. We must always have
+$\bar c_j \geq 0$ for all $j \in \NL$ and $\bar c_j \leq 0$
+for all $j \in \NU$. If we lose dual feasibility, it also
+means that the ratio test is not working. In this case, we chose
+a wrong value for $t_{\uk}$, not actually $\min_k \{ t_k \}$,
+something larger.
+
+Finally, recall that at any given iteration of the simplex
+method, we can compute the corresponding basic solution
+by letting $\bar x_{\B} = B^{-1} (b - L \ell_{\NL} - U u_{\NU})$,
+$\bar x_{\NL} = \ell_{\NL}$ and $\bar x_{\NU} = u_{\NU}$.
+In the dual simplex method, $\bar x$ will not be feasible
+(until the last iteration, at which point we stop).
+However, we can still compute the corresponding dual obective
+function value: $\bar z = c^T \bar x$.
+As the dual simplex method makes progress, this objective should be
+nondecreasing: from one iteration to the next, it either stays
+the same (when $\underline{t} = 0$), or increases.
+If $\bar z$ decreases, it means that we made a mistake in the choice of
+the leaving variable.
+
+%\end{document}
+

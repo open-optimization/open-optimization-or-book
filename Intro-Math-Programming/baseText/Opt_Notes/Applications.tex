@@ -1,0 +1,91 @@
+%By Douglas Bish
+%The text is licensed under the
+%\href{http://creativecommons.org/licenses/by-sa/4.0/}{Creative Commons
+%Attribution-ShareAlike 4.0 International License}.
+%
+%This file has been modified by Robert Hildebrand 2020.  
+%CC BY SA 4.0 licence still applies.
+
+\underline{\bf Cutting Stock - Column Generation}
+
+Consider the Cutting Stock Problem, which we use to illustrate column generation: \\
+
+Given a stock board of length $q$ and demand $d_i$ for boards of length $l_i$ (where $l_i \le q$), you must cut the stock boards to satisfy this demand, while minimizing waste, i.e., the number of stock boards required to satisfy the demand. \\
+
+Problem parameters: 
+\begin{description}
+\item[$P$]  set of cutting pattern indexes, $\{1,2,\cdots,n\}$.
+\item[$L$]  set of board length indexes, $\{1,2,\cdots,m\}$.
+\item[$d_i$] demand for boards of length $l_i$, $i = 1,\cdots,m$. 
+\item[$a_{ij}$] number of boards of length $l_i$, obtained when one stock board is cut using pattern $j$, $i \in L,~j \in P$.
+\end{description}
+
+Decision variable:
+\begin{description}
+\item[$x_j$] number of stock boards to cut using pattern $j \in P$.
+\end{description}
+
+\begin{align*}
+\mbox{Min~~} & z = \sum_{j \in P} x_j \\
+\mbox{s.t.~~} & \sum_{j \in P} a_{ij}x_j \ge d_i,~\forall i \in L \\
+& x_j \ge 0,~\forall j \in P.
+\end{align*}
+
+It can be difficult to enumerate all possible cutting patterns $\mathbf{a}_j$ (this set can be quite large). 
+
+Instead, solve a restricted problem (as follows) where $P_R$ is a subset of $P$ that provides a feasible solution:
+
+\begin{align*}
+\mbox{Min~~} & z = \sum_{j \in P_R} x_j \\
+\mbox{s.t.~~} & \sum_{j \in P_R} a_{ij}x_j \ge d_i,~\forall i \in L \\
+& x_j \ge 0,~\forall j \in P_R.
+\end{align*}
+
+The optimal solution to the restricted problem is a feasible solution to the full problem. We want to find a new cutting pattern that will allow us to improve the restricted problem solution. Recall that the optimality condition  for a minimization is $\mathbf{c_BB^{-1}a_i -c_i} \le 0$, thus to improve the restricted problem we want a column defined by $\mathbf{a_i}$ such that $\mathbf{c_BB^{-1}a_i -c_i} > 0$.  For this  problem $c_i = 1, i \in P$.  
+
+To find this vector $\mathbf{a_i}$ (a column in the simplex tableau and a cutting pattern), we use the  optimal solution to the restricted primal, which defines $\mathbf{c_BB^{-1}}$, we can solve the following integer program:
+\begin{align*}
+\mbox{Max~~} & \sum_{i \in L} \mathbf{c_BB^{-1}}a_i \\
+\mbox{s.t.~~} & \sum_{i \in L}l_i a_i \le q, \\
+& a_i \in \mathcal{Z}^{\ge 0}, ~\forall i \in L,
+\end{align*}
+
+where the $a_i$'s are the decision variables.  This produces a new cutting pattern, which is then added to the restricted problem.  This process continues until the sub-problem provides an optimal solution of zero.
+
+
+\underline{\bf Revenue Managemen - Shadow Prices}
+
+Consider an airline with a hub-and-spoke route structure. We define a flight as one take-off and landing of an aircraft at a particular time, flight are usually given flight numbers.  Ticket prices are based on the itinerary, where an itinerary is a specific flight or set of (connecting) flights and a booking class (reflated to rules for the ticket, e.g., refundability). The following figure illustrates seven possible combinations that can be used to build itineraries using connections through airport B, the hub (A-B, B-C, B-D, B-E, A-B-C, A-B-D, A-B-E).
+
+\begin{center}
+%\includegraphics[scale=1.0]{Figs_N/AirlineRM}
+\end{center}
+The airline forecasts demand for all important itinerary. Here are the problem parameters.
+
+\bigskip Problem Parameters: \\
+\begin{description}
+\item[$F$] set of all flights (one take-off and landing of an aircraft, at a specific time).
+\item[$c_f$] capacity of flight $f$, $\forall f \in F$.
+\item[$I$] set of all itineraries (set of flights that customer uses) and booking class.
+\item[$I_f$] set of all itineraries on flight f, $\forall f \in F$.
+\item[$d_i$ ] demand for itinerary $i$, $\forall i \in I$.
+\item[$f_i$] fare for itinerary $i$, $\forall i \in I$.
+\end{description}
+
+\bigskip Decision Variables: \\
+\begin{description}
+\item[$x_i$] \# of passengers accepted for itinerary $i$, $\forall i \in I$.
+\end{description}
+
+The following linear program maximize the revenue:
+
+\begin{align*}
+\mbox{Max~~} & \sum_{i \in I} f_i x_i  \\
+\mbox{s.t.:~~} 
+& x_i \le d_i,~~ \forall i \in I  \\
+& \sum_{i \in I_f} x_i \le c_f,~~ \forall f \in F \\
+&  x_i \ge 0,~~ \forall i \in I 
+\end{align*}
+
+
+

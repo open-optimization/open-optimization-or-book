@@ -1,0 +1,239 @@
+
+\subsection{NLP Circles Problem Code}
+\label{NLP:Circles-Problem}
+
+Code written below defines two vectors, \(a\) and \(b\), and sets the
+centers of the shperes to \((a_i, b_i)\).
+
+Note: Plotting functions are in the last cell of the file.
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}1}]:} \PY{k}{using} \PY{n}{JuMP}
+        \PY{k}{using} \PY{n}{Ipopt}
+        
+        \PY{n}{m} \PY{o}{=} \PY{n}{Model}\PY{p}{(}\PY{n}{solver}\PY{o}{=}\PY{n}{IpoptSolver}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+        
+        \PY{c}{\PYZsh{} a and b define the x and y coordinates of the centers of the spheres}
+        \PY{c}{\PYZsh{} that is, (a\PYZus{}i, b\PYZus{}i) is the center of sphere i}
+        
+        \PY{c}{\PYZsh{} Our problem in class}
+        \PY{n}{a} \PY{o}{=} \PY{p}{[}\PY{l+m+mi}{0} \PY{l+m+mi}{3} \PY{l+m+mi}{0} \PY{p}{]}
+        \PY{n}{b} \PY{o}{=} \PY{p}{[}\PY{l+m+mi}{0} \PY{l+m+mi}{2} \PY{l+m+mi}{5} \PY{p}{]}
+        
+        \PY{c}{\PYZsh{} radius of spheres}
+        \PY{n}{r} \PY{o}{=} \PY{l+m+mi}{1}  
+        
+        \PY{n}{n} \PY{o}{=} \PY{n}{length}\PY{p}{(}\PY{n}{a}\PY{p}{)}
+        \PY{c}{\PYZsh{} Super important!  Specify bounds on the variables}
+        \PY{c}{\PYZsh{} Tighter bounds could see better performance.}
+        
+        \PY{c}{\PYZsh{} Variables: }
+        \PY{c}{\PYZsh{} let (x[i], y[i]) be a point in circle i}
+        \PY{c}{\PYZsh{} let (c\PYZus{}x,c\PYZus{}y) be the center point}
+        \PY{c}{\PYZsh{} let w[i] be the distance of (x[i], y[i]) to (c\PYZus{}x, c\PYZus{}y)}
+        \PY{c}{\PYZsh{} upper and lower bounds on the variables were chosen to fit the problem}
+        \PY{n+nd}{@variable}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{o}{\PYZlt{}=} \PY{n}{x}\PY{p}{[}\PY{l+m+mi}{1}\PY{o}{:}\PY{n}{n}\PY{p}{]} \PY{o}{\PYZlt{}=} \PY{l+m+mi}{10}\PY{p}{)}
+        \PY{n+nd}{@variable}\PY{p}{(}\PY{n}{m}\PY{p}{,}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1} \PY{o}{\PYZlt{}=} \PY{n}{y}\PY{p}{[}\PY{l+m+mi}{1}\PY{o}{:}\PY{n}{n}\PY{p}{]}\PY{o}{\PYZlt{}=} \PY{l+m+mi}{10}\PY{p}{)}
+        \PY{n+nd}{@variable}\PY{p}{(}\PY{n}{m}\PY{p}{,}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1} \PY{o}{\PYZlt{}=} \PY{n}{c\PYZus{}x} \PY{o}{\PYZlt{}=} \PY{l+m+mi}{10}\PY{p}{)}
+        \PY{n+nd}{@variable}\PY{p}{(}\PY{n}{m}\PY{p}{,}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1} \PY{o}{\PYZlt{}=} \PY{n}{c\PYZus{}y} \PY{o}{\PYZlt{}=} \PY{l+m+mi}{10}\PY{p}{)}
+        \PY{n+nd}{@variable}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{w}\PY{p}{[}\PY{l+m+mi}{1}\PY{o}{:}\PY{n}{n}\PY{p}{]}\PY{o}{\PYZlt{}=} \PY{l+m+mi}{40}\PY{p}{)}
+        
+        \PY{c}{\PYZsh{} Objective is t minimize the sum of the distances}
+        \PY{n+nd}{@objective}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{n}{Min}\PY{p}{,} \PY{n}{sum}\PY{p}{(}\PY{n}{w}\PY{p}{)}\PY{p}{)}
+        
+        \PY{c}{\PYZsh{} Constraint to restrict (x[i],y[i]) to be }
+        \PY{c}{\PYZsh{} in the circle of radius r centered at (a[i], b[i])}
+        \PY{k}{for} \PY{n}{i}\PY{o}{=}\PY{l+m+mi}{1}\PY{o}{:}\PY{n}{n}
+            \PY{n+nd}{@NLconstraint}\PY{p}{(}\PY{n}{m}\PY{p}{,} \PY{p}{(}\PY{n}{x}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{o}{\PYZhy{}}\PY{n}{a}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{)}\PY{o}{\PYZca{}}\PY{l+m+mi}{2} \PY{o}{+} \PY{p}{(}\PY{n}{y}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{o}{\PYZhy{}} \PY{n}{b}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{)}\PY{o}{\PYZca{}}\PY{l+m+mi}{2} \PY{o}{\PYZlt{}=} \PY{n}{r}\PY{o}{\PYZca{}}\PY{l+m+mi}{2}\PY{p}{)}
+        \PY{k}{end}
+        
+        \PY{c}{\PYZsh{}\PYZsh{} Constraint to define distance}
+        \PY{c}{\PYZsh{} w[i] represents the distance from (x[i], y[i]) to (c\PYZus{}x, c\PYZus{}y)}
+        \PY{c}{\PYZsh{} since we are minimizing sum(w), it suffices to lower bound w\PYZca{}2 by the square of the distance.}
+        \PY{c}{\PYZsh{} this implies that at the minimum distance, this inequality will be tight.}
+        \PY{k}{for} \PY{n}{i}\PY{o}{=}\PY{l+m+mi}{1}\PY{o}{:}\PY{n}{n}
+            \PY{n+nd}{@NLconstraint}\PY{p}{(}\PY{n}{m}\PY{p}{,}\PY{p}{(}\PY{n}{x}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{o}{\PYZhy{}}\PY{n}{c\PYZus{}x}\PY{p}{)}\PY{o}{\PYZca{}}\PY{l+m+mi}{2} \PY{o}{+} \PY{p}{(}\PY{n}{y}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{o}{\PYZhy{}} \PY{n}{c\PYZus{}y}\PY{p}{)}\PY{o}{\PYZca{}}\PY{l+m+mi}{2} \PY{o}{\PYZlt{}=} \PY{n}{w}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{o}{\PYZca{}}\PY{l+m+mi}{2}\PY{p}{)}
+        \PY{k}{end}
+        
+        \PY{n}{solve}\PY{p}{(}\PY{n}{m}\PY{p}{)}
+        \PY{c}{\PYZsh{}display(m)}
+        \PY{n}{X} \PY{o}{=} \PY{n}{getvalue}\PY{p}{(}\PY{n}{x}\PY{p}{)}
+        \PY{n}{Y} \PY{o}{=} \PY{n}{getvalue}\PY{p}{(}\PY{n}{y}\PY{p}{)}
+        \PY{n}{W} \PY{o}{=} \PY{n}{getvalue}\PY{p}{(}\PY{n}{w}\PY{p}{)}
+        \PY{n}{C\PYZus{}x} \PY{o}{=} \PY{n}{getvalue}\PY{p}{(}\PY{n}{c\PYZus{}x}\PY{p}{)}
+        \PY{n}{C\PYZus{}y} \PY{o}{=} \PY{n}{getvalue}\PY{p}{(}\PY{n}{c\PYZus{}y}\PY{p}{)}
+        
+        \PY{n}{println}\PY{p}{(}\PY{n}{getobjectivevalue}\PY{p}{(}\PY{n}{m}\PY{p}{)}\PY{p}{)}
+        
+        
+        \PY{n}{display}\PY{p}{(}\PY{n}{m}\PY{p}{)}
+\end{Verbatim}
+
+
+    $$ \begin{array}{lr}
+    \min\quad & w_{1} + w_{2} + w_{3}\\
+\text{Subject to} \quad & ((x_{1} - 0.0) ^ 2.0 + (y_{1} - 0.0) ^ 2.0) - 1.0 ^ 2.0 \leq 0\\
+ & ((x_{2} - 3.0) ^ 2.0 + (y_{2} - 2.0) ^ 2.0) - 1.0 ^ 2.0 \leq 0\\
+ & ((x_{3} - 0.0) ^ 2.0 + (y_{3} - 5.0) ^ 2.0) - 1.0 ^ 2.0 \leq 0\\
+ & ((x_{1} - c_x) ^ 2.0 + (y_{1} - c_y) ^ 2.0) - w_{1} ^ 2.0 \leq 0\\
+ & ((x_{2} - c_x) ^ 2.0 + (y_{2} - c_y) ^ 2.0) - w_{2} ^ 2.0 \leq 0\\
+ & ((x_{3} - c_x) ^ 2.0 + (y_{3} - c_y) ^ 2.0) - w_{3} ^ 2.0 \leq 0\\
+ & -1 \leq x_{i} \leq 10 \quad\forall i \in \{1,2,3\}\\
+ & -1 \leq y_{i} \leq 10 \quad\forall i \in \{1,2,3\}\\
+ & 0 \leq w_{i} \leq 40 \quad\forall i \in \{1,2,3\}\\
+ & -1 \leq c_x \leq 10\\
+ & -1 \leq c_y \leq 10\\
+\end{array}
+ $$
+
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+
+******************************************************************************
+This program contains Ipopt, a library for large-scale nonlinear optimization.
+ Ipopt is released as open source code under the Eclipse Public License (EPL).
+         For more information visit http://projects.coin-or.org/Ipopt
+******************************************************************************
+
+This is Ipopt version 3.12.8, running with linear solver mumps.
+NOTE: Other linear solvers might be more efficient (see Ipopt documentation).
+
+Number of nonzeros in equality constraint Jacobian{\ldots}:        0
+Number of nonzeros in inequality constraint Jacobian.:       21
+Number of nonzeros in Lagrangian Hessian{\ldots}:       27
+
+Total number of variables{\ldots}:       11
+                     variables with only lower bounds:        0
+                variables with lower and upper bounds:       11
+                     variables with only upper bounds:        0
+Total number of equality constraints{\ldots}:        0
+Total number of inequality constraints{\ldots}:        6
+        inequality constraints with only lower bounds:        0
+   inequality constraints with lower and upper bounds:        0
+        inequality constraints with only upper bounds:        6
+
+iter    objective    inf\_pr   inf\_du lg(mu)  ||d||  lg(rg) alpha\_du alpha\_pr  ls
+   0  2.9999970e-02 2.40e+01 9.90e-01  -1.0 0.00e+00    -  0.00e+00 0.00e+00   0
+   1  3.1208786e-01 5.82e+00 2.41e+01  -1.0 2.41e+00    -  2.99e-01 1.00e+00h  1
+   2  3.4236386e-01 5.74e+00 2.97e+01  -1.0 2.20e+00   2.0 1.58e-01 1.81e-02h  1
+   3  1.7653053e+00 4.99e+00 3.78e+01  -1.0 5.53e+00   1.5 5.53e-02 1.47e-01h  1
+   4  2.2104261e+00 4.26e+00 4.17e+01  -1.0 1.45e+00   1.9 8.04e-01 1.51e-01h  1
+   5  1.7859496e+00 4.02e+00 9.75e+01  -1.0 3.72e+00   1.5 3.11e-01 4.64e-02H  1
+   6  1.3753103e+00 4.02e+00 9.52e+01  -1.0 1.91e+01    -  4.90e-02 1.29e-02H  1
+   7  1.3811261e+00 4.00e+00 2.25e+03  -1.0 1.69e+00   2.8 1.00e+00 3.81e-03h  1
+   8  3.0066934e+00 2.07e+00 3.59e+02  -1.0 1.64e+00    -  8.36e-01 1.00e+00h  1
+   9  3.0553048e+00 1.87e+00 3.12e+02  -1.0 1.46e+00   2.3 2.21e-02 1.10e-01h  1
+iter    objective    inf\_pr   inf\_du lg(mu)  ||d||  lg(rg) alpha\_du alpha\_pr  ls
+  10  3.1074628e+00 1.82e+00 1.21e+04  -1.0 1.03e+00   3.7 1.00e+00 2.69e-02h  1
+  11  3.6223934e+00 1.75e+00 1.25e+04  -1.0 1.52e+01   3.2 6.05e-03 4.32e-02h  1
+  12  3.8667066e+00 1.31e+00 3.19e+03  -1.0 6.05e-01   3.6 1.00e+00 2.63e-01h  1
+  13  5.0861293e+00 1.91e-01 2.05e+03  -1.0 9.17e-01    -  6.66e-01 1.00e+00h  1
+  14  5.1998722e+00 1.42e-01 8.11e+03  -1.0 2.87e-01   4.0 1.00e+00 2.62e-01h  1
+  15  5.4859533e+00 3.85e-02 5.68e+03  -1.0 2.34e-01   4.5 3.23e-01 7.57e-01h  1
+  16  5.6244709e+00 3.46e-04 5.58e+03  -1.0 8.80e-02   4.9 1.00e+00 1.00e+00f  1
+  17  5.6560967e+00 2.05e-05 1.39e+03  -1.0 8.03e-02    -  9.60e-01 1.00e+00f  1
+  18  5.6465072e+00 0.00e+00 5.87e+02  -1.0 9.84e-03   4.4 9.37e-01 1.00e+00f  1
+  19  5.6563462e+00 0.00e+00 5.73e+01  -1.0 5.64e-03   3.9 1.00e+00 1.00e+00f  1
+iter    objective    inf\_pr   inf\_du lg(mu)  ||d||  lg(rg) alpha\_du alpha\_pr  ls
+  20  5.6249129e+00 0.00e+00 1.55e+02  -1.0 3.87e-02    -  7.05e-01 1.00e+00f  1
+  21  5.6314193e+00 0.00e+00 1.19e+01  -1.0 3.70e-03   3.4 1.00e+00 1.00e+00f  1
+  22  5.5400517e+00 0.00e+00 5.04e+01  -1.0 1.18e-01    -  5.19e-01 1.00e+00f  1
+  23  5.5486888e+00 0.00e+00 5.03e+00  -1.0 4.75e-03   3.0 1.00e+00 1.00e+00h  1
+  24  5.3511651e+00 0.00e+00 1.38e+01  -1.0 2.93e-01    -  5.38e-01 1.00e+00f  1
+  25  5.3639101e+00 0.00e+00 2.14e+00  -1.0 6.25e-03   2.5 1.00e+00 1.00e+00h  1
+  26  4.8726259e+00 4.92e-02 9.36e+00  -1.0 8.08e-01    -  5.58e-01 1.00e+00f  1
+  27  4.9372004e+00 0.00e+00 2.62e+00  -1.0 2.47e-02   2.0 1.00e+00 1.00e+00h  1
+  28  4.8868458e+00 0.00e+00 1.12e+00  -1.0 3.19e-01    -  1.00e+00 1.00e+00f  1
+  29  4.9965528e+00 0.00e+00 2.51e-01  -1.0 7.71e-01    -  1.00e+00 1.00e+00f  1
+iter    objective    inf\_pr   inf\_du lg(mu)  ||d||  lg(rg) alpha\_du alpha\_pr  ls
+  30  4.4970697e+00 0.00e+00 5.34e-02  -1.7 7.38e-01    -  1.00e+00 9.26e-01h  1
+  31  4.3623889e+00 0.00e+00 2.50e-02  -2.5 2.26e-01    -  1.00e+00 1.00e+00h  1
+  32  4.3483371e+00 0.00e+00 5.37e-03  -3.8 3.25e-02    -  1.00e+00 9.62e-01h  1
+  33  4.3480623e+00 0.00e+00 6.19e-05  -3.8 3.23e-03    -  1.00e+00 1.00e+00f  1
+  34  4.3471709e+00 0.00e+00 2.36e-06  -5.7 8.16e-04    -  1.00e+00 1.00e+00h  1
+  35  4.3471601e+00 0.00e+00 4.66e-10  -8.6 1.11e-05    -  1.00e+00 1.00e+00h  1
+
+Number of Iterations{\ldots}: 35
+
+                                   (scaled)                 (unscaled)
+Objective{\ldots}:   4.3471601253458694e+00    4.3471601253458694e+00
+Dual infeasibility{\ldots}:   4.6603698812569084e-10    4.6603698812569084e-10
+Constraint violation{\ldots}:   0.0000000000000000e+00    0.0000000000000000e+00
+Complementarity{\ldots}:   2.5446154527921333e-09    2.5446154527921333e-09
+Overall NLP error{\ldots}:   2.5446154527921333e-09    2.5446154527921333e-09
+
+
+Number of objective function evaluations             = 38
+Number of objective gradient evaluations             = 36
+Number of equality constraint evaluations            = 0
+Number of inequality constraint evaluations          = 38
+Number of equality constraint Jacobian evaluations   = 0
+Number of inequality constraint Jacobian evaluations = 36
+Number of Lagrangian Hessian evaluations             = 35
+Total CPU secs in IPOPT (w/o function evaluations)   =      0.165
+Total CPU secs in NLP function evaluations           =      0.031
+
+EXIT: Optimal Solution Found.
+4.347160125345869
+
+    \end{Verbatim}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}14}]:} \PY{k}{using} \PY{n}{PyPlot}
+         \PY{n}{fig} \PY{o}{=} \PY{n}{figure}\PY{p}{(}\PY{l+s}{\PYZdq{}}\PY{l+s}{p}\PY{l+s}{y}\PY{l+s}{p}\PY{l+s}{l}\PY{l+s}{o}\PY{l+s}{t}\PY{l+s}{\PYZus{}}\PY{l+s}{s}\PY{l+s}{c}\PY{l+s}{a}\PY{l+s}{t}\PY{l+s}{t}\PY{l+s}{e}\PY{l+s}{r}\PY{l+s}{p}\PY{l+s}{l}\PY{l+s}{o}\PY{l+s}{t}\PY{l+s}{\PYZdq{}}\PY{p}{,}\PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{5}\PY{p}{,}\PY{l+m+mi}{5}\PY{p}{)}\PY{p}{)}
+         \PY{n}{title}\PY{p}{(}\PY{l+s}{\PYZdq{}}\PY{l+s}{S}\PY{l+s}{p}\PY{l+s}{h}\PY{l+s}{e}\PY{l+s}{r}\PY{l+s}{e}\PY{l+s}{s}\PY{l+s}{ }\PY{l+s}{C}\PY{l+s}{l}\PY{l+s}{o}\PY{l+s}{s}\PY{l+s}{e}\PY{l+s}{s}\PY{l+s}{t}\PY{l+s}{ }\PY{l+s}{P}\PY{l+s}{o}\PY{l+s}{i}\PY{l+s}{n}\PY{l+s}{t}\PY{l+s}{s}\PY{l+s}{\PYZdq{}}\PY{p}{)}
+         \PY{n}{xlabel}\PY{p}{(}\PY{l+s}{\PYZdq{}}\PY{l+s}{x}\PY{l+s}{\PYZdq{}}\PY{p}{)}
+         \PY{n}{ylabel}\PY{p}{(}\PY{l+s}{\PYZdq{}}\PY{l+s}{y}\PY{l+s}{\PYZdq{}}\PY{p}{)}
+         \PY{n}{c} \PY{o}{=} \PY{p}{[}\PY{n}{C\PYZus{}x}\PY{p}{,}\PY{n}{C\PYZus{}y}\PY{p}{]}
+         \PY{k}{for} \PY{n}{i}\PY{o}{=}\PY{l+m+mi}{1}\PY{o}{:}\PY{n}{n}
+             \PY{c}{\PYZsh{} uses special code below}
+             \PY{n}{plot\PYZus{}circle}\PY{p}{(}\PY{n}{a}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{,}\PY{n}{b}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{,}\PY{n}{r}\PY{p}{,}\PY{l+m+mi}{200}\PY{p}{)}
+             \PY{n}{plot\PYZus{}line\PYZus{}dots}\PY{p}{(}\PY{p}{[}\PY{n}{X}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{,}\PY{n}{Y}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{]}\PY{p}{,}\PY{n}{c}\PY{p}{)}
+         \PY{k}{end}
+\end{Verbatim}
+
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{circles-figure}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}13}]:} \PY{c}{\PYZsh{} here are some functions useful for making the plots}
+         
+         \PY{k}{function} \PY{n}{plot\PYZus{}circle}\PY{p}{(}\PY{n}{x}\PY{p}{,}\PY{n}{y}\PY{p}{,}\PY{n}{r}\PY{p}{,}\PY{n}{n}\PY{p}{)}
+             \PY{k}{function} \PY{n}{circle}\PY{p}{(}\PY{n}{x}\PY{p}{,}\PY{n}{y}\PY{p}{,}\PY{n}{r}\PY{p}{,}\PY{n}{n}\PY{p}{)}
+                 \PY{n}{X} \PY{o}{=} \PY{n}{linspace}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{n}{r}\PY{p}{,}\PY{n}{r}\PY{p}{,}\PY{n}{n}\PY{p}{)}
+         
+                 \PY{n}{f}\PY{p}{(}\PY{n}{xx}\PY{p}{)} \PY{o}{=} \PY{n}{sqrt}\PY{p}{(}\PY{n}{r}\PY{o}{\PYZca{}}\PY{l+m+mi}{2} \PY{o}{\PYZhy{}} \PY{n}{xx}\PY{o}{\PYZca{}}\PY{l+m+mi}{2}\PY{p}{)}
+                 \PY{n}{Y} \PY{o}{=} \PY{p}{[}\PY{n}{f}\PY{p}{(}\PY{n}{xx}\PY{p}{)} \PY{k}{for} \PY{n}{xx} \PY{k+kp}{in} \PY{n}{X}\PY{p}{]}
+                 \PY{n}{X} \PY{o}{=} \PY{n}{X} \PY{o}{+} \PY{n}{x}
+                 \PY{n}{Y1} \PY{o}{=} \PY{n}{Y} \PY{o}{+} \PY{n}{y}
+                 \PY{n}{Y2} \PY{o}{=} \PY{o}{\PYZhy{}}\PY{n}{Y} \PY{o}{+} \PY{n}{y}
+                 \PY{k}{return} \PY{n}{X}\PY{p}{,}\PY{n}{Y1}\PY{p}{,}\PY{n}{Y2}
+             \PY{k}{end}
+         
+             \PY{n}{X}\PY{p}{,}\PY{n}{Y1}\PY{p}{,}\PY{n}{Y2} \PY{o}{=} \PY{n}{circle}\PY{p}{(}\PY{n}{x}\PY{p}{,}\PY{n}{y}\PY{p}{,}\PY{n}{r}\PY{p}{,}\PY{n}{n}\PY{p}{)}
+             \PY{n}{plot}\PY{p}{(}\PY{n}{X}\PY{p}{,}\PY{n}{Y1}\PY{p}{,} \PY{n}{color} \PY{o}{=} \PY{o}{:}\PY{n}{black}\PY{p}{)}
+             \PY{n}{plot}\PY{p}{(}\PY{n}{X}\PY{p}{,}\PY{n}{Y2}\PY{p}{,} \PY{n}{color} \PY{o}{=} \PY{o}{:}\PY{n}{black}\PY{p}{)}
+         \PY{k}{end}
+         
+         \PY{k}{function} \PY{n}{plot\PYZus{}line}\PY{p}{(}\PY{n}{a}\PY{p}{,}\PY{n}{b}\PY{p}{)}
+             \PY{n}{plot}\PY{p}{(}\PY{p}{[}\PY{n}{a}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,}\PY{n}{b}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{n}{a}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{]}\PY{p}{,}\PY{n}{b}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{]}\PY{p}{]}\PY{p}{,} \PY{n}{color} \PY{o}{=} \PY{o}{:}\PY{n}{black}\PY{p}{)}
+         \PY{k}{end}
+         \PY{k}{function} \PY{n}{plot\PYZus{}line\PYZus{}dots}\PY{p}{(}\PY{n}{a}\PY{p}{,}\PY{n}{b}\PY{p}{)}
+             \PY{n}{plot}\PY{p}{(}\PY{p}{[}\PY{n}{a}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,}\PY{n}{b}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{n}{a}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{]}\PY{p}{,}\PY{n}{b}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{]}\PY{p}{]}\PY{p}{,} \PY{n}{color} \PY{o}{=} \PY{o}{:}\PY{n}{black}\PY{p}{)}
+             \PY{n}{scatter}\PY{p}{(}\PY{p}{[}\PY{n}{a}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,}\PY{n}{b}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{n}{a}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{]}\PY{p}{,}\PY{n}{b}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{]}\PY{p}{]}\PY{p}{,} \PY{n}{color} \PY{o}{=} \PY{o}{:}\PY{n}{black}\PY{p}{)}
+         \PY{k}{end}
+         \PY{k}{function} \PY{n}{plot\PYZus{}rectangle}\PY{p}{(}\PY{n}{x}\PY{p}{,}\PY{n}{y}\PY{p}{,}\PY{n}{h}\PY{p}{,}\PY{n}{w}\PY{p}{)}
+             \PY{n}{c1} \PY{o}{=} \PY{p}{[}\PY{n}{x} \PY{o}{\PYZhy{}} \PY{n}{w}\PY{o}{/}\PY{l+m+mi}{2}\PY{p}{,} \PY{n}{y} \PY{o}{\PYZhy{}} \PY{n}{h}\PY{o}{/}\PY{l+m+mi}{2}\PY{p}{]}
+             \PY{n}{c2} \PY{o}{=} \PY{p}{[}\PY{n}{x} \PY{o}{\PYZhy{}} \PY{n}{w}\PY{o}{/}\PY{l+m+mi}{2}\PY{p}{,}\PY{n}{y}\PY{o}{+} \PY{n}{h}\PY{o}{/}\PY{l+m+mi}{2}\PY{p}{]}
+             \PY{n}{c3} \PY{o}{=} \PY{p}{[}\PY{n}{x} \PY{o}{+} \PY{n}{w}\PY{o}{/}\PY{l+m+mi}{2}\PY{p}{,} \PY{n}{y} \PY{o}{+} \PY{n}{h}\PY{o}{/}\PY{l+m+mi}{2}\PY{p}{]}
+             \PY{n}{c4} \PY{o}{=} \PY{p}{[}\PY{n}{x} \PY{o}{+} \PY{n}{w}\PY{o}{/}\PY{l+m+mi}{2}\PY{p}{,} \PY{n}{y} \PY{o}{\PYZhy{}} \PY{n}{h}\PY{o}{/}\PY{l+m+mi}{2}\PY{p}{]}
+             \PY{n}{plot\PYZus{}line}\PY{p}{(}\PY{n}{c1}\PY{p}{,}\PY{n}{c2}\PY{p}{)}
+             \PY{n}{plot\PYZus{}line}\PY{p}{(}\PY{n}{c2}\PY{p}{,}\PY{n}{c3}\PY{p}{)}
+             \PY{n}{plot\PYZus{}line}\PY{p}{(}\PY{n}{c3}\PY{p}{,}\PY{n}{c4}\PY{p}{)}
+             \PY{n}{plot\PYZus{}line}\PY{p}{(}\PY{n}{c4}\PY{p}{,}\PY{n}{c1}\PY{p}{)}
+         \PY{k}{end}
+\end{Verbatim}
+

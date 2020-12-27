@@ -1,0 +1,100 @@
+% Copywrite Robert Hildeband 2019
+
+The \emph{capital budgeting} problem is a nice generalization of the knapsack problem.   This problem as the same structure as the knapsack problem, except now it has multiple constraints.   We will first describe the problem, give a general model, and then look at an explicit example.
+
+\begin{general}{Capital Budgeting}{}
+\label{general:capital-budgeting}
+A firm has $n$ projects it could undertake to maximize revenue, but budget limitations require that not all can be completed.
+\begin{itemize}
+\item Project $j$ expects to produce revenue $c_j$ dollars overall.
+\item Project $j$ requires investment of $a_{ij}$ dollars in time period $i$ for $i = 1,\ldots,m$.
+\item The capital available to spend in time period $i$ is $b_i$.
+\end{itemize}
+Which projects should the firm invest in to maximize it's expected return while satisfying it's weekly budget constriaints?
+\end{general}
+
+\newpage
+
+We will first provide a general formulation for this problem.
+
+\begin{general}{Capital Budgeting Model}{}
+\noindent \textbf{Sets:}
+\begin{itemize}
+\item Let $I = \{1, \dots, m\}$ be the set of time periods.
+\item Let $J = \{1, \dots, n\}$ be the set of possible investments.
+\end{itemize}
+
+\noindent \textbf{Parameters:}
+\begin{itemize}
+\item $c_j$ is the expected revenue of investment $j$ for $j \in J$
+\item $b_i$ is the available capital in time period $i$ for $i$ in  $I$
+\item $a_{ij}$ is the resources required for invesment $j$ in time period $i$, for $i$ in $I$, for $j$ in $J$.
+\end{itemize}
+
+\noindent \textbf{Variables:}
+\begin{itemize}
+\item let $x_i = 0$ if investment $i$ is chosen
+\item let $x_i = 1$ if investment $i$ is not chosen
+\end{itemize}
+\textbf{Model:}
+\begin{align*}
+	\max ~~~& \sum_{j = 1}^n c_jx_j \tag{Total Expected Revenue}\\
+	s.t. ~~~&\sum_{j = 1}^n a_{ij}x_j\leq b_i, ~~~i = 1,\ldots m  \tag{ Resource constraint week $i$}\\
+	& x_j \in \{0,1\} , \ j = 1,\ldots,n
+	\end{align*}
+
+\end{general}
+
+
+\newpage
+%\begin{examplewithcode}{Capital Budgeting}{code:capital-budgeting}
+%\label{example:capital-budgeting}
+Consider the example given in the following table.
+	\begin{table}[h]
+			\begin{tabular}{|c|c|c|c|}%[<+->]
+				\hline
+				Project & $\mathbb{E}$[Revenue] & Resources required in week 1 & Resources required in week 2\\\hline
+				\rowcolor{gray!10} 1 & 10 & 3 & 4\\
+				\hline
+				2 & 8 & 1 & 2\\\hline
+				\rowcolor{gray!10} 3 & 6 & 2 & 1\\
+				\hline
+				Resources available & & 5 & 6\\
+				\hline
+		\end{tabular}
+	\end{table}
+
+
+Given this data, we can setup our problem explicitly as follows
+
+\begin{examplewithcode}{Capital Budgeting}{https://github.com/open-optimization/open-optimization-or-examples/blob/master/integer-programming/capital-budgeting.ipynb}
+\noindent \textbf{Sets:}
+\begin{itemize}
+\item Let $I = \{1,2\}$ be the set of time periods.
+\item Let $J = \{1, 2,3\}$ be the set of possible investments.
+\end{itemize}
+
+\noindent \textbf{Parameters:}
+\begin{itemize}
+\item $c_j$ is given in column "$\mathbb{E}$[Revenue]".
+\item $b_i$ is given in row "Resources available".
+\item $a_{ij}$ given in row $j$, and column for week $i$.
+\end{itemize}
+
+\noindent \textbf{Variables:}
+\begin{itemize}
+\item let $x_i = 0$ if investment $i$ is chosen
+\item let $x_i = 1$ if investment $i$ is not chosen
+\end{itemize}
+
+The explict model is given by\\
+\noindent  \textbf{Model:}
+\begin{align*}
+	\max\ \ \  & 10x_1+8x_2+6x_3 \tag{Total Expected Revenue}\\
+	s.t. \ \ & 
+	3x_1+1x_2+2x_3\leq5 \tag{ Resource constraint week 1}\\
+	&4x_1+2x_2+1x_3\leq6 \tag{ Resource constraint week 2}\\
+&x_j \in \{0,1\},\  j = 1,2,3
+\end{align*}
+
+\end{examplewithcode}

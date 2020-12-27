@@ -1,0 +1,241 @@
+%By Kevin Cheung
+%The book is licensed under the
+%\href{http://creativecommons.org/licenses/by-sa/4.0/}{Creative Commons
+%Attribution-ShareAlike 4.0 International License}.
+%
+%This file has been modified by Robert Hildebrand 2020.  
+%CC BY SA 4.0 licence still applies.
+
+\section{Fundamental Theorem of Linear
+Programming}\label{fundamental-theorem-of-linear-programming}
+
+Having used Fourier-Motzkin elimination to solve a linear programming
+problem, we now will go one step further and use the same technique to
+prove the following important result.
+
+\begin{theorem}{Fundamental Theorem of Linear Programming}{}
+\protect\hypertarget{thm:fund-lp}{}{\label{thm:fund-lp}
+\iffalse (Fundamental Theorem of Linear Programming) \fi{} }For any
+given linear programming problem, exactly one of the following holds:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  the problem is infeasible;
+\item
+  the problem is unbounded;
+\item
+  the problem has an optimal solution.
+\end{enumerate}
+\end{theorem}
+
+\emph{Proof.} Without loss of generality, we may assume that the linear
+programming problem is of the form
+
+\begin{equation}
+\begin{array}{rl}
+\min & \vec{c}^\T \vec{x}  \\
+\text{s.t.} & \mm{A} \vec{x} \geq \vec{b}
+\label{eq:fund-lp-P}
+\end{array}
+\end{equation}
+
+where \(m\) and \(n\) are positive integers,
+\(\mm{A} \in \R^{m\times n}\), \(\vec{b} \in \R^m\),
+\(\vec{c} \in \R^n\), and
+\(\vec{x}= \begin{bmatrix} x_1\\\vdots \\ x_n\end{bmatrix}\) is a tuple
+of variables. Indeed, any linear programming problem can be converted to
+a linear programming problem in the form of \eqref{eq:fund-lp-P} having
+the same feasible region and optimal solution set. To see this, note
+that a constraint of the form \(\mathbf{a}^\T \vec{x} \leq \beta\) can
+be written as \(-\mathbf{a}^\T \vec{x} \geq -\beta\); a constraint of
+the form \(\mathbf{a}^\T \vec{x} = \beta\) written as a pair of
+constraints \(\mathbf{a}^\T \vec{x} \geq \beta\) and
+\(-\mathbf{a}^\T \vec{x} \geq -\beta\); and a maximization problem is
+equivalent to the problem that minimizes the negative of the objective
+function subject to the same constraints.
+
+Suppose that \eqref{eq:fund-lp-P} is not infeasible. Form the system
+\begin{align}
+\begin{split}
+z- \vec{c}^\T \vec{x} & \geq 0\\
+-z+ \vec{c}^\T \vec{x} & \geq 0 \\
+\mm{A}\vec{x} & \geq \vec{b}.
+\end{split}
+\label{eq:fund-lp-S}
+\end{align}
+
+Solving \eqref{eq:fund-lp-P} is equivalent to finding among all the
+solutions to \eqref{eq:fund-lp-S} one that minimizes \(z\), if it exists.
+Eliminating the variables \(x_1,\ldots,x_n\) (in any order) using
+Fourier-Motzkin elimination gives a system of linear inequalities (S)
+containing at most the variable \(z\). By scaling, we may assume that
+the each coefficient of \(z\) in (S) is \(1\), \(-1\), or \(0\). Note
+that any \(z\) satisfying (S) can be extended to a solution to
+\eqref{eq:fund-lp-S} and the \(z\) value from any solution to
+\eqref{eq:fund-lp-S} must satisfy (S).
+
+That \eqref{eq:fund-lp-P} is not unbounded implies that (S) must contain
+an inequality of the form \(z \geq \beta\) for some \(\beta \in \R.\)
+(Why?) Let all the inequalites in which the coefficient of \(z\) is
+positive be \[z \geq \beta_i\] where \(\beta_i \in \R\) for
+\(i = 1,\ldots,p\) for some positive integer \(p\). Let
+\(\gamma = \max\{\beta_1,\ldots,\beta_p\}\). Then for any solution
+\(x,z\) to \eqref{eq:fund-lp-S}, \(z\) is at least \(\gamma\). But we can
+set \(z = \gamma\) and extend it to a solution to \eqref{eq:fund-lp-S}.
+Hence, we obtain an optimal solution for \eqref{eq:fund-lp-P} and
+\(\gamma\) is the optimal value. This completes the proof of the
+theorem.
+
+\(\qed\)
+
+\textbf{Remark.} We can construct multipliers to infer the inequality
+\(\vec{c}^\T \vec{x} \geq \gamma\) from the system
+\(\mm{A}\vec{x} \geq \vec{b}\). Because we obtained the inequality
+\(z \geq \gamma\) using Fourier-Motzkin elimination, there must exist
+real numbers \(\alpha, \beta, y^*_1,\ldots, y^*_m\geq 0\) such that \[
+\begin{bmatrix}\alpha & \beta & y^*_1 & \cdots &y^*_m\end{bmatrix}
+\begin{bmatrix}
+1 & -\vec{c}^\T  \\
+-1 & \vec{c}^\T  \\
+0 & \mm{A}
+\end{bmatrix}
+\begin{bmatrix} z \\ \vec{x} \end{bmatrix}
+\geq
+\begin{bmatrix}\alpha & \beta & y^*_1 & \cdots &y^*_m\end{bmatrix}
+\begin{bmatrix} 0 \\ 0\\ \vec{b} \end{bmatrix}
+\] is identically \(z \geq \gamma\). Note that we must have
+\(\alpha-\beta = 1\) and
+\[\mathbf{y}^* \geq \mathbf{0},~{\mathbf{y}^*}^\T \mm{A}
+= \vec{c}^\T ,~\mbox{and }
+{\mathbf{y}^*}^\T \vec{b} = \gamma\] where
+\(\mathbf{y}^* = [y^*_1,\ldots,y^*_m]^\T \). Hence,
+\(y^*_1,\ldots,y^*_m\) are the desired multipliers.,
+
+The significance of the fact that we can infer
+\(\vec{c}^\T \vec{x} \geq \gamma\) where \(\gamma\) will be discussed in
+more details when we look at duality theory for linear programming.
+
+\subsection*{Exercises}\label{exercises-5}
+\addcontentsline{toc}{section}{Exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  Determine the optimal value of the following linear programming
+  problem: \[
+  \begin{array}{rl}
+  \min & x \\
+  \text{s.t.}
+  & x + y  \geq 2 \\
+  & x - 2y + z \geq 0 \\
+  &   y - 2z \geq -1.
+  \end{array}
+  \]
+\item
+  Determine if the following linear programming problem has an optimal
+  solution: \[
+  \begin{array}{rl}
+  \min & x_1 + 2x_2 \\
+  \text{s.t.}
+  & x_1 + 3x_2  \geq 4 \\
+  & -x_1 + x_2  \geq 0.
+  \end{array}
+  \]
+\item
+  A set \(S \subset \R^n\) is said to be bounded if there exists a real
+  number \(M \gt 0\) such that for every \(\vec{x} \in S\),
+  \(|x_i| \lt M\) for all \(i = 1,\ldots, n\). Prove that every linear
+  programming problem with a bounded nonempty feasible region has an
+  optimal solution.
+\end{enumerate}
+
+\subsection*{Solutions}\label{solutions-5}
+\addcontentsline{toc}{section}{Solutions}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  The problem is equivalent to determining the minimum value for \(x\)
+  among all \(x,y,z\) satisfying \[
+  \begin{array}{r}
+   x + y  \geq 2 ~~~~~~(1)\\
+   x - 2y + z \geq 0~~~~~~(2) \\
+      y - 2z \geq -1.~~~~(3)
+  \end{array}
+  \]
+
+  We use Fourier-Motzkin Elimination Method to eliminate \(z\).
+  Multiplying \((3)\) by \(\frac{1}{2}\), we get \[
+  \begin{array}{r}
+   x + y  \geq 2 ~~~~~~(1)\\
+   x - 2y + z \geq 0~~~~~~(2) \\
+      \frac{1}{2}y - z \geq -\frac{1}{2}.~~~~(4)
+  \end{array}
+  \] Eliminating \(z\), we obtain \[
+  \begin{array}{r}
+   x + y  \geq 2 ~~~~~~(1)\\
+   x - \frac{3}{2}y \geq -\frac{1}{2}~~~~~~(5) \\
+  \end{array}
+  \] where \((5)\) is given by \((2) + (4)\).
+
+  Multiplying \((5)\) by \(\frac{2}{3}\), we get \[
+  \begin{array}{r}
+   x + y  \geq 2 ~~~~~~(1)\\
+  \frac{2}{3} x - y \geq -\frac{1}{3}~~~~~~(6) \\
+  \end{array}
+  \] Eliminating \(y\), we get \[
+  \begin{array}{r}
+  \frac{5}{3} x  \geq \frac{5}{3} ~~~~~~(7)\\
+  \end{array}
+  \] where \((7)\) is given by \((1) + (6)\). Multiplying \((7)\) by
+  \(\frac{3}{5}\), we obtain \(x \geq 1\). Hence, the minimum possible
+  value for \(x\) is \(1\).
+
+  Note that setting \(x = 1\), the system \((1)\) and \((6)\) forces
+  \(y = 1.\) And \((2)\) and \((3)\) together force \(z = 1.\) One can
+  check that \((x,y,z) = (1,1,1)\) is a feasible solution.
+
+  \textbf{Remark.} Note that the inequality \(x \geq 1\) is given by
+
+  \begin{eqnarray*}
+  \frac{3}{5} (7)
+  & \Leftarrow & \frac{3}{5} (1) + \frac{3}{5} (6) \\
+  & \Leftarrow & \frac{3}{5} (1) + \frac{2}{5} (5) \\
+  & \Leftarrow & \frac{3}{5} (1) + \frac{2}{5} (2) + \frac{2}{5} (4)  \\
+  & \Leftarrow & \frac{3}{5} (1) + \frac{2}{5} (2) + \frac{1}{5} (3)
+  \end{eqnarray*}
+\item
+  It suffices to determine if there exists a minimum value for \(z\)
+  among all the solutions to the system \[
+  \begin{array}{rl}
+  z-  x_1 - 2x_2 \geq 0 & ~~~(1) \\
+  -z+  x_1 + 2x_2 \geq 0 &  ~~~(2)\\
+  x_1 + 3x_2   \geq 4 &  ~~~(3)\\
+  -x_1 + x_2  \geq 0 & ~~~(4)
+  \end{array}
+  \] Using Fourier-Motzkin elimination to eliminate \(x_1\), we obtain:
+  \[
+  \begin{array}{rrl}
+  (1) + (2): &  0 \geq 0 \\
+  (1) + (3): & z +  x_2 \geq 4 &  ~~~(5)\\
+  (2) + (4): & - z + 3x_2 \geq 0 & ~~~(6) \\
+  (3) + (4): & 4x_2 \geq 4 & ~~~(7)
+  \end{array}
+  \] Note that all the coefficients of \(x_2\) is nonnegative. Hence,
+  eliminating \(x_2\) will result in a system with no constraints.
+  Therefore, there is no lower bound on the value of \(z\). In
+  particular, if \(z = t\) for \(t\leq 0\), then from \((5)\)--\((6)\),
+  we need \(x_2 \geq 4-t\), \(3x_2 \geq t\), and \(x_2 \geq 1\). Hence,
+  we can set \(x_2 = 4-t\) and \(x_1 = -8+3t\). This gives a feasible
+  solution for all \(t \leq 0\) with objective function value that
+  approaches \(-\infty\) as \(t \rightarrow -\infty\). Hence, the linear
+  programming problem is unbounded.
+\item
+  Let (P) denote a linear programming problem with a bounded nonempty
+  feasible region with objective function \(\vec{c}^\T\vec{x}\). By
+  assumption, (P) is not infeasible. Note that (P) is not unbounded
+  because
+  \(|\vec{c}^\T\vec{x}| \leq \sum_{i} |c_i||x_i| \leq M \sum_{i} |c_i| \).
+  Thus, by Theorem \ref{thm:fund-lp}, (P) has an optimal solution.
+\end{enumerate}

@@ -1,0 +1,199 @@
+%By Kevin Cheung
+%The book is licensed under the
+%\href{http://creativecommons.org/licenses/by-sa/4.0/}{Creative Commons
+%Attribution-ShareAlike 4.0 International License}.
+%
+%This file has been modified by Robert Hildebrand 2020.  
+%CC BY SA 4.0 licence still applies.
+
+\chapter{Using an LP solver}\label{using-an-lp-solver}
+
+Linear programming problems are rarely solved by hand. Problems from
+industrial applications often have thousands (and sometimes millions) of
+variables and constraints. Fortunately, there exist a number of
+commercial as well as open-source solvers that can handle such
+large-scale problem. In this chapter, we will take a look at one of
+them. Before we do so, we introduce the CPLEX LP format which allows us
+to specify linear programming problems in a way close to how we write
+them.
+
+\section{CPLEX LP file format}\label{cplex-lp-file-format}
+
+A description of the CPLEX LP file format can be found here.
+
+However, it is perhaps easiest to illustrate with some examples.
+Consider \[\begin{array}{rrcrcrcrcl}
+\min & x_1 & - & 2x_2 & +& x_3 &   &  &  \\
+\mbox{s.t.}
+ & x_1 & - &  2x_2 & + &  x_3 & - & x_4  & \geq & 1  \\
+  & x_1 & + &  x_2 & + & 2x_3 & - & 2x_4 &  = & 3  \\
+ &  & - &  x_2 & + & 3 x_3 & - & 5x_4  & \leq & 7  \\
+   &  &  & & & x_3 & , & x_4 & \geq & 0.
+\end{array}\]
+
+The problem can be specified in LP format as follows:
+
+\begin{verbatim}
+min x_1 - 2x_2 + x_3
+st
+ x_1 - 2x_2 +  x_3 -  x_4 >= 1
+ x_1 +  x_2 + 2x_3 - 2x_4  = 3
+     -  x_2 + 3x_3 - 5x_4 <= 7
+bounds
+ x_1 free
+ x_2 free
+end
+\end{verbatim}
+
+Any variable that does not appear in the \texttt{bounds} section is
+automatically assumed to be nonnegative.
+
+\section{SoPlex}\label{soplex}
+
+\href{http://soplex.zib.de/}{SoPlex} is an open-source linear
+programming solver. It is free for noncommercial use.
+Binaries for Mac OS X and Windows are readily available for
+\href{http://soplex.zib.de/\#download}{download}.
+
+One great feature of SoPlex is that it can return exact rational
+solutions whereas most other solvers only return solutions as
+floating-point numbers.
+
+Suppose that the problem for the example at the beginning is saved in LP
+format in an ASCII file named \texttt{eg.lp}. The following is the
+output of running SoPlex in a macOS command-line terminal:
+
+{\footnotesize
+\begin{verbatim}
+bash-3.2$ ./soplex-2.2.1.darwin.x86_64.gnu.opt -X --solvemode=2 -f=0 -o=0 eg.lp
+SoPlex version 2.2.1 [mode: optimized] [precision: 8 byte] [rational: GMP 6.0.0] [githash: 267a44a]
+Copyright (c) 1996-2016 Konrad-Zuse-Zentrum fuer Informationstechnik Berlin (ZIB)
+
+int:solvemode = 2
+real:feastol = 0
+real:opttol = 0
+
+Reading (real) LP file <eg.lp> . . .
+Reading took 0.00 seconds.
+
+LP has 3 rows 4 columns and 11 nonzeros.
+
+Initial floating-point solve . . .
+Simplifier removed 0 rows, 0 columns, 0 nonzeros, 0 col bounds, 0 row bounds
+Reduced LP has 3 rows 4 columns 11 nonzeros
+Equilibrium scaling LP
+
+type |   time |   iters | facts |  shift   |violation |    value
+  L  |    0.0 |       0 |     1 | 4.00e+00 | 2.00e+00 | 0.00000000e+00
+  E  |    0.0 |       1 |     2 | 0.00e+00 | 4.00e+00 | 3.00000000e+00
+  E  |    0.0 |       2 |     3 | 0.00e+00 | 0.00e+00 | 1.00000000e+00
+
+Floating-point optimal.
+Max. bound violation = 0
+Max. row violation = 1/4503599627370496
+Max. reduced cost violation = 0
+Max. dual violation = 0
+Performing rational reconstruction . . .
+Tolerances reached.
+Solved to optimality.
+
+SoPlex status       : problem is solved [optimal]
+Solving time (sec)  : 0.00
+Iterations          : 2
+Objective value     : 1.00000000e+00
+
+
+Primal solution (name, value):
+x_1               7/3
+x_2               2/3
+All other variables are zero.
+bash-3.2$
+\end{verbatim}
+}
+
+The option \texttt{-X} asks the solver to display the primal rational
+solution. The options \texttt{-\/-solvemode=2} invokes iterative
+refinement for solving for a rational solution. The options
+\texttt{-f=0\ -o=0} set the primal feasibility and dual feasibility
+tolerances to 0. Without these options, one might get only approximate
+solutions to the problem. If we remove the last three options and
+replace \texttt{-X} with \texttt{-x}, we obtain the following instead:
+
+{\footnotesize
+\begin{verbatim}
+bash-3.2$ ./soplex-2.2.1.darwin.x86_64.gnu.opt -x eg.lp
+SoPlex version 2.2.1 [mode: optimized] [precision: 8 byte] [rational: GMP 6.0.0] [githash: 267a44a]
+Copyright (c) 1996-2016 Konrad-Zuse-Zentrum fuer Informationstechnik Berlin (ZIB)
+
+Reading (real) LP file <eg.lp> . . .
+Reading took 0.00 seconds.
+
+LP has 3 rows 4 columns and 11 nonzeros.
+
+Simplifier removed 0 rows, 0 columns, 0 nonzeros, 0 col bounds, 0 row bounds
+Reduced LP has 3 rows 4 columns 11 nonzeros
+Equilibrium scaling LP
+type |   time |   iters | facts |  shift   |violation |    value
+  L  |    0.0 |       0 |     1 | 4.00e+00 | 2.00e+00 | 0.00000000e+00
+  E  |    0.0 |       1 |     2 | 0.00e+00 | 4.00e+00 | 3.00000000e+00
+  E  |    0.0 |       2 |     3 | 0.00e+00 | 0.00e+00 | 1.00000000e+00
+ --- transforming basis into original space
+  L  |    0.0 |       0 |     1 | 0.00e+00 | 0.00e+00 | 1.00000000e+00
+  L  |    0.0 |       0 |     1 | 0.00e+00 | 0.00e+00 | 1.00000000e+00
+
+SoPlex status       : problem is solved [optimal]
+Solving time (sec)  : 0.00
+Iterations          : 2
+Objective value     : 1.00000000e+00
+
+
+Primal solution (name, value):
+x_1       2.333333333
+x_2       0.666666667
+All other variables are zero (within 1.0e-16).
+bash-3.2$ 
+\end{verbatim}
+}
+
+There are many solver options that one can specify. To view the list of
+all the options, simply run the solver without options and arguments.
+
+\section{NEOS server for
+optimization}\label{neos-server-for-optimization}
+
+If one does not want to download and install SoPlex, one can use the
+\href{https://neos-server.org/neos/solvers/index.html}{NEOS server for
+optimization}. In addition to SoPlex, there are many other solvers to
+choose from.
+
+To solve a linear programming problem using SoPlex on the NEOS server,
+one can submit a file in CPLEX LP format
+\href{https://neos-server.org/neos/solvers/lp:SoPlex80bit/LP.html}{here}.
+
+\section*{Exercises}\label{exercises-9}
+\addcontentsline{toc}{section}{Exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Use SoPlex to obtain the exact optimal value of
+  \[\begin{array}{rrcrcrcl}
+  \min & 3 x & + & 2 y & + & 9 z \\
+  \text{s.t.} & 53 x & + & 20 y & + & 96 z & \geq & 2 \\
+   & 13 x & - & 7 y & + & 6 z & \geq & \frac{3}{17} \\
+   & -x & + & 71 y & - & 3 z & \geq & \frac{7}{3} \\
+   & x &, & y &,  &z  &\geq & 0.
+  \end{array}\]
+\end{enumerate}
+
+\section*{Solutions}\label{solutions-9}
+\addcontentsline{toc}{section}{Solutions}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  The optimal value is \(\frac{1882}{11679}\).
+\end{enumerate}
+

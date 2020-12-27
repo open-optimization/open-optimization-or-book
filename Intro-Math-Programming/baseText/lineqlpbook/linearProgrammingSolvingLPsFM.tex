@@ -1,0 +1,105 @@
+%By Kevin Cheung
+%The book is licensed under the
+%\href{http://creativecommons.org/licenses/by-sa/4.0/}{Creative Commons
+%Attribution-ShareAlike 4.0 International License}.
+%
+%This file has been modified by Robert Hildebrand 2020.  
+%CC BY SA 4.0 licence still applies.
+
+\chapter{Solving linear programming problems}\label{fund-lp}
+
+\protect\hyperlink{fm}{Fourier-Motzkin elimination} can actually be used
+to solve a linear programming problem though the method is not efficient
+and is almost never used in practice. We illustrate the process with an
+example.
+
+Consider the following linear programming problem:
+
+\begin{equation}
+\begin{array}{rl}
+\min & x + y \\
+\text{s.t.}
+& x + 2y  \geq 2 \\
+& 3x + 2y  \geq 6.
+\end{array}\label{eq:LP}
+\end{equation}
+
+Observe that \eqref{eq:LP} is equivalent to
+
+\begin{equation}
+\begin{array}{rl}
+\min & z \\
+\text{s.t.}
+& z - x - y = 0 \\
+& x + 2y  \geq 2 \\
+& 3x + 2y  \geq 6.
+\end{array}\label{eq:LPprime}
+\end{equation}
+
+Note that the objective function is replaced with \(z\) and \(z\) is set
+to the original objective function in the first constraint of
+\eqref{eq:LPprime} since \(z = x+ y\) if and only if \(z-x-y=0\). Then,
+solving \eqref{eq:LPprime} is equivalent to finding among all the
+solutions to the following system a solution that minimizes \(z\), if it
+exists. \[
+\begin{array}{rl}
+ z - x - y \geq 0 & ~~~(1) \\
+-z + x + y \geq 0 & ~~~(2) \\
+ x + 2y  \geq 2 &~~~(3)\\
+ 3x + 2y  \geq 6 & ~~~(4)
+\end{array}
+\] Since we are interested in the minimum possible value for \(z\) we
+use Fourier-Motzking elimination to eliminate the variables \(x\) and
+\(y\).
+
+To eliminate \(x\), we first multiply \((4)\) by \(\frac{1}{3}\) to
+obtain: \[
+\begin{array}{rl}
+ z - x - y \geq 0 & ~~~(1) \\
+-z + x + y \geq 0 & ~~~(2) \\
+ x + 2y  \geq 2 &~~~(3)\\
+ x + \frac{2}{3}y  \geq 2 & ~~~(5)
+\end{array}
+\] Then eliminate \(x\) to obtain \[
+\begin{array}{rrl}
+(1) + (2):  & 0 \geq 0 \\
+(1) + (3):  & z + y \geq 2 & ~~~(6) \\
+(1) + (5):  & z - \frac{1}{3} y \geq 2 & ~~~(7) \\
+\end{array}
+\] Note that there is no need to keep the first inequality. To eliminate
+\(y\), we first multiply \((7)\) by \(3\) to obtain: \[
+\begin{array}{rl}
+  z + y \geq 2 & ~~~(6) \\
+  3z - y \geq 6 & ~~~(8) \\
+\end{array}
+\] Then eliminate \(y\) to obtain \[
+\begin{array}{rl}
+  4z \geq 8 & ~~~(9) \\
+\end{array}
+\] Multiplying \((9)\) by \(\frac{1}{4}\) gives \(z \geq 2\). Hence, the
+minimum possible value for \(z\) among all the solutions to the system
+is \(2\). So the optimal value of \eqref{eq:LPprime} is \(2\). To obtain
+an optimal solution, set \(z = 2\). Then we have no choice but to set
+\(y = 0\) and \(x = 2\). One can check that \((x,y) = (2,0)\) is a
+feasible solution with objective function value \(2\).
+
+We can obtain an independent proof that the optimal value is indeed
+\(2\) if we trace back the computations. Note that the inequality
+\(z \geq 2\) is given by
+
+\begin{eqnarray*}
+\frac{1}{4} (9) 
+& \Leftarrow & \frac{1}{4} (6) + \frac{1}{4} (8) \\
+& \Leftarrow & \frac{1}{4} (1)+\frac{1}{4}(3) + \frac{3}{4}(7) \\
+& \Leftarrow & \frac{1}{4} (1)+\frac{1}{4}(3) + \frac{3}{4}(1)+\frac{3}{4}(5) \\
+& \Leftarrow & (1)+ \frac{1}{4}(3) + \frac{1}{4} (4)  \\
+\end{eqnarray*}
+
+This shows that \(\frac{1}{4}(3) + \frac{1}{4} (4)\) gives the
+inequality \(x+y \geq 2\). Hence, no feasible solution to \eqref{eq:LP}
+can have objective function value less than \(2\). But we have found one
+feasible solution with objective function value \(2\). Hence, \(2\) is
+the optimal value.
+
+
+

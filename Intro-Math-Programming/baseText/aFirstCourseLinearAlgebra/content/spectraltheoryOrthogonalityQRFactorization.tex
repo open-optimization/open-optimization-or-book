@@ -1,0 +1,157 @@
+\subsection{$QR$ Factorization}
+
+In this section, a reliable factorization of matrices is studied. Called the $QR$ factorization of a matrix, it \textit{always} exists. While much can be said about the $QR$ factorization, this section will be limited to real matrices. Therefore we assume the dot product used below is the usual dot product. We begin with a definition. 
+
+\begin{definition}{$QR$ Factorization}{qrfactorization}
+Let $A$ be a real $m\times n$ matrix. Then a $QR$ factorization of $A$ consists
+of two matrices, $Q$ orthogonal and $R$ upper
+triangular, such that $A=QR.$ \index{QR factorization} 
+\end{definition}
+
+The following theorem claims that such a factorization exists. 
+
+\begin{theorem}{Existence of $QR$ Factorization}{existenceqr}
+Let $A$ be any real $m\times n$ matrix with linearly independent columns. Then there exists an orthogonal
+matrix $Q$ and an upper triangular matrix $R$ having non-negative entries
+on the main diagonal such that
+\begin{equation*}
+A=QR
+\end{equation*}
+\end{theorem}
+
+The procedure for obtaining the $QR$ factorization for any matrix $A$ is as follows.
+
+\begin{procedure}{$QR$ Factorization}{qrfactorization}
+Let $A$ be an $m \times n$ matrix given by $A = \leftB 
+\begin{array}{cccc}
+A_1 & A_2 & \cdots & A_n 
+\end{array}
+\rightB$ where the $A_i$ are the linearly independent columns of $A$. 
+\begin{enumerate}
+\item
+Apply the Gram-Schmidt Process \ref{algo:gramschmidtalgorithm} to the columns of $A$, writing $B_i$ for the resulting columns.
+
+\item
+Normalize the $B_i$, to find $C_i = \frac{1}{\vectlength B_i \vectlength} B_i$. 
+
+\item
+Construct the orthogonal matrix $Q$ as $Q=\leftB 
+\begin{array}{cccc}
+C_1 & C_2 & \cdots & C_n 
+\end{array}
+\rightB$. 
+
+\item 
+Construct the upper triangular matrix $R$ as 
+\[ R = 
+\leftB
+\begin{array}{ccccc}
+\vectlength B_1 \vectlength & A_2 \dotprod C_1 & A_3 \dotprod C_1 & \cdots & A_n \dotprod C_1 \\
+0 & \vectlength B_2 \vectlength & A_3 \dotprod C_2 & \cdots & A_n \dotprod C_2 \\
+0 & 0 & \vectlength B_3 \vectlength & \cdots & A_n \dotprod C_3 \\
+\vdots & \vdots & \vdots & & \vdots \\
+0 & 0 & 0 & \cdots & \vectlength B_n \vectlength 
+\end{array}
+\rightB
+\]
+
+\item
+Finally, write $A=QR$ where $Q$ is the orthogonal matrix and $R$ is the upper triangular matrix obtained above. 
+\end{enumerate} 
+\end{procedure}
+
+Notice that $Q$ is an orthogonal matrix as the $C_i$ form an orthonormal set. Since $\vectlength B_i \vectlength > 0$ for all $i$ (since the length of a vector is always positive), it follows that $R$ is an upper triangular matrix with positive entries on the main diagonal. 
+
+Consider the following example.
+
+\begin{example}{Finding a $QR$ Factorization}{qrfactorization}
+Let \[
+A = \leftB \begin{array}{rr}
+1 & 2 \\
+0 & 1 \\
+1 & 0 
+\end{array} \rightB
+\]
+Find an orthogonal matrix $Q$ and upper triangular matrix $R$ such that $A=QR$. 
+\end{example}
+
+\begin{solution}
+First, observe that $A_1$, $A_2$, the columns of $A$, are linearly independent. Therefore we can use the Gram-Schmidt Process to create a corresponding orthogonal set $\left\{ B_1, B_2 \right\}$ as follows:
+\begin{eqnarray*}
+B_1 &=& A_1 = \leftB \begin{array}{r}
+1 \\
+0 \\
+1
+\end{array} \rightB \\
+B_2 &=& A_2 - \frac{A_2 \dotprod B_1}{\vectlength B_1 \vectlength ^2} B_1 \\
+&=& \leftB \begin{array}{r}
+2 \\
+1 \\
+0
+\end{array}
+\rightB
+- \frac{2}{2} \leftB \begin{array}{r}
+1 \\
+0 \\
+1
+\end{array} \rightB \\
+&=& 
+\leftB
+\begin{array}{r}
+1 \\
+1 \\
+-1
+\end{array}
+\rightB
+\end{eqnarray*}
+
+Normalize each vector to create the set $\left\{ C_1, C_2 \right\}$ as follows:
+\begin{eqnarray*}
+C_1 &=& \frac{1}{\vectlength B_1 \vectlength} B_1 = \frac{1}{\sqrt{2}}  \leftB \begin{array}{r}
+1 \\
+0 \\
+1
+\end{array} \rightB \\
+C_2 &=& \frac{1}{\vectlength B_2 \vectlength} B_2 = \frac{1}{\sqrt{3}} \leftB \begin{array}{r}
+1 \\
+1 \\
+-1 
+\end{array}\rightB
+\end{eqnarray*}
+
+Now construct the orthogonal matrix $Q$ as 
+\begin{eqnarray*}
+Q &=& \leftB 
+\begin{array}{cccc}
+C_1 & C_2 & \cdots & C_n 
+\end{array}
+\rightB \\
+&=& \leftB
+\begin{array}{rr}
+\vspace{0.05in}\frac{1}{\sqrt{2}} & \vspace{0.05in}\frac{1}{\sqrt{3}} \\
+0  & \vspace{0.05in}\frac{1}{\sqrt{3}} \\
+\vspace{0.05in}\frac{1}{\sqrt{2}} & -\vspace{0.05in}\frac{1}{\sqrt{3}}
+\end{array}
+\rightB
+\end{eqnarray*}
+
+Finally, construct the upper triangular matrix $R$ as 
+\begin{eqnarray*}
+R &=& 
+\leftB
+\begin{array}{cc}
+\vectlength B_1 \vectlength & A_2 \dotprod C_1  \\
+0 & \vectlength B_2 
+\end{array}
+\rightB \\
+&=& 
+\leftB
+\begin{array}{cc}
+\sqrt{2} & \sqrt{2} \\
+0 & \sqrt{3} \\
+\end{array}
+\rightB
+\end{eqnarray*}
+
+It is left to the reader to verify that $A=QR$. 
+\end{solution}

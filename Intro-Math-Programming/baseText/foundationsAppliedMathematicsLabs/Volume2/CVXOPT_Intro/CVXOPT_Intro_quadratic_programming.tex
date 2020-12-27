@@ -1,0 +1,128 @@
+\chapter{Quadratic Programming}
+
+Quadratic programming is similar to linear programming, but the objective function is quadratic rather than linear.
+The constraints, if there are any, are still of the same form.
+Thus, $G, \mathbf{h}, A$, and $\b$ are optional.
+The formulation that we will use is
+\begin{align*}
+\text{minimize}\qquad &\frac{1}{2}\x\trp Q\x + \mathbf{r}\trp \x \\
+\text{subject to}\qquad &G\x \preceq \mathbf{h}\\
+ &A\x = \b,
+\end{align*}
+where $Q$ is a positive semidefinite symmetric matrix.
+In this formulation, we require again that $A$ has full row rank and that the block matrix
+$[Q \quad G \quad A]\trp $ has full column rank.
+
+As an example, consider the quadratic function
+\[
+f(x_1,x_2) = 2x_1^2 +2x_1x_2 + x_2^2 +x_1 -x_2.
+\]
+There are no constraints, so we only need to initialize the matrix $Q$ and the vector $\mathbf{r}$.
+To find these, we first rewrite our function to match the formulation given above.
+If we let
+\[
+Q = \begin{bmatrix}
+  a & b\\
+  b & c
+\end{bmatrix}, \qquad
+\mathbf{r} = \begin{bmatrix}
+  d\\
+  e
+\end{bmatrix},
+\qquad \text{and} \qquad
+\x = \begin{bmatrix}
+  x_1\\
+  x_2
+\end{bmatrix},
+\]
+then
+\begin{align*}
+\frac{1}{2}\x\trp Q\x + \mathbf{r}\trp \x &=
+\frac{1}{2}
+\begin{bmatrix}
+  x_1\\
+  x_2
+\end{bmatrix}\trp
+\begin{bmatrix}
+  a & b\\
+  b & c
+\end{bmatrix}
+\begin{bmatrix}
+  x_1\\
+  x_2
+\end{bmatrix} +
+\begin{bmatrix}
+  d\\
+  e
+\end{bmatrix}\trp
+\begin{bmatrix}
+  x_1\\
+  x_2
+\end{bmatrix} \\
+&= \frac{1}{2}ax_1^2 + bx_1x_2 + \frac{1}{2}cx_2^2 + dx_1 + ex_2
+\end{align*}
+Thus, we see that the proper values to initialize our matrix $Q$ and vector $\mathbf{r}$ are:
+\begin{align*}
+a &= 4  &d = 1 \\
+b &= 2  &e = -1 \\
+c &= 2
+\end{align*}
+Now that we have the matrix $Q$ and vector $\mathbf{r}$, we are ready to use the CVXOPT function for quadratic programming \li{solvers.qp()}.
+\begin{lstlisting}
+>>> Q = matrix(np.array([[4., 2.], [2., 2.]]))
+>>> r = matrix([1., -1.])
+>>> sol=solvers.qp(Q, r)
+>>> print(sol['x'])
+[-1.00e+00]
+[ 1.50e+00]
+>>> print sol['primal objective']
+-1.25
+\end{lstlisting}
+
+\begin{problem}{Quadratic Minimization}
+Find the minimizer and minimum of
+\begin{equation*}
+g(x_1,x_2,x_3) = \frac{3}{2}x_1^2 +2x_1x_2 + x_1x_3+ 2x_2^2 +2x_2x_3+\frac{3}{2}x_3^2+3x_1 + x_3
+\end{equation*}
+\\(Hint: Write the function $g$ to match the formulation given above before coding.)
+\begin{comment}
+\begin{equation}
+f(x) = \frac{1}{2}x\trp Qx - x\trp p
+\end{equation}
+where
+
+\begin{center}
+$Q =
+\begin{bmatrix}
+3 & 2 & 1\\
+2 & 4 & 2\\
+1 & 2 & 3\\
+\end{bmatrix}
+$
+and $p =
+\begin{bmatrix}
+3\\
+0\\
+1\\
+\end{bmatrix}
+$
+\end{center}
+\end{comment}
+
+\end{problem}
+
+
+\begin{problem}{$l_2$ minimization}
+The $l_2$ minimization problem is to
+\begin{align*}
+\text{minimize}\qquad &\|\x\|_2\\
+\text{subject to} \qquad &A\x = \b.
+\end{align*}
+
+This problem is equivalent to a quadratic program, since $\|\x\|_2 = \x\trp \x$.
+Write a function that accepts a matrix $A$ and vector $\b$ and solves the $l_2$ minimization problem.
+Return the minimizer $\x$ and the primal objective value.
+
+To test your function, use the matrix $A$ and vector $\b$ from Problem \ref{prob:l1}. 
+The minimizer is approximately $\x=[0.966, 2.169, 0.809, 0.888]^T$ and the minimum primal objective value is approximately $7.079$.
+\end{problem}
