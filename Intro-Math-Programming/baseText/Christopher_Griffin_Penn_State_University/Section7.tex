@@ -1,0 +1,420 @@
+\chapter{Degeneracy and Convergence}
+In this section, we will consider the problem of degeneracy and prove (at last) that there is an implementation of the Simplex Algorithm that is guaranteed to converge to an optimal solution, assuming one exists.
+
+\section{Degeneracy Revisited}
+We've already discussed degeneracy. Recall the following theorem from Chapter 5 that defines degeneracy in terms of the simplex tableau:
+
+\vspace*{1em}
+\noindent\textbf{Theorem \ref{thm:DegeneracyDef}.} \textit{Consider Problem $P$ (our linear programming problem). Let $\mathbf{B} \in \mathbb{R}^{m\times m}$ be a basis matrix corresponding to some set of basic variables $\mathbf{x_B}$. Let $\overline{\mathbf{b}} = \mathbf{B}^{-1}\mathbf{b}$. If $\overline{\mathbf{b}}_j = \mathbf{0}$ for some $j=1,\dots,m$, then $\mathbf{x}_B = \overline{\mathbf{b}}$ and $\mathbf{x_N} = \mathbf{0}$ is a degenerate extreme point of the feasible region of Problem $P$.}
+\vspace*{1em}
+
+We have seen in Example \ref{ex:ToyMakerDegenSimplex} that degeneracy can cause us to take extra steps on our way from an initial basic feasible solution to an optimal solution. When the simplex algorithm takes extra steps while remaining at the same degenerate extreme point, this is called \textit{stalling}. The problem can become much worse; for certain entering variable rules, the simplex algorithm can become locked in a cycle of pivots each one moving from one characterization of a degenerate extreme point to the next. The following example from Beale and illustrated in Chapter 4 of \cite{BJS04} demonstrates the point.
+
+\begin{example} Consider the following linear programming problem:
+\begin{equation}
+\begin{aligned}
+\min\;\;&-\frac{3}{4}x_4 + 20x_5 -\frac{1}{2}x_6 + 6x_7\\
+s.t\;\;&x_1 + \frac{1}{4}x_4 - 8x_5 - x_6 + 9x_7 = 0\\
+& x_2 + \frac{1}{2}x_4 - 12x_5 -\frac{1}{2}x_6 + 3x_7 = 0\\
+&x_3 + x_6 = 1\\
+&x_i \geq 0\;\;i=1,\dots,7
+\end{aligned}
+\end{equation}
+It is conducive to analyze the $\mathbf{A}$ matrix of the constraints of this problem. We have:
+\begin{equation}
+\mathbf{A} = \begin{bmatrix}
+1 & 0 & 0 & 1/4 & -8  & -1   & 9\\
+0 & 1 & 0 & 1/2 & -12 & -1/2 & 3\\
+0 & 0 & 1 & 0   &  0  & 1    & 0
+\end{bmatrix}
+\end{equation}
+The fact that the $\mathbf{A}$ matrix contains an identity matrix embedded within it suggests that an initial basic feasible solution with basic variables $x_1$, $x_2$ and $x_3$ would be a good choice. This leads to a vector of reduced costs given by:
+\begin{equation}
+\mathbf{c_B}^T\mathbf{B}^{-1}\mathbf{N}-\mathbf{c_N}^T = 
+\begin{bmatrix}3/4 & -20 & 1/2 & -6 \end{bmatrix}
+\end{equation}
+These yield an initial tableau with structure:
+\begin{displaymath}
+\begin{array}{c}
+\\z\\x_1\\x_2\\x_3
+\end{array}\left[
+\begin{array}{c|ccccccc|c}
+z & x_1 & x_2 & x_3 & x_4 & x_5 & x_6 & x_7 & RHS\\
+\hline
+1 & 0 & 0 & 0 & 3/4 & -20 & 1/2  & -6 & 0\\
+\hline
+0 & 1 & 0 & 0 & 1/4 & -8  & -1   & 9  & 0\\
+0 & 0 & 1 & 0 & 1/2 & -12 & -1/2 & 3  & 0\\
+0 & 0 & 0 & 1 & 0   &  0  & 1    & 0  & 1
+\end{array}\right]
+\end{displaymath}
+
+If we apply an entering variable rule where we always chose the non-basic variable to enter with the \textit{most positive} reduced cost (since this is a minimization problem), and we choose the leaving variable to be the first row that is in a tie, then we will obtain the following sequence of tableaux:\\
+\noindent\textbf{Tableau I:}
+\begin{displaymath}
+\begin{array}{c}
+\\z\\x_1\\x_2\\x_3
+\end{array}\left[
+\begin{array}{c|ccccccc|c}
+z & x_1 & x_2 & x_3 & x_4 & x_5 & x_6 & x_7 & RHS\\
+\hline
+1 & 0 & 0 & 0 & 3/4 & -20 & 1/2  & -6 & 0\\
+\hline
+0 & 1 & 0 & 0 & \fbox{1/4} & -8  & -1   & 9  & 0\\
+0 & 0 & 1 & 0 & 1/2 & -12 & -1/2 & 3  & 0\\
+0 & 0 & 0 & 1 & 0   &  0  & 1    & 0  & 1
+\end{array}\right]
+\end{displaymath}
+
+\noindent\textbf{Tableau II:}
+\begin{displaymath}
+\begin{array}{c}
+\\z\\x_4\\x_2\\x_3
+\end{array}\left[
+\begin{array}{c|ccccccc|c}
+z & x_1 & x_2 & x_3 & x_4 & x_5 & x_6 & x_7 & RHS\\
+\hline
+1 & -3 & 0 & 0 & 0 & 4 & 7/2  & -33 & 0\\
+\hline
+0 & 4  & 0 & 0 & 1   & -32  & -4   & 36   & 0\\
+0 & -2 & 1 & 0 & 0   &   \fbox{4}  & 3/2  & -15  & 0\\
+0 & 0  & 0 & 1 & 0   &  0   & 1    & 0    & 1
+\end{array}\right]
+\end{displaymath}
+
+\noindent\textbf{Tableau III:}
+\begin{displaymath}
+\begin{array}{c}
+\\z\\x_4\\x_5\\x_3
+\end{array}\left[
+\begin{array}{c|ccccccc|c}
+z & x_1 & x_2 & x_3 & x_4 & x_5 & x_6 & x_7 & RHS\\
+\hline
+1 & -1 & -1 & 0 & 0 & 0 & 2  & -18 & 0\\
+\hline
+0 & -12  & 8   & 0 & 1   & 0    & \fbox{8}    & -84     & 0\\
+0 & -1/2 & 1/4 & 0 & 0   & 1    & 3/8  & -15/4   & 0\\
+0 & 0    & 0   & 1 & 0   & 0    & 1    & 0       & 1
+\end{array}\right]
+\end{displaymath}
+
+\noindent\textbf{Tableau IV:}
+\begin{displaymath}
+\begin{array}{c}
+\\z\\x_6\\x_5\\x_3
+\end{array}\left[
+\begin{array}{c|ccccccc|c}
+z & x_1 & x_2 & x_3 & x_4 & x_5 & x_6 & x_7 & RHS\\
+\hline
+1 & 2 & -3 & 0 & -1/4 & 0 & 0  & 3 & 0\\
+\hline
+0 & -3/2  & 1     & 0 & 1/8   & 0    & 1    & -21/2   & 0\\
+0 & 1/16  & -1/8  & 0 & -3/64 & 1    & 0    & \fbox{3/16}    & 0\\
+0 & 3/2   & -1    & 1 & -1/8  & 0    & 0    & 21/2    & 1
+\end{array}\right]
+\end{displaymath}
+
+\noindent\textbf{Tableau V:}
+\begin{displaymath}
+\begin{array}{c}
+\\z\\x_6\\x_7\\x_3
+\end{array}\left[
+\begin{array}{c|ccccccc|c}
+z & x_1 & x_2 & x_3 & x_4 & x_5 & x_6 & x_7 & RHS\\
+\hline
+1 & 1 & -1 & 0 & 1/2 & -16 & 0 & 0 & 0\\
+\hline
+0 & \fbox{2}     & -6    & 0 & -5/2  & 56   & 1    & 0    & 0\\
+0 & 1/3   & -2/3  & 0 & -1/4  & 16/3 & 0    & 1    & 0\\
+0 & -2    &  6    & 1 &  5/2  & -56  & 0    & 0    & 1
+\end{array}\right]
+\end{displaymath}
+
+\noindent\textbf{Tableau VI:}
+\begin{displaymath}
+\begin{array}{c}
+\\z\\x_1\\x_7\\x_3
+\end{array}\left[
+\begin{array}{c|ccccccc|c}
+z & x_1 & x_2 & x_3 & x_4 & x_5 & x_6 & x_7 & RHS\\
+\hline
+1 & 0 & 2 & 0 & 7/4 & -44 & -1/2 & 0 & 0\\
+\hline
+0 & 1  & -3    & 0 & -5/4  & 28   & 1/2  & 0    & 0\\
+0 & 0  & \fbox{1/3}  & 0 &  1/6  & -4   & -1/6 & 1    & 0\\
+0 & 0  &  0    & 1 &  0    &  0   & 1    & 0    & 1
+\end{array}\right]
+\end{displaymath}
+
+\noindent\textbf{Tableau VII:}
+\begin{displaymath}
+\begin{array}{c}
+\\z\\x_1\\x_2\\x_3
+\end{array}\left[
+\begin{array}{c|ccccccc|c}
+z & x_1 & x_2 & x_3 & x_4 & x_5 & x_6 & x_7 & RHS\\
+\hline
+1 & 0 & 0 & 0 & 3/4 & -20 & 1/2  & -6 & 0\\
+\hline
+0 & 1 & 0 & 0 & 1/4 & -8  & -1   & 9  & 0\\
+0 & 0 & 1 & 0 & 1/2 & -12 & -1/2 & 3  & 0\\
+0 & 0 & 0 & 1 & 0   &  0  & 1    & 0  & 1
+\end{array}\right]
+\end{displaymath}
+We see that the last tableau (VII) is the same as the first tableau and thus we have constructed an instance where (using the given entering and leaving variable rules), the Simplex Algorithm will cycle forever at this degenerate extreme point.
+\label{ex:CyclingDegen}
+\end{example}
+
+
+\section{The Lexicographic Minimum Ratio Leaving Variable Rule}
+Given the example of the previous section, we require a method for breaking ties in the case of degeneracy is required that prevents cycling from occurring. There is a large literature on cycling prevention rules, however the most well known is the \textit{lexicographic rule for selecting the entering variable}.
+
+\begin{definition}[Lexicographic Order] Let $\mathbf{x}=[x_1,\dots,x_n]^T$ and $\mathbf{y}=[y_1,\dots,y_n]^T$ be vectors in $\mathbb{R}^n$. We say that $\mathbf{x}$ is \textit{lexicographically greater} than $\mathbf{y}$ if: there exists $m < n$ so that $x_i = y_i$ for $i=1,\dots,m$, and $x_{m+1} > y_{m+1}$. 
+
+Clearly, if there is no such $m < n$, then $x_i = y_i$ for $i = 1,\dots,n$ and thus $\mathbf{x} = \mathbf{y}$. We write $\mathbf{x}\succ\mathbf{y}$ to indicate that $\mathbf{x}$ is lexicographically greater than $\mathbf{y}$. Naturally, we can write $\mathbf{x}\succeq\mathbf{y}$ to indicate that $\mathbf{x}$ is lexicographically greater than or equal to $\mathbf{y}$. 
+\end{definition}
+
+Lexicographic ordering is simply the standard order operation $>$ applied to the individual elements of a vector in $\mathbb{R}^n$ with a precedence on the index of the vector.
+
+\begin{definition} A vector $\mathbf{x} \in \mathbb{R}^n$ is \textit{lexicographically positive} if $\mathbf{x} \succ \mathbf{0}$ where $\mathbf{0}$ is the zero vector in $\mathbb{R}^n$. 
+\end{definition}
+
+\begin{lemma} Let $\mathbf{x}$ and $\mathbf{y}$ be two lexicographically positive vectors in $\mathbb{R}^n$. Then $\mathbf{x} + \mathbf{y}$ is lexicographically positive. Let $c > 0$ be a constant in $\mathbb{R}$, then $c\mathbf{x}$ is a lexicographically positive vector.
+\label{lem:LexiSum}
+\end{lemma}
+
+\begin{exercise} Prove Lemma \ref{lem:LexiSum}. 
+\end{exercise}
+
+\subsection{Lexicographic Minimum Ratio Test}
+Suppose we are considering a linear programming problem and we have chosen an entering variable $x_j$ according to a fixed entering variable rule. Assume further, we are given some current basis matrix $\mathbf{B}$ and as usual, the right-hand-side vector of the constraints is denoted $\mathbf{b}$, while the coefficient matrix is denoted $\mathbf{A}$. Then the minimum ratio test asserts that we will chose as the leaving variable the basis variable with the minimum ratio in the minimum ratio test. Consider the following set:
+\begin{equation}
+I_0 = \left\{r : \frac{\overline{b}_r}{{\overline{a}_{j_r}}} = \min\left[ \frac{\overline{b}_i}{\overline{a}_{j_i}} : i=1,\dots,m \text{ and } a_{j_i} > 0 \right]\right\}
+\end{equation}
+In the absence of degeneracy, $I_0$ contains a \textit{single} element: the row index that has the smallest ratio of $\overline{b}_i$ to $\overline{a}_{j_i}$, where naturally: $\overline{\mathbf{b}} = \mathbf{B}^{-1}\mathbf{b}$ and $\overline{\mathbf{a}}_j = \mathbf{B}^{-1}\mathbf{A}_{\cdot j}$. In this case, $x_j$ is swapped into the basis in exchange for $x_{B_r}$ (the $r^\text{th}$ basic variable).
+
+When we have a degenerate basic feasible solution, then $I_0$ is not a singleton set and contains all the rows that have \textit{tied} in the minimum ratio test. In this case, we can form a new set:
+\begin{equation}
+I_1 = \left\{r : \frac{\overline{a}_{1_r}}{{\overline{a}_{j_r}}} = \min\left[ \frac{\overline{a}_{1_i}}{\overline{a}_{j_i}} : i\in I_0\right]\right\}
+\end{equation}
+Here, we are taking the elements in column 1 of $\mathbf{B}^{-1}\mathbf{A}_{\cdot 1}$ to obtain $\overline{\mathbf{a}}_1$. The elements of this (column) vector are then being divided by the elements of the (column) vector $\overline{\mathbf{a}}_{j}$ on a index-by-index basis. If this set is a singleton, then basic variable $x_{B_r}$ leaves the basis. If this set is not a singleton, we may form a new set $I_2$ with column  $\overline{\mathbf{a}}_2$. In general, we will have the set:
+\begin{equation}
+I_k = \left\{r : \frac{\overline{a}_{k_r}}{{\overline{a}_{j_r}}} = \min\left[ \frac{\overline{a}_{k_i}}{\overline{a}_{j_i}} : i\in I_{k-1}\right]\right\}
+\end{equation}
+\begin{lemma} For any degenerate basis matrix $\mathbf{B}$ for any linear programming problem, we will ultimately find a $k$ so that $I_k$ is a singleton.
+\label{lem:LexiStop}
+\end{lemma}
+\begin{exercise} Prove Lemma \ref{lem:LexiStop}. [Hint: Assume that the tableau is arranged so that the identity columns are columns $1$ through $m$. (That is $\overline{\mathbf{a}}_j = \mathbf{e}_j$ for $i=1,\dots,m$.) Show that this configuration will easily lead to a singleton $I_k$ for $k < m$.]
+\end{exercise}
+In executing the lexicographic minimum ratio test, we can see that we are essentially comparing the tied rows in a lexicographic manner. If a set of rows ties in the minimum ratio test, then we execute a minimum ratio test on the first column of the tied rows. If there is a tie, then we move on executing a minimum ratio test on the second column of the rows that tied in both previous tests. This continues until the tie is broken and a single row emerges as the leaving row.
+\begin{example}
+Let us consider the example from Beale again using the lexicographic minimum ratio test. Consider the tableau shown below. \\
+\noindent\textbf{Tableau I:}
+\begin{displaymath}
+\begin{array}{c}
+\\z\\x_1\\x_2\\x_3
+\end{array}\left[
+\begin{array}{c|ccccccc|c}
+z & x_1 & x_2 & x_3 & x_4 & x_5 & x_6 & x_7 & RHS\\
+\hline
+1 & 0 & 0 & 0 & 3/4 & -20 & 1/2  & -6 & 0\\
+\hline
+0 & 1 & 0 & 0 & 1/4 & -8  & -1   & 9  & 0\\
+0 & 0 & 1 & 0 & \fbox{1/2} & -12 & -1/2 & 3  & 0\\
+0 & 0 & 0 & 1 & 0   &  0  & 1    & 0  & 1
+\end{array}\right]
+\end{displaymath}
+Again, we chose to enter variable $x_4$ as it has the most positive reduced cost. Variables $x_1$ and $x_2$ tie in the minimum ratio test. So we consider a new minimum ratio test on the first column of the tableau:
+\begin{equation}
+\min\left\{\frac{1}{1/4}, \frac{0}{1/2}\right\}
+\end{equation}
+From this test, we see that $x_2$ is the leaving variable and we pivot on element $1/2$ as indicated in the tableau. Note, we \textit{only} need to execute the minimum ratio test on variables $x_1$ and $x_2$ since those were the tied variables in the standard minimum ratio test. That is, $I_0 = \{1,2\}$ and we construct $I_1$ from these indexes alone. In this case $I_1 = \{2\}$. Pivoting yields the new tableau:\\
+\noindent\textbf{Tableau II:}
+\begin{displaymath}
+\begin{array}{c}
+\\z\\x_1\\x_4\\x_3
+\end{array}\left[
+\begin{array}{c|ccccccc|c}
+z & x_1 & x_2 & x_3 & x_4 & x_5 & x_6 & x_7 & RHS\\
+\hline
+1 & 0 & -3/2 & 0 & 0 & -2 & 5/4  & -21/2 & 0\\
+\hline
+0 & 1 & -1/2 & 0 & 0   & -2  & -3/4   & 15/2  & 0\\
+0 & 0 & 2    & 0 & 1   & -24 & -1     & 6     & 0\\
+0 & 0 & 0    & 1 & 0   &  0  &  \fbox{1}     & 0     & 1
+\end{array}\right]
+\end{displaymath}
+There is no question this time of the entering or leaving variable, clearly $x_6$ must enter and $x_3$ must leave and we obtain\footnote{Thanks to Ethan Wright for finding a small typo in this example, that is now fixed.}:\\
+\noindent\textbf{Tableau III:}
+\begin{displaymath}
+\begin{array}{c}
+\\z\\x_1\\x_4\\x_6
+\end{array}\left[
+\begin{array}{c|ccccccc|c}
+z & x_1 & x_2 & x_3 & x_4 & x_5 & x_6 & x_7 & RHS\\
+\hline
+1 & 0 & -3/2 & -5/4 & 0 & -2 & 0  & -21/2 & -5/4\\
+\hline
+0 & 1 & -1/2 & 3/4 & 0   & -2  & 0     & 15/2  & 3/4\\
+0 & 0 & 2    & 1   & 1   & -24 & 0     & 6     & 1\\
+0 & 0 & 0    & 1   & 0   &  0  & 1     & 0     & 1
+\end{array}\right]
+\end{displaymath}
+Since this is a minimization problem and the reduced costs of the non-basic variables are now all negative, we have arrived at an optimal solution. The lexicographic minimum ratio test successfully prevented cycling.
+\end{example}
+
+\subsection{Convergence of the Simplex Algorithm Under Lexicographic Minimum Ratio Test}
+
+\begin{lemma} Consider the problem:
+\begin{displaymath}
+P\left\{
+\begin{aligned}
+\max\;\; & \mathbf{c}^T\mathbf{x}\\
+s.t.\;\; & \mathbf{A}\mathbf{x} = \mathbf{b}\\
+& \mathbf{x} \geq \mathbf{0}
+\end{aligned}\right.
+\end{displaymath}
+Suppose the following hold:
+\begin{enumerate}
+\item $\mathbf{I}_m$ is embedded in the matrix $\mathbf{A}$ and is used as the starting basis, 
+\item a consistent entering variable rule is applied (e.g., largest reduced cost first), and
+\item the lexicographic minimum ratio test is applied as the leaving variable rule.
+\end{enumerate}
+Then each row of the sequence of augmented matrices $[\overline{\mathbf{b}} |\mathbf{B}^{-1}]$ is lexicographically positive. Here $\mathbf{B}$ is the basis matrix and $\overline{\mathbf{b}} = \mathbf{B}^{-1}\mathbf{b}$.
+\label{lem:LexiPositiveTableau}
+\end{lemma}
+\begin{proof} The initial basis $\mathbf{I}_m$ yieds an augmented matrix $[\mathbf{b} | \mathbf{I}_m]$. This matrix clearly has every row lexicographically positive, since $\mathbf{b} \geq 0$. Assume that the rows of $[\overline{\mathbf{b}} |\mathbf{B}^{-1}] \succ \mathbf{0}$ for the first $n$ iterations of the simplex algorithm with fixed entering variable rule and lexicographic minimum ratio test. We will show that it is also true for step $n+1$. 
+
+Suppose (after iteration $n$) we have the following tableau:
+\begin{table}[h!]
+\centering
+\begin{displaymath}
+\scriptsize\hspace*{-3em}
+\begin{array}{c}\\
+z\\
+x_{B_1}\\
+\vdots\\
+x_{B_i}\\
+\vdots\\
+x_{B_r}\\
+\vdots\\
+x_{B_m}
+\end{array}
+\left[
+\begin{array}{c|ccccc|ccccc|c}
+z & x_1 & \dots & x_j & \dots & x_m & x_{m+1} & \dots & x_k & \dots & x_n & RHS\\
+\hline
+1 & z_1 - c_1 & \dots & z_j - c_j & \dots & z_m - c_m & z_{m+1} - c_{m+1} & \dots & z_k - c_k & \dots & z_{n} - c_{n} & \overline{z}\\
+\hline
+0 & \overline{a}_{11} & \dots & \overline{a}_{1j} & \dots & \overline{a}_{1m} & \overline{a}_{1m+1} & \dots & \overline{a}_{1k} & \dots & \overline{a}_{1n} & \overline{b}_1\\
+\vdots & \vdots & &\vdots & &\vdots & \vdots & & \vdots & & \vdots & \vdots\\
+0 & \overline{a}_{i1} & \dots & \overline{a}_{ij} & \dots & \overline{a}_{im} & \overline{a}_{im+1} & \dots & \overline{a}_{ik} & \dots & \overline{a}_{in} & \overline{b}_i\\
+\vdots & \vdots & &\vdots & &\vdots & \vdots & & \vdots & & \vdots & \vdots\\
+0 & \overline{a}_{r1} & \dots & \overline{a}_{rj} & \dots & \overline{a}_{rm} & \overline{a}_{rm+1} & \dots & \fbox{$\overline{a}_{rk}$} & \dots & \overline{a}_{rn} & \overline{b}_r\\
+\vdots & \vdots & &\vdots & &\vdots & \vdots & & \vdots & & \vdots & \vdots\\
+0 & \overline{a}_{m1} & \dots & \overline{a}_{mj} & \dots & \overline{a}_{mm} & \overline{a}_{mm+1} & \dots & \overline{a}_{mk} & \dots & \overline{a}_{mn} & \overline{b}_m
+\end{array}
+\right]
+\normalsize
+\end{displaymath}
+\caption{Tableau used for Proof of Lemma \ref{lem:LexiPositiveTableau}}
+\label{tab:LexiTableau}
+\end{table}
+
+
+Assume using the entering variable rule of our choice that $x_k$ will enter. Let us consider what happens as we choose a leaving variable and execute a pivot. Suppose that after executing the lexicographic minimum ratio test, we pivot on element $\overline{a}_{rk}$. Consider the pivoting operation on row $i$: there are two cases:
+
+\begin{description}
+\item [Case I $i \not \in I_0$] If $i \not\in I_0$, then we replace $b_i$ with 
+\begin{displaymath}
+\overline{b}_i' = \overline{b}_i - \frac{\overline{a}_{ik}}{\overline{a}_{rk}}\overline{b}_r
+\end{displaymath}
+If $\overline{a}_{ij} < 0$, then clearly $b_i' > 0$. Otherwise,
+since $i \not\in I_0$, then:
+\begin{displaymath}
+\frac{\overline{b}_r}{\overline{a}_{rk}} < \frac{\overline{b}_i}{\overline{a}_{ik}} \implies \overline{b}_r\frac{\overline{a}_{ik}}{\overline{a}_{rk}} < \overline{b}_i \implies 0 < \overline{b}_i - \frac{\overline{a}_{ik}}{\overline{a}_{rk}}\overline{b}_r
+\end{displaymath}
+Thus we know that $\overline{b}'_i > 0$. It follows then that row $i$ of the augmented matrix $[\overline{\mathbf{b}} | \mathbf{B}^{-1}]$ is lexicographically positive.
+
+
+\item [Case II $i \in I_0$] Then $\overline{b}_i' = \overline{b}_i - (\overline{a}_{ik}/\overline{a}_{rk})\overline{b}_r = 0$ since 
+\begin{displaymath}
+\frac{\overline{b}_r}{\overline{a}_{rk}} = \frac{\overline{b}_i}{\overline{a}_{ik}}
+\end{displaymath}
+There are now two possibilities, either $i \in I_1$ or $i \not \in I_1$. In the first, case we can argue that 
+\begin{displaymath}
+\overline{a}_{i1}' = \overline{a}_{i1} - \frac{\overline{a}_{ik}}{\overline{a}_{rk}}\overline{a}_{r1} > 0
+\end{displaymath} 
+for the same reason that $\overline{b}'_i > 0$ in the case when $i \in I_0$, namely that the lexicographic minimum ratio test ensures that:
+\begin{displaymath}
+\frac{\overline{a}_{r1}}{\overline{a}_{rk}} < \frac{\overline{a}_{i1}}{\overline{a}_{ik}}
+\end{displaymath}
+if $i \not\in I_1$. This confirms (since $\overline{b}'_i = 0)$ row $i$ of the augmented matrix $[\overline{\mathbf{b}} | \mathbf{B}^{-1}]$ is lexicographically positive.
+
+In the second case that $i \in I_1$, then we may proceed to determine whether $i \in I_2$. This process continues until we identify the $j$ for which $I_j$ is the singleton index $r$. Such a $j$ must exist by Lemma \ref{lem:LexiStop}. In each case, we may reason that row $i$ of the augmented matrix $[\overline{\mathbf{b}} | \mathbf{B}^{-1}]$ is lexicographically positive.
+\end{description}
+
+The preceding argument shows that at step $n+1$ of the simplex algorithm we will arrive an augmented matrix $[\overline{\mathbf{b}} | \mathbf{B}^{-1}]$ for which every row is lexicographically positive. This completes the proof.
+\end{proof}
+
+\begin{remark} The assumption that we force $\mathbf{I}_m$ into the basis can be justified in one of two ways:
+\begin{enumerate}
+\item We may assume that we first execute a Phase I simplex algorithm with artificial variables. Then the forgoing argument applies. 
+
+\item Assume we are provided with a crash basis $\mathbf{B}$ and we form the equivalent problem:
+\begin{displaymath}
+P'\left\{
+\begin{aligned}
+\max\;\; & \mathbf{0}^T\mathbf{x}_\mathbf{B} + 
+(\mathbf{c}_\mathbf{N}^T - \mathbf{c}_\mathbf{B}^T\mathbf{B}^{-1}\mathbf{N})\mathbf{x}_\mathbf{N}\\
+s.t.\;\;&\mathbf{I}_m\mathbf{x}_\mathbf{B} + \mathbf{B}^{-1}\mathbf{N}\mathbf{x}_\mathbf{N} = \mathbf{B}^{-1}\mathbf{b}\\
+& \mathbf{x}_\mathbf{B},\mathbf{x}_\mathbf{N} \geq \mathbf{0}
+\end{aligned}
+\right.
+\end{displaymath}
+where $\mathbf{B}^{-1}\mathbf{b} \geq 0$. This problem is clearly equivalent because its initial simplex tableau will be identical to a simplex tableau generated by Problem $P$ with basis matrix $\mathbf{B}$. If no such crash basis exists, then the problem is infeasible. 
+\end{enumerate}
+\end{remark}
+
+\begin{lemma} Under the assumptions of Lemma \ref{lem:LexiPositiveTableau}, let $\mathbf{z}_i$ and $\mathbf{z}_{i+1}$ be row vectors in $\mathbb{R}^{n+1}$ corresponding to Row 0 from the simplex tableau at iterations $i$ and $i+1$ respectively. Assume, however, that we exchange the $z$ column (column 1) and the RHS column (column $n+2$).
+Then $\mathbf{z}_{i+1} - \mathbf{z}_{i}$ is lexicographically positive. 
+\label{lem:LexiRow0}
+\end{lemma}
+\begin{proof} Consider the tableau in Table \ref{tab:LexiTableau}. If we are solving a maximization problem, then clearly for $x_k$ to be an entering variable (as we assumed in the proof of Lemma \ref{lem:LexiPositiveTableau}) we must have $z_k - c_k < 0$. Then the new Row Zero is obtained by adding:
+\begin{displaymath}
+\mathbf{y} = \frac{-(z_k - c_k)}{\overline{a}_{rk}}\left[
+\begin{array}{cccccccccccc}
+0 & \overline{a}_{r1} & \dots & \overline{a}_{rj} & \dots & \overline{a}_{rm} & \overline{a}_{rm+1} & \dots & \overline{a}_{rk} & \dots & \overline{a}_{rn} & \overline{b}_r
+\end{array}\right]
+\end{displaymath}
+to the current row zero consisting of $[1\;\;z_1 - c_1\;\;\dots\;\;z_n - c_n\;\;\overline{z}]$. That is: $\mathbf{z}_{i+1} = \mathbf{z}_i + \mathbf{y}$, or $\mathbf{y} = \mathbf{z}_{i+1} - \mathbf{z}_{i}$.
+
+The fact that $z_k - c_k < 0$ and $\overline{a}_{rk} > 0$ (in order to pivot at that element) implies that $-(z_k - c_k)/\overline{a}_{rk} > 0$. Further, Lemma \ref{lem:LexiPositiveTableau} asserts that the vector $[0\;\;\overline{a}_{r1}\;\;\dots\;\;\overline{a}_{rn}\;\;\overline{b}_r]$ is lexicographically positive (if we perform the exchange of column 1 and column $n+2$ as we assumed we would). Thus, $\mathbf{y}$ is lexicographically positive by Lemma \ref{lem:LexiSum}. This completes the proof.
+\end{proof}
+
+\begin{theorem} Under the assumptions of Lemma \ref{lem:LexiPositiveTableau}, the simplex algorithm converges in a finite number of steps. 
+\label{thm:SimplexConverge}
+\end{theorem}
+\begin{proof} Assume by contradiction that we begin to cycle. Then there is a sequence of row 0 vectors $\mathbf{z}_0, \mathbf{z}_1,\dots, \mathbf{z}_l$ so that $\mathbf{z}_l = \mathbf{z}_0$. Consider $\mathbf{y}_i = \mathbf{z}_i - \mathbf{z}_{i-1}$. By Lemma \ref{lem:LexiRow0}, $\mathbf{y}_i \succ \mathbf{0}$ for $i=1,\dots,n$. Then we have:
+\begin{multline}
+\mathbf{y}_1 + \mathbf{y}_2 + \dots + \mathbf{y}_l = (\mathbf{z}_1 - \mathbf{z}_0) + (\mathbf{z}_2 - \mathbf{z}_1) + \dots + (\mathbf{z}_l - \mathbf{z}_{l-1}) = \\
+(\mathbf{z}_1 - \mathbf{z}_0) + (\mathbf{z}_2 - \mathbf{z}_1) + \dots + (\mathbf{z}_0 - \mathbf{z}_{l-1}) = \mathbf{z}_0 - \mathbf{z}_0 = \mathbf{0}
+\end{multline}
+But by Lemma \ref{lem:LexiSum}, the sum of lexicographically positive vectors is lexicographically positive. Thus we have established a contradiction. This cycle cannot exist and the simplex algorithm must converge by the same argument we used in the proof of Theorem \ref{thm:SimpleConvergence}. This completes the proof.
+\end{proof}
+
+\begin{remark} Again, the proof of correctness, i.e., that the simplex algorithm with the lexicographic minimum ratio test finds a point of optimality, is left until the next chapter when we'll argue that the simplex algorithm finds a so-called KKT point.
+\end{remark}
+
+
+\section{Bland's Rule, Entering Variable Rules and Other Considerations}
+There are many other anti-cycling rules that each have their own unique proofs of convergence. Bland's rule is a simple one: All the variables are ordered (say by giving them an index) and strictly held in that order. If many variables may enter, then the variable with lowest index is chosen to enter. If a tie occurs in the minimum ratio test, then variable with smallest index leaves the basis. It is possible to show that this rule will prevent cycling. However, it can also lead to excessively long simplex algorithm execution. 
+
+In general, there are many rules for choosing the entering variable. Two common ones are:
+\begin{enumerate}
+\item Largest absolute reduced cost: In this case, the variable with most negative (in maximization) or most positive (in minimization) reduced cost is chosen to enter.
+
+\item Largest impact on the objective: In this case, the variable whose entry will cause the greatest increase (or decrease) to the objective function is chosen. This of course requires pre-computation of the value of the objective function for each possible choice of entering variable and can be time consuming.
+\end{enumerate}
+
+Leaving variable rules (like Bland's rule or the lexicographic minimum ratio test) can also be expensive to implement. Practically, many systems ignore these rules and use floating point error to break ties. This does not ensure that cycling does not occur, but often is useful in a practical sense. However, care must be taken. In certain simplex instances, floating point error cannot be counted on to ensure tie breaking and consequently cycling prevention rules \textit{must} be implemented. This is particularly true in network flow problems that are coded as linear programs. It is also important to note that \textit{none} of these rules prevent stalling. Stalling prevention is a complicated thing and there are still open questions on whether certain algorithms admit or prevent stalling. See Chapter 4 of \cite{BJS04} for a treatment of this subject.

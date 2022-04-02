@@ -1,0 +1,622 @@
+
+\section{The Simplex Method} {The Simplex Method}
+\label{lab:Simplex}
+\objective{
+The \emph{Simplex Method} is a straightforward algorithm for finding optimal solutions to optimization problems with linear constraints and cost functions.
+Because of its simplicity and applicability, this algorithm has been named one of the most important algorithms invented within the last 100 years.
+In this lab we implement a standard Simplex solver for the primal problem. %s that are feasible at the origin.
+}
+
+% The algorithm obtains the solution by traversing the edges of the feasible region defined by the constraints.
+% The theory of convex optimization guarantees that the optimal point will be found among the vertices of the feasible region, and so a carefully implemented Simplex Algorithm will discover the exact solution in a finite number of steps.
+
+\subsection*{Standard Form} % ====================================================
+
+The Simplex Algorithm accepts a linear constrained optimization problem, also called a \emph{linear program}, in the form given below:
+
+\begin{align*}
+\text{minimize}\qquad &\c\trp\x \\
+\text{subject to}\qquad & A\x \leq \b \\
+ &\x \geq \0
+\end{align*}
+
+Note that any linear program can be converted to standard form, so there is no loss of generality in restricting our attention to this particular formulation.
+
+Such an optimization problem defines a region in space called the \emph{feasible region}, the set of points satisfying the constraints.
+Because the constraints are all linear, the feasible region forms a geometric object called a \emph{polytope}, having flat faces and edges (see Figure \ref{fig:polytope}).
+The Simplex Algorithm jumps among the vertices of the feasible region searching for an optimal point.
+It does this by moving along the edges of the feasible region in such a way that the objective function is always increased after each move.
+
+\begin{figure}[H]
+\captionsetup[subfigure]{justification=centering}
+\centering
+\begin{subfigure}{.5\textwidth} % 2-d feasible polytope.
+    \centering
+    \includegraphics[width=\linewidth]{foundationsAppliedMathematicsLabs/Volume2/Simplex/figures/feasiblePolytope.pdf}
+    \caption{The feasible region for a linear program with 2-dimensional constraints.}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth} % 3-d feasible polytope.
+    \begin{center}
+    \begin{tikzpicture}[dot/.style={circle,fill=blue,minimum size=3pt,inner sep=0pt, outer sep=-1pt}, >=stealth']
+
+    \draw[blue!10!, fill=blue!5!](3,1)--(1.5,2.3)--(1.75,1.3)--cycle;
+    \draw[blue!25!, fill = blue!15!](3,1)--(1.75,1.3)--(2.3,-1)--cycle;
+    \draw[blue!55!, fill = blue!40!](1.75,1.3)--(2.3,-1)--(.8,-1)--cycle;
+    \draw[blue!80!, fill = blue!65!](.8,-1)--(-.05,-.2)--(.25,.6)--(1.22,.06)--cycle;
+    \draw[blue!85!, fill = blue!73!](-.05, -.2)--(-.3,0)--(.1, 1.65)--(.25, .6)--cycle;
+    \draw[blue!65!, fill = blue!50!](.1,1.7)--(.25,.6)--(1.22,.07)--(1.75,1.3)--cycle;
+    \draw[blue!40!, fill = blue!15!](.1,1.7)--(1.75,1.3)--(1.5,2.3)--cycle;
+
+    \draw[-,thick](-.3,0)--(.1,1.7)--(1.5, 2.3)--(3, 1)--(2.3,-1)--(.8,-1)--cycle;
+
+    \draw[-,thick](.1,1.7)--(3,1);
+    \draw[-,thick](1.5, 2.3)--(2.3,-1);
+    \draw[-,thick](.8,-1)--(1.74,1.3);
+    \draw[-,thick](.1,1.7)--(.25,.6);
+    \draw[-,thick](1.24,.07)--(.25,.6);
+    \draw[-,thick](-.05,-.24)--(.25,.6);
+
+    \draw[->](.37,.63)--(.22,1.61);
+    \draw[->](.31,1.55)--(1.63,1.23);
+    \draw[->](.75,-.85)--(1.12,.05);
+    \draw[->](1.05,.05)--(.25,.48);
+    \draw[->](1.83,1.35)--(1.65,2.1);
+
+    \node[draw=none](x*)at(1.8,2.45){$\x^*$};
+
+    \end{tikzpicture}
+    \end{center}
+    \caption{The feasible region for a linear program with 3-dimensional constraints.}
+\end{subfigure}
+\caption{If an optimal point exists, it is one of the vertices of the polyhedron.
+The simplex algorithm searches for optimal points by moving between adjacent vertices in a direction that increases the value of the objective function until it finds an optimal vertex.}
+\label{fig:polytope}
+\end{figure}
+
+% \begin{figure}[htb] % 3-d feasible polytope.
+% \end{figure}
+
+
+% % TODO: subfigure for 3-d polytope from book.
+
+Implementing the Simplex Algorithm is straightforward, provided one carefully follows the procedure.
+We will break the algorithm into several small steps, and write a function to perform each one.
+To become familiar with the execution of the Simplex algorithm, it is helpful to work several examples by hand.
+
+\subsection*{The Simplex Solver} % ===============================================
+
+Our program will be more lengthy than many other lab exercises and will consist of a collection of functions working together to produce a final result.
+It is important to clearly define the task of each function and how all the functions will work together.
+If this program is written haphazardly, it will be much longer and more difficult to read than it needs to be.
+We will walk you through the steps of implementing the Simplex Algorithm as a Python class.
+% Since the Simplex Algorithm assumes that all the variables are non-negative, we do not need any special logic for it.
+% what is this previous statement saying? What 'special logic' would you need if the variables were negative?
+
+For demonstration purposes, we will use the following linear program.
+\begin{align*}
+\text{minimize}\qquad & -3x_0 - 2x_1 \\
+\text{subject to}\qquad
+& x_0 - x_1 \leq 2 \\
+& 3x_0 + x_1 \leq 5 \\
+& 4x_0 + 3x_1 \leq 7 \\
+& x_0, x_1 \geq 0.
+\end{align*}
+
+\subsection*{Accepting a Linear Program} % ------------------------------------
+
+Our first task is to determine if we can even use the Simplex algorithm.
+Assuming that the problem is presented to us in standard form, we need to check that the feasible region includes the origin.  For now, we only check for feasibility at the origin. A more robust solver sets up the auxiliary problem and solves it to find a starting point if the origin is infeasible.
+
+\begin{problem}{Check feasibility at the origin.}{}
+Write a class that accepts the arrays $\c$, $A$, and $\b$ of a linear optimization problem in standard form.
+In the constructor, check that the system is feasible at the origin.
+That is, check that $A\x \preceq \b$ when $\x = \0$. Raise a \li{ValueError} if the problem is not feasible at the origin. \label{prob:initsolver}
+\end{problem}
+
+\subsection*{Adding Slack Variables} % ----------------------------------------
+
+The next step is to convert the inequality constraints $A\x \leq \b$ into equality constraints by introducing a slack variable for each constraint equation.
+If the constraint matrix $A$ is an $m \times n$ matrix, then there are $m$ slack variables, one for each row of $A$.
+Grouping all of the slack variables into a vector $\w$ of length $m$, the constraints now take the form $A\x + \w = \b$.
+In our example, we have \[\w = \left[\begin{array}{c}x_2\\x_3 \\x_4\end{array}\right]\]
+
+% TODO: change the representation of the slack variables to match the book.
+When adding slack variables, it is useful to represent all of your variables, both the original primal variables and the additional slack variables, in a convenient manner.
+One effective way is to refer to a variable by its subscript.
+For example, we can use the integers $0$ through $n-1$ to refer to the original (non-slack) variables $x_0$ through $x_{n-1}$, and we can use the integers $n$ through $n+m-1$ to track the slack variables (where the slack variable corresponding to the $i$th row of the constraint matrix is represented by the index $n+i-1$).
+
+We also need some way to track which variables are \emph{independent} (non-zero) and which variables are \emph{dependent} (those that have value $0$). This can be done using the objective function. At anytime during the optimization process, the non-zero variables in the objective function are \emph{independent} and all other variables are \emph{dependent}. 
+
+%A useful representation for the variables is a Python list (or NumPy array), where the elements of the list are integers.
+%Since we know how many dependent variables we have ($m$), we can partition the list so that all the dependent variables are kept in the first $m$ locations, and all the independent variables are stored at the end of the list.
+%The ordering of this list is important.
+%In particular, if $i \leq m$, the $i$th element of the list represents the dependent variable corresponding to the $i$th row of $A$.
+%Henceforth we will refer to this list as the \emph{index list}.
+
+%Initially, the dependent variables are simply the slack variables, and their values correspond to the values of %the vector $\b$.
+%In our example, we have 2 primal variables $x_0$ and $x_1$, and we must add 3 slack variables.
+%Thus, we instantiate the following index list:
+
+%\begin{lstlisting}
+%>>> L = [2, 3, 4, 0, 1]
+%\end{lstlisting}
+
+%Notice how the first $3$ entries of the index list are $2, 3, 4$, the indices representing the slack variables.
+%This reflects the fact that the dependent variables at this point are exactly the slack variables.
+
+%As the Simplex Algorithm progresses, however, the dependent variables change, and it will be necessary to swap
+%elements in our index list.
+%For example, suppose the variable represented by the index $4$ becomes independent, while the variable %represented by index $0$ becomes dependent.
+%In this case we swap these two entries in the index list.
+
+%\begin{lstlisting}
+%>>> L[2], L[3] = L[3], L[2]
+%>>> L
+%[2, 3, 0, 4, 1]
+%\end{lstlisting}
+
+%Now our index list tells us that the current dependent variables $2, 3, 0$.
+
+%\begin{problem} % Slack variables. % TODO: this problem is worthless...
+%Design and implement a way to store and track all of the dependent and independent variables.
+
+%Hint: Using integers that represent the index of each variable is useful for Problem \ref{prob:blands}.
+%\label{prob:slackvars}
+%\end{problem}
+
+\subsection*{Creating a Dictionary} % --------------------------------------------
+
+After we have determined that our program is feasible, we need to create the \emph{dictionary} (sometimes called the \emph{tableau}), a matrix to track the state of the algorithm.
+%Remember that your dictionary will need to include in some way the slack variables that you created in Problem \ref{prob:slackvars}.
+
+There are many different ways to build your dictionary.
+One way is to mimic the dictionary that is often used when performing the Simplex Algorithm by hand. To do this we will set the corresponding dependent variable equations to 0. For example, if $x_5$ were a dependent variable we would expect to see a -1 in the column that represents $x_5$.
+Define \[\bar{A} = \left[\begin{array}{cc} A & I_m \end{array}\right],\]
+where $I_m$ is the $m \times m$ identity matrix we will use to represent our slack variables, and define
+\[\bar{\c} = \left[\begin{array}{c}\c\\ \0\end{array}\right].\]
+That is, $\bar{\c} \in \mathbb{R}^{n+m}$ such that the first $n$ entries are $\c$ and the final $m$ entries are zeros.
+Then the initial dictionary has the form
+\begin{equation}
+D =
+\left[\begin{array}{ccc}
+0  & \bar{\c}\trp \\
+\b &  -\bar{A} 
+\end{array}\right]
+\label{eqn:hand_tab}
+\end{equation}
+
+The columns of the dictionary correspond to each of the variables (both primal and slack), and the rows of the dictionary correspond to the dependent variables.
+%Using the convention introduced above of representing the variables by indices in the index list, we have the following correspondence:
+%\[
+%\text{column } i \Leftrightarrow \text{index } i-2, \qquad i = 2, 3, \ldots, n+m+1,
+%\]
+%and
+%\[
+%\text{row } j \Leftrightarrow L_{j-1}, \qquad j = 2, 3, \ldots, m+1,
+%\]
+%where $L_{j-1}$ refers to the $(j-1)$th entry of the index list.
+
+%For our example problem, the initial index list is
+%\[
+%L = (2, 3, 4, 0, 1),
+%\]
+For our example the initial dictionary is
+\begin{equation*}
+D = \begin{bmatrix}
+    0 & -3 & -2 & 0 & 0 & 0\\
+    2 & -1 & 1 & -1 & 0 & 0\\
+    5 & -3 & -1 & 0 & -1 & 0\\
+    7 & -4 & -3 & 0 & 0 & -1
+    \end{bmatrix}.
+\end{equation*}
+%The third column corresponds to index $1$, and the fourth row corresponds to index $4$, since this is the
+%third entry of the index list.
+
+The advantage of using this kind of dictionary is that it is easy to check the progress of your algorithm by hand.
+%The disadvantage is that pivot operations require careful bookkeeping to track the variables and constraints.
+
+% This dictionary is less intuitive, and I think could lead to more confusion.
+\begin{comment}
+We can also use a dictionary of the format:
+\begin{equation}
+T = \begin{bmatrix}
+    0 & \c\trp  & 0 \\
+    \0 & I_n & \0\\
+    \b & -A  & \0
+\end{bmatrix}.
+\label{eqn:matrix_tab}
+\end{equation}
+Here, $T$ is a square matrix of size $(n+m+1) \times (n+m+1)$.
+The advantage of this form of the dictionary is that all the pivot bookkeeping is built into the matrix.
+For our example problem, the initial dictionary of this form is
+\begin{equation}
+T = \begin{bmatrix}
+        0 & 3 & 2 & 0 & 0 & 0 \\
+        0 & 1 & 0 & 0 & 0 & 0 \\
+        0 & 0 & 1 & 0 & 0 & 0 \\
+        2 &-1 & 1 & 0 & 0 & 0 \\
+        5 &-3 &-1 & 0 & 0 & 0 \\
+        7 &-4 &-3 & 0 & 0 & 0
+\end{bmatrix}.
+\label{eqn:matrix_inittab}
+\end{equation}
+\end{comment}
+
+\begin{problem}{Initialize the dictionary.}
+Add a method to your Simplex solver that takes in arrays c, A, and b to create the initial dictionary (D) as a NumPy array.
+\label{prob:makedictionary}
+\end{problem}
+
+\subsection{Pivoting} % ------------------------------------------------------
+
+Pivoting is the mechanism that really makes Simplex useful.
+Pivoting refers to the act of swapping dependent and independent variables, and transforming the dictionary appropriately.
+This has the effect of moving from one vertex of the feasible polytope to another vertex in a way that increases the value of the objective function.
+Depending on how you store your variables, you may need to modify a few different parts of your solver to reflect this swapping.
+
+When initiating a pivot, you need to determine which variables will be swapped.
+In the dictionary representation, you first find a specific element on which to pivot, and the row and column that contain the pivot element correspond to the variables that need to be swapped.
+Row operations are then performed on the dictionary so that the pivot column becomes a negative elementary vector.
+
+Let's break it down, starting with the pivot selection.
+We need to use some care when choosing the pivot element.
+To find the pivot column, search from left to right along the top row of the dictionary (ignoring the first column), and stop once you encounter the first negative value.
+The index corresponding to this column will be designated the \emph{entering index}, since after the full pivot operation, it will enter
+the basis and become a dependent variable.
+
+Using our initial dictionary $D$ in the example, we stop at the second column:
+\[ D = \left[ \:
+\begin{array}{*{7}{c}}
+\cline{2-2}
+0 & \multicolumn{1}{|c}{-3} & \multicolumn{1}{|c}{-2} & 0 & 0 & 0\\
+2 & \multicolumn{1}{|c}{-1} & \multicolumn{1}{|c}{1} & -1 & 0 & 0\\
+5 & \multicolumn{1}{|c}{-3} & \multicolumn{1}{|c}{-1} & 0 & -1 & 0\\
+7 & \multicolumn{1}{|c}{-4} & \multicolumn{1}{|c}{-3} & 0 & 0 & -1\\
+\cline{2-2}
+\end{array}
+\right] \]
+We now know that our pivot element will be found in the second column.
+The entering index is thus $1$.
+
+Next, we select the pivot element from among the negative entries in the pivot column (ignoring the entry in the first row).
+\emph{If all entries in the pivot column are non-negative, the problem is unbounded and has no solution.}
+In this case, the algorithm should terminate.
+Otherwise, assuming our pivot column is the $j$th column of the dictionary and that the negative entries of this column are
+$D_{i_1, j}, D_{i_2, j}, \ldots, D_{i_k, j}$, we calculate the ratios
+\[
+\frac{-D_{i_1,0}}{D_{i_1,j}}, \frac{-D_{i_2,0}}{D_{i_2,j}}, \ldots, \frac{-D_{i_k,0}}{D_{i_k,j}},
+\]
+and we choose our pivot element to be one that minimizes this ratio.
+If multiple entries minimize the ratio, then we utilize \emph{Bland's Rule}, which instructs us to choose the entry in the row corresponding to the smallest index (obeying this rule is important, as it prevents the possibility of the algorithm cycling back on itself infinitely).
+The index corresponding to the pivot row is designated as the \emph{leaving index}, since after the full pivot operation, it will leave the basis and become a independent variable.
+
+In our example, we see that all entries in the pivot column (ignoring the entry in the first row, of course) are negative, and hence they are all potential choices for the pivot element.
+We then calculate the ratios, and obtain
+\[
+\frac{-2}{-1} = 2,\quad \frac{-5}{-3} = 1.66...,\quad \frac{-7}{-4} = 1.75.
+\]
+We see that the entry in the third row minimizes these ratios.
+Hence, the element in the second column (index 1), third row (index 2) is our designated
+pivot element.
+
+\[ D = \left[ \:
+\begin{array}{*{7}{c}}
+
+0 & -3 & -2 & 0 & 0 & 0\\
+2 & -1 & 1 & -1 & 0 & 0\\\cline{2-2}
+5 & \multicolumn{1}{|c}{-3} & \multicolumn{1}{|c}{-1} & 0 & -1 & 0\\\cline{2-2}
+7 & -4 & -3 & 0 & 0 & -1\\
+\end{array}
+\right] \]
+
+\begin{comment}
+If we are using the dictionary representation in equation \ref{eqn:matrix_tab}, pivot operations are reduced to a simple matrix equation:
+\[T = T + T_m \otimes T_n,\]
+where $T_m$ is the column corresponding to the variable entering the basis and $T_n$ is a normalized vector corresponding to the variable leaving the basis.
+The result of the equation is the new dictionary.
+
+For example, for the initial dictionary, \ref{eqn:matrix_inittab}, we will demonstrate the first pivot operation.
+We can do the entire pivot with a single outer product.
+The first pivot should occur with $x_1$ leaving and $x_4$ entering.
+In other words, we want to pivot at row $i = 4$ and column $j = 1$ in the dictionary (the indices are offset by one because of the objective function and the row of constraints).
+
+The row corresponding to $x_4$ is
+\[
+\begin{bmatrix} 5 &-3 &-1 & 0 & 0 & 0\end{bmatrix}.
+\]
+This represents the equation
+\[
+x_4 = 5 - 3x_1 - x_2.
+\]
+Our eventual goal is to solve for $x_1$ and substitute into the remaining rows of the dictionary.
+A simple method to accomplish this is to rewrite the equation so that we have zero on the left-hand side:
+\[
+0 = 5 - 3x_1 - x_2 - x_4.
+\]
+Now, we can normalize this equation so that the coefficient of $x_1$ is $-1$.
+This is always accomplished by dividing the equation by the negative of the coefficient of $x_1$:
+\begin{equation}
+0 = \frac{5}{3} - x_1 - \frac{1}{3}x_2 - \frac{1}{3}x_4.
+\label{eq:zero-equation}
+\end{equation}
+This is represented by the vector
+\[
+\begin{bmatrix} 5/3 & -1 & -1/3 & 0 & -1/3 & 0\end{bmatrix}.
+\]
+Since this left-hand side is zero, I can add any scalar multiple of this equation to any of the equations for $x_i$ and still have an equation for $x_i$.
+For example, the equation for $x_5$ is
+\[
+x_5 = 7 - 4x_1 - 3x_2.
+\]
+Thus, I can add $-4$ times \eqref{eq:zero-equation} to this equation without changing the left-hand side:
+\[ x_5 = 7 - 4x_1 - 3x_2 = 7 - 4x_1 - 3x_2 + -4\left(\frac{5}{3} - x_1 - \frac{1}{3}x_2 - \frac{1}{3}x_4\right) = \frac{1}{3} - \frac{5}{3}x_2 + \frac{4}{3} x_4.
+\]
+Notice that we end up with an equation that does not include $x_1$ and now has $x_4$, just like we wanted.
+In fact, this works in all of our equations, including those for the objective function and even for $x_1$!
+Since the coefficient of $x_1$ in \eqref{eq:zero-equation} is $-1$, when we scale it by the coefficient of $x_1$ in any particular row, the $x_1$ cancels out.
+\[
+T = T + \begin{bmatrix}3 \\ 1 \\ 0 \\ -1 \\ -3 \\ -4\end{bmatrix}\begin{bmatrix} 5/3 & -1 & -1/3 & 0 & -1/3 & 0\end{bmatrix}.
+\]
+The column vector is just the second column of $T$, which is the column containing the coefficients of $x_1$ in each row.
+When we compute this sum, we obtain the dictionary.
+\[
+T = \begin{bmatrix}
+        5 &  0 & 1 & 0 & -1 & 0 \\
+        5/3 & 0 &-1/3 & 0 &-1/3 & 0 \\
+        0 & 0 & 1 & 0 & 0 & 0 \\
+        1/3 & 0 & 4/3 & 0 & 1/3 & 0 \\
+        0 & 0 & 0 & 0 & 1 & 0 \\
+        1/3 & 0 & -5/3 & 0 & 4/3 & 0
+\end{bmatrix}.
+\]
+\end{comment}
+%\begin{problem}
+%Write a method that will determine the pivot row and pivot column according to Bland's Rule.
+% \begin{comment}
+\begin{definition}{Bland's Rule}
+Choose the independent variable with the smallest index that has a negative coefficient in the objective function
+as the leaving variable.
+Choose the dependent variable with the smallest index among all the binding dependent variables.
+\end{definition}
+
+Bland's Rule is important in avoiding cycles when performing pivots.
+This rule guarantees that a feasible Simplex problem will terminate in a finite number of pivots.% \emph{Hint:} Avoid dividing by zero.
+% \end{comment}
+%\label{prob:blands}
+%\end{problem}
+
+%The next step is to swap the entering and leaving indices in our index list.
+%In the example, we determined above that these indices are $0$ and $3$.
+%We swap these two elements in our index list,
+%and the updated index list is now
+%\[
+%L = (2, 0, 4, 3, 1),
+%\]
+%so the dependent variables are now given by the indices $2, 0, 4$.
+
+Finally, we perform row operations on our dictionary in the following way: divide the pivot row by the negative value of the pivot entry.
+Then use the pivot row to zero out all entries in the pivot column above and below the pivot entry.
+In our example, we first divide the pivot row by -3, and then zero out the two entries above the pivot element and the single entry below it:
+\begin{align*}
+\begin{bmatrix}
+    0 & -3 & -2 & 0 & 0 & 0\\
+    2 & -1 & 1 & -1 & 0 & 0\\
+    5 & -3 & -1 & 0 & -1 & 0\\
+    7 & -4 & -3 & 0 & 0 & -1
+    \end{bmatrix} &\rightarrow
+\begin{bmatrix}
+    0 & -3 & -2 & 0 & 0 & 0\\
+    2 & -1 & 1 & -1 & 0 & 0\\
+    5/3 & -1 & -1/3 & 0 & -1/3 & 0\\
+    7 & -4 & -3 & 0 & 0 & -1
+    \end{bmatrix}\rightarrow\\
+\begin{bmatrix}
+    -5 & 0 & -1 & 0 & 1 & 0\\
+    2 & -1 & 1 & -1 & 0 & 0\\
+    5/3 & -1 & -1/3 & 0 & -1/3 & 0\\
+    7 & -4 & -3 & 0 & 0 & -1
+    \end{bmatrix} &\rightarrow
+\begin{bmatrix}
+    -5 & 0 & -1 & 0 & 1 & 0\\
+    1/3 & 0 & -4/3 & 1 & -1/3 & 0\\
+    5/3 & -1 & -1/3 & 0 & -1/3 & 0\\
+    7 & -4 & -3 & 0 & 0 & -1
+    \end{bmatrix}\rightarrow\\
+\begin{bmatrix}
+    -5 & 0 & -1 & 0 & 1 & 0\\
+    1/3 & 0 & 4/3 & -1 & 1/3 & 0\\
+    5/3 & -1 & -1/3 & 0 & -1/3 & 0\\
+    1/3 & 0 & -5/3 & 0 & 4/3 & -1
+    \end{bmatrix}&.
+\end{align*}
+The result of these row operations is our updated dictionary, and the pivot operation is complete.
+
+\begin{problem}{Pivoting}
+Add a method to your solver that checks for unboundedness and performs a single pivot operation from start to completion.
+If the problem is unbounded, raise a \li{ValueError}.
+\end{problem}
+
+\vspace{2mm}
+
+\subsection{Termination and Reading the Dictionary} % ---------------------------
+
+Up to this point, our algorithm accepts a linear program, adds slack variables, and creates the initial dictionary.
+After carrying out these initial steps, it then performs the pivoting operation iteratively until the optimal point is found.
+But how do we determine when the optimal point is found? The answer is to look at the top row of the dictionary, which represents the objective function.
+More specifically, before each pivoting operation, check whether all of the entries in the top row of the dictionary (ignoring the entry in the first column) are nonnegative.
+If this is the case, then we have found an optimal solution, and so we terminate the algorithm.
+
+The final step is to report the solution.
+The ending state of the dictionary and index list tells us everything we need to know.
+The minimal value attained by the objective function is found in the upper leftmost entry of the dictionary.
+The dependent variables all have the value $0$ in the objective function or first row of our dictionary array. The independent variables have values given by the first column of the dictionary.
+Specifically, the independent variable whose index is located at the $i$th entry of the index list has the value $T_{i+1, 0}$.
+
+In our example, suppose that our algorithm terminates with the dictionary and index list in the following state:
+\[
+D = \begin{bmatrix}
+-5.2 & 0 & 0 & 0 & 0.2 & 0.6\\
+0.6 & 0 & 0 & -1 & 1.4 & -0.8\\
+1.6 & -1 & 0 & 0 & -0.6 & 0.2\\
+0.2 & 0 & -1 & 0 & 0.8 & -0.6\\
+\end{bmatrix}
+\]
+%\[
+%L = (2, 0, 1, 3, 4).
+%\]
+Then the minimal value of the objective function is $-5.2$.
+The independent variables have indices $4, 5$ and have the value $0$.
+The dependent variables have indices $3, 1,$ and $2$, and have values $.6, 1.6$, and $.2$, respectively.
+In the notation of the original problem statement, the solution is given by
+\begin{align*}
+x_0 &= 1.6\\
+x_1 &= .2.
+\end{align*}
+
+\begin{problem}{SimplexSolver.solve()}
+Write an additional method in your solver called \li{solve()} that obtains the optimal solution, then returns the minimal value, the dependent variables, and the independent variables.
+The dependent and independent variables should be represented as two dictionaries that map the index of the variable to its corresponding value.
+
+For our example, we would return the tuple 
+
+\li{(-5.2, \{0: 1.6, 1: .2, 2: .6\}, \{3: 0, 4: 0\})}.
+%The correct format of this tuple is critical, as this tuple of information will be used judge whether or not your solver works!
+\end{problem}
+
+\vspace{5mm}
+
+At this point, you should have a Simplex solver that is ready to use.
+The following code demonstrates how your solver is expected to behave:
+
+\vspace{5mm}
+
+\begin{lstlisting}
+>>> import SimplexSolver
+
+# Initialize objective function and constraints.
+>>> c = np.array([-3., -2.])
+>>> b = np.array([2., 5, 7])
+>>> A = np.array([[1., -1], [3, 1], [4, 3]])
+
+# Instantiate the simplex solver, then solve the problem.
+>>> solver = SimplexSolver(c, A, b)
+>>> sol = solver.solve()
+>>> print(sol)
+(-5.2,
+ {0: 1.6, 1: 0.2, 2: 0.6},
+ {3: 0, 4: 0})
+\end{lstlisting}
+
+If the linear program were infeasible at the origin or unbounded, we would expect the solver to alert the user by raising an error.
+
+Note that this simplex solver is \emph{not} fully operational.
+It can't handle the case of infeasibility at the origin.
+This can be fixed by adding methods to your class that solve the \emph{auxiliary problem}, that of finding an initial feasible dictionary when the problem is not feasible at the origin.
+Solving the auxiliary problem involves pivoting operations identical to those you have already implemented, so adding this functionality
+is not overly difficult.
+
+
+\subsection{Exercises}
+
+\paragraph{Exercise $1.0$ (Learn $\mathrm{LT}_{\mathrm{E}} \mathrm{X}$ )}
+
+Learn to use $\operatorname{lt}_{\mathrm{E}} X$ for writing all of your homework solutions. Personally, I use MiKTEX, which is an implementation of $\mathrm{ET} \mathrm{E} \mathrm{X}$ for Windows. Specifically, within MiKTEX I am using pdfteTEX (it only matters for certain things like including graphics and also pdf into a document). I find it convenient to use the editor WinEdt, which is very LATEX friendly. A good book on $\mathrm{ET} \mathrm{T} \mathrm{X}$ is
+
+In A.1 there is a template to get started. Also, there are plenty of tutorials and beginner's guides on the web.
+
+\paragraph{Exercise $1.1$ (Convert to standard form)}
+
+Give an original example (i.e., with actual numbers) to demonstrate that you know how to transform a general linear-optimization problem to one in standard form.
+
+\paragraph{Exercise $1.2$ (Weak Duality example)}
+
+Give an original example to demonstrate the Weak Duality Theorem.
+
+\paragraph{Exercise $1.3$ (Convert to $\leq$ form)}
+
+Describe a general recipe for transforming an arbitrary linear-optimization problem into one in which all of the linear constraints are of $\leq$ type.
+
+\paragraph{Exercise $1.4$ ( $m+1$ inequalities)}
+
+Prove that the system of $m$ equations in $n$ variables $A x=b$ is equivalent to the system $A x \leq b$ augmented by only one additional linear inequality - that is, a total of only $m+1$ inequalities.
+
+\paragraph{Exercise $1.5$ (Weak duality for another form)}
+
+Give and prove a Weak Duality Theorem for
+
+$$
+\begin{aligned}
+\max \quad c^{\prime} x & \\
+A x & \leq b ; \\
+x & \geq 0 .
+\end{aligned}
+$$
+
+HINT: Convert $\left(\mathrm{P}^{\prime}\right)$ to a standard-form problem, and then apply the ordinary Weak Duality Theorem for standard-form problems. \paragraph{Exercise 1.6 (Weak duality for a complicated form)}
+
+Give and prove a Weak Duality Theorem for
+
+$$
+\begin{gathered}
+\min \quad c^{\prime} x+f^{\prime} w \\
+\begin{aligned}
+A x+B w & \leq b ; \\
+D x &=g ;
+\end{aligned} \\
+x \geq 0 \quad w \leq 0
+\end{gathered}
+$$
+
+HINT: Convert $\left(\mathrm{P}^{\prime}\right)$ to a standard-form problem, and then apply the ordinary Weak Duality Theorem for standard-form problems.
+
+\paragraph{Exercise $1.7$ (Weak duality for a complicated form - with MATLAB)}
+
+The MATLAB code below makes and solves an instance of $\left(\mathrm{P}^{\prime}\right)$ from Exercise 1.6. Study the code to see how it is works. Now, extend the code to solve the dual of $\left(\mathrm{P}^{\prime}\right)$. Also, after converting $\left(\mathrm{P}^{\prime}\right)$ to standard form (as indicated in the HINT for Exercise 1.6), use MATLAB to solve that problem and its dual. Make sure that you get the same optimal value for all of these problems.
+
+
+
+
+
+\subsection{$2.5$ Exercises}
+
+\paragraph{Exercise 2.1 (Dual in AMPL)}
+
+Without changing the file production. dat, use AMPL to solve the dual of the Production Problem example, as described in Section 2.1. You will need to modify production.mod and production.run.
+
+\paragraph{Exercise $2.2$ (Sparse solution for linear equations with AMPL)}
+
+In some application areas, it is interesting to find a "sparse solution" - that is, one with few non-zeros - to a system of equations $A x=b$. It is well known that a 1-norm minimizing solution is a good heuristic for finding a sparse solution. Using AMPL, try this idea out on several large examples, and report on your results.
+
+HINT: To get an interesting example, try generating a random $m \times n$ matrix $A$ of zeros and ones, perhaps $m=50$ equations and $n=500$ variables, maybe with probability $1 / 2$ of an entry being equal to one. Then choose maybe $m / 2$ columns from $A$ and add them up to get $b$. In this way, you will know that there is a solution with only $m / 2$ non-zeros (which is already pretty sparse). Your 1-norm minimizing solution might in fact recover this solution $(\odot)$, or it may be sparser $(\odot \odot)$, or perhaps less sparse $(\odot)$.
+
+\paragraph{Exercise $2.3$ (Bloody AMPL)}
+
+A transportation problem is a special kind of (single-commodity min-cost) networkflow problem. There are certain nodes $v$ called supply nodes which have net supply $b_{v}>0$. The other nodes $v$ are called demand nodes, and they have net supply $b_{v}<0$. There are no nodes with $b_{v}=0$, and all arcs point from supply nodes to demand nodes.
+
+A simplified example is for matching available supply and demand of blood, in types $A, B, A B$ and $O$. Suppose that we have $s_{v}$ units of blood available, in types $v \in\{A, B, A B, O\}$. Also, we have requirements $d_{v}$ by patients of different types $v \in$ $\{A, B, A B, O\}$. It is very important to understand that a patient of a certain type can accept blood not just from their own type. Do some research to find out the compatible blood types for a patient; don't make a mistake - lives depend on this! In this spirit, if your model misallocates any blood in an incompatible fashion, you will receive a grade of $F$ on this problem.
+
+Describe a linear-optimization problem that satisfies all of the patient demand with compatible blood. You will find that type $O$ is the most versatile blood, then both $A$ and $B$, followed by $A B$. Factor in this point when you formulate your objective function, with the idea of having the left-over supply of blood being as versatile as possible.
+
+Using AMPL, set up and solve an example of a blood-distribution problem.
+
+\paragraph{Exercise $2.4$ (Mix it up)}
+
+"I might sing a gospel song in Arabic or do something in Hebrew. I want to mix it up and do it differently than one might imagine." - Stevie Wonder
+
+We are given a set of ingredients $1,2, \ldots, m$ with availabilities $b_{i}$ and per unit costs $c_{i}$. We are given a set of products $j, 2, \ldots, m$ with minimum production requirements $d_{j}$ and per unit revenues $e_{j}$. It is required that product $j$ have at least a fraction of $l_{i j}$ of ingredient $i$ and at most a fraction of $u_{i j}$ of ingredient $i$. The goal is to devise a plan to maximize net profit.
+
+Formulate, mathematically, as a linear-optimization problem. Then, model with AMPL, make up some data, try some computations, and report on your results. Exercise $2.5$ (Task scheduling)
+
+
+We are given a set of tasks, numbered $1,2, \ldots, n$ that should be completed in the minimum amount of time. For convenience, task 0 is a "start task" and task $n+1$ is an "end task". Each task, except for the start and end task, has a known duration $d_{i}$. For convenience, let $d_{0}:=0$. There are precedences between tasks. Specifically, $\Psi_{i}$ is the set of tasks that must be completed before task $i$ can be started. Let $t_{0}:=0$, and for all other tasks $i$, let $t_{i}$ be a decision variable representing its start time.
+
+Formulate the problem, mathematically, as a linear-optimization problem. The objective should be to minimize the start time $t_{n+1}$ of the end task. Then, model the problem with AMPL, make up some data, try some computations, and report on your results.
+
+\paragraph{Exercise $2.6$ (Investing wisely)}
+
+Almost certainly, Albert Einstein did not say that "compound interest is the most powerful force in the universe."
+
+A company wants to maximize their cash holdings after $T$ time periods. They have an external inflow of $p_{t}$ dollars at the start of time period $t$, for $t=1,2, \ldots, T$. At the start of each time period, available cash can be allocated to any of $K$ different investment vehicles (in any available non-negative amounts). Money allocated to investmentvehicle $k$ at the start of period $t$ must be held in that investment $k$ for all remaining time periods, and it generates income $v_{t, t}^{k}, v_{t, t+1}^{k}, \ldots, v_{t T}^{k}$, per dollar invested. It should be assumed that money obtained from cashing out the investment at the end of the planning horizon (that is, at the end of period $T$ ) is part of $v_{t, T}^{k}$. Note that at the start of time period $t$, the cash available is the external inflow of $p_{t}$, plus cash accumulated from all investment vehicles in prior periods that was not reinvested. Finally, assume that cash held over for one time period earns interest of $q$ percent.
+
+Formulate the problem, mathematically, as a linear-optimization problem. Then, model the problem with AMPL, make up some data, try some computations, and report on your results.
+
