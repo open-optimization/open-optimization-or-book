@@ -1,8 +1,17 @@
 % Chapters will always start on odd numbered page
 \documentclass[letter,12pt]{book}
+
+
+  
 \usepackage[english]{babel}
 \usepackage{fancyhdr}
 
+
+
+
+%% Toggle text
+%\newcommand \nlptext{Show NLP text}
+%\newcommand \oldstuff{Show old text}
 
 %Toggle proofs
 %\def \showproofs {If commented, many proofs will not be shown}
@@ -16,7 +25,7 @@
 
 \usepackage{booktabs}
 
-
+\graphicspath{ {./images/}{images/}{optimization/multi-objective/images/} }
 % For the font
 \usepackage{mathptmx}
 %\usepackage{roboto} %%for Lyryx Icon font
@@ -95,6 +104,7 @@
 \usepackage{emptypage}
 
 % Draw images and figures
+\usepackage{rotating}
 \usepackage{tikz}
 \usetikzlibrary{calc,intersections,shapes.callouts}
 \usetikzlibrary{decorations.text}
@@ -103,6 +113,14 @@
 \usetikzlibrary{shadows}
 \usetikzlibrary{backgrounds}
 \usepackage{circuitikz}
+\tikzstyle arrowstyle=[scale=2.5]
+\tikzstyle directed=[postaction={decorate,decoration={markings,
+    mark=at position .65 with {\arrow[arrowstyle]{latex}}}}]
+\tikzstyle directed1=[postaction={decorate,decoration={markings,
+    mark=at position .99 with {\arrow[arrowstyle]{latex}}}}]   
+\tikzstyle{vertex}=[circle,fill=black!25,minimum size=20pt,inner sep=0pt]
+
+\definecolor{ocre}{RGB}{243,102,25} % Define the orange color used for highlighting throughout the book
 
 % Thew following passes on paperheight to ps2pdf... bug fix  
 \pdfpageheight=\paperheight 
@@ -227,10 +245,15 @@
 \input{optimization/title} 
 \input{lineqlpbook/linearProgrammingPreamble}
 
-\graphicspath{{aFirstCourseLinearAlgebra/},{lineqlpbook/},{optimization/figures/figures-static/}}
+\graphicspath{{aFirstCourseLinearAlgebra/},{lineqlpbook/},{optimization/figures/figures-static/},{Christopher_Griffin_Penn_State_University/}}
+
+
+
+\usetikzlibrary{arrows.meta,positioning}
+
 \begin{document}
 
-\input{optimization/front-matter.tex}
+\input{optimization/LP-front-matter.tex}
 
 
 
@@ -253,19 +276,32 @@
 %	\input frontmatter/titlepage.tex
 %	\cleardoublepage
 %}
-	\input preface.tex
-	%\input aFirstCourseLinearAlgebra/content/preface.tex
-% Lyryx with Open Texts 
-	\input aFirstCourseLinearAlgebra/frontmatter/LyryxOpenTexts.tex
-	\cleardoublepage
+	%\input preface.tex
+	\begin{center}
+\href{https://pixabay.com/illustrations/under-construction-construction-sign-2408060/}{\includegraphics[scale = 0.1]{optimization/figures/under-construction-2408060_1280}}
+\end{center}
 
-% License
-	\input aFirstCourseLinearAlgebra/frontmatter/license.tex
-	\input contributors-foundations.tex
-	\cleardoublepage
+This entire book is a working manuscript. 
+
+\begin{center}
+\fontsize{14pt}{16pt}\selectfont\textcolor{titletextcolour}{\textbf{MAJOR ACKNOWLEDGEMENTS}}
+\end{center}
+
+I would like to acknowledge that substantial parts of this book were borrowed under a CC-BY-SA license.   These substantial pieces include:
+\begin{itemize}
+\item "A First Course in Linear Algebra" by Lyryx Learning (based on original text by Ken Kuttler).   A majority of their formatting was used along with selected sections that make up the appendix sections on linear algebra. We are extremely grateful to Lyryx for sharing their files with us.  They do an amazing job compiling their books and the templates and formatting that we have borrowed here clearly took a lot of work to set up.  Thank you for sharing all of this material to make structuring and formating this book much easier! See subsequent page for list of contributors.
+\item "Foundations of Applied Mathmatics" with many contributors.  See \url{https://github.com/Foundations-of-Applied-Mathematics}.  Several sections from these notes were used along with some formatting.  Some of this content has been edited or rearranged to suit the needs of this book.  This content comes with some great references to code and nice formatting to present code within the book.   See subsequent page with list of contributors.
+\item "Linear Inequalities and Linear Programming" by 
+Kevin Cheung.  See \url{https://github.com/dataopt/lineqlpbook}.  These notes are posted on GitHub in a ".Rmd" format for nice reading online.  This content was converted to \LaTeX using Pandoc.    These notes make up a substantial section of the Linear Programming part of this book.
+\item Linear Programming notes by Douglas Bish.  These notes also make up a substantial section of the Linear Programming part of this book.
+\end{itemize}
+
+I would also like to acknowledge Laurent Porrier and Diego Moran for contributing various notes on linear and integer programming. 
+
+
 
 % Revision  
-	\input{revision-history.tex}
+	%\input{revision-history.tex}
 	\cleardoublepage
 
 %\end{document} %to compile only the front matter
@@ -294,11 +330,16 @@ Here are a list of resources that may be useful as alternative references or add
 
 \paragraph{\textbf{Free notes and textbooks}}
 \begin{itemize}
+\item \href{https://oer.avu.org/handle/123456789/780}{Linear Programming by K.J. Mtetwa, David}
 \item \href{http://www.optimization-online.org/DB_FILE/2013/12/4161.pdf}{A first course in optimization by Jon Lee}
 \item \href{https://people.inf.ethz.ch/fukudak/lect/opt2011/aopt11note1.pdf}{Introduction to Optimizaiton Notes by Komei Fukuda}
 \item \href{https://web.stanford.edu/~boyd/cvxbook/}{Convex Optimization by Bord and Vandenberghe}
 \item  \href{http://math.mit.edu/~goemans/18310S15/lpnotes310.pdf}{LP notes of Michel Goemans from MIT }
 \item \href{https://www.springer.com/gp/book/9783540306979}{Understanding and Using Linear Programming - Matousek and G\"artner} [Downloadable from Springer with University account]
+\item \href{https://rd.springer.com/book/10.1007/978-1-4471-5577-5}{Operations Research Problems
+Statements and Solutions
+-
+Ra\'ul PolerJosefa Mula Manuel D\'iaz-Madro\~nero} [Downloadable from Springer with University account]
 \end{itemize}
 \paragraph{\textbf{Notes, books, and videos by various solver groups}}
 \begin{itemize}
@@ -383,7 +424,20 @@ Also, go to \url{https://github.com/open-optimization/open-optimization-or-examp
 
 \todo[inline]{This part of the book needs substantial revision.  It is currently comprised of 3 sets of notes pasted together.}
 
+
 \input{optimization/linear-programming-Hildebrand-mix.tex}
+%\newcommand\oldstuff{thus}
+%\input{optimization/linear-programming-mix-hildebrand-simplex-method.tex}
+
+
+\ifdefined \oldstuff
+\newpage \section{Linear Optimization}
+In this section, we study on linear optimization problems, i.e., linear programs (LPs).
+
+\subsection{Problem Formulation} 
+\input{Opt_Notes/LO_Formulations}
+
+\part{OLD LP Stuff}
 
 \subimport{./foundationsAppliedMathematicsLabs/Volume2/CVXOPT_Intro/}{CVXOPT_Intro_linear_programming}
 \subimport{./foundationsAppliedMathematicsLabs/Volume2/Simplex/}{Simplex}
@@ -432,55 +486,465 @@ In this section, we study on linear optimization problems, i.e., linear programs
 \input{Opt_Notes/Applications}
 
 %\input{optimization/dualSimplexMethod.tex}
-
-\part{Integer Programming}
-\label{part:IntegerProgramming}
-\input{optimization/integerProgrammingFormulations}
-\input{optimization/models}
-\input{optimization/complexity.tex}
-\input{optimization/computational_complexity.tex}
-\input{optimization/integerProgrammingExponentialFormulations.tex}
-\input{optimization/integerProgrammingAlgorithms}
-
+%
+%\part{Integer Programming}
+%\label{part:IntegerProgramming}
+%\input{optimization/integerProgrammingFormulations}
+%\input{optimization/models}
+%\input{optimization/complexity.tex}
+%\input{optimization/computational_complexity.tex}
+%\input{optimization/integerProgrammingExponentialFormulations.tex}
+%\input{optimization/integerProgrammingAlgorithms}
+%
 \input{lineqlpbook/linearProgrammingIntegerLinearProgramming}
-
-\input{optimization/discreteOptimization.tex}
-
-
-\input{optimization/heuristics.tex}
+%
+%\input{optimization/discreteOptimization.tex}
+%
+%
+%\input{optimization/heuristics.tex}
+%%
+%
+%
+%\input{optimization/polyhedra.tex}
 %
 
 
-\input{optimization/polyhedra.tex}
-%
+\fi
 
+\chapter{Simplex Method}
+
+
+\begin{definition}{Standard Form}{standardform}
+A linear program is in \emph{standard form} if is written as 
+\begin{align*}
+\max \ \ &c^\top x \\
+s.t. \ \ & Ax = b\\
+& x \geq 0.
+\end{align*}
+\end{definition}
+
+\begin{definition}{Extreme Point}{extremepoint}
+A point $x$ in a convex set $C$ is called an \emph{extreme point} if it cannot be written as a strict convex combination of other points in $C$.
+\end{definition}
+
+\begin{theorem}{Optimal Extreme Point - Bounded Case}{}
+Consider a linear optimization problem in standard form.  Suppose that the feasible region is bounded and non-empty. 
+
+Then there exists an optimal solution at an extreme point of the feasible region.
+\end{theorem}
+
+\begin{proof}[Proof Sketch]
+
+\end{proof}
+
+
+% Winston
+\begin{definition}{Basic solution}{}
+A basic solution to $Ax = b$ is obtained by setting $n-m$ variables equal to $0$ and solving for the values of the remaining $m$ variables.  This assumes that the setting $n-m$ variables equal to 0 yields unique values for the remaining $m$ variables or, equivalently, the columns of the remaining $m$ variables are linearly independent.
+\end{definition}
+
+\begin{example}{}{}
+Consider the problem
+\begin{align*}
+\max \quad & Z =-5 X-7 Y  \\ 
+\text { s.t. } \quad & X+3 Y \geq 6 \\ 
+&5 X+ 2 Y \geq 10 \\ 
+&Y  \leq 4 \\ 
+&X, Y  \geq 0 
+\end{align*}
+
+\begin{center}
+\includegraphics[scale = 0.4]{screenshots/example1-feasible-region}
+\end{center}
+
+We begin by converting this problem to standard form.  
+\begin{align*}
+\max \quad & Z =-5 X-7 Y + 0s_1 + 0s_2 + 0 s_3\\ 
+\text { s.t. } \quad & X+3 Y - s_1 = 6 \\ 
+&5 X+ 2 Y - s_2 = 10 \\ 
+&Y  + s_3 = 4 \\ 
+&X, Y, s_1, s_2, s_3  \geq 0 
+\end{align*}
+
+Thus, we can write this problem in matrix form with 
+
+\begin{align}
+\max  & \begin{bmatrix}
+-5 \\ -7 \\ 0 \\ 0 \\0
+\end{bmatrix}^\top \begin{bmatrix}
+X\\Y\\s_1\\s_2\\ s_3
+\end{bmatrix}\\
+&\begin{bmatrix}
+1 & 3 & -1 & 0 & 0 \\
+5 & 2 & 0 & -1 & 0\\
+0 & 1 & 0 & 0 & 1\\
+\end{bmatrix}
+\begin{bmatrix}
+X \\ Y \\ s_1 \\ s_2 \\ s_3
+\end{bmatrix}
+= 
+\begin{bmatrix}
+6 \\ 10 \\ 4
+\end{bmatrix}\\
+&(X,Y,s_1, s_2, s_3) \geq 0
+\end{align}
+
+
+\end{example}
+
+
+%Winston
+\begin{definition}{Basic feasible solution}{}
+Any basic solution in which all the variables are non-negative is a \emph{basic feasible solution}.
+\end{definition}
+
+%Winston
+\begin{theorem}{BFS iff extreme}{}
+A point in the feasible region of an LP is an extreme point if and only if it is a basic feasible solution to the LP.
+\end{theorem}
+
+To prove this theorem, we 
+
+%Winston
+\begin{theorem}{Representation}{}
+Consider an LP in standard form, having bfs $b_1, \dots, b_k$.  Any point $x$ in the LP's feasible region may be written in the form 
+$$
+x = d + \sum_{i=1}^k \sigma_i b_i
+$$
+where $d$ is $0$ or a direction of unboundedness and $\sum_{i=1}^k \sigma_i = 1$ and $\sigma_i \geq 0$.
+\end{theorem}
+
+% Winston
+\begin{theorem}{Optimal bfs}{}
+If an LP has an optimal solution, then it has an optimal bfs.
+\end{theorem}
+
+\begin{proof}
+Let $x$ be an optimal solution.  Then 
+$$
+x = d + \sum_{i=1}^k \sigma_i b_i
+$$
+where $d$ is 0 or a direction of unboundeness.  
+
+\begin{itemize}
+\item If $c^\top d > 0$, the $x'  = \lambda d + \sum_{i=1}^k \sigma_i b_i$ has bigger objective value for $|lambda > 1$, which is a contradiction since $x$ was optimal. 
+\item If $c^\top d < 0$, the $x'' =\sum_{i=1}^k \sigma_i b_i$ has a bigger objective value, which is a contradiction since $x$ was optimal.
+\end{itemize}
+Thus, we conclude that $c^\top d = 0$.
+
+Since $$c^\top x \geq c^\top b_i$$ for all $i=1, \dots, k$, we can conclude that 
+$$
+c^\top x = c^\top b_i
+$$
+for all $i$ such that $\sigma_i > 0$.   Hence, there exists an optimal basic feasible solution.
+\end{proof}
+
+\chapter{Duality}
+\input{optimization/duality-borrowed.tex}
+%Stanford University - CS261: Optimization
+
+%Handout 6
+
+%Luca Trevisan
+
+%January 20, 2011
+
+%\section{Lecture 6}
+
+In which we introduce the theory of duality in linear programming.
+
+\section{The Dual of Linear Program}
+
+Suppose that we have the following linear program in maximization standard form:
+
+$$
+\begin{array}{ll}
+\underset{n a x i m i z e}{\operatorname{maxim}} & x_{1}+2 x_{2}+x_{3}+x_{4} \\
+\text { subject to } & \\
+& x_{1}+2 x_{2}+x_{3} \leq 2 \\
+& x_{2}+x_{4} \leq 1 \\
+& x_{1}+2 x_{3} \leq 1 \\
+& x_{1} \geq 0 \\
+& x_{2} \geq 0 \\
+& x_{3} \geq 0
+\end{array}
+$$
+
+and that an LP-solver has found for us the solution $x_{1}:=1, x_{2}:=\frac{1}{2}, x_{3}:=0, x_{4}:=\frac{1}{2}$ of cost 2.5. How can we convince ourselves, or another user, that the solution is indeed optimal, without having to trace the steps of the computation of the algorithm?
+
+Observe that if we have two valid inequalities
+
+$$
+a \leq b \text { and } c \leq d
+$$
+
+then we can deduce that the inequality
+
+$$
+a+c \leq b+d
+$$
+
+(derived by "summing the left hand sides and the right hand sides" of our original inequalities) is also true. In fact, we can also scale the inequalities by a positive multiplicative factor before adding them up, so for every non-negative values $y_{1}, y_{2} \geq 0$ we also have 
+
+$$
+y_{1} a+y_{2} c \leq y_{1} b+y_{2} d
+$$
+
+Going back to our linear program (1), we see that if we scale the first inequality by $\frac{1}{2}$, add the second inequality, and then add the third inequality scaled by $\frac{1}{2}$, we get that, for every $\left(x_{1}, x_{2}, x_{3}, x_{4}\right)$ that is feasible for (1),
+
+$$
+x_{1}+2 x_{2}+1.5 x_{3}+x_{4} \leq 2.5
+$$
+
+And so, for every feasible $\left(x_{1}, x_{2}, x_{3}, x_{4}\right)$, its cost is
+
+$$
+x_{1}+2 x_{2}+x_{3}+x_{4} \leq x_{1}+2 x_{2}+1.5 x_{3}+x_{4} \leq 2.5
+$$
+
+meaning that a solution of cost $2.5$ is indeed optimal.
+
+In general, how do we find a good choice of scaling factors for the inequalities, and what kind of upper bounds can we prove to the optimum?
+
+Suppose that we have a maximization linear program in standard form.
+
+$$
+\begin{array}{ll}
+\operatorname{maximize} & c_{1} x_{1}+\ldots c_{n} x_{n} \\
+\text { subject to } & \\
+& a_{1,1} x_{1}+\ldots+a_{1, n} x_{n} \leq b_{1} \\
+& \vdots \\
+& a_{m, 1} x_{1}+\ldots+a_{m, n} x_{n} \leq b_{m} \\
+& x_{1} \geq 0 \\
+& \vdots \\
+& x_{n} \geq 0
+\end{array}
+$$
+
+For every choice of non-negative scaling factors $y_{1}, \ldots, y_{m}$, we can derive the inequality
+
+$$
+\begin{gathered}
+y_{1} \cdot\left(a_{1,1} x_{1}+\ldots+a_{1, n} x_{n}\right) \\
++\cdots \\
++y_{n} \cdot\left(a_{m, 1} x_{1}+\ldots+a_{m, n} x_{n}\right) \\
+\leq y_{1} b_{1}+\cdots y_{m} b_{m}
+\end{gathered}
+$$
+
+which is true for every feasible solution $\left(x_{1}, \ldots, x_{n}\right)$ to the linear program (2). We can rewrite the inequality as
+
+$$
+\begin{aligned}
+\left(a_{1,1} y_{1}+\right.&\left.\cdots a_{m, 1} y_{m}\right) \cdot x_{1} \\
++& \cdots
+\end{aligned}
+$$
+
+
+
+$$
+\begin{gathered}
++\left(a_{1, n} y_{1} \cdots a_{m, n} y_{m}\right) \cdot x_{n} \\
+\leq y_{1} b_{1}+\cdots y_{m} b_{m}
+\end{gathered}
+$$
+
+So we get that a certain linear function of the $x_{i}$ is always at most a certain value, for every feasible $\left(x_{1}, \ldots, x_{n}\right)$. The trick is now to choose the $y_{i}$ so that the linear function of the $x_{i}$ for which we get an upper bound is, in turn, an upper bound to the cost function of $\left(x_{1}, \ldots, x_{n}\right)$. We can achieve this if we choose the $y_{i}$ such that
+
+$$
+\begin{aligned}
+&c_{1} \leq a_{1,1} y_{1}+\cdots a_{m, 1} y_{m} \\
+&\vdots \\
+&c_{n} \leq a_{1, n} y_{1} \cdots a_{m, n} y_{m}
+\end{aligned}
+$$
+
+Now we see that for every non-negative $\left(y_{1}, \ldots, y_{m}\right)$ that satisfies (3), and for every $\left(x_{1}, \ldots, x_{n}\right)$ that is feasible for $(2)$,
+
+$$
+\begin{gathered}
+c_{1} x_{1}+\ldots c_{n} x_{n} \\
+\leq\left(a_{1,1} y_{1}+\cdots a_{m, 1} y_{m}\right) \cdot x_{1} \\
++\cdots \\
++\left(a_{1, n} y_{1} \cdots a_{m, n} y_{m}\right) \cdot x_{n} \\
+\leq y_{1} b_{1}+\cdots y_{m} b_{m}
+\end{gathered}
+$$
+
+Clearly, we want to find the non-negative values $y_{1}, \ldots, y_{m}$ such that the above upper bound is as strong as possible, that is we want to
+
+$$
+\begin{array}{ll}
+\operatorname{minimize} & b_{1} y_{1}+\cdots b_{m} y_{m} \\
+\text { subject to } & \\
+& a_{1,1} y_{1}+\ldots+a_{m, 1} y_{m} \geq c_{1} \\
+& \vdots \\
+& a_{n, 1} y_{1}+\ldots+a_{m, n} y_{m} \geq c_{n} \\
+& y_{1} \geq 0 \\
+& \vdots \\
+& y_{m} \geq 0
+\end{array}
+$$
+
+So we find out that if we want to find the scaling factors that give us the best possible upper bound to the optimum of a linear program in standard maximization form, we end up with a new linear program, in standard minimization form. Definition 1 If
+
+$$
+\begin{array}{ll}
+\underset{\text { maximize }}{ } & \mathbf{c}^{T} \mathbf{x} \\
+\text { subject to } & \\
+& A \mathbf{x} \leq \mathbf{b} \\
+& \mathbf{x} \geq \mathbf{0}
+\end{array}
+$$
+
+is a linear program in maximization standard form, then its dual is the minimization linear program
+
+$$
+\begin{array}{ll}
+\operatorname{minimize} & \mathbf{b}^{T} \mathbf{y} \\
+\text { subject to } & \\
+& A^{T} \mathbf{y} \geq \mathbf{c} \\
+& \mathbf{y} \geq \mathbf{0}
+\end{array}
+$$
+
+So if we have a linear program in maximization linear form, which we are going to call the primal linear program, its dual is formed by having one variable for each constraint of the primal (not counting the non-negativity constraints of the primal variables), and having one constraint for each variable of the primal (plus the nonnegative constraints of the dual variables); we change maximization to minimization, we switch the roles of the coefficients of the objective function and of the right-hand sides of the inequalities, and we take the transpose of the matrix of coefficients of the left-hand side of the inequalities.
+
+The optimum of the dual is now an upper bound to the optimum of the primal. How do we do the same thing but starting from a minimization linear program? We can rewrite
+
+$$
+\begin{array}{ll}
+\underset{l}{\operatorname{minimize}} & \mathbf{c}^{T} \mathbf{y} \\
+\text { subject to } & \\
+& A \mathbf{y} \geq \mathbf{b} \\
+& \mathbf{y} \geq \mathbf{0}
+\end{array}
+$$
+
+in an equivalent way as
+
+$$
+\begin{array}{ll}
+\underset{\operatorname{maximize}}{\operatorname{mubject~to}} & -\mathbf{c}^{T} \mathbf{y} \\
+& -A \mathbf{y} \leq-\mathbf{b} \\
+& \mathbf{y} \geq \mathbf{0}
+\end{array}
+$$
+
+If we compute the dual of the above program we get
+
+$$
+\begin{array}{ll}
+\underset{\text { minimize }}{\operatorname{mubject} \text { to }} & -\mathbf{b}^{T} \mathbf{z} \\
+& -A^{T} \mathbf{z} \geq-\mathbf{c} \\
+& \mathbf{z} \geq \mathbf{0}
+\end{array}
+$$
+
+that is,
+
+$$
+\begin{array}{ll}
+\operatorname{maximize} & \mathbf{b}^{T} \mathbf{z} \\
+\text { subject to } & \\
+& A^{T} \mathbf{z} \leq \mathbf{c} \\
+& \mathbf{y} \geq \mathbf{0}
+\end{array}
+$$
+
+So we can form the dual of a linear program in minimization normal form in the same way in which we formed the dual in the maximization case:
+
+- switch the type of optimization,
+
+- introduce as many dual variables as the number of primal constraints (not counting the non-negativity constraints),
+
+- define as many dual constraints (not counting the non-negativity constraints) as the number of primal variables.
+
+- take the transpose of the matrix of coefficients of the left-hand side of the inequality,
+
+- switch the roles of the vector of coefficients in the objective function and the vector of right-hand sides in the inequalities.
+
+Note that:
+
+Fact 2 The dual of the dual of a linear program is the linear program itself.
+
+We have already proved the following:
+
+Fact 3 If the primal (in maximization standard form) and the dual (in minimization standard form) are both feasible, then
+
+$$
+\operatorname{opt}(\text { primal }) \leq \operatorname{opt}(\text { dual })
+$$
+
+Which we can generalize a little
+
+Theorem 4 (Weak Duality Theorem) If $L P_{1}$ is a linear program in maximization standard form, $L P_{2}$ is a linear program in minimization standard form, and $L P_{1}$ and $L P_{2}$ are duals of each other then:
+
+- If $L P_{1}$ is unbounded, then $L P_{2}$ is infeasible; - If $L P_{2}$ is unbounded, then $L P_{1}$ is infeasible;
+
+- If $L P_{1}$ and $L P_{2}$ are both feasible and bounded, then
+
+$$
+\operatorname{opt}\left(L P_{1}\right) \leq \operatorname{opt}\left(L P_{2}\right)
+$$
+
+ProOF: We have proved the third statement already. Now observe that the third statement is also saying that if $L P_{1}$ and $L P_{2}$ are both feasible, then they have to both be bounded, because every feasible solution to $L P_{2}$ gives a finite upper bound to the optimum of $L P_{1}$ (which then cannot be $+\infty$ ) and every feasible solution to $L P_{1}$ gives a finite lower bound to the optimum of $L P_{2}$ (which then cannot be $-\infty$ ).
+
+What is surprising is that, for bounded and feasible linear programs, there is always a dual solution that certifies the exact value of the optimum.
+
+Theorem 5 (Strong Duality) If either $L P_{1}$ or $L P_{2}$ is feasible and bounded, then so is the other, and
+
+$$
+\operatorname{opt}\left(L P_{1}\right)=\operatorname{opt}\left(L P_{2}\right)
+$$
+
+To summarize, the following cases can arise:
+
+- If one of $L P_{1}$ or $L P_{2}$ is feasible and bounded, then so is the other;
+
+- If one of $L P_{1}$ or $L P_{2}$ is unbounded, then the other is infeasible;
+
+- If one of $L P_{1}$ or $L P_{2}$ is infeasible, then the other cannot be feasible and bounded, that is, the other is going to be either infeasible or unbounded. Either case can happen.
+
+We will return to the Strong Duality Theorem, and discuss its proof, later in the course.
+\chapter{Sensitivity Analysis}
+
+\chapter{Multi-Objective Optimization}
+\input{optimization/multi-objective/multi-objective-optimization.tex}
+
+
+\part{Discrete Algorithms}
 
 \subimport{./foundationsAppliedMathematicsLabs/Volume2/DynamicProgramming/}{DynamicProgramming}
-\subimport{./foundationsAppliedMathematicsLabs/Volume2/PolicyFunctionIteration/}{PolicyFunctionIteration}
+%\subimport{./foundationsAppliedMathematicsLabs/Volume2/PolicyFunctionIteration/}{PolicyFunctionIteration}
 
 \chapter{Graph Algorithms}
+\begin{resource}
 \href{https://www.youtube.com/watch?v=09_LlHjoEiY}{Youtube!  Video of many graph algorithms by Google engineer (6+ hours)}
+\end{resource}
+
+\input{optimization/graphtheory-dor1.tex}
 
 
 
-
-
-\part{Nonlinear Programming}
-\input{optimization/NLP.tex}
-\input{optimization/NLP-algorithms.tex}
-
-\subimport{./foundationsAppliedMathematicsLabs/Volume2/CVXOPT_Intro/}{CVXOPT_Intro_quadratic_programming}
-%\subimport{./Volume1/QR_Decomposition/}{QR_Decomposition}
-\subimport{./foundationsAppliedMathematicsLabs/Volume1/LeastSquares_Eigenvalues/}{LeastSquares_Eigenvalues}
+%\part{Nonlinear Programming}
+%\input{optimization/NLP.tex}
+%\input{optimization/NLP-algorithms.tex}
+%
+%\subimport{./foundationsAppliedMathematicsLabs/Volume2/CVXOPT_Intro/}{CVXOPT_Intro_quadratic_programming}
+%%\subimport{./Volume1/QR_Decomposition/}{QR_Decomposition}
+%\subimport{./foundationsAppliedMathematicsLabs/Volume1/LeastSquares_Eigenvalues/}{LeastSquares_Eigenvalues}
 %\subimport{./Volume1/ImageSegmentation/}{ImageSegmentation}
 %\subimport{./Volume1/SVD_ImageCompression/}{SVD_ImageCompression}
 %\subimport{./Volume1/FacialRecognition/}{FacialRecognition}
 
 %\subimport{./Volume1/Differentiation/}{Differentiation}
-\subimport{./foundationsAppliedMathematicsLabs/Volume1/NewtonsMethod/}{NewtonsMethod}
+%\subimport{./foundationsAppliedMathematicsLabs/Volume1/NewtonsMethod/}{NewtonsMethod}
 %\subimport{./Volume1/Conditioning_Stability/}{Conditioning_Stability}
 
-
+\ifdefined \nlptext
+\part{Nonlinear Programming}
 
 \subimport{./foundationsAppliedMathematicsLabs/Volume2/OneD_Optimization/}{OneD_Optimization}
 \subimport{./foundationsAppliedMathematicsLabs/Volume2/GradientMethods/}{GradientMethods}
@@ -488,21 +952,23 @@ In this section, we study on linear optimization problems, i.e., linear programs
 \subimport{./foundationsAppliedMathematicsLabs/Volume2/InteriorPoint_Linear/}{InteriorPoint_Linear}
 \subimport{./foundationsAppliedMathematicsLabs/Volume2/InteriorPoint_Quadratic/}{InteriorPoint_Quadratic}
 
-\subimport{./foundationsAppliedMathematicsLabs/Volume2/OpenGym/}{OpenGym}
+\fi
+
+%\subimport{./foundationsAppliedMathematicsLabs/Volume2/OpenGym/}{OpenGym}
 
 
 %\subimport{./Volume3/PCA_LSI/}{PCA-LSI}
 %\subimport{./Volume3/Metropolis/}{Metropolis}
 %\subimport{./Volume3/LDA/}{LDA}
 %\subimport{./Volume3/CDHMM/}{CDHMM}
-\subimport{./foundationsAppliedMathematicsLabs/Volume3/KMeans/}{KMeans}
-
-\part{Advanced Optimization}
-\input{optimization/advancedIntegerProgramming.tex}
-\input{optimization/gmic.tex}
-\input{optimization/computational_complexity.tex}
-%\input{optimization/algebraicIdeas.tex}
-\input{optimization/decompositionTechniques.tex}
+%\subimport{./foundationsAppliedMathematicsLabs/Volume3/KMeans/}{KMeans}
+%
+%\part{Advanced Optimization}
+%\input{optimization/advancedIntegerProgramming.tex}
+%\input{optimization/gmic.tex}
+%\input{optimization/computational_complexity.tex}
+%%\input{optimization/algebraicIdeas.tex}
+%\input{optimization/decompositionTechniques.tex}
 %\input{optimization/MINLP.tex}
 %\input{optimization/poly-opt.tex}
 
@@ -575,41 +1041,6 @@ In this section, we study on linear optimization problems, i.e., linear programs
 	\input aFirstCourseLinearAlgebra/content/prerequisiteInduction.tex %Section
 	
 %\subimport{./Appendices/Setup/}{SetupStudent}
-\subimport{./foundationsAppliedMathematicsLabs/Appendices/Installation/}{Installation} %Chapter
-\subimport{./foundationsAppliedMathematicsLabs/Appendices/NumpyVisualGuide/}{NumpyVisualGuide} %Chapter
-\subimport{./foundationsAppliedMathematicsLabs/Appendices/MatplotlibCustomization/}{MatplotlibCustomization} %Chapter
-
-\section{Jupyter Notebooks}
-\url{https://github.com/mathinmse/mathinmse.github.io/blob/master/Lecture-00B-Notebook-Basics.ipynb}
-\url{https://github.com/mathinmse/mathinmse.github.io/blob/master/Lecture-00C-Writing-In-Jupyter.ipynb}
-
-\section{Reading and Writing}
-\url{https://github.com/mathinmse/mathinmse.github.io/blob/master/Lecture-10B-Reading-and-Writing-Data.ipynb}
-
-\section{Python Crash Course}
-\url{https://github.com/rpmuller/PythonCrashCourse}
-
-
-\section{Excel Solver}
-\subsection{Videos}
-\href{https://www.youtube.com/watch?v=V5DmekIFenA}{Solving a linear program}
-\href{https://www.youtube.com/watch?v=6xa1x_Iqjzg}{Optimal product mix}
-\href{https://www.youtube.com/watch?v=vpodCzRtUMU}{Set Cover}
-
-\href{https://www.youtube.com/watch?v=tKV24jzZ10s}{Introduction to Designing Optimization Models Using Excel Solver}
-
-\href{https://www.youtube.com/watch?v=-E3rSoClgMI}{Traveling Salesman Problem}
-
-\href{https://www.youtube.com/watch?v=UQYJvSjXE6I}{Also Travelin Salesman Problem}
-
-\href{https://www.youtube.com/watch?v=owHq3Mbniqo}{Multiple Traveling Salesman Problem}
-
-\href{https://www.youtube.com/watch?v=JkZkGxVZ8ao}{Shortest Path}
-
-\subsection{Links}
-\href{https://github.com/lobodemonte/excel-solver-loan-example}{Loan Example}
-
-\href{https://github.com/Bhargavanarasimhan/Excel-Solver-Files}{Several Examples including TSP}
 
 
 \section{GECODE and MiniZinc}
@@ -682,8 +1113,37 @@ ILOG CPLEX optimization Studio
 \url{https://www.youtube.com/watch?v=thuYiebq1cE&t=925s}
 \url{https://www.youtube.com/watch?v=4OifjG2kIJQ}
 
-\chapter{Graph Theory}
-\includepdf[page={1-},scale=0.75]{optimization/chapter_graphtheory.pdf}
+
+\section{Contributors}
+	%\input aFirstCourseLinearAlgebra/content/preface.tex
+% Lyryx with Open Texts 
+	\input aFirstCourseLinearAlgebra/frontmatter/LyryxOpenTexts.tex
+	\cleardoublepage
+
+% License
+	\input aFirstCourseLinearAlgebra/frontmatter/license.tex
+	\input contributors-foundations.tex
+	\cleardoublepage
+
+\subsection{Graph Theory}
+Chapter on Graph Theory adapted from: 
+CC-BY-SA 3.0
+Math in Society
+A survey of mathematics for the liberal arts major
+Math in Society is a free, open textbook. This book is a survey of contemporary mathematical topics, most non-algebraic, appropriate for a college-level quantitative literacy topics course for liberal arts majors. The text is designed so that most chapters are independent, allowing the instructor to choose a selection of topics to be covered. Emphasis is placed on the applicability of the mathematics. Core material for each topic is covered in the main text, with additional depth available through exploration exercises appropriate for in-class, group, or individual investigation. This book is appropriate for Washington State Community Colleges' Math 107.
+
+The current version is 2.5, released Dec 2017.
+\url{http://www.opentextbookstore.com/mathinsociety/2.5/GraphTheory.pdf}
+
+Communicated by 
+Tricia Muldoon Brown, Ph.D.
+Associate Professor of Mathematics
+Georgia Southern University
+Armstrong Campus
+Savannah, GA 31419\url{http://math.armstrong.edu/faculty/brown/MATH1001.html}
+
+
+%\includepdf[page={1-},scale=0.75]{optimization/chapter_graphtheory.pdf}
 % Solutions
 	%\Closesolutionfile{solutions}
 	%\chapter{Selected Exercise Answers}

@@ -1,0 +1,1283 @@
+% Copyright 2020 by Robert Hildebrand
+%This work is licensed under a
+%Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0)
+%See http://creativecommons.org/licenses/by-sa/4.0/
+
+\chapter{Linear Programming}
+\begin{outcome}
+
+\end{outcome}
+\bigskip  \underline{\bf A Generic Linear Program (LP)}
+
+\medskip  \underline{Decision Variables:}\\
+$x_i$ : continuous variables ($x_i \in \mathbb{R}$, i.e., a real number), $\forall i = 1,\cdots,3$.
+
+\medskip \underline{Parameters (known input parameters):}\\
+$c_i$ : cost coefficients $\forall i = 1,\dots,n$ \\
+$a_{ij}$ : constraint coefficients $\forall i = 1,\dots,n,~ j = 1,\dots,m$ \\
+$b_j$ : right hand side coefficient for constraint $j$, $j = 1,\dots,m$
+
+The problem we will consider is
+\begin{equation}
+\begin{aligned}
+\max\;\;& z = c_1x_1 + \dots + c_nx_n\\
+s.t.\;\;& a_{11}x_1 + \dots + a_{1n}x_n \leq b_1\\
+& \hspace*{0.5in}\vdots\\
+& a_{m1}x_1 + \dots + a_{mn} x_n \leq b_m\\
+%& h_{11}x_1 + \dots + h_{n1}x_n = r_1\\
+%&\hspace*{0.5in}\vdots\\
+%&h_{l1}x_1 + \dots + h_{ln}x_n = r_l
+\end{aligned}
+\label{eqn:GeneralLPMax}
+\end{equation}
+
+
+For example, in 3 variables and 4 contraints this could look like the following.   The following example considers other types of constraints, i.e., $\geq$ and $=$.  We will show how all these forms can be converted later.
+
+\medskip  \underline{Decision Variables:}\\
+$x_i$ : continuous variables ($x_i \in \mathbb{R}$, i.e., a real number), $\forall i = 1,\cdots,3$.
+
+\medskip \underline{Parameters (known input parameters):}\\
+$c_i$ : cost coefficients $\forall i = 1,\dots,3$ \\
+$a_{ij}$ : constraint coefficients $\forall i = 1,\dots,3,~ j = 1,\dots,4$ \\
+$b_j$ : right hand side coefficient for constraint $j$, $j = 1,\dots,4$
+
+
+\begin{align}
+\mbox{Min~~} & z = c_1x_1 + c_2x_2 + c_3x_3  \label{eq:OF1}\\
+\mbox{s.t.~~} & a_{11}x_1 + a_{12}x_2 + a_{13} x_3 \ge b_1 \label{eq:C1} \\
+& a_{21}x_1 + a_{22}x_2 + a_{23} x_3 \le b_2 \label{eq:C2} \\
+& a_{31}x_1 + a_{32}x_2 + a_{33} x_3 = b_3 \label{eq:C3}\\
+& a_{41}x_1 + a_{42}x_2 + a_{43} x_3 \ge b_4 \label{eq:C4}\\
+& x_1 \ge 0, x_2 \le 0, x_3~urs \label{eq:C5}.
+\end{align}
+
+
+
+
+
+\begin{definition}{Linear Function}{linearfunction} A function $z:\mathbb{R}^n \rightarrow \mathbb{R}$ is \textit{linear} if there are constants $c_1,\dots,c_n \in \mathbb{R}$ so that:
+\begin{equation}
+z(x_1,\dots,x_n) = c_1x_1 + \dots + c_nx_n
+\end{equation}
+\label{def:LinearFunc}
+\end{definition}
+
+\begin{lemma}{Linear Function}{linearfunction} If $z:\mathbb{R}^n \rightarrow \mathbb{R}$ is \textit{linear} then for all $\mathbf{x}_1, \mathbf{x}_2 \in \mathbb{R}^n$ and for all scalar constants $\alpha \in \mathbb{R}$ we have:
+\begin{gather}
+z(\mathbf{x}_1 + \mathbf{x}_2) = z(\mathbf{x}_1) + z(\mathbf{x}_2)\\
+z(\alpha \mathbf{x}_1) = \alpha z(\mathbf{x}_1)
+\end{gather}
+\label{lem:LinearFunc}
+\end{lemma}
+
+\begin{exercise}{}{} Prove Lemma \ref{lem:LinearFunc}.
+\end{exercise}
+
+For the time being, we will eschew the general form and focus exclusively on linear programming problems with two variables. Using this limited case, we will develop a graphical method for identifying optimal solutions, which we will generalize later to problems with arbitrary numbers of variables. 
+
+\begin{example}{Toy Maker}{ex:ToyMaker} Consider the problem of a toy company that produces toy planes and toy boats. The toy company can sell its planes for $\$10$ and its boats for $\$8$ dollars. It costs $\$3$ in raw materials to make a plane and $\$2$ in raw materials to make a boat. A plane requires $3$ hours to make and $1$ hour to finish while a boat requires $1$ hour to make and $2$ hours to finish. The toy company knows it will not sell anymore than $35$ planes per week. Further, given the number of workers, the company cannot spend anymore than $160$ hours per week finishing toys and $120$ hours per week making toys. The company wishes to maximize the profit it makes by choosing how much of each toy to produce. 
+
+We can represent the profit maximization problem of the company as a linear programming problem. Let $x_1$ be the number of planes the company will produce and let $x_2$ be the number of boats the company will produce. The profit for each plane is $\$10 - \$3 = \$7$ per plane and the profit for each boat is $\$8 - \$2 = \$6$ per boat. Thus the total profit the company will make is:
+\begin{equation}
+z(x_1,x_2) = 7x_1 + 6x_2
+\end{equation}
+The company can spend no more than $120$ hours per week making toys and since a plane takes $3$ hours to make and a boat takes $1$ hour to make we have:
+\begin{equation}
+3x_1 + x_2 \leq 120
+\end{equation}
+Likewise, the company can spend no more than $160$ hours per week finishing toys and since it takes $1$ hour to finish a plane and $2$ hour to finish a boat we have:
+\begin{equation}
+x_1 + 2x_2 \leq 160
+\end{equation}
+Finally, we know that $x_1 \leq 35$, since the company will make no more than $35$ planes per week. Thus the complete linear programming problem is given as:
+\begin{equation}
+\left\{
+\begin{aligned}
+\max\;\;& z(x_1,x_2) = 7x_1 + 6x_2\\
+s.t.\;\;&  3x_1 + x_2 \leq 120\\
+& x_1 + 2x_2 \leq 160\\
+& x_1 \leq 35\\
+& x_1 \geq 0\\
+& x_2 \geq 0
+\end{aligned}
+\right.
+\label{eqn:ToyMakerEx}
+\end{equation}
+\label{ex:ToyMaker}
+\end{example}
+
+\begin{exercise}{Chemical Manufacturing}{exer:ChemicalPlant} A chemical manufacturer produces three chemicals: A, B and C. These chemical are produced by two processes: 1 and 2. Running process 1 for 1 hour costs \$4 and yields 3 units of chemical A, 1 unit of chemical B and 1 unit of chemical C. Running process 2 for 1 hour costs \$1 and produces 1 units of chemical A, and 1 unit of chemical B (but none of Chemical C). To meet customer demand, at least 10 units of chemical A, 5 units of chemical B and 3 units of chemical C must be produced daily. Assume that the chemical manufacturer wants to minimize the cost of production. Develop a linear programming problem describing the constraints and objectives of the chemical manufacturer. 
+
+\emph{[Hint: Let $x_1$ be the amount of time Process 1 is executed and let $x_2$ be amount of time Process 2 is executed. Use the coefficients above to express the cost of running Process 1 for $x_1$ time and Process 2 for $x_2$ time. Do the same to compute the amount of chemicals A, B, and C that are produced.]}
+\label{exer:ChemicalPlant}
+\end{exercise}
+
+\section{Modeling Assumptions in Linear Programming}
+\begin{outcome}
+\begin{enumerate}
+\item Address crucial assumptions when chosing to model a problem with linear programming.
+\end{enumerate}
+\end{outcome}
+Inspecting Example \ref{ex:ToyMaker} (or the more general Problem \ref{eqn:GeneralLPMax}) we can see there are several assumptions that must be satisfied when using a linear programming model. We enumerate these below:
+\begin{description}
+\item[Proportionality Assumption] A problem can be phrased as a linear program only if the contribution to the objective function \textit{and} the left-hand-side of each constraint by each decision variable $(x_1,\dots,x_n)$ is proportional to the value of the decision variable.
+
+\item[Additivity Assumption] A problem can be phrased as a linear programming problem only if the contribution to the objective function \textit{and} the left-hand-side of each constraint by any decision variable $x_i$ ($i=1,\dots,n$) is completely independent of any other decision variable $x_j$ ($j \neq i$) and additive. 
+
+\item[Divisibility Assumption] A problem can be phrased as a linear programming problem only if the quantities represented by each decision variable are infinitely divisible (i.e., fractional answers make sense). 
+
+\item[Certainty Assumption] A problem can be phrased as a linear programming problem only if the coefficients in the objective function and constraints are known with certainty. 
+\end{description}
+
+The first two assumptions simply assert (in English) that both the objective function and functions on the left-hand-side of the (in)equalities in the constraints are linear functions of the variables $x_1,\dots,x_n$. 
+
+The third assumption asserts that a valid optimal answer could contain fractional values for decision variables. It's important to understand how this assumption comes into play--even in the toy making example. Many quantities can be divided into non-integer values (ounces, pounds etc.) but many other quantities cannot be divided. For instance, can we really expect that it's reasonable to make $\tfrac{1}{2}$ a plane in the toy making example? When values must be constrained to true integer values, the linear programming problem is called an \textit{integer programming problem}. These problems are outside the scope of this course, but there is a \textit{vast} literature dealing with them \cite{PS98,WN99}. For many problems, particularly when the values of the decision variables may become large, a fractional optimal answer could be obtained and then rounded to the nearest integer to obtain a reasonable answer. For example, if our toy problem were re-written so that the optimal answer was to make $1045.3$ planes, then we could round down to $1045$.
+
+The final assumption asserts that the coefficients (e.g., profit per plane or boat) is known with absolute certainty. In traditional linear programming, there is no lack of knowledge about the make up of the objective function, the coefficients in the left-hand-side of the constraints or the bounds on the right-hand-sides of the constraints. There is a literature on \textit{stochastic programming} \cite{KW94,BN02} that relaxes some of these assumptions, but this too is outside the scope of the course.
+
+\begin{exercise}{}{} In a short sentence or two, discuss whether the problem given in Example \ref{ex:ToyMaker} meets all of the assumptions of a scenario that can be  modeled by a linear programming problem. Do the same for Exercise \ref{exer:ChemicalPlant}. \emph{[Hint: Can you make $\tfrac{2}{3}$ of a toy? Can you run a process for $\tfrac{1}{3}$ of an hour?]}
+\end{exercise}
+
+\begin{exercise}{Stochastic Objective}{stochasticobjective} Suppose the costs are not known with certainty but instead a probability distribution for each value of $c_i$ ($i=1,\dots,n$) is known. Suggest a way of constructing a linear program from the probability distributions. 
+
+\emph{[Hint: Suppose I tell you that I'll give you a uniformly random amount of money between $\$1$ and $\$2$. How much money do you expect to receive? Use the same reasoning to answer the question.]}
+\end{exercise}
+
+
+
+
+
+\section{Examples}
+\begin{outcome}
+
+\begin{enumerate}
+\item[A.] Learn how to format a linear optimization problem.
+\item[B.] Identify and understand common classes of linear optimization problems.
+\end{enumerate}
+\end{outcome}
+
+We will begin with a few examples, and then discuss specific problem types that occur often.
+\newpage
+\begin{example}{Production Problem}{productionproblem}
+You have 21 units of transparent aluminum alloy (TAA), LazWeld1, a joining robot leased for 23 hours, and CrumCut1, a cutting robot leased for 17 hours of aluminum cutting. You also have production code for a bookcase, desk, and cabinet, along with commitments to buy any of these you can produce for \$18,  \$16, and  \$10 apiece, respectively.  A bookcase requires 2 units of TAA, 3 hours of joining, and 1 hour of cutting, a desk requires 2 units of TAA, 2 hours of joining, and 2 hour of cutting, and a cabinet requires 1 unit of TAA, 2 hours of joining, and 1 hour of cutting. Formulate an LP to maximize your revenue given your current resources.
+\end{example}
+
+\begin{solution}
+
+\noindent\medskip \underline{Sets:}
+\begin{itemize}
+\item The types of objects $ = \{$ bookcase,~desk,~cabinet$\}$.
+\end{itemize}
+\medskip \underline{Parameters:} 
+\begin{itemize}
+\item Purchase cost of each object
+\item Units of TAA needed for each object
+\item Hours of joining needed for each object
+\item Hours of cutting needed for each object
+\item Hours of TAA, Joining, and Cutting available on robots
+\end{itemize}
+
+\noindent\medskip \underline{Decision variables:} \\
+$x_i$ : number of units of product $i$ to produce, \\
+for all $ i = $bookcase,~desk,~cabinet.\\
+
+\noindent \medskip \underline{Objective and Constraints:}
+\begin{align*}
+\max~& z = 18x_1 + 16x_2 + 10x_3  & \text{ (profit)}\\
+& 2x_1 + 2x_2 + 1x_3 \le 21 & (TAA) \\
+& 3x_1 + 2x_2 + 2x_3 \le 23 & (LazWeld1) \\
+&  1x_1 + 2x_2 + 1x_3 \le 17 & (CrumCut1)  \\
+& x_1, x_2, x_3 \ge 0.
+\end{align*}
+\end{solution}
+
+
+\begin{example}{The Diet Problem}{thedietproblem}
+In the future (as envisioned in a bad 70's science fiction film) all food is in tablet form, and there are four types, green, blue, yellow, and red. A balanced, futuristic diet requires, at least 20 units of Iron, 25 units of Vitamin B, 30 units of Vitamin C, and 15 units of Vitamin D. Formulate an LP that ensures a balanced diet at the minimum possible cost.
+
+
+\end{example}
+\begin{table}[h!] \begin{center} \begin{tabular} {|c|c|c|c|c|c|}
+\hline Tablet  & Iron &  B &  C  &  D & Cost (\$) \\ \hline
+\hline  green (1)  & 6    & 6  & 7          & 4        &  1.25 \\
+\hline  blue (2)  & 4    & 5  & 4          & 9        &  1.05 \\
+\hline  yellow (3) & 5    & 2  & 5          & 6        &  0.85 \\
+\hline  red (4)   & 3    & 6  & 3          & 2        &  0.65 \\ \hline
+\end{tabular} \end{center} \end{table}
+\begin{solution}
+Now we formulate the problem:
+\smallskip \underline{Sets:}
+\begin{itemize}
+\item Set of tablets $\{1,2,3,4\}$
+\end{itemize}
+
+\smallskip \underline{Parameters:}
+\begin{itemize}
+\item Iron in each tablet
+\item Vitamin B in each tablet
+\item Vitamin C in each tablet
+\item Vitamin D in each tablet
+\item Cost of each tablet
+\end{itemize}
+
+\smallskip  \underline{Decision variables:} \\
+$x_i$ : number of tablet of type $i$ to include in the diet, $\forall i \in \{1,2,3,4\}$.\\
+
+\smallskip  \underline{Objective and Constraints:}
+\begin{align*}
+\mbox{Min~~ } & z = 1.25x_1 + 1.05x_2 + 0.85x_3 + 0.65x_4 \\
+\mbox{s.t.~~} &  6x_1 + 4x_2 + 5x_3 + 3x_4 \ge 20  \\
+& 6x_1 + 5x_2 + 2x_3 + 6x_4 \ge 25 \\
+& 7x_1 + 4x_2 + 5x_3 + 3x_4 \ge 30 \\
+& 4x_1 + 9x_2 + 6x_3 + 2x_4 \ge 15  \\
+& x_1, x_2, x_3, x_4 \ge 0. 
+\end{align*}
+\end{solution}
+%The optimal diet costs \$5.35, and consists of 4.0625 green tablets and 0.3125 blue tablets.
+
+\begin{example}{The Next Diet Problem}{thenextdietproblem}
+Progress is important, and our last problem had too many tablets, so we are going to produce a single, purple, 10 gram tablet for our futuristic diet requires, which are at least 20 units of Iron, 25 units of Vitamin B, 30 units of Vitamin C, and 15 units of Vitamin D, and 2000 calories. The tablet is made from blending 4 nutritious chemicals; the following table shows the units of our nutrients per, and cost of, grams of each chemical.
+Formulate an LP that ensures a balanced diet at the minimum possible cost.
+\end{example}
+\begin{table}[h!] \begin{center} \begin{tabular} {|c|c|c|c|c|c|c|}
+\hline Tablet  & Iron  &  B &  C &  D & Calories & Cost (\$) \\ \hline
+\hline  Chem 1  & 6    & 6         & 7         & 4         &  1000    & 1.25 \\
+\hline  Chem 2  & 4    & 5         & 4         & 9         &  250     & 1.05 \\
+\hline  Chem 3  & 5    & 2         & 5         & 6         &  850     & 0.85 \\
+\hline  Chem 4  & 3    & 6         & 3         & 2         &  750     & 0.65 \\
+\hline
+\end{tabular} \end{center} \end{table}
+\begin{solution}
+\smallskip \underline{Sets:}
+\begin{itemize}
+\item Set of chemicals $\{1,2,3,4\}$
+\end{itemize}
+\smallskip \underline{Parameters:}
+\begin{itemize}
+\item Iron in each chemical
+\item Vitamin B in each chemical
+\item Vitamin C in each chemical
+\item Vitamin D in each chemical
+\item Cost of each chemical
+\end{itemize}
+\smallskip \underline{Decision variables:} \\
+$x_i$ : grams of chemical $i$ to include in the purple tablet, $\forall i = 1,2,3,4$.\\
+\smallskip \underline{Objective and Constraints:}
+\begin{align*}
+\mbox{Min} \ & z = 1.25x_1 + 1.05x_2 + 0.85x_3 + 0.65x_4 \\
+\mbox{s.t.~~} &  6x_1 + 4x_2 + 5x_3 + 3x_4 \ge 20 \\
+& 6x_1 + 5x_2 + 2x_3 + 6x_4 \ge 25  \\
+& 7x_1 + 4x_2 + 5x_3 + 3x_4 \ge 30  \\
+& 4x_1 + 9x_2 + 6x_3 + 2x_4 \ge 15  \\
+& 1000x_1 + 250x_2 + 850x_3 + 750x_4 \ge 2000 \\
+& x_1 + x_2 + x_3 + x_4 = 10  \\
+& x_1, x_2, x_3, x_4 \ge 0. 
+\end{align*}
+
+\end{solution}
+
+
+\newpage
+
+\begin{example}{Work Scheduling Problem}{workschedulingproblem}
+You are the manager of LP Burger. The following table shows the minimum number of employees required to staff the restaurant on each day of the week. Each employees must work for five consecutive days. Formulate an LP to find the minimum number of employees required to staff the restaurant.
+
+
+\end{example}
+\begin{table}[h!] \begin{center} \begin{tabular} {|l|l|} 
+\hline Day of Week & Workers Required   \\ \hline
+\hline  1 = Monday & 6  \\
+\hline  2 = Tuesday & 4  \\
+\hline  3 = Wednesday & 5  \\
+\hline  4 = Thursday & 4  \\
+\hline  5 = Friday & 3  \\
+\hline  6 = Saturday & 7  \\
+\hline  7 = Sunday & 7  \\
+\hline \end{tabular} \end{center} \end{table}
+
+\begin{solution}
+\underline{Decision variables:} \\
+
+\underline{Decision variables:} \\
+$x_i$ : the number of workers that start 5 consecutive days of work on day $i$, $ i = 1,\cdots,7$ \\
+
+\begin{align*}
+\mbox{Min~~ } & z = x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7  \\
+\mbox{s.t.~~} & x_1 + x_4 + x_5 + x_6 + x_7 \ge 6 \\
+& x_2 + x_5 + x_6 + x_7 + x_1 \ge 4 \\
+& x_3 + x_6 + x_7 + x_1 + x_2 \ge 5 \\
+& x_4 + x_7 + x_1 + x_2 + x_3 \ge 4 \\
+& x_5 + x_1 + x_2 + x_3 + x_4 \ge 3 \\
+& x_6 + x_2 + x_3 + x_4 + x_5 \ge 7 \\
+& x_7 + x_3 + x_4 + x_5 + x_6 \ge 7 \\
+& x_1, x_2, x_3, x_4, x_5, x_6, x_7 \ge 0.
+\end{align*}
+
+The solution is as follows:
+%\begin{table}[h!] 
+\begin{center} \begin{tabular} {|l|l|}
+\hline   LP Solution        & IP Solution \\
+\hline  $z_{LP} = 7.333$    & $z_I = 8.0$ \\
+\hline  $x_1 = 0$           & $x_1 = 0$ \\
+\hline  $x_2 = 0.333$       & $x_2 = 0 $ \\
+\hline  $x_3 = 1$           & $x_3 = 0$ \\
+\hline  $x_4 = 2.333$       & $x_4 = 3$ \\
+\hline  $x_5 = 0$           & $x_5 = 0 $ \\
+\hline  $x_6 = 3.333$       & $x_6 = 4 $ \\
+\hline  $x_7 = 0.333$       & $x_7 = 1 $ \\
+\hline
+\end{tabular} \end{center} 
+%\end{table}
+\end{solution}
+
+\newpage
+\begin{example}{LP Burger - extended}{LPBurgerextended}
+LP Burger has changed it's policy, and allows, at most, two part time workers, who work for two consecutive days in a week.  Formulate this problem.
+\end{example}
+\begin{solution}
+\underline{Decision variables:} \\
+$x_i$ : the number of workers that start 5 consecutive days of work on day $i$, $ i = 1,\cdots,7$ \\
+$y_i$ : the number of workers that start 2 consecutive days of work on day $i$, $ i = 1,\cdots,7$.
+
+\begin{align*}
+\mbox{Min~~ } & z = 5(x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7) \\
+& + 2(y_1 + y_2 + y_3 + y_4 + y_5 + y_6 + y_7) \nonumber \\
+\mbox{s.t.~~} & x_1 + x_4 + x_5 + x_6 + x_7 + y_1 + y_7 \ge 6 \\
+& x_2 + x_5 + x_6 + x_7 + x_1 + y_2 + y_1 \ge 4 \\
+&           x_3 + x_6 + x_7 + x_1 + x_2 + y_3 + y_2 \ge 5 \\
+&           x_4 + x_7 + x_1 + x_2 + x_3 + y_4 + y_3 \ge 4 \\
+&           x_5 + x_1 + x_2 + x_3 + x_4 + y_5 + y_4 \ge 3 \\
+&           x_6 + x_2 + x_3 + x_4 + x_5 + y_6 + y_5 \ge 7 \\
+&           x_7 + x_3 + x_4 + x_5 + x_6 + y_7 + y_6 \ge 7 \\
+&           y_1 + y_2 + y_3 + y_4 + y_5 + y_6 + y_7 \le 2 \\
+&           x_i \ge 0, y_i \ge 0, \forall i = 1,\cdots,7.
+\end{align*}
+\end{solution}
+
+
+\subsection{Knapsack Problem}
+
+
+\subsection{Work Scheduling}
+
+
+\subsection{Assignment Problem}
+Consider the assignment of $n$ teams to $n$ projects, where each team ranks the projects, where their favorite project is given a rank of $n$, their next favorite $n-1$, and their least favorite project is given a rank of 1.  The assignment problem is formulated as follows (we denote ranks using the $R$-parameter):
+
+\smallskip \underline{Variables:} \\
+$x_{ij}$ : 1 if project $i$ assigned to team $j$, else 0.
+\begin{align*}
+\mbox{Max~}   & z = \sum_{i=1}^{n}\sum_{j=1}^{n} R_{ij} x_{ij}  \\
+\mbox{s.t.~}& \sum_{i=1}^{n} x_{ij} = 1,~~ \forall j = 1,\cdots,n  \\
+& \sum_{j=1}^{n} x_{ij} = 1,~~ \forall i = 1,\cdots,n  \\
+& x_{ij} \ge 0,~~ \forall i = 1,\cdots,n, j = 1,\cdots,n. 
+\end{align*}
+The assignment problem has an integrality property, such that if we remove the binary restriction on the $x$ variables (now just non-negative, i.e., $x_{ij} \ge 0$) then we still get binary assignments, despite the fact that it is now an LP.  This property is very interesting and useful. Of course, the objective function might not quite what we want, we might be interested ensuring that the team with the worst assignment is as good as possible (a fairness criteria). One way of doing this is to modify the assignment problem using a max-min objective:
+
+\medskip {\bf Max-min Assignment-like Formulation} \\
+\begin{eqnarray}
+& Max  & z  \nonumber \\
+& s.t. & \sum_{i=1}^{n} x_{ij} = 1,~~ \forall j = 1,\cdots,n \nonumber \\
+&      & \sum_{j=1}^{n} x_{ij} = 1,~~ \forall i = 1,\cdots,n \nonumber \\
+&      & x_{ij} \ge 0,~~ \forall i = 1,\cdots,n, J = 1,\cdots,n \nonumber \\
+&      & z \le \sum_{i=1}^{n} R_{ij} x_{ij},~~ \forall j = 1,\cdots,n. \nonumber
+\end{eqnarray}
+Does this formulation have the integrality property (it is not an assignment problem)?  Consider a very simple example where two teams are to be assigned to two projects and the teams give the projects the following rankings:
+\begin{table}[h!] \begin{center} \begin{tabular} {|c||c|c|}
+\hline           & Project~1 & Project~2 \\ \hline \hline
+\hline Team 1    & 2  & 1  \\
+\hline Team 2    & 2  & 1 \\ \hline
+\end{tabular} \end{center} \end{table}
+Both teams prefer Project 2.  For both problems, if we remove the binary restriction on the
+$x$-variable, they can take values between (and including) zero and one. For the assignment problem the optimal solution will have $z=3$, and fractional $x$-values will not improve $z$. For the max-min assignment problem this is not the case, the optimal solution will have $z=1.5$, which occurs when each team is assigned half of each project (i.e., for Team 1 we have $x_{11} = 0.5$ and $x_{21} = 0.5$).
+
+
+
+\subsection{Multi period Models}
+\todo[inline]{Fill in this subsection}
+
+\subsubsection{Production Planning}
+
+\subsubsection{Crop Planning}
+
+
+\subsection{Mixing Problems}
+
+\subsection{Financial Planning}
+
+\todo[inline]{Fill in this subsection}
+
+
+
+
+\subsection{Network Flow}
+\begin{resource}
+\begin{itemize}
+\item \href{https://ocw.mak.ac.ug/courses/electrical-engineering-and-computer-science/6-046j-design-and-analysis-of-algorithms-spring-2012/lecture-notes/MIT6_046JS12_lec13.pdf}{MIT - CC BY NC SA 4.0 license}
+\item \href{https://www.cs.princeton.edu/~wayne/kleinberg-tardos/pearson/}{Slides for Algorithms book by Kleinberg-Tardos}
+\end{itemize}
+\end{resource}
+
+To begin a discussion on Network flow, we first need to discuss graphs.   
+
+\subsubsection{Graphs}
+
+A graph $G = (V,E)$ is defined by a set of vertices $V$ and a set of edges $E$ that contains pairs of vertices. 
+
+For example, the following graph $G$ can be described by the vertex set $V = \{1,2,3,4,5,6\}$ and the edge set $E = \{(4,6),(4,5), (5,1) (1,2), (2,5), (2,3), (3,4)\}$. 
+
+\begin{center}
+\begin{tikzpicture}
+  [scale=.8,auto=left,every node/.style={circle,fill=blue!20}]
+  \node (n6) at (1,10) {6};
+  \node (n4) at (4,8)  {4};
+  \node (n5) at (8,9)  {5};
+  \node (n1) at (11,8) {1};
+  \node (n2) at (9,6)  {2};
+  \node (n3) at (5,5)  {3};
+
+  \foreach \from/\to in {n6/n4, n4/n5,n5/n1,n1/n2,n2/n5,n2/n3,n3/n4}
+    \draw (\from) -- (\to);
+
+\end{tikzpicture}
+\end{center}
+
+In an undirected graph, we do not distinguish the direction of the edge.  That is, for two vertices $i,j \in V$, we can equivalently write $(i,j)$ or $(j,i)$ to represent the edge.
+
+
+
+
+Alternatively, we will want to consider directed graphs.  We denote these as $G = (V,\mathcal A)$ where $\mathcal A$ is a set of arcs where an arc is a directed edge.
+
+For example, the following directed graph $G$ can be described by the vertex set $V = \{1,2,3,4,5,6\}$ and the edge set $\mathcal A= \{(4,6),(6,4), (4,5), (5,1) (1,2), (2,5), (2,3), (3,4)\}$. 
+\begin{center}
+\begin{tikzpicture}
+  [scale=.8,auto=left,every node/.style={circle,fill=blue!20}]
+  \node (n6) at (1,10) {6};
+  \node (n4) at (4,8)  {4};
+  \node (n5) at (8,9)  {5};
+  \node (n1) at (11,8) {1};
+  \node (n2) at (9,6)  {2};
+  \node (n3) at (5,5)  {3};
+
+  \foreach \from/\to in {n6/n4,n4/n6,n4/n5,n5/n1,n1/n2,n2/n5,n2/n3,n3/n4}
+  	\path[every node/.style={font=\sffamily\small}]
+    	(\from) edge[->, bend left] node [left] {} (\to);
+   % \draw[->] (\from) to [out=15,in=-15] (\to);
+
+\end{tikzpicture}
+\end{center}
+
+
+
+
+
+\paragraph{Sets}
+A finite network $G$ is described by a finite set of vertices $V$ and a finite set $\mathcal{A}$ of arcs. Each arc $(i,j)$ has two key attributes, namely its tail $j \in V$ and its head $i \in V$. 
+
+
+We think of a (single) commodity as being allowed to "flow" along each arc, from its tail to its head. 
+\paragraph{Variables}
+Indeed, we have "flow" variables
+$$
+x_{ij}:=\text { amount of flow on } \operatorname{arc} (i,j) \text{ from vertex $i$ to vertex $j$},
+$$
+for all $(i,j) \in \mathcal{A}$. 
+
+
+
+\subsubsection{Maximum Flow Problem}
+
+\begin{tcolorbox}
+\begin{align}
+\max \ \ & \sum_{(s, i) \in \mathcal{A}} x_{si} &
+\text{max total flow from source}\\
+s.t.\ \ 
+&\sum_{i : (i,v) \in \mathcal A} x_{i v}-\sum_{j : (v,j) \in \mathcal{A}} x_{v j} =0  &  v \in V \backslash\{s, t\}\\
+%[a constraint per edge and a constraint per nonterminal node]\\
+&0 \leq x_{ij} \leq  u_{ij} \quad \forall(i,j) \in \mathcal{A}
+\end{align}
+
+\end{tcolorbox}
+%\documentclass[border=4mm]{standalone}
+%\usepackage{tikz}
+%\usetikzlibrary{arrows.meta,positioning}
+%\begin{document}
+
+\paragraph{Shortest Path Problem}
+
+
+\begin{tcolorbox}
+$$
+\begin{aligned}
+& \text { minimize } & \sum_{u \rightarrow v} \ell_{u \rightarrow v} \cdot x_{u \rightarrow v} & \\
+\text { subject to } & \sum_{u} x_{u \rightarrow s}-\sum_{w} x_{s \rightarrow w} &=1 & \\
+\sum_{u} x_{u \rightarrow t}-\sum_{w} x_{t \rightarrow w} &=-1 & \\
+\sum_{u} x_{u \rightarrow v}-\sum_{w} x_{v \rightarrow w} &=0 & \text { for every vertex } v \neq s, t \\
+x_{u \rightarrow v} & \geq 0 & \text { for every edge } u \rightarrow v
+\end{aligned}
+$$
+\end{tcolorbox}
+\begin{example}{Max flow example}{}
+\begin{center}
+    \begin{tikzpicture}[
+      mycircle/.style={
+         circle,
+         draw=black,
+         fill=gray,
+         fill opacity = 0.3,
+         text opacity=1,
+         inner sep=0pt,
+         minimum size=20pt,
+         font=\small},
+         startcircle/.style={
+         circle,
+         draw=black,
+         fill=green,
+         fill opacity = 0.3,
+         text opacity=1,
+         inner sep=0pt,
+         minimum size=20pt,
+         font=\small},
+         endcircle/.style={
+         circle,
+         draw=black,
+         fill=red,
+         fill opacity = 0.3,
+         text opacity=1,
+         inner sep=0pt,
+         minimum size=20pt,
+         font=\small},
+      myarrow/.style={-Stealth},
+      node distance=0.6cm and 1.2cm
+      ]
+      \node[startcircle] (c1) {$s$};
+      \node[mycircle,below right=of c1] (c2) {$v_2$};
+      \node[mycircle,right=of c2] (c3) {$v_4$};
+      \node[mycircle,above right=of c1] (c4) {$v_1$};
+      \node[mycircle,right=of c4] (c5) {$v_3$};
+      \node[endcircle,below right=of c5] (c6) {$t$};
+
+    \foreach \i/\j/\txt/\p in {% start node/end node/text/position
+      c1/c2/8/below,
+      c1/c4/11/above,
+      c2/c3/11/below,
+      c3/c6/4/below,
+      c4/c5/12/above,
+      c5/c6/15/above,
+      c5/c2/4/below,
+      c3/c5/7/below,
+      c2.70/c4.290/1/below}
+       \draw [myarrow] (\i) -- node[sloped,font=\small,\p] {\txt} (\j);
+
+
+     % draw this outside loop to get proper orientation of 10
+     \draw [myarrow] (c4.250) -- node[sloped,font=\small,above,rotate=180] {10} (c2.110);
+    \end{tikzpicture}
+%\end{document}
+\end{center}
+\end{example}
+
+\begin{example}{Min Cost Network Flow}{}
+\begin{center}
+    \begin{tikzpicture}[
+      mycircle/.style={
+         circle,
+         draw=black,
+         fill=gray,
+         fill opacity = 0.3,
+         text opacity=1,
+         inner sep=0pt,
+         minimum size=20pt,
+         font=\small},
+         startcircle/.style={
+         circle,
+         draw=black,
+         fill=green,
+         fill opacity = 0.3,
+         text opacity=1,
+         inner sep=0pt,
+         minimum size=20pt,
+         font=\small},
+         endcircle/.style={
+         circle,
+         draw=black,
+         fill=red,
+         fill opacity = 0.3,
+         text opacity=1,
+         inner sep=0pt,
+         minimum size=20pt,
+         font=\small},
+      myarrow/.style={-Stealth},
+      node distance=0.6cm and 1.2cm
+      ]
+      \node[mycircle, label = {left: {\color{blue}-2}}] (c1) {$v_5$};
+      \node[mycircle,below right=of c1, label = {below: {\color{blue}-5}}] (c2) {$v_2$};
+      \node[mycircle,right=of c2,label = {below: {\color{blue}-6}}] (c3) {$v_4$};
+      \node[mycircle,above right=of c1, label = {above: {\color{blue}6}}] (c4) {$v_1$};
+      \node[mycircle,right=of c4, label = {above: {\color{blue}-3}}] (c5) {$v_3$};
+      \node[mycircle,below right=of c5, label = {right: {\color{blue}10}}] (c6) {$v_6$};
+      
+
+    \foreach \i/\j/\txt/\txtr/\p in {% start node/end node/text/position
+      c1/c2/8/7/below,
+      c1/c4/11/4/above,
+      c2/c3/11/7/below,
+      c3/c6/4/2/below,
+      c4/c5/12/9/above,
+      c5/c6/15/2/above,
+      c5/c2/4/1/below,
+      c3/c5/7/8/below,
+      c2.70/c4.290/1/2/below}
+       \draw [myarrow] (\i) -- node[sloped,font=\small,\p] {\txt, {\color{red} \txtr}} (\j);
+
+%    \foreach \i/\txt/\p in {% start node/end node/text/position
+%      c1/8/left,
+%      c2/11/above,
+%      c3/2/below,
+%      c4/9/above,
+%      c5/2/above,
+%      c6/1/below}
+%       \node[\p] (\i) {\txt};
+
+     % draw this outside loop to get proper orientation of 10
+     \draw [myarrow] (c4.250) -- node[sloped,font=\small,above,rotate=180] {10, {\color{red} 1}} (c2.110);
+    \end{tikzpicture}
+   \end{center}
+   \end{example}
+
+\includefigurestatic[][scale = 0.5][h]{network-flow}
+
+
+\includefigurestatic[][scale = 0.5][h]{network-flow-solution}
+
+
+
+\subsubsection{Minimum Cost Network Flow}
+\paragraph{Parameters}
+
+We assume that flow on arc $(i,j)$ should be non-negative and should not exceed
+$$
+u_{ij}:=\text { the flow upper bound on } \operatorname{arc} (i,j) \text {, }
+$$
+for $(i,j) \in \mathcal{A}$. Associated with each arc $(i,j)$ is a cost
+$$
+c_{ij}:=\text { cost per-unit-flow on arc } (i,j),
+$$
+for $(i,j) \in \mathcal{A}$. The (total) cost of the flow $x$ is defined to be
+$$
+\sum_{(i,j) \in \mathcal{A}} c_{ij} x_{ij} .
+$$
+
+We assume that we have further data for the nodes. Namely,
+$$
+b_{v}:=\text { the net supply at node } v,
+$$
+for $v \in V$. 
+
+A flow is conservative if the net flow out of node $v$, minus the net flow into node $v$, is equal to the net supply at node $v$, for all nodes $v \in V$.
+
+The (single-commodity min-cost) network-flow problem is to find a minimumcost conservative flow that is non-negative and respects the flow upper bounds on the arcs. 
+
+\paragraph{Objective and Constraints}
+We can formulate this as follows:
+\begin{tcolorbox}
+$$
+\begin{aligned}
+\min & \sum_{(i,j) \in \mathcal{A}} c_{ij}\, x_{ij} & \text{ minimize cost}\\
+& \sum_{(i,v) \in \mathcal{A}} x_{iv}-\sum_{(v,i)  \in \mathcal{A} } x_{vi}=b_{v}, \quad \text{ for all }  v \in V,  & \text{ flow conservation}\\
+& 0 \leq x_{ij} \leq u_{ij}, \quad \text{ for all }  (i,j) \in \mathcal{A} .
+\end{aligned}
+$$
+\end{tcolorbox}
+
+\begin{theorem}{Integrality of Network Flow}{integralitynetworkflow}
+If the capacities and demands are all integer values, then there always exists an optimal solution to the LP that has integer values.
+\end{theorem}
+
+\subsection{Multi-Commodity Network Flow}
+In the same vein as the Network Flow Problem
+\begin{align*}
+\min~& \sum_{k=1}^{K} \sum_{e \in \mathcal{A}} c^k_e x^k_e \\
+&\sum_{e\in \mathcal{A} ~:~ t(e)=v} x^k_e - \sum_{e\in \mathcal{A} ~:~ h(e)=v} x^k_e 
+= b^k_v,~ \mbox{ for } v \in \mathcal{N},~ k=1,2,\ldots,K;\\
+& \sum_{k=0}^{K}  x^k_{e} \leq u_e,~ \mbox{ for } e \in \mathcal{A};\\
+&  x^k_{e}\geq 0,~ \mbox{ for } e \in \mathcal{A},~ k=1,2,\ldots,K\\
+\end{align*}
+
+Notes:
+
+K=1 is ordinary single-commodity network flow. Integer solutions for free when node-supplies and arc capacities are integer.
+K=2 example below with integer data gives a fractional basic optimum. This example doesn't have any feasible integer flow at all.
+
+\begin{remark}{}{}
+Unfortunately, the same integrality theorem does not hold in the multi-commodity network flow probem.  Nontheless, if the quanties in each flow are very large, then the LP solution will likely be very close to an integer valued solution.
+\end{remark}
+
+\subsection{Modeling Tricks}
+
+
+\begin{example}{Minimizing a Maximum}{}
+
+let.....
+
+
+
+\end{example}
+
+\begin{example}{Minimizing an Absolute Value}{}
+
+
+\end{example}
+
+\section{Other examples}
+
+
+\href{https://gurobi.github.io/modeling-examples/food_manufacturing_1_2/food_manufacture_1.html}{Food manfacturing - GUROBI}
+
+\href{https://www.andrew.cmu.edu/user/gc0v/webpub/book.pdf}{Optimization Methods in Finance - Corneujols, T\"ut\"unc\"u}
+
+\input{Christopher_Griffin_Penn_State_University/Section2.tex}
+
+\newpage 
+
+\chapter{Software}
+
+\section{Excel}
+\begin{resource}
+\begin{itemize}
+\item \href{https://www.youtube.com/watch?v=dRm5MEoA3OI&ab_channel=LeilaGharani}{Excel Solver - Introduction on Youtube}
+
+\item \href{https://ocw.mit.edu/courses/sloan-school-of-management/15-053-optimization-methods-in-management-science-spring-2013/tutorials/MIT15_053S13_tut03.pdf}{Some notes from MIT}
+\end{itemize}
+\end{resource}
+
+\subsection{Excel Solver}
+\subsection{Videos}
+\href{https://www.youtube.com/watch?v=V5DmekIFenA}{Solving a linear program}
+\href{https://www.youtube.com/watch?v=6xa1x_Iqjzg}{Optimal product mix}
+\href{https://www.youtube.com/watch?v=vpodCzRtUMU}{Set Cover}
+
+\href{https://www.youtube.com/watch?v=tKV24jzZ10s}{Introduction to Designing Optimization Models Using Excel Solver}
+
+\href{https://www.youtube.com/watch?v=-E3rSoClgMI}{Traveling Salesman Problem}
+
+\href{https://www.youtube.com/watch?v=UQYJvSjXE6I}{Also Travelin Salesman Problem}
+
+\href{https://www.youtube.com/watch?v=owHq3Mbniqo}{Multiple Traveling Salesman Problem}
+
+\href{https://www.youtube.com/watch?v=JkZkGxVZ8ao}{Shortest Path}
+
+\subsection{Links}
+\href{https://github.com/lobodemonte/excel-solver-loan-example}{Loan Example}
+
+\href{https://github.com/Bhargavanarasimhan/Excel-Solver-Files}{Several Examples including TSP}
+
+
+
+
+\subimport{./foundationsAppliedMathematicsLabs/Appendices/Installation/}{Installation} %Chapter
+\subimport{./foundationsAppliedMathematicsLabs/Appendices/NumpyVisualGuide/}{NumpyVisualGuide} %Chapter
+\subimport{./foundationsAppliedMathematicsLabs/Appendices/MatplotlibCustomization/}{MatplotlibCustomization} %Chapter
+
+\subsection{Jupyter Notebooks}
+\url{https://github.com/mathinmse/mathinmse.github.io/blob/master/Lecture-00B-Notebook-Basics.ipynb}
+\url{https://github.com/mathinmse/mathinmse.github.io/blob/master/Lecture-00C-Writing-In-Jupyter.ipynb}
+
+\subsection{Reading and Writing}
+\url{https://github.com/mathinmse/mathinmse.github.io/blob/master/Lecture-10B-Reading-and-Writing-Data.ipynb}
+
+\subsection{Python Crash Course}
+\url{https://github.com/rpmuller/PythonCrashCourse}
+
+
+\subsection{Gurobi}
+\href{https://github.com/Gurobi/grblogtools}{Gurobi Log Tools}
+
+
+
+
+
+
+\ifdefined \oldstuff
+\chapter{Old text}
+
+Remember, for a linear program (LP), we want to maximize or minimize a linear {\bf objective function} of the continous decision variables, while considering linear constraints on the values of the decision variables.
+
+%\bigskip {\bf Definition:} 
+\begin{definition}{Linear Function}
+A function $f(x_1,x_2,\dots,x_n)$ is \emph{linear} if, and only if, we have $f(x_1,x_2,\dots,x_n) = c_1x_1 + c_2x_2 + \dots + c_nx_n$, where the  $c_1,c_2,\dots,c_n$ coefficients are constants.  
+\end{definition}
+
+\bigskip  \underline{\bf A Generic Linear Program (LP)}
+
+\medskip  \underline{Decision Variables:}\\
+$x_i$ : continuous variables ($x_i \in \mathcal{R}$, i.e., a real number), $\forall i = 1,\cdots,3$.
+
+\medskip \underline{Parameters (known input parameters):}\\
+$c_i$ : cost coefficients $\forall i = 1,\dots,3$ \\
+$a_{ij}$ : constraint coefficients $\forall i = 1,\dots,3,~ j = 1,\dots,4$ \\
+$b_j$ : right hand side coefficient for constraint $j$, $j = 1,\dots,4$
+
+\begin{align}
+\mbox{Min~~} & z = c_1x_1 + c_2x_2 + c_3x_3  \label{eq:OF1}\\
+\mbox{s.t.~~} & a_{11}x_1 + a_{12}x_2 + a_{13} x_3 \ge b_1 \label{eq:C1} \\
+& a_{21}x_1 + a_{22}x_2 + a_{23} x_3 \le b_2 \label{eq:C2} \\
+& a_{31}x_1 + a_{32}x_2 + a_{33} x_3 = b_3 \label{eq:C3}\\
+& a_{41}x_1 + a_{42}x_2 + a_{43} x_3 \ge b_4 \label{eq:C4}\\
+& x_1 \ge 0, x_2 \le 0, x_3~urs \label{eq:C5}.
+\end{align}
+
+Eq.~(\ref{eq:OF1}) is the objective function, (\ref{eq:C1})-(\ref{eq:C4}) are the functional constraints, while (\ref{eq:C5}) is the sign restrictions ({\it ur}s signifies that the variable is unrestricted). If we were to add any one of these following constraints $x_2 \in \{0, 1\}$ ($x_2$ is binary-valued) or $x_3 \in \mathcal{Z}$ ($x_3$ is integer-valued) we would have an Integer Program.  For the purposes of this class, an Integer Program (IP) is just an LP with added integer restrictions on (some) variables.
+
+While, in general, solvers will take any form of the LP, there are some special forms we use in analysis:\\
+
+\medskip \underline{\bf LP Standard Form}: The standard form has all constraints as equalities, and all variables as non-negative.  The generic LP is not in standard form, but any LP can be converted to standard form. \\
+
+Since $x_2$ is non-positive and $x_3$ unrestricted, perform the following substitutions $x_2=-\hat{x}_2$ and $x_3 = x_3^+ -x_3^-$, where $\hat{x}_2$, $x_3^+$, $x_3^- \ge 0$.   Eqs.~(\ref{eq:C1}) and (\ref{eq:C4}) are in the form left-hand side (LHS) $\ge$ right-hand side (RHS), so to make an equality, subtract a non-negative slack variable from the LHS ($s_1$ and $s_4$).  Eq.~(\ref{eq:C2}) is in the form LHS $\le$ RHS, so add a non-negative slack variable to the LHS.
+\begin{align*}
+\mbox{Min~~} & z = c_1x_1 - c_2\hat{x}_2 + c_3 (x_3^+ -x_3^-)  \\
+\mbox{s.t.~~} & a_{11}x_1 - a_{12}x_2 + a_{13} (x_3^+ -x_3^-) - s_1 = b_1 \\
+& a_{21}x_1 - a_{22}\hat{x}_2 + a_{23} (x_3^+ -x_3^-) + s_2 = b_2 \\
+&  a_{31}x_1 - a_{32}\hat{x}_2 + a_{33} (x_3^+ -x_3^-) = b_3 \\
+& a_{41}x_1 - a_{42}\hat{x}_2 + a_{43} x_3 - s_4 = b_4 \\
+& x_1, \hat{x}_2, x_3^+, x_3^-, s_1, s_2, s_4 \ge 0.
+\end{align*}
+
+\medskip \underline{\bf  LP Canonical Form}: For a minimization problem the canonical form of the LP has the LHS of each constraint greater than or equal to the the RHS, and a maximization the LHS less than or equal to the RHS, and non-negative variables.
+
+Next we consider some formulation examples:
+
+
+\bigskip {\bf The Assignment Problem:} Consider the assignment of $n$ teams to $n$ projects, where each team ranks the projects, where their favorite project is given a rank of $n$, their next favorite $n-1$, and their least favorite project is given a rank of 1.  The assignment problem is formulated as follows (we denote ranks using the $R$-parameter):
+
+\smallskip \underline{Variables:} \\
+$x_{ij}$ : 1 if project $i$ assigned to team $j$, else 0.
+\begin{align*}
+\mbox{Max~}   & z = \sum_{i=1}^{n}\sum_{j=1}^{n} R_{ij} x_{ij}  \\
+\mbox{s.t.~}& \sum_{i=1}^{n} x_{ij} = 1,~~ \forall j = 1,\cdots,n  \\
+& \sum_{j=1}^{n} x_{ij} = 1,~~ \forall i = 1,\cdots,n  \\
+& x_{ij} \ge 0,~~ \forall i = 1,\cdots,n, j = 1,\cdots,n. 
+\end{align*}
+The assignment problem has an integrality property, such that if we remove the binary restriction on the $x$ variables (now just non-negative, i.e., $x_{ij} \ge 0$) then we still get binary assignments, despite the fact that it is now an LP.  This property is very interesting and useful. Of course, the objective function might not quite what we want, we might be interested ensuring that the team with the worst assignment is as good as possible (a fairness criteria). One way of doing this is to modify the assignment problem using a max-min objective:
+
+\medskip {\bf Max-min Assignment-like Formulation} \\
+\begin{eqnarray}
+& Max  & z  \nonumber \\
+& s.t. & \sum_{i=1}^{n} x_{ij} = 1,~~ \forall j = 1,\cdots,n \nonumber \\
+&      & \sum_{j=1}^{n} x_{ij} = 1,~~ \forall i = 1,\cdots,n \nonumber \\
+&      & x_{ij} \ge 0,~~ \forall i = 1,\cdots,n, J = 1,\cdots,n \nonumber \\
+&      & z \le \sum_{i=1}^{n} R_{ij} x_{ij},~~ \forall j = 1,\cdots,n. \nonumber
+\end{eqnarray}
+Does this formulation have the integrality property (it is not an assignment problem)?  Consider a very simple example where two teams are to be assigned to two projects and the teams give the projects the following rankings:
+\begin{table}[h!] \begin{center} \begin{tabular} {|c||c|c|}
+\hline           & Project~1 & Project~2 \\ \hline \hline
+\hline Team 1    & 2  & 1  \\
+\hline Team 2    & 2  & 1 \\ \hline
+\end{tabular} \end{center} \end{table}
+Both teams prefer Project 2.  For both problems, if we remove the binary restriction on the
+$x$-variable, they can take values between (and including) zero and one. For the assignment problem the optimal solution will have $z=3$, and fractional $x$-values will not improve $z$. For the max-min assignment problem this is not the case, the optimal solution will have $z=1.5$, which occurs when each team is assigned half of each project (i.e., for Team 1 we have $x_{11} = 0.5$ and $x_{21} = 0.5$).
+
+
+\newpage \bigskip  {\bf Linear Data Models:} Consider a data set that consists of $n$ data points $(x_i,y_i)$.  We want to fit the best line to this data, such that given an $x$-value, we can predict the associated $y$-value.  Thus, the form is $y_ i = \alpha x_i + \beta$ and we want to choose the $\alpha$ and $\beta$ values such that we minimize the error for our $n$ data points.
+
+\smallskip  \underline{\bf Variables:}\\
+$e_i$ : error for data point $i$, $i = 1,\cdots,n$. \\
+$\alpha$ : slope of fitted line. \\
+$\beta$ : intercept of fitted line.
+\begin{eqnarray}
+& Min   & \sum_{i=1}^n |e_i|  \nonumber \\
+& s.t.  & \alpha x_i + \beta - y_i = e_i,~~ i=1,\cdots,n \nonumber \\
+&       & e_i, \alpha, \beta ~ urs \nonumber.
+\end{eqnarray}
+
+Of course, absolute values are not linear function, so we can linearize as follows:
+
+\smallskip  \underline{\bf Decision variables:}\\
+$e_i^+$ : positive error for data point $i$, $i = 1,\cdots,n$. \\
+$e_i^-$ : negative error for data point $i$, $i = 1,\cdots,n$. \\
+$\alpha$ : slope of fitted line. \\
+$\beta$ : intercept of fitted line.
+\begin{eqnarray}
+& Min   & \sum_{i=1}^n e_i^+ +e_i^- \nonumber \\
+& s.t.  & \alpha x_i + \beta - y_i = e_i^+-e_i^-,~~ i=1,\cdots,n \nonumber \\
+&       & e_i^+, e_i^- \ge 0, \alpha, \beta ~ urs \nonumber.
+\end{eqnarray}
+ 
+\bigskip {\bf Two-Person Zero-Sum Games:} Consider a game with two players, $\mathcal{A}$ and $\mathcal{B}$. In each round of the game, $\mathcal{A}$ chooses one out of $m$ possible actions, while $\mathcal{B}$ chooses one out of $n$ actions.  If $\mathcal{A}$ takes action $j$ while $\mathcal{B}$ takes action $i$, then $c_{ij}$ is the payoff for $\mathcal{A}$ , if $c_{ij} > 0$, $\mathcal{A}$ ``wins" $c_{ij}$ (and $\mathcal{B}$ losses that amount), and if $c_{ij} < 0$ if $\mathcal{B}$ ``wins" $-c_{ij}$ (and $\mathcal{A}$ losses that amount).  This is a two-person zero-sum game.
+
+\smallskip Rock, Paper, Scissors is a two-person zero-sum game, with the following payoff matrix.
+\begin{center} \begin{tabular}{c|c|c|c|c|}
+\multicolumn{5}{ c }{~~~~$\mathcal{A}$} \\ \cline{2-5}
+              &         & {\bf R} & {\bf P} & {\bf S} \\ \cline{2-5}
+              & {\bf R} & 0       & 1       & -1      \\ \cline{2-5}
+$\mathcal{B}$ & {\bf P} & -1      & 0       & 1       \\ \cline{2-5}
+              & {\bf S} & 1       & -1      & 0       \\ \cline{2-5}
+\end{tabular} \end{center}
+
+\smallskip  We can have a similar game, but with a different payoff matrix, as follows:
+\begin{center} \begin{tabular}{c|c|c|c|c|}
+\multicolumn{5}{ c }{~~~~$\mathcal{A}$} \\ \cline{2-5}
+              &         & {\bf R} & {\bf P} & {\bf S} \\ \cline{2-5}
+              & {\bf R} & 4       & -1      & -1 \\ \cline{2-5}
+$\mathcal{B}$ & {\bf P} & -2      & 4       & -2 \\ \cline{2-5}
+              & {\bf S} & -3      & -3      & 4 \\ \cline{2-5}
+\end{tabular} \end{center}
+
+\medskip What is the optimal strategy for $\mathcal{A}$ (for either game)? We define $x_j$ as the probability that $\mathcal{A}$ takes action $j$ (related to the columns).  Then the payoff for $\mathcal{A}$, if $\mathcal{B}$ takes action $i$ is $\sum_{j=1}^m c_{ij}x_{j}$. Of course, $\mathcal{A}$ does not know what action $\mathcal{B}$ will take, so let's find a strategy that maximizes the minimum expected winnings of $\mathcal{A}$ given any random strategy of $\mathcal{B}$, which we can formulate as follows:
+\begin{eqnarray}
+& Max  & (min_{i=1,\cdots,n} \sum_{j=1}^m  c_{ij}x_i) \nonumber \\
+& s.t. & \sum_{j=1}^m x_j = 1 \nonumber \\
+&      & x_j \ge 0,~~ i = 1,\cdots,m, \nonumber
+\end{eqnarray}
+which can be linearized as follows:
+\begin{eqnarray}
+& Max  & z \nonumber \\
+& s.t. & z \le \sum_{j=1}^m  c_{ij}x_j,~~ i = 1,\cdots,n \nonumber \\
+&      & \sum_{j=1}^m x_j = 1 \nonumber \\
+&      & x_j \ge 0,~~ i = 1,\cdots,m. \nonumber
+\end{eqnarray}
+
+The last two constraints ensure the that $x_i$-variables are valid probabilities. If you solved this LP for the first game (i.e., payoff matrix) you find the best strategy is $x_1 = 1/3$, $x_2 = 1/3$, and $x_3 = 1/3$ and there is no expected gain for player $\mathcal{A}$.  For the second game, the best strategy is $x_1 = 23/107$, $x_2 = 37/107$, and $x_3 = 47/107$, with $\mathcal{A}$ gaining, on average, $8/107$ per round.
+
+\subsection*{Eating on a Budget}
+
+In 2009, the inmates of Morgan County jail convinced Judge Clemon of the Federal District Court in Birmingham to put Sheriff Barlett in jail for malnutrition.
+Under Alabama law, in order to encourage less spending, "the chief lawman could go light on prisoners' meals and pocket the leftover change."\footnote[1]{Nossiter, Adam, 8 Jan 2009, "As His Inmates Grew Thinner, a Sheriff’s Wallet Grew Fatter", \emph{New York Times},\url{https://www.nytimes.com/2009/01/09/us/09sheriff.html}}.
+Sheriffs had to ensure a minimum amount of nutrition for inmates, but minimizing costs meant more money for the sheriffs themselves.
+Judge Clemon jailed Sheriff Barlett one night until a plan was made to use all allotted funds, $1.75$ per inmate, to feed prisoners more nutritious meals.
+While this case made national news, the controversy of feeding prisoners in Alabama continues as of 2019\footnote[2]{Sheets, Connor, 31 January 2019, "Alabama sheriffs urge lawmakers to get them out of the jail food business", \url{https://www.al.com/news/2019/01/alabama-sheriffs-urge-lawmakers-to-get-them-out-of-the-jail-food-business.html}}.
+
+The problem of minimizing cost while reaching healthy nutritional requirements can be approached as a convex optimization problem.
+Rather than viewing this problem from the sheriff's perspective, we view it from the perspective of a college student trying to minimize food cost in order to pay for higher education, all while meeting standard nutritional guidelines.
+
+The file \li{food.npy} contains a dataset with nutritional facts for 18 foods that have been eaten frequently by college students working on this text.
+A subset of this dataset can be found in Table \ref{tab:food-data}, where the "Food" column contains the list of all 18 foods.
+
+The columns of the full dataset are:
+\begin{align*}
+& \text{Column 1: $p$, price (dollars)} \\
+& \text{Column 2: $s$, number of servings} \\
+& \text{Column 3: $c$, calories per serving} \\
+& \text{Column 4: $f$, fat per serving (grams)} \\
+& \text{Column 5: $\hat{s}$, sugar per serving (grams)} \\
+& \text{Column 6: $\hat{c}$, calcium per serving (milligrams)} \\
+& \text{Column 7: $\hat{f}$, fiber per serving (grams)} \\
+& \text{Column 8: $\hat{p}$, protein per serving (grams)}
+\end{align*}
+
+
+ \begin{table}[H]
+% \begin{adjustwidth}{-.5in}{-.5in}
+\begin{tabular}{|c||c|c|c|c|c|c|c|c|c|c|}
+\hline
+\textbf{Food} & \textbf{Price} & \textbf{Serving Size} & \textbf{Calories} & \textbf{Fat} & \textbf{Sugar} & \textbf{Calcium} & \textbf{Fiber} & \textbf{Protein} \\ 
+& $p$ & $s$ & $c$ & $f$ & $\hat{s}$ & $\hat{c}$ & $\hat{f}$ & $\hat{p}$ \\ 
+& dollars & & & g & g & mg & g & g \\ \hline\hline
+Ramen & 6.88 & 48 & 190 & 7 & 0 & 0 & 0 & 5 \\ \hline
+Potatoes & 0.48 & 1 & 290 & 0.4 & 3.2 & 53.8 & 6.9 & 7.9 \\ \hline
+Milk & 1.79 & 16 & 130 & 5 & 12 & 250 & 0 & 8 \\ \hline
+Eggs & 1.32 & 12 & 70 & 5 & 0 & 28 & 0 & 6 \\ \hline
+Pasta & 3.88 & 8 & 200 & 1 & 2 & 0 & 2 & 7 \\ \hline
+Frozen Pizza & 2.78 & 5 & 350 & 11 & 5 & 150 & 2 & 14 \\ \hline
+Potato Chips & 2.12 & 14 & 160 & 11 & 1 & 0 & 1 & 1 \\ \hline
+Frozen Broccoli & 0.98 & 4 & 25 & 0 & 1 & 25 & 2 & 1 \\ \hline
+Carrots & 0.98 & 2 & 52.5 & 0.3 & 6.1 & 42.2 & 3.6 & 1.2 \\ \hline
+Bananas & 0.24 & 1 & 105 & 0.4 & 14.4 & 5.9 & 3.1 & 1.3 \\ \hline
+Tortillas & 3.48 & 18 & 140 & 4 & 0 & 0 & 0 & 3 \\ \hline
+Cheese & 1.88 & 8 & 110 & 8 & 0 & 191 & 0 & 6 \\ \hline
+Yogurt & 3.47 & 5 & 90 & 0 & 7 & 190 & 0 & 17 \\ \hline
+Bread & 1.28 & 6 & 120 & 2 & 2 & 60 & 0.01 & 4 \\ \hline
+Chicken & 9.76 & 20 & 110 & 3 & 0 & 0 & 0 & 20 \\ \hline
+Rice & 8.43 & 40 & 205 & 0.4 & 0.1 & 15.8 & 0.6 & 4.2 \\ \hline
+Pasta Sauce & 3.57 & 15 & 60 & 1.5 & 7 & 20 & 2 & 2 \\ \hline
+Lettuce & 1.78 & 6 & 8 & 0.1 & 0.6 & 15.5 & 1 & 0.6 \\ \hline
+\end{tabular}
+\caption{Subset of table containing food data}
+\label{tab:food-data}
+% \end{adjustwidth}
+\end{table}
+
+ According to the FDA\footnote[1]{url{https://www.accessdata.fda.gov/scripts/InteractiveNutritionFactsLabel/pdv.html}} and US Department of Health, someone on a $2000$ calorie diet should have no more than 2000 calories, no more than 65 grams of fat, no more than 50 grams of sugar\footnote[2]{https://www.today.com/health/4-rules-added-sugars-how-calculate-your-daily-limit-t34731}, at least 1000 milligrams of calcium\footnote[1]{26 Sept 2018, \url{https://ods.od.nih.gov/factsheets/Calcium-HealthProfessional/}}, at least 25 grams of fiber, and at least 46 grams of protein\footnote[2]{\url{https://www.accessdata.fda.gov/scripts/InteractiveNutritionFactsLabel/protein.html}} per day.
+
+ We can rewrite this as a convex optimization problem below.
+
+ \begin{align*}
+\text{minimize } & \sum_{i=1}^{18}p_ix_i, \\
+\text{subject to }& \sum_{i=1}^{18} c_ix_i \leq 2000, \\
+			& \sum_{i=1}^{18} f_ix_i \leq 65, \\
+			& \sum_{i=1}^{18} \hat{s}_ix_i \leq 50, \\
+			& \sum_{i=1}^{18} \hat{c}_ix_i \geq 1000, \\
+			& \sum_{i=1}^{18} \hat{f}_ix_i \geq 25, \\
+			& \sum_{i=1}^{18} \hat{p}_ix_i \geq 46, \\
+			& x_i \geq 0.
+\end{align*}
+
+ \begin{problem}{Eating on a Budget}{}
+Read in the file \li{food.npy}.
+Identify how much of each food item a college student should each to minimize cost spent each day.
+Return the minimizing vector and the total amount of money spent.
+
+What is the food you should eat most each day? 
+What are the three foods you should eat most each week?
+
+(Hint: Each nutritional value must be multiplied by the number of servings to get the nutrition value of the whole product).
+\label{prob:diet}
+\end{problem}
+
+
+\section{Other notes}
+Let's define a procedure for finding the extreme directions, using the following LP's feasible region.  Graphically, we can see that the extreme directions should follow the the $s_1=0$ (red) line and the $s_3 = 0$ (orange) line. 
+ 
+\begin{minipage}[t][][b]{.4\linewidth}
+\begin{align*}
+\mbox{max~~} & z = -5x_1 - x_2  \\\
+\mbox{s.t.~~} & x_1 - 4x_2 +s_1 = 0  \\
+& -x_1 + x_2 + s_2 = 1 \\
+& -x_1 + 2x_2 +s_3 = 4 \\
+& x_1, x_2, s_1, s_2, s_3 \ge 0.
+\end{align*}
+\end{minipage}%
+\begin{minipage}[t][][b]{.6\linewidth}
+\begin{center}  \begin{tikzpicture} [scale=1.5]
+    \draw[gray!50, thin, step=.5] (0,0) grid (5,5);
+    \draw[opacity=0.9] (0,0) -- (5.4,0) node[below] {$x_1$};
+    \draw[opacity=0.9] (0,0) -- (0,5.4) node[left] {$x_2$}; % option \draw[very thick,->]
+
+    \foreach \x in {0,...,5} \draw (\x,0.05) -- (\x,-0.05) node[below] {\x};
+    \foreach \y in {0,...,5} \draw (-0.05,\y) -- (0.05,\y) node[left] {\y};
+
+    \fill[yellow,opacity=0.3] (0,0) -- (0,1) -- (2,3) -- (5,4.5) --(5,1.25)-- cycle;
+
+    \draw [red](0,0) -- node[below] {$s_1=0$} (5, 1.25);
+    \draw [teal] (0,1)  --  (4,5) node[left, sloped] {$s_2=0$};
+    \draw [orange](0,2) --  (5,4.5) node[below, sloped] {$s_3=0$}; %node[above right ,sloped] 
+	\filldraw[fill=red] (-0.05,-0.05) rectangle (0.05,0.05);
+	\filldraw[fill=red] (-0.05,.95) rectangle (0.05,1.05);
+	\filldraw[fill=red] (1.95,2.95) rectangle (2.05,3.05);
+\end{tikzpicture} \end{center} 
+\end{minipage}
+
+\begin{center}  \begin{tikzpicture} [scale=1.5]
+    \draw[gray!50, thin, step=.5] (0,0) grid (5,5);
+    \draw[opacity=0.9] (0,0) -- (5.4,0) node[below] {$x_1$};
+    \draw[opacity=0.9] (0,0) -- (0,5.4) node[left] {$x_2$}; % option \draw[very thick,->]
+
+    \foreach \x in {0,...,5} \draw (\x,0.05) -- (\x,-0.05) node[below] {\x};
+    \foreach \y in {0,...,5} \draw (-0.05,\y) -- (0.05,\y) node[left] {\y};
+
+    \fill[yellow,opacity=0.3] (0,0) -- (0,1) -- (2,3) -- (5,4.5) --(5,1.25)-- cycle;
+
+\draw[domain=0:4,smooth,variable=\x, teal] plot ({\x},{\x+1}) node[left] {$s_2=0$};
+\draw[domain=0:5,smooth,variable=\x, red] plot ({\x},{\x*1/4}) node[below] {$s_1=0$};
+%    \draw [red](0,0) -- node[below] {$s_1=0$} (5, 1.25);
+    %\draw [teal] (0,1)  --  (4,5) node[left, sloped] {$s_2=0$};
+    \draw [orange](0,2) --  (5,4.5) node[below, sloped] {$s_3=0$}; %node[above right ,sloped] 
+	\filldraw[fill=red] (-0.05,-0.05) rectangle (0.05,0.05);
+	\filldraw[fill=red] (-0.05,.95) rectangle (0.05,1.05);
+	\filldraw[fill=red] (1.95,2.95) rectangle (2.05,3.05);
+\end{tikzpicture} \end{center} 
+
+% \draw[scale=0.5,domain=-3:3,smooth,variable=\x,blue] plot ({\x},{\x*\x});
+
+
+\medskip E.g., consider the $s_3=0$ (orange) line, to find the extreme direction start at extreme point (2,3) and find another feasible point on the orange line, say (4,4) and subtract (2,3) from (4,4), which yields (2,1). 
+
+\medskip This is related to the slope in two-dimensions, as discussed in class, the rise is 1 and the run is 2. So this direction has a slope of 1/2, but this does not carry over easily to higher dimensions where directions cannot be defined by a single number. 
+
+\medskip To find the extreme directions we can change the right-hand-side to $\mathbf{b} = \mathbf{0}$, which forms a polyhedral cone (in yellow), and then add the constraint $x_1 + x_2 = 1$. The intersection of the cone and  $x_1 + x_2 = 1$ form a line segment.
+
+\begin{minipage}[t][][b]{.4\linewidth} \vspace{0mm}
+\begin{align*}
+\mbox{max~~} & z = -5x_1 - x_2  \\
+\mbox{s.t.~~} & x_1 - 4x_2 +s_1 = 0  \\
+& -x_1 + x_2 + s_2 = 0 \\
+& -x_1 + 2x_2 +s_3 = 0 \\
+& x_1 + x_2 = 1 \\
+& x_1, x_2, s_1, s_2, s_3 \ge 0.
+\end{align*}
+\end{minipage}%
+\begin{minipage}[t][][b]{.6\linewidth}
+\begin{center} \begin{tikzpicture} [scale=1.5]
+\draw[gray!50, thin, step=.5] (0,0) grid (4,4);
+\draw[opacity=0.9] (0,0) -- (4.4,0) node[below] {$x_1$};
+\draw[opacity=0.9] (0,0) -- (0,4.4) node[left] {$x_2$}; % option \draw[very thick,->]
+
+\foreach \x in {0,...,4} \draw (\x,0.05) -- (\x,-0.05) node[below] {\x};
+\foreach \y in {0,...,4} \draw (-0.05,\y) -- (0.05,\y) node[left] {\y};
+        
+\draw [red](0, 0) -- node[below] {$s_1=0$} (4, 1);
+\draw [teal] (0,0)  -- (4,4) node[left, sloped] {$s_2=0$};
+\draw [orange](0,0) -- (4,2) node[below, sloped] {$s_3=0$}; 
+\fill[yellow,opacity=0.3] (0,0) -- (4,2) -- (4,1) --  cycle; % \draw [orange!50!blue] 
+
+\draw [black] (0,1)  -- node[above right] {$x_1+x_2 = 1$} (1,0); 
+\end{tikzpicture} \end{center} 
+\end{minipage}
+
+
+
+\begin{center} \begin{tikzpicture} [scale=1.5]
+\draw[gray!50, thin, step=.5] (0,0) grid (4,4);
+\draw[opacity=0.9] (0,0) -- (4.4,0) node[below] {$x_1$};
+\draw[opacity=0.9] (0,0) -- (0,4.4) node[left] {$x_2$}; % option \draw[very thick,->]
+
+\foreach \x in {0,...,4} \draw (\x,0.05) -- (\x,-0.05) node[below] {\x};
+\foreach \y in {0,...,4} \draw (-0.05,\y) -- (0.05,\y) node[left] {\y};
+        
+\draw [red](0, 0) -- node[below] {$s_1=0$} (4, 1);
+\draw [teal] (0,0)  -- (4,4) node[left, sloped] {$s_2=0$};
+\draw [orange](0,0) -- (4,2) node[below, sloped] {$s_3=0$}; 
+\fill[yellow,opacity=0.3] (0,0) -- (4,2) -- (4,1) --  cycle; % \draw [orange!50!blue] 
+
+\draw [black] (0,1)  -- node[above right] {$x_1+x_2 = 1$} (1,0); 
+\end{tikzpicture} \end{center} 
+
+
+\medskip Magnifying for clarity, and removing the $s_2=0$ (teal) line, as it is redundant, and marking the extreme points of the new feasible region, (4/5, 1/5) and (2/3, 1/3), with red boxes, we have:
+
+\begin{center}  \begin{tikzpicture} [x=50mm, y=50mm] [scale=1.5]
+\draw[gray!50, thin, step=.5] (0,0) grid (2,1);
+\draw[opacity=0.9] (0,0) -- (2.2,0) node[below] {$x_1$};
+\draw[opacity=0.9] (0,0) -- (0,1.2) node[left] {$x_2$}; % option \draw[very thick,->]
+
+\foreach \x in {0,...,2} \draw (\x,0.005) -- (\x,-0.005) node[below] {\x};
+\foreach \y in {0,...,1} \draw (-0.005,\y) -- (0.005,\y) node[left] {\y};
+
+\filldraw[fill=red] (0.8-0.02,0.2-0.02) rectangle (0.8+0.02,0.2+0.02);
+\filldraw[fill=red] (0.667-0.02,0.333-0.02) rectangle (0.667+0.02,0.333+0.02);
+
+\draw [red](0, 0) -- node[below] {$s_1=0$} (2, .5);
+\draw [orange](0,0) -- (2,1) node[below, sloped] {$s_3=0$}; 
+\fill[yellow,opacity=0.3] (0,0) -- (2,.5) -- (2,1) --  cycle; % \draw [orange!50!blue] 
+\draw [black] (0,1)  -- node[above right] {$x_1+x_2 = 1$} (1,0); 
+\end{tikzpicture} \end{center} 
+
+The extreme directions are thus (4/5, 1/5) and (2/3, 1/3). \\
+
+{\bf Representation Theorem:} Let  $\mathbf{x_1}, \mathbf{x_2},\cdots \mathbf{x_k}$ be the set of extreme points of $\mathcal{S}$, and if $\mathcal{S}$ is unbounded, $\mathbf{d_1}, \mathbf{d_2},\cdots \mathbf{d_l}$ be the set of extreme directions. Then any $\mathbf{x} \in \mathcal{S}$ is equal to a convex combination of the extreme points and a non-negative linear combination of the extreme directions: $\mathbf{x} = \sum_{j=1}^k \lambda_j \mathbf{x_j} + \sum_{j=1}^l \mu_j \mathbf{d_j}$, where $\sum_{j=1}^k \lambda_j = 1$, $\lambda_j \ge 0,~\forall  j=1,2,\cdots,k$, and $\mu_j \ge 0,~\forall j=1,2,\cdots,l$.
+
+ \begin{minipage}[t][][b]{.4\linewidth}
+\begin{align*}
+\mbox{max~~} & z = -5x_1 - x_2  \\\
+\mbox{s.t.~~} & x_1 - 4x_2 +s_1 = 0  \\
+& -x_1 + x_2 + s_2 = 1 \\
+& -x_1 + 2x_2 +s_3 = 4 \\
+& x_1, x_2, s_1, s_2, s_3 \ge 0.
+\end{align*}
+\end{minipage}%
+\begin{minipage}[t][][b]{.6\linewidth}
+\begin{center}  \begin{tikzpicture} [scale=1.5]
+    \draw[gray!50, thin, step=.5] (0,0) grid (5,5);
+    \draw[opacity=0.9] (0,0) -- (5.4,0) node[below] {$x_1$};
+    \draw[opacity=0.9] (0,0) -- (0,5.4) node[left] {$x_2$}; % option \draw[very thick,->]
+
+    \foreach \x in {0,...,5} \draw (\x,0.05) -- (\x,-0.05) node[below] {\x};
+    \foreach \y in {0,...,5} \draw (-0.05,\y) -- (0.05,\y) node[left] {\y};
+
+    \fill[yellow,opacity=0.3] (0,0) -- (0,1) -- (2,3) -- (5,4.5) --(5,1.25)-- cycle;
+
+    \draw [red](0,0) -- node[below] {$s_1=0$} (5, 1.25);
+    \draw [teal] (0,1)  --  (4,5) node[left, sloped] {$s_2=0$};
+    \draw [orange](0,2) --  (5,4.5) node[below, sloped] {$s_3=0$}; %node[above right ,sloped] 
+	\filldraw[fill=red] (-0.05,-0.05) rectangle (0.05,0.05);
+	\filldraw[fill=red] (-0.05,.95) rectangle (0.05,1.05);
+	\filldraw[fill=red] (1.95,2.95) rectangle (2.05,3.05);
+\end{tikzpicture} \end{center} 
+\end{minipage}
+
+Represent point (1/2, 1) as a convex combination of the extreme points of the above LP.  Find $\lambda$s to solve the following system of equations:
+
+$$\lambda_1 \left[
+  \begin{array}{c}
+  0 \\
+  0 \\
+  \end{array} \right]+
+ \lambda_2 \left[
+  \begin{array}{c}
+  0 \\
+  1 \\
+  \end{array} \right] +
+ \lambda_3 \left[
+  \begin{array}{c}
+  2 \\
+  3 \\
+  \end{array} \right]  =
+ \left[
+  \begin{array}{c}
+  1/2 \\
+  1 \\
+  \end{array} \right] 
+$$
+
+
+\newpage The Variable (Canonical Form) and Requirement Space 
+
+\begin{minipage}[t][][b]{.4\linewidth}
+\begin{align*}
+\mbox{max~~} & z = 2x_1 + x_2  \\\
+\mbox{s.t.~~} & x_1 - x_2 +s_1 =  2  \\
+& x_1 + x_2 +s_2  = 3 \\
+& x_1, x_2, s_1 , s_2  \ge 0.
+\end{align*}
+\end{minipage}%
+\begin{minipage}[t][][b]{.6\linewidth}
+\begin{center}  \begin{tikzpicture} [scale=1.5]
+\draw[gray!50, thin, step=.5] (0,0) grid (4,4);
+\draw[opacity=0.9] (0,0) -- (4.4,0) node[below] {$x_1$};
+\draw[opacity=0.9] (0,0) -- (0,4.4) node[left] {$x_2$};
+
+\foreach \x in {0,...,4} \draw (\x,0.05) -- (\x,-0.05) node[below] {\x};
+\foreach \y in {0,...,4} \draw (-0.05,\y) -- (0.05,\y) node[left] {\y};
+
+\draw [red](2, 0) --  (4, 2) node[above] {$s_1= 0$};
+\draw [blue] (0,3)  -- node[above right] {$s_2=0$} (3,0) ;
+\draw [teal!70!black](0,-.5) --  (0,4.5) node[below right] {$x_1=0$}; 
+\draw [orange](-.5,0) --  (4.5,0) node[above left] {$x_2=0$}; 
+
+\fill[yellow,opacity=0.2] (0,0) -- (2,0) -- (2.5,0.5) -- (0,3) -- cycle;
+
+\draw [green!60!black] (-0.5, 1)  node[above right] {$z=0$} --  (0.5, -1)  ; % o.f.
+\draw [green!60!black, very thick,->](0,0) -- (0+1, 0+2/5); % gradient
+
+\filldraw[fill=red] (-0.05,-0.05) rectangle (0.05,0.05);
+\filldraw[fill=red] (2.45,0.45) rectangle (2.55,0.55);
+\filldraw[fill=red] (1.95,-0.05) rectangle (2.05,0.05);
+\filldraw[fill=red] (-0.05,2.95) rectangle (0.05,3.05);    
+\end{tikzpicture} \end{center} 
+\end{minipage}
+
+
+
+\begin{minipage}[t][][b]{.4\linewidth}
+\begin{align*}
+\mbox{max~~} & z = 2x_1 + x_2  \\\
+\mbox{s.t.~~} & x_1 - x_2 +s_1 =  2  \\
+& x_1 + x_2 +s_2  = 3 \\
+& x_1, x_2, s_1 , s_2  \ge 0.
+\end{align*}
+\end{minipage}%
+\begin{minipage}[t][][b]{.6\linewidth}
+\begin{center}  \begin{tikzpicture}[x=20mm, y=20mm] [scale=1.5]  % requirement space
+\draw[gray!50, thin, step=.5] (0,0) grid (3,3);
+\draw[opacity=0.9] (0,0) -- (3.4,0) node[below] {$c_1$};
+\draw[opacity=0.9] (0,0) -- (0,3.4) node[left] {$c_2$};
+
+\foreach \x in {0,...,3} \draw (\x,0.05) -- (\x,-0.05) node[below] {\x};
+\foreach \y in {0,...,3} \draw (-0.05,\y) -- (0.05,\y) node[left] {\y};
+
+\draw [red,->](0, 0) --  (1, 1) node[above] {$x_1$};
+\draw [blue,->] (0,0)  -- node[above right] {$x_2$} (-1,1) ;
+\draw [thick, teal!70!black,->](0,0) -- node[right] {$s_1$} (1,0); 
+\draw [thick, orange,->](0,0) -- node[above right] {$s_2$} (0,1); 
+\draw [green,->] (0, 0)  --  (2,3) node[above right] {$rhs$}   ; 
+\end{tikzpicture} \end{center} 
+\end{minipage}
+
+
+
+%\section{Graphical Example}
+\input{lineqlpbook/linearProgrammingGraphicalExample.tex}
+
+\fi

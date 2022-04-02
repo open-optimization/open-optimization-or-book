@@ -1,4 +1,5 @@
-\section{The Simplex Method}{The Simplex Method}
+
+\section{The Simplex Method} {The Simplex Method}
 \label{lab:Simplex}
 \objective{
 The \emph{Simplex Method} is a straightforward algorithm for finding optimal solutions to optimization problems with linear constraints and cost functions.
@@ -31,7 +32,7 @@ It does this by moving along the edges of the feasible region in such a way that
 \centering
 \begin{subfigure}{.5\textwidth} % 2-d feasible polytope.
     \centering
-    \includegraphics[width=\linewidth]{figures/feasiblePolytope.pdf}
+    \includegraphics[width=\linewidth]{foundationsAppliedMathematicsLabs/Volume2/Simplex/figures/feasiblePolytope.pdf}
     \caption{The feasible region for a linear program with 2-dimensional constraints.}
 \end{subfigure}%
 \begin{subfigure}{.5\textwidth} % 3-d feasible polytope.
@@ -472,7 +473,7 @@ x_0 &= 1.6\\
 x_1 &= .2.
 \end{align*}
 
-\begin{problem}{SimplexSolver.solve()}{}
+\begin{problem}{SimplexSolver.solve()}
 Write an additional method in your solver called \li{solve()} that obtains the optimal solution, then returns the minimal value, the dependent variables, and the independent variables.
 The dependent and independent variables should be represented as two dictionaries that map the index of the variable to its corresponding value.
 
@@ -514,150 +515,108 @@ This can be fixed by adding methods to your class that solve the \emph{auxiliary
 Solving the auxiliary problem involves pivoting operations identical to those you have already implemented, so adding this functionality
 is not overly difficult.
 
-\section{The Product Mix Problem}
-We now use our Simplex implementation to solve the \emph{product mix problem}, which in its dependent form can be expressed as a simple linear program.
-Suppose that a manufacturer makes $n$ products using $m$ different resources (labor, raw materials, machine time available, etc).
-The $i$th product is sold at a unit price $p_i$, and there are at most $m_j$ units
-of the $j$th resource available.
-Additionally, each unit of the $i$th product requires $a_{j,i}$ units of resource $j$.
-Given that the demand for product $i$ is $d_i$ units per a certain time period, how do we choose the optimal amount
-of each product to manufacture in that time period so as to maximize revenue, while not exceeding the available resources?
 
-Let  $x_1, x_2, \ldots, x_n$ denote the amount of each product to be manufactured.
-The sale of product $i$ brings revenue in the amount of $p_ix_i$.
-Therefore our objective function, the profit, is given by
-\[
-\sum_{i=1}^n p_ix_i.
-\]
-Additionally, the manufacture of product $i$ requires $a_{j,i}x_i$ units of resource $j$.
-Thus we have the resource constraints
-\[
-\sum_{i=1}^n a_{j,i}x_i \leq m_j  \text{ for } j = 1, 2, \ldots, m.
-\]
+\subsection{Exercises}
 
-Finally, we have the demand constraints which tell us not to exceed the demand for the products:
-\[
-x_i \leq d_i \text{ for } i = 1, 2, \ldots, n
-\]
+\paragraph{Exercise $1.0$ (Learn $\mathrm{LT}_{\mathrm{E}} \mathrm{X}$ )}
 
-The variables $x_i$ are constrained to be nonnegative, of course.
-We therefore have a linear program in the appropriate form that is feasible at the origin.
-It is a simple task to solve the problem using our Simplex solver.
+Learn to use $\operatorname{lt}_{\mathrm{E}} X$ for writing all of your homework solutions. Personally, I use MiKTEX, which is an implementation of $\mathrm{ET} \mathrm{E} \mathrm{X}$ for Windows. Specifically, within MiKTEX I am using pdfteTEX (it only matters for certain things like including graphics and also pdf into a document). I find it convenient to use the editor WinEdt, which is very LATEX friendly. A good book on $\mathrm{ET} \mathrm{T} \mathrm{X}$ is
 
-\begin{problem}{Product mix problem.}{}
-Solve the product mix problem for the data contained in the file \li{productMix.npz}.
-In this problem, there are 4 products and 3 resources.
-The archive file, which you can load using the function
-\li{np.load}, contains a dictionary of arrays.
-The array with key \li{'A'} gives the resource coefficients $a_{i,j}$ (i.e. the $(i,j)$-th entry of the array give $a_{i,j}$).
-The array with key \li{'p'} gives the unit prices $p_i$.
-The array with key \li{'m'} gives the available resource
-units $m_j$.
-The array with key \li{'d'} gives the demand constraints $d_i$.
+In A.1 there is a template to get started. Also, there are plenty of tutorials and beginner's guides on the web.
 
-Report the number of units that should be produced for each product. \emph{Hint:} Because this is a maximization problem and your solver works with minimizations, you will need to change the sign of the array c.
-\end{problem}
+\paragraph{Exercise $1.1$ (Convert to standard form)}
 
-\begin{comment}
-\section*{Auxiliary Problems} % ===============================================
+Give an original example (i.e., with actual numbers) to demonstrate that you know how to transform a general linear-optimization problem to one in standard form.
 
-When one of the entries of $\b$ is negative, we need to run an auxiliary problem to find a feasible point.
-Try adding $x_0$ as the last variable.
-That way you just need to add a single row and column to your current dictionary $T$.
-You can check that subtracting $x_0$ from each of the constraints is the same as adding $x_0$ to each of the expressions for the slack variables.
-Since we also need write $x_0$ in terms of itself ($x_0 = x_0$), this is equivalent to setting the last column equal to 1 for all the rows corresponding to slack variables, plus one new row.
-We also need to change the objective function to $-x_0$.
-Let's let $N$ be the matrix for the auxiliary problem.
-Then we can construct it from $T$ using the code
+\paragraph{Exercise $1.2$ (Weak Duality example)}
 
-\begin{lstlisting}
->>> N = zeros((s+1,s+1))
->>> N[0:s,0:s] = T
->>> N[n:s+1,s] = 1
->>> N[0,s] = -1
-\end{lstlisting}
+Give an original example to demonstrate the Weak Duality Theorem.
 
-Before you run simplex on this auxiliary dictionary, make sure you do a pivot on the last column and the row corresponding to the smallest entry of $b$.
-Check that the objective function value is 0 when simplex finishes running.
-If not, your initial problem is infeasible.
-If the problem is feasible, get the system of equations from $N$ and put them back into $T$, leaving off the last row and column of $N$ (for $x_0$) and the first row (corresponding to the objective function).
+\paragraph{Exercise $1.3$ (Convert to $\leq$ form)}
 
-\begin{lstlisting}
-T[1:s,0:s] = N[1:s,0:s]
-\end{lstlisting}
+Describe a general recipe for transforming an arbitrary linear-optimization problem into one in which all of the linear constraints are of $\leq$ type.
 
-The last thing to do is to insert the previous objective function.
-However, we need to re-write it in terms of the current independent variables.
-Fortunately, $T$ currently contains all of the variables written in terms of the independent variables.
-You can check (mathematically, or however you want to satisfy yourself) that
+\paragraph{Exercise $1.4$ ( $m+1$ inequalities)}
 
-\begin{lstlisting}
-T[0,0:s] = np.dot(T[0,0:s], T)
-\end{lstlisting}
+Prove that the system of $m$ equations in $n$ variables $A x=b$ is equivalent to the system $A x \leq b$ augmented by only one additional linear inequality - that is, a total of only $m+1$ inequalities.
 
-will put the objective function into the first row, now written in terms of the new independent variables.
-\end{comment}
+\paragraph{Exercise $1.5$ (Weak duality for another form)}
 
-% TODO: Dual problem and duality theory.
+Give and prove a Weak Duality Theorem for
 
-\section*{Beyond Simplex} % ===================================================
+$$
+\begin{aligned}
+\max \quad c^{\prime} x & \\
+A x & \leq b ; \\
+x & \geq 0 .
+\end{aligned}
+$$
 
-The \emph{Computing in Science and Engineering} journal listed Simplex as one of the top ten algorithms of the twentieth century \cite{Nash2000}.
-However, like any other algorithm, Simplex has its drawbacks.
+HINT: Convert $\left(\mathrm{P}^{\prime}\right)$ to a standard-form problem, and then apply the ordinary Weak Duality Theorem for standard-form problems. \paragraph{Exercise 1.6 (Weak duality for a complicated form)}
 
-In 1972, Victor Klee and George Minty Cube published a paper with several examples of worst-case polytopes for the Simplex algorithm \cite{Klee1972}.
-In their paper, they give several examples of polytopes that the Simplex algorithm struggles to solve.
+Give and prove a Weak Duality Theorem for
 
-Consider the following linear program from Klee and Minty.
-\begin{align*}
-\text{max } & 2^{n-1}x_1 & + & 2^{n-2}x_2  & + & \cdots & + & 2x_{n-1} & + & x_n\\
-\text{subject to } & x_1 &  &  &  &  &  &  &  &\leq 5\\
-& 4x_1 & + & x_2 &  &  &  &  &  &\leq 25\\
-& 8x_1 & + & 4x_2 & + & x_3 &  &  &  &\leq 125\\
-& \vdots & &      &   &     &  &  &  &\vdots\\
-& 2^n x_1 & + & 2^{n-1} x_2 & + & \cdots & + & 4x_{n-1} & + x_n &\leq 5\\
-\end{align*}
+$$
+\begin{gathered}
+\min \quad c^{\prime} x+f^{\prime} w \\
+\begin{aligned}
+A x+B w & \leq b ; \\
+D x &=g ;
+\end{aligned} \\
+x \geq 0 \quad w \leq 0
+\end{gathered}
+$$
 
-% When $n = 3$, we have the initial dictionary
-% \begin*{equation*}
-% \begin{bmatrix}
-% 0 & 4 & 2 & 1 & 0 & 0 & 0\\
-% 0 & 1 & 0 & 0 & 0 & 0 & 0\\
-% 0 & 0 & 1 & 0 & 0 & 0 & 0\\
-% 0 & 0 & 0 & 1 & 0 & 0 & 0\\
-% 5 & -1 & 0 & 0 & 0 & 0 & 0\\
-% 25 & -4 & -1 & 0 & 0 & 0 & 0\\
-% 125 & -8 & -4 & -1 & 0 & 0 & 0\\
-% \end{bmatrix}
-% \end{equation*}
-%
-% After the first pivot with $x_1$ leaving and $s_1$ entering, we have the dictionary
-%
-% \begin{equation*}
-% \begin{bmatrix}
-% 20 & 0 & 2 & 1 & -4 & 0 & 0\\
-% 5 & 0 & 0 & 0 & -1 & 0 & 0\\
-% 0 & 0 & 1 & 0 & 0 & 0 & 0\\
-% 0 & 0 & 0 & 1 & 0 & 0 & 0\\
-% 0 & 0 & 0 & 0 & 1 & 0 & 0\\
-% 5 & 0 & -1 & 0 & 4 & 0 & 0\\
-% 85 & 0 & -4 & -1 & 8 & 0 & 0\\
-% \end{bmatrix}
-% \end{equation*}
-%
-% \begin{problem}
-% What is the final dictionary for this Klee-Minty example with $n=3$?
-% How many iterations does it take to arrive at the final dictionary?
-% \end{problem}
-%
-% \begin{problem}
-% Using problem 1 as a guide, guess the optimum value of the Klee-Minty example with $n=20$.
-% Then find the maximum value for the Klee-Minty example with $n=20$.
-% How many iterations does it take to arrive at the final dictionary?
-% How long does the program take to run for only $20$ variables?
-% \end{problem}
+HINT: Convert $\left(\mathrm{P}^{\prime}\right)$ to a standard-form problem, and then apply the ordinary Weak Duality Theorem for standard-form problems.
 
-Klee and Minty show that for this example, the worst case scenario has exponential time complexity.
-With only $n$ constraints and $n$ variables, the simplex algorithm goes through $2^n$ iterations.
-This is because there are $2^n$ extreme points, and when starting at the point $x=0$, the simplex algorithm goes through all of the extreme points before reaching the optimal point $(0,0,\dots, 0, 5^n)$.
-Other algorithms, such as interior point methods, solve this problem much faster because they are not constrained to follow the edges.
+\paragraph{Exercise $1.7$ (Weak duality for a complicated form - with MATLAB)}
+
+The MATLAB code below makes and solves an instance of $\left(\mathrm{P}^{\prime}\right)$ from Exercise 1.6. Study the code to see how it is works. Now, extend the code to solve the dual of $\left(\mathrm{P}^{\prime}\right)$. Also, after converting $\left(\mathrm{P}^{\prime}\right)$ to standard form (as indicated in the HINT for Exercise 1.6), use MATLAB to solve that problem and its dual. Make sure that you get the same optimal value for all of these problems.
+
+
+
+
+
+\subsection{$2.5$ Exercises}
+
+\paragraph{Exercise 2.1 (Dual in AMPL)}
+
+Without changing the file production. dat, use AMPL to solve the dual of the Production Problem example, as described in Section 2.1. You will need to modify production.mod and production.run.
+
+\paragraph{Exercise $2.2$ (Sparse solution for linear equations with AMPL)}
+
+In some application areas, it is interesting to find a "sparse solution" - that is, one with few non-zeros - to a system of equations $A x=b$. It is well known that a 1-norm minimizing solution is a good heuristic for finding a sparse solution. Using AMPL, try this idea out on several large examples, and report on your results.
+
+HINT: To get an interesting example, try generating a random $m \times n$ matrix $A$ of zeros and ones, perhaps $m=50$ equations and $n=500$ variables, maybe with probability $1 / 2$ of an entry being equal to one. Then choose maybe $m / 2$ columns from $A$ and add them up to get $b$. In this way, you will know that there is a solution with only $m / 2$ non-zeros (which is already pretty sparse). Your 1-norm minimizing solution might in fact recover this solution $(\odot)$, or it may be sparser $(\odot \odot)$, or perhaps less sparse $(\odot)$.
+
+\paragraph{Exercise $2.3$ (Bloody AMPL)}
+
+A transportation problem is a special kind of (single-commodity min-cost) networkflow problem. There are certain nodes $v$ called supply nodes which have net supply $b_{v}>0$. The other nodes $v$ are called demand nodes, and they have net supply $b_{v}<0$. There are no nodes with $b_{v}=0$, and all arcs point from supply nodes to demand nodes.
+
+A simplified example is for matching available supply and demand of blood, in types $A, B, A B$ and $O$. Suppose that we have $s_{v}$ units of blood available, in types $v \in\{A, B, A B, O\}$. Also, we have requirements $d_{v}$ by patients of different types $v \in$ $\{A, B, A B, O\}$. It is very important to understand that a patient of a certain type can accept blood not just from their own type. Do some research to find out the compatible blood types for a patient; don't make a mistake - lives depend on this! In this spirit, if your model misallocates any blood in an incompatible fashion, you will receive a grade of $F$ on this problem.
+
+Describe a linear-optimization problem that satisfies all of the patient demand with compatible blood. You will find that type $O$ is the most versatile blood, then both $A$ and $B$, followed by $A B$. Factor in this point when you formulate your objective function, with the idea of having the left-over supply of blood being as versatile as possible.
+
+Using AMPL, set up and solve an example of a blood-distribution problem.
+
+\paragraph{Exercise $2.4$ (Mix it up)}
+
+"I might sing a gospel song in Arabic or do something in Hebrew. I want to mix it up and do it differently than one might imagine." - Stevie Wonder
+
+We are given a set of ingredients $1,2, \ldots, m$ with availabilities $b_{i}$ and per unit costs $c_{i}$. We are given a set of products $j, 2, \ldots, m$ with minimum production requirements $d_{j}$ and per unit revenues $e_{j}$. It is required that product $j$ have at least a fraction of $l_{i j}$ of ingredient $i$ and at most a fraction of $u_{i j}$ of ingredient $i$. The goal is to devise a plan to maximize net profit.
+
+Formulate, mathematically, as a linear-optimization problem. Then, model with AMPL, make up some data, try some computations, and report on your results. Exercise $2.5$ (Task scheduling)
+
+
+We are given a set of tasks, numbered $1,2, \ldots, n$ that should be completed in the minimum amount of time. For convenience, task 0 is a "start task" and task $n+1$ is an "end task". Each task, except for the start and end task, has a known duration $d_{i}$. For convenience, let $d_{0}:=0$. There are precedences between tasks. Specifically, $\Psi_{i}$ is the set of tasks that must be completed before task $i$ can be started. Let $t_{0}:=0$, and for all other tasks $i$, let $t_{i}$ be a decision variable representing its start time.
+
+Formulate the problem, mathematically, as a linear-optimization problem. The objective should be to minimize the start time $t_{n+1}$ of the end task. Then, model the problem with AMPL, make up some data, try some computations, and report on your results.
+
+\paragraph{Exercise $2.6$ (Investing wisely)}
+
+Almost certainly, Albert Einstein did not say that "compound interest is the most powerful force in the universe."
+
+A company wants to maximize their cash holdings after $T$ time periods. They have an external inflow of $p_{t}$ dollars at the start of time period $t$, for $t=1,2, \ldots, T$. At the start of each time period, available cash can be allocated to any of $K$ different investment vehicles (in any available non-negative amounts). Money allocated to investmentvehicle $k$ at the start of period $t$ must be held in that investment $k$ for all remaining time periods, and it generates income $v_{t, t}^{k}, v_{t, t+1}^{k}, \ldots, v_{t T}^{k}$, per dollar invested. It should be assumed that money obtained from cashing out the investment at the end of the planning horizon (that is, at the end of period $T$ ) is part of $v_{t, T}^{k}$. Note that at the start of time period $t$, the cash available is the external inflow of $p_{t}$, plus cash accumulated from all investment vehicles in prior periods that was not reinvested. Finally, assume that cash held over for one time period earns interest of $q$ percent.
+
+Formulate the problem, mathematically, as a linear-optimization problem. Then, model the problem with AMPL, make up some data, try some computations, and report on your results.
+
