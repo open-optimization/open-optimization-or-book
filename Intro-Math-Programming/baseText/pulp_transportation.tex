@@ -1,0 +1,414 @@
+
+
+\hypertarget{transportation-problem}{%
+\subsubsection{Transportation Problem}\label{transportation-problem}}
+
+Transport programming is a special form of linear programming, and in
+general, the objective function is cost minimization. The formula form
+and applicable variables of the Transport Planning Act are as follows.
+When supply and demand match, the constraint becomes an equation, but
+when supply and demand do not match, the constraint becomes an
+inequality.
+
+Sets: - J = set of demand nodes - I = set of supply nodes
+
+Parameters: 
+\begin{itemize}
+\item  $D_j$: Demand at node $j$ 
+\item  $S_i$: Supply from node i 
+\item  $c_{ij}$:
+cost per unit to send supply i to demand j
+\end{itemize}
+
+Variables: 
+\begin{itemize}
+\item  X\_ij: Transport volume from supply \(i\) to demand \(j\)
+(units)
+\end{itemize}
+
+\begin{itemize}
+\item
+  Objective function: \[\min \sum_{i=1}^n\sum_{j=1}^mc_{ij}x_{ij}\]
+\item
+  Constraints:
+  \[\sum_{i=1}^nx_{ij}=S_i\],
+  \[\sum_{i=1}^mx_{ij}=D_j\]
+ \[ x_{ij}\geq 0 \text{ for } i \in I, j \in J\]
+\end{itemize}
+
+    \hypertarget{optimization-with-pulp}{%
+\subsubsection{Optimization with PuLP}\label{optimization-with-pulp}}
+
+Here we do a very basic implementation of the problem
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{1}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{k+kn}{from} \PY{n+nn}{pulp} \PY{k+kn}{import} \PY{o}{*}
+
+\PY{n}{prob} \PY{o}{=} \PY{n}{LpProblem}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Transportation\PYZus{}Problem}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{LpMinimize}\PY{p}{)}
+
+\PY{n}{x11} \PY{o}{=} \PY{n}{LpVariable}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{X11}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{lowBound}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}
+\PY{n}{x12} \PY{o}{=} \PY{n}{LpVariable}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{X12}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{lowBound}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}
+\PY{n}{x13} \PY{o}{=} \PY{n}{LpVariable}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{X13}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{lowBound}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}
+\PY{n}{x14} \PY{o}{=} \PY{n}{LpVariable}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{X14}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{lowBound}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}
+\PY{n}{x21} \PY{o}{=} \PY{n}{LpVariable}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{X21}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{lowBound}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}
+\PY{n}{x22} \PY{o}{=} \PY{n}{LpVariable}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{X22}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{lowBound}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}
+\PY{n}{x23} \PY{o}{=} \PY{n}{LpVariable}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{X23}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{lowBound}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}
+\PY{n}{x24} \PY{o}{=} \PY{n}{LpVariable}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{X24}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{lowBound}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}
+\PY{n}{x31} \PY{o}{=} \PY{n}{LpVariable}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{X31}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{lowBound}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}
+\PY{n}{x32} \PY{o}{=} \PY{n}{LpVariable}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{X32}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{lowBound}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}
+\PY{n}{x33} \PY{o}{=} \PY{n}{LpVariable}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{X33}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{lowBound}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}
+\PY{n}{x34} \PY{o}{=} \PY{n}{LpVariable}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{X34}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{lowBound}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}
+
+\PY{n}{prob} \PY{o}{+}\PY{o}{=} \PY{l+m+mi}{4}\PY{o}{*}\PY{n}{x11} \PY{o}{+} \PY{l+m+mi}{5}\PY{o}{*}\PY{n}{x12} \PY{o}{+} \PY{l+m+mi}{6}\PY{o}{*}\PY{n}{x13} \PY{o}{+} \PY{l+m+mi}{8}\PY{o}{*}\PY{n}{x14} \PY{o}{+} \PY{l+m+mi}{4}\PY{o}{*}\PY{n}{x21} \PY{o}{+} \PY{l+m+mi}{7}\PY{o}{*}\PY{n}{x22} \PY{o}{+} \PY{l+m+mi}{9}\PY{o}{*}\PY{n}{x23} \PY{o}{+} \PY{l+m+mi}{2}\PY{o}{*}\PY{n}{x24} \PY{o}{+} \PY{l+m+mi}{5}\PY{o}{*}\PY{n}{x31} \PY{o}{+} \PY{l+m+mi}{8}\PY{o}{*}\PY{n}{x32} \PY{o}{+} \PY{l+m+mi}{7}\PY{o}{*}\PY{n}{x33} \PY{o}{+} \PY{l+m+mi}{6}\PY{o}{*}\PY{n}{x34}
+
+\PY{n}{prob} \PY{o}{+}\PY{o}{=} \PY{n}{x11} \PY{o}{+} \PY{n}{x12} \PY{o}{+} \PY{n}{x13} \PY{o}{+} \PY{n}{x14} \PY{o}{==} \PY{l+m+mi}{120}
+\PY{n}{prob} \PY{o}{+}\PY{o}{=} \PY{n}{x21} \PY{o}{+} \PY{n}{x22} \PY{o}{+} \PY{n}{x23} \PY{o}{+} \PY{n}{x24} \PY{o}{==} \PY{l+m+mi}{150}
+\PY{n}{prob} \PY{o}{+}\PY{o}{=} \PY{n}{x31} \PY{o}{+} \PY{n}{x32} \PY{o}{+} \PY{n}{x33} \PY{o}{+} \PY{n}{x34} \PY{o}{==} \PY{l+m+mi}{200}
+
+\PY{n}{prob} \PY{o}{+}\PY{o}{=} \PY{n}{x11} \PY{o}{+} \PY{n}{x21} \PY{o}{+} \PY{n}{x31} \PY{o}{==} \PY{l+m+mi}{100}
+\PY{n}{prob} \PY{o}{+}\PY{o}{=} \PY{n}{x12} \PY{o}{+} \PY{n}{x22} \PY{o}{+} \PY{n}{x32} \PY{o}{==} \PY{l+m+mi}{60}
+\PY{n}{prob} \PY{o}{+}\PY{o}{=} \PY{n}{x13} \PY{o}{+} \PY{n}{x23} \PY{o}{+} \PY{n}{x33} \PY{o}{==} \PY{l+m+mi}{130}
+\PY{n}{prob} \PY{o}{+}\PY{o}{=} \PY{n}{x14} \PY{o}{+} \PY{n}{x24} \PY{o}{+} \PY{n}{x34} \PY{o}{==} \PY{l+m+mi}{180}
+
+\PY{c+c1}{\PYZsh{} Solving problem}
+\PY{n}{prob}\PY{o}{.}\PY{n}{solve}\PY{p}{(}\PY{p}{)}\PY{p}{;}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{2}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Status:}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{LpStatus}\PY{p}{[}\PY{n}{prob}\PY{o}{.}\PY{n}{status}\PY{p}{]}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Objective value: }\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{prob}\PY{o}{.}\PY{n}{objective}\PY{o}{.}\PY{n}{value}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+
+\PY{k}{for} \PY{n}{v} \PY{o+ow}{in} \PY{n}{prob}\PY{o}{.}\PY{n}{variables}\PY{p}{(}\PY{p}{)}\PY{p}{:}
+    \PY{n+nb}{print}\PY{p}{(}\PY{n}{v}\PY{o}{.}\PY{n}{name}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{: }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{v}\PY{o}{.}\PY{n}{value}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+Status: Optimal
+Objective value:  2130.0
+X11 :  60.0
+X12 :  60.0
+X13 :  0.0
+X14 :  0.0
+X21 :  0.0
+X22 :  0.0
+X23 :  0.0
+X24 :  150.0
+X31 :  40.0
+X32 :  0.0
+X33 :  130.0
+X34 :  30.0
+    \end{Verbatim}
+
+    \hypertarget{optimization-with-pulp-round-2}{%
+\subsubsection{Optimization with PuLP: Round
+2!}\label{optimization-with-pulp-round-2}}
+
+We now use set notation for this implementation
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{3}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{k+kn}{from} \PY{n+nn}{pulp} \PY{k+kn}{import} \PY{o}{*}
+
+\PY{n}{prob} \PY{o}{=} \PY{n}{LpProblem}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Transportation\PYZus{}Problem}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{LpMinimize}\PY{p}{)}
+
+
+\PY{c+c1}{\PYZsh{} Sets}
+\PY{n}{n\PYZus{}suppliers} \PY{o}{=} \PY{l+m+mi}{3}
+\PY{n}{n\PYZus{}buyers} \PY{o}{=} \PY{l+m+mi}{4}
+
+\PY{n}{I} \PY{o}{=} \PY{n+nb}{range}\PY{p}{(}\PY{n}{n\PYZus{}suppliers}\PY{p}{)}
+\PY{n}{J} \PY{o}{=} \PY{n+nb}{range}\PY{p}{(}\PY{n}{n\PYZus{}buyers}\PY{p}{)}
+
+\PY{n}{routes} \PY{o}{=} \PY{p}{[}\PY{p}{(}\PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)} \PY{k}{for} \PY{n}{i} \PY{o+ow}{in} \PY{n}{I} \PY{k}{for} \PY{n}{j} \PY{o+ow}{in} \PY{n}{J}\PY{p}{]}
+
+
+\PY{c+c1}{\PYZsh{} Parameters}
+\PY{n}{costs} \PY{o}{=} \PY{p}{[}
+    \PY{p}{[}\PY{l+m+mi}{4}\PY{p}{,} \PY{l+m+mi}{5}\PY{p}{,} \PY{l+m+mi}{6}\PY{p}{,} \PY{l+m+mi}{8}\PY{p}{]}\PY{p}{,}
+    \PY{p}{[}\PY{l+m+mi}{4}\PY{p}{,} \PY{l+m+mi}{7}\PY{p}{,} \PY{l+m+mi}{9}\PY{p}{,} \PY{l+m+mi}{2}\PY{p}{]}\PY{p}{,} 
+    \PY{p}{[}\PY{l+m+mi}{5}\PY{p}{,} \PY{l+m+mi}{8}\PY{p}{,} \PY{l+m+mi}{7}\PY{p}{,} \PY{l+m+mi}{6}\PY{p}{]}
+\PY{p}{]}
+
+\PY{n}{supply} \PY{o}{=} \PY{p}{[}\PY{l+m+mi}{120}\PY{p}{,} \PY{l+m+mi}{150}\PY{p}{,} \PY{l+m+mi}{200}\PY{p}{]}
+\PY{n}{demand} \PY{o}{=} \PY{p}{[}\PY{l+m+mi}{100}\PY{p}{,} \PY{l+m+mi}{60}\PY{p}{,} \PY{l+m+mi}{130}\PY{p}{,} \PY{l+m+mi}{180}\PY{p}{]}
+
+
+
+\PY{c+c1}{\PYZsh{} Variables}
+\PY{n}{x} \PY{o}{=} \PY{n}{LpVariable}\PY{o}{.}\PY{n}{dicts}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{X}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{routes}\PY{p}{,} \PY{n}{lowBound}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}
+
+\PY{c+c1}{\PYZsh{} Objective}
+\PY{n}{prob} \PY{o}{+}\PY{o}{=} \PY{n}{lpSum}\PY{p}{(}\PY{p}{[}\PY{n}{x}\PY{p}{[}\PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{]} \PY{o}{*} \PY{n}{costs}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{[}\PY{n}{j}\PY{p}{]} \PY{k}{for} \PY{n}{i} \PY{o+ow}{in} \PY{n}{I} \PY{k}{for} \PY{n}{j} \PY{o+ow}{in} \PY{n}{J}\PY{p}{]}\PY{p}{)}
+
+
+\PY{c+c1}{\PYZsh{} Constraints}
+
+\PY{c+c1}{\PYZsh{}\PYZsh{} Supply Constraints}
+\PY{k}{for} \PY{n}{i} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{n}{n\PYZus{}suppliers}\PY{p}{)}\PY{p}{:}
+    \PY{n}{prob} \PY{o}{+}\PY{o}{=} \PY{n}{lpSum}\PY{p}{(}\PY{p}{[}\PY{n}{x}\PY{p}{[}\PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{]} \PY{k}{for} \PY{n}{j} \PY{o+ow}{in} \PY{n}{J}\PY{p}{]}\PY{p}{)} \PY{o}{==} \PY{n}{supply}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{,} \PY{l+s+sa}{f}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Supply}\PY{l+s+si}{\PYZob{}}\PY{n}{i}\PY{l+s+si}{\PYZcb{}}\PY{l+s+s2}{\PYZdq{}}
+    
+\PY{c+c1}{\PYZsh{}\PYZsh{} Demand Constraints}
+\PY{k}{for} \PY{n}{j} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{n}{n\PYZus{}buyers}\PY{p}{)}\PY{p}{:}
+    \PY{n}{prob} \PY{o}{+}\PY{o}{=} \PY{n}{lpSum}\PY{p}{(}\PY{p}{[}\PY{n}{x}\PY{p}{[}\PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{]} \PY{k}{for} \PY{n}{i} \PY{o+ow}{in} \PY{n}{I}\PY{p}{]}\PY{p}{)} \PY{o}{==} \PY{n}{demand}\PY{p}{[}\PY{n}{j}\PY{p}{]}\PY{p}{,} \PY{l+s+sa}{f}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Demand}\PY{l+s+si}{\PYZob{}}\PY{n}{j}\PY{l+s+si}{\PYZcb{}}\PY{l+s+s2}{\PYZdq{}}
+    
+\PY{c+c1}{\PYZsh{} Solving problem}
+\PY{n}{prob}\PY{o}{.}\PY{n}{solve}\PY{p}{(}\PY{p}{)}\PY{p}{;}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{4}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Status:}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{LpStatus}\PY{p}{[}\PY{n}{prob}\PY{o}{.}\PY{n}{status}\PY{p}{]}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Objective value: }\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{prob}\PY{o}{.}\PY{n}{objective}\PY{o}{.}\PY{n}{value}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+
+\PY{k}{for} \PY{n}{v} \PY{o+ow}{in} \PY{n}{prob}\PY{o}{.}\PY{n}{variables}\PY{p}{(}\PY{p}{)}\PY{p}{:}
+    \PY{n+nb}{print}\PY{p}{(}\PY{n}{v}\PY{o}{.}\PY{n}{name}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{: }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{v}\PY{o}{.}\PY{n}{value}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+Status: Optimal
+Objective value:  2130.0
+X\_(0,\_0) :  60.0
+X\_(0,\_1) :  60.0
+X\_(0,\_2) :  0.0
+X\_(0,\_3) :  0.0
+X\_(1,\_0) :  0.0
+X\_(1,\_1) :  0.0
+X\_(1,\_2) :  0.0
+X\_(1,\_3) :  150.0
+X\_(2,\_0) :  40.0
+X\_(2,\_1) :  0.0
+X\_(2,\_2) :  130.0
+X\_(2,\_3) :  30.0
+    \end{Verbatim}
+
+    \hypertarget{changing-details-of-the-problem}{%
+\subsection{Changing details of the
+problem}\label{changing-details-of-the-problem}}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{5}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{original\PYZus{}obj} \PY{o}{=} \PY{n}{prob}\PY{o}{.}\PY{n}{objective}
+\PY{n}{val} \PY{o}{=} \PY{n}{prob}\PY{o}{.}\PY{n}{objective}\PY{o}{.}\PY{n}{value}\PY{p}{(}\PY{p}{)}
+\PY{n}{r} \PY{o}{=} \PY{l+m+mf}{1.2}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{6}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{prob} \PY{o}{+}\PY{o}{=} \PY{n}{original\PYZus{}obj} \PY{o}{\PYZlt{}}\PY{o}{=} \PY{n}{r}\PY{o}{*}\PY{n}{val}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Objective bound}\PY{l+s+s2}{\PYZdq{}}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{7}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{prob}
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{7}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+Transportation\_Problem:
+MINIMIZE
+4*X\_(0,\_0) + 5*X\_(0,\_1) + 6*X\_(0,\_2) + 8*X\_(0,\_3) + 4*X\_(1,\_0) + 7*X\_(1,\_1) +
+9*X\_(1,\_2) + 2*X\_(1,\_3) + 5*X\_(2,\_0) + 8*X\_(2,\_1) + 7*X\_(2,\_2) + 6*X\_(2,\_3) + 0
+SUBJECT TO
+Supply0: X\_(0,\_0) + X\_(0,\_1) + X\_(0,\_2) + X\_(0,\_3) = 120
+
+Supply1: X\_(1,\_0) + X\_(1,\_1) + X\_(1,\_2) + X\_(1,\_3) = 150
+
+Supply2: X\_(2,\_0) + X\_(2,\_1) + X\_(2,\_2) + X\_(2,\_3) = 200
+
+Demand0: X\_(0,\_0) + X\_(1,\_0) + X\_(2,\_0) = 100
+
+Demand1: X\_(0,\_1) + X\_(1,\_1) + X\_(2,\_1) = 60
+
+Demand2: X\_(0,\_2) + X\_(1,\_2) + X\_(2,\_2) = 130
+
+Demand3: X\_(0,\_3) + X\_(1,\_3) + X\_(2,\_3) = 180
+
+Objective\_bound: 4 X\_(0,\_0) + 5 X\_(0,\_1) + 6 X\_(0,\_2) + 8 X\_(0,\_3)
+ + 4 X\_(1,\_0) + 7 X\_(1,\_1) + 9 X\_(1,\_2) + 2 X\_(1,\_3) + 5 X\_(2,\_0) + 8 X\_(2,\_1)
+ + 7 X\_(2,\_2) + 6 X\_(2,\_3) <= 2556
+
+VARIABLES
+X\_(0,\_0) Continuous
+X\_(0,\_1) Continuous
+X\_(0,\_2) Continuous
+X\_(0,\_3) Continuous
+X\_(1,\_0) Continuous
+X\_(1,\_1) Continuous
+X\_(1,\_2) Continuous
+X\_(1,\_3) Continuous
+X\_(2,\_0) Continuous
+X\_(2,\_1) Continuous
+X\_(2,\_2) Continuous
+X\_(2,\_3) Continuous
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{8}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{c+c1}{\PYZsh{} Change the objective}
+\PY{n}{prob} \PY{o}{+}\PY{o}{=} \PY{n}{x}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{0}\PY{p}{]}   \PY{c+c1}{\PYZsh{} minimize x[0,0]}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+/opt/anaconda3/envs/python377/lib/python3.7/site-packages/pulp/pulp.py:1544:
+UserWarning: Overwriting previously set objective.
+  warnings.warn("Overwriting previously set objective.")
+    \end{Verbatim}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{9}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{prob}\PY{o}{.}\PY{n}{solve}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{9}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+1
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{10}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{LpStatus}\PY{p}{[}\PY{n}{prob}\PY{o}{.}\PY{n}{status}\PY{p}{]}
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{10}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+'Optimal'
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{11}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Status:}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{LpStatus}\PY{p}{[}\PY{n}{prob}\PY{o}{.}\PY{n}{status}\PY{p}{]}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Objective value: }\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{prob}\PY{o}{.}\PY{n}{objective}\PY{o}{.}\PY{n}{value}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+
+\PY{k}{for} \PY{n}{v} \PY{o+ow}{in} \PY{n}{prob}\PY{o}{.}\PY{n}{variables}\PY{p}{(}\PY{p}{)}\PY{p}{:}
+    \PY{n+nb}{print}\PY{p}{(}\PY{n}{v}\PY{o}{.}\PY{n}{name}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{: }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{v}\PY{o}{.}\PY{n}{value}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+Status: Optimal
+Objective value:  0.0
+X\_(0,\_0) :  0.0
+X\_(0,\_1) :  60.0
+X\_(0,\_2) :  60.0
+X\_(0,\_3) :  0.0
+X\_(1,\_0) :  100.0
+X\_(1,\_1) :  0.0
+X\_(1,\_2) :  0.0
+X\_(1,\_3) :  50.0
+X\_(2,\_0) :  0.0
+X\_(2,\_1) :  0.0
+X\_(2,\_2) :  70.0
+X\_(2,\_3) :  130.0
+    \end{Verbatim}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{12}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{original\PYZus{}obj}
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{12}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+4*X\_(0,\_0) + 5*X\_(0,\_1) + 6*X\_(0,\_2) + 8*X\_(0,\_3) + 4*X\_(1,\_0) + 7*X\_(1,\_1) +
+9*X\_(1,\_2) + 2*X\_(1,\_3) + 5*X\_(2,\_0) + 8*X\_(2,\_1) + 7*X\_(2,\_2) + 6*X\_(2,\_3) + 0
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{13}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{original\PYZus{}obj}\PY{o}{.}\PY{n}{value}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{13}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+2430.0
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \hypertarget{changing-constraint-coefficients}{%
+\subsection{Changing Constraint
+Coefficients}\label{changing-constraint-coefficients}}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{14}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{a} \PY{o}{=} \PY{n}{prob}\PY{o}{.}\PY{n}{constraints}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Supply0}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{15}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{a}\PY{o}{.}\PY{n}{changeRHS}\PY{p}{(}\PY{l+m+mi}{500}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{16}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{a}
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{16}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+1*X\_(0,\_0) + 1*X\_(0,\_1) + 1*X\_(0,\_2) + 1*X\_(0,\_3) + -500 = 0
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{17}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{prob}\PY{o}{.}\PY{n}{constraints}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Supply0}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{keys}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{17}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+odict\_keys([X\_(0,\_0), X\_(0,\_1), X\_(0,\_2), X\_(0,\_3)])
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+
+\end{Verbatim}
+\end{tcolorbox}
+
