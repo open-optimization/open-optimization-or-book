@@ -680,6 +680,10 @@ A flow is conservative if the net flow out of node $v$, minus the net flow into 
 
 The (single-commodity min-cost) network-flow problem is to find a minimumcost conservative flow that is non-negative and respects the flow upper bounds on the arcs. 
 
+
+
+
+
 \paragraph{Objective and Constraints}
 We can formulate this as follows:
 \begin{tcolorbox}
@@ -715,19 +719,40 @@ K=2 example below with integer data gives a fractional basic optimum. This examp
 Unfortunately, the same integrality theorem does not hold in the multi-commodity network flow probem.  Nontheless, if the quanties in each flow are very large, then the LP solution will likely be very close to an integer valued solution.
 \end{remark}
 
-\subsection{Modeling Tricks}
+\section{Modeling Tricks}
 
 
-\begin{example}{Minimizing a Maximum}{}
-
-let.....
-
+\subsection{Maximizing a minimum}
+When the constraints could be general, we will write $x \in X$ to define general constraints.  For instance, we could have $X = \{ x \in \R^n : Ax \leq b\}$ of $X  = \{ x \in \R^n : Ax \leq b, x \in \Z^n\}$ or many other possibilities.  
 
 
-\end{example}
+Consider the problem 
+
+\begin{align*}
+\max   \quad & \min \{x_1, \dots, x_n\}\\
+\text{ such that } \quad &  x \in X
+\end{align*}
+Having the minimum on the inside is inconvenient.  To remove this, we just define a new variable $y$ and enforce that $y \leq x_i$ and then we maximize $y$.  Since we are maximizing $y$, it will take the value of the smallest $x_i$.  Thus, we can recast the problem as
+
+\begin{align*}
+\max\quad    & y\\
+\text{ such that } \quad  & y \leq x_i \ \text{ for }\  i=1, \dots, n \\
+&  x \in X
+\end{align*}
 
 \begin{example}{Minimizing an Absolute Value}{}
+Note that 
+$$
+|t| = \max(t, -t),
+$$
+Thus, if we need to minimize $|t|$ we can instead write
 
+\begin{align}
+\min z\\
+s.t.\\
+t \leq z
+-t \leq z
+\end{align}
 
 \end{example}
 
@@ -792,22 +817,71 @@ let.....
 \subimport{./foundationsAppliedMathematicsLabs/Appendices/NumpyVisualGuide/}{NumpyVisualGuide} %Chapter
 \subimport{./foundationsAppliedMathematicsLabs/Appendices/MatplotlibCustomization/}{MatplotlibCustomization} %Chapter
 
-\subsection{Jupyter Notebooks}
-\url{https://github.com/mathinmse/mathinmse.github.io/blob/master/Lecture-00B-Notebook-Basics.ipynb}
-\url{https://github.com/mathinmse/mathinmse.github.io/blob/master/Lecture-00C-Writing-In-Jupyter.ipynb}
+\section{Networkx - A Python Graph Algorithms Package}
 
-\subsection{Reading and Writing}
+
+\section{PuLP - An Optimization Modeling Tool for Python}
+\begin{outcome}
+\begin{itemize}
+\item Install and import PuLP
+\item Run basic first PuLP model
+\item Run "advanced" PuLP model using the algebraic modeling approach and importing data.
+\item Explore PuLP objects and possibilities
+\item Solve a Multi-Objective problem
+\end{itemize}
+\end{outcome}
+
+
+\begin{resource}
+\begin{itemize}
+\item \href{https://coin-or.github.io/pulp/}{Documentation}
+\item \href{https://pypi.org/project/PuLP/}{PyPi installation}
+\item \href{https://github.com/coin-or/pulp/tree/master/examples}{Examples}
+\item \href{https://benalexkeen.com/linear-programming-with-python-and-pulp-part-1/}{Blog with tutorial}
+\end{itemize}
+\end{resource}
+
+PuLP is an optimizaiton modeling language that is written for Python.  It is free and open source.  Yay!   See Section ?? for a discussion of other options for implementing your optimization problem.
+PuLP is convenient for it's simple syntax and easy installation.   
+ 
+Key benefits of using an algebraic modeling language like PuLP over Excel
+\begin{itemize}
+\item Easily readable models
+\item Precompute parameters within Python
+\item Reuse of common optimization models without recreating the equations
+\end{itemize}
+
+We will follow the introduction to pulp Jupyter Notebook Tutorial and the following application with a cleaner implementation.
+
+\input{pulp_import.tex}
+\input{pulp_transportation.tex}
+
+\input{transportation-multi-objective/transportation-multi-objective-jupyter.tex}
+\section{Jupyter Notebooks}
+\begin{resource}
+\begin{itemize}
+\item \url{https://github.com/mathinmse/mathinmse.github.io/blob/master/Lecture-00B-Notebook-Basics.ipynb}
+\item \url{https://github.com/mathinmse/mathinmse.github.io/blob/master/Lecture-00C-Writing-In-Jupyter.ipynb}
+\end{itemize}
+\end{resource}
+
+\section{Reading and Writing}
 \url{https://github.com/mathinmse/mathinmse.github.io/blob/master/Lecture-10B-Reading-and-Writing-Data.ipynb}
 
-\subsection{Python Crash Course}
+\section{Python Crash Course}
 \url{https://github.com/rpmuller/PythonCrashCourse}
 
 
-\subsection{Gurobi}
+\section{Gurobi}
 \href{https://github.com/Gurobi/grblogtools}{Gurobi Log Tools}
 
 
+\section{Plots, Pandas, and Geopandas}
 
+
+\subsection{Geopandas}
+\href{tutorial}{https://jcutrer.com/python/learn-geopandas-plotting-usmaps}
+\href{tutorial github}{https://github.com/joncutrer/geopandas-tutorial}
 
 
 
@@ -1010,6 +1084,8 @@ Lettuce & 1.78 & 6 & 8 & 0.1 & 0.6 & 15.5 & 1 & 0.6 \\ \hline
 % \end{adjustwidth}
 \end{table}
 
+
+
  According to the FDA\footnote[1]{url{https://www.accessdata.fda.gov/scripts/InteractiveNutritionFactsLabel/pdv.html}} and US Department of Health, someone on a $2000$ calorie diet should have no more than 2000 calories, no more than 65 grams of fat, no more than 50 grams of sugar\footnote[2]{https://www.today.com/health/4-rules-added-sugars-how-calculate-your-daily-limit-t34731}, at least 1000 milligrams of calcium\footnote[1]{26 Sept 2018, \url{https://ods.od.nih.gov/factsheets/Calcium-HealthProfessional/}}, at least 25 grams of fiber, and at least 46 grams of protein\footnote[2]{\url{https://www.accessdata.fda.gov/scripts/InteractiveNutritionFactsLabel/protein.html}} per day.
 
  We can rewrite this as a convex optimization problem below.
@@ -1093,6 +1169,7 @@ Let's define a procedure for finding the extreme directions, using the following
 % \draw[scale=0.5,domain=-3:3,smooth,variable=\x,blue] plot ({\x},{\x*\x});
 
 
+  
 \medskip E.g., consider the $s_3=0$ (orange) line, to find the extreme direction start at extreme point (2,3) and find another feasible point on the orange line, say (4,4) and subtract (2,3) from (4,4), which yields (2,1). 
 
 \medskip This is related to the slope in two-dimensions, as discussed in class, the rise is 1 and the run is 2. So this direction has a slope of 1/2, but this does not carry over easily to higher dimensions where directions cannot be defined by a single number. 
@@ -1198,6 +1275,9 @@ The extreme directions are thus (4/5, 1/5) and (2/3, 1/3). \\
 \end{tikzpicture} \end{center} 
 \end{minipage}
 
+
+
+
 Represent point (1/2, 1) as a convex combination of the extreme points of the above LP.  Find $\lambda$s to solve the following system of equations:
 
 $$\lambda_1 \left[
@@ -1288,7 +1368,13 @@ $$
 
 
 
+
+
 %\section{Graphical Example}
 \input{lineqlpbook/linearProgrammingGraphicalExample.tex}
 
+
 \fi
+
+
+

@@ -1,0 +1,316 @@
+
+
+%    \hypertarget{pulp-tutorial}{%
+%\subsection{Pulp Tutorial}\label{pulp-tutorial}}
+
+    \hypertarget{installation}{%
+\subsection{Installation}\label{installation}}
+
+Open a Jupyter notebook. In one of the cells, run the following command,
+based on which system you are running. It will take a minute to load and
+download the package.
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{c+c1}{\PYZsh{}\PYZsh{} Install pulp (on windows)}
+\PY{o}{!}pip install pulp
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{c+c1}{\PYZsh{} on a mac}
+\PY{n}{pip} \PY{n}{install} \PY{n}{pulp}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{ }{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{c+c1}{\PYZsh{} on the VT ARC servers}
+\PY{k+kn}{import} \PY{n+nn}{sys}
+\PY{o}{!}\PY{o}{\PYZob{}}sys.executable\PY{o}{\PYZcb{}} \PYZhy{}m pip install pulp
+\end{Verbatim}
+\end{tcolorbox}
+
+    \#\#\# Installation (Continued) Now restart the kernel of your notebook
+(find the tab labeled Kernel in your Jupyter notebook, and in the drop
+down, select restart).
+
+    \hypertarget{example-problem}{%
+\subsection{Example Problem}\label{example-problem}}
+
+\hypertarget{product-mix-problem}{%
+\subsubsection{Product Mix Problem}\label{product-mix-problem}}
+
+\begin{align*}
+  & \text{maximize }   &   Z=3&X_{1}+2X_{2}         & \text{(Objective function)} &\quad(1.1)\\[1ex]
+  & \text{subject to } & \, 10&X_{1}+5X_{2} \le 300 & \text{(Constraint 1)}       &\quad(1.2)\\[1ex]
+  &                    & \,  4&X_{1}+4X_{2} \le 160 & \text{(Constraint 2)}       &\quad(1.3)\\[1ex]  
+  &                    & \,  2&X_{1}+6X_{2} \le 180 & \text{(Constraint 3)}       &\quad(1.4)\\[1ex] 
+  & \text{and}         & \,   &X_{1},X_{2} \ge 0    & \text{(Non-negative)}       &\quad(1.5)\\[1ex] 
+\end{align*}
+
+    \hypertarget{optimization-with-pulp}{%
+\paragraph{Optimization with PuLP}\label{optimization-with-pulp}}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{1}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{k+kn}{from} \PY{n+nn}{pulp} \PY{k+kn}{import} \PY{o}{*}
+
+\PY{c+c1}{\PYZsh{} Define problem}
+\PY{n}{prob} \PY{o}{=} \PY{n}{LpProblem}\PY{p}{(}\PY{n}{name}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Product\PYZus{}Mix\PYZus{}Problem}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{sense}\PY{o}{=}\PY{n}{LpMaximize}\PY{p}{)}
+
+\PY{c+c1}{\PYZsh{} Create decision variables and non\PYZhy{}negative constraint}
+\PY{n}{x1} \PY{o}{=} \PY{n}{LpVariable}\PY{p}{(}\PY{n}{name}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{X1}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{lowBound}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{,} \PY{n}{upBound}\PY{o}{=}\PY{k+kc}{None}\PY{p}{,} \PY{n}{cat}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Continuous}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{x2} \PY{o}{=} \PY{n}{LpVariable}\PY{p}{(}\PY{n}{name}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{X2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{lowBound}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{,} \PY{n}{upBound}\PY{o}{=}\PY{k+kc}{None}\PY{p}{,} \PY{n}{cat}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Continuous}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+
+\PY{c+c1}{\PYZsh{} Set objective function}
+\PY{n}{prob} \PY{o}{+}\PY{o}{=} \PY{l+m+mi}{3}\PY{o}{*}\PY{n}{x1} \PY{o}{+} \PY{l+m+mi}{2}\PY{o}{*}\PY{n}{x2}
+
+\PY{c+c1}{\PYZsh{} Set constraints}
+\PY{n}{prob} \PY{o}{+}\PY{o}{=} \PY{l+m+mi}{10}\PY{o}{*}\PY{n}{x1} \PY{o}{+} \PY{l+m+mi}{5}\PY{o}{*}\PY{n}{x2} \PY{o}{\PYZlt{}}\PY{o}{=} \PY{l+m+mi}{300}
+\PY{n}{prob} \PY{o}{+}\PY{o}{=} \PY{l+m+mi}{4}\PY{o}{*}\PY{n}{x1} \PY{o}{+} \PY{l+m+mi}{4}\PY{o}{*}\PY{n}{x2} \PY{o}{\PYZlt{}}\PY{o}{=} \PY{l+m+mi}{160}
+\PY{n}{prob} \PY{o}{+}\PY{o}{=} \PY{l+m+mi}{2}\PY{o}{*}\PY{n}{x1} \PY{o}{+} \PY{l+m+mi}{6}\PY{o}{*}\PY{n}{x2} \PY{o}{\PYZlt{}}\PY{o}{=} \PY{l+m+mi}{180}
+
+\PY{c+c1}{\PYZsh{} Solving problem}
+\PY{n}{prob}\PY{o}{.}\PY{n}{solve}\PY{p}{(}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Status}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{LpStatus}\PY{p}{[}\PY{n}{prob}\PY{o}{.}\PY{n}{status}\PY{p}{]}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+Status Optimal
+    \end{Verbatim}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{2}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Status:}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{LpStatus}\PY{p}{[}\PY{n}{prob}\PY{o}{.}\PY{n}{status}\PY{p}{]}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Objective value: }\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{prob}\PY{o}{.}\PY{n}{objective}\PY{o}{.}\PY{n}{value}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+
+\PY{k}{for} \PY{n}{v} \PY{o+ow}{in} \PY{n}{prob}\PY{o}{.}\PY{n}{variables}\PY{p}{(}\PY{p}{)}\PY{p}{:}
+    \PY{n+nb}{print}\PY{p}{(}\PY{n}{v}\PY{o}{.}\PY{n}{name}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{: }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{v}\PY{o}{.}\PY{n}{value}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+Status: Optimal
+Objective value:  100.0
+X1 :  20.0
+X2 :  20.0
+    \end{Verbatim}
+
+    \hypertarget{things-we-can-do}{%
+\subsection{Things we can do}\label{things-we-can-do}}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{3}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{c+c1}{\PYZsh{} print the problem}
+\PY{n}{prob}
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{3}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+Product\_Mix\_Problem:
+MAXIMIZE
+3*X1 + 2*X2 + 0
+SUBJECT TO
+\_C1: 10 X1 + 5 X2 <= 300
+
+\_C2: 4 X1 + 4 X2 <= 160
+
+\_C3: 2 X1 + 6 X2 <= 180
+
+VARIABLES
+X1 Continuous
+X2 Continuous
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{4}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{c+c1}{\PYZsh{} get the objective function}
+\PY{n}{prob}\PY{o}{.}\PY{n}{objective}\PY{o}{.}\PY{n}{value}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{4}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+100.0
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{5}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{c+c1}{\PYZsh{} get list of the variables}
+\PY{n}{prob}\PY{o}{.}\PY{n}{variables}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{5}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+[X1, X2]
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{6}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{k}{for} \PY{n}{v} \PY{o+ow}{in} \PY{n}{prob}\PY{o}{.}\PY{n}{variables}\PY{p}{(}\PY{p}{)}\PY{p}{:}
+    \PY{n+nb}{print}\PY{p}{(}\PY{l+s+sa}{f}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+si}{\PYZob{}}\PY{n}{v}\PY{l+s+si}{\PYZcb{}}\PY{l+s+s1}{: }\PY{l+s+si}{\PYZob{}}\PY{n}{v}\PY{o}{.}\PY{n}{varValue}\PY{l+s+si}{\PYZcb{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+X1: 20.0
+X2: 20.0
+    \end{Verbatim}
+
+    \hypertarget{exploring-the-variables}{%
+\subsubsection{Exploring the variables}\label{exploring-the-variables}}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{7}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{v} \PY{o}{=} \PY{n}{prob}\PY{o}{.}\PY{n}{variables}\PY{p}{(}\PY{p}{)}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{9}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{v}\PY{o}{.}\PY{n}{name}
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{9}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+'X1'
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{10}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{v}\PY{o}{.}\PY{n}{value}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{10}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+20.0
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{11}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{v}\PY{o}{.}\PY{n}{varValue}
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{11}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+20.0
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \hypertarget{other-things-you-can-do}{%
+\subsubsection{Other things you can do}\label{other-things-you-can-do}}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{12}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{c+c1}{\PYZsh{} get list of the constraints}
+\PY{n}{prob}\PY{o}{.}\PY{n}{constraints}
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{12}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+OrderedDict([('\_C1', 10*X1 + 5*X2 + -300 <= 0),
+             ('\_C2', 4*X1 + 4*X2 + -160 <= 0),
+             ('\_C3', 2*X1 + 6*X2 + -180 <= 0)])
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{13}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{prob}\PY{o}{.}\PY{n}{to\PYZus{}dict}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{13}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\{'objective': \{'name': 'OBJ',
+  'coefficients': [\{'name': 'X1', 'value': 3\}, \{'name': 'X2', 'value': 2\}]\},
+ 'constraints': [\{'sense': -1,
+   'pi': 0.2,
+   'constant': -300,
+   'name': None,
+   'coefficients': [\{'name': 'X1', 'value': 10\}, \{'name': 'X2', 'value': 5\}]\},
+  \{'sense': -1,
+   'pi': 0.25,
+   'constant': -160,
+   'name': None,
+   'coefficients': [\{'name': 'X1', 'value': 4\}, \{'name': 'X2', 'value': 4\}]\},
+  \{'sense': -1,
+   'pi': -0.0,
+   'constant': -180,
+   'name': None,
+   'coefficients': [\{'name': 'X1', 'value': 2\}, \{'name': 'X2', 'value': 6\}]\}],
+ 'variables': [\{'lowBound': 0,
+   'upBound': None,
+   'cat': 'Continuous',
+   'varValue': 20.0,
+   'dj': -0.0,
+   'name': 'X1'\},
+  \{'lowBound': 0,
+   'upBound': None,
+   'cat': 'Continuous',
+   'varValue': 20.0,
+   'dj': -0.0,
+   'name': 'X2'\}],
+ 'parameters': \{'name': 'Product\_Mix\_Problem',
+  'sense': -1,
+  'status': 1,
+  'sol\_status': 1\},
+ 'sos1': [],
+ 'sos2': []\}
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{15}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{c+c1}{\PYZsh{} Store problem information in a json}
+\PY{n}{prob}\PY{o}{.}\PY{n}{to\PYZus{}json}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Product\PYZus{}Mix\PYZus{}Problem.json}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \hypertarget{common-issue}{%
+\subsection{Common issue}\label{common-issue}}
+
+If you forget the \textless=, ==, or \textgreater= when writing a
+constraint, you will silently overwrite the objective function instead
+of adding a constraint!
+
+
+
