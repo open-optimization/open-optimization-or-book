@@ -239,6 +239,21 @@
 	% No change in geometry for regular pdf
 }
 
+
+\usepackage{tocloft}
+\usepackage{xpatch}
+\xapptocmd{\Chap}{\addtocontents{tdo}{\protect\todoline{\thechapter}}}{}{}
+\makeatletter
+\newcommand{\todoline}[1]{\@ifnextchar\Endoftdo{}{\@todoline{#1}}}
+\newcommand{\@todoline}[1]{%
+  \@ifnextchar\todoline
+    {}
+    {\vskip\bigskipamount\noindent\spacedlowsmallcaps{Chapter #1}\par\nobreak\vskip\medskipamount}}
+\let\l@todo\l@section
+\makeatother
+\newcommand{\Endoftdo}{}
+\AtEndDocument{\addtocontents{tdo}{\string\Endoftdo}}
+
 %To create index
 \makeindex
 
@@ -253,19 +268,25 @@
 \usetikzlibrary{arrows.meta,positioning}
 
 \begin{document}
+\tableofcontents
+\listoftodos
 
  \section{Linear Optimization}
 In this section, we study on linear optimization problems, i.e., linear programs (LPs).
-
+\todo[inline, list]{Add this to the list}
+\todo{Somehing to do...}
 \subsection{Problem Formulation} 
 \input{Opt_Notes/LO_Formulations}
 
+\todo{Something else to do}
 \part{OLD LP Stuff}
 
+\todo[inline]{More things to do}
 \subimport{./foundationsAppliedMathematicsLabs/Volume2/CVXOPT_Intro/}{CVXOPT_Intro_linear_programming}
 \subimport{./foundationsAppliedMathematicsLabs/Volume2/Simplex/}{Simplex}
 
 \input{optimization/linear-programming-review.tex}
+
 
 \input{lineqlpbook/linearProgrammingPreface}
 \input{lineqlpbook/linearProgrammingNotation}

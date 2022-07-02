@@ -1,0 +1,55 @@
+\documentclass[%
+]{scrreprt}
+
+\usepackage{blindtext}  %lorem ipsum
+\usepackage[colorinlistoftodos, ngerman]{todonotes}
+\usepackage{etoolbox}
+
+\newcommand\getcurrentref[1]{%
+ \ifnumequal{\value{#1}}{0}
+  {??}
+  {\the\value{#1}}%
+}    
+
+ \newcommand{\todored}[1]{\todo[inline, color=red]{\textbf{(\getcurrentref{chapter}\hspace{-0.5pt}.\getcurrentref{section})}  #1}}
+
+\begin{document}
+
+% list of todos
+\listoftodos{}
+
+
+Chapter: \getcurrentref{chapter}
+
+ \chapter{I}
+ \tracingmacros=1\tracingonline=1
+ Chapter: \getcurrentref{chapter}\\
+ \tracingmacros=0
+ Section: \getcurrentref{section}
+
+ \section{i}
+ Chapter: \getcurrentref{chapter}\\
+ Section: \getcurrentref{section}\\
+ Subsection: \getcurrentref{subsection}
+
+ \section{ii}
+ Section: \getcurrentref{section}
+
+ \subsection{a}
+ Subsection: \getcurrentref{subsection}
+
+% lorem ipsum
+\blindtext
+
+\todored{This is a test}
+
+%Todo #1: comments/ todos about status for professor or lecture
+\todo[inline, color=red]{\getcurrentref{chapter} . \getcurrentref{section}.) comments/ todos about status for professor or lecture}
+% lorem ipsum
+\blindtext
+%Todo #2: comments for internal use. Just for me.
+\todo{Todo \#2: comments for internal use. Just for me.}
+% lorem ipsum
+\blindtext
+
+\end{document}

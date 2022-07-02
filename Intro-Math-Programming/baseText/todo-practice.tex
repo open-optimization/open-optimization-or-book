@@ -1,0 +1,57 @@
+\documentclass{scrreprt}
+
+\usepackage{classicthesis}
+\usepackage{todonotes}
+\usepackage{tocloft}
+\usepackage{lipsum}
+\hypersetup{colorlinks=true,linktocpage=true}
+
+\usepackage{xpatch}
+\xapptocmd{\Chap}{\addtocontents{tdo}{\protect\todoline{\thechapter}}}{}{}
+\makeatletter
+\newcommand{\todoline}[1]{\@ifnextchar\Endoftdo{}{\@todoline{#1}}}
+\newcommand{\@todoline}[1]{%
+  \@ifnextchar\todoline
+    {}
+    {\vskip\bigskipamount\noindent\spacedlowsmallcaps{Chapter #1}\par\nobreak\vskip\medskipamount}}
+\let\l@todo\l@section
+\makeatother
+\newcommand{\Endoftdo}{}
+\AtEndDocument{\addtocontents{tdo}{\string\Endoftdo}}
+
+
+\begin{document}
+\tableofcontents
+\listoftodos
+
+\chapter{My first chapter}
+\lipsum[1]
+\todo{Chapter 1 note - we need to add something useful here....}
+
+\section{A first section}
+
+\lipsum[1]
+
+\todo{Chapter 1, section 1 note}
+
+\section{Another section}
+
+\lipsum[1]
+
+\todo{Chapter 1, section 2 note}
+
+\chapter{My second chapter}
+
+\section{A first section}
+
+\lipsum[1]
+
+\todo{Chapter 2, section 1 note}
+
+\section{Another section}
+
+\lipsum[1]
+
+\todo{Chapter 2, section 2 note}
+
+\end{document} 

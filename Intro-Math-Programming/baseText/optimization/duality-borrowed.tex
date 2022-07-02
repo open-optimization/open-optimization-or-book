@@ -54,3 +54,738 @@ $$
 "This example is taken from Robert Vanderbei's excellent textbook Linear Programming: Foundations and Extensions [Springer, 2001], but the idea appears earlier in Jens Clausen's 1997 paper 'Teaching Duality in Linear Programming: The Multiplier Approach'.
 
 \url{https://www.cs.purdue.edu/homes/egrigore/580FT15/26-lp-jefferickson.pdf}
+
+
+
+
+%Stanford University - CS261: Optimization
+
+%Handout 6
+
+%Luca Trevisan
+
+%January 20, 2011
+
+%\section{Lecture 6}
+
+In which we introduce the theory of duality in linear programming.
+
+\section{The Dual of Linear Program}
+
+Suppose that we have the following linear program in maximization standard form:
+
+$$
+\begin{array}{ll}
+\underset{n a x i m i z e}{\operatorname{maxim}} & x_{1}+2 x_{2}+x_{3}+x_{4} \\
+\text { subject to } & \\
+& x_{1}+2 x_{2}+x_{3} \leq 2 \\
+& x_{2}+x_{4} \leq 1 \\
+& x_{1}+2 x_{3} \leq 1 \\
+& x_{1} \geq 0 \\
+& x_{2} \geq 0 \\
+& x_{3} \geq 0
+\end{array}
+$$
+
+and that an LP-solver has found for us the solution $x_{1}:=1, x_{2}:=\frac{1}{2}, x_{3}:=0, x_{4}:=\frac{1}{2}$ of cost 2.5. How can we convince ourselves, or another user, that the solution is indeed optimal, without having to trace the steps of the computation of the algorithm?
+
+Observe that if we have two valid inequalities
+
+$$
+a \leq b \text { and } c \leq d
+$$
+
+then we can deduce that the inequality
+
+$$
+a+c \leq b+d
+$$
+
+(derived by "summing the left hand sides and the right hand sides" of our original inequalities) is also true. In fact, we can also scale the inequalities by a positive multiplicative factor before adding them up, so for every non-negative values $y_{1}, y_{2} \geq 0$ we also have 
+
+$$
+y_{1} a+y_{2} c \leq y_{1} b+y_{2} d
+$$
+
+Going back to our linear program (1), we see that if we scale the first inequality by $\frac{1}{2}$, add the second inequality, and then add the third inequality scaled by $\frac{1}{2}$, we get that, for every $\left(x_{1}, x_{2}, x_{3}, x_{4}\right)$ that is feasible for (1),
+
+$$
+x_{1}+2 x_{2}+1.5 x_{3}+x_{4} \leq 2.5
+$$
+
+And so, for every feasible $\left(x_{1}, x_{2}, x_{3}, x_{4}\right)$, its cost is
+
+$$
+x_{1}+2 x_{2}+x_{3}+x_{4} \leq x_{1}+2 x_{2}+1.5 x_{3}+x_{4} \leq 2.5
+$$
+
+meaning that a solution of cost $2.5$ is indeed optimal.
+
+In general, how do we find a good choice of scaling factors for the inequalities, and what kind of upper bounds can we prove to the optimum?
+
+Suppose that we have a maximization linear program in standard form.
+
+$$
+\begin{array}{ll}
+\operatorname{maximize} & c_{1} x_{1}+\ldots c_{n} x_{n} \\
+\text { subject to } & \\
+& a_{1,1} x_{1}+\ldots+a_{1, n} x_{n} \leq b_{1} \\
+& \vdots \\
+& a_{m, 1} x_{1}+\ldots+a_{m, n} x_{n} \leq b_{m} \\
+& x_{1} \geq 0 \\
+& \vdots \\
+& x_{n} \geq 0
+\end{array}
+$$
+
+For every choice of non-negative scaling factors $y_{1}, \ldots, y_{m}$, we can derive the inequality
+
+$$
+\begin{gathered}
+y_{1} \cdot\left(a_{1,1} x_{1}+\ldots+a_{1, n} x_{n}\right) \\
++\cdots \\
++y_{n} \cdot\left(a_{m, 1} x_{1}+\ldots+a_{m, n} x_{n}\right) \\
+\leq y_{1} b_{1}+\cdots y_{m} b_{m}
+\end{gathered}
+$$
+
+which is true for every feasible solution $\left(x_{1}, \ldots, x_{n}\right)$ to the linear program (2). We can rewrite the inequality as
+
+$$
+\begin{aligned}
+\left(a_{1,1} y_{1}+\right.&\left.\cdots a_{m, 1} y_{m}\right) \cdot x_{1} \\
++& \cdots
+\end{aligned}
+$$
+
+ 
+
+$$
+\begin{gathered}
++\left(a_{1, n} y_{1} \cdots a_{m, n} y_{m}\right) \cdot x_{n} \\
+\leq y_{1} b_{1}+\cdots y_{m} b_{m}
+\end{gathered}
+$$
+
+So we get that a certain linear function of the $x_{i}$ is always at most a certain value, for every feasible $\left(x_{1}, \ldots, x_{n}\right)$. The trick is now to choose the $y_{i}$ so that the linear function of the $x_{i}$ for which we get an upper bound is, in turn, an upper bound to the cost function of $\left(x_{1}, \ldots, x_{n}\right)$. We can achieve this if we choose the $y_{i}$ such that
+
+$$
+\begin{aligned}
+&c_{1} \leq a_{1,1} y_{1}+\cdots a_{m, 1} y_{m} \\
+&\vdots \\
+&c_{n} \leq a_{1, n} y_{1} \cdots a_{m, n} y_{m}
+\end{aligned}
+$$
+
+Now we see that for every non-negative $\left(y_{1}, \ldots, y_{m}\right)$ that satisfies (3), and for every $\left(x_{1}, \ldots, x_{n}\right)$ that is feasible for $(2)$,
+
+$$
+\begin{gathered}
+c_{1} x_{1}+\ldots c_{n} x_{n} \\
+\leq\left(a_{1,1} y_{1}+\cdots a_{m, 1} y_{m}\right) \cdot x_{1} \\
++\cdots \\
++\left(a_{1, n} y_{1} \cdots a_{m, n} y_{m}\right) \cdot x_{n} \\
+\leq y_{1} b_{1}+\cdots y_{m} b_{m}
+\end{gathered}
+$$
+
+Clearly, we want to find the non-negative values $y_{1}, \ldots, y_{m}$ such that the above upper bound is as strong as possible, that is we want to
+
+$$
+\begin{array}{ll}
+\operatorname{minimize} & b_{1} y_{1}+\cdots b_{m} y_{m} \\
+\text { subject to } & \\
+& a_{1,1} y_{1}+\ldots+a_{m, 1} y_{m} \geq c_{1} \\
+& \vdots \\
+& a_{n, 1} y_{1}+\ldots+a_{m, n} y_{m} \geq c_{n} \\
+& y_{1} \geq 0 \\
+& \vdots \\
+& y_{m} \geq 0
+\end{array}
+$$
+
+So we find out that if we want to find the scaling factors that give us the best possible upper bound to the optimum of a linear program in standard maximization form, we end up with a new linear program, in standard minimization form. Definition 1 If
+
+$$
+\begin{array}{ll}
+\underset{\text { maximize }}{ } & \mathbf{c}^{T} \mathbf{x} \\
+\text { subject to } & \\
+& A \mathbf{x} \leq \mathbf{b} \\
+& \mathbf{x} \geq \mathbf{0}
+\end{array}
+$$
+
+is a linear program in maximization standard form, then its dual is the minimization linear program
+
+$$
+\begin{array}{ll}
+\operatorname{minimize} & \mathbf{b}^{T} \mathbf{y} \\
+\text { subject to } & \\
+& A^{T} \mathbf{y} \geq \mathbf{c} \\
+& \mathbf{y} \geq \mathbf{0}
+\end{array}
+$$
+
+So if we have a linear program in maximization linear form, which we are going to call the primal linear program, its dual is formed by having one variable for each constraint of the primal (not counting the non-negativity constraints of the primal variables), and having one constraint for each variable of the primal (plus the nonnegative constraints of the dual variables); we change maximization to minimization, we switch the roles of the coefficients of the objective function and of the right-hand sides of the inequalities, and we take the transpose of the matrix of coefficients of the left-hand side of the inequalities.
+
+The optimum of the dual is now an upper bound to the optimum of the primal. How do we do the same thing but starting from a minimization linear program? We can rewrite
+
+$$
+\begin{array}{ll}
+\underset{l}{\operatorname{minimize}} & \mathbf{c}^{T} \mathbf{y} \\
+\text { subject to } & \\
+& A \mathbf{y} \geq \mathbf{b} \\
+& \mathbf{y} \geq \mathbf{0}
+\end{array}
+$$
+
+in an equivalent way as
+
+$$
+\begin{array}{ll}
+\underset{\operatorname{maximize}}{\operatorname{mubject~to}} & -\mathbf{c}^{T} \mathbf{y} \\
+& -A \mathbf{y} \leq-\mathbf{b} \\
+& \mathbf{y} \geq \mathbf{0}
+\end{array}
+$$
+
+If we compute the dual of the above program we get
+
+$$
+\begin{array}{ll}
+\underset{\text { minimize }}{\operatorname{mubject} \text { to }} & -\mathbf{b}^{T} \mathbf{z} \\
+& -A^{T} \mathbf{z} \geq-\mathbf{c} \\
+& \mathbf{z} \geq \mathbf{0}
+\end{array}
+$$
+
+that is,
+
+$$
+\begin{array}{ll}
+\operatorname{maximize} & \mathbf{b}^{T} \mathbf{z} \\
+\text { subject to } & \\
+& A^{T} \mathbf{z} \leq \mathbf{c} \\
+& \mathbf{y} \geq \mathbf{0}
+\end{array}
+$$
+
+So we can form the dual of a linear program in minimization normal form in the same way in which we formed the dual in the maximization case:
+
+- switch the type of optimization,
+
+- introduce as many dual variables as the number of primal constraints (not counting the non-negativity constraints),
+
+- define as many dual constraints (not counting the non-negativity constraints) as the number of primal variables.
+
+- take the transpose of the matrix of coefficients of the left-hand side of the inequality,
+
+- switch the roles of the vector of coefficients in the objective function and the vector of right-hand sides in the inequalities.
+
+Note that:
+
+Fact 2 The dual of the dual of a linear program is the linear program itself.
+
+We have already proved the following:
+
+Fact 3 If the primal (in maximization standard form) and the dual (in minimization standard form) are both feasible, then
+
+$$
+\operatorname{opt}(\text { primal }) \leq \operatorname{opt}(\text { dual })
+$$
+
+Which we can generalize a little
+
+Theorem 4 (Weak Duality Theorem) If $L P_{1}$ is a linear program in maximization standard form, $L P_{2}$ is a linear program in minimization standard form, and $L P_{1}$ and $L P_{2}$ are duals of each other then:
+
+- If $L P_{1}$ is unbounded, then $L P_{2}$ is infeasible; - If $L P_{2}$ is unbounded, then $L P_{1}$ is infeasible;
+
+- If $L P_{1}$ and $L P_{2}$ are both feasible and bounded, then
+
+$$
+\operatorname{opt}\left(L P_{1}\right) \leq \operatorname{opt}\left(L P_{2}\right)
+$$
+
+ProOF: We have proved the third statement already. Now observe that the third statement is also saying that if $L P_{1}$ and $L P_{2}$ are both feasible, then they have to both be bounded, because every feasible solution to $L P_{2}$ gives a finite upper bound to the optimum of $L P_{1}$ (which then cannot be $+\infty$ ) and every feasible solution to $L P_{1}$ gives a finite lower bound to the optimum of $L P_{2}$ (which then cannot be $-\infty$ ).
+
+What is surprising is that, for bounded and feasible linear programs, there is always a dual solution that certifies the exact value of the optimum.
+
+Theorem 5 (Strong Duality) If either $L P_{1}$ or $L P_{2}$ is feasible and bounded, then so is the other, and
+
+$$
+\operatorname{opt}\left(L P_{1}\right)=\operatorname{opt}\left(L P_{2}\right)
+$$
+
+To summarize, the following cases can arise:
+
+- If one of $L P_{1}$ or $L P_{2}$ is feasible and bounded, then so is the other;
+
+- If one of $L P_{1}$ or $L P_{2}$ is unbounded, then the other is infeasible;
+
+- If one of $L P_{1}$ or $L P_{2}$ is infeasible, then the other cannot be feasible and bounded, that is, the other is going to be either infeasible or unbounded. Either case can happen.
+
+\section{Linear programming duality}\label{linear-programming-duality}
+
+Consider the following problem:
+
+\begin{equation}
+\begin{array}{rl}
+\min & \vec{c}^\T\vec{x} \\
+\mbox{s.t.} & \mm{A}\vec{x} \geq \vec{b}.
+\label{eq:duality-primal}
+\end{array}
+\end{equation}
+
+In the remark at the end of Chapter \ref{fund-lp}, we saw that if
+\eqref{eq:duality-primal} has an optimal solution, then there exists
+\(\vec{y}^*\in\R^m\) such that \(\vec{y}^* \geq 0\),
+\({\vec{y}^*}^\T\mm{A} = \vec{c}^\T\), and
+\({\vec{y}^*}^\T\vec{b} = \gamma\) where \(\gamma\) denotes the optimal
+value of \eqref{eq:duality-primal}.
+
+Take any \(\vec{y}\in\R^m\) satisfying \(\vec{y} \geq \vec{0}\) and
+\(\vec{y}^\T\mm{A} = \vec{c}^\T\). Then we can infer from
+\(\mm{A}\vec{x}\geq \vec{b}\) the inequality
+\(\vec{y}^\T\mm{A}\vec{x} \geq \vec{y}^\T \vec{b}\), or more simply,
+\(\vec{c}^\T\vec{x} \geq \vec{y}^\T \vec{b}\). Thus, for any such
+\(\vec{y}\), \(\vec{y}^\T \vec{b}\) gives a lower bound for the
+objective function value of any feasible solution to
+\eqref{eq:duality-primal}. Since \(\gamma\) is the optimal value of
+\((P)\), we must have \(\gamma \geq \vec{y}^\T\vec{b}\).
+
+As \({\vec{y}^*}^\T\vec{b} = \gamma\), we see that \(\gamma\) is the
+optimal value of
+
+\begin{equation}
+\begin{array}{rl}
+\max & \vec{y}^\T\vec{b} \\
+\mbox{s.t.} & \vec{y}^\T\mm{A} = \vec{c}^\T \\
+&\vec{y} \geq \vec{0}.
+\end{array}\label{eq:duality-dual}
+\end{equation}
+
+Note that \eqref{eq:duality-dual} is a linear programming problem! We call
+it the \textbf{dual problem} of the \textbf{primal problem}
+\eqref{eq:duality-primal}. We say that the dual variable \(y_i\) is
+\textbf{associated} with the constraint
+\({\vec{a}^{(i)}}^\T \vec{x} \geq b_i\) where \({\vec{a}^{(i)}}^\T\)
+denotes the \(i\)th row of \(\mm{A}\).
+
+In other words, we define the dual problem of \eqref{eq:duality-primal} to
+be the linear programming problem \eqref{eq:duality-dual}. In the
+discussion above, we saw that if the primal problem has an optimal
+solution, then so does the dual problem and the optimal values of the
+two problems are equal. Thus, we have the following result:
+
+\begin{theorem}{strong-duality-special}{}
+\protect\hypertarget{thm:strong-duality-special}{}{\label{thm:strong-duality-special}}
+Suppose that \eqref{eq:duality-primal} has an optimal solution. Then
+\eqref{eq:duality-dual} also has an optimal solution and the optimal
+values of the two problems are equal.
+\end{theorem}
+
+At first glance, requiring all the constraints to be
+\(\geq\)-inequalities as in \eqref{eq:duality-primal} before forming the
+dual problem seems a bit restrictive. We now see how the dual problem of
+a primal problem in general form can be defined. We first make two
+observations that motivate the definition.
+
+\textbf{Observation 1}
+
+Suppose that our primal problem contains a mixture of all types of
+linear constraints:
+
+\begin{equation}
+\begin{array}{rl}
+\min & \vec{c}^\T\vec{x}  \\
+\mbox{s.t.} & \mm{A}\vec{x}\geq \vec{b} \\
+& \mm{A'}\vec{x} \leq \vec{b'} \\
+& \mm{A''}\vec{x} = \vec{b''}
+\end{array} \label{eq:P-prime}
+\end{equation}
+
+where \(\mm{A} \in \R^{m\times n}\), \(\vec{b} \in \R^{m}\),
+\(\mm{A}' \in \R^{m'\times n}\), \(\vec{b}' \in \R^{m'}\),
+\(\mm{A}'' \in \R^{m''\times n}\), and \(\vec{b}'' \in \R^{m''}\).
+
+We can of course convert this into an equivalent problem in the form of
+\eqref{eq:duality-primal} and form its dual.\\
+However, if we take the point of view that the function of the dual is
+to infer from the constraints of \eqref{eq:P-prime} an inequality of the
+form \(\vec{c}^\T \vec{x} \geq \gamma\) with \(\gamma\) as large as
+possible by taking an appropriate linear combination of the constraints,
+we are effectively looking for \(\vec{y} \in \R^{m}\),
+\(\vec{y} \geq \vec{0}\), \(\vec{y}' \in \R^{m'}\),
+\(\vec{y}' \leq \vec{0}\), and \(\vec{y}'' \in \R^{m''}\), such that
+\[\vec{y}^\T\mm{A}
++\vec{y'}^\T\mm{A'}
++\vec{y''}^\T\mm{A''} = \vec{c}^\T\] with
+\(\vec{y}^\T\vec{b} +\vec{y'}^\T\vec{b'} +\vec{y''}^\T\vec{b''}\) to be
+maximized.
+
+(The reason why we need \(\vec{y'} \leq \vec{0}\) is because inferring a
+\(\geq\)-inequality from \(\mm{A}'\vec{x} \leq \vec{b}'\) requires
+nonpositive multipliers. There is no restriction on \(\vec{y''}\)
+because the constraints \(\mm{A}''\vec{x} = \vec{b}''\) are equalities.)
+
+This leads to the dual problem:
+
+\begin{equation}
+\begin{array}{rl}
+\max~ & \vec{y}^\T\vec{b} 
++\vec{y'}^\T\vec{b'}
++\vec{y''}^\T\vec{b''} \\
+\mbox{s.t.} ~
+& \vec{y}^\T\mm{A}
++\vec{y'}^\T\mm{A'}
++\vec{y''}^\T\mm{A''} = \vec{c}^\T \\
+&~~~~\vec{y} \geq \vec{0} \\
+&~~~~\vec{y'} \leq \vec{0}.
+\end{array} \label{eq:D-prime}
+\end{equation}
+
+In fact, we could have derived this dual by applying the definition of
+the dual problem to
+
+\begin{equation*}
+\begin{array}{rl}
+\min ~& \vec{c}^\T\vec{x} \\
+\mbox{s.t.}  ~
+& \begin{bmatrix} 
+ \mm{A} \\
+ -\mm{A'} \\
+ \mm{A''} \\
+ -\mm{A''}
+\end{bmatrix} \vec{x}
+\geq
+\begin{bmatrix}
+\vec{b} \\
+-\vec{b'} \\
+\vec{b''} \\
+-\vec{b''}
+\end{bmatrix},
+\end{array}
+\end{equation*}
+
+which is equivalent to \eqref{eq:P-prime}. The details are left as an
+exercise.
+
+\textbf{Observation 2}
+
+Consider the primal problem of the following form:
+
+\begin{equation}
+\begin{array}{rl}
+\min ~& \vec{c}^\T\vec{x} \\
+\mbox{s.t.} ~& \mm{A}\vec{x} \geq \vec{b} \\
+ & x_i \geq 0 ~~i \in P \\
+ & x_i \leq 0 ~~i \in N 
+\end{array}\label{eq:P-dbl-prime}
+\end{equation}
+
+where \(P\) and \(N\) are disjoint subsets of \(\{1,\ldots,n\}\). In
+other words, constraints of the form \(x_i \geq 0\) or \(x_i \leq 0\)
+are separated out from the rest of the inequalities.
+
+Forming the dual of \eqref{eq:P-dbl-prime} as defined under Observation 1,
+we obtain the dual problem
+
+\begin{equation}
+\begin{array}{rll}
+\max & \vec{y}^\T\vec{b} \\
+\mbox{s.t.} & 
+ \vec{y}^\T\vec{a}^{(i)} = c_i & i \in \{1,\ldots,n\}\backslash 
+(P\cup N) \\
+&\vec{y}^\T\vec{a}^{(i)} + p_i = c_i & i \in P \\
+& \vec{y}^\T\vec{a}^{(i)} + q_i = c_i & i \in N \\
+& p_i \geq 0 & i \in P \\
+& q_i \leq 0 & i \in N \\
+\end{array} \label{eq:D-tilde}
+\end{equation}
+
+where \(\vec{y} = \begin{bmatrix} y_1\\ \vdots \\ y_m\end{bmatrix}\).
+Note that this problem is equivalent to the following without the
+variables \(p_i\), \(i \in P\) and \(q_i\), \(i \in N\):
+
+\begin{equation}
+\begin{array}{rll}
+\max & \vec{y}^\T\vec{b} \\
+\mbox{s.t.} & 
+ \vec{y}^\T\vec{a}^{(i)} = c_i & i \in \{1,\ldots,n\}\backslash 
+(P\cup N) \\
+&\vec{y}^\T\vec{a}^{(i)} \leq c_i & i \in P      \\
+& \vec{y}^\T\vec{a}^{(i)} \geq c_i & i \in N,     \\
+\end{array}
+\end{equation}
+
+which can be taken as the dual problem of \eqref{eq:P-dbl-prime} instead
+of \eqref{eq:D-tilde}. The advantage here is that it has fewer variables
+than \eqref{eq:D-tilde}.
+
+Hence, the dual problem of
+
+\begin{equation*}
+\begin{array}{rl}
+\min & \vec{c}^\T\vec{x}  \\
+\mbox{s.t.} & \mm{A}\vec{x} \geq \vec{b} \\
+& \vec{x} \geq \vec{0}
+\end{array}
+\end{equation*}
+
+is simply
+
+\begin{equation*}
+\begin{array}{rl}
+\max & \vec{y}^\T\vec{b} \\
+\mbox{s.t.} & \vec{y}^\T\mm{A} \leq \vec{c}^\T \\
+& \vec{y} \geq \vec{0}.
+\end{array}
+\end{equation*}
+
+As we can see from bove, there is no need to associate dual variables to
+constraints of the form \(x_i \geq 0\) or \(x_i \leq 0\) provided we
+have the appropriate types of constraints in the dual problem. Combining
+all the observations lead to the definition of the dual problem for a
+primal problem in general form as discussed next.
+
+\hypertarget{primal-dual}{\subsection{The dual problem}\label{primal-dual}}
+
+Let \(\mm{A} \in \R^{m\times n}\), \(\vec{b} \in \R^m\),
+\(\vec{c} \in \R^n\). Let \({\vec{a}^{(i)}}^\T\) denote the \(i\)th row
+of \(\mm{A}\). Let \(\mm{A}_j\) denote the \(j\)th column of \(\mm{A}\).
+
+Let \((P)\) denote the minimization problem with variables in the tuple
+\(\vec{x} = \begin{bmatrix} x_1\\ \vdots \\ x_n\end{bmatrix}\) given as
+follows:
+
+\begin{itemize}
+\item
+  The objective function to be minimized is \(\vec{c}^\T \vec{x}\)
+\item
+  The constraints are
+
+  \begin{equation*}{\vec{a}^{(i)}}^\T\vec{x}~\sqcup_i~b_i
+  \end{equation*}
+
+  where \(\sqcup_i\) is \(\leq\), \(\geq\), or \(=\) for
+  \(i = 1,\ldots, m\).
+\item
+  For each \(j \in \{1,\ldots,n\}\), \(x_j\) is constrained to be
+  nonnegative, nonpositive, or free (i.e.~not constrained to be
+  nonnegative or nonpositive.)
+\end{itemize}
+
+Then the \textbf{dual problem} is defined to be the maximization problem
+with variables in the tuple
+\(\vec{y} = \begin{bmatrix} y_1\\ \vdots\\ y_m\end{bmatrix}\) given as
+follows:
+
+\begin{itemize}
+\item
+  The objective function to be maximized is \(\vec{y}^\T \vec{b}\)
+\item
+  For \(j = 1,\ldots, n\), the \(j\)th constraint is
+
+  \begin{equation*}
+  \left \{\begin{array}{ll}
+  \vec{y}^\T\mm{A}_j \leq c_j & \text{if } x_j \text{ is constrained to 
+  be nonnegative} \\
+  \vec{y}^\T\mm{A}_j \geq c_j & \text{if } x_j \text{ is constrained to 
+  be nonpositive} \\
+  \vec{y}^\T\mm{A}_j = c_j & \text{if } x_j \text{ is free}.
+  \end{array}\right.
+  \end{equation*}
+\item
+  For each \(i \in \{1,\ldots,m\}\), \(y_i\) is constrained to be
+  nonnegative if \(\sqcup_i\) is \(\geq\); \(y_i\) is constrained to be
+  nonpositive if \(\sqcup_i\) is \(\leq\); \(y_i\) is free if
+  \(\sqcup_i\) is \(=\).
+\end{itemize}
+
+The following table can help remember the above.
+
+\begin{longtable}[]{@{}cc@{}}
+\toprule
+Primal (min) & Dual (max)\tabularnewline
+\midrule
+\endhead
+\(\geq\) constraint & \(\geq 0\) variable\tabularnewline
+\(\leq\) constraint & \(\leq 0\) variable\tabularnewline
+\(=\) constraint & \(\text{free}\) variable\tabularnewline
+\(\geq 0\) variable & \(\leq\) constraint\tabularnewline
+\(\leq 0\) variable & \(\geq\) constraint\tabularnewline
+\(\text{free}\) variable & \(=\) constraint\tabularnewline
+\bottomrule
+\end{longtable}
+
+Below is an example of a primal-dual pair of problems based on the above
+definition:
+
+Consider the primal problem: \[\begin{array}{rrcrcrcl}
+\mbox{min} &  x_1 & - & 2x_2 & + & 3x_3 & \\
+\mbox{s.t.} & -x_1 &   &      & + & 4x_3 &  =   &5 \\
+            & 2x_1 & + & 3x_2 & - & 5x_3 & \geq &  6 \\
+            &      &   & 7x_2 &   &      & \leq &  8 \\
+            &  x_1 &   &      &   &      & \geq &  0 \\
+            &     &    & x_2  &   &      & &      \mbox{free} \\
+            &     &    &      &   & x_3  & \leq & 0.\\
+\end{array}\]
+
+Here,
+\(\mm{A}= \begin{bmatrix}  -1 & 0 & 4 \\  2 & 3 & -5 \\  0 & 7 & 0 \end{bmatrix}\),
+\(\vec{b} = \begin{bmatrix}5 \\6\\8\end{bmatrix}\), and
+\(\vec{c} = \begin{bmatrix}1 \\-2\\3\end{bmatrix}\).
+
+The primal problem has three constraints. So the dual problem has three
+variables. As the first constraint in the primal is an equation, the
+corresponding variable in the dual is free. As the second constraint in
+the primal is a \(\geq\)-inequality, the corresponding variable in the
+dual is nonnegative. As the third constraint in the primal is a
+\(\leq\)-inequality, the corresponding variable in the dual is
+nonpositive. Now, the primal problem has three variables. So the dual
+problem has three constraints. As the first variable in the primal is
+nonnegative, the corresponding constraint in the dual is a
+\(\leq\)-inequality. As the second variable in the primal is free, the
+corresponding constraint in the dual is an equation. As the third
+variable in the primal is nonpositive, the corresponding constraint in
+the dual is a \(\geq\)-inequality. Hence, the dual problem is:
+\[\begin{array}{rrcrcrcl}
+\mbox{max} & 5y_1 & + & 6y_2 & + & 8y_3 & \\
+\mbox{s.t.} & -y_1 & + & 2y_2 &   &      & \leq &  1 \\
+            &      &   & 3y_2 & + & 7y_3 & = & -2 \\
+            & 4y_1 & - & 5y_2 &   &      & \geq &  3 \\
+            &  y_1 &   &      &   &      &      &  \mbox{free} \\ 
+            &     &    & y_2  &   &      & \geq & 0 \\
+            &     &    &      &   & y_3  & \leq & 0.\\
+\end{array}\]
+
+\textbf{Remarks.} Note that in some books, the primal problem is always
+a maximization problem. In that case, what is our primal problem is
+their dual problem and what is our dual problem is their primal problem.
+
+One can now prove a more general version of Theorem
+\ref{thm:strong-duality-special} as stated below. The details are left
+as an exercise.
+
+\begin{theorem}{Duality Theorem for Linear Programming}{}
+\protect\hypertarget{thm:strong-duality}{}{\label{thm:strong-duality}
+\iffalse (Duality Theorem for Linear Programming) \fi{} } Let (P) and
+(D) denote a primal-dual pair of linear programming problems. If either
+(P) or (D) has an optimal solution, then so does the other. Furthermore,
+the optimal values of the two problems are equal.
+\end{theorem}
+
+Theorem \ref{thm:strong-duality} is also known informally as
+\textbf{strong duality}.
+
+\subsection*{Exercises}\label{exercises-6}
+\addcontentsline{toc}{section}{Exercises}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  Write down the dual problem of \[\begin{array}{rrcrcl}
+  \min & 4x_1 & - & 2x_2 \\
+  \text{s.t.} 
+   & x_1 & + & 2x_2 & \geq & 3\\
+   & 3x_1 & - & 4x_2 & = & 0 \\
+   &  & & x_2 & \geq & 0.
+  \end{array}\]
+\item
+  Write down the dual problem of the following: \[
+  \begin{array}{rrcrcrcl}
+  \min  &    &  &3x_2  & + & x_3 \\
+  \mbox{s.t.}
+   & x_1 & + & x_2 & + & 2x_3 & = & 1 \\
+   & x_1 &   &     & - & 3x_3 & \leq & 0 \\
+   & x_1 & , & x_2 & , & x_3 & \geq & 0.
+  \end{array}
+  \]
+\item
+  Write down the dual problem of the following: \[
+  \begin{array}{rrcrcrcl}
+  \min  & x_1 &  &  & - & 9x_3 \\
+  \mbox{s.t.}
+   & x_1 & - & 3x_2 &  + & 2x_3 & = & 1 \\
+   & x_1 & &  & &  & \leq & 0 \\
+   & &  & x_2 & &  &  & \mbox{free} \\
+   & &  & &  & x_3 & \geq & 0.
+  \end{array}\]
+\item
+  Determine all values \(c_1,c_2\) such that the linear programming
+  problem \[\begin{array}{rl}
+  \min & c_1 x_1 + c_2 x_2 \\
+  \text{s.t.} & 2x_1 + x_2 \geq 2 \\
+  & x_1 + 3x_2 \geq 1.
+  \end{array}
+  \] has an optimal solution. Justify your answer
+\end{enumerate}
+
+\subsection*{Solutions}\label{solutions-6}
+\addcontentsline{toc}{section}{Solutions}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  The dual is \[\begin{array}{rrcrcll}
+  \max & 3y_1 \\
+  \text{s.t.} 
+  & y_1 & +  & 3y_2 & = & 4\\
+  & 2y_1 & - & 4y_2 & \leq & -2 \\
+  &  y_1 &   &      &\geq & 0.
+  \end{array}\]
+\item
+  The dual is \[\begin{array}{rrcrcll}
+  \max  & y_1  &   &   \\
+  \mbox{s.t.}
+   & y_1 & + &  y_2 & \leq & 0 \\
+   & y_1 &   &      & \leq & 3 \\
+   &2y_1 & - & 3y_2 & \leq & 1 \\
+   & y_1 &   &      &      & \mbox{free} \\
+   &     &   &  y_2 &  \leq & 0.
+  \end{array}\]
+\item
+  The dual is \[\begin{array}{rrcll}
+  \max  & y_1  \\
+  \mbox{s.t.}
+   &   y_1 & \geq & 1 \\
+   & -3y_1 & = & 0 \\
+   & 2y_1 & \leq & -9 \\
+   & y_1 &    & \mbox{free}.
+  \end{array}\]
+\item
+  Let (P) denote the given linear programming problem.
+
+  Note that
+  \(\begin{bmatrix} x_1 \\ x_2\end{bmatrix} = \begin{bmatrix} 1 \\ 0\end{bmatrix}\)
+  is a feasible solution to (P). Therefore, by Theorem \ref{fund-lp}, it
+  suffices to find all values \(c_1,c_2\) such that
+
+  \begin{enumerate}
+  \def\labelenumii{(\Alph{enumii})}
+  \setcounter{enumii}{15}
+  \tightlist
+  \item
+    is not unbounded. This amounts to finding all values \(c_1,c_2\)
+    such that the dual problem of (P) has a feasible solution.
+  \end{enumerate}
+
+  The dual problem of (P) is \[\begin{array}{rl}
+  \max & 2 y_1 + y_2 \\
+  & 2y_1 + y_2 = c_1 \\
+  & y_1 + 3y_2 = c_2 \\
+  & y_1 , y_2 \geq 0. \\
+  \end{array}
+  \]
+
+  The two equality constraints gives
+  \(\begin{bmatrix} y_1 \\ y_2 \end{bmatrix} = \begin{bmatrix} \frac{3}{5}c_1 - \frac{1}{5} c_2 \\ -\frac{1}{5}c_1 + \frac{2}{5} c_2 \end{bmatrix}.\)
+  Thus, the dual problem is feasible if and only if \(c_1\) and \(c_2\)
+  are real numbers satisfying
+  \begin{align*}
+  \frac{3}{5}c_1 - \frac{1}{5} c_2 & \geq & 0 \\
+  -\frac{1}{5}c_1 + \frac{2}{5} c_2  & \geq & 0,
+  \end{align*}
+
+  or more simply, \[\frac{1}{3} c_2 \leq c_1 \leq 2 c_2.\]
+\end{enumerate}
