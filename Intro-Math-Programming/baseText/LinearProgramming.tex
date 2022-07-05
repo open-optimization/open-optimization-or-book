@@ -249,8 +249,34 @@
 
 \usetikzlibrary{arrows.meta,positioning}
 
-\usepackage{todonotes}
+%\usepackage{todonotes}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage{etoolbox}
 
+\newcommand\getcurrentref[1]{%
+ \ifnumequal{\value{#1}}{0}
+  {??}
+  {\the\value{#1}}%
+}    
+
+ \newcommand{\todored}[1]{\todo[inline, color=red]{\textbf{(\getcurrentref{chapter}\hspace{-0.5pt}.\getcurrentref{section})}  #1}}
+
+
+\let\Chaptermark\chaptermark
+\def\chaptermark#1{\def\Chaptername{#1}\Chaptermark{#1}}
+\let\Sectionmark\sectionmark
+\def\sectionmark#1{\def\Sectionname{#1}\Sectionmark{#1}}
+\let\Subsectionmark\subsectionmark
+\def\subsectionmark#1{\def\Subsectionname{#1}\Subsectionmark{#1}}
+\let\Subsubsectionmark\subsubsectionmark
+\def\subsubsectionmark#1{\def\Subsubsectionname{#1}\Subsubsectionmark{#1}}
+
+\definecolor{capri}{rgb}{0.0, 0.75, 1.0}
+\definecolor{cherryblossompink}{rgb}{1.0, 0.72, 0.77}
+ \newcommand{\todoChapter}[1]{\todo[inline, color=capri]{\textbf{Chapter \getcurrentref{chapter}\hspace{-0.5pt}. \Chaptername}\\
+   #1}}
+ \newcommand{\todoSection}[1]{\todo[inline, color=cherryblossompink]{\textbf{Section \getcurrentref{chapter}\hspace{-0.5pt}.\getcurrentref{section}\hspace{-0.5pt}. \Sectionname}\\
+   #1}}
 
 \begin{document}
 
@@ -315,7 +341,8 @@
 	\addtocontents{toc}{\protect\hypertarget{toc}{}}
 	\tableofcontents
 	\cleardoublepage
-	
+	\listoftodos{}
+	\cleardoublepage
 	\mainmatter
 	
 %LOAD COURSE CONTENT
@@ -327,22 +354,120 @@
 
 %LOAD CHAPTERS / SECTIONS / SUBSECTIONS IN DESIRED ORDER
 
+\todo[inline, color = yellow]{General notes about the book....}
+
 \input{optimization/resources_and_notation.tex}
 \input{optimization/introduction}
 \input{optimization/introductionNotation}
 \input{optimization/mathematicalProgramming}
 
 
-
+%%%%%%%%%%%%%%%
+%% Comment definition to remove part 1
+\def\partOne{Show Part One}
+\ifdefined\partOne
+%%%%%%%%%%%%%%%%
 
 \part{Linear Programming}
+\todo[inline, color = green]{Part I: Linear Programming\\
+Notes:  This Part applies to DORI.   We hope for 80\% completion by January 2023, and 100\% completion for January 2024}
 
 \input{optimization/linear-programming-Hildebrand-mix.tex}
 %\newcommand\oldstuff{thus}
-%\input{optimization/linear-programming-mix-hildebrand-simplex-method.tex}
+\input{optimization/linear-programming-mix-hildebrand-simplex-method.tex}
+
+
+\input{optimization/simplex_method.tex}
 
 
 
+\input{optimization/duality-borrowed.tex}
 
 
+\chapter{Sensitivity Analysis}
+
+\input{optimization/sensitivity-analysis.tex}
+
+
+\input{optimization/multi-objective/multi-objective-optimization.tex}
+
+\part{Discrete Algorithms}
+
+\chapter{Graph Algorithms}
+\todoChapter{ 10\% complete. Goal 80\% completion date: July 20\\
+Notes: .}
+\input{optimization/graph_algorithms.tex}
+\input{optimization/graphtheory-dor1.tex}
+
+%%%%%%%%%%%%
+%% End if for for showing part 1
+\fi
+%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%
+%% Comment definition to remove part 2
+\def\partTwo{Show Part Two}
+\ifdefined\partTwo
+%%%%%%%%%%%%%%%%
+
+\part{Integer Programming}
+\todo[inline, color = green]{Part II: Integer Programming\\
+Notes:  This Part applies to DORII.  Ideally it will be ready for September 2022.}
+\label{part:IntegerProgramming}
+\input{optimization/integerProgrammingFormulations-LP-notes}
+\input{optimization/models}
+
+\input{optimization/complexity.tex}
+\input{optimization/computational_complexity.tex}
+\input{optimization/integerProgrammingExponentialFormulations.tex}
+\input{optimization/integerProgrammingAlgorithms}
+
+\input{lineqlpbook/linearProgrammingIntegerLinearProgramming}
+
+\input{optimization/discreteOptimization.tex}
+
+
+\input{optimization/heuristics.tex}
+
+%%%%%%%%%%%%
+%% End if for for showing part 2
+\fi
+%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%
+%% Comment definition to remove part 3
+\def\partThree{Show Part Three}
+\ifdefined\partThree
+%%%%%%%%%%%%%%%%
+
+\part{Nonlinear Programming}
+\todo[inline, color = green]{Part III: Nonlinear Programming\\
+Notes:  This Part applies to DORII.   Ideally, it will be ready for November 2022.}
+\input{optimization/NLP.tex}
+\input{optimization/NLP-algorithms.tex}
+%
+%\subimport{./foundationsAppliedMathematicsLabs/Volume2/CVXOPT_Intro/}{CVXOPT_Intro_quadratic_programming}
+%%\subimport{./Volume1/QR_Decomposition/}{QR_Decomposition}
+%\subimport{./foundationsAppliedMathematicsLabs/Volume1/LeastSquares_Eigenvalues/}{LeastSquares_Eigenvalues}
+%\subimport{./Volume1/ImageSegmentation/}{ImageSegmentation}
+%\subimport{./Volume1/SVD_ImageCompression/}{SVD_ImageCompression}
+%\subimport{./Volume1/FacialRecognition/}{FacialRecognition}
+
+%\subimport{./Volume1/Differentiation/}{Differentiation}
+%\subimport{./foundationsAppliedMathematicsLabs/Volume1/NewtonsMethod/}{NewtonsMethod}
+%\subimport{./Volume1/Conditioning_Stability/}{Conditioning_Stability}
+
+
+\subimport{./foundationsAppliedMathematicsLabs/Volume2/OneD_Optimization/}{OneD_Optimization}
+\subimport{./foundationsAppliedMathematicsLabs/Volume2/GradientMethods/}{GradientMethods}
+
+%%%%%%%%%%%%
+%% End if for for showing part 3
+\fi
+%%%%%%%%%%%%
+
+\appendix
+\chapter{Linear Algebra}
+\todoChapter{ Decide which material to add here.}
 \end{document}
