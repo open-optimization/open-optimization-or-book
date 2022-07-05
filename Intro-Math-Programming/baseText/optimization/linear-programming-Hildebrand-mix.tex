@@ -3,11 +3,77 @@
 %Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0)
 %See http://creativecommons.org/licenses/by-sa/4.0/
 
-\chapter{Linear Programming}
-\todo[inline]{Add introduction to the section.  Add description of what is to come and what applications we might look at.}
+\chapter{Modeling: Linear Programming}
+\todoChapter{ 50\% complete. Goal 80\% completion date: July 20\\
+Notes: }
 \begin{outcome}
-
+\begin{enumerate}
+\item Define what a linear program is
+\item Understand how to model a linear program
+\item View many examples and get a sense of what types of problems can be modeled as linear programs.
+\end{enumerate}
 \end{outcome}
+
+Linear Programming, also known as Linear Optimization, is the starting point for most forms of optimization.  It is the problem of optimization a linear function over linear constraints.   
+
+In this section, we will define what this means, how to setup a linear program, and discuss many examples.   Examples will be connected with code in Excel and Python (using with PuLP or Gurobipy modeling tools) so that you can easily start solving optimization problems.   Tutorials on these tools will come in later chapters.
+
+We begin this section with a simple example.
+\begin{examplewithallcode}{Toy Maker}
+{https://github.com/open-optimization/open-optimization-or-examples/blob/master/linear-programming/toy_maker/toymaker.xlsx}
+{https://github.com/open-optimization/open-optimization-or-examples/blob/master/linear-programming/toy_maker/toymaker_pulp.ipynb}
+{https://github.com/open-optimization/open-optimization-or-examples/blob/master/linear-programming/toy_maker/toymaker_gurobipy.ipynb}
+%{ex:ToyMaker}{}{}{} 
+Consider the problem of a toy company that produces toy planes and toy boats. The toy company can sell its planes for $\$10$ and its boats for $\$8$ dollars. It costs $\$3$ in raw materials to make a plane and $\$2$ in raw materials to make a boat. A plane requires $3$ hours to make and $1$ hour to finish while a boat requires $1$ hour to make and $2$ hours to finish. The toy company knows it will not sell anymore than $35$ planes per week. Further, given the number of workers, the company cannot spend anymore than $160$ hours per week finishing toys and $120$ hours per week making toys. The company wishes to maximize the profit it makes by choosing how much of each toy to produce. 
+
+We can represent the profit maximization problem of the company as a linear programming problem. Let $x_1$ be the number of planes the company will produce and let $x_2$ be the number of boats the company will produce. The profit for each plane is $\$10 - \$3 = \$7$ per plane and the profit for each boat is $\$8 - \$2 = \$6$ per boat. Thus the total profit the company will make is:
+\begin{equation}
+z(x_1,x_2) = 7x_1 + 6x_2
+\end{equation}
+The company can spend no more than $120$ hours per week making toys and since a plane takes $3$ hours to make and a boat takes $1$ hour to make we have:
+\begin{equation}
+3x_1 + x_2 \leq 120
+\end{equation}
+Likewise, the company can spend no more than $160$ hours per week finishing toys and since it takes $1$ hour to finish a plane and $2$ hour to finish a boat we have:
+\begin{equation}
+x_1 + 2x_2 \leq 160
+\end{equation}
+Finally, we know that $x_1 \leq 35$, since the company will make no more than $35$ planes per week. Thus the complete linear programming problem is given as:
+\begin{equation}
+\left\{
+\begin{aligned}
+\max\;\;& z(x_1,x_2) = 7x_1 + 6x_2\\
+s.t.\;\;&  3x_1 + x_2 \leq 120\\
+& x_1 + 2x_2 \leq 160\\
+& x_1 \leq 35\\
+& x_1 \geq 0\\
+& x_2 \geq 0
+\end{aligned}
+\right.
+\label{eqn:ToyMakerEx}
+\end{equation}
+\label{ex:ToyMaker}
+\end{examplewithallcode}
+
+\begin{exercise}{Chemical Manufacturing}{exer:ChemicalPlant} A chemical manufacturer produces three chemicals: A, B and C. These chemical are produced by two processes: 1 and 2. Running process 1 for 1 hour costs \$4 and yields 3 units of chemical A, 1 unit of chemical B and 1 unit of chemical C. Running process 2 for 1 hour costs \$1 and produces 1 units of chemical A, and 1 unit of chemical B (but none of Chemical C). To meet customer demand, at least 10 units of chemical A, 5 units of chemical B and 3 units of chemical C must be produced daily. Assume that the chemical manufacturer wants to minimize the cost of production. Develop a linear programming problem describing the constraints and objectives of the chemical manufacturer. 
+
+\emph{[Hint: Let $x_1$ be the amount of time Process 1 is executed and let $x_2$ be amount of time Process 2 is executed. Use the coefficients above to express the cost of running Process 1 for $x_1$ time and Process 2 for $x_2$ time. Do the same to compute the amount of chemicals A, B, and C that are produced.]}
+\label{exer:ChemicalPlant}
+\end{exercise}
+
+\section{Modeling and Assumptions in Linear Programming}
+\todoSection{ 20\% complete. Goal 80\% completion date: July 20\\
+Notes: Clean up this section.   Describe process of modeling a problem.}
+
+
+\begin{outcome}
+\begin{enumerate}
+\item Address crucial assumptions when chosing to model a problem with linear programming.
+\end{enumerate}
+\end{outcome}
+
+\subsection{General models}
+
 \bigskip  \underline{\bf A Generic Linear Program (LP)}
 
 \medskip  \underline{Decision Variables:}\\
@@ -77,54 +143,7 @@ z(\alpha \mathbf{x}_1) = \alpha z(\mathbf{x}_1)
 
 For the time being, we will eschew the general form and focus exclusively on linear programming problems with two variables. Using this limited case, we will develop a graphical method for identifying optimal solutions, which we will generalize later to problems with arbitrary numbers of variables. 
 
-\begin{examplewithallcode}{Toy Maker}
-{https://github.com/open-optimization/open-optimization-or-examples/blob/master/linear-programming/toy_maker/toymaker.xlsx}
-{https://github.com/open-optimization/open-optimization-or-examples/blob/master/linear-programming/toy_maker/toymaker_pulp.ipynb}
-{https://github.com/open-optimization/open-optimization-or-examples/blob/master/linear-programming/toy_maker/toymaker_gurobipy.ipynb}
-%{ex:ToyMaker}{}{}{} 
-Consider the problem of a toy company that produces toy planes and toy boats. The toy company can sell its planes for $\$10$ and its boats for $\$8$ dollars. It costs $\$3$ in raw materials to make a plane and $\$2$ in raw materials to make a boat. A plane requires $3$ hours to make and $1$ hour to finish while a boat requires $1$ hour to make and $2$ hours to finish. The toy company knows it will not sell anymore than $35$ planes per week. Further, given the number of workers, the company cannot spend anymore than $160$ hours per week finishing toys and $120$ hours per week making toys. The company wishes to maximize the profit it makes by choosing how much of each toy to produce. 
-
-We can represent the profit maximization problem of the company as a linear programming problem. Let $x_1$ be the number of planes the company will produce and let $x_2$ be the number of boats the company will produce. The profit for each plane is $\$10 - \$3 = \$7$ per plane and the profit for each boat is $\$8 - \$2 = \$6$ per boat. Thus the total profit the company will make is:
-\begin{equation}
-z(x_1,x_2) = 7x_1 + 6x_2
-\end{equation}
-The company can spend no more than $120$ hours per week making toys and since a plane takes $3$ hours to make and a boat takes $1$ hour to make we have:
-\begin{equation}
-3x_1 + x_2 \leq 120
-\end{equation}
-Likewise, the company can spend no more than $160$ hours per week finishing toys and since it takes $1$ hour to finish a plane and $2$ hour to finish a boat we have:
-\begin{equation}
-x_1 + 2x_2 \leq 160
-\end{equation}
-Finally, we know that $x_1 \leq 35$, since the company will make no more than $35$ planes per week. Thus the complete linear programming problem is given as:
-\begin{equation}
-\left\{
-\begin{aligned}
-\max\;\;& z(x_1,x_2) = 7x_1 + 6x_2\\
-s.t.\;\;&  3x_1 + x_2 \leq 120\\
-& x_1 + 2x_2 \leq 160\\
-& x_1 \leq 35\\
-& x_1 \geq 0\\
-& x_2 \geq 0
-\end{aligned}
-\right.
-\label{eqn:ToyMakerEx}
-\end{equation}
-\label{ex:ToyMaker}
-\end{examplewithallcode}
-
-\begin{exercise}{Chemical Manufacturing}{exer:ChemicalPlant} A chemical manufacturer produces three chemicals: A, B and C. These chemical are produced by two processes: 1 and 2. Running process 1 for 1 hour costs \$4 and yields 3 units of chemical A, 1 unit of chemical B and 1 unit of chemical C. Running process 2 for 1 hour costs \$1 and produces 1 units of chemical A, and 1 unit of chemical B (but none of Chemical C). To meet customer demand, at least 10 units of chemical A, 5 units of chemical B and 3 units of chemical C must be produced daily. Assume that the chemical manufacturer wants to minimize the cost of production. Develop a linear programming problem describing the constraints and objectives of the chemical manufacturer. 
-
-\emph{[Hint: Let $x_1$ be the amount of time Process 1 is executed and let $x_2$ be amount of time Process 2 is executed. Use the coefficients above to express the cost of running Process 1 for $x_1$ time and Process 2 for $x_2$ time. Do the same to compute the amount of chemicals A, B, and C that are produced.]}
-\label{exer:ChemicalPlant}
-\end{exercise}
-
-\section{Modeling Assumptions in Linear Programming}
-\begin{outcome}
-\begin{enumerate}
-\item Address crucial assumptions when chosing to model a problem with linear programming.
-\end{enumerate}
-\end{outcome}
+\subsection{Assumptions}
 Inspecting Example \ref{ex:ToyMaker} (or the more general Problem \ref{eqn:GeneralLPMax}) we can see there are several assumptions that must be satisfied when using a linear programming model. We enumerate these below:
 \begin{description}
 \item[Proportionality Assumption] A problem can be phrased as a linear program only if the contribution to the objective function \textit{and} the left-hand-side of each constraint by each decision variable $(x_1,\dots,x_n)$ is proportional to the value of the decision variable.
@@ -155,6 +174,9 @@ The final assumption asserts that the coefficients (e.g., profit per plane or bo
 
 
 \section{Examples}
+\todoSection{ 40\% complete. Goal 80\% completion date: July 20\\
+Notes: Clean up this section.   Finish describing several of the problems, give examples for all problem classes and attach code to all examples.}
+
 \begin{outcome}
 
 \begin{enumerate}
@@ -369,6 +391,17 @@ $y_i$ : the number of workers that start 2 consecutive days of work on day $i$, 
 \subsection{Knapsack Problem}
 
 
+\begin{examplewithallcode}{Capital allocation}{}{}{}
+
+\end{examplewithallcode}
+
+\subsection{Capital Investment}
+
+\begin{examplewithallcode}{Capital Investment\footnote{We thank \url{excel-easy.com} for sharing this example with us and allowing us to link to their excel solution.}}{https://www.excel-easy.com/examples/capital-investment.html}{}{}
+
+
+\end{examplewithallcode}
+
 \subsection{Work Scheduling}
 
 
@@ -383,6 +416,25 @@ $x_{ij}$ : 1 if project $i$ assigned to team $j$, else 0.
 & \sum_{j=1}^{n} x_{ij} = 1,~~ \forall i = 1,\cdots,n  \\
 & x_{ij} \ge 0,~~ \forall i = 1,\cdots,n, j = 1,\cdots,n. 
 \end{align*}
+
+\begin{examplewithallcode}{Hiring for tasks}{https://www.excel-easy.com/examples/assignment-problem.html}{}{}
+In this assignment problem, we need to hire three people (Person 1, Person 2, Person 3) to three tasks (Task 1, Task 2, Task 3).   In the table below, we list the cost of hiring each person for each task, in dollars.  Since each person has a different cost for each task, we must make an assignment to minimize our total cost.
+\begin{table}[!ht]
+    \centering
+    \begin{tabular}{|l|l|l|l|}
+    \hline
+        Cost & Task 1 & Task 2 & Task 3  \\ \hline
+        Person 1 & 40 & 47 & 80  \\ \hline
+        Person 2 & 72 & 36 & 58  \\ \hline
+        Person 3 & 24 & 61 & 71 \\ \hline
+    \end{tabular}
+\end{table}
+\end{examplewithallcode}
+
+\todo[inline]{Add mathematical model}
+
+
+
 The assignment problem has an integrality property, such that if we remove the binary restriction on the $x$ variables (now just non-negative, i.e., $x_{ij} \ge 0$) then we still get binary assignments, despite the fact that it is now an LP.  This property is very interesting and useful. Of course, the objective function might not quite what we want, we might be interested ensuring that the team with the worst assignment is as good as possible (a fairness criteria). One way of doing this is to modify the assignment problem using a max-min objective:
 
 \medskip {\bf Max-min Assignment-like Formulation} \\
@@ -730,7 +782,8 @@ Unfortunately, the same integrality theorem does not hold in the multi-commodity
 \end{remark}
 
 \section{Modeling Tricks}
-
+\todoSection{ 40\% complete. Goal 80\% completion date: July 20\\
+Notes: Only one modeling trick listed here.  Discuss absolute value application and also making a free variable non-negative.}
 
 \subsection{Maximizing a minimum}
 When the constraints could be general, we will write $x \in X$ to define general constraints.  For instance, we could have $X = \{ x \in \R^n : Ax \leq b\}$ of $X  = \{ x \in \R^n : Ax \leq b, x \in \Z^n\}$ or many other possibilities.  
@@ -778,6 +831,8 @@ t \leq z
 \newpage 
 
 \chapter{Software - Excel}
+\todoChapter{ 10\% complete. Goal 80\% completion date: July 20\\
+Notes: }
 \begin{resource}
 \begin{itemize}
 \item \href{https://www.youtube.com/watch?v=dRm5MEoA3OI&ab_channel=LeilaGharani}{Excel Solver - Introduction on Youtube}
@@ -809,6 +864,8 @@ t \leq z
 
 
 \chapter{Software - Python}
+\todoChapter{ 10\% complete. Goal 80\% completion date: July 20\\
+Notes: }
 \begin{outcome}
 \begin{itemize}
 \item Install and get python up and running in some form
