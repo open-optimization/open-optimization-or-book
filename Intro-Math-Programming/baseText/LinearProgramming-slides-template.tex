@@ -1,0 +1,356 @@
+\documentclass{book}
+
+\usepackage[english]{babel}
+\usepackage{fancyhdr}
+
+%% Toggle text
+%\newcommand \nlptext{Show NLP text}
+%\newcommand \oldstuff{Show old text}
+
+%Toggle proofs
+%\def \showproofs {If commented, many proofs will not be shown}
+% See command.tex for all package imports, environments, and special commands.
+\input{foundationsAppliedMathematicsLabs/command}
+\input{optimization/preamble}
+\input{optimization/preamble0}
+\input{optimization/preamble0-biblatex}
+\input{preamble-jupyter.tex}
+
+
+\usepackage{pdfpages}
+
+\usepackage{booktabs}
+
+\graphicspath{ {./images/}{images/}{optimization/multi-objective/images/}{OR-Book-Vorwerk/images/ }}
+% For the font
+\usepackage{mathptmx}
+%\usepackage{roboto} %%for Lyryx Icon font
+\usepackage[T1]{fontenc}
+\usepackage[EULERGREEK]{sansmath}
+
+% Various math packages
+\usepackage{amsmath,amsfonts,amsthm,amssymb}
+
+% Make it look more like the Word docs
+%\setlength{\parskip}{\baselineskip}
+%\setlength{\parindent}{0pt}
+
+% Simple arithmetic
+\usepackage{calc}
+
+% For colouring various things
+\usepackage{xcolor}
+
+% Colored tables and other nice enhancements
+\usepackage{tabu}
+
+% Conditional statements
+\usepackage{ifthen}
+
+% Page layout
+\ifthenelse{\equal{\detokenize{interior}}{\jobname}}{
+	\usepackage[headheight=15pt,top=1in, bottom=0.75in, outer=0.65in, inner=0.85in]{geometry}
+        % \usepackage[headheight=15pt,top=1in, bottom=0.1in, outer=0.75in, inner=1.25in]{geometry}
+}{
+  \usepackage[headheight=15pt,top=1in, bottom=0.75in, outer=0.75in, inner=0.75in]{geometry}
+  %\usepackage[headheight=15pt,top=1in, bottom=0.1in, outer=1in, inner=1in]{geometry}
+}
+
+% Captions for objects
+\usepackage[format=hang,font=bf]{caption}
+  
+% Additional commands for simple LaTeX drawings
+\usepackage{eepic}
+
+% For multicolumn cells in text
+\usepackage{multicol}
+
+% Standard package for creating indexes
+\usepackage{makeidx} 
+
+% If you want to include postscript graphics
+\usepackage{graphicx}
+
+% For including eps graphic files
+\usepackage{epsfig}
+
+% Additional features for lists
+\usepackage{mdwlist}
+
+% Coloured titlepage setup
+\usepackage{afterpage}
+\usepackage{pagecolor}
+
+% Hyperlinks
+\usepackage{hyperref}
+
+
+% To insert df page (only open text distribution project)
+%\usepackage{pdfpages}
+
+% Creates coloured boxes
+\usepackage{tcolorbox}
+\tcbuselibrary{theorems,breakable}
+
+% Draw frames around text
+\usepackage[framemethod=tikz]{mdframed}
+\mdfsetup{skipabove=\topskip,skipbelow=\topskip}
+
+% To remove headers and footers from truly empty pages
+\usepackage{emptypage}
+
+% Draw images and figures
+\usepackage{rotating}
+\usepackage{tikz}
+\usetikzlibrary{calc,intersections,shapes.callouts}
+\usetikzlibrary{decorations.text}
+\usetikzlibrary{positioning}
+\usetikzlibrary{decorations.pathreplacing}
+\usetikzlibrary{shadows}
+\usetikzlibrary{backgrounds}
+\usepackage{circuitikz}
+\tikzstyle arrowstyle=[scale=2.5]
+\tikzstyle directed=[postaction={decorate,decoration={markings,
+    mark=at position .65 with {\arrow[arrowstyle]{latex}}}}]
+\tikzstyle directed1=[postaction={decorate,decoration={markings,
+    mark=at position .99 with {\arrow[arrowstyle]{latex}}}}]   
+\tikzstyle{vertex}=[circle,fill=black!25,minimum size=20pt,inner sep=0pt]
+
+\definecolor{ocre}{RGB}{243,102,25} % Define the orange color used for highlighting throughout the book
+
+% Thew following passes on paperheight to ps2pdf... bug fix  
+\pdfpageheight=\paperheight 
+
+% For plotting data
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+
+% For fancy headers!
+\usepackage{fancyhdr}
+
+% Used for creating EOC questions with corresponding solutions at the end of the textbook
+\usepackage{answers}
+
+% fancy section headers, sc for small caps, prevent titles from being stranded on previous page
+\usepackage[explicit,sc,nobottomtitles]{titlesec}
+
+
+% Inputs information regarding book Title, Authors, Version and Revision
+\input aFirstCourseLinearAlgebra/frontmatter/bookinfo.txt
+
+% Inputs information regarding Institution,Course Code, Name, Session and Section (for adapted text)
+%\input aFirstCourseLinearAlgebra/courseInfo.txt
+
+% Lyryx Math Style
+\usepackage{aFirstCourseLinearAlgebra/LyryxMathStyle}
+
+% Lyryx Linear Algebra Style 
+\usepackage{aFirstCourseLinearAlgebra/LyryxLinAlgStyle}
+
+
+\renewcommand{\b}{\mathbf{b}}
+\renewcommand{\x}{\mathbf{x}}
+\renewcommand{\c}{\mathbf{c}}
+\renewcommand{\0}{\mathbf{0}}
+\renewcommand{\u}{\mathbf{u}}
+
+%% Print Setup
+\newlength{\coverwidth}
+\newlength{\frontsideleft}
+\newlength{\pagethickness}
+
+%%set page number of interior
+\newcommand{\numpages}{604}
+
+% Color interior
+\setlength{\pagethickness}{0.0025in}
+
+% B+W Interior
+%\setlength{\pagethickness}{0.002252in}
+
+% TODO: Is there a way to automatically calculate the dimensions of the print-cover? 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% PRINT COVER GEOMETRY CALCULATIONS
+%
+% % %
+%%% Here are the calculations from createspace:
+% 
+% Spine width: --> black+white interior is 0.002252in * page count
+%              --> colour interior is 0.0025in * page count
+%
+% Spine: allow for 0.0625" variance on either side of the fold lines for your cover.
+%
+% Bleed: 0.125 * 2  (needed on all 4 outside edges of PDF, but not spine)
+%
+% Safe zone: Text and images must be at least .125" inside the trim lines to ensure
+%            that no live elements are cut during the bookmaking process.
+%
+% Minimum Cover Width: Bleed + Back Cover Trim Size + Spine Width + Front Cover Trim Size + Bleed
+%
+% 
+% For 108 pages in colour: (exclude front and back cover - 2 pages)
+%
+% paper width = 0.125 + 8.5 + (0.0025 * 108) + 8.5 + 0.125 = 17.52in
+% paper height = 11 + (2 * 0.125) = 11.25in
+%
+%                paper size - safe zone		(layoutsize)
+% layout width = 8.5 - (.125 * 2)
+% layout height = 11 - (.125 * 2)
+%
+%                   bleed + left side + spine + safe zone
+% layout offset x = 0.125 + 8.5 + (0.0025 * 108) + 0.125 = 9.02in
+%                   bleed + safe zone
+% layout offset y = 0.125 + 0.125 = 0.25in
+%
+% spine width:	0.002252 * 360 = 0.81072in B&W
+% 				0.0025 * 360 = 0.9in colour
+%
+%
+% HOWEVER this will leave space for headers/footers/marginal notes/etc
+%
+% So we want to tweak the body size to be something nice, such as layoutsize minus 1/2 inch on each side for margins
+%
+%% LULU DIMENSIONS
+%
+%From Lulu:
+%Spine width = 0.419cm
+%Spine begins = 21.905cm from the left
+%Total cover width = 44.229cm X 28.571cm 
+
+%CreateSpace
+%\setlength{\coverwidth}{0.125in + 8.5in + (\pagethickness * \numpages) + 8.5in + 0.125in}
+%\setlength{\frontsideleft}{0.125in + 8.5in + (\pagethickness * \numpages) + 0.125in}
+
+%Lengths from LULU for samples 2017-01-16
+\setlength{\coverwidth}{44.229cm}
+\setlength{\frontsideleft}{21.905cm+0.419cm+0.3cm} %Spine begins + Spine width +safe zone
+
+% Options showframe, showcrop, and verbose can be used for debugging
+\ifthenelse{\equal{\detokenize{print-cover}}{\jobname}}{
+%   \geometry{papersize={\coverwidth,28.571cm},layoutsize={21cm,27.3cm},layoutoffset={\frontsideleft,0.6cm},body={18.4cm,24.7cm}}
+	\geometry{papersize={\coverwidth,28.571cm},layoutsize={21.3cm,27.3cm},layoutoffset={\frontsideleft,0.3cm},body={18.4cm,24.7cm}}
+}{
+	% No change in geometry for regular pdf
+}
+
+%To create index
+\makeindex
+
+
+\input{optimization/title} 
+\input{lineqlpbook/linearProgrammingPreamble}
+
+\graphicspath{{aFirstCourseLinearAlgebra/},{lineqlpbook/},{optimization/figures/figures-static/},{Christopher_Griffin_Penn_State_University/},{OR-Book-Vorwerk/images/}}
+
+
+\usetikzlibrary{arrows.meta,positioning}
+
+%\usepackage{todonotes}
+\usepackage[disable]{todonotes}
+\usepackage{etoolbox}
+
+\newcommand\getcurrentref[1]{%
+ \ifnumequal{\value{#1}}{0}
+  {??}
+  {\the\value{#1}}%
+}    
+
+ \newcommand{\todored}[1]{\todo[inline, color=red]{\textbf{(\getcurrentref{chapter}\hspace{-0.5pt}.\getcurrentref{section})}  #1}}
+
+
+\let\Chaptermark\chaptermark
+\def\chaptermark#1{\def\Chaptername{#1}\Chaptermark{#1}}
+\let\Sectionmark\sectionmark
+\def\sectionmark#1{\def\Sectionname{#1}\Sectionmark{#1}}
+\let\Subsectionmark\subsectionmark
+\def\subsectionmark#1{\def\Subsectionname{#1}\Subsectionmark{#1}}
+\let\Subsubsectionmark\subsubsectionmark
+\def\subsubsectionmark#1{\def\Subsubsectionname{#1}\Subsubsectionmark{#1}}
+
+\definecolor{capri}{rgb}{0.0, 0.75, 1.0}
+\definecolor{cherryblossompink}{rgb}{1.0, 0.72, 0.77}
+ \newcommand{\todoChapter}[1]{\todo[inline, color=capri]{\textbf{Chapter \getcurrentref{chapter}\hspace{-0.5pt}. \Chaptername}\\
+   #1}}
+ \newcommand{\todoSection}[1]{\todo[inline, color=cherryblossompink]{\textbf{Section \getcurrentref{chapter}\hspace{-0.5pt}.\getcurrentref{section}\hspace{-0.5pt}. \Sectionname}\\
+   #1}}
+   
+   
+   
+   % OR Book Vorwerk
+ \usepackage[export]{adjustbox}
+
+
+\usepackage[affil-it]{authblk}
+\usepackage{xspace,xcolor}
+\usepackage{graphics}
+\usepackage[screen,nopanel,orange]{pdfscreen}
+\hypersetup{pdftoolbar=true}
+\usepackage[display]{texpower}
+
+\margins{0.25in}{0.25in}{0.25in}{0.25in}
+\screensize{4.5in}{6in}% 4.5in by 8in for widescreen
+\backgroundcolor{white}
+\color{black}
+
+\author{Robert Hildebrand}
+%\author[1]{Bill}
+\affil{Virginia Tech}
+\title{Deterministic Operations Research\\ 
+\tblue{Sections 3.1-3.3:\\
+ Modeling - Linear Programs}\\}
+\begin{document}
+\maketitle
+\setcounter{chapter}{2} % set this to one less than the desired chapter
+\chapter{Modeling: Linear Programming}
+\begin{examplewithallcode}{Toy Maker}
+{https://github.com/open-optimization/open-optimization-or-examples/blob/master/linear-programming/toy_maker/toymaker.xlsx}
+{https://github.com/open-optimization/open-optimization-or-examples/blob/master/linear-programming/toy_maker/toymaker_pulp.ipynb}
+{https://github.com/open-optimization/open-optimization-or-examples/blob/master/linear-programming/toy_maker/toymaker_gurobipy.ipynb}
+%{ex:ToyMaker}{}{}{} 
+Consider the problem of a toy company that produces toy planes and toy boats. The toy company can sell its planes for $\$10$ and its boats for $\$8$ dollars. It costs $\$3$ in raw materials to make a plane and $\$2$ in raw materials to make a boat. A plane requires $3$ hours to make and $1$ hour to finish while a boat requires $1$ hour to make and $2$ hours to finish. The toy company knows it will not sell anymore than $35$ planes per week. Further, given the number of workers, the company cannot spend anymore than $160$ hours per week finishing toys and $120$ hours per week making toys. The company wishes to maximize the profit it makes by choosing how much of each toy to produce. 
+
+\newpage 
+
+We can represent the profit maximization problem of the company as a linear programming problem. Let $x_1$ be the number of planes the company will produce and let $x_2$ be the number of boats the company will produce. The profit for each plane is $\$10 - \$3 = \$7$ per plane and the profit for each boat is $\$8 - \$2 = \$6$ per boat. Thus the total profit the company will make is:
+\begin{equation}
+z(x_1,x_2) = 7x_1 + 6x_2
+\end{equation}
+The company can spend no more than $120$ hours per week making toys and since a plane takes $3$ hours to make and a boat takes $1$ hour to make we have:
+\begin{equation}
+3x_1 + x_2 \leq 120
+\end{equation}
+Likewise, the company can spend no more than $160$ hours per week finishing toys and since it takes $1$ hour to finish a plane and $2$ hour to finish a boat we have:
+\begin{equation}
+x_1 + 2x_2 \leq 160
+\end{equation}
+Finally, we know that $x_1 \leq 35$, since the company will make no more than $35$ planes per week. Thus the complete linear programming problem is given as:
+\begin{equation}
+\left\{
+\begin{aligned}
+\max\;\;& z(x_1,x_2) = 7x_1 + 6x_2\\
+s.t.\;\;&  3x_1 + x_2 \leq 120\\
+& x_1 + 2x_2 \leq 160\\
+& x_1 \leq 35\\
+& x_1 \geq 0\\
+& x_2 \geq 0
+\end{aligned}
+\right.
+\label{eqn:ToyMakerEx}
+\end{equation}
+\label{ex:ToyMaker}
+\end{examplewithallcode}
+
+
+\section{Modeling and Assumptions in Linear Programming}
+\todoSection{ 20\% complete. Goal 80\% completion date: July 20\\
+Notes: Clean up this section.   Describe process of modeling a problem.}
+
+
+\begin{outcome}
+\begin{enumerate}
+\item Address crucial assumptions when chosing to model a problem with linear programming.
+\end{enumerate}
+\end{outcome}
+
+\end{document}
