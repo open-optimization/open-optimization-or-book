@@ -11,6 +11,34 @@
 \todoChapter{ 50\% complete. Goal 80\% completion date: September 20\\
 Notes: }
 \label{sec:IP-algorithms}
+
+\begin{outcome}
+\begin{enumerate}
+\item Understand misconceptions in difficulty of integer programs
+\item Learn basic concepts of algorithms used in solvers
+\item Practice these basic concepts at an elementary level
+\item Apply these concepts to understanding output from a solver
+\end{enumerate}
+\end{outcome}
+
+In this section, we seek to understand some of the fundamental approaches used for solving integer programs.   These tools have been developed the past 70 years.  As  such, advanced solvers today are incredibly complicated and have many possible settings to hope to solve your problem more effiently.  Unfortunately, there is no single approach that is best for all different problems.
+
+\includefigurestatic[GUROBI Performance on a set of problems while varying different  possible settings.  This plot show the wild variablity of performance of different approaches.  Thus, it is very unclear which is the ``best" method. Furthermore, this plot can look quite different depending on the problem set one is working with.   Altough we will not emphasize determining optimal settings in this text, we want to make clear that the techniques used in solvers are quite complicated and are tuned very carefully.  We will study some elementary versions of techniques used in these solvers.][width=0.90\linewidth][h]{gurobi_performance}
+
+Although there are many tricks used to imrove the solve time, there are thee core elements to solving an integer program: \emph{Presolve}, \emph{Primal techniques}, \emph{Cutting Planes}, and \emph{Branch and Bound}.   
+
+\paragraph{Presolve} contains many tricks to elimate variables, reduce the problem size, and make format the problem into something that might be easier to solve.  We will not focus on this aspect of solving integer programs.
+
+\paragraph{Primal techniques} use a variety of approaches to try to find feasible solutions.  These feasible solutions are extemely helpful in conjunction with branch and bound.
+
+\paragraph{Cutting planes} are ways to improve the description by adding additional inequalities.  There are many ways to derive cutting planes.  We will learn just a couple to get an idea of how these work.  
+
+\paragraph{Brach and bound} is a method to decompose the problem into smaller subproblems and also to certify optimality (or at least provide a bound to how close to optimal a solution is) by removing sets of subproblems that can be argued to be suboptimal.   We will look at an elementary branch and bound approach.  \underline{Understanding this technique is key to explaining the ouput of an integer programming solver.}
+
+
+We will being this chapter with a comparison of solving the linear programming relaxation comparted to solving an integer program.  We will then use this understanding as fundamental to both the techniques of cutting planes and branch and bound.
+We will end this section with an example of output from GUROBI and explain how to interpret this information.
+
 \section{LP to solve IP}
 
 Recall that the linear relaxation of an integer program is the linear programming problem after removing the integrality constraints
@@ -63,10 +91,7 @@ Consider the problem
   
   
   \subsection{Rounding LP Solution can be bad!}
-  \begin{resource}
-  \href{https://youtu.be/Az7HUuq4SOI?t=189}{Video! - Michel Belaire (EPFL) looking at rounding the LP solution to an IP solution}
-  \end{resource}
-  
+
   Consider the two variable knapsack problem
   \begin{align}
   \max   3x_1 + 100 x_2\\
@@ -95,20 +120,8 @@ Consider the problem
 \subsection{Fractional Knapsack}
 The fractional knapsack problem has an exact greedy algorithm.
 
-\begin{resource}
-\begin{itemize}
-\item \href{https://www.youtube.com/watch?time_continue=424&v=m1p-eWxrt6g}{Youtube!}
-\item \href{https://www.geeksforgeeks.org/fractional-knapsack-problem/}{Blog}
-\end{itemize}
-\end{resource}
-
 \section{Branch and Bound}
-\begin{resource}
-\href{https://www.youtube.com/watch?v=SdXPNaID-T8}{Video! -  Michel Belaire (EPFL) Teaching Branch and Bound Theory}
-\href{https://www.youtube.com/watch?v=nKXZYQUtvAY}{Video! -  Michel Belaire (EPFL) Teaching Branch and Bound with Example}
 
-See \href{http://web.tecnico.ulisboa.pt/mcasquilho/compute/_linpro/TaylorB_module_c.pdf}{Module by Miguel Casquilho} for some nice notes on branch and bound.
-\end{resource}
 
 \subsection{Algorithm}
 
@@ -246,9 +259,9 @@ Solve the following problem with branch and bound.
 \subsection{Traveling Salesman Problem solution via Branching}
 
 
-\begin{todo}
+\todo[inline]{
 Describe solving TSP via a generalized branching method that removes subtours (instead of adding constraints).
-\end{todo}
+}
 
 
 
@@ -397,12 +410,6 @@ The solution to the LP relaxation is exactly $q = 3, d = 0, n = 1, p = 3$, which
 
 
 \subsection{Gomory Cuts}
-\begin{resource}
-\begin{itemize}
-\item \href{https://www.youtube.com/watch?v=1i0rKtH_YPs&list=PLNMgVqt8MREx6Nex1Q9003vrZem-JXNvX&index=28&ab_channel=EducationalDocumentaries}{Pascal Van Hyndryk (Georgia Tech) Teaching Gomory Cuts}
-\item \href{https://www.youtube.com/watch?v=VdXHGNDnjjo}{Michel Bierlaire (EPFL) Teaching Gomory Cuts}
-\end{itemize}
-\end{resource}
 Gomory cuts are a type of Chv\'atal cut that is derived from the simplex tableau.  Specifically, suppose that 
 \begin{equation}
 \label{eq:tableau-row}
@@ -579,7 +586,17 @@ S = \{2,3,4\} \ \ \Rightarrow \ \ \ x_2 + x_3 + x_4 \leq 2
 \end{solution}
 
 
+\section{Interpreting Output Information and Progress}
+\todoSection{Write this section.  Include screenshot of a solver log}
+
+
+\includefigurestatic[This shows the progress of the solver over time.][width=0.90\linewidth][h]{solve_progress1}
+
+\includefigurestatic[This shows the progress of the solver over time.][width=0.90\linewidth][h]{solve_progress2}
+
 \section{Branching Rules}
+These are advanced techniques that are not necessary at this point.
+
 There is a few clever ideas out there on how to choose which variables to branch on.  We will not go into this here.  But for the interested reader, look into 
 \begin{itemize}
 \item Strong Branching
@@ -587,23 +604,52 @@ There is a few clever ideas out there on how to choose which variables to branch
 \end{itemize}
 
 \section{Lagrangian Relaxation for Branch and Bound}
+This is an advanced technique that is not necessary to learn at this point.
 
 At each note in the branch and bound tree, we want to bound the objective value.  One way to get a a good bound can be using the Lagrangian. 
 
-\begin{resource}
 See~\cite{Fisher2004}  \href{https://my.eng.utah.edu/~kalla/phy_des/lagrange-relax-tutorial-fisher.pdf}{(link)} for a description of this.
-\end{resource}
+
+
 
 
 \section{Benders Decomposition}
+This is an advanced technique that is not necessary to learn at this point.
+
+\section{Literature and Resources}
+
+
 \begin{resource}
-\href{https://www.juliaopt.org/notebooks/Shuvomoy%20-%20Benders%20decomposition.html}{Benders Decomposition - Julia Opt}
+LP Rounding
+\begin{itemize}
+\item  \href{https://youtu.be/Az7HUuq4SOI?t=189}{Video! - Michel Belaire (EPFL) looking at rounding the LP solution to an IP solution}
+\end{itemize}
 
-\href{https://www.youtube.com/watch?v=8vUNXHwVnC8}{Youtube!  SCIP lecture}
+Fractional Knapsack problem
+\begin{itemize}
+\item \href{https://youtu.be/m1p-eWxrt6g}{Video solving the Fractional Knapsack Problem}
+\item \href{https://www.geeksforgeeks.org/fractional-knapsack-problem/}{Blog solving the Fractional Knapsack Problem}
+\end{itemize}
+
+Branch and Bound
+\begin{itemize}
+\item \href{https://www.youtube.com/watch?v=SdXPNaID-T8}{Video! -  Michel Belaire (EPFL) Teaching Branch and Bound Theory}
+\item \href{https://www.youtube.com/watch?v=nKXZYQUtvAY}{Video! -  Michel Belaire (EPFL) Teaching Branch and Bound with Example}
+\item See \href{http://web.tecnico.ulisboa.pt/mcasquilho/compute/_linpro/TaylorB_module_c.pdf}{Module by Miguel Casquilho} for some nice notes on branch and bound.
+\end{itemize}
+
+Gomory Cuts
+\begin{itemize}
+\item \href{https://www.youtube.com/watch?v=1i0rKtH_YPs&list=PLNMgVqt8MREx6Nex1Q9003vrZem-JXNvX&index=28&ab_channel=EducationalDocumentaries}{Pascal Van Hyndryk (Georgia Tech) Teaching Gomory Cuts}
+\item \href{https://www.youtube.com/watch?v=VdXHGNDnjjo}{Michel Bierlaire (EPFL) Teaching Gomory Cuts}
+\end{itemize}
+
+Benders Decomposition
+\begin{itemize}
+\item \href{https://www.juliaopt.org/notebooks/Shuvomoy%20-%20Benders%20decomposition.html}{Benders Decomposition - Julia Opt}
+\item \href{https://www.youtube.com/watch?v=8vUNXHwVnC8}{Youtube!  SCIP lecture}
+\end{itemize}
 \end{resource}
-
-\section{Literature}
-
 
 
 %\end{document}
