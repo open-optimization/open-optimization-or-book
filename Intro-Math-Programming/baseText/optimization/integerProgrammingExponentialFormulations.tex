@@ -790,6 +790,16 @@ $$
 
 
 \section{Vehicle Routing Problem (VRP)}
+\todoSection{10\% complete.
+
+Add discussion and examples of solving VRP using Google OR tools.
+\url{https://www.youtube.com/watch?v=AJ6LeiMe_PQ&t=757s&ab_channel=MixedIntegerProgramming}
+
+Add description and link to code for Clark-Wright Algorithm
+
+Discuss that there are many many variations of this problem and it is somewhat endless to work on.
+}
+
 The VRP is a generlization of the TSP and comes in many many forms.  The major difference is now we may consider multiple vehicles visiting the around cities.
 Obvious examples are creating bus schedules and mail delivery routes.  
 
@@ -815,7 +825,42 @@ For one example of a VRP model, see \href{https://github.com/Gurobi/modeling-exa
 Review this case study after studying algorihtms and heuristics for integer programming.
 
 
+\subsection{An Integer Programming Model}
 
+ILP
+$$
+\begin{array}{r}
+c_{i j}=\text { cost of travel } i \text { to } j \\
+x_{i j k}=1 \text { iff vehicle } k \text { travels } \\
+\text { directly from } i \text { to } j
+\end{array}
+$$
+subject to
+$$
+\begin{array}{cll}
+\min \sum_{i,j} c_{ij} \sum_k x_{ijk}\\
+\sum_{i} \sum_{k} x_{i j k}=1 & \forall j \neq \text { depot } & \text { Exactly one vehicle in } \\
+\sum_{j} \sum_{k}^{k} x_{i j k}=1 & \forall i \neq \text { depot } & \text { Exactly one vehicle out } \\
+\sum_{i} \sum_{k} x_{i h k}-\sum_{j} \sum_{k} x_{h j k}=0 & \forall k, h & \text { It's the same vehicle } \\
+\sum_{i} q_{i} \sum_{j} x_{i j k} \leq Q_{k} \quad \forall k & \text { Capacity constraint } \\
+\sum_{i j k} x_{i j k}=|S|-1 \forall S \subseteq P(N), 0 \notin S & \text { Subtour elimination } \\
+x_{i j k} \in\{0,1\} &
+\end{array}
+$$
+
+\subsection{Clark Wright Algorithm}
+
+\begin{quote}
+Borrowed from \url{https://www.researchgate.net/publication/285833854_Chapter_4_Heuristics_for_the_Vehicle_Routing_Problem} \\
+
+The Clarke and Wright Savings Heuristic
+The Clarke and Wright heuristic [12] initially constructs back and forth routes $(0, i, 0)$ for $(i=1, \ldots, n)$ and gradually merges them by applying a saving criterion. More specifically, merging the two routes $(0, \ldots, i, 0)$ and $(0, j, \ldots, 0)$ into a single route $(0, \ldots, i, j, \ldots, 0)$ generates a saving $s_{i j}=c_{i 0}+c_{0 j}-c_{i j}$. Since the savings remain the same throughout the algorithm, they can be computed a priori. In the so-called parallel version of the algorithm which appears to be the best (see Laporte and Semet [46]), the feasible route merger yielding the largest saving is implemented at each iteration, until no more merger is feasible. This simple algorithm possesses the advantages of being intuitive, easy to implement, and fast. It is often used to generate an initial solution in more sophisticated algorithms. Several enhancements and acceleration procedures have been proposed for this algorithm (see, e.g., Nelson et al. [59] and Paessens [62]), but given the speed of today's computers and the robustness of the latest metaheuristics, these no longer seem justified.
+
+[12] G. CLARKE AND J. W. WRIGHT, Scheduling of vehicles from a central depot to a number of delivery points, Operations Research, 12 (1964), pp. 568-581.
+\end{quote}
+
+
+\begin{resource}
 \url{https://www.informs.org/Impact/O.R.-Analytics-Success-Stories/Optimized-school-bus-routing-helps-school-districts-design-better-policies}
 
 \url{https://pubsonline.informs.org/doi/abs/10.1287/inte.2019.1015}
@@ -824,6 +869,13 @@ Review this case study after studying algorihtms and heuristics for integer prog
 
 
 \url{https://www.youtube.com/watch?v=LFeeaNP_rbY}
+
+\href{https://www.youtube.com/watch?v=BZA_UaX8rs8&t=23s&ab_channel=MERSCognitiveRobotics}{Fantastic talk - Very thorough}
+
+\url{https://www.opendoorlogistics.com/tutorials/tutorial-v-vehicle-routing-scheduling/}
+\end{resource}
+
+
 
 \section{Steiner Tree Problem}
 % GUROBI Vodafone talk
