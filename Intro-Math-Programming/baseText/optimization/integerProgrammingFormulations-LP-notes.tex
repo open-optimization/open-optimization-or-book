@@ -25,24 +25,12 @@ Notes: }
 %\end{comment}
 
 
-\begin{resource}
-\begin{itemize}
-\item The AIMMS modeling has many great examples.  It can be book found here:\href{https://www.aimms.com/english/developers/resources/manuals/optimization-modeling}{AIMMS Modeling Book}.
-\item \href{http://web.mit.edu/15.053/www/AMP-Chapter-09.pdf}{MIT Open Courseware}
-\item  For many real world examples, see this book \href{https://link-springer-com.ezproxy.lib.vt.edu/book/10.1007/978-1-4939-1007-6}{
-Case Studies in Operations Research
-Applications of Optimal Decision Making, edited by  Murty, Katta G}.
-Or find it \href{https://www.springer.com/gp/book/9781493910069}{here}.
-\item \href{https://github.com/Gurobi/modeling-examples}{GUROBI modeling examples by GUROBI}
-\item \href{https://github.com/open-optimization/open-optimization-or-examples/tree/master/integer-programming}{GUROBI modeling examples by Open Optimization that are linked in this book}
-\end{itemize}
 
-\end{resource}
 
 In this section, we will describe classical integer programming formulations.     These formulations may reflect  a real world problem exactly, or may be part of the setup of a real world problem.   
 
 \section{Knapsack Problem}
-The \emph{knapsack problem}\footnote{\href{https://www.youtube.com/watch?v=GteOoMGUOdY}{Video! - Michel Belaire (EPFL) teaching knapsack problem}} can take different forms depending on if the variables are binary or integer.  The binary version means that there is only one item of each item type that can be taken.  This is typically illustrated as a backpack (knapsack) and some items to put into it (see  \autoref{fig:wiki/File/knapsack}), but has applications in many contexts.  
+The \emph{knapsack problem} can take different forms depending on if the variables are binary or integer.  The binary version means that there is only one item of each item type that can be taken.  This is typically illustrated as a backpack (knapsack) and some items to put into it (see  \autoref{fig:wiki/File/knapsack}), but has applications in many contexts.  
 
 
 
@@ -160,8 +148,44 @@ where $x_v$ is a 0/1 variable that takes the value $1$ if we include item $j$ in
 Add flight crew scheduling example and images.
 }
 
+\begin{examplewithcode}{Capital Budgeting}{https://github.com/open-optimization/open-optimization-or-examples/blob/master/integer-programming/capital-budgeting.ipynb}
+\noindent \textbf{Sets:}
+\begin{itemize}
+\item Let $I = \{1,2\}$ be the set of time periods.
+\item Let $J = \{1, 2,3\}$ be the set of possible investments.
+\end{itemize}
+
+\noindent \textbf{Parameters:}
+\begin{itemize}
+\item $c_j$ is given in column "$\mathbb{E}$[Revenue]".
+\item $b_i$ is given in row "Resources available".
+\item $a_{ij}$ given in row $j$, and column for week $i$.
+\end{itemize}
+
+\noindent \textbf{Variables:}
+\begin{itemize}
+\item let $x_i = 0$ if investment $i$ is chosen
+\item let $x_i = 1$ if investment $i$ is not chosen
+\end{itemize}
+
+The explict model is given by\\
+\noindent  \textbf{Model:}
+\begin{align*}
+	\max\ \ \  & 10x_1+8x_2+6x_3 \tag{Total Expected Revenue}\\
+	s.t. \ \ & 
+	3x_1+1x_2+2x_3\leq5 \tag{ Resource constraint week 1}\\
+	&4x_1+2x_2+1x_3\leq6 \tag{ Resource constraint week 2}\\
+&x_j \in \{0,1\},\  j = 1,2,3
+\end{align*}
+
+\end{examplewithcode}
+
+
+
+
 One specific type of set cover problem is the \emph{vertex cover} problem.
 \begin{general}{Example: Vertex Cover}{\npcomplete}
+\label{ex:vertex-cover}
 Given a graph $G = (V,E)$ of vertices and edges, we want to find a smallest size subset $S \subseteq V$ such that every for every $e = (v,u) \in E$, either $u$ or $v$ is in $S$.   
 
 We can write this as a mathematical program in the form:
@@ -237,12 +261,7 @@ Given a non-negative matrix $A \in \Z_+^{m \times n}$, a non-negative vector $b 
 %\end{examplewithcode}
 
 
-\begin{resource}
-\begin{itemize}
-\item \href{https://www.youtube.com/watch?v=cjSeHSjPmsk}{Video! - Michel Belaire (EPFL) explaining set covering problem}
-\item See \href{https://download.aimms.com/aimms/download/manuals/AIMMS3OM_MediaSelection.pdf}{AIMMS - Media Selection} for an example of set covering applied to media selection.
-\end{itemize}
-\end{resource}
+
 
 \section{Assignment Problem}
 \todoSection{}
@@ -357,6 +376,16 @@ x_{i} = \begin{cases}
 
 \end{general}
 
+Alternative model!
+
+\begin{align*}
+\min \ \ \ & \sum_{i = 1}^m\sum_{j=1}^n c_{ij}x_{ij}+\sum_{i = 1}^mf_iy_i\\
+s.t.&  \sum_{i = 1}^mx_{ij} = 1,~~~~~j =1,\ldots n\\
+&x_{ij}\leq y_i,~~~~~ i = 1,\ldots m,~~~ j = 1,\ldots,n\\
+&  x_{ij} \geq 0~~~~~ i = 1,\ldots,m, ~~~j = 1,\ldots,n\\
+& y_i\in \{0,1\}, \  \  i = 1,\ldots,m
+\end{align*}
+
 \subsection{Uncapacitated Facility Location}
 \begin{general}{Uncapacitated Facility Location}{\npcomplete}
 Given costs connections $c_{ij}$ and fixed building costs $f_i$, the uncapacitated facility location problem is 
@@ -372,21 +401,10 @@ Given costs connections $c_{ij}$ and fixed building costs $f_i$, the uncapacitat
 Here $M$ is a large number and can be chosen as $M = m$, but could be refined smaller if more context is known.
 \end{general}
 
-\begin{resource}{}{}
-\begin{itemize}
-\item \href{https://en.wikipedia.org/wiki/Facility_location_problem}{Wikipedia - Facility Location Problem}
-\item See \href{https://github.com/Gurobi/modeling-examples/tree/master/facility_location}{GUROBI Modeling Examples - Facility Location}.
-\end{itemize}
-\end{resource}
 
+\newpage
 \section{Basic Modeling Tricks - Using Binary Variables}
-\todoSection{}
-\begin{resource}
-\begin{itemize}
-\item \href{https://jump.dev/JuMP.jl/stable/tutorials/linear/tips_and_tricks/}{JuMP tips and tricks}
-\item \href{https://docs.mosek.com/modeling-cookbook/mio.html}{Mosek Modeling Cookbook}
-\end{itemize}
-\end{resource}
+%\todoSection{}
 In this section, we describe ways to model a variety of constraints that commonly appear in practice.  The goal is changing constraints described in words to constraints defined by math.
 
 Binary variables can allow you to model many types of constraints.  We discuss here varios logical constraints where we assume that $x_i \in \{0,1\}$ for $i=1, \dots, n$.  We will take the meaning of the variable to be selecting an item.
@@ -476,6 +494,405 @@ Here, $z_i$ represents if we buy the $i$th unit.  The inequality constraints imp
 \end{example}
 
 
+
+In this section, we describe ways to model a variety of constraints that commonly appear in practice.  The goal is changing constraints described in words to constraints defined by math.
+\subsection{Big M constraints - Activating/Deactivating Inequalities}
+Big M comes again!   It's extremely useful when trying to activate constrants based on a binary variable.
+
+For intance, if we don't rent a bus, then we can have at most 3 passengers join us on our trip.   Consider passengers $A,B,C,D,E$ and let $x_i \in \{0,1\}$ be 1 if we take passenger $i$ and 0 otherwise.
+We can model the constraint that we can have at most 5 passengers as 
+$$
+x_A + x_B + x_C + x_D + x_E \leq 3.
+$$
+
+We want to be able to activate this constraint in the event that we don't rent a bus.
+
+Let $\delta \in \{0,1\}$ be 1 if rent a bus, and 0 otherwise.  
+
+Then we want to say
+\begin{quote}
+If $\delta = 0$ , then 
+$$
+x_A + x_B + x_C + x_D + x_E \leq 3.
+$$
+\end{quote}
+
+We can formulate this using a big-M constraint as
+
+\begin{equation}
+x_A + x_B + x_C + x_D + x_E \leq 3 + M \delta.
+\end{equation}
+
+Notice the two case
+$$
+\begin{cases}
+x_A + x_B + x_C + x_D + x_E \leq 3  & \text{ if } \delta = 0\\
+x_A + x_B + x_C + x_D + x_E \leq 3 +M & \text{ if } \delta = 1
+\end{cases}
+$$
+In the second case, we choose $M$ to be so large, that the second case inequality is vacuous.    That said, choosing smaller $M$ values (that are still valid) will help the computer program solve the problem faster.  In this case, it suffices to let $M = 2$.
+
+We can speak about this technique more generally as
+\begin{general}{Big-M: If then}{}{}
+We aim to model the relationship
+\begin{equation}
+\text{ If } \ \ \   \delta = 0, \ \ \  \text{then  } \ \ \ a^\top x \leq b.
+\end{equation}
+By letting $M$ be an upper bound on the quantity $a^\top x - b$, we can model this condition as 
+\begin{equation}
+\begin{split}
+a^\top x - b& \leq M\delta\\
+\delta & \in \{0,1\}
+\end{split}
+\end{equation}
+\end{general}
+
+
+\subsection{Either Or Constraints}
+\emph{``At least one of these constraints holds"} is what we would like to model.  Equivalently, we can phrase this as an \emph{inclusive or} constraint.  This can be molded with a pair of Big-M constraints.
+\begin{general}{Either Or}{}{}
+
+\begin{equation}
+\text{Either} \ \ \ a^\top x \leq b\ \  \text{  or  } \ \  c^\top x \leq d \ \ \text{holds} 
+\end{equation}
+can be modeled as 
+\begin{equation}
+\begin{split}
+a^\top x - b &\leq M_1 \delta\\
+c^\top x - d &\leq M_2 (1-\delta)\\
+\delta &\in \{0,1\},
+\end{split}
+\end{equation}
+where $M_1$ is an upper bound on $a^\top x - b$ and $M_2$ is an upper bound on $c^\top x - d$.
+\end{general}
+
+\begin{example}{}{}
+Either $2$ buses or $10$ cars are needed shuttle students to the football game.  
+\begin{itemize}
+\item Let $x$ be the number of buses we have and 
+\item let $y$ be the number of cars that we have.  
+\end{itemize}
+Suppose that there are at most $M_1 = 5$ buses that could be rented an at most $M_2 = 20$ cars that could be available.
+
+This constraint can be modeled as 
+\begin{equation}
+\begin{split}
+x - 2 &\leq 5\delta\\
+y - 10 &\leq 20 (1-\delta)\\
+\delta &\in \{0,1\},
+\end{split}
+\end{equation}
+\end{example}
+\subsection{If then implications - opposite direction}
+Suppose that we want to model the fact that if we have at most 10 students attending this course, then we must switch to a smaller classroom.   
+
+Let $x_i \in \{0,1\}$ be 1 if student $i$ is in the course or not.   Let $\delta \in \{0,1\}$ be 1 if we need to switch to a smaller classroom.  
+
+Thus, we want to model 
+\begin{quote}
+If $$
+\sum_{i \in I} x_i \leq 10
+$$
+then 
+$$
+\delta = 1.
+$$
+\end{quote}
+
+We can model this as 
+\begin{equation}
+\sum_{i \in I} x_i \geq 10 + 1 + M\delta.
+\end{equation}
+
+
+\begin{general}{If inequality, then indicator}
+We let $m$ be a lower bound on the quantity $a^\top x - b$ and we let $\epsilon$ be a tiny number that is an error bound in verifying if an inequality is violated.  \textbf{If the data $a,b$ are integer and $x$ is an integer, then we can take $\epsilon = 1$.}
+
+Now
+\begin{equation}
+\text{If } \ \ a^\top x \leq b  \ \ \text{then}\ \ \delta = 1
+\end{equation}
+can be modeled as 
+\begin{equation}
+a^\top x -b  \geq  \epsilon(1-\delta) + m \delta.
+\end{equation}
+\end{general}
+
+
+
+\begin{proof}We not justify the statement above.
+
+A simple way to understand this constraint is to consider the \emph{contrapositive} of the if then statement that we want to model.  The contrapositive says that 
+\begin{equation}
+\text{If $\delta = 0$, then $a^\top x - b > 0$.}
+\end{equation}
+To show the contrapositive, we set $\delta = 0$.  Then the inequality becomes 
+$$
+a^\top x - b \geq \epsilon(1-0) + m0 = \epsilon > 0.
+$$
+Thus, the contrapositive holds.
+
+\textbf{If instead we wanted a direct proof:}
+
+Case 1: Suppose $a^\top x \leq b$.  Then $0 \geq a^\top x - b$, which implies that 
+$$
+\delta(a^\top x - b) \geq a^\top x - b
+$$
+Therefore
+$$
+\delta(a^\top x - b) \geq \epsilon(1-\delta) + m \delta
+$$
+After rearranging
+$$
+\delta(a^\top x - b - m) \geq \epsilon(1-\delta)
+$$
+Since $a^\top x - b - m \geq 0$ and $\epsilon > 0$, the only feasible choice is $\delta = 1$.
+
+
+Case 2:  Suppose $a^\top x > b$.  Then $a^\top x - b \geq \epsilon$.    Since $a^\top x -b \geq m$, both choices $\delta = 0$ and $\delta = 1$ are feasible.
+
+By the choice of $\epsilon$,  we know that $a^\top x -b > 0$ implies that $a^\top x - b \geq \epsilon$.  
+
+
+
+Since we don't like strict inequalities, we write the strict inequality as $a^\top x - b \geq \epsilon$ where $\epsilon$ is a small positive number that is a smallest difference between $a^\top x - b$ and $0$ that we would typically observe.  As mentioned above, if $a,b,x$ are all integer, then we can use $\epsilon = 1$.
+
+Now we want an inequality with left hand side $a^\top x - b \geq$ and right hand side to take the value 
+\begin{itemize}
+\item $\epsilon$ if $\delta = 0$,
+\item $m$ if $\delta = 1$.
+\end{itemize}
+This is accomplished with right hand side $\epsilon (1-\delta) + m\delta$.
+\end{proof}
+
+Many other combinations of if then statements are summarized in the following table:
+\begin{table}
+\begin{center}
+\begin{tabular}{|c|c|}
+\hline
+\textbf{Implication} & \textbf{Constraint}\\
+\hline
+If $\delta = 0$, then $a^\top x \leq b$ & $a^\top x \leq b + M \delta$\\
+If $a^\top x \leq b$, then $\delta = 1$ & $a^\top x \geq m \delta + \epsilon(1-\delta)$\\
+\hline
+\end{tabular}
+\end{center}
+\caption{Short list: If/then models with a constraint and a binary variable.  Here $M$ and $m$ are upper and lower bounds on $a^\top x - b$ and $\epsilon$ is a small number such that if $a^\top x > b$, then $a^\top x \geq b + \epsilon$.}
+\end{table}
+These two implications can be used to derive the following longer list of implications.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{|c|c|}
+\hline
+\textbf{Implication} & \textbf{Constraint}\\
+\hline
+If $\delta = 0$, then $a^\top x \leq b$ & $a^\top x \leq b + M \delta$\\
+If $\delta = 0$, then $a^\top x \geq b$ & $a^\top x \geq b + m \delta$\\
+If $\delta = 1$, then $a^\top x \leq b$ & $a^\top x \leq b + M (1-\delta)$\\
+If $\delta = 1$, then $a^\top x \geq b$ & a$^\top x \geq b + m (1-\delta)$\\
+If $a^\top x \leq b$, then $\delta = 1$ & $a^\top x \geq b + m \delta + \epsilon(1-\delta)$\\
+If $a^\top x \geq b$, then $\delta = 1$ & $a^\top x \leq b + M \delta - \epsilon(1-\delta)$\\
+If $a^\top x \leq b$, then $\delta = 0$ & $a^\top x \geq b + m (1-\delta) + \epsilon \delta$\\
+If $a^\top x \geq b$, then $\delta = 0$ & $a^\top x \geq b + m (1-\delta) - \epsilon \delta$\\
+\hline
+\end{tabular}
+\end{center}
+\caption{Long list: If/then models with a constraint and a binary variable.  Here $M$ and $m$ are upper and lower bounds on $a^\top x - b$ and $\epsilon$ is a small number such that if $a^\top x > b$, then $a^\top x \geq b + \epsilon$.}
+\end{table}
+Lastly, if you insist on having exact correspondance, that is, "$\delta = 0 $ if and only if $a^\top x \leq b$" you can simply include both constraints for "if $\delta = 0 $, then $a^\top x \leq b$" and if "$a^\top x \leq b$, then $\delta = 0 $".  Although many problems may be phrased in a way that suggests you need "if and only if", it is often not necessary to use both constraints due to the objectives in the problem that naturally prevent one of these from happening.  
+
+For example, if we want to add a binary variable $\delta$ that means
+$$
+\begin{cases}
+\delta = 0 \text{ implies }  a^\top x \leq b\\
+\delta = 1  \text{ Otherwise}
+\end{cases}
+$$
+If $\delta = 1$ does not effect the rest of the optimization problem, then adding the constraint regarding $\delta = 1$ is not necessary.  Hence, typically, in this scenario, we only need to add the constraint $a^\top x \leq b + M \delta$.
+
+\subsection{Binary reformulation of integer variables}
+If an integer variable has small upper and lower bounds, it can sometimes be advantageous to recast it as a sequence of binary variables - for either modeling, the solver, or both.   Although there are technically many ways to do this, here are the two most common ways.
+
+\begin{general}{Full reformulation}{\textcolor{blue}{$u$ many binary variables}}
+\label{general:full-reformulation}
+For a non-negative integer variable $x$ with upper bound $u$, modeled as 
+\begin{equation}
+0 \leq x \leq u, \ \ \ \ x \in \Z,
+\end{equation}
+this can be reformulated with $u$ binary variables $z_1, \dots, z_u$ as 
+\begin{equation}
+\begin{split}
+x & = \sum_{i=1}^u i z_i = z_1 + 2 z_2 + \dots + u z_u\\
+1 & \geq \sum_{i=1}^u z_i = z_1 + z_2 + \dots + z_u\\
+z_i & \in \{0,1\} \ \ \text{ for } i=1, \dots, u
+\end{split}
+\end{equation}
+\end{general}
+We call this the \emph{full reformulation} because there is a binary variable $z_i$ associated with every value $i$ that $x$ could take.  That is, if $z_3 = 1$, then the second constraint forces $z_i = 0$ for all $i \neq 3$ (that is, $z_3$ is the only non-zero binary variable), and hence by the first constraint, $x = 3$.
+
+\begin{general}{Binary reformulation}{\textcolor{blue}{$O(\log u)$ many binary variables}}
+\label{general:log-reformulation}
+For a non-negative integer variable $x$ with upper bound $u$, modeled as 
+\begin{equation}
+0 \leq x \leq u, \ \ \ \ x \in \Z,
+\end{equation}
+this can be reformulated with $u$ binary variables $z_1, \dots, z_{\log(\lfloor u \rfloor)+ 1}$ as 
+\begin{equation}
+\begin{split}
+x & = \sum_{i=0}^{\log(\lfloor u \rfloor)+ 1}2^i z_i = z_0 + 2 z_1 +  4 z_2 + 8 z_3 + \dots + 2^{\log(\lfloor u \rfloor) + 1} z_{\log(\lfloor u \rfloor)+ 1}\\
+z_i & \in \{0,1\} \ \ \text{ for } i=1, \dots, \log(\lfloor u \rfloor)+ 1
+\end{split}
+\end{equation}
+\end{general}
+We call this the \emph{log reformulation} because this requires only logarithmically many binary variables in terms of the upper bound $u$.   This reformulation is particularly better than the full reformulation when the upper bound $u$ is a ``larger" number, although we will leave it ambiguous as to how larger a number need to be in order to be described as a ``larger" number. 
+\subsection{SOS1 Constraints}
+\begin{definition}{Special Ordered Sets of Type 1 (SOS1)}
+A Special Ordered Sets of type 1 (SOS1) constraint on a vector indicates that \emph{at most one element of the vector can non-zero}.
+\end{definition}
+We next give an example of how to use binary variables to model this and then show how much simpler it can be coded using the SOS1 constraint.
+
+\begin{examplewithcode}{SOS1 Constraints}{https://github.com/open-optimization/open-optimization-or-examples/blob/master/nonlinear-programming/Gurobi-SOS-Examples.ipynb}
+\label{example:sos1}
+Solve the following optimization problem: \[\begin{aligned}
+\text{maximize}\quad & 3x_1 + 4x_2 + x_3 + 5x_4 \\
+\text{subject to}\quad & 0 \le x_i \le 5 \\
+& \text{at most one of the $x_i$ can be nonzero}
+\end{aligned}\]
+\end{examplewithcode}
+\subsection{SOS2 Constraints}
+\begin{definition}{Special Ordered Sets of Type 2 (SOS2)}{}
+A \emph{Special Ordered Set of Type 2 (SOS2)} constraint on a vector indicates that \emph{at most two elements of the vector can non-zero AND the non-zero elements must appear consecutively}.
+\end{definition}
+We next give an example of how to use binary variables to model this and then show how much simpler it can be coded using the SOS2 constraint.
+\begin{examplewithcode}{SOS2}{https://github.com/open-optimization/open-optimization-or-examples/blob/master/nonlinear-programming/Gurobi-SOS-Examples.ipynb}
+\label{example:SOS2}
+Solve the following optimization problem: \[\begin{aligned}
+\text{maximize}\quad & 3x_1 + 4x_2 + x_3 + 5x_4 \\
+\text{subject to}\quad & 0 \le x_i \le 5 \\
+& \text{at most two of the $x_i$ can be nonzero} \\
+& \text{and the nonzero $x_i$ must be consecutive}
+\end{aligned}\]
+\end{examplewithcode}
+
+\subsection{Piecewise linear functions with SOS2 constraint}
+\begin{examplewithcode}{Piecewise Linear Function}{https://github.com/open-optimization/open-optimization-or-examples/blob/master/nonlinear-programming/Gurobi-SOS-Examples.ipynb}
+\label{example:pwl}
+Consider the piecewise linear function 
+ $c(x)$ given by
+$$
+c(x) = 
+\begin{cases}
+25x  & \text{ if } 0 \leq x \leq 5\\
+20x + 25 & \text{ if } 5 \leq x \leq 10\\
+15x + 75 & \text{ if } 10 \leq x \leq 15
+\end{cases}
+$$
+
+\includegraphicstatic[scale = 0.35]{pwl-plot.png}
+
+We will use integer programming to describe this function.  We will fix $x = a$ and then the integer program will set the value $y$ to $c(a)$.
+\begin{align*}
+\min\quad & 0\\
+\text{Subject to} \quad & x - 5 z_{2} - 10 z_{3} - 15 z_{4} = 0\\
+ & y - 125 z_{2} - 225 z_{3} - 300 z_{4} = 0\\
+ & z_{1} + z_{2} + z_{3} + z_{4} = 1\\
+ & SOS2: \{z_1, z_2, z_3, z_4\}\\
+ & 0 \leq z_{i} \leq 1 \quad\forall i \in \{1,2,3,4\}\\
+ & x = a\\
+\end{align*}
+
+\end{examplewithcode}
+
+\begin{examplewithcode}{Piecewise Linear Function Application}{code:pwl-application}
+\label{example:pwl-application}
+Consider the following optimization problem where the objective function includes the term $c(x)$, where $c(x)$ is the piecewise linear function described in \nameref{example:pwl}:
+\begin{align}
+\max & z = 12x_{11} + 12x_{21} + 14x_{12} + 14x_{22} - c(x)\\
+\text{s.t.} & x_{11} + x_{12} \leq x + 5\\
+& x_{21} + x_{22} \leq 10\\
+& 0.5 x_{11} - 0.5x_{21} \geq 0\\
+& 0.4 x_{12} - 0.6 x_{22} \geq 0\\
+& x_{ij} \geq 0\\
+& 0 \leq x \leq 15
+\end{align}
+
+Given the piecewise linear, we can model the whole problem explicitly as a mixed-integer linear program.
+
+ \begin{equation}
+ \begin{array}{rrlr}
+ \max\quad & 12 X_{1,1} + 12 X_{2,1} + 14 X_{1,2} + 14 X_{2,2} - y\\
+\text{Subject to} \quad & x - 5 z_{2} - 10 z_{3} - 15 z_{4} &= 0\\
+ & y - 125 z_{2} - 225 z_{3} - 300 z_{4} &= 0\\
+ & z_{1} + z_{2} + z_{3} + z_{4} &= 1\\
+ & X_{1,1} + X_{1,2} - x &\leq 5\\
+ & X_{2,1} + X_{2,2} \leq 10\\
+ & 0.5 X_{1,1} - 0.5 X_{2,1} &\geq 0\\
+ & 0.4 X_{1,2} - 0.6 X_{2,2} &\geq 0\\
+ & SOS2: \{z_1, z_2, z_3, z_4\}\\
+ & X_{i,j} &\geq 0 &\quad\forall i \in \{1,2\}, j \in \{1,2\}\\
+ & 0 \leq z_{i} &\leq 1 &\quad\forall i \in \{1,2,3,4\}\\
+ & 0 \leq x &\leq 15\\
+ & y & \text{ free} \\
+\end{array}
+\end{equation}
+\end{examplewithcode}
+
+
+\subsubsection{SOS2 with binary variables}
+
+{Modeling Piecewise linear function}
+{\begin{itemize}
+\item Write down pairs of breakpoints and functions values $(a_i, f(a_i))$.
+\item Define a binary variable $z_i$ indicating if $x$ is in the interval $[a_i, a_{i+1}]$.
+\item Define multipliers $\lambda_i$ such that $x$ is a combination of the $a_i$'s and therefore the output $y = f(x)$ is a combination of the $f(a_i)$'s.
+\item Restrict that at most 2 $\lambda_i's$ are non-zero and that those 2 are consecutive.
+
+\end{itemize}
+
+\begin{align*}
+\min \ \ & \sum_{i=1}^k \lambda_i f(a_i)\\
+\text{s.t.} \ \ &  \sum_{i=1}^k \lambda_i = 1\\
+& x = \sum_{i=1}^k \lambda_i a_i\\
+& \lambda_1 \leq z_1\\
+& \lambda_i \leq z_{i-1} + z_{i} & \text{ for }  i=2, \dots, k-1,\\
+& \lambda_k \leq z_{k-1}\\
+& \lambda_i \geq 0, y_i \in \{0,1\}.
+\end{align*}
+
+\subsection{Maximizing a minimum}
+When the constraints could be general, we will write $x \in X$ to define general constraints.  For instance, we could have $X = \{ x \in \R^n : Ax \leq b\}$ of $X  = \{ x \in \R^n : Ax \leq b, x \in \Z^n\}$ or many other possibilities.  
+
+
+Consider the problem 
+
+\begin{align*}
+\max   \quad & \min \{x_1, \dots, x_n\}\\
+\text{ such that } \quad &  x \in X
+\end{align*}
+Having the minimum on the inside is inconvenient.  To remove this, we just define a new variable $y$ and enforce that $y \leq x_i$ and then we maximize $y$.  Since we are maximizing $y$, it will take the value of the smallest $x_i$.  Thus, we can recast the problem as
+
+\begin{align*}
+\max\quad    & y\\
+\text{ such that } \quad  & y \leq x_i \ \text{ for }\  i=1, \dots, n \\
+&  x \in X
+\end{align*}
+
+
+\subsection{Relaxing (nonlinear) equality constraints}
+
+There are a number of scenarios where the constraints can be relaxed without sacrificing optimal solutions to your problem.   In a similar vein of the maximizing a minimum, if because of the objective we know that certain constraints will be tight at optimal solutions, we can relax the equality to an inequality.   For example, 
+\begin{align*}
+\max   \quad &x_1 + x_2 +  \dots + x_n\\
+\text{ such that } \quad &  x_i = y_i^2 + z_i^2 \text{ for } i=1, \dots, n
+\end{align*}
+
+
+
+
+
+
+
 \subsection{Connecting to continuous variables}
 
 Let $x_i \geq 0$ and $y_i \in \{0,1\}$ for all $i=1, \dots, n$.
@@ -544,7 +961,7 @@ z & \in\{0,1\}^{n}
 \end{aligned}
 $$
 
-
+\newpage
 
 
 
@@ -659,7 +1076,186 @@ Add discussion of transportation problem and picture.
 \todo[inline]{Fill in model and discussion and add code example.  Need to create gnat chart code for nice visulizations. }
 
 
-\section{Other examples}
+\section{Jobshop Scheduling: Makespan Minimization}
+\todo[inline]{
+ Add discussion of some makespan minimization problems.
+}
+
+\href{https://en.wikipedia.org/wiki/Job_shop_scheduling}{Wikipedia: Jobshop Scheduling}
+$$
+x_{ij} = \text{ start time of job $j$ on machine $i$}.
+$$
+
+$$
+y_{ijk} = \begin{cases} 1, & \text{if job } j \text{ precedes job } k \text{ on machine } i \text{,}\\ & i \in I \text{, } j, k  \in J \text{, } j \neq k \\ 0, & \text{otherwise} \end{cases}
+$$
+
+
+
+\begin{align}\textrm{min: }  &  \\
+               & C \\
+\textrm{s.t.: } &  \\
+               x_{o^{j}_{r}j} &  \geq x_{o^{j}_{r-1}j} +p_{o^{j}_{r-1}j} \,\,\, \forall r \in \{2,..,m\}, j \in {J} \\
+                   x_{ij}     & \geq x_{ik} + p_{ik} - M \cdot y_{ijk} \,\,\, \forall j,k \in {J}, j \neq k, i \in {M} \\
+                   x_{ik}     & \geq x_{ij} + p_{ij} - M \cdot (1-y_{ijk}) \,\,\, \forall j,k \in {J}, j \neq k,i \in {I} \\
+                   C          & \geq x_{o^{j}_{m}j} + p_{o^{j}_{m}j} \,\,\, \forall j \in {J} \\
+                  x_{ij}      & \geq 0 \,\,\, \forall i \in {J}, i \in {I} \\
+                  y_{ijk}     & \in \{0,1\} \,\,\, \forall j,k \in {J}, i \in {I} \\
+                  C & \geq 0
+              \end{align}
+
+
+
+\section{Quadratic Assignment Problem (QAP)}
+\begin{resource}{}{}
+\begin{itemize}
+\item \href{https://ieeexplore-ieee-org.ezproxy.lib.vt.edu/stamp/stamp.jsp?tp=&arnumber=7170278}{An applied case of quadratic assignment problem in hospital department layout}
+\item See \href{https://www.semanticscholar.org/paper/Quadratic-Assignment-Problem%3A-A-survey-and-Shawky-Metwally/247b45613d6d3b6961fdad44f9e7fefb70fd3e82}{Quadratic Assignment Problem: A survey and Applications}.
+\end{itemize}
+\end{resource}
+The quadratic assignment problem must choose the assignment of $n$ facilities to $n$ locations.  Each facility sends some flow to each other facility, and there is a distance to consider between locations.   
+The objective is to minimize to distance times the flow of the assignment.
+
+
+\textbf{Example:  Hospital Layout}
+On any given day in the hospital, there will be patients that move from various locations in the hospital to various other locations in the hospital.  For example, patients move from the operating room to a recovery room, or from the emergency room to the operating room, etc.
+
+We would like to chose the locations of these places in the hospital to minimize the amount of total distance traveled by all the patients. 
+
+
+
+
+
+
+\begin{general}{Quadratic Assignment Problem}{\npcomplete}
+Given flow $f_{ij}$  connections $c_{ij}$ and fixed building costs $f_i$, demands $d_j$ and capacities $u_i$, the capacitated facility location problem is 
+
+\noindent \textbf{Sets:}
+\begin{itemize}
+\item Let $I = \{1,\dots, n\}$ be the set of facilities.
+\item Let $K = \{1, \dots, n\}$ be the set of locations.
+\end{itemize}
+
+\noindent \textbf{Parameters:}
+\begin{itemize}
+\item $f_{ij}$ - flow from facility $i$ to facility $j$.
+\item $d_{kl}$ - distance from location $k$ to location $l$.
+\item $c_{ik}$ - cost to setup facility $i$ at location $k$.
+\end{itemize}
+
+\noindent \textbf{Variables:}
+\begin{itemize}
+\item Let 
+\begin{equation*}
+x_{ik} = \begin{cases}
+1 & \text{if we place facility $i$ in location $k$,}\\
+0 & \text{otherwise.}
+\end{cases}
+\end{equation*}
+\end{itemize}
+
+\noindent  \textbf{Model:}
+\begin{align}
+\min & \displaystyle\sum_{i=1}^n\sum_{j=1}^n \sum_{k=1}^n \sum_{l = 1}^n f_{ij}d_{kl}x_{ik}x_{jl} + \sum_{i=1}^n \sum_{k = 1}^n c_{ik} x_{ik} \tag{total cost}\\
+\text{s.t.} & \displaystyle\sum_{i=1}^n x_{ik}=1 \text{ for all }k=1,\dots,n \tag{assign facility to location $k$}\\
+& \displaystyle \sum_{k=1}^n x_{ik}=1 \text{ for all }i=1\dots,n \tag{assign one location to facility $i$}\\
+&x_{ik}\in\{0,1\}\text{ for all } i=1,\dots,n, \text{ and } k = 1, \dots, n \tag{binary decisions}
+\end{align}
+\end{general}
+
+\section{Genaralized Assignment Problem (GAP)}
+\todo[inline]{Fix up this section}
+\url{https://en.wikipedia.org/wiki/Generalized_assignment_problem}
+In \href{applied_mathematics}{applied mathematics}, the maximum
+\textbf{generalized assignment problem} is a problem in
+\href{combinatorial_optimization}{combinatorial optimization}. This
+problem is a \url{generalization} of the
+\href{assignment_problem}{assignment problem} in which both tasks and
+\href{Agent-based_model}{agents} have a size. Moreover, the size of each
+task might vary from one agent to the other.
+
+This problem in its most general form is as follows: There are a number
+of agents and a number of tasks. Any agent can be assigned to perform
+any task, incurring some cost and profit that may vary depending on the
+agent-task assignment. Moreover, each agent has a budget and the sum of
+the costs of tasks assigned to it cannot exceed this budget. It is
+required to find an assignment in which all agents do not exceed their
+budget and total profit of the assignment is maximized.
+
+\hypertarget{in-special-cases}{%
+\subsection{In special cases}\label{in-special-cases}}
+
+In the special case in which all the agents' budgets and all tasks'
+costs are equal to 1, this problem reduces to the
+\href{assignment_problem}{assignment problem}. When the costs and
+profits of all tasks do not vary between different agents, this problem
+reduces to the multiple knapsack problem. If there is a single agent,
+then, this problem reduces to the \href{knapsack_problem}{knapsack
+problem}.
+
+\hypertarget{explanation-of-definition}{%
+\subsection{Explanation of definition}\label{explanation-of-definition}}
+
+In the following, we have \emph{n} kinds of items, \(a_1\) through
+\(a_n\) and \emph{m} kinds of bins \(b_1\) through \(b_m\). Each bin
+\(b_i\) is associated with a budget \(t_i\). For a bin \(b_i\), each
+item \(a_j\) has a profit \(p_{ij}\) and a weight \(w_{ij}\). A solution
+is an assignment from items to bins. A feasible solution is a solution
+in which for each bin \(b_i\) the total weight of assigned items is at
+most \(t_i\). The solution's profit is the sum of profits for each
+item-bin assignment. The goal is to find a maximum profit feasible
+solution.
+
+Mathematically the generalized assignment problem can be formulated as
+an \href{Integer_programming}{integer program}:
+\begin{align} \text{maximize } &
+\sum_{i=1}^m\sum_{j=1}^n
+p_{ij} x_{ij}. \\
+\text{subject to } & \sum_{j=1}^n
+w_{ij} x_{ij} \le t_i & & i=1,
+\ldots, m; \\ &
+\sum_{i=1}^m x_{ij} = 1 & & j=1,
+\ldots, n; \\ & x_{ij}
+\in \{0,1\} & & i=1,
+\ldots, m, \quad j=1,
+\ldots, n; \end{align}
+
+
+
+\begin{resource}
+
+
+
+\begin{itemize}
+\item The AIMMS modeling has many great examples.  It can be book found here:\href{https://www.aimms.com/english/developers/resources/manuals/optimization-modeling}{AIMMS Modeling Book}.
+\item \href{http://web.mit.edu/15.053/www/AMP-Chapter-09.pdf}{MIT Open Courseware}
+\item  For many real world examples, see this book \href{https://link-springer-com.ezproxy.lib.vt.edu/book/10.1007/978-1-4939-1007-6}{
+Case Studies in Operations Research
+Applications of Optimal Decision Making, edited by  Murty, Katta G}.
+Or find it \href{https://www.springer.com/gp/book/9781493910069}{here}.
+\item \href{https://github.com/Gurobi/modeling-examples}{GUROBI modeling examples by GUROBI}
+\item \href{https://github.com/open-optimization/open-optimization-or-examples/tree/master/integer-programming}{GUROBI modeling examples by Open Optimization that are linked in this book}
+\end{itemize}
+
+Knapsack Problem
+\begin{itemize}
+\item \href{https://www.youtube.com/watch?v=GteOoMGUOdY}{Video! - Michel Belaire (EPFL) teaching knapsack problem}
+\end{itemize}
+
+Set Cover
+\begin{itemize}
+\item \href{https://www.youtube.com/watch?v=cjSeHSjPmsk}{Video! - Michel Belaire (EPFL) explaining set covering problem}
+\item See \href{https://download.aimms.com/aimms/download/manuals/AIMMS3OM_MediaSelection.pdf}{AIMMS - Media Selection} for an example of set covering applied to media selection.
+\end{itemize}
+
+Facility Location
+\begin{itemize}
+\item \href{https://en.wikipedia.org/wiki/Facility_location_problem}{Wikipedia - Facility Location Problem}
+\item See \href{https://github.com/Gurobi/modeling-examples/tree/master/facility_location}{GUROBI Modeling Examples - Facility Location}.
+\end{itemize}
+
+
+{Other examples}
 \begin{itemize}
 \item \href{https://www.juliaopt.org/notebooks/JuMP-Sudoku.html}{Sudoku}
 \item \href{https://download.aimms.com/aimms/download/manuals/AIMMS3OM_EmployeeTraining.pdf}{AIMMS - Employee Training}
@@ -676,7 +1272,7 @@ Add discussion of transportation problem and picture.
 \item \href{https://www.informs.org/Impact/O.R.-Analytics-Success-Stories/Optimized-school-bus-routing-helps-school-districts-design-better-policies}{INFORMS - Success Story - Bus Routing}
 \end{itemize}
 
-\section{Notes from AIMMS modeling book.}
+{Notes from AIMMS modeling book.}
 \begin{itemize}
 
 \item \href{http://inside.mines.edu/~anewman/MIP_practice120212.pdf}{AIMMS - Practical guidelines for solving difficult MILPs}
@@ -689,9 +1285,18 @@ Add discussion of transportation problem and picture.
 
 \item \href{https://pdfs.semanticscholar.org/b01f/ad44c20c372fdda95cbfb980c0d37302de07.pdf}{AIMMS - Practical guidelines for solving difficult linear programs}
 \end{itemize}
-\subsection{Further Topics}
+
+Modeling Tricks
+\begin{itemize}
+\item \href{https://jump.dev/JuMP.jl/stable/tutorials/linear/tips_and_tricks/}{JuMP tips and tricks}
+\item \href{https://docs.mosek.com/modeling-cookbook/mio.html}{Mosek Modeling Cookbook}
+\end{itemize}
+
+
+{Further Topics}
 \begin{itemize}
 \item \href{https://or.stackexchange.com/questions/1319/best-model-for-precedence-constraints-within-scheduling-problem}{Precedence Constraints}
 \end{itemize}
+\end{resource}
 
 %\end{document}

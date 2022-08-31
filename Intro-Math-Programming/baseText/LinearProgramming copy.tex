@@ -1,0 +1,654 @@
+% Chapters will always start on odd numbered page
+\documentclass[letter,12pt]{book}
+
+%\def \oldstuff {add old stuff}
+  
+\usepackage[english]{babel}
+\usepackage{fancyhdr}
+
+%% Toggle text
+%\newcommand \nlptext{Show NLP text}
+%\newcommand \oldstuff{Show old text}
+
+%Toggle proofs
+%\def \showproofs {If commented, many proofs will not be shown}
+% See command.tex for all package imports, environments, and special commands.
+\input{foundationsAppliedMathematicsLabs/command}
+\input{optimization/preamble}
+\input{optimization/preamble0}
+\input{optimization/preamble0-biblatex}
+\input{preamble-jupyter.tex}
+
+
+\usepackage{pdfpages}
+
+\usepackage{booktabs}
+
+\graphicspath{ {./images/}{images/}{optimization/multi-objective/images/}{OR-Book-Vorwerk/images/ }}
+% For the font
+\usepackage{mathptmx}
+%\usepackage{roboto} %%for Lyryx Icon font
+\usepackage[T1]{fontenc}
+\usepackage[EULERGREEK]{sansmath}
+
+% Various math packages
+\usepackage{amsmath,amsfonts,amsthm,amssymb}
+
+% Make it look more like the Word docs
+%\setlength{\parskip}{\baselineskip}
+%\setlength{\parindent}{0pt}
+
+% Simple arithmetic
+\usepackage{calc}
+
+% For colouring various things
+\usepackage{xcolor}
+
+% Colored tables and other nice enhancements
+\usepackage{tabu}
+
+% Conditional statements
+\usepackage{ifthen}
+
+% Page layout
+\ifthenelse{\equal{\detokenize{interior}}{\jobname}}{
+	\usepackage[headheight=15pt,top=1in, bottom=0.75in, outer=0.65in, inner=0.85in]{geometry}
+        % \usepackage[headheight=15pt,top=1in, bottom=0.1in, outer=0.75in, inner=1.25in]{geometry}
+}{
+  \usepackage[headheight=15pt,top=1in, bottom=0.75in, outer=0.75in, inner=0.75in]{geometry}
+  %\usepackage[headheight=15pt,top=1in, bottom=0.1in, outer=1in, inner=1in]{geometry}
+}
+
+% Captions for objects
+\usepackage[format=hang,font=bf]{caption}
+  
+% Additional commands for simple LaTeX drawings
+\usepackage{eepic}
+
+% For multicolumn cells in text
+\usepackage{multicol}
+
+% Standard package for creating indexes
+\usepackage{makeidx} 
+
+% If you want to include postscript graphics
+\usepackage{graphicx}
+
+% For including eps graphic files
+\usepackage{epsfig}
+
+% Additional features for lists
+\usepackage{mdwlist}
+
+% Coloured titlepage setup
+\usepackage{afterpage}
+\usepackage{pagecolor}
+
+% Hyperlinks
+\usepackage{hyperref}
+
+
+% To insert df page (only open text distribution project)
+%\usepackage{pdfpages}
+
+% Creates coloured boxes
+\usepackage{tcolorbox}
+\tcbuselibrary{theorems,breakable}
+
+% Draw frames around text
+\usepackage[framemethod=tikz]{mdframed}
+\mdfsetup{skipabove=\topskip,skipbelow=\topskip}
+
+% To remove headers and footers from truly empty pages
+\usepackage{emptypage}
+
+% Draw images and figures
+\usepackage{rotating}
+\usepackage{tikz}
+\usetikzlibrary{calc,intersections,shapes.callouts}
+\usetikzlibrary{decorations.text}
+\usetikzlibrary{positioning}
+\usetikzlibrary{decorations.pathreplacing}
+\usetikzlibrary{shadows}
+\usetikzlibrary{backgrounds}
+\usepackage{circuitikz}
+\tikzstyle arrowstyle=[scale=2.5]
+\tikzstyle directed=[postaction={decorate,decoration={markings,
+    mark=at position .65 with {\arrow[arrowstyle]{latex}}}}]
+\tikzstyle directed1=[postaction={decorate,decoration={markings,
+    mark=at position .99 with {\arrow[arrowstyle]{latex}}}}]   
+\tikzstyle{vertex}=[circle,fill=black!25,minimum size=20pt,inner sep=0pt]
+
+\definecolor{ocre}{RGB}{243,102,25} % Define the orange color used for highlighting throughout the book
+
+% Thew following passes on paperheight to ps2pdf... bug fix  
+\pdfpageheight=\paperheight 
+
+% For plotting data
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+
+% For fancy headers!
+\usepackage{fancyhdr}
+
+% Used for creating EOC questions with corresponding solutions at the end of the textbook
+\usepackage{answers}
+
+% fancy section headers, sc for small caps, prevent titles from being stranded on previous page
+\usepackage[explicit,sc,nobottomtitles]{titlesec}
+
+
+% Inputs information regarding book Title, Authors, Version and Revision
+\input aFirstCourseLinearAlgebra/frontmatter/bookinfo.txt
+
+% Inputs information regarding Institution,Course Code, Name, Session and Section (for adapted text)
+%\input aFirstCourseLinearAlgebra/courseInfo.txt
+
+% Lyryx Math Style
+\usepackage{aFirstCourseLinearAlgebra/LyryxMathStyle}
+
+% Lyryx Linear Algebra Style 
+\usepackage{aFirstCourseLinearAlgebra/LyryxLinAlgStyle}
+
+
+\renewcommand{\b}{\mathbf{b}}
+\renewcommand{\x}{\mathbf{x}}
+\renewcommand{\c}{\mathbf{c}}
+\renewcommand{\0}{\mathbf{0}}
+\renewcommand{\u}{\mathbf{u}}
+
+%% Print Setup
+\newlength{\coverwidth}
+\newlength{\frontsideleft}
+\newlength{\pagethickness}
+
+%%set page number of interior
+\newcommand{\numpages}{604}
+
+% Color interior
+\setlength{\pagethickness}{0.0025in}
+
+% B+W Interior
+%\setlength{\pagethickness}{0.002252in}
+
+% TODO: Is there a way to automatically calculate the dimensions of the print-cover? 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% PRINT COVER GEOMETRY CALCULATIONS
+%
+% % %
+%%% Here are the calculations from createspace:
+% 
+% Spine width: --> black+white interior is 0.002252in * page count
+%              --> colour interior is 0.0025in * page count
+%
+% Spine: allow for 0.0625" variance on either side of the fold lines for your cover.
+%
+% Bleed: 0.125 * 2  (needed on all 4 outside edges of PDF, but not spine)
+%
+% Safe zone: Text and images must be at least .125" inside the trim lines to ensure
+%            that no live elements are cut during the bookmaking process.
+%
+% Minimum Cover Width: Bleed + Back Cover Trim Size + Spine Width + Front Cover Trim Size + Bleed
+%
+% 
+% For 108 pages in colour: (exclude front and back cover - 2 pages)
+%
+% paper width = 0.125 + 8.5 + (0.0025 * 108) + 8.5 + 0.125 = 17.52in
+% paper height = 11 + (2 * 0.125) = 11.25in
+%
+%                paper size - safe zone		(layoutsize)
+% layout width = 8.5 - (.125 * 2)
+% layout height = 11 - (.125 * 2)
+%
+%                   bleed + left side + spine + safe zone
+% layout offset x = 0.125 + 8.5 + (0.0025 * 108) + 0.125 = 9.02in
+%                   bleed + safe zone
+% layout offset y = 0.125 + 0.125 = 0.25in
+%
+% spine width:	0.002252 * 360 = 0.81072in B&W
+% 				0.0025 * 360 = 0.9in colour
+%
+%
+% HOWEVER this will leave space for headers/footers/marginal notes/etc
+%
+% So we want to tweak the body size to be something nice, such as layoutsize minus 1/2 inch on each side for margins
+%
+%% LULU DIMENSIONS
+%
+%From Lulu:
+%Spine width = 0.419cm
+%Spine begins = 21.905cm from the left
+%Total cover width = 44.229cm X 28.571cm 
+
+%CreateSpace
+%\setlength{\coverwidth}{0.125in + 8.5in + (\pagethickness * \numpages) + 8.5in + 0.125in}
+%\setlength{\frontsideleft}{0.125in + 8.5in + (\pagethickness * \numpages) + 0.125in}
+
+%Lengths from LULU for samples 2017-01-16
+\setlength{\coverwidth}{44.229cm}
+\setlength{\frontsideleft}{21.905cm+0.419cm+0.3cm} %Spine begins + Spine width +safe zone
+
+% Options showframe, showcrop, and verbose can be used for debugging
+\ifthenelse{\equal{\detokenize{print-cover}}{\jobname}}{
+%   \geometry{papersize={\coverwidth,28.571cm},layoutsize={21cm,27.3cm},layoutoffset={\frontsideleft,0.6cm},body={18.4cm,24.7cm}}
+	\geometry{papersize={\coverwidth,28.571cm},layoutsize={21.3cm,27.3cm},layoutoffset={\frontsideleft,0.3cm},body={18.4cm,24.7cm}}
+}{
+	% No change in geometry for regular pdf
+}
+
+%To create index
+\makeindex
+
+
+\input{optimization/title} 
+\input{lineqlpbook/linearProgrammingPreamble}
+
+\graphicspath{{aFirstCourseLinearAlgebra/},{lineqlpbook/},{optimization/figures/figures-static/},{Christopher_Griffin_Penn_State_University/},{OR-Book-Vorwerk/images/}}
+
+
+\usetikzlibrary{arrows.meta,positioning}
+
+%\usepackage{todonotes}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage{etoolbox}
+
+\newcommand\getcurrentref[1]{%
+ \ifnumequal{\value{#1}}{0}
+  {??}
+  {\the\value{#1}}%
+}    
+
+ \newcommand{\todored}[1]{\todo[inline, color=red]{\textbf{(\getcurrentref{chapter}\hspace{-0.5pt}.\getcurrentref{section})}  #1}}
+
+
+\let\Chaptermark\chaptermark
+\def\chaptermark#1{\def\Chaptername{#1}\Chaptermark{#1}}
+\let\Sectionmark\sectionmark
+\def\sectionmark#1{\def\Sectionname{#1}\Sectionmark{#1}}
+\let\Subsectionmark\subsectionmark
+\def\subsectionmark#1{\def\Subsectionname{#1}\Subsectionmark{#1}}
+\let\Subsubsectionmark\subsubsectionmark
+\def\subsubsectionmark#1{\def\Subsubsectionname{#1}\Subsubsectionmark{#1}}
+
+\definecolor{capri}{rgb}{0.0, 0.75, 1.0}
+\definecolor{cherryblossompink}{rgb}{1.0, 0.72, 0.77}
+ \newcommand{\todoChapter}[1]{\todo[inline, color=capri]{\textbf{Chapter \getcurrentref{chapter}\hspace{-0.5pt}. \Chaptername}\\
+   #1}}
+ \newcommand{\todoSection}[1]{\todo[inline, color=cherryblossompink]{\textbf{Section \getcurrentref{chapter}\hspace{-0.5pt}.\getcurrentref{section}\hspace{-0.5pt}. \Sectionname}\\
+   #1}}
+   
+   
+   
+   % OR Book Vorwerk
+% \usepackage[export]{adjustbox}
+
+
+\begin{document}
+
+
+\input{optimization/LP-front-matter.tex}
+
+
+
+% Title page
+%\ifthenelse{\equal{\detokenize{print-cover-front}}{\jobname}}{
+%	\pagestyle{empty}
+%	\input frontmatter/titlepage
+%}{
+%\ifthenelse{\equal{\detokenize{print-cover}}{\jobname}}{
+%	\pagestyle{empty}
+%	\input frontmatter/titlepage
+%}{
+%	\raggedbottom
+%	\allowdisplaybreaks
+%	\frontmatter
+%
+%\ifthenelse{\equal{\detokenize{interior}}{\jobname}}{
+%	% Skip title page for interior
+%}{
+%	\input frontmatter/titlepage.tex
+%	\cleardoublepage
+%}
+\input preface.tex
+%	\begin{center}
+%\href{https://pixabay.com/illustrations/under-construction-construction-sign-2408060/}{\includegraphics[scale = 0.1]{optimization/figures/under-construction-2408060_1280}}
+%\end{center}
+
+%This entire book is a working manuscript. 
+%
+%\begin{center}
+%\fontsize{14pt}{16pt}\selectfont\textcolor{titletextcolour}{\textbf{MAJOR ACKNOWLEDGEMENTS}}
+%\end{center}
+%
+%I would like to acknowledge that substantial parts of this book were borrowed under a CC-BY-SA license.   These substantial pieces include:
+%\begin{itemize}
+%\item "A First Course in Linear Algebra" by Lyryx Learning (based on original text by Ken Kuttler).   A majority of their formatting was used along with selected sections that make up the appendix sections on linear algebra. We are extremely grateful to Lyryx for sharing their files with us.  They do an amazing job compiling their books and the templates and formatting that we have borrowed here clearly took a lot of work to set up.  Thank you for sharing all of this material to make structuring and formating this book much easier! See subsequent page for list of contributors.
+%\item "Foundations of Applied Mathmatics" with many contributors.  See \url{https://github.com/Foundations-of-Applied-Mathematics}.  Several sections from these notes were used along with some formatting.  Some of this content has been edited or rearranged to suit the needs of this book.  This content comes with some great references to code and nice formatting to present code within the book.   See subsequent page with list of contributors.
+%\item "Linear Inequalities and Linear Programming" by 
+%Kevin Cheung.  See \url{https://github.com/dataopt/lineqlpbook}.  These notes are posted on GitHub in a ".Rmd" format for nice reading online.  This content was converted to \LaTeX using Pandoc.    These notes make up a substantial section of the Linear Programming part of this book.
+%\item Linear Programming notes by Douglas Bish.  These notes also make up a substantial section of the Linear Programming part of this book.
+%\end{itemize}
+%
+%I would also like to acknowledge Laurent Porrier and Diego Moran for contributing various notes on linear and integer programming. 
+
+
+
+% Revision  
+	%\input{revision-history.tex}
+	\cleardoublepage
+
+%\end{document} %to compile only the front matter
+
+% Table of Contents
+	\phantomsection
+	\addcontentsline{toc}{chapter}{Contents} %Adds contents to the table of contents itself
+	\setlength{\parskip}{3.5pt} % alter vertical space in subsequent contents. Can alter this value to adjust TOC to fit nicely on page and prevent widows/orphans, careful that this will affect the entire text. 
+	\addtocontents{toc}{\protect\hypertarget{toc}{}}
+	\tableofcontents
+	\cleardoublepage
+	
+	\mainmatter
+	
+%LOAD COURSE CONTENT
+	%\input courseSetup.tex
+	
+%%%%%%%%%%%%%%%
+%%% Course Content %%%
+%%%%%%%%%%%%%%%
+
+%LOAD CHAPTERS / SECTIONS / SUBSECTIONS IN DESIRED ORDER
+
+\input{optimization/resources_and_notation.tex}
+\input{optimization/introduction}
+\input{optimization/introductionNotation}
+\input{optimization/mathematicalProgramming}
+
+
+
+
+\part{Linear Programming}
+
+\input{optimization/linear-programming-Hildebrand-mix.tex}
+%\newcommand\oldstuff{thus}
+%\input{optimization/linear-programming-mix-hildebrand-simplex-method.tex}
+
+
+\input{optimization/simplex_method.tex}
+
+
+\chapter{Duality}
+\input{optimization/duality-borrowed.tex}
+
+
+\chapter{Sensitivity Analysis}
+
+\input{optimization/sensitivity-analysis.tex}
+
+\chapter{Multi-Objective Optimization}
+\input{optimization/multi-objective/multi-objective-optimization.tex}
+
+\part{Discrete Algorithms}
+
+\chapter{Graph Algorithms}
+\input{optimization/graph_algorithms.tex}
+\input{optimization/graphtheory-dor1.tex}
+
+\part{Integer Programming}
+\label{part:IntegerProgramming}
+\input{optimization/integerProgrammingFormulations-LP-notes}
+\input{optimization/models}
+
+\input{optimization/complexity.tex}
+\input{optimization/computational_complexity.tex}
+\input{optimization/integerProgrammingExponentialFormulations.tex}
+\input{optimization/integerProgrammingAlgorithms}
+
+\input{lineqlpbook/linearProgrammingIntegerLinearProgramming}
+
+\input{optimization/discreteOptimization.tex}
+
+
+\input{optimization/heuristics.tex}
+
+
+\part{Nonlinear Programming}
+\input{optimization/NLP.tex}
+\input{optimization/NLP-algorithms.tex}
+%
+%\subimport{./foundationsAppliedMathematicsLabs/Volume2/CVXOPT_Intro/}{CVXOPT_Intro_quadratic_programming}
+%%\subimport{./Volume1/QR_Decomposition/}{QR_Decomposition}
+%\subimport{./foundationsAppliedMathematicsLabs/Volume1/LeastSquares_Eigenvalues/}{LeastSquares_Eigenvalues}
+%\subimport{./Volume1/ImageSegmentation/}{ImageSegmentation}
+%\subimport{./Volume1/SVD_ImageCompression/}{SVD_ImageCompression}
+%\subimport{./Volume1/FacialRecognition/}{FacialRecognition}
+
+%\subimport{./Volume1/Differentiation/}{Differentiation}
+%\subimport{./foundationsAppliedMathematicsLabs/Volume1/NewtonsMethod/}{NewtonsMethod}
+%\subimport{./Volume1/Conditioning_Stability/}{Conditioning_Stability}
+
+
+\subimport{./foundationsAppliedMathematicsLabs/Volume2/OneD_Optimization/}{OneD_Optimization}
+\subimport{./foundationsAppliedMathematicsLabs/Volume2/GradientMethods/}{GradientMethods}
+
+\subimport{./foundationsAppliedMathematicsLabs/Volume2/InteriorPoint_Linear/}{InteriorPoint_Linear}
+\subimport{./foundationsAppliedMathematicsLabs/Volume2/InteriorPoint_Quadratic/}{InteriorPoint_Quadratic}
+
+
+
+%\subimport{./foundationsAppliedMathematicsLabs/Volume2/OpenGym/}{OpenGym}
+
+
+%\subimport{./Volume3/PCA_LSI/}{PCA-LSI}
+%\subimport{./Volume3/Metropolis/}{Metropolis}
+%\subimport{./Volume3/LDA/}{LDA}
+%\subimport{./Volume3/CDHMM/}{CDHMM}
+%\subimport{./foundationsAppliedMathematicsLabs/Volume3/KMeans/}{KMeans}
+%
+%\part{Advanced Optimization}
+%\input{optimization/advancedIntegerProgramming.tex}
+%\input{optimization/gmic.tex}
+%\input{optimization/computational_complexity.tex}
+%%\input{optimization/algebraicIdeas.tex}
+%\input{optimization/decompositionTechniques.tex}
+%\input{optimization/MINLP.tex}
+%\input{optimization/poly-opt.tex}
+
+\appendix
+\part{Appendix - Linear Algebra Background}
+\subimport{./foundationsAppliedMathematicsLabs/Volume1/LinearTransformations/}{LinearTransformations} %Chapter
+\subimport{./foundationsAppliedMathematicsLabs/Volume1/LinearSystems/}{LinearSystems}
+
+
+\input aFirstCourseLinearAlgebra/content/systemsofequations.tex %Chapter
+	\input aFirstCourseLinearAlgebra/content/systemsofequationsGeometry.tex %Section
+
+	\input aFirstCourseLinearAlgebra/content/systemsofequationsAlgebraicProcedures.tex %Section
+		\input aFirstCourseLinearAlgebra/content/systemsofequationsAlgebraicProceduresElementaryOperations.tex %Subection
+		\input aFirstCourseLinearAlgebra/content/systemsofequationsAlgebraicProceduresGaussianElimination.tex %Subection
+		\input aFirstCourseLinearAlgebra/content/systemsofequationsAlgebraicProceduresUniquenessRREF.tex %Subection
+		\input aFirstCourseLinearAlgebra/content/systemsofequationsAlgebraicProceduresRankHomogeneousSystems.tex %Subection
+
+\input aFirstCourseLinearAlgebra/content/matrices.tex %Chapter
+	\input aFirstCourseLinearAlgebra/content/matricesMatrixArithmetic.tex %Section
+		\input aFirstCourseLinearAlgebra/content/matricesMatrixArithmeticAddition.tex %Subsection
+		\input aFirstCourseLinearAlgebra/content/matricesMatrixArithmeticScalarMultiplication.tex %Subsection
+		\input aFirstCourseLinearAlgebra/content/matricesMatrixArithmeticMultiplication.tex %Subsection
+		\input aFirstCourseLinearAlgebra/content/matricesMatrixArithmeticProductEntry.tex %Subsection
+		\input aFirstCourseLinearAlgebra/content/matricesMatrixArithmeticMultiplicationProperties.tex %Subsection
+		\input aFirstCourseLinearAlgebra/content/matricesMatrixArithmeticTranspose.tex %Subsection
+		\input aFirstCourseLinearAlgebra/content/matricesMatrixArithmeticIdentityInverses.tex %Subsection
+		\input aFirstCourseLinearAlgebra/content/matricesMatrixArithmeticFindingInverse.tex %Subsection
+
+			
+\input aFirstCourseLinearAlgebra/content/determinants.tex %Chapter
+	\input aFirstCourseLinearAlgebra/content/determinantsBasicTechniquesProperties.tex %Section
+		\input aFirstCourseLinearAlgebra/content/determinantsBasicTechniquesPropertiesCofactors.tex %Subsection
+		\input aFirstCourseLinearAlgebra/content/determinantsBasicTechniquesPropertiesTriangularMatrix.tex 
+	\input aFirstCourseLinearAlgebra/content/determinantsApplications.tex %Section
+		%\input content/determinantsApplicationsInverseFormula.tex %Subsection	
+		\input aFirstCourseLinearAlgebra/content/determinantsApplicationsCramer.tex %Subsection
+		%\input content/determinantsApplicationsPolynomialInterpolation.tex %Subsection
+%		\input exercises/Determinants-Applications.tex %Subsection
+%			\input exercises/Determinants-Applications-FormulaforInverse.tex
+%			\input exercises/Determinants-Applications-Cramer.tex
+%			
+
+\input aFirstCourseLinearAlgebra/content/RnVectors.tex %Chapter
+	\input aFirstCourseLinearAlgebra/content/RnVectorsRn.tex %Section
+	\input aFirstCourseLinearAlgebra/content/RnVectorsAlgebra.tex %Section
+		\input aFirstCourseLinearAlgebra/content/RnVectorsAlgebraAddition.tex %Subsection
+		\input aFirstCourseLinearAlgebra/content/RnVectorsAlgebraScalarMult.tex %Subsection
+
+			
+
+	
+	\input aFirstCourseLinearAlgebra/content/RnVectorsAdditionMeaning.tex %Section
+	\input aFirstCourseLinearAlgebra/content/RnVectorsLength.tex %Section
+	\input aFirstCourseLinearAlgebra/content/RnVectorsScalarMultMeaning.tex 
+	
+	\input aFirstCourseLinearAlgebra/content/RnVectorsDotProduct.tex %Section
+		\input aFirstCourseLinearAlgebra/content/RnVectorsDotProductDot.tex %Subsection
+		\input aFirstCourseLinearAlgebra/content/RnVectorsDotProductSignificance.tex %Subsection
+
+\input aFirstCourseLinearAlgebra/content/spectraltheory.tex %Chapter
+	\input aFirstCourseLinearAlgebra/content/spectraltheoryEigenvaluesEigenvectors.tex %Section
+		\input aFirstCourseLinearAlgebra/content/spectraltheoryEigenvaluesEigenvectorsDefinition.tex %Subsection
+		\input aFirstCourseLinearAlgebra/content/spectraltheoryEigenvaluesEigenvectorsFinding.tex %Subsection
+		\input aFirstCourseLinearAlgebra/content/spectraltheoryEigenvaluesEigenvectorsSpecialMatrices.tex 
+\part{Other Appendices} % Relevant Appendices ---------------------------------------
+
+\input aFirstCourseLinearAlgebra/content/prerequisite.tex %Chapter
+	\input aFirstCourseLinearAlgebra/content/prerequisiteSets.tex %Section
+	\input aFirstCourseLinearAlgebra/content/prerequisiteInduction.tex %Section
+	
+%\subimport{./Appendices/Setup/}{SetupStudent}
+
+
+\section{GECODE and MiniZinc}
+Open constraint programming toolkit.
+\url{https://www.gecode.org/}
+See also MiniZinc, which is a modeler that uses GECODE.
+\url{https://www.minizinc.org/}.
+
+Also, they have two coursera courses on using their code:
+\url{https://www.coursera.org/learn/basic-modeling?action=enroll&authMode=signup}\\
+\url{https://www.coursera.org/learn/advanced-modeling?action=enroll&authMode=signup}
+
+
+\section{Optaplanner}
+Open source software to solve a variety of problems with local heuristics.  All code is in Java.  
+
+\url{https://www.optaplanner.org/}
+\section{Python Modeling/Optimization}
+\subsection{SCIP}
+\href{https://www.youtube.com/channel/UCpu5Kj1Q9SQ1kZ1QlwsurAQ}{SCIP youtube channel}
+
+\href{https://www.youtube.com/watch?v=FFqGzckSRW4}{Youtube! SCIP solving MINLP}
+\href{https://youtu.be/FFqGzckSRW4?t=734}{Circle Packing Problem Model and Code in SCIP}
+\href{https://www.youtube.com/watch?v=7SvapoXVYq0}{SCIP - Python Inteface Demonstration}
+
+\subsection{Pyomo}
+Excellent modeling language.  Open source.  Many features.
+\url{http://www.pyomo.org/}
+
+\subsection{Python-MIP}
+Awesome new modeling language for python that is very efficient at setting up optimization problems.  Loads CBC binaries.  Can be installed with pip.
+\url{https://python-mip.com/}
+
+
+\subsection{Local Solver}
+
+\url{https://www.localsolver.com/}
+\url{https://www.youtube.com/watch?v=4aw9PM09U5Q}
+
+\subsection{GUROBI}
+
+\begin{verbatim}
+Solver takes to long too find Incumbent solution:
+It might be better to focus on trying to find heuristic solutions faster. You can do this with MIPFocus=1 or by increasing the value of the Heuristics parameter.
+\end{verbatim}
+
+\subsection{CPLEX}
+
+ILOG CPLEX optimization Studio
+
+\url{https://www.youtube.com/watch?v=IwYt5bzrhxA}
+
+
+
+\subsection{Scipy}
+
+\url{http://scipy-lectures.org/advanced/mathematical_optimization/index.html}
+
+\section{Julia}
+\subsection{JuMP}
+\url{https://www.juliaopt.org/}
+\url{https://jump.dev/JuMP.jl/dev/}
+
+\section{LINDO/LINGO}
+\url{https://www.lindo.com/}
+
+\section{Foundations of Machine Learning}
+\href{https://bloomberg.github.io/foml/#home}{Free course with excellent videos on foundations of machine learning}
+\section{Convex Optimization}
+\url{https://www.youtube.com/watch?v=thuYiebq1cE&t=925s}
+\url{https://www.youtube.com/watch?v=4OifjG2kIJQ}
+
+\subimport{./foundationsAppliedMathematicsLabs/Volume2/DynamicProgramming/}{DynamicProgramming}
+%\subimport{./foundationsAppliedMathematicsLabs/Volume2/PolicyFunctionIteration/}{PolicyFunctionIteration}
+
+\section{Contributors}
+	%\input aFirstCourseLinearAlgebra/content/preface.tex
+% Lyryx with Open Texts 
+	\input aFirstCourseLinearAlgebra/frontmatter/LyryxOpenTexts.tex
+	\cleardoublepage
+
+% License
+	\input aFirstCourseLinearAlgebra/frontmatter/license.tex
+	\input contributors-foundations.tex
+	\cleardoublepage
+
+\subsection{Graph Theory}
+Chapter on Graph Theory adapted from: 
+CC-BY-SA 3.0
+Math in Society
+A survey of mathematics for the liberal arts major
+Math in Society is a free, open textbook. This book is a survey of contemporary mathematical topics, most non-algebraic, appropriate for a college-level quantitative literacy topics course for liberal arts majors. The text is designed so that most chapters are independent, allowing the instructor to choose a selection of topics to be covered. Emphasis is placed on the applicability of the mathematics. Core material for each topic is covered in the main text, with additional depth available through exploration exercises appropriate for in-class, group, or individual investigation. This book is appropriate for Washington State Community Colleges' Math 107.
+
+The current version is 2.5, released Dec 2017.
+\url{http://www.opentextbookstore.com/mathinsociety/2.5/GraphTheory.pdf}
+
+Communicated by 
+Tricia Muldoon Brown, Ph.D.
+Associate Professor of Mathematics
+Georgia Southern University
+Armstrong Campus
+Savannah, GA 31419\url{http://math.armstrong.edu/faculty/brown/MATH1001.html}
+
+
+%\includepdf[page={1-},scale=0.75]{optimization/chapter_graphtheory.pdf}
+% Solutions
+	%\Closesolutionfile{solutions}
+	%\chapter{Selected Exercise Answers}
+	%\begin{enumialphparenastyle}
+	%\input{ex}
+	%\end{enumialphparenastyle}
+	%\cleardoublepage
+
+% Print Index at the end and add to TOC
+	\cleardoublepage
+	\phantomsection
+	\addcontentsline{toc}{chapter}{\indexname}
+	\printindex
+
+% Back cover page
+%\ifthenelse{\equal{\detokenize{interior}}{\jobname}}{
+%	% Skip back cover page
+%}{
+%	\input frontmatter/backpage.tex
+%}
+%}
+
+
+\end{document}
