@@ -1,0 +1,427 @@
+% Copyright 2023 by Robert Hildebrand
+%This work is licensed under a
+%Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0)
+%See http://creativecommons.org/licenses/by-sa/4.0/
+
+
+
+\section{Forecasting Demand with SARIMA Models}
+
+Forecasting future demand is an essential task for businesses of all sizes, as it can help optimize production, inventory, and staffing levels. Time series forecasting is a popular method for demand forecasting, as it can capture the patterns and trends in the data over time.
+
+SARIMA (Seasonal Autoregressive Integrated Moving Average) models are a class of time series models that can be used to capture the autocorrelation and seasonality in the data. SARIMA models have four main parameters: the autoregressive order (p), the differencing order (d), the moving average order (q), and the seasonal order (P, D, Q, s).
+
+To fit a SARIMA model to a time series of demand data, we can use the `SARIMAX` function from the `statsmodels` package in Python. Once we have fit a SARIMA model to the data, we can use the `forecast` method to generate point forecasts for future periods. 
+
+To generate a distribution of demand for each future period, we can assume that the forecast errors are normally distributed and use the standard deviation of the forecast errors to generate a normal distribution around each point forecast. We can then sample from these distributions using the `np.random.normal` function to generate a 12-tuple of random variables representing the sampled demand for each month in the future.
+
+However, this approach assumes that the demand for each future period is an independent random variable. If the demand for each period is dependent on the demand in previous periods or on external factors, we may need to use a multivariate time series model such as vector autoregression (VAR) or dynamic linear regression (DLR) to capture these dependencies.
+\begin{verbatim}
+Date,Sales
+2018-01-01, 1500
+2018-02-01, 2100
+2018-03-01, 1800
+2018-04-01, 2200
+2018-05-01, 2400
+2018-06-01, 2600
+2018-07-01, 2800
+2018-08-01, 3200
+2018-09-01, 2800
+2018-10-01, 3300
+2018-11-01, 3900
+2018-12-01, 4500
+2019-01-01, 1700
+2019-02-01, 2000
+2019-03-01, 2200
+2019-04-01, 2500
+2019-05-01, 2700
+2019-06-01, 2900
+2019-07-01, 3200
+2019-08-01, 3600
+2019-09-01, 3300
+2019-10-01, 3800
+2019-11-01, 4200
+2019-12-01, 4900
+2020-01-01, 1800
+2020-02-01, 2200
+2020-03-01, 2400
+2020-04-01, 2700
+2020-05-01, 2900
+2020-06-01, 3100
+2020-07-01, 3600
+2020-08-01, 3800
+2020-09-01, 3500
+2020-10-01, 4000
+2020-11-01, 4400
+2020-12-01, 5200
+2021-01-01, 2000
+2021-02-01, 2300
+2021-03-01, 2600
+2021-04-01, 2800
+2021-05-01, 3100
+2021-06-01, 3300
+2021-07-01, 3800
+2021-08-01, 4100
+2021-09-01, 3800
+2021-10-01, 4400
+2021-11-01, 4800
+2021-12-01, 5700
+2022-01-01, 2200
+2022-02-01, 2400
+2022-03-01, 2800
+2022-04-01, 3100
+2022-05-01, 3500
+2022-06-01, 3700
+2022-07-01, 4100
+2022-08-01, 4600
+2022-09-01, 4200
+2022-10-01, 4800
+2022-11-01, 5100
+2022-12-01, 6100
+\end{verbatim}
+
+\begin{verbatim}
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from statsmodels.tsa.statespace.sarimax import SARIMAX
+
+# Load sales data into a pandas dataframe
+sales_data = pd.read_csv('sales_data.csv', index_col='Date', parse_dates=True)
+
+# Check the data and make sure it's in the right format
+print(sales_data.head())
+print(sales_data.info())
+
+# Fit a SARIMA model to the sales data
+model = SARIMAX(sales_data, order=(1,1,1), seasonal_order=(1,1,1,12))
+model_fit = model.fit()
+
+# Get the residuals of the model on the training data
+residuals = model_fit.resid
+
+# Generate point forecasts for the next 12 months
+forecast = model_fit.forecast(steps=12)
+
+# Combine the residuals with the point forecasts to obtain the forecasted sales for the next 12 months
+forecasted_sales = np.concatenate((sales_data['Sales'].values[-12:], forecast))
+
+# Calculate the standard deviation of the forecast errors
+forecast_errors = forecasted_sales[-12:] - sales_data['Sales'].values[-12:]
+stddev = np.sqrt(np.mean(forecast_errors ** 2))
+
+# Sample demand for each month in 2023 from the forecast distribution 100 times
+demands_2023_samples = []
+for i in range(100):
+    forecast_distributions = [np.random.normal(forecast[i], stddev) for i in range(12)]
+    demands_2023_samples.append([np.random.normal(forecast_distributions[i], stddev) for i in range(12)])
+
+# Plot all samples on the same graph
+plt.figure(figsize=(10, 6))
+plt.title('Sampled Demand for Each Month in 2023')
+plt.xlabel('Month')
+plt.ylabel('Demand')
+for i in range(100):
+    plt.plot(demands_2023_samples[i], alpha=0.2)
+plt.show()
+
+\end{verbatim}
+
+\section{Forecasting Demand with SARIMA Models}
+
+Forecasting future demand is an essential task for businesses of all sizes, as it can help optimize production, inventory, and staffing levels. Time series forecasting is a popular method for demand forecasting, as it can capture the patterns and trends in the data over time.
+
+SARIMA (Seasonal Autoregressive Integrated Moving Average) models are a class of time series models that can be used to capture the autocorrelation and seasonality in the data. SARIMA models have four main parameters: the autoregressive order (p), the differencing order (d), the moving average order (q), and the seasonal order (P, D, Q, s).
+
+A SARIMA(p,d,q)(P,D,Q)s model is defined as:
+
+$$\phi_p(B)\Phi_P(B^s)(1-B)^d(1-B^s)^Dy_t=\theta_q(B)\Theta_Q(B^s)\epsilon_t$$
+
+where $y_t$ is the time series, $B$ is the backshift operator, $\epsilon_t$ is white noise with zero mean and variance $\sigma^2$, and $\phi_p(B)$, $\theta_q(B)$, $\Phi_P(B^s)$, and $\Theta_Q(B^s)$ are polynomials in $B$ and $B^s$ with the following general forms:
+
+$$\phi_p(B) = 1 - \phi_1B - \phi_2B^2 - \cdots - \phi_pB^p$$
+$$\theta_q(B) = 1 + \theta_1B + \theta_2B^2 + \cdots + \theta_qB^q$$
+$$\Phi_P(B^s) = 1 - \Phi_1B^s - \Phi_2B^{2s} - \cdots - \Phi_PB^{Ps}$$
+$$\Theta_Q(B^s) = 1 + \Theta_1B^s + \Theta_2B^{2s} + \cdots + \Theta_QB^{Qs}$$
+
+The parameters $p$, $d$, and $q$ are the orders of the autoregressive, differencing, and moving average components, respectively. The parameters $P$, $D$, $Q$, and $s$ are the orders of the seasonal autoregressive, seasonal differencing, seasonal moving average, and the length of the seasonal cycle, respectively.
+
+To fit a SARIMA model to a time series of demand data, we can use the `SARIMAX` function from the `statsmodels` package in Python. Once we have fit a SARIMA model to the data, we can use the `forecast` method to generate point forecasts for future periods. 
+
+To generate a distribution of demand for each future period, we can assume that the forecast errors are normally distributed and use the standard deviation of the forecast errors to generate a normal distribution around each point forecast. We can then sample from these distributions using the `np.random.normal` function to generate a 12-tuple of random variables representing the sampled demand for each month in the future.
+
+However, this approach assumes that the demand for each future period is an independent random variable. If the demand for each period is dependent on the demand in previous periods or on external factors, we may need to use a multivariate time series model such as vector autoregression (VAR) or dynamic linear regression (DLR) to capture these dependencies.
+
+
+\section{Inventory Problem}
+Let $d_t$ be the forecasted demand for month $t$, and let $c_t$ be the cost of ordering inventory in month $t$. We can define the following decision variables:
+
+$x_t$: an integer variable that represents the amount of inventory ordered in month $t$
+The objective is to minimize the total cost of inventory over the planning horizon, which is defined as:
+
+$$\text{minimize} \quad \sum_{t=1}^{12} c_t x_t$$
+
+The constraints are as follows:
+
+Inventory balance constraint: the amount of inventory on hand at the end of month $t$ is equal to the amount of inventory on hand at the end of month $t-1$, plus the amount of inventory ordered in month $t$, minus the demand in month $t$. This can be expressed as:
+$$x_t - d_t + y_{t-1} = y_t, \quad \forall t$$
+
+where $y_0$ is the starting inventory level and $y_t$ is the inventory level at the end of month $t$.
+
+Non-negativity constraint: the inventory ordered in a given month must be non-negative. This can be expressed as:
+$$x_t \geq 0, \quad \forall t$$
+
+Maximum inventory constraint: the amount of inventory on hand at the end of each month must be non-negative and cannot exceed a maximum inventory level $M$. This can be expressed as:
+$$0 \leq y_t \leq M, \quad \forall t$$
+
+\begin{verbatim}
+import gurobipy as gp
+from gurobipy import GRB
+import numpy as np
+
+# Define parameters
+M = 1000  # maximum inventory level
+T = 12  # number of months in planning horizon
+c = np.random.rand(T)  # cost of ordering inventory in each month
+d = np.array([100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650])  # forecasted demand
+y0 = 0  # initial inventory level
+
+# Create model
+m = gp.Model()
+
+# Add decision variables
+x = m.addVars(T, vtype=GRB.INTEGER, name="x")
+y = m.addVars(T, lb=0, ub=M, name="y")
+
+# Set objective function
+m.setObjective(gp.quicksum(c[t] * x[t] for t in range(T)), GRB.MINIMIZE)
+
+# Add constraints
+for t in range(T):
+    if t == 0:
+        m.addConstr(y[t] == y0 + x[t] - d[t])
+    else:
+        m.addConstr(y[t] == y[t-1] + x[t] - d[t])
+    m.addConstr(x[t] >= 0)
+
+# Set Gurobi parameters
+m.setParam("OutputFlag", 0)
+
+# Optimize model
+m.optimize()
+
+# Print solution
+print("Optimal objective value:", m.objVal)
+for t in range(T):
+    print("Order", int(x[t].x), "units in month", t)
+    print("Ending inventory level in month", t, "is", int(y[t].x))
+
+\end{verbatim}
+
+\subsection*{Stochastic integer program for inventory management}
+
+Suppose we want to manage inventory over a planning horizon of $T$ months, where the demand for each month is uncertain and follows a probability distribution. Let $d_t$ be the random demand for month $t$, and let $c_t$ be the cost of ordering inventory in month $t$. We also assume that there is a cost $c_h$ for holding inventory, which is incurred for each unit of inventory held in each month.
+
+We can model this problem as a stochastic integer program, where we seek to minimize the expected total cost of inventory over the planning horizon. We can define the following decision variables:
+
+- $x_t$: an integer variable that represents the amount of inventory ordered in month $t$
+- $y_{t,k}$: a non-negative variable that represents the amount of inventory on hand at the end of month $t$ for demand scenario $k$
+
+The objective is to minimize the total cost of inventory over the planning horizon, which is defined as:
+
+$$\text{minimize} \quad \sum_{t=1}^{T} c_t x_t + \frac{1}{100} \sum_{t=1}^{T} \sum_{k=1}^{100} c_h y_{t,k}$$
+
+The first term represents the cost of ordering inventory, and the second term represents the expected cost of holding inventory. The factor of $1/100$ in the second term accounts for the fact that we are averaging over 100 demand scenarios.
+
+The constraints are as follows:
+
+- Inventory balance constraint: for each demand scenario $k$, the amount of inventory on hand at the end of month $t$ is equal to the amount of inventory on hand at the end of month $t-1$, plus the amount of inventory ordered in month $t$, minus the demand in month $t$. This can be expressed as:
+
+$$y_{t,k} = \begin{cases}
+y_0 + x_t - d_t & \text{if } t = 1 \\
+y_{t-1,k} + x_t - d_t & \text{if } t > 1
+\end{cases} \quad \forall t, k$$
+
+where $y_0$ is the starting inventory level and $y_{T,k}$ is the ending inventory level for demand scenario $k$.
+
+- Non-negativity constraint: the inventory ordered in a given month must be non-negative. This can be expressed as:
+
+$$x_t \geq 0, \quad \forall t$$
+
+- Maximum inventory constraint: the amount of inventory on hand at the end of each month for each demand scenario must be non-negative and cannot exceed a maximum inventory level $M$. This can be expressed as:
+
+$$0 \leq y_{t,k} \leq M, \quad \forall t, k$$
+
+We can solve this stochastic integer program using Gurobi by sampling 100 demand scenarios from the forecast distribution and solving the optimization problem using scenario generation. In practice, more sophisticated methods such as dynamic programming or robust optimization may be needed to handle more complex inventory models.
+
+
+\begin{verbatim}
+import gurobipy as gp
+from gurobipy import GRB
+import numpy as np
+
+# Define parameters
+M = 1000  # maximum inventory level
+T = 12  # number of months in planning horizon
+c_order = np.random.rand(T)  # cost of ordering inventory in each month
+c_hold = 1  # cost of holding inventory per unit per month
+y0 = 0  # initial inventory level
+
+# Sample demand from the forecast distribution 100 times
+np.random.seed(0)  # for reproducibility
+d_samples = [np.random.normal(mu, sigma, size=(T, 100)) for mu, sigma in forecast_distribution]
+
+# Create model
+m = gp.Model()
+
+# Add decision variables
+x = m.addVars(T, vtype=GRB.INTEGER, name="x")
+y = m.addVars(T, 100, lb=0, ub=M, name="y")
+d = m.addVars(T, 100, lb=0, name="d")
+
+# Set objective function
+m.setObjective(gp.quicksum(c_order[t] * x[t] for t in range(T)) +
+               gp.quicksum(gp.quicksum(c_hold * y[t, k] for k in range(100)) for t in range(T)) / 100, GRB.MINIMIZE)
+
+# Add constraints for each demand scenario
+for k in range(100):
+    for t in range(T):
+        if t == 0:
+            m.addConstr(y[t, k] == y0 + x[t] - d[t, k])
+        else:
+            m.addConstr(y[t, k] == y[t-1, k] + x[t] - d[t, k])
+        m.addConstr(d[t, k] >= 0)
+    m.addConstrs((x[t] >= 0 for t in range(T)))
+
+# Set Gurobi parameters
+m.setParam("OutputFlag", 0)
+
+# Optimize model
+m.optimize()
+
+# Print solution
+print("Optimal objective value:", m.objVal)
+for t in range(T):
+    print("Order", int(x[t].x), "units in month", t)
+    print("Average ending inventory level in month", t, "is", int(np.mean([y[t, k].x for k in range(100)])))
+
+\end{verbatim}
+
+
+\subsection*{Bender's decomposition for stochastic integer programming}
+
+Bender's decomposition is a classical algorithm for solving large-scale stochastic optimization problems. The algorithm decomposes the original problem into a master problem and subproblems, each of which is solved iteratively until convergence.
+
+In the case of a stochastic integer programming problem, Bender's decomposition works by decomposing the problem into two levels. The first level, called the master problem, includes the deterministic decision variables and a relaxation of the stochastic variables. The second level, called the subproblem, includes the stochastic variables and their associated constraints. The algorithm iteratively solves the subproblem for each scenario, and generates cuts that are added to the master problem to ensure that the relaxation is tightened.
+
+More specifically, Bender's decomposition works as follows:
+
+1. Solve the master problem without considering the stochastic variables.
+2. For each scenario, solve the subproblem using the current solution to the master problem.
+3. If the current solution violates the stochastic constraints for a scenario, generate a cut that is added to the master problem to ensure that the relaxation is tightened.
+4. Return to step 1 and repeat until the solution to the master problem is feasible for all scenarios.
+
+Bender's decomposition can be particularly effective for large-scale stochastic optimization problems, as it reduces the size of the problem that needs to be solved at each iteration. In addition, the use of cuts can significantly reduce the number of iterations needed to reach convergence.
+
+In practice, the performance of Bender's decomposition depends on the structure of the problem, the number of scenarios, and the quality of the cuts generated. Other solution methods, such as stochastic dual dynamic programming, may be more effective for some problems.
+
+
+\subsection*{Bender's decomposition for the stochastic inventory problem}
+
+In the stochastic inventory problem, the objective is to determine the inventory levels and order quantities that minimize the expected cost of ordering and holding inventory over a finite time horizon. The problem includes a set of deterministic decision variables, such as the order quantities, as well as a set of stochastic variables, such as the demand in each time period.
+
+To apply Bender's decomposition to this problem, we first decompose the problem into a master problem and subproblems. The master problem includes the deterministic decision variables and a relaxation of the stochastic variables, while the subproblem includes the stochastic variables and their associated constraints.
+
+In this particular case, we can define the master problem as follows:
+
+1. Define the decision variables $x_t$, which represent the order quantity in each time period $t$.
+2. Define the decision variables $y_{t,k}$, which represent the ending inventory level at the end of time period $t$ for each demand scenario $k$.
+3. Define the objective function as the expected cost of ordering and holding inventory over the time horizon, given the expected demand scenario.
+4. Define constraints that enforce the inventory balance for each demand scenario, using the decision variables $x_t$ and $y_{t,k}$.
+
+The subproblem, on the other hand, can be defined as follows:
+
+1. Define the decision variables $d_{t,k}$, which represent the demand in each time period $t$ for each demand scenario $k$.
+2. Define the objective function as the negative ending inventory level in the subproblem.
+3. Define constraints that enforce the inventory balance for each demand scenario, using the decision variables $x_t$, $y_{t,k}$, and $d_{t,k}$.
+
+The algorithm then proceeds as follows:
+
+1. Solve the master problem without considering the stochastic variables.
+2. For each scenario, solve the subproblem using the current solution to the master problem.
+3. If the current solution violates the stochastic constraints for a scenario, generate a cut that is added to the master problem to ensure that the relaxation is tightened.
+4. Return to step 1 and repeat until the solution to the master problem is feasible for all scenarios.
+
+In this particular problem, the cuts generated in step 3 can be expressed as constraints that enforce the total amount of inventory ordered to be at least 1 over all demand scenarios. These cuts ensure that the inventory level is not too low in any scenario, and therefore the solution to the master problem is feasible for all scenarios.
+
+Bender's decomposition can be particularly effective for this problem, as it allows us to decompose the problem into a deterministic master problem and a stochastic subproblem. The use of cuts can significantly reduce the number of iterations needed to reach convergence, and can provide a more efficient solution method for large-scale problems with demand uncertainty.
+
+In practice, the performance of Bender's decomposition for this problem depends on the structure of the problem, the number of scenarios, and the quality of the cuts generated. By solving the master problem and subproblems iteratively, we can obtain a more accurate and efficient solution to the stochastic inventory problem.
+
+
+\begin{verbatim}
+import gurobipy as gp
+from gurobipy import GRB
+import numpy as np
+
+# Define parameters
+M = 1000  # maximum inventory level
+T = 12  # number of months in planning horizon
+c_order = np.random.rand(T)  # cost of ordering inventory in each month
+c_hold = 1  # cost of holding inventory per unit per month
+y0 = 0  # initial inventory level
+
+# Sample demand from the forecast distribution 100 times
+np.random.seed(0)  # for reproducibility
+d_samples = [np.random.normal(mu, sigma, size=(T, 100)) for mu, sigma in forecast_distribution]
+
+# Create master problem
+m_master = gp.Model()
+x = m_master.addVars(T, vtype=GRB.INTEGER, name="x")
+y_avg = m_master.addVars(T, lb=0, ub=M, name="y_avg")
+m_master.setObjective(gp.quicksum(c_order[t] * x[t] for t in range(T)) +
+                      gp.quicksum(c_hold * y_avg[t] for t in range(T)), GRB.MINIMIZE)
+for t in range(T):
+    m_master.addConstr(y_avg[t] == (1/100) * gp.quicksum(y[t, k] for k in range(100)))
+
+# Create subproblem
+m_sub = gp.Model()
+d = m_sub.addVars(T, lb=0, name="d")
+m_sub.setObjective(gp.quicksum(-1 * y[t, k] for t in range(T) for k in range(100)), GRB.MAXIMIZE)
+for t in range(T):
+    m_sub.addConstr(y[t, k] == y0 + gp.quicksum(x[i] for i in range(t+1)) - gp.quicksum(d[i, k] for i in range(t+1)))
+m_sub.Params.OutputFlag = 0
+
+# Define Bender's cuts
+cuts = []
+
+# Set Gurobi parameters
+m_master.Params.LazyConstraints = 1
+m_master.Params.OutputFlag = 0
+
+# Define callback function for adding Bender's cuts
+def callback(model, where):
+    if where == GRB.Callback.MIPSOL:
+        y_vals = model.cbGetSolution(y)
+        for k in range(100):
+            d_vals = [model.cbGetSolution(d[t, k]) for t in range(T)]
+            m_sub.setObjective(gp.quicksum(-1 * y_vals[t, k] for t in range(T)), GRB.MAXIMIZE)
+            m_sub.optimize()
+            if m_sub.objVal > -1e-6:
+                cuts.append(master.addConstr(gp.quicksum(d_vals[t] for t in range(T)) >= 1))
+
+# Optimize master problem with Bender's decomposition
+m_master.optimize(callback)
+
+# Print solution
+print("Optimal objective value:", m_master.objVal)
+for t in range(T):
+    print("Order", int(x[t].x), "units in month", t)
+    print("Average ending inventory level in month", t, "is", int(y_avg[t].x))
+
+\end{verbatim}
+
+
+
+
+%%%%%%%%%

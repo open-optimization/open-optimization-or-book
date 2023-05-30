@@ -21,12 +21,7 @@ Notes: }
 \end{outcome}
 
 
-\begin{resource}
-\begin{itemize}
-\item \href{http://web.mit.edu/16.070/www/lecture/big_o.pdf}{MIT Lecture Notes - Big O}
-\item \href{https://www.youtube.com/watch?v=YX40hbAHx3s}{Youtube! - P versus NP}
-\end{itemize}
-\end{resource}
+
 
 How long will an algorithm take to run?   How difficult might it be to solve a certain problem?   Is the knapsack problem easier to solve than the traveling salesman problem?  Or the matching problem?  
 How can we compare the difficulty to solve these problems?
@@ -261,11 +256,7 @@ The following definition comes from Merriam-Webster's dictionary.
 An algorithm is a procedure for solving a mathematical problem in a finite number of steps that frequently involves repetition of an operation; broadly: a step-by-step procedure for solving a problem or accomplishing some end.
 \end{definition}
 \subsection{Sorting }
-\begin{resource}
-\begin{itemize}
-\item \href{https://en.wikipedia.org/wiki/Bubble_sort}{Wikipedia}
-\end{itemize}
-\end{resource}
+
 
 The problem of sorting a list is a simple problem to think about that has many algorithms to consider.  We will describe one such algorithm: Bubble Sort. 
 
@@ -841,9 +832,6 @@ Let  $G$ be a  connected graph with $n$ vertices.
 
 See Section~\ref{sec:spanning-tree-models} for integer programming formulations of this problem.  
 \subsection{Kruskal's algorithm}
-\begin{resource}
-\href{https://en.wikipedia.org/wiki/Kruskal\%27s_algorithm}{Wikipedia}
-\end{resource}
 \begin{general}{Kruskal  - for Minimum Spanning tree}{Complexity: $O(|E| \log(|V|)$}
 \label{alg:Kruskal}
 \begin{enumerate}
@@ -875,26 +863,14 @@ See Section~\ref{sec:spanning-tree-models} for integer programming formulations 
 %\end{proof}
 
 \subsubsection{Prim's Algorithm}
-\begin{resource}
-\begin{itemize}
-\item \href{https://en.wikipedia.org/wiki/Prim\%27s_algorithm}{Wikipedia}
-\item \href{http://www.texample.net/tikz/examples/prims-algorithm/}{TeXAmple - Figure for min spannig tree}
-\end{itemize}
-\end{resource}
+
 
 \subsection{Traveling Salesman Problem}
-\begin{resource}
-\begin{itemize}
-\item 
-\end{itemize}
-\end{resource}
 
 See Section~\ref{sec:tsp-models} for integer programming formulations of this problem.  Also, hill climbing algorithms for this problem such as 2-Opt, simulated annealing, and tabu search will be discussed in Section~\ref{sec:IP-Heuristics}.
 
 \subsubsection{Nearest Neighbor - Construction Heuristic}
-\begin{resource}
-\href{https://en.wikipedia.org/wiki/Nearest_neighbour_algorithm}{Wikipedia}
-\end{resource}
+
 We will discuss heuristics more later in this book.   For now, present this construction heuristic as a simple algorithmic example.   
 
 
@@ -960,4 +936,61 @@ and hence, $S$ is a 2-approximation of the optimal solution.
 If we combine algorithms for minimum spanning tree and matching, we can find a better approximation algorithm.  This is given by Christofides.  Again, this is in the case where the graph satisfies the triangle inequality.  See 
 \href{https://en.wikipedia.org/wiki/Christofides_algorithm}{Wikipedia - Christofides Algorithm} or \href{https://resources.mpi-inf.mpg.de/conferences/adfocs-15/material/Ola-Lect1.pdf}{Ola Svensson Lecture Slides} for more detail.
 
+
+\section{Resources}
+\begin{resource}
+\begin{itemize}
+\item \href{http://web.mit.edu/16.070/www/lecture/big_o.pdf}{MIT Lecture Notes - Big O}
+\item \href{https://www.youtube.com/watch?v=YX40hbAHx3s}{Youtube! - P versus NP}
+\end{itemize}
+\end{resource}
+
+\begin{resource}
+Bubble Sort
+\begin{itemize}
+\item \href{https://en.wikipedia.org/wiki/Bubble_sort}{Wikipedia}
+\end{itemize}
+\end{resource}
+\begin{resource}
+Kruskal
+\href{https://en.wikipedia.org/wiki/Kruskal\%27s_algorithm}{Wikipedia}
+\end{resource}
+\begin{resource}
+Prim's Algorithm
+\begin{itemize}
+\item \href{https://en.wikipedia.org/wiki/Prim\%27s_algorithm}{Wikipedia}
+\item \href{http://www.texample.net/tikz/examples/prims-algorithm/}{TeXAmple - Figure for min spannig tree}
+\end{itemize}
+\end{resource}
+\begin{resource}
+Nearest Neighbor for TSP
+\href{https://en.wikipedia.org/wiki/Nearest_neighbour_algorithm}{Wikipedia}
+\end{resource}
+
+\subsection{Advanced - NP Completeness Reductions}
+\textbf{Problem: Subset Sum}
+
+Instance: A set of $n$ positive integers $S$ and a target positive integer $t$.
+
+Question: Is there a subset of $S$ that adds up to $t$?
+
+\textbf{Reduction:} We'll reduce the problem "3SAT" to "Subset Sum".
+
+Given an instance of 3SAT with $m$ clauses and $n$ variables, we'll create a corresponding instance of Subset Sum as follows:
+
+For each variable, create two positive integers: $2^{(i-1)}$ and $2^{i}$, where $i$ is the index of the variable.
+
+For each clause $(x$ or $y$ or $z)$, create a target integer $t$ equal to $2^{(m+n)} + 2^{(x-1)} + 2^{(y-1)} + 2^{(z-1)}$, where $x, y, z$ are the indices of the variables in the clause.
+
+The set $S$ for Subset Sum will be the $n$ positive integers created for the $n$ variables, plus all the target integers created for the $m$ clauses.
+
+\textbf{Claim:} The 3SAT instance is satisfiable if and only if the corresponding Subset Sum instance has a solution.
+
+\textbf{Proof:}
+
+If the 3SAT instance is satisfiable, then for each clause $(x$ or $y$ or $z)$, at least one of the variables $x, y,$ or $z$ must be set to true. Thus, we can include the corresponding positive integers in our solution for the Subset Sum instance, and the solution will sum up to the target $t$ for that clause.
+
+If the Subset Sum instance has a solution, then for each clause $t$, there must be a subset of $S$ that sums up to $t$. We can set the variables corresponding to the positive integers included in the subset to true, and set all other variables to false. This will result in a satisfying assignment for the 3SAT instance.
+
+Since 3SAT is NP-complete, and we have shown that Subset Sum can be reduced to 3SAT in polynomial time, it follows that Subset Sum is also NP-complete.
 %\end{document}

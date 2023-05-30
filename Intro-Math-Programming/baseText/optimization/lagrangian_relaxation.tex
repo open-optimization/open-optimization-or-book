@@ -1,0 +1,632 @@
+% Copyright 2023 by Robert Hildebrand
+%This work is licensed under a
+%Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0)
+%See http://creativecommons.org/licenses/by-sa/4.0/
+
+
+
+
+%%%%%%%%%
+
+% Lagrangian relaxation with two sets of constraints
+
+\section{Lagrangian Relaxation}
+\subsection{Motivation}
+
+Integer programming problems with integrality constraints and multiple sets of constraints can be difficult to solve. One technique to address this difficulty is Lagrangian relaxation. 
+
+Lagrangian relaxation is a method for relaxing the integrality constraint of an integer programming problem by introducing a Lagrange multiplier term into the objective function. In some cases, it may be helpful to only introduce Lagrange multipliers for a subset of the constraints, rather than all of them.
+
+\subsection{Formulation}
+
+Consider the following integer programming problem with two sets of constraints:
+
+\begin{alignat*}{2}
+& \text{minimize} \quad && c^T x \\
+& \text{subject to}       \quad && A^1 x \leq b^1 \\
+&                          \quad && A^2 x \leq b^2 \\
+&                          \quad && x_i \in \{0,1\} \quad \forall i \in \{1,\dots,n\}
+\end{alignat*}
+
+where $c$ is a vector of objective coefficients, $A^1$ and $A^2$ are matrices of constraint coefficients, $b^1$ and $b^2$ are vectors of constraint values, and $x$ is a vector of binary variables.
+
+To apply Lagrangian relaxation, we partition the constraints into two sets, $A^1 x \leq b^1$ and $A^2 x \leq b^2$, and introduce a set of Lagrange multipliers $u$ for the second set of constraints, $A^2 x \leq b^2$. We then add the Lagrange multipliers to the objective function as penalty terms, resulting in the following Lagrangian function:
+
+\begin{align*}
+L(x,u) = c^T x - u^T (A^2 x - b^2)
+\end{align*}
+
+Note that the Lagrange multipliers are only added to the second set of constraints, $A^2 x \leq b^2$, and not to the first set of constraints, $A^1 x \leq b^1$. This is sometimes called "partial" Lagrangian relaxation.
+
+\subsection{Solution}
+
+The Lagrangian dual function is then defined as:
+
+\begin{align*}
+g(u) = \inf_{x \in \{0,1\}^n} L(x,u)
+\end{align*}
+
+We can then solve the Lagrangian dual problem by maximizing the dual function $g(u)$ over the Lagrange multipliers $u$. Once we have found an optimal value $u^*$ for the Lagrange multipliers, we can use it to construct a feasible solution for the original integer programming problem.
+
+In particular, if $x^*$ is a minimizer of the Lagrangian objective function with $u = u^*$, subject to the constraints $A^1 x \leq b^1$, then $x^*$ is a feasible solution for the original integer programming problem. However, $x^*$ may not necessarily be optimal. To obtain an optimal solution, we can use branch-and-bound or another algorithm to search for the optimal solution among all feasible solutions.
+
+
+\begin{lemma}{Lagrangian Dual is Concave}{LDC} The Lagrangian dual objective function $g(u)$ is a concave function of the Lagrange multipliers $u$.
+\end{lemma}
+\begin{proof}
+
+To show that $g(u)$ is concave, we need to show that for any $u_1, u_2 \in \mathbb{R}^m$ and any $\lambda \in [0,1]$, we have:
+
+\begin{align*}
+g(\lambda u_1 + (1-\lambda)u_2) \geq \lambda g(u_1) + (1-\lambda) g(u_2)
+\end{align*}
+
+We start by defining the Lagrangian dual function as:
+
+\begin{align*}
+g(u) = \inf_{x \in {0,1}^n} L(x,u)
+\end{align*}
+
+where $L(x,u) = c^T x - u^T (Ax - b)$ is the Lagrangian function.
+
+For any $u_1, u_2 \in \mathbb{R}^m$, let $x_1$ and $x_2$ be the corresponding solutions to the Lagrangian function with $u = u_1$ and $u = u_2$ respectively. Then, we have:
+
+\begin{align*}
+g(u_1) = L(x_1,u_1) \quad \text{and} \quad g(u_2) = L(x_2,u_2)
+\end{align*}
+
+We define $x_\lambda = \lambda x_1 + (1-\lambda) x_2$ and $u_\lambda = \lambda u_1 + (1-\lambda) u_2$. Then, we have:
+
+\begin{align*}
+L(x_\lambda, u_\lambda) &= c^T x_\lambda - u_\lambda^T (Ax_\lambda - b) \
+&= \lambda (c^T x_1 - u_1^T (Ax_1 - b)) + (1-\lambda) (c^T x_2 - u_2^T (Ax_2 - b)) \
+&\leq \lambda L(x_1, u_1) + (1-\lambda) L(x_2, u_2) \
+&= \lambda g(u_1) + (1-\lambda) g(u_2)
+\end{align*}
+
+where the inequality follows from the fact that $L(x_1, u_1)$ is the infimum over all $x$ that satisfy $Ax = b$ and $x_i \in {0,1}$ for $i = 1,\dots,n$, and $L(x_2, u_2)$ is the infimum over all $x$ that satisfy $Ax = b$ and $x_i \in {0,1}$ for $i = 1,\dots,n$. Therefore, any linear combination of feasible solutions is also feasible, and the inequality follows.
+
+Thus, we have shown that $g(u)$ is a concave function of $u$.
+\end{proof}
+
+% Optimization of the Lagrangian dual problem
+
+\subsection{Optimizing Lagrangian Dual}
+
+After formulating the Lagrangian dual function $g(u)$, the next step is to optimize it over the Lagrange multipliers $u$. The optimal value of $g(u)$ gives us an upper bound on the optimal value of the original integer programming problem, and the optimal Lagrange multipliers can be used to construct a feasible solution for the original problem.
+
+\subsection{Optimization}
+
+To optimize the Lagrangian dual function $g(u)$, we can use a variety of methods, such as subgradient methods, projected gradient methods, or interior point methods. In general, the optimization problem is of the form:
+
+\begin{align*}
+\max_{u \in \mathbb{R}^m} g(u) = \max_{u \in \mathbb{R}^m} \inf_{x \in \{0,1\}^n} L(x,u)
+\end{align*}
+
+Since $L(x,u)$ is a convex function of $x$ for fixed $u$, the infimum over $x$ can be found using a variety of optimization methods, such as linear programming or branch-and-bound. Once the infimum over $x$ is found for a given $u$, we can evaluate $g(u)$, and then use an optimization method to maximize $g(u)$ over $u$.
+
+One popular method for optimizing the Lagrangian dual function is the subgradient method, which involves iteratively updating the Lagrange multipliers based on the subgradients of the Lagrangian dual function. Another method is the projected gradient method, which involves projecting the gradient of the Lagrangian dual function onto the feasible Lagrange multiplier space. Interior point methods can also be used to solve the optimization problem.
+
+\subsection{Termination}
+
+The optimization of the Lagrangian dual function can be terminated based on various criteria, such as reaching a maximum number of iterations, achieving a certain level of duality gap (i.e., the difference between the optimal dual and primal values), or satisfying a stopping criterion for the optimization algorithm. Once the optimization is terminated, we can use the optimal Lagrange multipliers to construct a feasible solution for the original integer programming problem, as described in the previous section.
+
+\subsection{Conclusion}
+
+Optimizing the Lagrangian dual function is an important step in Lagrangian relaxation, as it allows us to construct feasible solutions for the original integer programming problem and provides an upper bound on the optimal value. The choice of optimization method will depend on the specific problem and the trade-off between computational efficiency and solution quality.
+
+\begin{verbatim}
+import gurobipy as gp
+
+# Define the problem data
+c = [1, 2, 3]
+A = [[1, 1, 1],
+     [1, -1, 0],
+     [0, 1, -1]]
+b = [3, 1, 1]
+n = len(c)
+
+# Define the Lagrangian relaxation function
+def lagrangian_relaxation(u):
+    model = gp.Model('Lagrangian relaxation')
+    x = model.addVars(n, vtype=gp.GRB.BINARY, name='x')
+    for i in range(len(b)):
+        expr = gp.LinExpr()
+        for j in range(n):
+            expr += A[i][j] * x[j]
+        model.addConstr(expr <= b[i] + u[i])
+    obj = gp.LinExpr()
+    for i in range(n):
+        obj += c[i] * x[i]
+    obj -= gp.quicksum([u[i] * (gp.LinExpr(A[i]) @ x - b[i]) for i in range(len(b))])
+    model.setObjective(obj, gp.GRB.MINIMIZE)
+    model.setParam('OutputFlag', False)
+    model.optimize()
+    return model, model.objVal, [x[i].x for i in range(n)]
+
+# Define the Lagrangian dual function
+def lagrangian_dual(u):
+    relaxed_obj = lagrangian_relaxation(u)[1]
+    return relaxed_obj - sum([u[i] * (b[i] - (gp.LinExpr(A[i]) @ lagrangian_relaxation(u)[2])) for i in range(len(b))])
+
+# Define the subgradient method to optimize the Lagrangian dual function
+def subgradient_method():
+    alpha = 0.1
+    T = 100
+    u = [0] * len(b)
+    best_obj = float('inf')
+    for t in range(T):
+        obj = lagrangian_dual(u)
+        if obj < best_obj:
+            best_obj = obj
+            best_u = u.copy()
+        grad = [b[i] - (gp.LinExpr(A[i]) @ lagrangian_relaxation(u)[2]) for i in range(len(b))]
+        u = [max(0, u[i] + alpha * grad[i]) for i in range(len(b))]
+    return best_u, best_obj
+
+# Solve the integer program using Lagrangian relaxation
+u_star = subgradient_method()[0]
+integer_model = gp.Model('Integer program')
+x = integer_model.addVars(n, vtype=gp.GRB.BINARY, name='x')
+for i in range(len(b)):
+    expr = gp.LinExpr()
+    for j in range(n):
+        expr += A[i][j] * x[j]
+    integer_model.addConstr(expr <= b[i] + u_star[i])
+integer_model.setObjective(gp.quicksum([c[i] * x[i] for i in range(n)]), gp.GRB.MINIMIZE)
+integer_model.setParam('OutputFlag', True)
+integer_model.optimize()
+\end{verbatim}
+
+% Common application of Lagrangian relaxation
+
+\subsection{Motivation}
+
+Lagrangian relaxation is a widely used technique for solving optimization problems that arise in many different applications, such as transportation planning, network design, and scheduling. One common application of Lagrangian relaxation is the vehicle routing problem, which involves determining an optimal set of routes for a fleet of vehicles to serve a set of customers.
+
+\subsection{Vehicle Routing Problem}
+
+The vehicle routing problem (VRP) is a classic optimization problem in which a set of vehicles must visit a set of customers, subject to various constraints such as vehicle capacity and travel time. The goal is to minimize the total distance traveled by the vehicles.
+
+Formally, the VRP can be defined as follows:
+
+\begin{align*}
+\text{minimize} \quad & \sum_{i=1}^n \sum_{j=1}^n c_{ij} x_{ij} \\
+\text{subject to} \quad & \sum_{i=1}^n x_{ij} = 1 \quad \forall j \in \{1,\dots,n\} \\
+& \sum_{j=1}^n x_{ij} = 1 \quad \forall i \in \{1,\dots,n\} \\
+& \sum_{i \in S} \sum_{j \in S} x_{ij} \leq |S| - 1 \quad \forall S \subseteq \{1,\dots,n\}, 2 \leq |S| \leq n \\
+& x_{ij} \in \{0,1\} \quad \forall i,j \in \{1,\dots,n\}
+\end{align*}
+
+where $c_{ij}$ is the distance between customers $i$ and $j$, $x_{ij}$ is a binary variable that is 1 if there is a path from customer $i$ to customer $j$, and 0 otherwise, and the constraints ensure that each customer is visited exactly once and that the routes do not form cycles or subcycles.
+
+\subsection{Lagrangian Relaxation for VRP}
+
+The VRP can be difficult to solve directly using mixed integer programming, especially for large instances. One approach to solving the VRP is to use Lagrangian relaxation to relax some of the constraints and solve a series of simpler subproblems.
+
+In particular, we can apply Lagrangian relaxation to the subtour elimination constraints, which ensure that the routes do not form cycles or subcycles. We can relax these constraints by adding a penalty term to the objective function that encourages the formation of longer routes. We can then solve the relaxed problem using a simple algorithm such as the nearest-neighbor heuristic or the Christofides algorithm.
+
+The Lagrangian dual problem is then to find the optimal Lagrange multipliers for the relaxed subtour elimination constraints. We can use subgradient optimization to solve the Lagrangian dual problem, as described earlier.
+
+Once we have found the optimal Lagrange multipliers, we can use them to construct a feasible solution for the original VRP. In particular, we can use the subgradient method to update the Lagrange multipliers and solve the relaxed subproblem iteratively, until a feasible solution for the VRP is found.
+
+\subsection{Conclusion}
+
+Lagrangian relaxation is a powerful technique for solving optimization problems such as the vehicle routing problem. By relaxing some of the constraints and optimizing a Lagrangian dual problem, we can solve a series of simpler subproblems and obtain an upper bound on the optimal value of the original problem.
+
+
+% Common application of Lagrangian relaxation
+
+\subsection{Motivation}
+
+Lagrangian relaxation is a widely used technique for solving optimization problems that arise in many different applications, such as transportation planning, network design, and scheduling. One common application of Lagrangian relaxation is the vehicle routing problem, which involves determining an optimal set of routes for a fleet of vehicles to serve a set of customers.
+
+\subsection{Vehicle Routing Problem}
+
+The vehicle routing problem (VRP) is a classic optimization problem in which a set of vehicles must visit a set of customers, subject to various constraints such as vehicle capacity and travel time. The goal is to minimize the total distance traveled by the vehicles.
+
+Formally, the VRP can be defined as follows:
+
+\begin{align*}
+\text{minimize} \quad & \sum_{i=1}^n \sum_{j=1}^n c_{ij} x_{ij} \\
+\text{subject to} \quad & \sum_{i=1}^n x_{ij} = 1 \quad \forall j \in \{1,\dots,n\} \\
+& \sum_{j=1}^n x_{ij} = 1 \quad \forall i \in \{1,\dots,n\} \\
+& \sum_{i \in S} \sum_{j \in S} x_{ij} \leq |S| - 1 \quad \forall S \subseteq \{1,\dots,n\}, 2 \leq |S| \leq n \\
+& x_{ij} \in \{0,1\} \quad \forall i,j \in \{1,\dots,n\}
+\end{align*}
+
+where $c_{ij}$ is the distance between customers $i$ and $j$, $x_{ij}$ is a binary variable that is 1 if there is a path from customer $i$ to customer $j$, and 0 otherwise, and the constraints ensure that each customer is visited exactly once and that the routes do not form cycles or subcycles.
+
+\subsection{Lagrangian Relaxation for VRP}
+
+The VRP can be difficult to solve directly using mixed integer programming, especially for large instances. One approach to solving the VRP is to use Lagrangian relaxation to relax some of the constraints and solve a series of simpler subproblems.
+
+In particular, we can apply Lagrangian relaxation to the subtour elimination constraints, which ensure that the routes do not form cycles or subcycles. We can relax these constraints by adding a penalty term to the objective function that encourages the formation of longer routes. We can then solve the relaxed problem using a simple algorithm such as the nearest-neighbor heuristic or the Christofides algorithm.
+
+The Lagrangian dual problem is then to find the optimal Lagrange multipliers for the relaxed subtour elimination constraints. We can use subgradient optimization to solve the Lagrangian dual problem, as described earlier.
+
+Once we have found the optimal Lagrange multipliers, we can use them to construct a feasible solution for the original VRP. In particular, we can use the subgradient method to update the Lagrange multipliers and solve the relaxed subproblem iteratively, until a feasible solution for the VRP is found.
+
+\subsection{Conclusion}
+
+Lagrangian relaxation is a powerful technique for solving optimization problems such as the vehicle routing problem. By relaxing some of the constraints and optimizing a Lagrangian dual problem, we can solve a series of simpler subproblems and obtain an upper bound on the optimal value of the original problem.
+
+
+% Applying Lagrangian relaxation to the subtour elimination formulation
+
+\subsection{Motivation}
+
+The subtour elimination formulation of the vehicle routing problem involves adding additional constraints that eliminate subcycles in the routes. These constraints can be difficult to solve using mixed integer programming, especially for large instances. By applying Lagrangian relaxation to these constraints, we can obtain a relaxed problem that is easier to solve and provides a bound on the optimal value of the original problem.
+
+\subsection{Subtour Elimination Constraints}
+
+The subtour elimination constraints ensure that the routes do not form subcycles. We can add these constraints to the VRP formulation as follows:
+
+\begin{align*}
+\sum_{i \in S} \sum_{j \in S} x_{ij} \leq |S| - 1 \quad \forall S \subseteq \{2,\dots,n\}
+\end{align*}
+
+where $S$ is a subset of customers, and the constraint ensures that the number of arcs leaving $S$ is at least one less than the size of $S$. These constraints eliminate subcycles in the routes and ensure that each route is a connected subgraph of the complete graph.
+
+\subsection{Lagrangian Relaxation}
+
+We can apply Lagrangian relaxation to the subtour elimination constraints by relaxing them and adding a penalty term to the objective function that encourages the formation of longer routes. In particular, we add a Lagrange multiplier $u_S$ to each subtour elimination constraint, and define the Lagrangian relaxation function as:
+
+\begin{align*}
+L(x,u) = \sum_{i=1}^n \sum_{j=1}^n c_{ij} x_{ij} + \sum_{S \subseteq \{2,\dots,n\}} u_S (\sum_{i \in S} \sum_{j \in S} x_{ij} - |S| + 1)
+\end{align*}
+
+We then solve the Lagrangian dual problem by optimizing the Lagrangian dual function $g(u)$ over the Lagrange multipliers $u$. The Lagrangian dual function is:
+
+\begin{align*}
+g(u) = \inf_{x \in \{0,1\}^n} L(x,u) = \sum_{S \subseteq \{2,\dots,n\}} (|S|-1)u_S + \min_{x} \sum_{i=1}^n \sum_{j=1}^n (c_{ij} - \sum_{S: i,j \in S} u_S) x_{ij}
+\end{align*}
+
+where the first term is a constant that depends on the Lagrange multipliers, and the second term is a relaxed version of the objective function that is easier to solve than the original VRP.
+
+To optimize the Lagrangian dual function, we can use subgradient optimization as described earlier, and update the Lagrange multipliers iteratively until a feasible solution for the VRP is found. In particular, we can use the subgradient method to update the Lagrange multipliers and solve the relaxed subproblem, and use the resulting routes to construct a feasible solution for the original VRP.
+
+\subsection{Conclusion}
+
+By applying Lagrangian relaxation to the subtour elimination constraints of the vehicle routing problem, we can obtain a relaxed problem that is easier to solve and provides an upper bound on the optimal value of the original problem. This approach can be applied to many other optimization problems that involve difficult constraints, and can be a powerful tool for
+
+
+\begin{verbatim}
+import gurobipy as gp
+import numpy as np
+
+# Define the problem data
+np.random.seed(0)
+n = 10
+c = np.random.randint(1, 10, size=(n, n))
+A = np.zeros((n, n, n))
+for i in range(n):
+    for j in range(n):
+        if i != j:
+            A[i, j, i] = 1
+            A[i, j, j] = -1
+b = np.ones((n, n)) - np.eye(n)
+B = set(range(1, n))
+C = set([0])
+
+# Define the Lagrangian relaxation function for the VRP
+def lagrangian_relaxation(u):
+    model = gp.Model('Lagrangian relaxation')
+    x = model.addVars(n, n, vtype=gp.GRB.BINARY, name='x')
+    for S in range(1, n):
+        expr = gp.LinExpr()
+        for i in range(n):
+            for j in range(n):
+                if i != j:
+                    if i in S and j in S:
+                        expr += x[i, j]
+        model.addConstr(expr <= len(S) - 1 + u[S])
+    obj = gp.LinExpr()
+    for i in range(n):
+        for j in range(n):
+            obj += c[i, j] * x[i, j]
+    obj -= gp.quicksum([u[S] * (gp.quicksum([x[i, j] for i in S for j in S if i != j]) - len(S) + 1) for S in range(1, n)])
+    model.setObjective(obj, gp.GRB.MINIMIZE)
+    model.setParam('OutputFlag', False)
+    model.optimize()
+    return model, model.objVal, [[x[i, j].x for j in range(n)] for i in range(n)]
+
+# Define the Lagrangian dual function for the VRP
+def lagrangian_dual(u):
+    relaxed_obj = lagrangian_relaxation(u)[1]
+    return relaxed_obj - sum([u[S] * (gp.quicksum([lagrangian_relaxation(u)[2][i][j] for i in S for j in S if i != j]) - len(S) + 1) for S in range(1, n)])
+
+# Define the subgradient method to optimize the Lagrangian dual function for the VRP
+def subgradient_method():
+    alpha = 0.01
+    T = 100
+    u = np.zeros(n)
+    best_obj = float('inf')
+    for t in range(T):
+        obj = lagrangian_dual(u)
+        if obj < best_obj:
+            best_obj = obj
+            best_u = u.copy()
+        grad = np.zeros(n)
+        for S in range(1, n):
+            grad[S] = gp.quicksum([lagrangian_relaxation(u)[2][i][j] for i in S for j in S if i != j]) - len(S) + 1
+        u = np.maximum(0, u + alpha * grad)
+    return best_u, best_obj
+
+# Solve the VRP using Lagrangian relaxation and Gurobi's optimization capabilities
+u_star = subgradient_method()[0]
+integer_model = gp.Model('VRP')
+x = integer_model.addVars(n, n, vtype=gp.GRB.BINARY, name='x')
+for i in range(n):
+    integer_model.addConstr(gp.quicksum([x[i, j] for j in range(n) if i != j]) == 1)
+for j in range(n):
+integer_model.addConstr(gp.quicksum([x[i, j] for i in range(n) if i != j]) == 1)
+for i in range(n):
+for j in range(n):
+if i != j:
+integer_model.addConstr(x[i, j] <= b[i, j])
+for i in range(n):
+for j in range(n):
+if i != j:
+integer_model.addConstr(x[i, j] <= gp.quicksum([x[k, j] for k in range(n) if k != i]))
+integer_model.addConstr(x[i, j] >= gp.quicksum([x[k, j] for k in range(n) if k != i]) - (1 - x[i, j]))
+integer_model.addConstr(x[i, j] <= gp.quicksum([x[i, k] for k in range(n) if k != j]))
+integer_model.addConstr(x[i, j] >= gp.quicksum([x[i, k] for k in range(n) if k != j]) - (1 - x[i, j]))
+integer_model.setObjective(gp.quicksum([c[i, j] * x[i, j] for i in range(n) for j in range(n)]), gp.GRB.MINIMIZE)
+integer_model.setParam('OutputFlag', False)
+for S in range(1, n):
+model = gp.Model('VRP subproblem')
+y = model.addVars(n, n, vtype=gp.GRB.BINARY, name='y')
+for i in range(n):
+model.addConstr(gp.quicksum([y[i, j] for j in range(n) if j != i]) == 1)
+model.addConstr(gp.quicksum([y[j, i] for j in range(n) if j != i]) == 1)
+for i in range(n):
+for j in range(n):
+if i != j:
+model.addConstr(y[i, j] <= x[i, j])
+for i in range(n):
+for j in range(n):
+if i != j:
+model.addConstr(y[i, j] <= gp.quicksum([y[k, j] for k in range(n) if k != i]))
+model.addConstr(y[i, j] >= gp.quicksum([y[k, j] for k in range(n) if k != i]) - (1 - y[i, j]))
+model.addConstr(y[i, j] <= gp.quicksum([y[i, k] for k in range(n) if k != j]))
+model.addConstr(y[i, j] >= gp.quicksum([y[i, k] for k in range(n) if k != j]) - (1 - y[i, j]))
+obj = gp.quicksum([c[i, j] * y[i, j] for i in range(n) for j in range(n)])
+obj += u_star[S] * (gp.quicksum([y[i, j] for i in range(n) for j in range(n) if i in B and j in B]) - len(B) + 1)
+model.setObjective(obj, gp.GRB.MINIMIZE)
+model.setParam('OutputFlag', False)
+model.optimize()
+for i in range(n):
+for j in range(n):
+if i != j:
+x[i, j].setAttr('Start', y[i, j].x)
+integer_model.optimize()
+print('Optimal objective value:', integer_model.objVal)
+
+\end{verbatim}
+
+
+\section{Embedding Lagrangian relaxation into a branch and bound tree}
+
+\subsection{Motivation}
+
+Branch and bound is a popular algorithm for solving mixed integer programs, where the solution space is divided into smaller subproblems that are recursively solved until an optimal solution is found. However, branch and bound can be computationally expensive, especially for large instances. By embedding Lagrangian relaxation into the branch and bound tree, we can obtain a tighter lower bound and reduce the number of subproblems that need to be solved, leading to faster convergence and better performance.
+
+\subsection{Lagrangian Relaxation}
+
+Lagrangian relaxation involves relaxing constraints and optimizing a Lagrangian dual problem to obtain a lower bound on the optimal value of the original problem. By adding Lagrange multipliers to the objective function, we can obtain a relaxed problem that is easier to solve and provides a bound on the optimal value of the original problem.
+
+\subsection{Branch and Bound with Lagrangian Relaxation}
+
+We can embed Lagrangian relaxation into a branch and bound tree by using the relaxed problem as a lower bound for the subproblems. In particular, we can use the Lagrangian relaxation function to compute a lower bound for each subproblem, and use this lower bound to prune the subproblems that cannot improve the current best solution.
+
+The branch and bound tree starts with the original problem, and each node in the tree corresponds to a subproblem that is created by branching on a binary variable. At each node, we solve the Lagrangian dual problem for the relaxed problem and use the resulting Lagrange multipliers to compute a lower bound for the subproblem. We then compare this lower bound to the current best solution and prune the subproblem if its lower bound is worse than the current best solution.
+
+If the subproblem is not pruned, we solve it using mixed integer programming and obtain a feasible solution. We then compare this feasible solution to the current best solution and update the current best solution if the feasible solution is better. We then continue to recursively solve the subproblems until all nodes in the branch and bound tree have been explored.
+
+\subsection{Conclusion}
+
+By embedding Lagrangian relaxation into a branch and bound tree, we can obtain a tighter lower bound and reduce the number of subproblems that need to be solved, leading to faster convergence and better performance. This approach can be applied to many other optimization problems that involve difficult constraints, and can be a powerful tool for finding optimal solutions to large-scale optimization problems.
+
+
+% Embedding Lagrangian relaxation into a branch and bound tree
+
+\subsection{Motivation}
+
+Branch and bound is a popular algorithm for solving mixed integer programs, where the solution space is divided into smaller subproblems that are recursively solved until an optimal solution is found. However, branch and bound can be computationally expensive, especially for large instances. By embedding Lagrangian relaxation into the branch and bound tree, we can obtain a tighter lower bound and reduce the number of subproblems that need to be solved, leading to faster convergence and better performance.
+
+\subsection{Lagrangian Relaxation}
+
+Lagrangian relaxation involves relaxing constraints and optimizing a Lagrangian dual problem to obtain a lower bound on the optimal value of the original problem. By adding Lagrange multipliers to the objective function, we can obtain a relaxed problem that is easier to solve and provides a bound on the optimal value of the original problem.
+
+\subsection{Branch and Bound with Lagrangian Relaxation}
+
+We can embed Lagrangian relaxation into a branch and bound tree by using the relaxed problem as a lower bound for the subproblems. In particular, we can use the Lagrangian relaxation function to compute a lower bound for each subproblem, and use this lower bound to prune the subproblems that cannot improve the current best solution.
+
+The branch and bound algorithm with Lagrangian relaxation can be described as follows:
+
+\begin{algorithm}
+\caption{My Algorithm}
+\begin{algorithmic}[1]
+\State \textbf{Input:} Mixed integer program $P$
+\State \textbf{Output:} Optimal solution to $P$
+\State $LB \leftarrow -\infty$ \Comment{Initialize the lower bound}
+\State $UB \leftarrow \infty$ \Comment{Initialize the upper bound}
+\State Create an empty stack $S$ and push $P$ onto $S$
+\While{$S$ is not empty}
+    \State $P \leftarrow pop(S)$ \Comment{Select a subproblem}
+    \State Solve the Lagrangian dual problem for the relaxed problem of $P$ using the current best Lagrange multipliers $\lambda$
+    \State Let $z_L$ be the lower bound for $P$ computed from the Lagrangian relaxation
+    \If{$z_L < UB$}
+        \If{$P$ is a feasible solution}
+            \State Update $UB$ with the optimal value of $P$
+        \Else
+            \State Select a branching variable and create two subproblems by fixing the variable to $0$ and $1$
+            \State Push the two subproblems onto $S$
+        \EndIf
+    \Else
+        \State Discard $P$
+    \EndIf
+\EndWhile
+\State \Return $UB$
+\end{algorithmic}
+\end{algorithm}
+
+The Lagrangian relaxation function used in this algorithm can be obtained by relaxing one or more constraints in the original problem, and solving a Lagrangian dual problem with Lagrange multipliers added to the objective function. The Lagrange multipliers can be updated as the algorithm proceeds, using the subgradient method or other optimization techniques.
+
+\subsection{Conclusion}
+
+By embedding Lagrangian relaxation into a branch and bound tree, we can obtain a tighter lower bound and reduce the number of subproblems that need to be solved, leading to faster convergence and better performance. This approach can be applied to many other optimization problems that involve difficult constraints, and can be a powerful tool for finding optimal solutions to large-scale optimization problems.
+
+
+\begin{verbatim}
+import gurobipy as gp
+
+# Generic mixed integer program with two sets of constraints
+def mip(A1, b1, A2, b2, c):
+    n, m1, m2 = len(c), len(A1), len(A2)
+    model = gp.Model('MIP')
+    x = model.addVars(n, vtype=gp.GRB.BINARY, name='x')
+    for i in range(m1):
+        model.addConstr(gp.quicksum([A1[i, j] * x[j] for j in range(n)]) <= b1[i])
+    model.setObjective(gp.quicksum([c[j] * x[j] for j in range(n)]), gp.GRB.MINIMIZE)
+    model.setParam('OutputFlag', False)
+    model.optimize()
+    return model.objVal, {j: x[j].x for j in range(n)}
+
+# Lagrangian relaxation with two sets of constraints
+def lagrangian_relaxation(u, A1, b1, A2, b2, c):
+    n, m1, m2 = len(c), len(A1), len(A2)
+    model = gp.Model('Lagrangian relaxation')
+    x = model.addVars(n, vtype=gp.GRB.BINARY, name='x')
+    for i in range(m1):
+        model.addConstr(gp.quicksum([A1[i, j] * x[j] for j in range(n)]) <= b1[i])
+    obj = gp.quicksum([c[j] * x[j] for j in range(n)])
+    for i in range(m2):
+        obj += u[i] * (gp.quicksum([A2[i, j] * x[j] for j in range(n)]) - b2[i])
+    model.setObjective(obj, gp.GRB.MINIMIZE)
+    model.setParam('OutputFlag', False)
+    model.optimize()
+    return model.objVal, {j: x[j].x for j in range(n)}, {i: u[i] - A2[i, :].dot({j: x[j].x for j in range(n)}) + b2[i] for i in range(m2)}
+
+# Branch and bound with Lagrangian relaxation
+def branch_and_bound(A1, b1, A2, b2, c, max_iter=100):
+    n, m1, m2 = len(c), len(A1), len(A2)
+    LB, UB = -gp.GRB.INFINITY, gp.GRB.INFINITY
+    S = [(A1, b1)] # Stack of subproblems
+    for iter in range(max_iter):
+        if not S:
+            break
+        A, b = S.pop() # Select a subproblem
+        obj, sol = mip(A, b, A2, b2, c) # Solve the subproblem
+        if obj < UB:
+            UB = obj
+        u, conv = np.zeros(m2), []
+        for t in range(max_iter):
+            obj_lag, sol_lag, subgrad = lagrangian_relaxation(u, A, b, A2, b2, c) # Solve the Lagrangian dual problem
+            if obj_lag >= UB: # Prune the subproblem
+                break
+            if all(abs(subgrad[i]) <= 1e-6 for i in range(m2)): # Check for optimality
+                LB = obj_lag
+                break
+                        x_frac = {j: sol_lag[j] - int(sol_lag[j]) for j in range(n)} # Compute the fractional parts of the variables
+            j = max(x_frac, key=x_frac.get) # Select the variable with the largest fractional part
+            x_j = int(sol_lag[j]) # Round down the variable
+            S1, S2 = [], [] # Create two subproblems
+            S1.append((A1, b1 + [gp.quicksum([A2[i, j] for j in range(n) if int(sol_lag[j]) == x_j]) <= x_j])) # Add constraint x_j <= floor(x_j) to set A1
+            S2.append((A, b + [gp.quicksum([A2[i, j] for j in range(n) if int(sol_lag[j]) == x_j]) >= x_j + 1])) # Add constraint x_j >= ceil(x_j) to set A2
+            if S1: # Add the first subproblem to the stack
+                S.append(S1[-1])
+            if S2: # Add the second subproblem to the stack
+                S.append(S2[-1])
+            u += 0.01 * np.array(subgrad) # Update the Lagrange multipliers
+        print(f'Iteration {iter}: LB={LB:.2f}, UB={UB:.2f}, Conv={conv}') # Print the progress
+    return UB
+\end{verbatim}
+
+
+Here is a version applied to the VRP
+\begin{verbatim}
+import numpy as np
+import gurobipy as gp
+
+# Vehicle routing problem with Lagrangian relaxation
+
+def vrp_lagrangian_relaxation(u, D, Q, K):
+    n = len(D)
+    model = gp.Model('VRP Lagrangian relaxation')
+    x = model.addVars(n, n, K, vtype=gp.GRB.BINARY, name='x')
+    for k in range(K):
+        for i in range(n):
+            model.addConstr(gp.quicksum([x[i, j, k] for j in range(n) if j != i]) == 1) # Each customer is visited exactly once
+            model.addConstr(gp.quicksum([x[j, i, k] for j in range(n) if j != i]) == 1) # Each customer is visited exactly once
+        model.addConstr(gp.quicksum([x[0, j, k] for j in range(1, n)]) == 1) # Each route starts at the depot
+        model.addConstr(gp.quicksum([x[j, 0, k] for j in range(1, n)]) == 1) # Each route ends at the depot
+        for i in range(1, n):
+            for j in range(1, n):
+                if i != j:
+                    model.addConstr(gp.quicksum([x[i, j, k] for k in range(K)]) <= 1) # Subtours are not allowed
+        model.addConstr(gp.quicksum([D[i][j] * x[i, j, k] for i in range(n) for j in range(n) for k in range(K)]) <= Q) # Capacity constraint
+    obj = gp.quicksum([D[i][j] * x[i, j, k] for i in range(n) for j in range(n) for k in range(K)])
+    for i in range(n):
+        for j in range(n):
+            if i != j:
+                for k in range(K):
+                    obj += u[k][i][j] * (x[i, j, k] - x[j, i, k])
+    model.setObjective(obj, gp.GRB.MINIMIZE)
+    model.setParam('OutputFlag', False)
+    model.optimize()
+    return model.objVal, {(i, j, k): x[i, j, k].x for i in range(n) for j in range(n) for k in range(K)}, {(k, i, j): u[k][i][j] - x[i, j, k].x + x[j, i, k].x for k in range(K) for i in range(n) for j in range(n) if i != j}
+
+# Branch and bound with Lagrangian relaxation for the VRP
+def vrp_branch_and_bound(D, Q, K, max_iter=100):
+    n = len(D)
+    LB, UB = -gp.GRB.INFINITY, gp.GRB.INFINITY
+    S = [([], [])] # Stack of subproblems
+    for iter in range(max_iter):
+        if not S:
+            break
+        I, J = S.pop() # Select a subproblem
+        u, conv = np.zeros((K, n, n)), []
+        for t in range(max_iter):
+            obj_lag, sol_lag, subgrad = vrp_lagrangian_relaxation(u, D, Q, K) # Solve the Lagrangian dual problem
+            if obj_lag >= UB:
+                break
+            if all(abs(subgrad[k, i, j]) <= 1e-6 for k in range(K) for i in range(n) for j in range(n) if i != j): # Check for optimality
+                LB = obj_lag
+                break
+            x_frac = {(i, j, k): sol_lag[i, j, k] - int(sol_lag[i, j, k]) for i in range(n) for j in range(n) for k in range(K)} # Compute the fractional parts of the variables
+            (i, j, k) = max(x_frac, key=x_frac.get) # Select the variable with the largest fractional part
+            x_ijk = int(sol_lag[i, j, k]) # Round down the variable
+            S1, S2 = [], [] # Create two subproblems
+            I1, J1, I2, J2 = list(I), list(J), list(I), list(J)
+            if x_ijk == 0:
+                J1.append(j) # Add customer j to route k in the first subproblem
+            else:
+                I2.append(i) # Add customer i to route k in the second subproblem
+            if J1: # Add the first subproblem to the stack
+                S.append((I1, J1))
+            if J2: # Add the second subproblem to the stack
+                S.append((I2, J2))
+            u += 0.01 * np.array(subgrad) # Update the Lagrange multipliers
+        print(f'Iteration {iter}: LB={LB:.2f}, UB={UB:.2f}, Conv={conv}') # Print the progress
+    return UB
+\end{verbatim}
+
+Sample Instance
+\begin{verbatim}
+import numpy as np
+
+# Sample instance for the vehicle routing problem
+D = np.array([
+    [0, 5, 8, 12, 15],
+    [5, 0, 6, 8, 12],
+    [8, 6, 0, 4, 7],
+    [12, 8, 4, 0, 3],
+    [15, 12, 7, 3, 0]
+])
+Q = 15
+K = 2
+\end{verbatim}
+
+This instance has five customers, and the distance matrix D represents the distance between each pair of customers. The capacity of each vehicle is 15, and there are two vehicles available. You can use this instance to test the performance of the branch and bound algorithm with Lagrangian relaxation. Note that the algorithm may take some time to run, depending on the size of the instance and the choice of parameters.

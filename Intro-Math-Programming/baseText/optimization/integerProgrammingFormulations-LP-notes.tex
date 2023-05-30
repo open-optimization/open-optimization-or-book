@@ -722,41 +722,87 @@ $$
 $$
 If $\delta = 1$ does not effect the rest of the optimization problem, then adding the constraint regarding $\delta = 1$ is not necessary.  Hence, typically, in this scenario, we only need to add the constraint $a^\top x \leq b + M \delta$.
 
-\subsection{Binary reformulation of integer variables}
-If an integer variable has small upper and lower bounds, it can sometimes be advantageous to recast it as a sequence of binary variables - for either modeling, the solver, or both.   Although there are technically many ways to do this, here are the two most common ways.
+\subsection{Multi Term Disjunction with application to 2D packing}
 
-\begin{general}{Full reformulation}{\textcolor{blue}{$u$ many binary variables}}
-\label{general:full-reformulation}
-For a non-negative integer variable $x$ with upper bound $u$, modeled as 
-\begin{equation}
-0 \leq x \leq u, \ \ \ \ x \in \Z,
-\end{equation}
-this can be reformulated with $u$ binary variables $z_1, \dots, z_u$ as 
-\begin{equation}
-\begin{split}
-x & = \sum_{i=1}^u i z_i = z_1 + 2 z_2 + \dots + u z_u\\
-1 & \geq \sum_{i=1}^u z_i = z_1 + z_2 + \dots + z_u\\
-z_i & \in \{0,1\} \ \ \text{ for } i=1, \dots, u
-\end{split}
-\end{equation}
-\end{general}
-We call this the \emph{full reformulation} because there is a binary variable $z_i$ associated with every value $i$ that $x$ could take.  That is, if $z_3 = 1$, then the second constraint forces $z_i = 0$ for all $i \neq 3$ (that is, $z_3$ is the only non-zero binary variable), and hence by the first constraint, $x = 3$.
+%\section{Generalized $k$-of-$n$ Disjunction}
+A disjunction is a generalization of an ``or'' statement. Suppose that we have $n$ constraints 
+	$$
+	\mathbf{a}_1^\top\mathbf{x} \leq b_1, \quad \mathbf{a}_2^\top\mathbf{x} \leq b_2, \quad\dots, \quad \mathbf{a}_n^\top\mathbf{x} \leq b_n
+	$$
+and we want to enforce at least $k$ of them. This can be accomplished linearly by introducing a new binary indicator variable $\delta_i$ for each of the disjunctive constraints $i \in \{1,\dots,n\}$:
+	\begin{align*}
+	\mathbf{a}_1^\top\mathbf{x} &\leq b_1+M(1-\delta_1) \\
+	\mathbf{a}_2^\top\mathbf{x} &\leq b_2+M(1-\delta_2) \\
+								&\vdots 				\\
+	\mathbf{a}_n^\top\mathbf{x} &\leq b_n+M(1-\delta_1) \\
+	\sum_{i=1}^n\delta_i &\geq k
+	\end{align*}
+If $\delta_i = 1$, then the $i^\text{th}$ disjunctive constraint is actively enforced. The last constraint $\left(\sum_{i=1}^n\delta_i \geq 1\right)$ ensures that at least $k$ of the constraints is active.
 
-\begin{general}{Binary reformulation}{\textcolor{blue}{$O(\log u)$ many binary variables}}
-\label{general:log-reformulation}
-For a non-negative integer variable $x$ with upper bound $u$, modeled as 
-\begin{equation}
-0 \leq x \leq u, \ \ \ \ x \in \Z,
-\end{equation}
-this can be reformulated with $u$ binary variables $z_1, \dots, z_{\lfloor\log( u )\rfloor}$ as 
-\begin{equation}
-\begin{split}
-x & = \sum_{i=0}^{\lfloor\log( u )\rfloor}2^i z_i = z_0 + 2 z_1 +  4 z_2 + 8 z_3 + \dots + 2^{\lfloor\log( u )\rfloor} z_{\lfloor\log( u )\rfloor}\\
-z_i & \in \{0,1\} \ \ \text{ for } i=1, \dots, \lfloor\log( u )\rfloor
-\end{split}
-\end{equation}
-\end{general}
-We call this the \emph{log reformulation} because this requires only logarithmically many binary variables in terms of the upper bound $u$.   This reformulation is particularly better than the full reformulation when the upper bound $u$ is a ``larger" number, although we will leave it ambiguous as to how larger a number need to be in order to be described as a ``larger" number. 
+\subsubsection{Strip Packing Problem}
+Suppose we a selection of rectangles $I$ and a 2-dimensional strip with width $W$ and infinite height. Each rectangle $i \in I$ has width $w_i$ and 
+height $h_i$ and we want to pack the rectangles into the strip so that \eqref{mod:StripPackingObj-simple} overall height is minimized, \eqref{mod:StripPackingWidth-simple} overall width is less than $W$, and \eqref{mod:StripPackingOverlap-simple} none of the rectangles overlap. See Figure \ref{fig:StripPacking} for an example.
+	\begin{figure}[h!]
+	\begin{subfigure}[b]{.6\textwidth}
+	\centering
+	\includegraphics[height=.4\textheight]{Figures/StripPacking0}
+	\caption{Pack the rectangles into the strip}
+	\label{fig:StripPacking-PackStrip}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{.3\textwidth}
+	\centering
+	\includegraphics[height=.4\textheight]{Figures/StripPacking1}
+	\caption{Minimize overall height $H$.}
+	\label{fig:StripPacking-MinHeight}
+	\end{subfigure}
+	\caption{An Example of the Strip Packing Problem}
+	\label{fig:StripPacking}
+	\end{figure}
+
+Let $(x_i,y_i)$ denote the position of the lower-left-hand corner of each rectangle $i \in I$. The overlapping constraint \eqref{mod:StripPackingOverlap-simple} is the trickiest part. Consider a pair of rectangles $i$ and $j$: rectangle $j$ is located entirely to the left of rectangle $i$ if $x_j$ has a value larger than $x_j+w_j$. That is, if $x_j \geq x_j+w_j$. On the other hand, if $y_j \geq y_i+h_i$, then rectangle $j$ is located entirely above rectangle $i$. If either of these constraints is satisfied then rectangles $i$ and $j$ do not overlap. We could also place $i$ above or to the right of $j$. This gives four constraints that we need to satisfy at least one of. The model can be thought of thusly:
+
+	\begin{subequations}
+	\begin{alignat}{4}
+	\text{Minimize}& \quad & \mathclap{\hspace{-69pt} \max_{i\in I}\{y_i+h_i\}} 	\label{mod:StripPackingObj-simple}\\
+		\text{s.t.}& 	   & \max_{i\in I}\{x_i+w_i\} &\leq W 						\label{mod:StripPackingWidth-simple}\\
+				   &	   & \mathclap{\hspace{111pt} \left.\begin{aligned}
+				   		x_i+w_i &\leq x_j \\
+				   		x_j+w_j &\leq x_i \\
+				   		y_i+h_i &\leq y_j \\
+				   		y_j+h_j &\leq y_i
+				   		\end{aligned}\right\} \parbox{110pt}{At least one of these for every distinct pairs of rectangles $i,j \in I$}} \label{mod:StripPackingOverlap-simple} \\
+			   	   &	   & x_i,y_i &\geq 0		&\qquad& & &\forall\ i\in I
+	\end{alignat}
+	\end{subequations}
+Constraint \eqref{mod:StripPackingOverlap-simple} is a set of four \textit{disjunctive} constraints. This can be expressed linearly by introducing a new binary indicator variable $\delta_{ijk}$ for each of the disjunctive constraints in \eqref{mod:StripPackingOverlap-simple}:
+	\begin{alignat}{4}
+	\text{Minimize}& \quad & \mathclap{\hspace{-53pt} H}	\nonumber\\
+		\text{s.t.}& 	   & y_i+h_i &\leq H						&\qquad& & &\forall\ i\in I		\tag{\ref{mod:StripPackingObj-simple}}	\\
+				   & 	   & x_i+w_i &\leq W						&\qquad& & &\forall\ i\in I		\tag{\ref{mod:StripPackingWidth-simple}}\\
+				   &	   & x_i+w_i &\leq x_j+M(1-\delta_{ij1}) 	&\qquad& & &\forall\ i,j\in I:\ i>j	\nonumber \\
+				   &	   & x_j+w_j &\leq x_i+M(1-\delta_{ij2}) 	&\qquad& & &\forall\ i,j\in I:\ i>j	\nonumber \\
+				   &	   & y_i+h_i &\leq y_j+M(1-\delta_{ij3}) 	&\qquad& & &\forall\ i,j\in I:\ i>j	\tag{\ref{mod:StripPackingOverlap-simple}}\\
+				   &	   & y_j+h_j &\leq y_i+M(1-\delta_{ij4}) 	&\qquad& & &\forall\ i,j\in I:\ i>j	\nonumber \\
+				   &	   & \sum_{k=1}^4\delta_{ijk} & \geq 1	 	&\qquad& & &\forall\ i,j\in I:\ i>j	\nonumber \\
+				   &	   & x_i,y_i &\geq 0		&\qquad& & &\forall\ i\in I							\nonumber \\
+				   &	   & \boldsymbol{\delta}_{ij} &\in\{0,1\}^4	&\qquad& & &\forall\ i,j\in I:\ i>j	\nonumber 
+	\end{alignat}
+If $\delta_{ijk} = 1$, then the $k^\text{th}$ disjunctive constraint is actively enforced. The last constraint $\left(\sum_{k=1}^4\delta_{ijk} \geq 1\right)$ ensures that at least one of the constraints is active. An optimal solution to the example is given in Figure \ref{fig:StripPacking-Opt}; it was found via GurobiPy.
+	\begin{figure}[h!]
+	\centering
+	\includegraphics[height=.4\textheight]{Figures/StripPacking2}
+	\caption{The Optimal Solution to the example problem}
+	\label{fig:StripPacking-Opt}
+	\end{figure}
+
+This problem is considered strongly NP-Hard.
+
+
+
+
+
+
 \subsection{SOS1 Constraints}
 \begin{definition}{Special Ordered Sets of Type 1 (SOS1)}
 A Special Ordered Sets of type 1 (SOS1) constraint on a vector indicates that \emph{at most one element of the vector can non-zero}.
@@ -1117,6 +1163,179 @@ $$
 
 
 
+\subsection{Other models}
+Job shop scheduling is a common optimization problem in which a set of jobs needs to be scheduled on a set of machines. The goal is to minimize the total completion time of all the jobs or to maximize some other objective function. This problem can be formulated as an integer programming (IP) model, which is a mathematical optimization model that includes both continuous and integer decision variables.
+
+One of the most popular IP models for job shop scheduling is the Johnson's rule model. This model can be formulated as follows:
+
+Let there be $n$ jobs and $m$ machines.
+
+Let $x_{ij}$ be a binary variable that is 1 if job $i$ is assigned to machine $j$, and 0 otherwise.
+
+Let $y_i$ be an integer variable that represents the start time of job $i$.
+
+The objective function is to minimize the maximum completion time of all the jobs.
+
+$\min \max\limits_{i=1}^{n} y_i + p_i$
+
+Subject to:
+
+Each job can be assigned to only one machine: $\sum\limits_{j=1}^{m} x_{ij} = 1$ for $i=1$ to $n$
+
+Each machine can process only one job at a time: $\sum\limits_{i=1}^{n} x_{ij} \leq 1$ for $j=1$ to $m$
+
+Start time of a job is based on the completion time of its predecessor: $y_i \geq y_j + p_j$ for $(i,j) \in E$
+
+$y_i \geq 0$ for $i=1$ to $n$
+
+$x_{ij} \in {0,1}$ for $i=1$ to $n$ and $j=1$ to $m$
+
+$y_i \in \mathbb{N}$ for $i=1$ to $n$
+
+Where, $p_i$ is the processing time of job $i$, $E$ is the set of edges that represent the precedence constraints between the jobs.
+
+The model can be implemented using python with Gurobi library as follows:
+
+\begin{verbatim}
+from gurobipy import *
+
+def job_shop_scheduling(n,m,p,E):
+    # Create a new model
+    model = Model()
+
+    # Create variables
+    x = {}
+    y = {}
+    for i in range(n):
+        y[i] = model.addVar(vtype=GRB.INTEGER, name="y_"+str(i))
+        for j in range(m):
+            x[i,j] = model.addVar(vtype=GRB.BINARY, name="x_"+str(i)+"_"+str(j))
+
+    # Set objective
+    obj = quicksum([y[i]+p[i] for i in range(n)])
+    model.setObjective(obj,GRB.MINIMIZE)
+
+    # Add constraints
+    for i in range(n):
+        model.addConstr(quicksum([x[i,j] for j in range(m)]) == 1)
+
+    for j in range(m):
+        model.addConstr(quicksum([x[i,j] for i in range(n)]) <= 1)
+
+    for (i,j) in E:
+        model.addConstr(y[i] >= y[j]+p[j])
+
+    for i in range(n):
+        model.addConstr(y[i] >= 0)
+
+    # Optimize model
+    model.optimize()
+
+    return
+\end{verbatim}
+
+Here is an example:
+Here is an example job shop scheduling problem with 5 machines and 15 jobs:
+
+Machine 1: Can perform jobs 1, 2, 3, 4, and 5
+Machine 2: Can perform jobs 6, 7, 8, 9, and 10
+Machine 3: Can perform jobs 11, 12, 13, 14, and 15
+Machine 4: Can perform jobs 1, 6, 11, 2, and 7
+Machine 5: Can perform jobs 3, 8, 13, 4, and 9
+Jobs:
+
+Job 1: Machine 1 (processing time = 2 hours), Machine 4 (processing time = 1 hour)
+Job 2: Machine 1 (processing time = 3 hours), Machine 4 (processing time = 2 hours)
+Job 3: Machine 1 (processing time = 2 hours), Machine 5 (processing time = 1 hour)
+Job 4: Machine 1 (processing time = 4 hours), Machine 5 (processing time = 2 hours)
+Job 5: Machine 1 (processing time = 1 hour)
+Job 6: Machine 2 (processing time = 3 hours), Machine 4 (processing time = 2 hours)
+Job 7: Machine 2 (processing time = 2 hours), Machine 4 (processing time = 1 hour)
+Job 8: Machine 2 (processing time = 4 hours), Machine 5 (processing time = 2 hours)
+Job 9: Machine 2 (processing time = 1 hour), Machine 5 (processing time = 1 hour)
+Job 10: Machine 2 (processing time = 2 hours)
+Job 11: Machine 3 (processing time = 3 hours), Machine 4 (processing time = 2 hours)
+Job 12: Machine 3 (processing time = 2 hours), Machine 4 (processing time = 1 hour)
+Job 13: Machine 3 (processing time = 4 hours), Machine 5 (processing time = 2 hours)
+Job 14: Machine 3 (processing time = 1 hour), Machine 5 (processing time = 1 hour)
+Job 15: Machine 3 (processing time = 2 hours)
+Objective: Minimize the makespan (i.e. the total time it takes to complete all the jobs)
+
+Constraints:
+
+Each job can only be performed on the specified machines in the order listed
+A machine can only work on one job at a time
+There are no precedence constraints between jobs.
+
+
+\textbf{Machines:}
+\begin{itemize}
+    \item Machine 1: Can perform jobs 1, 2, 3, 4, and 5
+    \item Machine 2: Can perform jobs 6, 7, 8, 9, and 10
+    \item Machine 3: Can perform jobs 11, 12, 13, 14, and 15
+    \item Machine 4: Can perform jobs 1, 6, 11, 2, and 7
+    \item Machine 5: Can perform jobs 3, 8, 13, 4, and 9
+\end{itemize}
+
+\textbf{Jobs:}
+\begin{itemize}
+    \item Job 1: Machine 1 (processing time = 2 hours), Machine 4 (processing time = 1 hour)
+    \item Job 2: Machine 1 (processing time = 3 hours), Machine 4 (processing time = 2 hours)
+    \item Job 3: Machine 1 (processing time = 2 hours), Machine 5 (processing time = 1 hour)
+    \item Job 4: Machine 1 (processing time = 4 hours), Machine 5 (processing time = 2 hours)
+    \item Job 5: Machine 1 (processing time = 1 hour)
+    \item Job 6: Machine 2 (processing time = 3 hours), Machine 4 (processing time = 2 hours)
+    \item Job 7: Machine 2 (processing time = 2 hours), Machine 4 (processing time = 1 hour)
+    \item Job 8: Machine 2 (processing time = 4 hours), Machine 5 (processing time = 2 hours)
+    \item Job 9: Machine 2 (processing time = 1 hour), Machine 5 (processing time = 1 hour)
+    \item Job 10: Machine 2 (processing time = 2 hours)
+    \item Job 11: Machine 3 (processing time = 3 hours), Machine 4 (processing time = 2 hours)
+    \item Job 12: Machine 3 (processing time = 2 hours), Machine 4 (processing time = 1 hour)
+    \item Job 13: Machine 3 (processing time = 4 hours), Machine 5 (processing time = 2 hours)
+    \item Job 14: Machine 3 (processing time = 1 hour), Machine 5 (processing time = 1 hour)
+    \item Job 15: Machine 3 (processing time = 2 hours)
+\end{itemize}
+
+\textbf{Objective:} Minimize the makespan (i.e. the total time it takes to complete all the jobs)
+
+\textbf{Constraints:}
+\begin{itemize}
+    \item Each job can only be performed on the specified machines in the order listed
+    \item A machine can only work on one job at a time
+    \item There are no precedence constraints between jobs.
+\end{itemize}
+
+\begin{verbatim}
+job_shop_data = {
+    'machines': {
+        1: {'jobs': [1, 2, 3, 4, 5]},
+        2: {'jobs': [6, 7, 8, 9, 10]},
+        3: {'jobs': [11, 12, 13, 14, 15]},
+        4: {'jobs': [1, 6, 11, 2, 7]},
+        5: {'jobs': [3, 8, 13, 4, 9]}
+    },
+    'jobs': {
+        1: {'machine_times': {1: 2, 4: 1}},
+        2: {'machine_times': {1: 3, 4: 2}},
+        3: {'machine_times': {1: 2, 5: 1}},
+        4: {'machine_times': {1: 4, 5: 2}},
+        5: {'machine_times': {1: 1}},
+        6: {'machine_times': {2: 3, 4: 2}},
+        7: {'machine_times': {2: 2, 4: 1}},
+        8: {'machine_times': {2: 4, 5: 2}},
+        9: {'machine_times': {2: 1, 5: 1}},
+        10: {'machine_times': {2: 2}},
+        11: {'machine_times': {3: 3, 4: 2}},
+        12: {'machine_times': {3: 2, 4: 1}},
+        13: {'machine_times': {3: 4, 5: 2}},
+        14: {'machine_times': {3: 1, 5: 1}},
+        15: {'machine_times': {3: 2}}
+    },
+    'objective': 'minimize_makespan',
+    'constraints': ['job_machine_mapping', 'single_job_single_machine', 'no_job_precedence']
+}
+\end{verbatim}
+
 \section{Quadratic Assignment Problem (QAP)}
 \begin{resource}{}{}
 \begin{itemize}
@@ -1231,7 +1450,45 @@ w_{ij} x_{ij} \le t_i & & i=1,
 \ldots, m, \quad j=1,
 \ldots, n; \end{align}
 
+\section{Other material}
 
+\subsection{Binary reformulation of integer variables}
+If an integer variable has small upper and lower bounds, it can sometimes be advantageous to recast it as a sequence of binary variables - for either modeling, the solver, or both.   Although there are technically many ways to do this, here are the two most common ways.
+
+\begin{general}{Full reformulation}{\textcolor{blue}{$u$ many binary variables}}
+\label{general:full-reformulation}
+For a non-negative integer variable $x$ with upper bound $u$, modeled as 
+\begin{equation}
+0 \leq x \leq u, \ \ \ \ x \in \Z,
+\end{equation}
+this can be reformulated with $u$ binary variables $z_1, \dots, z_u$ as 
+\begin{equation}
+\begin{split}
+x & = \sum_{i=1}^u i z_i = z_1 + 2 z_2 + \dots + u z_u\\
+1 & \geq \sum_{i=1}^u z_i = z_1 + z_2 + \dots + z_u\\
+z_i & \in \{0,1\} \ \ \text{ for } i=1, \dots, u
+\end{split}
+\end{equation}
+\end{general}
+We call this the \emph{full reformulation} because there is a binary variable $z_i$ associated with every value $i$ that $x$ could take.  That is, if $z_3 = 1$, then the second constraint forces $z_i = 0$ for all $i \neq 3$ (that is, $z_3$ is the only non-zero binary variable), and hence by the first constraint, $x = 3$.
+
+\begin{general}{Binary reformulation}{\textcolor{blue}{$O(\log u)$ many binary variables}}
+\label{general:log-reformulation}
+For a non-negative integer variable $x$ with upper bound $u$, modeled as 
+\begin{equation}
+0 \leq x \leq u, \ \ \ \ x \in \Z,
+\end{equation}
+this can be reformulated with $u$ binary variables $z_1, \dots, z_{\lfloor\log( u )\rfloor}$ as 
+\begin{equation}
+\begin{split}
+x & = \sum_{i=0}^{\lfloor\log( u )\rfloor}2^i z_i = z_0 + 2 z_1 +  4 z_2 + 8 z_3 + \dots + 2^{\lfloor\log( u )\rfloor} z_{\lfloor\log( u )\rfloor}\\
+z_i & \in \{0,1\} \ \ \text{ for } i=1, \dots, \lfloor\log( u )\rfloor
+\end{split}
+\end{equation}
+\end{general}
+We call this the \emph{log reformulation} because this requires only logarithmically many binary variables in terms of the upper bound $u$.   This reformulation is particularly better than the full reformulation when the upper bound $u$ is a ``larger" number, although we will leave it ambiguous as to how larger a number need to be in order to be described as a ``larger" number. 
+
+\section{Literature and Resources}
 
 \begin{resource}
 
