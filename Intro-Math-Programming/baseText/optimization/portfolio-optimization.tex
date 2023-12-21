@@ -1,0 +1,134 @@
+
+
+
+\section{Markowitz Portfolio Optimization}
+
+Harry Markowitz introduced Modern Portfolio Theory in 1952, which provides a mathematical framework for assembling a portfolio of assets such that the expected return is maximized for a given level of risk. The fundamental insight is that by combining assets with different expected returns and volatilities, one can achieve diversification, leading to reduced portfolio risk.
+
+\subsection{Formulation}
+
+Given a set of $n$ assets with expected returns $\mathbf{r} = [r_1, r_2, \ldots, r_n]^\top$, and a covariance matrix $\Sigma$ representing the covariances between the returns of the assets, the problem can be formulated as:
+
+\begin{equation}
+\begin{aligned}
+& \underset{\mathbf{w}}{\text{maximize}}
+& & \mathbf{r}^\top\mathbf{w} - \frac{\gamma}{2} \mathbf{w}^T \Sigma \mathbf{w} \\
+& \text{subject to}
+& & \mathbf{1}^\top\mathbf{w} = 1, \\
+& & \mathbf{w} \geq 0
+\end{aligned}
+\end{equation}
+
+where:
+\begin{itemize}
+    \item $\mathbf{w} = [w_1, w_2, \ldots, w_n]^\top$ is the vector of portfolio weights.
+    \item $\gamma$ is the risk aversion coefficient. A larger $\gamma$ indicates greater aversion to risk.
+    \item $\mathbf{1}$ is a vector of ones.
+\end{itemize}
+
+\subsection{Interpretation}
+
+The objective function is comprised of two components: the expected portfolio return ($\mathbf{r}^\top\mathbf{w}$) and a penalty for portfolio variance ($\mathbf{w}^\top \Sigma \mathbf{w}$). By adjusting $\gamma$, an investor can trade off between risk and return.
+
+The constraint ensures that the sum of the portfolio weights is 1, meaning the portfolio is fully invested.
+
+By solving this optimization problem, one can obtain the weights that maximize the expected return for a given level of risk, forming the efficient frontier.
+
+\subsection{Alternative Formulation I: Bounding Risk}
+
+Given a maximum acceptable risk level $\rho$, the optimization problem can be formulated as:
+
+\begin{equation}
+\begin{aligned}
+& \underset{\mathbf{w}}{\text{maximize}}
+& & \mathbf{r}^\top\mathbf{w} \\
+& \text{subject to}
+& & \mathbf{w}^\top \Sigma \mathbf{w} \leq \rho, \\
+& & & \mathbf{1}^\top\mathbf{w} = 1. \\
+\end{aligned}
+\end{equation}
+
+\subsection{Alternative Formulation II: Bounding Expected Profits}
+
+Given a minimum acceptable return level $\rho_r$, the optimization problem can be formulated as:
+
+\begin{equation}
+\begin{aligned}
+& \underset{\mathbf{w}}{\text{minimize}}
+& & \mathbf{w}^\top \Sigma \mathbf{w} \\
+& \text{subject to}
+& & \mathbf{r}^\top\mathbf{w} \geq \rho_r, \\
+& & & \mathbf{1}^\top\mathbf{w} = 1. \\
+\end{aligned}
+\end{equation}
+
+
+\subsection{Properties of the Covariance Matrix}
+
+\begin{lemma}{Covariance is Symmetric}{}
+The covariance matrix $\Sigma$ is symmetric.
+\end{lemma}
+\begin{proof}
+By definition, the covariance between two random variables \(X\) and \(Y\) is given by:
+\begin{equation}
+\text{cov}(X, Y) = E\left[(X - E[X])(Y - E[Y])\right]
+\end{equation}
+
+From this definition, it's straightforward to deduce that:
+\begin{align*}
+\text{cov}(X, Y) &= E\left[(X - E[X])(Y - E[Y])\right] \\
+&= E\left[(Y - E[Y])(X - E[X])\right] \\
+&= \text{cov}(Y, X)
+\end{align*}
+
+Thus, the covariance matrix, which captures the covariances between all pairs of random variables, is symmetric.
+\end{proof}
+
+\begin{lemma}{Covariance is PSD}{}
+The covariance matrix $\Sigma$ is positive semi-definite.
+\end{lemma}
+\begin{proof}
+
+Consider a covariance matrix \(\Sigma\) for a set of random variables \(\mathbf{X} = [X_1, X_2, ..., X_n]^T\). By definition, the \(i,j\)-th entry of \(\Sigma\) is:
+\[
+\Sigma_{ij} = \text{cov}(X_i, X_j)
+\]
+
+We wish to show that for any vector \(\mathbf{w} \in \mathbb{R}^n\), the quadratic form \(Q(\mathbf{w}) = \mathbf{w}^T \Sigma \mathbf{w} \geq 0\).
+
+Starting with this quadratic form:
+\begin{align*}
+Q(\mathbf{w}) &= \mathbf{w}^T \Sigma \mathbf{w} 
+= \sum_{i=1}^{n} \sum_{j=1}^{n} w_i w_j \text{cov}(X_i, X_j) 
+= \sum_{i=1}^{n} \sum_{j=1}^{n} w_i w_j E[(X_i - E[X_i])(X_j - E[X_j])]
+\end{align*}
+
+Consider \(Y = \sum_{i=1}^{n} w_i X_i\). Its expectation is:
+\[
+E[Y] = E\left[ \sum_{i=1}^{n} w_i X_i \right] = \sum_{i=1}^{n} w_i E[X_i].
+\]
+
+The variance of \(Y\) is:
+\begin{align*}
+\text{var}(Y) &= E\left[ (Y - E[Y])^2 \right] 
+= E\left[ \left( \sum_{i=1}^{n} w_i X_i - \sum_{i=1}^{n} w_i E[X_i] \right)^2 \right] \\
+&= E\left[ \left( \sum_{i=1}^{n} w_i (X_i - E[X_i]) \right) \left( \sum_{j=1}^{n} w_j (X_j - E[X_j]) \right) \right] 
+= \sum_{i=1}^{n} \sum_{j=1}^{n} w_i w_j E[(X_i - E[X_i])(X_j - E[X_j])].
+\end{align*}
+
+From the above, we deduce:
+\[
+Q(\mathbf{w}) = \text{var}(Y).
+\]
+
+Since variance is non-negative, \(Q(\mathbf{w}) \geq 0\) for all \(\mathbf{w} \in \mathbb{R}^n\), proving that \(\Sigma\) is positive semidefinite.
+
+\end{proof}
+
+
+In essence, the symmetry of the covariance matrix stems from the commutative property of the covariance calculation, while its positive semidefiniteness arises from the inherent non-negativity of variance for any linear combination of the concerned random variables.
+
+\begin{examplewithcode}{Portfolio Optimizaiton}{}
+
+\end{examplewithcode}
+

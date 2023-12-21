@@ -38,15 +38,29 @@ Starting from any node, add the edge to the next closest node.  Continue this pr
 \end{general}
 
 \subsection{Insertion Method }
-\begin{general}{Insertion Method}{Complexity: $O(n^2)$}
+%\begin{general}{Insertion Method}{Complexity: $O(n^2)$}
+%\label{heuristic:insertion}
+%\begin{enumerate}
+%\item Start from any 3 nodes (lets call this node 1) and label this as your current node.
+%\item Pick the next current node as the one that is closest to the current node that has not yet been visited.
+%\item Repeat step 2 until all nodes are in the tour.
+%\end{enumerate}
+%\end{general}
+\begin{algorithm}
+\caption{Insertion Method}
 \label{heuristic:insertion}
-\begin{enumerate}
-\item Start from any 3 nodes (lets call this node 1) and label this as your current node.
-\item Pick the next current node as the one that is closest to the current node that has not yet been visited.
-\item Repeat step 2 until all nodes are in the tour.
-\end{enumerate}
-\end{general}
+\begin{algorithmic}[1]
+    \State \textbf{Input:} Set of nodes, distance between nodes, etc.
+    \State \textbf{Output:} Constructed tour.
+    \State \textbf{Complexity:} $O(n^2)$
 
+    \State Start from any 3 nodes (let's call the first one node 1) and label this as your current node.
+    \While{there are unvisited nodes}
+        \State Pick the next current node as the one closest to the current node that hasn't been visited yet.
+    \EndWhile
+    \State \Return the constructed tour.
+\end{algorithmic}
+\end{algorithm}
 
 \section{Improvement Heuristics}
 There are many ways to generate improving steps.  The key features of improving step to consider are
@@ -110,14 +124,24 @@ This is a generalization of 2-Opt and 3-Opt.
 The \emph{Hill Climbing} algorithm finds an improving neighboring solution and climbs in that direction.  It continues this process until there is no other neighbor that is improving.  
 
 In the context of TSP, we will consider 2-Opt improving moves and the Hill Climbing algorithm for TSP in this case is referred to as the 2-Opt algorithm (also known as the Subtour Reversal Algorithm).
-\begin{general}{Hill Climbing}{}
-\begin{enumerate}
-\item Start with an initial feasible solution, label it as the current solution.
-\item List all neighbors of the current solution.
-\item If no neighbor has a better solution, then stop.
-\item Otherwise, move to the best neighbor and go to Step 2.
-\end{enumerate}
-\end{general}
+\begin{algorithm}
+\caption{Hill Climbing}
+\begin{algorithmic}[1]
+    \State \textbf{Input:} Initial feasible solution, etc.
+    \State \textbf{Output:} Best solution found.
+    
+    \State Start with an initial feasible solution, label it as the current solution.
+    \Repeat
+        \State List all neighbors of the current solution.
+        \State Evaluate all neighbors to find the best one.
+        \If{no neighbor is better}
+            \State \textbf{break}
+        \EndIf
+        \State Move to the best neighbor.
+    \Until{no better neighbor is found}
+    \State \Return the current solution.
+\end{algorithmic}
+\end{algorithm}
 
 
 Here is an example on the TSP problem with 2-Opt swaps:
@@ -175,28 +199,34 @@ A typically temperature schedule starts at a value $T = 0.2 \times Z_c$, where $
 \item $T_5 = 0.8 T_4$
 \end{itemize}
 For instance, we could choose to run the algorithm for 10 iterations at each temperature value.  The Simulated Annealing algorithm is the following:
-\begin{general}{Simulated Annealing Outline}{[minimization version]}
-\begin{enumerate}
-\item Start with an initial feasible solution, label it as the current solution, and compute its object value $Z_c$.
-\item Select a neighbor of the current solution and compute its objective value $Z_n$.
-\item Decide whether or not to move to the neighbor:
-\begin{enumerate}
-\item If the neighbor is an improvement ($Z_n < Z_c$), \textbf{accept the move} and set the neighbor as the current solution.\\
-\item Otherwise, $Z_c < Z_n$ and thus $Z_c - Z_n < 0$.   Now with probability $e^{\frac{Z_c - Z_n}{T}}$ accept the move.  In detail:  
-\begin{itemize}
-\item Compute the number $p = e^{\frac{Z_c - Z_n}{T}}$
-\item Generate a random number $x \in [0,1]$ from the computer.
-\item If $x < p$, then \textbf{accept the move}.
-\item Otherwise, if $x \geq p$, \textbf{reject the move} and stay at the current solution.
-\end{itemize}
-\end{enumerate}
-\item While still iterations left in the schedule, update the temperature $T$ and go to Step 2.
-\item Return the best found solution during the algorithm.
-\end{enumerate}
-\end{general}
+\begin{algorithm}
+\caption{Simulated Annealing Outline [minimization version]}
+\begin{algorithmic}[1]
+    \State \textbf{Input:} Initial feasible solution, temperature schedule, etc.
+    \State \textbf{Output:} Best found solution during the algorithm.
+
+    \State Start with an initial feasible solution, label it as the current solution, and compute its objective value $Z_c$.
+    \While{iterations left in the schedule}
+        \State Select a neighbor of the current solution and compute its objective value $Z_n$.
+        \If{$Z_n < Z_c$}
+            \State \textbf{accept the move} and set the neighbor as the current solution.
+        \Else
+            \State Compute $p = e^{\frac{Z_c - Z_n}{T}}$
+            \State Generate a random number $x \in [0,1]$ from the computer.
+            \If{$x < p$}
+                \State \textbf{accept the move}
+            \Else
+                \State \textbf{reject the move} and stay at the current solution.
+            \EndIf
+        \EndIf
+        \State Update the temperature $T$.
+    \EndWhile
+    \State \Return the best found solution.
+\end{algorithmic}
+\end{algorithm}
 
 
-\refincludefigurestatic{simulated_annealing_temperatures}
+\refincludefigurestatic{simulated_annealing_temperatures.png}
 
 
 \subsection{Tabu Search}
@@ -238,77 +268,56 @@ Authors: Resende, Mauricio, Ribeiro, Celso C.}.
 Notice how the heuristics are generally faster and provide reasonable solutions, but the solvers provide the best solutions.  This is a trade off to consider when deciding how fast you need a solution and how good of a solution it is that you actually need.  
 
 
-On an instance with 5 nodes:
-\begin{verbatim}
-Nearest Neighbor
-494
-  0.000065 seconds (58 allocations: 2.172 KiB)
+% Table for 5 nodes instance
+\begin{table}[h]
+\centering
+\caption{Instance with 5 nodes}
+\begin{tabularx}{\linewidth}{l c c c}
+\toprule
+Algorithm & Value & Time (seconds) & Memory \\
+\midrule
+Nearest Neighbor & 494 & 0.000065 & 2.172 KiB \\
+Farthest Insertion & 494 & 0.000057 & 1.781 KiB \\
+Simulated Annealing & 494 & 0.000600 & 162.156 KiB \\
+Math Programming Cbc & 494.0 & 0.091290 & 1.460 MiB \\
+Math Programming Gurobi & 494.0 & 0.006610 & 78.797 KiB \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
- Farthest Insertion
-494
-  0.000057 seconds (49 allocations: 1.781 KiB)
+% Table for 20 nodes instance
+\begin{table}[h]
+\centering
+\caption{Instance with 20 nodes}
+\begin{tabularx}{\linewidth}{l c c c}
+\toprule
+Algorithm & Value & Time (seconds) & Memory \\
+\midrule
+Nearest Neighbor & 790 & 0.000162 & 6.406 KiB \\
+Farthest Insertion & 791 & 0.000128 & 2.734 KiB \\
+Simulated Annealing & 777 & 0.007818 & 2.601 MiB \\
+Math Programming Cbc & 773.0 & 2.738521 & 607.961 KiB \\
+Math Programming Gurobi & 773.0 & 0.238488 & 717.133 KiB \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
- Simulated Annleaning
-494
-  0.000600 seconds (7.81 k allocations: 162.156 KiB)
-
- Math Programming Cbc
-494.0
-  0.091290 seconds (26.29 k allocations: 1.460 MiB)
-
- Math Programming Gurobi
-Academic license - for non-commercial use only
-494.0
-  0.006610 seconds (780 allocations: 78.797 KiB)
-  \end{verbatim}
-  
-  
-  One instance on 20 nodes.
-  \begin{verbatim}
-Nearest Neighbor
-790
-  0.000162 seconds (103 allocations: 6.406 KiB)
-
- Farthest Insertion
-791
-  0.000128 seconds (58 allocations: 2.734 KiB)
-
- Simulated Annleaning
-777
-  0.007818 seconds (130.31 k allocations: 2.601 MiB)
-
- Math Programming Cbc
-773.0
-  2.738521 seconds (5.76 k allocations: 607.961 KiB)
-
- Math Programming Gurobi
-Academic license - for non-commercial use only
-773.0
-  0.238488 seconds (5.68 k allocations: 717.133 KiB)
-  \end{verbatim}
-  
-  \begin{verbatim}
-  Nearest Neighbor
-1216
-  0.000288 seconds (142 allocations: 15.141 KiB)
-
- Farthest Insertion
-1281
-  0.000286 seconds (60 allocations: 3.969 KiB)
-
- Simulated Annleaning
-1227
-  0.047512 seconds (520.51 k allocations: 10.387 MiB, 19.12% gc time)
-
- Math Programming Cbc
-1088.0
-  6.292632 seconds (20.30 k allocations: 2.111 MiB)
-
- Math Programming Gurobi
-Academic license - for non-commercial use only
-1088.0
-  1.349253 seconds (20.16 k allocations: 2.520 MiB)
-  \end{verbatim}
+% Table for third instance (number of nodes not specified)
+\begin{table}[h]
+\centering
+\caption{Instance with 40 nodes}
+\begin{tabularx}{\linewidth}{l c c c}
+\toprule
+Algorithm & Value & Time (seconds) & Memory \\
+\midrule
+Nearest Neighbor & 1216 & 0.000288 & 15.141 KiB \\
+Farthest Insertion & 1281 & 0.000286 & 3.969 KiB \\
+Simulated Annealing & 1227 & 0.047512 & 10.387 MiB \\
+Math Programming Cbc & 1088.0 & 6.292632 & 2.111 MiB \\
+Math Programming Gurobi & 1088.0 & 1.349253 & 2.520 MiB \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
 \subsection{VRP - Clark Wright Algorithm}
 \todo[inline]{Include discussion of Clark Wright algorihtm, or link to earlier section on Algorithms}

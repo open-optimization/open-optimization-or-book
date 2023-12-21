@@ -45,6 +45,103 @@ For example,
 Note, the optimal solution lies at $x^* = \sqrt{2}$, which is an irrational number.  Since we will consider algorithms using floating point precision, we will look to return a solution $\bar x$ such that $\|x^* - \bar x\| < \epsilon$ for some small $\epsilon > 0$, for instance, $\epsilon = 10^{-6}$.
 
 
+\section*{Golden Section Search} % --------------------------------------------
+
+A function $f:[a,b]\rightarrow\mathbb{R}$ satisfies the \emph{unimodal property} if it has exactly one local minimum and is monotonic on either side of the minimizer.
+In other words, $f$ decreases from $a$ to its minimizer $x^*$, then increases up to $b$ (see Figure \ref{fig:1dopt-golden-unimodal}).
+% Unimodal functions are the ``easiest'' kinds of functions to optimize, but there are several strategies for doing so.
+The \emph{golden section search} method optimizes a unimodal function $f$ by iteratively defining smaller and smaller intervals containing the unique minimizer $x^*$.
+This approach is especially useful if the function's derivative does not exist, is unknown, or is very costly to compute.
+
+By definition, the minimizer $x^*$ of $f$ must lie in the interval $[a,b]$.
+To shrink the interval around $x^*$, we test the following strategically chosen points.
+\begin{equation*}
+\tilde{a} = b - \frac{b - a}{\varphi}\qquad\qquad
+\tilde{b} = a + \frac{b - a}{\varphi}
+% \label{eq:1dopt-golden-testpts}
+\end{equation*}
+Here $\varphi = \frac{1 + \sqrt{5}}{2}$ is the \emph{golden ratio}.
+At each step of the search, $[a,b]$ is refined to either $[a,\tilde{b}]$ or $[\tilde{a}, b]$, called the \emph{golden sections}, depending on the following criteria.
+ % \footnote{Note that this is the same as $\tilde{a} = a + \rho(b-a)$ and $\tilde{b} = a + (1-\rho)(b-a)$ where $\rho = \frac{3-\sqrt{5}}{2}$.}
+% These points define evenly sized intervals $[\tilde{a}, b]$ and $[a, \tilde{b}]$, called \emph{golden sections} since the ratio of the lengths of $[a,\tilde{a}]$ to $[\tilde{a},b]$ is the same as the ratio of the lengths of $[\tilde{a}, b]$ and $[a, b]$.
+% Additionally, the property of the golden ratio that  $\frac{1}{\varphi^2} = 1 - \frac{1}{\varphi}$ leads to a smaller amount of computations needed.
+
+If $f(\tilde{a}) < f(\tilde{b})$, then since $f$ is unimodal, it must be increasing in a neighborhood of $\tilde{b}$.
+The unimodal property also guarantees that $f$ must be increasing on $[\tilde{b}, b]$ as well, so $x^* \in [a, \tilde{b}]$ and we set $b = \tilde{b}$.
+By similar reasoning, if $f(\tilde{a}) > f(\tilde{b})$, then $x^* \in [\tilde{a}, b]$ and we set $a = \tilde{a}$.
+If, however, $f(\tilde{a}) = f(\tilde{b})$, then the unimodality of $f$ does not guarantee anything about where the minimizer lies.
+Assuming either $x^*\in [a, \tilde{b}]$ or $x^* \in [\tilde{a}, b]$ allows the iteration to continue, but the method is no longer guaranteed to converge to the local minimum.
+
+At each iteration, the length of the search interval is divided by $\varphi$.
+The method therefore converges linearly, which is somewhat slow.
+However, the idea is simple and each step is computationally inexpensive.
+
+\begin{figure}[H] % Golden section search for unimodal optimization.
+    \centering
+    \includegraphics[width=.7\textwidth]{golden_section.pdf}
+    \caption{The unimodal $f:[a,b]\rightarrow\mathbb{R}$ can be minimized with a golden section search.
+    For the first iteration, $f(\tilde{a}) < f(\tilde{b})$, so $x^* \in [a, \tilde{b}]$.
+    New values of $\tilde{a}$ and $\tilde{b}$ are then calculated from this new, smaller interval.}
+    \label{fig:1dopt-golden-unimodal}
+\end{figure}
+
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\Procedure{golden\_section}{$f$,\ $a$,\ $b$,\ \li{tol},\ \li{maxiter}}
+   \State $x_0 \gets (a + b)/2$
+        \Comment{Set the initial minimizer approximation as the interval midpoint.}
+   \State $\varphi = (1+\sqrt{5})/2$
+        % \Comment{Set $\varphi$.}
+   \For{$i=1,2,\dots,$\ \li{maxiter}}
+        \Comment Iterate only \li{maxiter} times at most.
+        \State $c \gets (b - a)/\varphi$
+        \State $\tilde{a} \gets b - c$
+            % \Comment{Set $\tilde{a}$.}
+        \State $\tilde{b} \gets a + c$
+            % \Comment{Set $\tilde{b}$. }
+        \If{$f(\tilde{a}) \leq f(\tilde{b})$}
+            \Comment{Get new boundaries for the search interval.}
+            \State $b \gets \tilde{b}$
+         \Else{}
+            \State $a \gets \tilde{a}$
+                \EndIf
+        \State $x_1 \gets (a + b)/2$
+            \Comment{Set the minimizer approximation as the interval midpoint.}
+        \If{$|x_0-x_1| <$ \li{tol}}
+              \State \texttt{break}
+                \Comment{Stop iterating if the approximation stops changing enough.}
+       \EndIf
+        \State $x_0 \gets x_1$
+   \EndFor
+   \State \pseudoli{return} $x_1$
+\EndProcedure
+\end{algorithmic}
+\caption{The Golden Section Search}
+\label{Alg:Golden-Section-Search}
+\end{algorithm}
+
+\begin{problem}{Implement golden search.}
+Write a function that accepts a function $f:\mathbb{R}\rightarrow\mathbb{R}$, interval limits $a$ and $b$, a stopping tolerance \li{tol}, and a maximum number of iterations \li{maxiter}.
+Use Algorithm \ref{Alg:Golden-Section-Search} to implement the golden section search.
+Return the approximate minimizer $x^*$, whether or not the algorithm converged (\li{true} or \li{false}), and the number of iterations computed.
+
+Test your function by minimizing $f(x) = e^x - 4x$ on the interval $[0, 3]$, then plotting the function and the computed minimizer together.
+Also compare your results to SciPy's golden section search, \li{scipy.optimize.golden()}.
+
+\begin{lstlisting}
+>>> from scipy import optimize as opt
+>>> import numpy as np
+
+>>> f = lambda x : np.exp(x) - 4*x
+>>> opt.golden(f, brack=(0,3), tol=.001)
+1.3862578679031485              # ln(4) is the minimizer.
+\end{lstlisting}
+\label{prob:golden-section-search}
+\end{problem}
+
+
+
+
 \subsection{Golden Search Method - Derivative Free Algorithm}
 \begin{resource}
 \begin{itemize}
@@ -200,6 +297,95 @@ $$
 \end{enumerate}
 
 
+\section*{Newton's Method} % ==================================================
+
+\emph{Newton's method} is an important root-finding algorithm that can also be used for optimization.
+Given $f:\mathbb{R}\rightarrow\mathbb{R}$ and a good initial guess $x_0$, the sequence $(x_k)_{k=1}^\infty$ generated by the recursive rule
+\[
+x_{k+1} = x_k - \frac{f(x_k)}{f'(x_k)}
+\]
+converges to a point $\bar{x}$ satisfying $f(\bar{x}) = 0$.
+The first-order necessary conditions from elementary calculus state that if $f$ is differentiable, then its derivative evaluates to zero at each of its local minima and maxima.
+Therefore using Newton's method to find the zeros of $f'$ is a way to identify potential minima or maxima of $f$.
+Specifically, starting with an initial guess $x_0$, set
+\begin{equation}
+x_{k+1} = x_k - \frac{f'(x_k)}{f''(x_k)}
+\label{eq:1dopt-newton}
+\end{equation}
+and iterate until $|x_k - x_{k-1}|$ is satisfactorily small.
+Note that this procedure does not use the actual function $f$ at all, but it requires many evaluations of its first and second derivatives.
+As a result, Newton's method converges in few iterations, but it can be computationally expensive.
+
+Each step of \eqref{eq:1dopt-newton} can be thought of approximating the objective function $f$ by a quadratic function $q$ and finding its unique extrema.
+That is, we first approximate $f$ with its second-degree Taylor polynomial centered at $x_k$.
+\[
+q(x) = f(x_k) + f'(x_k) (x - x_k) + \frac{1}{2} f''(x_k) (x - x_k)^2
+\]
+This quadratic function satisfies $q(x_k) = f(x_k)$ and matches $f$ fairly well close to $x_k$.
+Thus the optimizer of $q$ is a reasonable guess for an optimizer of $f$.
+To compute that optimizer, solve $q'(x) = 0$.
+\[
+0 = q'(x) = f'(x_k) + f''(x_k)(x - x_k)
+\qquad\Longrightarrow\qquad
+x = x_k - \frac{f'(x_k)}{f''(x_k)}
+\]
+This agrees with \eqref{eq:1dopt-newton} using $x_{k+1}$ for $x$.
+See Figure \ref{fig:1dopt-quadratic-newton}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width = .7 \textwidth]{quad_approx.pdf}
+\caption{A quadratic approximation of $f$ at $x_k$.
+The minimizer $x_{k+1}$ of $q$ is close to the minimizer of $f$.
+}
+\label{fig:1dopt-quadratic-newton}
+\end{figure}
+
+Newton's method for optimization works well to locate minima when $f''(x) > 0$ on the entire domain.
+However, it may fail to converge to a minimizer if $f''(x) \le 0$ for some portion of the domain.
+If $f$ is not unimodal, the initial guess $x_0$ must be sufficiently close to a local minimizer $x^*$ in order to converge.
+
+\begin{problem}{Newton's method for optimization}{}
+Let $f:\mathbb{R}\rightarrow\mathbb{R}$.
+Write a function that accepts $f'$, $f''$, a starting point $x_0$, a stopping tolerance \li{tol}, and a maximum number of iterations \li{maxiter}.
+Implement Newton's method using \eqref{eq:1dopt-newton} to locate a local optimizer.
+Return the approximate optimizer, whether or not the algorithm converged, and the number of iterations computed.
+
+Test your function by minimizing $f(x) = x^2 + \sin(5x)$ with an initial guess of $x_0 = 0$.
+Compare your results to \li{scipy.optimize.newton()}, which implements the root-finding version of Newton's method.
+\begin{lstlisting}
+>>> df = lambda x : 2*x + 5*np.cos(5*x)
+>>> d2f = lambda x : 2 - 25*np.sin(5*x)
+>>> opt.newton(df, x0=0, fprime=d2f, tol=1e-10, maxiter=500)
+-1.4473142236328096
+\end{lstlisting}
+Note that other initial guesses can yield different minima for this function.
+\end{problem}
+
+
+\paragraph{Convervence of Newton's Method}
+
+We consider the function $f(x) = e^x + e^{-x}$.
+
+\begin{tabular}{lrrrrr}
+\toprule
+{} &           $x$ &      $f(x)$ &  $f^\prime(x)$ &  $|x^k - x^{k-1}|$ &  $\frac{|x^ k - x^{k-1}|}{|x^{k-1} - x^{k-2}|}$ \\
+\midrule
+0 &  6.100000e+00 &  445.860013 &   4.458555e+02 &                NaN &                                            NaN \\
+0 &  5.100010e+00 &  164.029654 &   1.640175e+02 &       9.999899e-01 &                                            NaN \\
+0 &  4.100084e+00 &   60.361952 &   6.032881e+01 &       9.999257e-01 &                                   9.999357e-01 \\
+0 &  3.100633e+00 &   22.257038 &   2.216700e+01 &       9.994509e-01 &                                   9.995252e-01 \\
+0 &  2.104679e+00 &    8.326354 &   8.082584e+00 &       9.959545e-01 &                                   9.965016e-01 \\
+0 &  1.133956e+00 &    3.429685 &   2.786169e+00 &       9.707231e-01 &                                   9.746662e-01 \\
+0 &  3.215870e-01 &    2.104313 &   6.543175e-01 &       8.123688e-01 &                                   8.368697e-01 \\
+0 &  1.064582e-02 &    2.000113 &   2.129203e-02 &       3.109412e-01 &                                   3.827587e-01 \\
+0 &  4.021572e-07 &    2.000000 &   8.043143e-07 &       1.064541e-02 &                                   3.423609e-02 \\
+0 & -6.935643e-17 &    2.000000 &  -1.110223e-16 &       4.021572e-07 &                                   3.777751e-05 \\
+0 & -1.384528e-17 &    2.000000 &   0.000000e+00 &       5.551115e-17 &                                   1.380335e-10 \\
+0 & -1.384528e-17 &    2.000000 &   0.000000e+00 &       0.000000e+00 &                                   0.000000e+00\\
+\hline
+\end{tabular}
+
 
 \subsection{Newton's Method - 2nd Order Method (using Derivative and Hessian)}
 
@@ -215,6 +401,48 @@ $$
 \end{enumerate}
 \item Return $x^t$.
 \end{enumerate}
+
+
+\begin{theorem}{Rate of Convergence of Second-Order Methods in Continuous Optimization}{}
+Let $ f: \mathbb{R}^n \rightarrow \mathbb{R} $ be a twice continuously differentiable function and $ x^* $ be a local minimum of $ f $. If the Hessian matrix $ \nabla^2 f(x^*) $ is positive definite, and if the iteration scheme is based on a quadratic model of the objective function (like Newton's method), then the method is locally quadratically convergent. Specifically, there exists a neighborhood $ N $ of $ x^* $ such that for all starting points $ x_0 $ in $ N $, the error at iteration $ k+1 $ satisfies:
+\[
+\| x_{k+1} - x^* \| \leq C \| x_k - x^* \|^2
+\]
+for some constant $ C > 0 $.
+\end{theorem}
+
+\begin{proof}
+Assuming that we're working with Newton's method, the iteration is given by:
+\[
+x_{k+1} = x_k - \left( \nabla^2 f(x_k) \right)^{-1} \nabla f(x_k)
+\]
+
+1. Taylor's expansion of $ f $ about $ x^* $ gives:
+\[
+f(x) \approx f(x^*) + \nabla f(x^*)^T (x - x^*) + \frac{1}{2} (x - x^*)^T \nabla^2 f(x^*) (x - x^*)
+\]
+
+2. Since $ x^* $ is a local minimum and the gradient vanishes at $ x^* $, the first-order term disappears, and we have:
+\[
+f(x) \approx f(x^*) + \frac{1}{2} (x - x^*)^T \nabla^2 f(x^*) (x - x^*)
+\]
+
+3. Using Newton's iteration, the update becomes:
+\[
+x_{k+1} - x^* = (x_k - x^*) - \left( \nabla^2 f(x_k) \right)^{-1} \nabla f(x_k)
+\]
+
+4. As $ f $ is twice continuously differentiable and $ \nabla^2 f(x^*) $ is positive definite, there exists a neighborhood $ N $ of $ x^* $ where the Hessian is invertible and Lipschitz continuous. Thus, for $ x_k $ close enough to $ x^* $, the Hessian at $ x_k $ will be close to the Hessian at $ x^* $.
+
+5. Consequently, for $ x_k $ close enough to $ x^* $, $ \nabla^2 f(x_k) $ will also be positive definite, ensuring that Newton's direction is a descent direction.
+
+6. From the Taylor expansion, the gradient $ \nabla f(x_k) $ is approximately proportional to $ x_k - x^* $, and the Hessian is roughly constant. Hence, the update step in the Newton iteration will be proportional to the square of the error:
+\[
+x_{k+1} - x^* \propto (x_k - x^*)^2
+\]
+
+From the above, we see that the error at iteration $ k+1 $ is bounded by the square of the error at iteration $ k $, proving the local quadratic convergence.
+\end{proof}
 
 
 \section{Multi-Variate Unconstrained Optimizaition}
@@ -410,15 +638,31 @@ This problem has an easy time of finding an initial feasible solution.  For inst
 
 
 \textbf{Images below: the value $t$ is the value $\phi$ discussed above}
-\includegraphics[scale = 0.4]{barrier-function}
+\begin{figure}
+\includegraphics[width = 0.35\textwidth]{barrier-function}\ \ 
+\includegraphics[width = 0.35\textwidth]{barrier-functions-added}\\
+\includegraphics[width = 0.35\textwidth]{barrier-method} \ \ 
+\includegraphics[width = 0.35\textwidth]{central-path1}
+\caption{Upper Left: Barrier function for varying values of $t$.  Upper Right: Combining barrier functions to create a barrier function on the interval $1 \leq x \leq 2$. Lower left: Combining barrier function and the objective function $x^2$ for cetain choices of $t$.  Lower right: Same picture but more values of $t$.}
+\end{figure}
 
-\includegraphics[scale = 0.4]{barrier-functions-added}
 
-\includegraphics[scale = 0.4]{barrier-method}
 
-\includegraphics[scale = 0.4]{central-path1}
+\begin{figure}
+\includegraphics[scale = 0.35]{interior-point-method} \ \ 
+\includegraphics[scale = 0.35]{interior-mu-1-1}
 
-\includegraphics[scale = 0.4]{central-path2}\footnote{Image taken from unknown source.}
+\caption{Barrier method appled to minimizing a linear program with two variables.  Contours of the barrier plotted and the red curve is an approximation of the central path.}
+\end{figure}
+
+\textbf{Complexity}
+11.5.3 Total number of Newton iterations
+We can now give an upper bound on the total number of Newton steps in the barrier method, not counting the initial centering step (which we will analyze later, as part of phase I). We multiply (11.26), which bounds the number of Newton steps per outer iteration, by (11.13), the number of outer steps required, to obtain
+
+$$
+N=\left\lceil\frac{\log \left(m /\left(t^{(0)} \epsilon\right)\right)}{\log \mu}\right\rceil\left(\frac{m(\mu-1-\log \mu)}{\gamma}+c\right)
+$$
+
 
 
 \chapter{Computational Issues with NLP}
@@ -485,89 +729,28 @@ Given a matrix $A \in \R^{m\times n}$, vector $b \in \R^m$ and vector $c \in \R^
 
 
  
-\section{Karush-Huhn-Tucker (KKT) Conditions}
-
-The KKT conditions use the augmented Lagrangian problem to describe sufficient conditions for optimality of a convex program.  
-
-
-\begin{general}{KKT Conditions for Optimality}{}
-Given a convex function $f(x)\colon \R^d \to \R$ and convex functions $g_i(x)\colon \R^d \to \R$ for $i=1, \dots, m$,  the \emph{convex programming} problem is
-\begin{equation}
-\label{eq:convex-programming-KKT}
-\begin{split}
-\min \quad & f(x)\\
-\st  \quad & g_i(x) \leq 0  \quad  \text{ for } i=1, \dots, m\\
-& x \in \R^d
-\end{split}
-\end{equation}
-
-Given $(\bar x, \bar \lambda)$ with $\bar x \in \R^d$ and $\bar \lambda \in \R^m$, if the KKT conditions hold, then $\bar x$ is optimal for the convex programming problem.  
-
-The KKT conditions are
-\begin{enumerate}
-\item (Stationary).   
-\begin{equation}
-- \nabla f(\bar x) = \sum_{i=1}^m \bar \lambda_i \nabla g_i(\bar x)\\
-\end{equation}
-\item (Complimentary Slackness).   
-\begin{equation}
- \bar \lambda_i  g_i(\bar x) = 0 \text{ for } i=1, \dots, m\\
-\end{equation}
-\item (Primal Feasibility).   
-\begin{equation}
-  g_i(\bar x) \leq 0 \text{ for } i=1, \dots, m\\
-\end{equation}
-\item (Dual Feasibility).   
-\begin{equation}
- \bar \lambda_i \geq 0 \text{ for } i=1, \dots, m\\
-\end{equation}
-\end{enumerate}
-\end{general}
-
-If certain properties are true of the convex program, then every optimizer has these properties.   In particular, this holds for Linear Programming.
-
-
-\includegraphicsource[width = 0.6\textwidth]{tikz/kkt-optimal}
-
-\begin{minipage}{0.5\textwidth}
-\includegraphicsource[width = 1\textwidth]{tikz/kkt-non-optimal1}
-\end{minipage}
-\begin{minipage}{0.5\textwidth}
-\includegraphicsource[width = 1\textwidth]{tikz/kkt-non-optimal2}
-\end{minipage}
 
 
 
 
-\section{Gradient Free Algorithms}
 
 
-\subsection{Needler-Mead}
+
+\section{Resources}
+
+
 \begin{resource}
+\paragraph{Gradient Free Algorithms - Needler-Mead}
 \begin{itemize}
 \item \href{https://en.wikipedia.org/wiki/Nelder%E2%80%93Mead_method}{Wikipedia}\\
 \item \href{https://youtube/NI3WllrvWoc?t=96}{Youtube}
 \end{itemize}
-\end{resource}
-
-
-
-
-
-
-\chapter{Material to add...}
-\todoChapter{ Decide if we want this material. }
-\subsection{Bisection Method and Newton's Method}
-\begin{resource}
+\paragraph{Bisection Method and Newton's Method}
 \begin{itemize}
-\item See section 4 of the following nodes:
+\item See section 4 of the following notes:
 \url{http://www.seas.ucla.edu/~vandenbe/133A/133A-notes.pdf}
 \end{itemize}
-\end{resource}
-
-\section{Gradient Descent}
-\begin{resource}
-Recap Gradient and Directional Derivatives:
+\paragraph{Gradient Descent}
 \begin{itemize}
 \item \url{https://www.youtube.com/watch?v=tIpKfDc295M}
 
@@ -577,13 +760,7 @@ Recap Gradient and Directional Derivatives:
 
 \item \url{https://www.youtube.com/watch?v=4RBkIJPG6Yo}
 \end{itemize}
-
-
-
-
-
-
-Idea of Gradient descent:\\
+\paragraph{Idea of Gradient descent}
 \begin{itemize}
 \item \url{https://youtu.be/IHZwWFHWa-w?t=323}
 \end{itemize}
@@ -592,6 +769,10 @@ Vectors:\\
 \item \url{https://www.youtube.com/watch?v=fNk_zzaMoSs&list=PLZHQObOWTQDPD3MizzM2xVFitgF8hE_ab&index=2&t=0s}
 \end{itemize}
 \end{resource}
+
+
+
+
 
 
 \chapter{Fairness in Algorithms}
