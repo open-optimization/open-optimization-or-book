@@ -1,0 +1,32 @@
+\subsection{Fractional Knapsack}
+\label{subsection:fractional-knapsack}
+We will quickly state a result about the Fractional Knapsack problem (a.k.a. Continuous Knapsack Problem).  This will help provide a nice easy problem for our first branch and bound example.
+The generalization of this problem is called the continuous knapsack problem: given $\mathbf{c},\mathbf{a} \in \R^n_+$ and $b \in \R_+$, determine 
+		\begin{subequations}\label{model:contKnap}
+			\begin{alignat}{2}
+				\underset{x}{\textrm{Maximize}}& \quad &  \mathclap{\hspace{-20pt} \mathbf{c}^\top \mathbf{x} }	\\
+								  \textrm{s.t.}& \quad &  \mathbf{a}^\top \mathbf{x} &\leq b \label{model:contKnap:capacity}\\
+											   & \quad &  		 \mathbf{x} &\in [0,1]^n
+			\end{alignat}
+		\end{subequations}
+		
+		We will assume that the solution $x_i = 1$ for all $i=1, \dots, n$ is not feasible, i.e., that $\sum_{i=1}^n a_i > b$.  This ensures that the inequality $\a^\top \x \leq b$ is not redundant.
+		
+The fractional knapsack problem has an exact greedy algorithm.  In particular, if we order the variables according to their value versus their weight, then we can choose to add items according to this ordering.  This is summarized in the following theorem.
+
+\begin{theorem}\label{thm:knapsoln}
+		Assume that the problem is indexed in such a way that $\frac{c_i}{a_i} \geq \frac{c_{i+1}}{a_{i+1}}$. Find the smallest integer $k$ such that $\sum_{i=1}^ka_i \geq b$ (in this cases $k = \lfloor b\rfloor)$. The optimal solution $\mathbf{x}^*$ is given by 
+		\begin{equation*}
+			x^*_i = \begin{cases}
+				1, 									& \text{if }i < k 	\\
+				\frac{\bar{b}}{a_k}  	& \text{if }i = k 	\\
+				0  									& \text{if }i > k 	\\
+				\end{cases}
+		\end{equation*}
+  where $\bar b  = b - \sum_{i<k} a_i$.
+		or written differently, 
+		\begin{equation}
+		    \x^* = (1,\dots, 1,\tfrac{\bar b}{a_k}, 0, \dots, 0) ,
+		\end{equation}
+	where $\bar{b} = b-\sum_{i=1}^{k-1}a_i$ is the remaining capacity in constraint \eqref{model:contKnap:capacity} after the first $k-1$ variables are assigned to their maximum value.
+	\end{theorem}

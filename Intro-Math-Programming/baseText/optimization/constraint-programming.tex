@@ -1,0 +1,272 @@
+\chapter{Constraint Programming}
+\begin{outcome}
+\begin{itemize}
+\item Learn about an alternative approach to integer programming
+\item Understand the modeling flexibility of constraint programming
+\item Develop intuition for techniques of contstraint programming
+\item See when constraint programming can outperform integer programming
+\end{itemize}
+\end{outcome}
+\section{Introduction to Constraint Programming}
+
+Constraint programming (CP) is a powerful paradigm for solving combinatorial problems by specifying relationships between variables in terms of constraints. Instead of explicitly enumerating all possible solutions, CP allows us to declare the properties that a solution must satisfy, and then utilizes specialized algorithms to search for solutions that meet these criteria.
+
+\subsection{What is Constraint Programming?}
+
+At its core, constraint programming revolves around the idea of constraints, which are simply rules or conditions that solutions must adhere to. For example, in a scheduling problem, a constraint might specify that two events cannot occur at the same time. By defining a set of constraints, we can narrow down the search space and efficiently find solutions that satisfy all the given conditions.
+
+\subsection{Why Use Constraint Programming?}
+
+There are several reasons to use constraint programming:
+
+\begin{itemize}
+    \item \textbf{Expressiveness:} Constraints allow for a high-level, declarative description of the problem, making it easier to model and understand.
+    \item \textbf{Flexibility:} It's easy to add or remove constraints, allowing for dynamic problem modeling.
+    \item \textbf{Efficiency:} Modern constraint solvers are optimized to handle large and complex problems, often outperforming traditional optimization methods.
+\end{itemize}
+
+\subsection{Scope of this Chapter}
+
+In this chapter, we will delve deeper into the principles of constraint programming, explore its underlying algorithms, and learn how to model and solve real-world problems using CP. By the end of this chapter, you will have a solid understanding of the power and potential of constraint programming.
+
+
+\section{Comparison: Constraint Programming vs. Integer Programming}
+
+\begin{enumerate}[label=\textbf{\arabic*.}]
+    \item \textbf{Definition}:
+    \begin{itemize}
+        \item \textbf{Constraint Programming (CP)}:
+        \begin{itemize}
+            \item CP is a declarative programming paradigm where relationships between variables are expressed as constraints.
+            \item The goal is to find a solution that satisfies all the constraints or to prove that no such solution exists.
+        \end{itemize}
+        \item \textbf{Integer Programming (IP)}:
+        \begin{itemize}
+            \item IP is a mathematical optimization technique where the objective is to maximize or minimize a linear function subject to linear constraints, and some or all of the variables are restricted to integer values.
+        \end{itemize}
+    \end{itemize}
+    
+    \item \textbf{Modeling}:
+    \begin{itemize}
+        \item \textbf{CP}:
+        \begin{itemize}
+            \item CP allows for a more flexible representation of problems, especially when the relationships between variables are complex and not easily expressed as linear equations.
+            \item It's particularly useful for problems with large domains or those that require complex global constraints.
+        \end{itemize}
+        \item \textbf{IP}:
+        \begin{itemize}
+            \item IP models problems using linear equations and inequalities.
+            \item It's best suited for problems that can be naturally expressed in terms of linear relationships.
+        \end{itemize}
+    \end{itemize}
+    
+    \item \textbf{Solution Techniques}:
+    \begin{itemize}
+        \item \textbf{CP}:
+        \begin{itemize}
+            \item CP uses techniques like backtracking, constraint propagation, and domain reduction to prune the search space and find solutions.
+        \end{itemize}
+        \item \textbf{IP}:
+        \begin{itemize}
+            \item IP uses techniques from linear programming (like the simplex method) combined with branch-and-bound or branch-and-cut methods to handle the integer constraints.
+        \end{itemize}
+    \end{itemize}
+    
+    \item \textbf{Strengths}:
+    \begin{itemize}
+        \item \textbf{CP}:
+        \begin{itemize}
+            \item Can handle problems with complex constraints and large domains.
+            \item Allows for more natural representation of some problems, making modeling easier.
+            \item Can provide all solutions to a problem, not just one optimal solution.
+        \end{itemize}
+        \item \textbf{IP}:
+        \begin{itemize}
+            \item Provides a clear objective function, which makes it easier to find the optimal solution.
+            \item Has a well-established theory and many efficient solvers available.
+            \item Suitable for problems with well-defined linear relationships.
+        \end{itemize}
+    \end{itemize}
+    
+    \item \textbf{Applications}:
+    \begin{itemize}
+        \item \textbf{CP}:
+        \begin{itemize}
+            \item Scheduling problems, puzzle solving, configuration problems, and many other combinatorial problems where the constraints are more important than the objective.
+        \end{itemize}
+        \item \textbf{IP}:
+        \begin{itemize}
+            \item Resource allocation, production planning, transportation problems, and any problem where there's a need to optimize a linear objective subject to linear constraints.
+        \end{itemize}
+    \end{itemize}
+    
+    \end{enumerate}
+    
+    \section{Techniques in Constraint Programming}
+
+Constraint programming (CP) is not just about defining constraints; it's also about efficiently finding solutions that satisfy these constraints. Over the years, several techniques have been developed to make this process more efficient. In this section, we will explore some of the fundamental techniques used in constraint programming.
+
+\subsection{Backtracking Search}
+
+Backtracking is the cornerstone of many constraint solvers. It involves exploring the solution space by making decisions for variables and checking if they lead to a solution. If a decision leads to a contradiction (i.e., no solution can be found with the current decisions), the algorithm backtracks to a previous decision point and tries a different path.
+
+\begin{itemize}
+    \item \textbf{Depth-First Search (DFS):} A common strategy where the solver explores as deep as possible before backtracking.
+    \item \textbf{Variable and Value Ordering Heuristics:} These are strategies to decide which variable to assign next and which value to try first. Good heuristics can significantly reduce the search space.
+\end{itemize}
+
+\begin{algorithm}
+\caption{Backtracking Search}
+\begin{algorithmic}[1]
+\Procedure{Backtrack}{$variables$}
+    \If{$all$ $variables$ $are$ $assigned$}
+        \State \Return $current$ $assignment$
+    \EndIf
+    \State $var \gets selectUnassignedVariable(variables)$
+    \For{$value$ in $domain(var)$}
+        \If{$value$ $is$ $consistent$ $with$ $current$ $assignment$}
+            \State $add$ $(var, value)$ $to$ $current$ $assignment$
+            \State $result \gets \Call{Backtrack}{variables}$
+            \If{$result$ $is$ $not$ $failure$}
+                \State \Return $result$
+            \EndIf
+            \State $remove$ $(var, value)$ $from$ $current$ $assignment$
+        \EndIf
+    \EndFor
+    \State \Return $failure$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+
+\subsection{Constraint Propagation}
+
+Constraint propagation is the process of deducing domain reductions or variable assignments based on the current state of the problem and the defined constraints. The idea is to reduce the search space by eliminating values that cannot be part of a valid solution.
+
+\begin{itemize}
+    \item \textbf{Arc Consistency:} Ensures that for every value in a variable's domain, there is some consistent value in the domain of another variable.
+    \item \textbf{Forward Checking:} When a variable is assigned, the domains of unassigned variables are checked and reduced to maintain consistency.
+\end{itemize}
+
+
+\begin{algorithm}
+\caption{AC-3 Algorithm}
+\begin{algorithmic}[1]
+\Procedure{AC-3}{$variables$, $constraints$}
+    \State $queue \gets all$ $arcs$ $in$ $constraints$
+    \While{$queue$ $is$ $not$ $empty$}
+        \State $(X_i, X_j) \gets dequeue(queue)$
+        \If{\Call{Revise}{$X_i$, $X_j$}}
+            \If{$domain(X_i)$ $is$ $empty$}
+                \State \Return $false$
+            \EndIf
+            \ForAll{$X_k$ $adjacent$ $to$ $X_i$ $and$ $not$ $X_j$}
+                \State $enqueue$ $(X_k, X_i)$ $to$ $queue$
+            \EndFor
+        \EndIf
+    \EndWhile
+    \State \Return $true$
+\EndProcedure
+
+\Function{Revise}{$X_i$, $X_j$}
+    \State $revised \gets false$
+    \For{$x$ in $domain(X_i)$}
+        \If{$no$ $value$ $y$ $in$ $domain(X_j)$ $satisfies$ $the$ $constraint$ $between$ $X_i$ $and$ $X_j$}
+            \State $delete$ $x$ $from$ $domain(X_i)$
+            \State $revised \gets true$
+        \EndIf
+    \EndFor
+    \State \Return $revised$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+
+\subsection{Global Constraints}
+
+Global constraints are specialized constraints that capture common combinatorial substructures (e.g., \textit{all-different}, \textit{circuit}, \textit{cumulative}). They come with efficient propagation algorithms that can significantly reduce the search space.
+
+\subsection{Symmetry Breaking}
+
+Many problems have symmetrical solutions, meaning different assignments lead to essentially the same solution. By recognizing and breaking these symmetries, we can avoid redundant searches.
+
+\subsection{Local Search and Large Neighborhood Search (LNS)}
+
+Local search techniques start with an initial solution and iteratively refine it. LNS, on the other hand, focuses on a subset of the variables and tries to improve the current solution by changing these variables.
+
+\subsection{Hybrid Methods}
+
+These methods combine CP with other optimization techniques, such as linear programming or metaheuristics, to leverage the strengths of both paradigms.
+
+\section{Maximizing Objectives in Constraint Programming}
+
+Constraint programming (CP) is adept at solving feasibility problems. However, real-world scenarios often require optimization. CP addresses this through the \textit{branch and bound} technique.
+
+\subsection{Branch and Bound}
+
+\begin{itemize}
+    \item \textbf{Initialization:} Begin with an initial solution and its objective value.
+    \item \textbf{Branching:} Select an unassigned variable and branch on its values.
+    \item \textbf{Bounding:} Post branching, compute a bound on the best possible solution for that branch.
+    \item \textbf{Pruning:} Discard branches that cannot yield a better solution than the current best.
+    \item \textbf{Updating:} If a superior solution is found, update the best solution.
+    \item \textbf{Backtracking:} On reaching a pruned branch or leaf node, backtrack.
+    \item \textbf{Termination:} Continue until all branches are explored or pruned.
+\end{itemize}
+
+\subsection{Incorporating Objectives into CP}
+
+To maximize an objective, transform the objective function into a constraint. For an objective \( f(x) \), introduce an auxiliary variable \( Z \) and constrain \( f(x) \leq Z \). Update \( Z \) as better solutions emerge.
+
+\subsection{Global Constraints for Optimization}
+
+Some global constraints, like the `cumulative` constraint in scheduling, aid in optimization by ensuring resource usage minimization.
+
+\subsection{Hybrid Approaches}
+
+Merging CP with techniques like linear programming can be beneficial, especially when problems exhibit both combinatorial and linear characteristics.
+
+\section*{Conclusion}
+
+While CP's forte is feasibility problems, it can adeptly handle optimization through methods like branch and bound, making it versatile for various applications.
+
+
+\section{Software}
+There are several prominent constraint programming (CP) software and libraries available. The best choice often depends on the specific requirements of your project, your familiarity with programming languages, and the nature of the problems you're tackling. Here are some of the most widely-used CP solvers and libraries:
+
+1. **IBM CPLEX CP Optimizer**: 
+   - A part of IBM's CPLEX suite, the CP Optimizer is a robust solver that can handle both constraint programming and mathematical programming models.
+   - Suitable for large-scale industrial problems.
+   - Offers a user-friendly modeling language and integrates well with various programming languages.
+
+2. **Google OR-Tools**:
+   - An open-source software suite by Google that includes support for constraint programming, linear programming, and routing problems.
+   - Provides interfaces for C++, Python, Java, and .NET.
+   - Particularly known for its efficiency in solving routing and scheduling problems.
+
+3. **MiniZinc**:
+   - A high-level modeling language for constraint programming.
+   - Can be used in conjunction with various solvers, such as Gecode, Chuffed, and OR-Tools.
+   - Comes with an Integrated Development Environment (IDE) that makes modeling and solving easier.
+
+4. **Gecode**:
+   - An open-source C++ library for constraint programming.
+   - Known for its efficiency and flexibility.
+   - Provides a rich set of global constraints and offers parallel search capabilities.
+
+5. **Choco**:
+   - A Java library for constraint satisfaction problems (CSP), constraint programming (CP), and explanation-based constraint solving (e-CP).
+   - Suitable for developing custom CP applications in Java.
+
+6. **ECLiPSe**:
+   - A platform for developing constraint programming applications, particularly in combinatorial optimization.
+   - Offers integration with external solvers and supports both logic programming and constraint programming paradigms.
+
+7. **SICStus Prolog**:
+   - A high-performance Prolog system that includes a constraint logic programming (CLP) extension.
+   - Suitable for both research and industrial applications.
+
+**Recommendation**: 
+If you're just starting with constraint programming, **Google OR-Tools** or **MiniZinc** might be a good choice due to their user-friendly interfaces and extensive documentation. For industrial-scale problems, **IBM CPLEX CP Optimizer** is a robust choice. If you have a preference for a specific programming language, choose a solver that integrates well with that language (e.g., Choco for Java, Gecode for C++, OR-Tools for Python).
+
+Always consider the nature of your problem, the scalability requirements, and your development environment when choosing a CP software.

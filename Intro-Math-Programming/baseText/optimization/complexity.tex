@@ -210,22 +210,34 @@ $n^2 + n \leq 2 n^3$ for all $n \geq 1$.
 
 In this example, $O(n^3)$ is the case where the internet tells you the package will arrive before 1 year from today.    The bound is true, but it is not as useful information as we would like to have.
 Let's compare these upper bounds.  
-Let $f(n) = n^2 + n$,
- $g(n) = 2n^2$,
-$h(n) = 2n^3$.
+Let 
+\begin{align*}
+f(n) &= n^2 + n, \\
+g(n) &= 2n^2, \\
+h(n) &= 2n^3.
+\end{align*}
+
+Then we have:
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|}
+        \hline
+                  & $n = 10$   & $n = 100$  & $n = 1000$   & $n = 10000$ \\
+        \hline
+        $f(n)=n^2 + n$    & 110        & 10,100     & 1,001,000    & 100,010,000 \\
+        \hline
+        $g(n)= 2n^2$    & 200        & 20,000     & 2,000,000    & 200,000,000 \\
+        \hline
+        $h(n)= 2n^3$    & 2,000      & 2,000,000  & 2,000,000,000 & 2,000,000,000,000 \\
+        \hline
+    \end{tabular}
+\end{table}
 
 
 
-Then we have
-\begin{verbatim}
-                n = 10 .         n = 100 .       n = 1000 .      n = .  10000
 
-f(n)            110,         10100,        1001000,            100010000
 
-g(n)           200,         20000,       2000000,              200000000
 
-h(n) .         2000,       2000000,     2000000000,     2000000000000
-\end{verbatim}
 
 
 So, here we see that $g(n)$ and $h(n)$ are both upper bounds on $f(n)$, but the nice part about $g(n)$ is that is growing at a similar rate to $ f(n)$.  In particular, it is always within a factor of 2 of $f(n)$.  
@@ -624,18 +636,121 @@ Note that it is easy to verify if $x$ is a solution to the problem because you j
 \end{example}
 \subsection{Problem Reductions}
 
-We can compare different types of problems by showing that we can use one to solve the other.
+We can compare different types of problems by showing that we can use one to solve the other.  As an example, we will discuss how sorting can be solved as an integer program.
 
-A simple example of this is the problem \emph{Integer Programming} and the \emph{Matching Problem}.
+%A simple example of this is the problem \emph{Integer Programming} and the \emph{Matching Problem}.
+%
+%Since we can model the \emph{Matching Problem} as an \emph{Integer Program}, then we know that we can solve the \emph{Matching Problem} provided that we can solve \emph{Integer Programs.}
+%\begin{center}
+%Matching Problem $\leq$ Integer Programming.
+%\end{center}
+%
+%Another example:
 
-Since we can model the \emph{Matching Problem} as an \emph{Integer Program}, then we know that we can solve the \emph{Matching Problem} provided that we can solve \emph{Integer Programs.}
-\begin{center}
-Matching Problem $\leq$ Integer Programming.
-\end{center}
+\paragraph{Solving the Sorting Problem Using Integer Programming}
+
+Integer programming (IP) offers a powerful modeling framework capable of representing a wide range of optimization problems, including fundamental ones like the sorting problem. In this section, we will delve into an IP formulation to sort a given list of numbers.
+
+\paragraph{Sorting Problem Definition}
+Given a list \( \mathbf{a} = [a_1, a_2, \ldots, a_n] \) of \( n \) distinct numbers, our goal is to find a permutation \( \mathbf{b} = [b_1, b_2, \ldots, b_n] \) such that \( b_1 \leq b_2 \leq \ldots \leq b_n \).
+
+\paragraph{IP Formulation}
+To cast the sorting problem as an IP, we introduce binary decision variables:
+\[ x_{ij} = 
+\begin{cases} 
+1 & \text{if } a_i \text{ is placed in position } j \\
+0 & \text{otherwise} 
+\end{cases}
+\]
+for \( i, j \in \{1, \ldots, n\} \).
+
+Additionally, we define:
+\[ b_j = \sum_{i=1}^{n} a_i x_{ij} \]
+which represents the value in position \( j \) of the sorted list.
+
+\textbf{Objective Function:} Since our main goal is to sort the list, we can use a trivial objective, such as:
+\[ \min \sum_{i=1}^{n} \sum_{j=1}^{n} x_{ij} \]
+
+\textbf{Constraints:}
+
+1. Ensure that each number is assigned to exactly one position:
+\[ \sum_{j=1}^{n} x_{ij} = 1 \quad \forall i \in \{1, \ldots, n\} \]
+
+2. Ensure that each position receives exactly one number:
+\[ \sum_{i=1}^{n} x_{ij} = 1 \quad \forall j \in \{1, \ldots, n\} \]
+
+3. Define \( b_j \) variables:
+\[ b_j = \sum_{i=1}^{n} a_i x_{ij} \quad \forall j \in \{1, \ldots, n\} \]
+
+4. Ensure the numbers are ordered:
+\[ b_j \leq b_{j+1} \quad \forall j \in \{1, \ldots, n-1\} \]
+
+\paragraph{Discussion}
+This IP formulation aptly captures the sorting problem. However, as before, it's pivotal to understand that sorting through IP is substantially less efficient than employing classical sorting algorithms like QuickSort or MergeSort. This IP representation primarily demonstrates the versatility of integer programming. In real-world scenarios, integer programming would not typically be the first choice for sorting. Nonetheless, understanding this approach paves the way for modeling more intricate combinatorial optimization challenges with IP.
+
+
+
+
+\paragraph{Problem Reductions}
+
+Problem reductions are a central concept in the realm of computational complexity theory and algorithm design. Reductions allow us to understand the relative difficulty of problems by transforming or "reducing" one problem to another. In essence, if we can reduce problem \(A\) to problem \(B\) in polynomial time, then \(B\) is at least as hard as \(A\).
 
 \begin{definition}{Reduction}{}
 Given two problems $\mathcal A, \mathcal B$, we say $\mathcal A$ is \emph{reduced to} $\mathcal B$ (and we write $\mathcal A \leq \mathcal B$ when we can assert that if we can solve $\mathcal B$ in polynomial time, then we can also solve $\mathcal A$ in polynomial time.
 \end{definition}
+
+Perhaps more formally, we can 
+
+\begin{definition}{Polynomial-time reducible}{}
+A problem \(A\) is polynomial-time reducible to a problem \(B\), denoted as \(A \leq_p B\), if there exists a polynomial-time computable function \(f\) such that for every instance \(i\) of \(A\):
+\[ i \text{ is a yes-instance of } A \iff f(i) \text{ is a yes-instance of } B \]
+If \(A \leq_p B\) and \(B \leq_p A\), we say that \(A\) and \(B\) are polynomial-time equivalent.
+\end{definition}
+
+\subsection{Significance of Reductions}
+
+1. \textbf{Algorithmic Perspective:} If we have an efficient algorithm for solving \(B\) and if \(A\) can be polynomially reduced to \(B\), then we can solve \(A\) efficiently as well.
+
+2. \textbf{Complexity Perspective:} If \(A\) can be polynomially reduced to \(B\) and if \(B\) is known to be hard (for instance, NP-hard), then \(A\) is hard as well.
+
+\subsection{Examples of Problem Reductions}
+
+\subsubsection{VERTEX COVER to SET COVER}
+\textbf{Problem Descriptions:}
+
+\textbf{VERTEX COVER (VC):} Given an undirected graph \(G(V, E)\) and an integer \(k\), does there exist a subset of vertices \(V' \subseteq V\) such that every edge in \(E\) has at least one endpoint in \(V'\), and \(|V'|\leq k\)?
+
+\textbf{SET COVER (SC):} Given a universe \(U\) of \(n\) elements, a collection of subsets \(S_1, S_2, \ldots, S_m\) of \(U\), and an integer \(k\), is there a collection \(C\) of \(k\) or fewer sets such that the union of the sets in \(C\) covers all elements of \(U\)?
+
+\textbf{Reduction:} 
+1. For each edge \(e = (u, v) \in E\) in the graph \(G\), create an element \(e\) in the universe \(U\).
+2. For each vertex \(v \in V\) in \(G\), create a set \(S_v\) in SC where \(S_v\) contains all edges incident to \(v\).
+3. Set \(k\) in SC to be the same as \(k\) in VC.
+
+The intuition is that if there is a vertex cover of size \(k\), then there is a set cover of size \(k\) which covers all edges.
+
+\subsubsection{3SAT to 3D MATCHING}
+\textbf{Problem Descriptions:}
+
+\textbf{3SAT:} Given a Boolean formula \( \phi \) consisting of clauses with exactly 3 literals each, is there a satisfying assignment?
+
+\textbf{3D MATCHING (3DM):} Given three disjoint sets \(X, Y, Z\) each of size \(n\) and a set \(T \subseteq X \times Y \times Z\) of triples, does there exist a perfect matching? A perfect matching \(M\) is a subset of \(T\) such that each element of \(X \cup Y \cup Z\) is contained in exactly one triple of \(M\).
+
+\textbf{Reduction:}
+Construct the 3DM instance from a 3SAT instance as follows:
+1. For each variable \(x_i\), create two elements: \(x_i\) and \( \bar{x_i}\) in \(X\).
+2. For each clause \(C_j\) in \( \phi \), create an element \(C_j\) in \(Y\).
+3. For each literal in each clause, create a corresponding element in \(Z\).
+4. For each clause \(C_j = (l_{j1} \lor l_{j2} \lor l_{j3})\), add triples \((l_{j1}, C_j, l_{j1})\), \((l_{j2}, C_j, l_{j2})\), and \((l_{j3}, C_j, l_{j3})\) to \(T\).
+
+The key idea is that a perfect matching in the 3D matching problem corresponds to a satisfying assignment in the 3SAT problem.
+
+\subsubsection{Discussion}
+Both of these reductions establish the NP-hardness of the target problems, assuming the source problems are NP-hard. They provide insights into the relationships between seemingly unrelated computational problems and demonstrate the versatility and importance of reductions in complexity theory.
+
+
+
+
 
 \subsection{NP-Hard}
 The class of problems that are called \emph{NP-Hard} are those that can be used to solve any other problem in the NP class.  
@@ -897,6 +1012,54 @@ w(e_{ab}) + w(e_{bc}) \geq w(e_{ac}).
 \]
 \end{definition}
 
+\begin{tikzpicture}
+    % Define the triangle vertices
+    \coordinate (A1) at (0,0);
+    \coordinate (B1) at (4,0);
+    \coordinate (C1) at (2,3.5);
+
+    % Draw the triangle
+    \draw (A1) -- (B1) -- (C1) -- cycle;
+
+    % Label the vertices
+    \node at (A1) [below] {A};
+    \node at (B1) [below] {B};
+    \node at (C1) [above] {C};
+
+    % Label the sides
+    \path (A1) -- (B1) node[midway,below] {$c$};
+    \path (A1) -- (C1) node[midway,left] {$b$};
+    \path (B1) -- (C1) node[midway,right] {$a$};
+
+
+    % Add the inequality
+    \node at (6,1.75) {$\begin{aligned}
+        a + b &\geq c \\
+        a + c &\geq b \\
+        b + c &\geq a \\
+    \end{aligned}$};
+    
+    % Second triangle with C approaching AB
+    \coordinate (A2) at (10,0);
+    \coordinate (B2) at (14,0);
+    \coordinate (C2) at (12,0.2); % C is very close to AB
+
+    % Draw the triangle
+    \draw (A2) -- (B2) -- (C2) -- cycle;
+
+    % Label the vertices
+    \node at (A2) [below] {A};
+    \node at (B2) [below] {B};
+    \node at (C2) [above] {C'};
+
+    % Label the sides
+    \path (A2) -- (B2) node[midway,below] {$c$};
+    \path (A2) -- (C2) node[midway,above left] {$b'$};
+    \path (B2) -- (C2) node[midway,above right] {$a'$};
+
+    % Add the approximation
+    \node at (13,1.75) {$c \approx a' + b'$};
+\end{tikzpicture}
 
 
 \begin{algorithm}

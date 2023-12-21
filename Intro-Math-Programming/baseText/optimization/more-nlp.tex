@@ -1,0 +1,489 @@
+
+
+
+\section{Box Design: Minimizing Box Surface Area with a Volume Constraint}
+
+\textbf{Problem Description}: 
+We want to design a box with the smallest possible surface area such that its volume is at least 10 cubic units.
+
+\textbf{Mathematical Model}:
+
+\begin{minipage}{0.45\textwidth}
+\textbf{Variables}:
+\begin{itemize}
+    \item \( x \colon \) length of the box
+    \item \( y \colon \) width of the box
+    \item \( z \colon \) height of the box
+\end{itemize}
+\end{minipage}
+\begin{minipage}{0.45\textwidth}
+\begin{tikzpicture}[scale=1,transform shape]
+    % Define the points for the vertices of the box
+    \coordinate (A) at (0,0,0);
+    \coordinate (B) at (0,3,0);
+    \coordinate (C) at (4,3,0);
+    \coordinate (D) at (4,0,0);
+    \coordinate (E) at (0,0,2);
+    \coordinate (F) at (0,3,2);
+    \coordinate (G) at (4,3,2);
+    \coordinate (H) at (4,0,2);
+
+    % Draw the edges of the box
+    \draw (A) -- (B) -- (C) -- (D) -- cycle;
+    \draw (E) -- (F) -- (G) -- (H) -- cycle;
+    \draw (A) -- (E);
+    \draw (B) -- (F);
+    \draw (C) -- (G);
+    \draw (D) -- (H);
+
+    % Label the dimensions
+    \path (A) -- (B) node[midway, left] {$y$}; % y-dimension
+    \path (A) -- (D) node[midway, below] {$x$}; % x-dimension
+    \path (A) -- (E) node[midway, left] {$z$}; % z-dimension
+\end{tikzpicture}
+\end{minipage}
+
+\textbf{Objective Function}:
+To minimize the surface area of the box, we aim to minimize the sum of the areas of all its sides. The surface area \( A \) of the box is:
+\[ A(x,y,z) = 2xy + 2xz + 2yz \]
+
+\textbf{Constraints}:
+\begin{enumerate}
+    \item The volume \( V(x,y,z) = xyz \) of the box must be at least 10:
+    \[ xyz \geq 10 \]
+
+    \item All dimensions must be non-negative:
+    \[ x \geq 0, \quad y \geq 0, \quad z \geq 0 \]
+\end{enumerate}
+
+
+\textbf{Complete Mathematical Model}:
+\begin{align*}
+\text{Minimize:} \quad & A(x,y,z) = 2xy + 2xz + 2yz \\
+\text{Subject to:} \quad & xyz \geq 10 \\
+& x \geq 0, \quad y \geq 0, \quad z \geq 0
+\end{align*}
+
+Notice this is a non-convex quadratic objective function with a cubic constraint.
+
+Notice that 
+$$
+\nabla A(x,y,z) = 2\begin{bmatrix}
+y + z\\ x + z \\ x + y\end{bmatrix}, 
+\ \ \ \  \nabla^2 A(x,y,z) = 2 \begin{bmatrix} 0 & 1& 1\\ 1 & 0 & 1\\ 0 & 1 & 1\end{bmatrix}
+$$
+This objective is non-convex as the hessian has both positive and negative eigenvalues.
+
+But notice that at optimality, we expect the volume constraint to be tight! 
+
+Thus, we can assume at the optimal solution that 
+$$
+xyz = 10.
+$$
+
+Thus, we have the relationships
+$$
+xy = \frac{10}{z} \ \ \  yz= \frac{10}{x} \ \ \ xz = \frac{10}{y}.
+$$
+
+Thus, we could recast the problem as 
+
+\begin{align*}
+\text{Minimize:} \quad & A(x,y,z) = 20\left(\frac{1}{x} + \frac{1}{y} + \frac{1}{z}\right) \\
+\text{Subject to:} \quad & xyz = 10 \\
+& x \geq 0, \quad y \geq 0, \quad z \geq 0
+\end{align*}
+Now let's recast the problem one more time by setting $x' = \frac{1}{x}$, $y' = \frac{1}{y}$ and $z' = \frac{1}{z}$.  Then the problem becomes
+\begin{align*}
+\text{Minimize:} \quad & A(x',y',z') = 20\left(x'+ y' + z'\right) \\
+\text{Subject to:} \quad & \frac{1}{x'y'z'} = 10 \\
+& x' \geq 0, \quad y' \geq 0, \quad z' \geq 0
+\end{align*}
+Resulting in 
+\begin{align*}
+\text{Minimize:} \quad & A(x',y',z') = 20\left(x'+ y' + z'\right) \\
+\text{Subject to:} \quad & \frac{1}{10} = x'y'z' \\
+& x' \geq 0, \quad y' \geq 0, \quad z' \geq 0
+\end{align*}
+In fact, this can be relaxed to 
+\begin{align*}
+\text{Minimize:} \quad & A(x',y',z') = 20\left(x'+ y' + z'\right) \\
+\text{Subject to:} \quad & \frac{1}{10} \leq x'y'z' \\
+& x' \geq 0, \quad y' \geq 0, \quad z' \geq 0
+\end{align*}
+And this problem actually has convex constraints and an linear (and hence convex) objective.
+
+\section{Modeling}
+We will discuss a few models and mention important changes to the models that will make them solvable.  
+
+\paragraph{Important tips}
+\begin{enumerate}
+\item \textbf{Find a convex formulation.}  It may be that the most obvious model for your problem is actually non-convex.  Try to reformulate your model into one that is convex and hence easier for solvers to handle.
+\item \textbf{Intelligent formulation.}  Understanding the problem structure may help reduce the complexity of the problem.  Try to deduce something about the solution to the problem that might make the problem easier to solve.  This may work for special cases of the problem.
+\item \textbf{Identify problem type and select solver.}  Based on your formulation, identify which type of problem it is and which solver is best to use for that type of problem.  For instance, \gurobi can handle some convex quadratic problems, but not all.  \ipopt is a more general solver, but may be slower due to the types of algorithms that it uses.
+
+\item \textbf{Add bounds on the variables.} Many solvers perform much better if they are provided bounds to the variables.  This is because it reduces the search region where the variables live.   Adding good bounds could be the difference in the solver finding an optimal solution and not finding any solution at all.
+\item \textbf{Warm start.} If you know good possible solutions to the problem (or even just a feasible solution), you can help the solver by telling it this solution.  This will reduce the amount of work the solver needs to do.  In \jump this can be done by using the command \textit{setvalue(x,[2 4 6])}, where here it sets the value of vector $x$ to $[2\ 4\ 6]$.  It may be necessary to specify values for all variables in the problem for it to start at.
+\item \textbf{Rescaling variables.} It sometimes is useful to have all variables on the same rough scale.  For instance, if minimizing $x^2 + 100^2 y^2$, it may be useful to define a new variable $\bar y = 100y$ and instead minimize $x^2 + \bar y^2$.
+\item \textbf{Provide derivatives.} Working out gradient and hessian information by hand can save the solver time.  Particularly when these are sparse (many zeros).  These can often be provided directly to the solver.
+\end{enumerate}
+
+\subsection{Minimum distance to circles}
+
+The problem we will consider here is:
+Given $n$ circles, find a center point that minimizes the sum of the distances to all of the circles. 
+
+\begin{general}{Minimize distance to circles}{}%\polynomial}
+Given circles described by center points $(a_i, b_i)$ and radius $r_i$ for $i=1, \dots, n$, find a point $c = (c_x,c_y)$ that minimizes the sum of the distances to the circles.  \\
+\end{general}
+
+\begin{center}
+\includegraphicstatic[scale = 0.7]{circle-problem.png}
+\end{center}
+
+\begin{general}{Minimize distance to circles - Model attempt $\#1$}{Non-convex}
+Let $(x_i,y_i)$ be a point in circle $i$.  Let $w_i$ be the distance from $(x_i, y_i)$ to $c$.  Then we can  model the problem as follows:
+\begin{equation}
+\begin{array}{rlr}
+\min \quad & \sum_{i=1}^3 w_i \hfill & \text{ Sum of distances}\\
+\text{ s.t. } &  \sqrt{(x_i - a_i)^2  + (y_i - b_i)^2}  = r , \ \ i=1,\dots, n& \text{ $(x_i, y_i)$ is in circle $i$}\\
+& \sqrt{(x_i - c_x)^2 + (y_i - c_y)^2} = w_i \ \ i=1, \dots, n & \text{$w_i$ is distance from $(x_i, y_i)$ to $c$}\\
+\end{array}
+\end{equation}
+\end{general}
+
+\textbf{This model has several issues:}
+\begin{enumerate}
+\item  If the center $c$ lies inside one of the circles, then the constraint  $\sqrt{(x_i - a_i)^2  + (y_i - b_i)^2}  = r$ may not be valid.  This is because the optimal choice for $(x_i,y_i)$ in this case would be inside the circle, that is, satisfying $ \sqrt{(x_i - a_i)^2  + (y_i - b_i)^2}  \leq r$.
+\item This model is \textbf{nonconvex}.  In particular the equality constraints make the problem nonconvex.
+\end{enumerate}
+
+Fortunately, we can relax the problem to make it convex an still model the correct solution.  In particular, consider the constraint 
+$$
+ \sqrt{(x_i - c_x)^2 + (y_i - c_y)^2} = w_i .
+$$
+Since we are minimizing $\sum w_i$, it is equivalent to have the constraint
+$$
+ \sqrt{(x_i - c_x)^2 + (y_i - c_y)^2} \leq w_i.
+$$
+This is equivalent because any optimal solution make $w_i$ the smallest it can, and hence will meet that constraint at equality.  
+
+What is great about this change, it that it makes the constraint \textbf{convex!}. To see this we can write $f(z) = \|z\|_2^2$, $z = (x_i - c_x, y_i - x_y)$.  Since $f(z)$ is convex and the transformation into variables $x_i, c_x, y_i, c_y$ is linear, we have that $f(x_i - c_x, y_i - x_y)$ is convex.   Then since $-w_i$ is linear, we have that
+$$
+f(x_i - c_x, y_i - x_y) - w_i
+$$
+is a convex function.  Thus, the constraint 
+$$
+f(x_i - c_x, y_i - x_y) - w_i \leq 0 
+$$
+is a convex constraint.
+
+
+This brings us to our second model.
+
+
+\begin{general}{Minimize distance to circles - Model attempt $\#2$}{Convex, but has square roots}
+Let $(x_i,y_i)$ be a point in circle $i$.  Let $w_i$ be the distance from $(x_i, y_i)$ to $c$.  Then we can  model the problem as follows:
+\begin{equation}
+\begin{array}{rlr}
+\min \quad & \sum_{i=1}^3 w_i \hfill & \text{ Sum of distances}\\
+\text{ s.t. } &  \sqrt{(x_i - a_i)^2  + (y_i - b_i)^2}  \leq r , \ \ i=1,\dots, n& \text{ $(x_i, y_i)$ is in circle $i$}\\
+& \sqrt{(x_i - c_x)^2 + (y_i - c_y)^2}\leq w_i \ \ i=1, \dots, n & \text{$w_i$ is distance from $(x_i, y_i)$ to $c$}\\
+\end{array}
+\end{equation}
+\end{general}
+
+Lastly, we would like to make this model better for a solver.  For this we will
+
+\begin{enumerate}
+\item Add bounds on all the variables
+\item Change format of non-linear inequalities
+\end{enumerate}
+
+\begin{general}{Minimize distance to circles - Model attempt $\#3$}{Convex Model, easy to code}
+Let $(x_i,y_i)$ be a point in circle $i$.  Let $w_i$ be the distance from $(x_i, y_i)$ to $c$.  Then we can  model the problem as follows:
+\begin{equation}
+\begin{array}{rlr}
+\min \quad & \sum_{i=1}^3 w_i \hfill & \text{ Sum of distances}\\
+\text{ s.t. } & (x_i - a_i)^2  + (y_i - b_i)^2  \leq r^2 , \ \ i=1,\dots, n& \text{ $(x_i, y_i)$ is in circle $i$}\\
+& (x_i - c_x)^2 + (y_i - c_y)^2\leq w_i^2 \ \ i=1, \dots, n & \text{$w_i$ is distance from $(x_i, y_i)$ to $c$}\\
+& 0 \leq w_i \leq u_i\\
+& a_i - r \leq x_i \leq a_i + r\\
+& b_i -r \leq y_i \leq b_i + r\\
+\end{array}
+\end{equation}
+\end{general}
+
+\begin{examplewithcode}{Minimize distance to circles}{https://github.com/open-optimization/open-optimization-or-examples/blob/master/nonlinear-programming/Circle-problem.ipynb}
+Here we minimize the distance of three circles of radius 1 centered at $(0,0)$, $(3,2)$, and $(0,5)$.  
+Note: The bounds on the variables here are not chosen optimally. 
+\begin{align*}\min\quad & w_{1} + w_{2} + w_{3}\\
+\text{Subject to} \quad & (x_{1} - 0) ^ 2 + (y_{1} - 0)^ 2  \leq 1\\
+ & (x_{2} - 3) ^ 2 + (y_{2} - 2) ^ 2)  \leq 1\\
+ & (x_{3} - 0) ^ 2 + (y_{3} - 5) ^ 2)  \leq 1\\
+ & (x_{1} - c_x) ^ 2 + (y_{1} - c_y) ^ 2\leq w_{1}^ 2\\
+ & (x_{2} - c_x) ^ 2 + (y_{2} - c_y) ^ 2\leq w_{2}^ 2\\
+ & (x_{3} - c_x) ^ 2 + (y_{3} - c_y) ^ 2\leq w_{3}^ 2\\
+ & -1 \leq x_{i} \leq 10 \quad\forall i \in \{1,2,3\}\\
+ & -1 \leq y_{i} \leq 10 \quad\forall i \in \{1,2,3\}\\
+ & 0 \leq w_{i} \leq 40 \quad\forall i \in \{1,2,3\}\\
+ & -1 \leq c_x \leq 10\\
+ & -1 \leq c_y \leq 10\\
+\end{align*}
+\end{examplewithcode}
+
+
+
+
+\section{k-Means Clustering}
+
+$k$-means clustering typically refers to both a model and an algorithm. The model aims to partition a dataset into \(k\) distinct, non-overlapping subsets (or clusters) based on the similarity of data points, with the objective of minimizing the sum of squared distances between data points and the center of their respective clusters. Conventionally, when discussing k-means, the distinction between the model and the associated iterative algorithm (often called the Lloyd's algorithm) might blur. It's crucial to understand that the commonly used k-means algorithm is heuristic in nature and does not guarantee an optimal solution. To seek exact optimal solutions for the k-means clustering model, one would typically resort to methods like integer programming.
+
+
+\includegraphicstatic{k-means}
+
+
+
+
+\subsection{Mathematical Formulation}
+
+Given a dataset \(\mathcal{D} = \{x_1, x_2, \dots, x_n\}\) where each \(x_i\) is a d-dimensional real vector, k-means clustering aims to partition the n data points into \(k \leq n\) sets \(S = \{S_1, S_2, \dots, S_k\}\) so as to minimize the within-cluster sum of squares:
+
+\[
+\underset{S}{\text{min}} \sum_{i=1}^{k} \sum_{x_j \in S_i} ||x_j - \mu_i||^2
+\]
+
+Where \(\mu_i\) is the mean of points in \(S_i\).
+
+
+The following algorithm typically provides great solutions to this problem.
+\begin{algorithm}
+\caption{K-means Clustering}
+\begin{algorithmic}[1]
+\Procedure{Kmeans}{$DataPoints, NumberOfClusters, MaxIterations$}
+    \State \textbf{Initialize} centroids with random data points
+    \For{$i \gets 1$ \textbf{to} MaxIterations}
+        \State \textbf{Assign} each data point to its closest centroid
+        \State \textbf{Update} centroids to be the mean of assigned data points
+        \If{centroids do not change}
+            \State \textbf{break}
+        \EndIf
+    \EndFor
+    \State \Return updated centroids and data point assignments
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+
+
+\subsection{Mixed Integer Nonlinear Programming (MINLP) Formulation}
+
+To cast k-means clustering as an MINLP problem, we can introduce binary decision variables and continuous variables to represent the cluster assignments and centroids, respectively.
+
+\begin{align*}
+& \underset{y,z}{\text{min}} \sum_{i=1}^{n} \sum_{j=1}^{k} ||x_i - z_j||^2 y_{ij} \\
+\text{s.t.} & \\
+& \sum_{j=1}^{k} y_{ij} = 1 \quad \forall i \in \{1, \dots, n\} \\
+& y_{ij} \in \{0, 1\} \quad \forall i \in \{1, \dots, n\}, j \in \{1, \dots, k\} \\
+& z_j = \frac{\sum_{i=1}^{n} x_i y_{ij}}{\sum_{i=1}^{n} y_{ij}} \quad \forall j \in \{1, \dots, k\}
+\end{align*}
+
+Where:
+- \(y_{ij}\) is a binary decision variable that is equal to 1 if data point \(i\) is assigned to cluster \(j\), and 0 otherwise.
+- \(z_j\) represents the centroid of cluster \(j\).
+
+This IP is highly nonconvex since it has cubic terms in the objective function.
+
+\paragraph{Convex Mixed Binary Model}
+\begin{align*}
+\textbf{Decision Variables:} \\
+& x_{ij} \in \{0,1\} & \text{equals 1 if data point } i \text{ is assigned to centroid } j, \text{ 0 otherwise.} \\
+& c_{j\ell} & \text{represents the } \ell^{th} \text{ coordinate of centroid } j. \\
+& d_{ij} \geq 0 & \text{squared distance between data point } i \text{ and centroid } j. \\
+\textbf{Objective Function:} \\
+\text{Minimize:} \quad & \sum_{i=1}^{n} \sum_{j=1}^{k} x_{ij} d_{ij} \\
+\textbf{Constraints:} \\
+\text{(1) Assignment:} \quad & \sum_{j=1}^{k} x_{ij} = 1 \quad \forall i \\
+\text{(2) Distance:} \quad & d_{ij} \geq \sum_{\ell} (a_{i\ell} - c_{j\ell})^2 - M(1 - x_{ij}) \quad \forall i,j \\
+\text{(3) Centroid Coordinate:} \quad & c_{j\ell} = \frac{\sum_{i=1}^{n} x_{ij} a_{i\ell}}{\sum_{i=1}^{n} x_{ij}} \quad \forall j, \ell \\
+\end{align*}
+
+
+This model is now convex and mixed binary, but now has aweful big M constraints.
+
+\subsection{Applications in ISE and Operations Research}
+
+k-means clustering has a myriad of applications in the realms of Industrial and Systems Engineering and Operations Research:
+
+\begin{enumerate}
+    \item \textbf{Facility Location:} Using k-means, we can determine the optimal locations for warehouses or service centers by considering customer locations as data points. The resulting centroids represent optimal facility locations for minimizing the average distance to customers.
+    
+    \item \textbf{Segmentation in Supply Chain:} k-means can be utilized to segment suppliers or customers based on various attributes, like order frequency, volume, and lead time, to optimize inventory policies or marketing strategies.
+    
+    \item \textbf{Job Scheduling:} In manufacturing settings, similar jobs can be clustered together to reduce setup times or to optimize the scheduling of tasks on machines.
+    
+    \item \textbf{Traffic Analysis:} By clustering patterns of traffic flow or vehicle movements, planners can identify peak periods or routes that need intervention or redesign.
+    
+    \item \textbf{Maintenance Planning:} k-means can help cluster machines or equipment based on their maintenance records or failure patterns, leading to more efficient preventive maintenance strategies.
+\end{enumerate}
+
+In all these applications, the power of k-means lies in its ability to uncover patterns or groupings in data, which can be critical for decision-making in complex ISE or OR environments.
+
+\subsection{Implementation}
+See \href{https://github.com/open-optimization/open-optimization-or-examples/blob/master/nonlinear-programming/k-means-clustering.ipynb}{Code - Sklearn and Gurobi Comparison} to see an implementation of this clustering problem.
+
+\subsection{Voronoi cell decompositions}
+
+
+\begin{definition}{Voronoi Cell}{}
+Given a set of distinct points \(S = \{\mathbf{p}^1, \mathbf{p}^2, \dots, \mathbf{p}^n\}\) in \(\mathbb{R}^d\), the Voronoi cell \(V(\mathbf{p}^i)\) associated with the point \(\mathbf{p}^i\) is defined as:
+\[ V(\mathbf{p}^i) = \{ \mathbf{x} \in \mathbb{R}^d : \forall j \neq i, \|\mathbf{x} - \mathbf{p}^i\|_2 \leq \|\mathbf{x} - \mathbf{p}^j\|_2 \} \]
+In other words, \(V(\mathbf{p}^i)\) consists of all points in \(\mathbb{R}^d\) that are closer to \(\mathbf{p}^i\) than to any other point in \(S\).
+\end{definition}
+
+\begin{theorem}{Voronoi cell is a convex polytope}{}
+Every Voronoi cell associated with a point in \(\mathbb{R}^d\) is a convex polytope.
+\end{theorem}
+\begin{proof}
+Given a set of points \(S = \{\mathbf{p}^1, \mathbf{p}^2, \dots, \mathbf{p}^n\}\) in \(\mathbb{R}^d\), the Voronoi cell for a point \(\mathbf{p}^i\) is defined as:
+\[ V(\mathbf{p}^i) = \{ \mathbf{x} \in \mathbb{R}^d : \forall j \neq i, \|\mathbf{x} - \mathbf{p}^i\|_2 \leq \|\mathbf{x} - \mathbf{p}^j\|_2 \} \]
+
+Consider two distinct points \(\mathbf{p}^i\) and \(\mathbf{p}^j\) from the set \(S\). The set of points \(\mathbf{x}\) which are closer to \(\mathbf{p}^i\) than \(\mathbf{p}^j\) is given by the inequality:
+\[ \|\mathbf{x} - \mathbf{p}^i\|_2^2 \leq \|\mathbf{x} - \mathbf{p}^j\|_2^2 \]
+
+Expanding both sides:
+\[ (\mathbf{x} - \mathbf{p}^i) \cdot (\mathbf{x} - \mathbf{p}^i) \leq (\mathbf{x} - \mathbf{p}^j) \cdot (\mathbf{x} - \mathbf{p}^j) \]
+
+Expanding the dot products:
+\[ \mathbf{x} \cdot \mathbf{x} - 2\mathbf{p}^i \cdot \mathbf{x} + \mathbf{p}^i \cdot \mathbf{p}^i \leq \mathbf{x} \cdot \mathbf{x} - 2\mathbf{p}^j \cdot \mathbf{x} + \mathbf{p}^j \cdot \mathbf{p}^j \]
+
+Simplifying:
+\[ 2(\mathbf{p}^j - \mathbf{p}^i) \cdot \mathbf{x} \leq \mathbf{p}^j \cdot \mathbf{p}^j - \mathbf{p}^i \cdot \mathbf{p}^i \]
+
+This represents a half-space, denoted as \(H_{ij}\).
+
+For each point \(\mathbf{p}^i\), considering all other points \(\mathbf{p}^j\) where \(j \neq i\), we get \(n-1\) such half-spaces. The Voronoi cell \(V(\mathbf{p}^i)\) is the intersection of these half-spaces:
+\[ V(\mathbf{p}^i) = \bigcap_{j \neq i} H_{ij} \]
+
+Since the intersection of a finite number of half-spaces is a polytope, \(V(\mathbf{p}^i)\) is a polytope.
+\end{proof}
+
+\includefigurestatic{voronoi}
+
+
+
+\subsection{The Elbow Method in k-Means Clustering}
+
+\textbf{Introduction:}\\
+K-means clustering is a widely used partitioning technique that divides a dataset into $k$ distinct, non-overlapping subsets (or clusters). One of the primary challenges with k-means clustering, however, is determining the optimal number of clusters, $k$. The Elbow Method is a heuristic used for this purpose.
+
+\textbf{Basic Idea:}\\
+The Elbow Method involves running k-means clustering on the dataset for a range of values of $k$, and then for each value of $k$ compute the sum of squared distances from each point to its assigned center. When these overall dispersions are plotted against $k$ values, the "elbow" of the curve represents an optimal value for $k$ (a balance between precision and computational cost).
+
+\textbf{Steps:}
+\begin{enumerate}
+    \item \textbf{Compute Clustering for Different k Values:} For each $k$, perform k-means clustering and compute the sum of squared distances (SSD).
+    \item \textbf{Plot SSD Values:} Plot $k$ against the SSD. As $k$ increases, the SSD will tend to decrease. The idea is to find the "elbow" or the point where the SSD starts to level off.
+    \item \textbf{Determine the Elbow Point:} This is more of an art than a precise science since the "elbow" can be subjective. Generally, the elbow point is where the SSD starts to decrease linearly.
+\end{enumerate}
+
+\textbf{Interpreting the Elbow Curve:}\\
+If the line chart looks like an arm, then the "elbow" (the point of inflection on the curve) is a good indication that the underlying model fits best at that point. In the context of k-means clustering, it's the value of $k$. For datasets with no clear elbow, other methods or domain knowledge may be needed to determine an appropriate number of clusters.
+
+\textbf{Limitations:}
+\begin{itemize}
+    \item The Elbow Method is a heuristic and, as such, might not always be able to determine the optimal number of clusters, especially if the data is not very clustered.
+    \item For datasets where the true number of clusters is ambiguous, the elbow might not be clear and sharp, but rather smooth. Other validation techniques might be necessary in such cases.
+\end{itemize}
+
+\textbf{Conclusion:}\\
+While the Elbow Method provides a quick and intuitive way of determining the number of clusters, it's essential to validate the coherence of clusters using additional techniques or domain-specific knowledge. The key takeaway is that there's no one-size-fits-all answer, and the optimal number of clusters will often depend on the specific context and objectives of the analysis.
+
+
+\includefigurestatic{k-means-vary-k}
+
+\includefigurestatic{k-means-elbow}
+
+
+\section{Machine Learning}
+We discuss briefly the field of machine learning and will go into this area deeper in later chapters.
+
+There are two main fields of machine learning:
+\begin{itemize}
+\item Supervised Machine Learning,
+\item Unsupervised Machine Learning.
+\end{itemize}
+Supervised machine learning is composed of \emph{Regression} and \emph{Classification}.  This area is thought of as being given labeled data that you are then trying to understand the trends of this labeled data.
+
+Unsupervised machine learning is where you are given unlabeled data and then need to decide how to label this data. For instance, how can you optimally partition the people in a room into 5 groups that share the most commonalities?
+
+
+
+\section{Machine learning - Supervised Learning - Classification}
+The problem of data \emph{classification} begins with \emph{data} and \emph{labels}.  The goal is \emph{classification} of future data based on sample data that you have by constructing a function to understand future data.
+\begin{center}
+\textit{
+\textbf{Goal:} Classification - create a function $f(x)$ that takes in a data point $x$ and outputs the correct label.}
+\end{center}
+
+These functions can take many forms.  In binary classification, the label set is $\{+1, -1\}$, and we want to correctly (as often as we can) determine the correct label for a future data point.
+
+There are many ways to determine such a function $f(x)$.  SVM is one way to go about this classigication. SVM that determines the function by computing a hyperplane that separates the data labeled $+1$ from the data labeled $-1$.
+
+Later, we will learn about \emph{neural networks} that describe much more complicated functions.  
+
+Another method is to create a \emph{decision tree}.  These are typically more interpretable functions (neural networks are often a bit mysterious) and thus sometimes preferred in settings where the classification should be easily understood, such as a medical diagnosis.  We will not discuss this method here since it fits less well with the theme of nonlinear programming.
+
+\section{Resources and Literature Comments}
+
+\begin{resource}
+SVM
+\begin{itemize}
+\item \href{https://github.com/llSourcell/Classifying_Data_Using_a_Support_Vector_Machine/blob/master/support_vector_machine_lesson.ipynb}{Python SGD implementation and video for support vector machines}
+\item
+\url{https://www.youtube.com/watch?time_continue=6&v=N1vOgolbjSc}
+\end{itemize}
+Box design
+\begin{itemize}
+\item \href{https://www.youtube.com/watch?v=iSnTtV6b0Gw}{Box design optimization using Scipy}
+\end{itemize}
+Classification
+\begin{itemize}
+\item \url{https://www.youtube.com/watch?v=bwZ3Qiuj3i8&list=PL9ooVrP1hQOHUfd-g8GUpKI3hHOwM_9Dn&index=13}
+\item \url{https://towardsdatascience.com/solving-a-simple-classification-problem-with-python-fruits-lovers-edition-d20ab6b071d2}
+\end{itemize}
+
+Neural Networks:
+\begin{itemize}
+\item \url{https://www.youtube.com/watch?v=bVQUSndDllU}
+\item \url{https://www.youtube.com/watch?v=8bNIkfRJZpo}
+\item \url{https://www.youtube.com/watch?v=Dws9Zveu9ug}
+\end{itemize}
+\end{resource}
+
+\textbf{K-MEANS GAURANTEES}
+The k-means algorithm, a widely-used clustering technique, has been the subject of thorough analysis within theoretical computer science. The quality of clusters it produces, particularly in relation to the optimal k-means clustering, is of significant interest.
+
+\textbf{Standard k-means Algorithm}
+
+For the traditional k-means approach, which initiates with arbitrary centers and then iteratively refines them, no constant-factor approximation is guaranteed. This is due to the fact that the resulting clustering quality can heavily depend on these initial centers. A poor choice of initialization can lead the algorithm to produce clusters that are far from optimal.
+
+\textbf{k-means++ Initialization}
+
+A promising improvement over the standard initialization is the \textit{k-means++} initialization method. The k-means++ method selects the first center from the data points uniformly at random. Subsequent centers are chosen from the remaining points with a probability proportional to the square of their distance from the nearest previously selected center.
+
+\textbf{Approximation Guarantees}
+
+Using k-means++ for initialization, followed by the traditional iterative refinement of k-means, provides a provable approximation guarantee. Specifically, this combined approach yields an $O(\log k)$ approximation to the optimal k-means solution in expectation, where $k$ represents the number of clusters. This suggests that the expected cost of the clusters found through this method is at most a logarithmic factor away from the optimal k-means cost, a substantial improvement over arbitrary initializations.
+
+
+%\bibitem{arthur2007}
+D.~Arthur and S.~Vassilvitskii, ``k-means++: The advantages of careful seeding,'' in \textit{Proceedings of the eighteenth annual ACM-SIAM symposium on Discrete algorithms}, New Orleans, Louisiana, 2007, pp. 1027--1035.
+
+
+
+
+%\input{optimization/neural-networks.tex}
+
+%
+%\end{document}

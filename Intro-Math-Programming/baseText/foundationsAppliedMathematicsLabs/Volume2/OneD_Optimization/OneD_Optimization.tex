@@ -190,6 +190,50 @@ We consider the function $f(x) = e^x + e^{-x}$.
 \hline
 \end{tabular}
 
+
+\begin{theorem}{Rate of Convergence of Second-Order Methods in Continuous Optimization}{}
+Let $ f: \mathbb{R}^n \rightarrow \mathbb{R} $ be a twice continuously differentiable function and $ x^* $ be a local minimum of $ f $. If the Hessian matrix $ \nabla^2 f(x^*) $ is positive definite, and if the iteration scheme is based on a quadratic model of the objective function (like Newton's method), then the method is locally quadratically convergent. Specifically, there exists a neighborhood $ N $ of $ x^* $ such that for all starting points $ x_0 $ in $ N $, the error at iteration $ k+1 $ satisfies:
+\[
+\| x_{k+1} - x^* \| \leq C \| x_k - x^* \|^2
+\]
+for some constant $ C > 0 $.
+\end{theorem}
+
+\begin{proof}
+Assuming that we're working with Newton's method, the iteration is given by:
+\[
+x_{k+1} = x_k - \left( \nabla^2 f(x_k) \right)^{-1} \nabla f(x_k)
+\]
+
+1. Taylor's expansion of $ f $ about $ x^* $ gives:
+\[
+f(x) \approx f(x^*) + \nabla f(x^*)^T (x - x^*) + \frac{1}{2} (x - x^*)^T \nabla^2 f(x^*) (x - x^*)
+\]
+
+2. Since $ x^* $ is a local minimum and the gradient vanishes at $ x^* $, the first-order term disappears, and we have:
+\[
+f(x) \approx f(x^*) + \frac{1}{2} (x - x^*)^T \nabla^2 f(x^*) (x - x^*)
+\]
+
+3. Using Newton's iteration, the update becomes:
+\[
+x_{k+1} - x^* = (x_k - x^*) - \left( \nabla^2 f(x_k) \right)^{-1} \nabla f(x_k)
+\]
+
+4. As $ f $ is twice continuously differentiable and $ \nabla^2 f(x^*) $ is positive definite, there exists a neighborhood $ N $ of $ x^* $ where the Hessian is invertible and Lipschitz continuous. Thus, for $ x_k $ close enough to $ x^* $, the Hessian at $ x_k $ will be close to the Hessian at $ x^* $.
+
+5. Consequently, for $ x_k $ close enough to $ x^* $, $ \nabla^2 f(x_k) $ will also be positive definite, ensuring that Newton's direction is a descent direction.
+
+6. From the Taylor expansion, the gradient $ \nabla f(x_k) $ is approximately proportional to $ x_k - x^* $, and the Hessian is roughly constant. Hence, the update step in the Newton iteration will be proportional to the square of the error:
+\[
+x_{k+1} - x^* \propto (x_k - x^*)^2
+\]
+
+From the above, we see that the error at iteration $ k+1 $ is bounded by the square of the error at iteration $ k $, proving the local quadratic convergence.
+\end{proof}
+
+
+
 \subsection*{The Secant Method} % ---------------------------------------------
 
 The second derivative of an objective function is not always known or may be prohibitively expensive to evaluate.

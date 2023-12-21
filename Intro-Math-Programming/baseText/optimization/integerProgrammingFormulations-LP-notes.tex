@@ -96,7 +96,10 @@ Given an non-negative weight vector $a \in \Q^n_+$, a capacity $b \in \Q_+$, and
 & x \in \Z^n_+
 \end{align}
 \end{general}
-\begin{example}
+
+
+
+\begin{examplewithcode}{Min Coins}{https://github.com/open-optimization/open-optimization-or-examples/blob/master/integer-programming/coins-minimize-problem.ipynb}
 \label{ex:min-coins}
 Using pennies, nickels, dimes, and quarters, how can you minimize the number of coins you need to to make up a sum of $83\cent$? 
 
@@ -113,7 +116,8 @@ Using pennies, nickels, dimes, and quarters, how can you minimize the number of 
 \text{ s.t. } \quad & p + 5n + 10d + 25 q = 83 & \text{sums to } 83 \cent\\
 & p,d,n,q \in \Z_+ & \text{each is a non-negative integer}
 \end{align*}
-\end{example}
+\end{examplewithcode}
+
 \section{Capital Budgeting}
 \todoSection{}
 
@@ -318,6 +322,49 @@ x_{ij} = \begin{cases}
 \end{examplewithcode}
 
 
+\begin{examplewithcode}{School Bus Routing Problem}{https://github.com/open-optimization/open-optimization-or-examples/blob/master/integer-programming/School-bus-assignment.ipynb}
+
+A school district has a set of schools \( I \) and a fleet of school buses \( J \). Each bus needs to be assigned to a school every morning to pick up students. The cost \( c_{ij} \) represents the fuel cost for bus \( j \) to reach school \( i \) and complete the route. The district aims to minimize the total fuel cost while ensuring that each school is served by exactly one bus and each bus is assigned to exactly one school.
+
+The fuel costs can be found in the following table.  They are also in csv file format \href{https://github.com/open-optimization/open-optimization-or-examples/blob/master/integer-programming/school_bus_data.csv}{here}.
+\begin{tabular}{l|ccccc}
+\toprule
+Bus/School & School A & School B & School C & School D & School E \\
+\midrule
+Bus 1 & 50 & 80 & 60 & 90 & 100 \\
+Bus 2 & 60 & 85 & 55 & 70 & 110 \\
+Bus 3 & 75 & 65 & 50 & 85 & 90 \\
+Bus 4 & 70 & 90 & 55 & 80 & 95 \\
+Bus 5 & 80 & 70 & 60 & 75 & 85 \\
+\bottomrule
+\end{tabular}
+
+We can model this as follows:
+
+\textbf{Indices:}
+\begin{itemize}
+    \item \(i \) - Index for schools, \(i \in I\)
+    \item \(j \) - Index for buses, \(j \in J\)
+\end{itemize}
+
+\textbf{Parameters:}
+\begin{itemize}
+    \item \(c_{ij} \) - Fuel cost for bus \(j\) to serve school \(i\).
+\end{itemize}
+
+\textbf{Decision Variables:}
+\begin{itemize}
+    \item \(x_{ij} \) - 1 if bus \(j\) is assigned to school \(i\), 0 otherwise.
+\end{itemize}
+
+\textbf{Model:}
+\begin{align*}
+	\min\ \ \  & \sum_{i \in I, j \in J} c_{ij} x_{ij} \tag{Minimize total fuel cost}\\
+	s.t. \ \ & \sum_{i \in I} x_{ij} = 1 & \text{for all $j \in J$} \tag{Each bus is assigned to one school}\\
+	& \sum_{j \in J} x_{ij} = 1 & \text{for all $i\in I$} \tag{Each school is served by one bus}\\
+	 & x_{ij} \in \{0,1\} \forall i \in I, j \in J
+\end{align*}
+\end{examplewithcode}
 
 \section{Facility Location}
 \todoSection{}
@@ -387,6 +434,59 @@ s.t.&  \sum_{i = 1}^mx_{ij} = 1,~~~~~j =1,\ldots n\\
 & y_i\in \{0,1\}, \  \  i = 1,\ldots,m
 \end{align*}
 
+\begin{examplewithcode}{Capacitated Facility Location: Retail Distribution Example}{https://github.com/open-optimization/open-optimization-or-examples/blob/master/integer-programming/facility-location-capacitated.ipynb}
+
+\textbf{Context:} A retail company plans to establish distribution centers across a country to serve its stores efficiently. The company faces decisions on which distribution centers to open and which stores each center should serve. Costs associated with opening each center and serving stores from them are known, and each center has a maximum capacity. Additionally, each store has a known demand.
+
+\textbf*{Given Data:} (\href{https://github.com/open-optimization/open-optimization-or-examples/blob/master/integer-programming/distribution-data.xlsx}{distribution-data.xlsx})
+
+\begin{itemize}
+    \item Number of potential distribution centers ($n$): 3
+    \item Number of stores ($m$): 4
+\end{itemize}
+
+\noindent\textbf{Costs to Open Distribution Centers ($f_i$):}
+\begin{itemize}
+    \item Distribution Center 1: \$150,000
+    \item Distribution Center 2: \$100,000
+    \item Distribution Center 3: \$180,000
+\end{itemize}
+
+\noindent\textbf{Cost to Serve a Store from a Distribution Center ($c_{ij}$):}
+
+\begin{center}
+\begin{tabular}{l|cccc}
+\toprule
+& Store 1 & Store 2 & Store 3 & Store 4 \\
+\midrule
+Center 1 & \$50 & \$60 & \$70 & \$85 \\
+Center 2 & \$75 & \$45 & \$55 & \$50 \\
+Center 3 & \$65 & \$80 & \$40 & \$60 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent\textbf{Capacity of Distribution Centers ($u_i$):}
+\begin{itemize}
+    \item Distribution Center 1: 100 units
+    \item Distribution Center 2: 80 units
+    \item Distribution Center 3: 90 units
+\end{itemize}
+
+\noindent\textbf{Demand by Each Store ($d_j$):}
+\begin{itemize}
+    \item Store 1: 40 units
+    \item Store 2: 30 units
+    \item Store 3: 20 units
+    \item Store 4: 25 units
+\end{itemize}
+
+\textbf*{Model Formulation:}
+The capacitated facility location model described earlier can be applied to this scenario with the given data to determine the optimal number and location of distribution centers to open, and which stores each center should serve.
+\end{examplewithcode}
+
+
+
 \subsection{Uncapacitated Facility Location}
 \begin{general}{Uncapacitated Facility Location}{\npcomplete}
 Given costs connections $c_{ij}$ and fixed building costs $f_i$, the uncapacitated facility location problem is 
@@ -413,6 +513,50 @@ Alternative model!
 &x_i\in\{0,1\}\text{ for all } i=1,\dots,n
 \end{array}
 \end{equation}
+\newpage
+
+\section{Graph Coloring}
+
+
+Graph coloring \refincludefigurestatic{wiki/File/Petersen-graph-3-coloring.png} is 
+is problem of finding a minimum coloring in a graph can be formulated in many ways. Each vertex is assigned a color and two vertices cannot share the same color if they are connected by an edge.
+
+In order to present integer programming formulations, we use $x_{i j}$ to denote binary variables, with $i \in V$ and $1 \leqslant j \leqslant n$, where $x_{i j}=1$ if color $j$ is assigned to vertex $i$ and $x_{i j}=0$ otherwise. We also define $n$ binary variables $w_j$ for $j=1, \ldots, n$, that indicate whether color $j$ is used in some node, i.e., $w_j=1$ if $x_{i j}=1$ for some vertex $i$.
+The following is a classical integer programming formulation:
+$$
+\begin{aligned}
+\min & \sum_{j=1}^n w_j \\
+& \sum_{j=1}^n x_{i j}=1 \quad \forall i \in V, \\
+& x_{i j}+x_{k j} \leqslant w_j \quad \forall\{i, k\} \in E, \quad 1 \leqslant j \leqslant n, \\
+& x_{i j} \in\{0,1\} \quad \forall i \in V, 1 \leqslant j \leqslant n\\
+& w_j \in\{0,1\} \quad 1 \leqslant j \leqslant n .
+\end{aligned}
+$$
+
+
+We can improve upon this model.  We suggest two possible models from~\cite{MENDEZDIAZ2008159}.  Please read their paper for more advanced models with additional families of cuts added.
+
+\textbf{ Color order model:}. 
+Given a $(k)$-coloring, selecting any $k$ colors from the set $\{1, \ldots, n\}$ results in a valid solution, and these solutions are deemed equivalent. To reduce redundancy among these solutions, we stipulate that color $j$ can only be allocated to a vertex if color $j-1$ has previously been assigned. By doing so, we exclude symmetrical $(k)$-colorings that use colors with labels exceeding $k$. To define these valid solutions, we simply need to incorporate the subsequent set of constraints:
+$$
+\begin{aligned}
+& w_j \leqslant \sum_{i \in V} x_{i j} \quad \forall 1 \leqslant j \leqslant n, \\
+& w_j \geqslant w_{j+1} \quad \forall 1 \leqslant j \leqslant n-1 .
+\end{aligned}
+$$
+The reduction of feasible solutions is very significant.
+
+\textbf{ Independent set order model:} 
+In a $(k)$-coloring, permutations of the initial $k$ colors lead to equivalent outcomes. To reduce the occurrence of these similar solutions, the subsequent model introduces stricter constraints than the previous one. It mandates that the count of vertices colored with $j$ should be at least equal to or surpass the count of vertices colored with $j+1$. We incorporate the ensuing inequalities:
+$$
+\begin{aligned}
+& w_j \leqslant \sum_{i \in V} x_{i j} \quad \forall 1 \leqslant j \leqslant n \\
+& \sum_{i=1}^n x_{i j} \geqslant \sum_{i=1}^n x_{i j+1} \quad \forall 1 \leqslant j \leqslant n-1 .
+\end{aligned}
+$$
+
+As an exercise, try implementing these different models and compare the solve times.
+
 \newpage
 \section{Basic Modeling Tricks - Using Binary Variables}
 %\todoSection{}
@@ -845,14 +989,13 @@ c(x) =
 15x + 75 & \text{ if } 10 \leq x \leq 15
 \end{cases}
 $$
-
-\includegraphicstatic[scale = 0.35]{pwl-plot.png}
+See \refincludefigurestatic[scale = 0.35]{pwl-plot.png}.
 
 We will use integer programming to describe this function.  We will fix $x = a$ and then the integer program will set the value $y$ to $c(a)$.
 \begin{align*}
 \min\quad & 0\\
-\text{Subject to} \quad & x - 5 z_{2} - 10 z_{3} - 15 z_{4} = 0\\
- & y - 125 z_{2} - 225 z_{3} - 300 z_{4} = 0\\
+\text{Subject to} \quad & x = 5 z_{2} +10 z_{3} + 15 z_{4}\\
+ & y = 125 z_{2} + 225 z_{3} + 300 z_{4}\\
  & z_{1} + z_{2} + z_{3} + z_{4} = 1\\
  & SOS2: \{z_1, z_2, z_3, z_4\}\\
  & 0 \leq z_{i} \leq 1 \quad\forall i \in \{1,2,3,4\}\\
@@ -949,28 +1092,28 @@ There are a number of scenarios where the constraints can be relaxed without sac
 
 
 
-
-\subsection{Connecting to continuous variables}
-
-Let $x_i \geq 0$ and $y_i \in \{0,1\}$ for all $i=1, \dots, n$.
-
-\begin{enumerate}
-\item If $x_i > 0$, then $y_i = 1$.
-\begin{equation}
-x_i \leq M y_i
-\end{equation}
-where $M$ is a suffiently large upper bound on the variable $x_i$.
-\item If $x_i = 0$, then $y_i = 0$.\\
-This is harder to model!  Alternatively, we try modeling "if $x_i$ is sufficiently small, then $y_i = 0$.   For instance, if $x_i \leq 0.0000001$, then $y_i = 0$.
-This can be modeled as
-\begin{equation}
-x_i - 0.0000001 \geq y_i -1.
-\end{equation}
-\item If $y_i = 1$, then $x_i \geq 5$
-\begin{equation}
-5y_i \leq x_i.
-\end{equation}
-\end{enumerate}
+%
+%\subsection{Connecting to continuous variables}
+%
+%Let $x_i \geq 0$ and $y_i \in \{0,1\}$ for all $i=1, \dots, n$.
+%
+%\begin{enumerate}
+%\item If $x_i > 0$, then $y_i = 1$.
+%\begin{equation}
+%x_i \leq M y_i
+%\end{equation}
+%where $M$ is a suffiently large upper bound on the variable $x_i$.
+%\item If $x_i = 0$, then $y_i = 0$.\\
+%This is harder to model!  Alternatively, we try modeling "if $x_i$ is sufficiently small, then $y_i = 0$.   For instance, if $x_i \leq 0.0000001$, then $y_i = 0$.
+%This can be modeled as
+%\begin{equation}
+%x_i - 0.0000001 \geq y_i -1.
+%\end{equation}
+%\item If $y_i = 1$, then $x_i \geq 5$
+%\begin{equation}
+%5y_i \leq x_i.
+%\end{equation}
+%\end{enumerate}
 
 \subsection{Exact absolute value}
 % Borrowed from Mosek Cookbook
@@ -1029,87 +1172,244 @@ $$
 \section{Network Flow}
 \todoSection{}
 \todo[inline]{Fix up this section}
-\begin{center}
-\href{https://pixabay.com/illustrations/under-construction-construction-sign-2408060/}{\includegraphics[scale = 0.05]{optimization/figures/under-construction-2408060_1280}}
-\end{center}
-\subsection{Example - Multicommodity Flow}
 
-\url{https://en.wikipedia.org/wiki/Multi-commodity_flow_problem}
-The \textbf{multi-commodity flow problem} is a
-\href{flow_network}{network flow} problem with multiple commodities
-(flow demands) between different source and sink nodes.
+\subsection{Maximum flow}
 
-\paragraph{Problem Definition}
+The network flow problem is a fundamental problem in operations research and computer science, with applications in a wide variety of fields. It involves finding the maximum amount of flow that can be sent from a source node to a sink node in a network, without exceeding the capacities of the individual arcs, and ensuring that the flow on each arc is non-negative. This problem arises in many real-world situations, such as in transportation, where it can be used to find the maximum amount of goods that can be transported from a factory to a warehouse, or in telecommunications, where it can be used to find the maximum amount of data that can be sent from one server to another. Other applications include supply chain optimization, water distribution, and electrical power grid optimization. In this section, we will describe a linear programming formulation for the network flow problem.
 
-Given a flow network \(\,G(V,E)\), where edge \((u,v) \in E\) has
-capacity \(\,c(u,v)\). There are \(\,k\) commodities
-\(K_1,K_2,\dots,K_k\), defined by \(\,K_i=(s_i,t_i,d_i)\), where
-\(\,s_i\) and \(\,t_i\) is the \textbf{source} and \textbf{sink} of
-commodity \(\,i\), and \(\,d_i\) is its demand. The variable
-\(\,f_i(u,v)\) defines the fraction of flow \(\,i\) along edge
-\(\,(u,v)\), where \(\,f_i(u,v) \in [0,1]\) in case the flow can be
-split among multiple paths, and \(\,f_i(u,v) \in \{0,1\}\) otherwise
-(i.e. "single path routing"). Find an assignment of all flow variables
-which satisfies the following four constraints:
+A network can be described as a directed graph \( G = (N, A) \), where \( N \) is the set of nodes and \( A \) is the set of arcs. Each arc \( (i, j) \in A \) has a capacity \( u_{ij} \), which is the maximum amount of flow that can traverse the arc from node \( i \) to node \( j \).
 
-\textbf{(1) Link capacity:} The sum of all flows routed over a link does
-not exceed its capacity.
+The network flow problem can be defined as follows: Given a network \( G = (N, A) \), a source node \( s \), a sink node \( t \), and capacities \( u_{ij} \) on the arcs, find the maximum flow from \( s \) to \( t \) that respects the capacity constraints.
 
-\[\forall (u,v)\in E:\,\sum_{i=1}^{k} f_i(u,v)\cdot d_i \leq c(u,v)\]
+\noindent \textbf{Sets:}
+\begin{itemize}
+\item \( N \): Set of nodes in the network.
+\item \( A \): Set of arcs in the network.
+\end{itemize}
 
-\textbf{(2) Flow conservation on transit nodes:} The amount of a flow
-entering an intermediate node \(u\) is the same that exits the node.
+\noindent \textbf{Parameters:}
+\begin{itemize}
+\item \( u_{ij} \): Capacity of arc \( (i, j) \in A \), which is the maximum amount of flow that can traverse the arc from node \( i \) to node \( j \).
+\item \( s \): Source node.
+\item \( t \): Sink node.
+\end{itemize}
 
-\[\,\sum_{w \in V} f_i(u,w) - \sum_{w \in V} f_i(w,u) = 0 \quad \mathrm{when} \quad u \neq s_i, t_i\]
+\noindent \textbf{Variables:}
+\begin{itemize}
+\item \( f_{ij} \): Flow on arc \( (i, j) \in A \).
+\end{itemize}
 
-\textbf{(3) Flow conservation at the source:} A flow must exit its
-source node completely.
+\noindent \textbf{Model:}
+The network flow problem can be formulated as a linear programming problem as follows:
 
-\[\,\sum_{w \in V} f_i(s_i,w) - \sum_{w \in V} f_i(w,s_i) = 1\]
+\begin{align*}
+\text{Maximize} \quad & \sum_{j:(s, j) \in A} f_{sj} - \sum_{j:(j, s) \in A} f_{js} \\
+\text{Subject to} \quad & \sum_{j:(i, j) \in A} f_{ij} - \sum_{j:(j, i) \in A} f_{ji} = 0, \quad \forall i \in N \setminus \{s, t\} \\
+& \sum_{j:(s, j) \in A} f_{sj} - \sum_{j:(j, s) \in A} f_{js} = \sum_{j:(j, t) \in A} f_{jt} - \sum_{j:(t, j) \in A} f_{tj} \\
+& 0 \leq f_{ij} \leq u_{ij}, \quad \forall (i, j) \in A
+\end{align*}
 
-\textbf{(4) Flow conservation at the destination:} A flow must enter its
-sink node completely.
+\noindent \textbf{Objective Function}
+- The objective is to maximize the total flow from the source node \( s \) to the sink node \( t \).
 
-\[\,\sum_{w \in V} f_i(w,t_i) - \sum_{w \in V} f_i(t_i,w) = 1\]
+\noindent \textbf{Constraints}
+- Flow Balance: The first set of constraints ensures that the flow into each node is equal to the flow out of the node, except for the source and sink nodes.
 
-\hypertarget{corresponding-optimization-problems}{%
-\subsection{Corresponding optimization
-problems}\label{corresponding-optimization-problems}}
+- Flow Conservation: The second constraint ensures that the flow out of the source node is equal to the flow into the sink node.
 
-\textbf{Load balancing} is the attempt to route flows such that the
-utilization \(U(u,v)\) of all links \((u,v)\in E\) is even, where
+- Capacity Constraints: The third set of constraints ensures that the flow on each arc does not exceed its capacity.
 
-\[U(u,v)=\frac{\sum_{i=1}^{k} f_i(u,v)\cdot d_i}{c(u,v)}\]
 
-The problem can be solved e.g. by minimizing
-\(\sum_{u,v\in V} (U(u,v))^2\). A common linearization of this problem
-is the minimization of the maximum utilization \(U_{max}\), where
+There are of course many variations on this problem.  Most commonly is to compute a minimum cost network flow.
 
-\[\forall (u,v)\in E:\, U_{max} \geq U(u,v)\]
 
-In the \textbf{minimum cost multi-commodity flow problem}, there is a
-cost \(a(u,v) \cdot f(u,v)\) for sending a flow on \(\,(u,v)\). You then
-need to minimize
+\subsection{Minimum Cost Network Flow}
 
-\[\sum_{(u,v) \in E} \left( a(u,v) \sum_{i=1}^{k} f_i(u,v) \right)\]
+The minimum cost network flow problem is an extension of the network flow problem that considers not only the capacities of the arcs, but also the costs associated with sending flow along the arcs and the demands at the nodes. The objective is to find the flow of minimum cost that satisfies the demands at the nodes and the capacity constraints on the arcs.
 
-In the \textbf{maximum multi-commodity flow problem}, the demand of each
-commodity is not fixed, and the total throughput is maximized by
-maximizing the sum of all demands \(\sum_{i=1}^{k} d_i\)
+A network can be described as a directed graph \( G = (N, A) \), where \( N \) is the set of nodes and \( A \) is the set of arcs. Each arc \( (i, j) \in A \) has a capacity \( u_{ij} \) and a cost \( c_{ij} \). Each node \( i \in N \) has a demand \( d_i \), which can be positive, negative, or zero. A positive demand means that the node requires that amount of flow, a negative demand means that the node supplies that amount of flow, and a zero demand means that the node neither requires nor supplies flow.
 
-\hypertarget{relation-to-other-problems}{%
-\subsection{Relation to other
-problems}\label{relation-to-other-problems}}
+The minimum cost network flow problem can be defined as follows: Given a network \( G = (N, A) \), capacities \( u_{ij} \) and costs \( c_{ij} \) on the arcs, and demands \( d_i \) at the nodes, find the flow \( f_{ij} \) on the arcs that minimizes the total cost of the flow, while satisfying the demands at the nodes and the capacity constraints on the arcs.
 
-The minimum cost variant of the multi-commodity flow problem is a
-generalization of the \href{minimum_cost_flow_problem}{minimum cost flow
-problem} (in which there is merely one source \(s\) and one sink \(t\).
-Variants of the \href{circulation_problem}{circulation problem} are
-generalizations of all flow problems. That is, any flow problem can be
-viewed as a particular circulation problem.\footnote{}
+\noindent \textbf{Sets:}
+\begin{itemize}
+\item \( N \): Set of nodes in the network.
+\item \( A \): Set of arcs in the network.
+\end{itemize}
+
+\noindent \textbf{Parameters:}
+\begin{itemize}
+\item \( u_{ij} \): Capacity of arc \( (i, j) \in A \).
+\item \( c_{ij} \): Cost per unit of flow on arc \( (i, j) \in A \).
+\item \( d_i \): Demand at node \( i \in N \).
+\end{itemize}
+
+\noindent \textbf{Variables:}
+\begin{itemize}
+\item \( f_{ij} \): Flow on arc \( (i, j) \in A \).
+\end{itemize}
+
+\noindent \textbf{Model:}
+The minimum cost network flow problem can be formulated as a linear programming problem as follows:
+
+\begin{align*}
+\text{Minimize} \quad & \sum_{(i, j) \in A} c_{ij} f_{ij} \\
+\text{Subject to} \quad & \sum_{j:(i, j) \in A} f_{ij} - \sum_{j:(j, i) \in A} f_{ji} = d_i, \quad \forall i \in N \\
+& 0 \leq f_{ij} \leq u_{ij}, \quad \forall (i, j) \in A
+\end{align*}
+
+\noindent \textbf{Objective Function}
+- The objective is to minimize the total cost of the flow.
+
+\noindent \textbf{Constraints}
+- Flow Conservation: The first set of constraints ensures that the flow into each node minus the flow out of the node is equal to the demand at the node.
+
+- Capacity Constraints: The second set of constraints ensures that the flow on each arc does not exceed its capacity.
+
+
+\subsection{Multi-Commodity Minimum Cost Network Flow with Integrality Constraints}
+
+The multi-commodity minimum cost network flow problem is a generalization of the minimum cost network flow problem that considers multiple commodities flowing through the network. Each commodity has its own demand at each node and its own cost on each arc. The objective is to find the integer flow of minimum cost that satisfies the demands of all commodities at the nodes and the capacity constraints on the arcs.
+
+A network can be described as a directed graph \( G = (N, A) \), where \( N \) is the set of nodes and \( A \) is the set of arcs. Each arc \( (i, j) \in A \) has a capacity \( u_{ij} \). Each commodity \( k \) has a demand \( d_{ik} \) at each node \( i \in N \) and a cost \( c_{ijk} \) on each arc \( (i, j) \in A \).
+
+The multi-commodity minimum cost network flow problem can be defined as follows: Given a network \( G = (N, A) \), capacities \( u_{ij} \) on the arcs, demands \( d_{ik} \) and costs \( c_{ijk} \) for each commodity \( k \), find the integer flow \( f_{ijk} \) on the arcs for each commodity \( k \) that minimizes the total cost of the flow, while satisfying the demands of all commodities at the nodes and the capacity constraints on the arcs.
+
+\noindent \textbf{Sets:}
+\begin{itemize}
+\item \( N \): Set of nodes in the network.
+\item \( A \): Set of arcs in the network.
+\item \( K \): Set of commodities.
+\end{itemize}
+
+\noindent \textbf{Parameters:}
+\begin{itemize}
+\item \( u_{ij} \): Capacity of arc \( (i, j) \in A \).
+\item \( c_{ijk} \): Cost per unit of flow of commodity \( k \) on arc \( (i, j) \in A \).
+\item \( d_{ik} \): Demand of commodity \( k \) at node \( i \in N \).
+\end{itemize}
+
+\noindent \textbf{Variables:}
+\begin{itemize}
+\item \( f_{ijk} \): Flow of commodity \( k \) on arc \( (i, j) \in A \).
+\end{itemize}
+
+\noindent \textbf{Model:}
+The multi-commodity minimum cost network flow problem can be formulated as an integer linear programming problem as follows:
+
+\begin{align*}
+\text{Minimize} \quad & \sum_{k \in K} \sum_{(i, j) \in A} c_{ijk} f_{ijk} \\
+\text{Subject to} \quad & \sum_{k \in K} \sum_{j:(i, j) \in A} f_{ijk} - \sum_{k \in K} \sum_{j:(j, i) \in A} f_{jik} \leq u_{ij}, \quad \forall (i, j) \in A \\
+& \sum_{j:(i, j) \in A} f_{ijk} - \sum_{j:(j, i) \in A} f_{jik} = d_{ik}, \quad \forall i \in N, k \in K \\
+& f_{ijk} \in \mathbb{Z}^+, \quad \forall (i, j) \in A, k \in K
+\end{align*}
+
+\noindent \textbf{Objective Function}
+- The objective is to minimize the total cost of the flow.
+
+\noindent \textbf{Constraints}
+- Capacity Constraints: The first set of constraints ensures that the total flow on each arc does not exceed its capacity.
+
+- Flow Conservation: The second set of constraints ensures that the flow into each node minus the flow out of the node is equal to the demand of each commodity at the node.
+
+- Integrality Constraints: The third set of constraints ensures that the flow on each arc for each commodity is an integer.
+
+\begin{examplewithcode}{Multi-commodity network flow}{https://github.com/open-optimization/open-optimization-or-examples/blob/master/integer-programming/MultiCommodityNetworkFlow.ipynb}
+\begin{verbatim}
+# Sample data
+nodes = [1, 2, 3, 4]
+arcs = [(1, 2), (1, 3), (2, 4), (3, 4)]
+commodities = [1, 2]
+capacities = {(1, 2): 20, (1, 3): 15, (2, 4): 25, (3, 4): 20}
+costs = {(1, 2, 1): 2, (1, 2, 2): 3, (1, 3, 1): 3, 
+(1, 3, 2): 2, (2, 4, 1): 1, (2, 4, 2): 2, (3, 4, 1): 2, (3, 4, 2): 1}
+demands = {(1, 1): -10, (1, 2): -5, (2, 1): 0, (2, 2): 0, (3, 1): 0, (3, 2): 0, 
+(4, 1): 10, (4, 2): 5}
+\end{verbatim}
+
+\includefigurestatic{multi-network-flow-data.png}
+\includefigurestatic{multi-network-flow-solution.png}
+
+\end{examplewithcode}
+%
+%\subsection{Example - Multicommodity Flow}
+%
+%\url{https://en.wikipedia.org/wiki/Multi-commodity_flow_problem}
+%The \textbf{multi-commodity flow problem} is a
+%\href{flow_network}{network flow} problem with multiple commodities
+%(flow demands) between different source and sink nodes.
+%
+%\paragraph{Problem Definition}
+%
+%Given a flow network \(\,G(V,E)\), where edge \((u,v) \in E\) has
+%capacity \(\,c(u,v)\). There are \(\,k\) commodities
+%\(K_1,K_2,\dots,K_k\), defined by \(\,K_i=(s_i,t_i,d_i)\), where
+%\(\,s_i\) and \(\,t_i\) is the \textbf{source} and \textbf{sink} of
+%commodity \(\,i\), and \(\,d_i\) is its demand. The variable
+%\(\,f_i(u,v)\) defines the fraction of flow \(\,i\) along edge
+%\(\,(u,v)\), where \(\,f_i(u,v) \in [0,1]\) in case the flow can be
+%split among multiple paths, and \(\,f_i(u,v) \in \{0,1\}\) otherwise
+%(i.e. "single path routing"). Find an assignment of all flow variables
+%which satisfies the following four constraints:
+%
+%\textbf{(1) Link capacity:} The sum of all flows routed over a link does
+%not exceed its capacity.
+%
+%\[\forall (u,v)\in E:\,\sum_{i=1}^{k} f_i(u,v)\cdot d_i \leq c(u,v)\]
+%
+%\textbf{(2) Flow conservation on transit nodes:} The amount of a flow
+%entering an intermediate node \(u\) is the same that exits the node.
+%
+%\[\,\sum_{w \in V} f_i(u,w) - \sum_{w \in V} f_i(w,u) = 0 \quad \mathrm{when} \quad u \neq s_i, t_i\]
+%
+%\textbf{(3) Flow conservation at the source:} A flow must exit its
+%source node completely.
+%
+%\[\,\sum_{w \in V} f_i(s_i,w) - \sum_{w \in V} f_i(w,s_i) = 1\]
+%
+%\textbf{(4) Flow conservation at the destination:} A flow must enter its
+%sink node completely.
+%
+%\[\,\sum_{w \in V} f_i(w,t_i) - \sum_{w \in V} f_i(t_i,w) = 1\]
+%
+%\hypertarget{corresponding-optimization-problems}{%
+%\subsection{Corresponding optimization
+%problems}\label{corresponding-optimization-problems}}
+%
+%\textbf{Load balancing} is the attempt to route flows such that the
+%utilization \(U(u,v)\) of all links \((u,v)\in E\) is even, where
+%
+%\[U(u,v)=\frac{\sum_{i=1}^{k} f_i(u,v)\cdot d_i}{c(u,v)}\]
+%
+%The problem can be solved e.g. by minimizing
+%\(\sum_{u,v\in V} (U(u,v))^2\). A common linearization of this problem
+%is the minimization of the maximum utilization \(U_{max}\), where
+%
+%\[\forall (u,v)\in E:\, U_{max} \geq U(u,v)\]
+%
+%In the \textbf{minimum cost multi-commodity flow problem}, there is a
+%cost \(a(u,v) \cdot f(u,v)\) for sending a flow on \(\,(u,v)\). You then
+%need to minimize
+%
+%\[\sum_{(u,v) \in E} \left( a(u,v) \sum_{i=1}^{k} f_i(u,v) \right)\]
+%
+%In the \textbf{maximum multi-commodity flow problem}, the demand of each
+%commodity is not fixed, and the total throughput is maximized by
+%maximizing the sum of all demands \(\sum_{i=1}^{k} d_i\)
+%
+%\hypertarget{relation-to-other-problems}{%
+%\subsection{Relation to other
+%problems}\label{relation-to-other-problems}}
+%
+%The minimum cost variant of the multi-commodity flow problem is a
+%generalization of the \href{minimum_cost_flow_problem}{minimum cost flow
+%problem} (in which there is merely one source \(s\) and one sink \(t\).
+%Variants of the \href{circulation_problem}{circulation problem} are
+%generalizations of all flow problems. That is, any flow problem can be
+%viewed as a particular circulation problem.\footnote{}
 
 \hypertarget{usage}{%
-\subsection{Usage}\label{usage}}
+\textbf{Usage}\label{usage}}
 
 \href{Routing_and_wavelength_assignment}{Routing and wavelength
 assignment} (RWA) in \href{optical_burst_switching}{optical burst
@@ -1117,28 +1417,168 @@ switching} of \href{SONET}{Optical Network} would be approached via
 multi-commodity flow formulas.
 
 
-\section{Transportation Problem}
-\todoSection{}
-\todo[inline]{
-Add discussion of transportation problem and picture.
-}
+%\section{Transportation Problem}
+%\todoSection{}
+%\todo[inline]{
+%Add discussion of transportation problem and picture.
+%}
+%
+%\href{https://www.youtube.com/watch?v=Jr7LI-sUEmo}{Youtube! - TRANSPORTATION PROBLEM with PuLP in PYTHON}
+%
+%\href{https://nbviewer.jupyter.org/github/Pyomo/PyomoGallery/blob/master/transport/transport.ipynb}{Notebook: Solution with Pyomo}
+%
+%
+%
+%The transportation problem involves determining the optimal way to transport goods from a set of suppliers to a set of markets. The goal is to minimize total transportation costs while satisfying supply availabilities at the suppliers and demand requirements at the markets.
+%
+%Let $I$ be the set of suppliers and $J$ be the set of markets. Parameters include:
+%
+%\begin{itemize}
+%\item $s_i$: supply available at supplier $i$ 
+%\item $d_j$: demand required at market $j$
+%\item $c_{ij}$: cost of shipping one unit from $i$ to $j$
+%\end{itemize}
+%
+%Decision variables are:
+%
+%\begin{itemize}
+%\item $x_{ij}$: units shipped from supplier $i$ to market $j$
+%\end{itemize}
+%
+%The optimization model is:
+%
+%\begin{align*}
+%\text{minimize: } &\sum_{i\in I}\sum_{j \in J} c_{ij}x_{ij} && \text{(total shipping cost)}\\
+%\text{subject to: } &\sum_{j\in J} x_{ij} = s_i && \forall i \in I \\
+%& \sum_{i\in I} x_{ij} = d_j && \forall j \in J\\
+%& x_{ij} \geq 0 &&\forall i\in I, j\in J
+%\end{align*}
+%
+%The objective is to minimize total shipping costs. The constraints ensure that supply at each supplier and demand at each market are satisfied. The decision variables $x_{ij}$ determine the optimal shipment quantities.
 
-\href{https://www.youtube.com/watch?v=Jr7LI-sUEmo}{Youtube! - TRANSPORTATION PROBLEM with PuLP in PYTHON}
 
-\href{https://nbviewer.jupyter.org/github/Pyomo/PyomoGallery/blob/master/transport/transport.ipynb}{Notebook: Solution with Pyomo}
 
 \section{Job Shop Scheduling}
 \todoSection{}
-\href{https://python-mip.readthedocs.io/en/latest/examples.html#job-shop-scheduling-problem}{Pyhton MIP example}
+Example borrowed from:\href{https://python-mip.readthedocs.io/en/latest/examples.html#job-shop-scheduling-problem}{Pyhton MIP example}
 \todo[inline]{Fill in model and discussion and add code example.  Need to create gnat chart code for nice visulizations. }
 
+The Job Shop Scheduling Problem, abbreviated as JSSP, is a classical combinatorial optimization problem that is classified as NP-hard. It is characterized by a collection of jobs that are to be processed on a specific group of machines. Each job has a predetermined processing sequence across the machines, with a fixed processing duration for each machine. A job can only visit a machine once, and machines can only accommodate one job at a time. Once a machine starts a job, it must finish it without any interruptions. The primary goal is to reduce the makespan, which is the total time taken to complete all jobs.
 
-\section{Jobshop Scheduling: Makespan Minimization}
+Consider the case of having three jobs and three machines. The jobs have the following processing sequences and times:
+
+\begin{itemize}
+  \item Job \( j_1 \): \( m_3(2) \) followed by \( m_1(1) \) and then \( m_2(2) \).
+  \item Job \( j_2 \): \( m_2(1) \) followed by \( m_3(2) \) and then \( m_1(2) \).
+  \item Job \( j_3 \): \( m_3(1) \) followed by \( m_2(2) \) and then \( m_1(1) \).
+\end{itemize}
+
+Below, we present two potential schedules. The first one is a straightforward approach where jobs are processed sequentially, leading to machines having idle periods. The second approach is optimal, where jobs are executed concurrently.
+
+\subsection{JSSP Components}
+The JSSP can be formally described by the following parameters:
+
+\begin{itemize}
+  \item \( J\): Represents the set of jobs, indexed as \( \{1, \ldots, n\} \).
+  \item \( I\): Represents the set of machines, indexed as \( \{1, \ldots, m\} \).
+  \item \( o_r^j \): Specifies the machine that handles the \( r \)-th operation of job \( j \). The sequence \( O^j=\left(o_1^j, o_2^j, \ldots, o_m^j\right) \) illustrates the processing order for job \( j \).
+  \item \( p_{i j} \): Represents the non-negative processing time of job \( j \) on machine \( i \).
+\end{itemize}
+
+The solution to the JSSP must satisfy:
+
+\begin{enumerate}
+  \item Every job \( j \) should be processed according to the machine sequence \( O^j \).
+  \item At any given time, a machine can only process one job.
+  \item A job, once started on a machine, must run to completion without any breaks.
+\end{enumerate}
+
+The objective is to minimize the makespan, or the finishing time of the last job. The problem remains NP-hard even if \( n \geq 3 \) or \( m \geq 3 \).
+
+Decision variables include:
+\begin{itemize}
+  \item \( x_{i j} \): Starting time of job \( j \) on machine \( i \).
+  \item \( y_{i j k} \): A binary variable. It's 1 if job \( j \) precedes job \( k \) on machine \( i \) and 0 otherwise.
+  \item \( C \): The makespan or the maximum completion time.
+\end{itemize}
+
+
+
+\textbf{Example: Job Shop Scheduling Problem Input Data}
+
+\textbf{Basic Parameters}
+The number of jobs, \( n \), is 5 and the number of machines, \( m \), is 3. 
+
+\textbf{Processing Times}
+The matrix of processing times for each job on each machine is given by:
+
+\[
+\text{times} = 
+\begin{bmatrix}
+2 & 1 & 2 \\
+1 & 2 & 2 \\
+1 & 2 & 1 \\
+1 & 1 & 1 \\
+3 & 4 & 5 \\
+\end{bmatrix}
+\]
+
+Where the element in the \(i\)-th row and \(j\)-th column represents the time required to process job \(i\) on machine \(j\).
+
+\textbf{Machine Sequences}
+The order in which each job needs to be processed on the machines is described by:
+
+\[
+\text{machines} = 
+\begin{bmatrix}
+2 & 0 & 1 \\
+1 & 2 & 0 \\
+2 & 1 & 0 \\
+1 & 2 & 0 \\
+0 & 1 & 2 \\
+\end{bmatrix}
+\]
+
+Here, the sequence of machines for each job is given by the rows of the matrix. For instance, job 1 is processed first on machine 2, then on machine 0, and finally on machine 1.
+
+\textbf{Big \(M\) Calculation}
+A large constant, \( M \), is used in the model formulation. It is computed as the sum of all processing times, given by:
+
+\[
+M = \sum_{i=1}^{n} \sum_{j=1}^{m} \text{times}[i][j]
+\]
+
+\refincludefigurestatic[scale = 1.5]{jssp.png}
+
+
+
+\paragraph{Applications of JSSP}
+The JSSP has numerous practical applications, including:
+\begin{itemize}
+  \item Manufacturing: Scheduling tasks in a production line to optimize throughput.
+  \item Computer Science: Allocating tasks to processors in parallel computing environments.
+  \item Healthcare: Scheduling surgeries and other treatments in hospitals.
+  \item Transportation: Optimizing maintenance tasks for vehicles or aircraft in a maintenance facility.
+\end{itemize}
+
+
+\subsection{Mathematical Model}
 \todo[inline]{
  Add discussion of some makespan minimization problems.
 }
 
-\href{https://en.wikipedia.org/wiki/Job_shop_scheduling}{Wikipedia: Jobshop Scheduling}
+
+\noindent \textbf{Sets:}
+\begin{itemize}
+  \item \( J\): Represents the set of jobs, indexed as \( \{1, \ldots, n\} \).
+  \item \( I \): Represents the set of machines, indexed as \( \{1, \ldots, m\} \).
+  \end{itemize}
+\noindent \textbf{Parameters:}
+\begin{itemize}
+ \item \( o_r^j \): Specifies the machine that handles the \( r \)-th operation of job \( j \). The sequence \( O^j=\left(o_1^j, o_2^j, \ldots, o_m^j\right) \) illustrates the processing order for job \( j \).
+  \item \( p_{i j} \): Represents the non-negative processing time of job \( j \) on machine \( i \).
+\end{itemize}
+\noindent \textbf{Variables:}
 $$
 x_{ij} = \text{ start time of job $j$ on machine $i$}.
 $$
@@ -1148,125 +1588,146 @@ y_{ijk} = \begin{cases} 1, & \text{if job } j \text{ precedes job } k \text{ on 
 $$
 
 
+\noindent \textbf{Model:}
+\begin{subequations}
+\begin{equation}
+\begin{array}{rrlrr}
+\min 
+               & C_{\max} \\
+\text{s.t.} \\
+&& \text{Overlapping constraints}\\
+&            x_{o^{j}_{r}j} &  \geq x_{o^{j}_{r-1}j} +p_{o^{j}_{r-1}j} & \forall r \in \{2,..,m\}, j \in {J} & \text{Order tasks for job $j$} \\
+             &      x_{ij}     & \geq x_{ik} + p_{ik} - M \cdot y_{ijk} & \forall j,k \in {J}, j \neq k, i \in {I} & \text{Ordering on machine $i$} \\
+              &     x_{ik}     & \geq x_{ij} + p_{ij} - M \cdot (1-y_{ijk}) & \forall j,k \in {J}, j \neq k,i \in {I} & \text{Reverse ordering on machine $i$}\\
+              \\
+           &   & \text{ Bounding objective}\\
+            &       C_{\max}          & \geq x_{o^{j}_{m}j} + p_{o^{j}_{m}j} & \forall j \in {J} & \text{last task of job $j$ completed before end}\\
+            \\
+            && \text{ Domain of variables}\\
+            &      x_{ij}      & \geq 0 & \forall i \in {J}, i \in {I} \\
+           &       y_{ijk}     & \in \{0,1\} & \forall j,k \in {J}, i \in {I} \\
+          &        C_{\max} & \geq 0
+              \end{array}
+              \end{equation}
+\end{subequations}
+\begin{examplewithcode}{Duplo Scheduling}{https://github.com/open-optimization/open-optimization-or-examples/blob/master/integer-programming/job-shop-scheduling.ipynb}
 
-\begin{align}\textrm{min: }  &  \\
-               & C \\
-\textrm{s.t.: } &  \\
-               x_{o^{j}_{r}j} &  \geq x_{o^{j}_{r-1}j} +p_{o^{j}_{r-1}j} \,\,\, \forall r \in \{2,..,m\}, j \in {J} \\
-                   x_{ij}     & \geq x_{ik} + p_{ik} - M \cdot y_{ijk} \,\,\, \forall j,k \in {J}, j \neq k, i \in {M} \\
-                   x_{ik}     & \geq x_{ij} + p_{ij} - M \cdot (1-y_{ijk}) \,\,\, \forall j,k \in {J}, j \neq k,i \in {I} \\
-                   C          & \geq x_{o^{j}_{m}j} + p_{o^{j}_{m}j} \,\,\, \forall j \in {J} \\
-                  x_{ij}      & \geq 0 \,\,\, \forall i \in {J}, i \in {I} \\
-                  y_{ijk}     & \in \{0,1\} \,\,\, \forall j,k \in {J}, i \in {I} \\
-                  C & \geq 0
-              \end{align}
+The Duplo in class exercise is solved with Gurobi in the link.
+
+The optimal value is 11.
+
+\includegraphics[scale = 0.5]{optimization/figures/figures-static/jssp-duplo}
+
+\includegraphics[scale = 0.07]{optimization/figures/figures-static/jssp-duplo-actual}
+
+\end{examplewithcode}
+
+\subsection{Job Shop Scheduling Variations}
+
+Makespan minimization of assining jobs to machines.
+
+In this variation, each machine can handle a number of of different types of jobs.  Some machines can do certain jobs faster than others. 
+
+We want to minimize the completion time of all of the jobs.  
+
+In this simple variation, each job only needs to be processed on a single machine, but that choice of machine might vary dependent on which machine can do that job faster and which one is available.
 
 
+%
+%
+%Let there be $n$ jobs and $m$ machines.
+%
+%Let $x_{ij}$ be a binary variable that is 1 if job $i$ is assigned to machine $j$, and 0 otherwise.
+%
+%Subject to:
+%
+%Each job can be assigned to only one machine: $\sum\limits_{j=1}^{m} x_{ij} = 1$ for $i=1$ to $n$
+%
+%Each machine can process only one job at a time: $\sum\limits_{i=1}^{n} x_{ij} \leq 1$ for $j=1$ to $m$
+%
+%Start time of a job is based on the completion time of its predecessor: $y_i \geq y_j + p_j$ for $(i,j) \in E$
+%
+%$y_i \geq 0$ for $i=1$ to $n$
+%
+%$x_{ij} \in {0,1}$ for $i=1$ to $n$ and $j=1$ to $m$
+%
+%$y_i \in \mathbb{N}$ for $i=1$ to $n$
+%
+%Where, $p_i$ is the processing time of job $i$, $E$ is the set of edges that represent the precedence constraints between the jobs.
+%
+%The model can be implemented using python with Gurobi library as follows:
+%
+%\begin{verbatim}
+%from gurobipy import *
+%
+%def job_shop_scheduling(n,m,p,E):
+%    # Create a new model
+%    model = Model()
+%
+%    # Create variables
+%    x = {}
+%    y = {}
+%    for i in range(n):
+%        y[i] = model.addVar(vtype=GRB.INTEGER, name="y_"+str(i))
+%        for j in range(m):
+%            x[i,j] = model.addVar(vtype=GRB.BINARY, name="x_"+str(i)+"_"+str(j))
+%
+%    # Set objective
+%    obj = quicksum([y[i]+p[i] for i in range(n)])
+%    model.setObjective(obj,GRB.MINIMIZE)
+%
+%    # Add constraints
+%    for i in range(n):
+%        model.addConstr(quicksum([x[i,j] for j in range(m)]) == 1)
+%
+%    for j in range(m):
+%        model.addConstr(quicksum([x[i,j] for i in range(n)]) <= 1)
+%
+%    for (i,j) in E:
+%        model.addConstr(y[i] >= y[j]+p[j])
+%
+%    for i in range(n):
+%        model.addConstr(y[i] >= 0)
+%
+%    # Optimize model
+%    model.optimize()
+%
+%    return
+%\end{verbatim}
 
-\subsection{Other models}
-Job shop scheduling is a common optimization problem in which a set of jobs needs to be scheduled on a set of machines. The goal is to minimize the total completion time of all the jobs or to maximize some other objective function. This problem can be formulated as an integer programming (IP) model, which is a mathematical optimization model that includes both continuous and integer decision variables.
-
-One of the most popular IP models for job shop scheduling is the Johnson's rule model. This model can be formulated as follows:
-
-Let there be $n$ jobs and $m$ machines.
-
-Let $x_{ij}$ be a binary variable that is 1 if job $i$ is assigned to machine $j$, and 0 otherwise.
-
-Let $y_i$ be an integer variable that represents the start time of job $i$.
-
-The objective function is to minimize the maximum completion time of all the jobs.
-
-$\min \max\limits_{i=1}^{n} y_i + p_i$
-
-Subject to:
-
-Each job can be assigned to only one machine: $\sum\limits_{j=1}^{m} x_{ij} = 1$ for $i=1$ to $n$
-
-Each machine can process only one job at a time: $\sum\limits_{i=1}^{n} x_{ij} \leq 1$ for $j=1$ to $m$
-
-Start time of a job is based on the completion time of its predecessor: $y_i \geq y_j + p_j$ for $(i,j) \in E$
-
-$y_i \geq 0$ for $i=1$ to $n$
-
-$x_{ij} \in {0,1}$ for $i=1$ to $n$ and $j=1$ to $m$
-
-$y_i \in \mathbb{N}$ for $i=1$ to $n$
-
-Where, $p_i$ is the processing time of job $i$, $E$ is the set of edges that represent the precedence constraints between the jobs.
-
-The model can be implemented using python with Gurobi library as follows:
-
-\begin{verbatim}
-from gurobipy import *
-
-def job_shop_scheduling(n,m,p,E):
-    # Create a new model
-    model = Model()
-
-    # Create variables
-    x = {}
-    y = {}
-    for i in range(n):
-        y[i] = model.addVar(vtype=GRB.INTEGER, name="y_"+str(i))
-        for j in range(m):
-            x[i,j] = model.addVar(vtype=GRB.BINARY, name="x_"+str(i)+"_"+str(j))
-
-    # Set objective
-    obj = quicksum([y[i]+p[i] for i in range(n)])
-    model.setObjective(obj,GRB.MINIMIZE)
-
-    # Add constraints
-    for i in range(n):
-        model.addConstr(quicksum([x[i,j] for j in range(m)]) == 1)
-
-    for j in range(m):
-        model.addConstr(quicksum([x[i,j] for i in range(n)]) <= 1)
-
-    for (i,j) in E:
-        model.addConstr(y[i] >= y[j]+p[j])
-
-    for i in range(n):
-        model.addConstr(y[i] >= 0)
-
-    # Optimize model
-    model.optimize()
-
-    return
-\end{verbatim}
-
-Here is an example:
-Here is an example job shop scheduling problem with 5 machines and 15 jobs:
-
-Machine 1: Can perform jobs 1, 2, 3, 4, and 5
-Machine 2: Can perform jobs 6, 7, 8, 9, and 10
-Machine 3: Can perform jobs 11, 12, 13, 14, and 15
-Machine 4: Can perform jobs 1, 6, 11, 2, and 7
-Machine 5: Can perform jobs 3, 8, 13, 4, and 9
-Jobs:
-
-Job 1: Machine 1 (processing time = 2 hours), Machine 4 (processing time = 1 hour)
-Job 2: Machine 1 (processing time = 3 hours), Machine 4 (processing time = 2 hours)
-Job 3: Machine 1 (processing time = 2 hours), Machine 5 (processing time = 1 hour)
-Job 4: Machine 1 (processing time = 4 hours), Machine 5 (processing time = 2 hours)
-Job 5: Machine 1 (processing time = 1 hour)
-Job 6: Machine 2 (processing time = 3 hours), Machine 4 (processing time = 2 hours)
-Job 7: Machine 2 (processing time = 2 hours), Machine 4 (processing time = 1 hour)
-Job 8: Machine 2 (processing time = 4 hours), Machine 5 (processing time = 2 hours)
-Job 9: Machine 2 (processing time = 1 hour), Machine 5 (processing time = 1 hour)
-Job 10: Machine 2 (processing time = 2 hours)
-Job 11: Machine 3 (processing time = 3 hours), Machine 4 (processing time = 2 hours)
-Job 12: Machine 3 (processing time = 2 hours), Machine 4 (processing time = 1 hour)
-Job 13: Machine 3 (processing time = 4 hours), Machine 5 (processing time = 2 hours)
-Job 14: Machine 3 (processing time = 1 hour), Machine 5 (processing time = 1 hour)
-Job 15: Machine 3 (processing time = 2 hours)
-Objective: Minimize the makespan (i.e. the total time it takes to complete all the jobs)
-
-Constraints:
-
-Each job can only be performed on the specified machines in the order listed
-A machine can only work on one job at a time
-There are no precedence constraints between jobs.
-
+%Here is an example:
+%Here is an example job shop scheduling problem with 5 machines and 15 jobs:
+%
+%Machine 1: Can perform jobs 1, 2, 3, 4, and 5
+%Machine 2: Can perform jobs 6, 7, 8, 9, and 10
+%Machine 3: Can perform jobs 11, 12, 13, 14, and 15
+%Machine 4: Can perform jobs 1, 6, 11, 2, and 7
+%Machine 5: Can perform jobs 3, 8, 13, 4, and 9
+%Jobs:
+%
+%Job 1: Machine 1 (processing time = 2 hours), Machine 4 (processing time = 1 hour)
+%Job 2: Machine 1 (processing time = 3 hours), Machine 4 (processing time = 2 hours)
+%Job 3: Machine 1 (processing time = 2 hours), Machine 5 (processing time = 1 hour)
+%Job 4: Machine 1 (processing time = 4 hours), Machine 5 (processing time = 2 hours)
+%Job 5: Machine 1 (processing time = 1 hour)
+%Job 6: Machine 2 (processing time = 3 hours), Machine 4 (processing time = 2 hours)
+%Job 7: Machine 2 (processing time = 2 hours), Machine 4 (processing time = 1 hour)
+%Job 8: Machine 2 (processing time = 4 hours), Machine 5 (processing time = 2 hours)
+%Job 9: Machine 2 (processing time = 1 hour), Machine 5 (processing time = 1 hour)
+%Job 10: Machine 2 (processing time = 2 hours)
+%Job 11: Machine 3 (processing time = 3 hours), Machine 4 (processing time = 2 hours)
+%Job 12: Machine 3 (processing time = 2 hours), Machine 4 (processing time = 1 hour)
+%Job 13: Machine 3 (processing time = 4 hours), Machine 5 (processing time = 2 hours)
+%Job 14: Machine 3 (processing time = 1 hour), Machine 5 (processing time = 1 hour)
+%Job 15: Machine 3 (processing time = 2 hours)
+%Objective: Minimize the makespan (i.e. the total time it takes to complete all the jobs)
+%
+%Constraints:
+%
+%Each job can only be performed on the specified machines in the order listed
+%A machine can only work on one job at a time
+%There are no precedence constraints between jobs.
+%
 
 \textbf{Machines:}
 \begin{itemize}
@@ -1304,37 +1765,39 @@ There are no precedence constraints between jobs.
     \item A machine can only work on one job at a time
     \item There are no precedence constraints between jobs.
 \end{itemize}
+%
+%\begin{verbatim}
+%job_shop_data = {
+%    'machines': {
+%        1: {'jobs': [1, 2, 3, 4, 5]},
+%        2: {'jobs': [6, 7, 8, 9, 10]},
+%        3: {'jobs': [11, 12, 13, 14, 15]},
+%        4: {'jobs': [1, 6, 11, 2, 7]},
+%        5: {'jobs': [3, 8, 13, 4, 9]}
+%    },
+%    'jobs': {
+%        1: {'machine_times': {1: 2, 4: 1}},
+%        2: {'machine_times': {1: 3, 4: 2}},
+%        3: {'machine_times': {1: 2, 5: 1}},
+%        4: {'machine_times': {1: 4, 5: 2}},
+%        5: {'machine_times': {1: 1}},
+%        6: {'machine_times': {2: 3, 4: 2}},
+%        7: {'machine_times': {2: 2, 4: 1}},
+%        8: {'machine_times': {2: 4, 5: 2}},
+%        9: {'machine_times': {2: 1, 5: 1}},
+%        10: {'machine_times': {2: 2}},
+%        11: {'machine_times': {3: 3, 4: 2}},
+%        12: {'machine_times': {3: 2, 4: 1}},
+%        13: {'machine_times': {3: 4, 5: 2}},
+%        14: {'machine_times': {3: 1, 5: 1}},
+%        15: {'machine_times': {3: 2}}
+%    },
+%    'objective': 'minimize_makespan',
+%    'constraints': ['job_machine_mapping', 'single_job_single_machine', 'no_job_precedence']
+%}
+%\end{verbatim}
 
-\begin{verbatim}
-job_shop_data = {
-    'machines': {
-        1: {'jobs': [1, 2, 3, 4, 5]},
-        2: {'jobs': [6, 7, 8, 9, 10]},
-        3: {'jobs': [11, 12, 13, 14, 15]},
-        4: {'jobs': [1, 6, 11, 2, 7]},
-        5: {'jobs': [3, 8, 13, 4, 9]}
-    },
-    'jobs': {
-        1: {'machine_times': {1: 2, 4: 1}},
-        2: {'machine_times': {1: 3, 4: 2}},
-        3: {'machine_times': {1: 2, 5: 1}},
-        4: {'machine_times': {1: 4, 5: 2}},
-        5: {'machine_times': {1: 1}},
-        6: {'machine_times': {2: 3, 4: 2}},
-        7: {'machine_times': {2: 2, 4: 1}},
-        8: {'machine_times': {2: 4, 5: 2}},
-        9: {'machine_times': {2: 1, 5: 1}},
-        10: {'machine_times': {2: 2}},
-        11: {'machine_times': {3: 3, 4: 2}},
-        12: {'machine_times': {3: 2, 4: 1}},
-        13: {'machine_times': {3: 4, 5: 2}},
-        14: {'machine_times': {3: 1, 5: 1}},
-        15: {'machine_times': {3: 2}}
-    },
-    'objective': 'minimize_makespan',
-    'constraints': ['job_machine_mapping', 'single_job_single_machine', 'no_job_precedence']
-}
-\end{verbatim}
+We leave this as an exercise for the reader to model and solve.
 
 \section{Quadratic Assignment Problem (QAP)}
 \begin{resource}{}{}
