@@ -19,10 +19,21 @@ Add discussion of Optimization, Operations Research, and Mathematical Programmin
 Also, give an introduction to the content in this book, what you will learn by working though the book, and why this book is interesting and different from other sources.}
 
 \begin{outcome}
-
+\begin{itemize}
+\item Identify reasons for studying operations research
+\item Define "Mathematical Programming"
+\item Learn about different applications of the tools in this book
+\item Explore the different types of optimization models and what types we will see in this book.
+\end{itemize}
 \end{outcome}
+\section{Why study operations research?}
+
+\section{What is Mathematical Programming?}
+
+\section{Applications}
 
 
+\section{Types of Optimization problems}
 We will state main general problem classes to be associated with in these notes.  These are Linear Programming (LP), Mixed-Integer Linear Programming (MILP), Non-Linear Programming (NLP), and Mixed-Integer Non-Linear Programming (MINLP).  
 
 
@@ -172,6 +183,26 @@ Given a matrix $A \in \R^{m\times n}$, vector $b \in \R^m$ and vector $c \in \R^
 \end{split}
 \end{equation}
 \end{general}
+
+Alternatively, consider the transformation where $x_i \in \{-1,1\}$.
+$$
+\begin{aligned}
+\min & c^\top x \\
+\text { s.t. } & A x \leq b \\
+& x \in \{-1,1\}^n
+\end{aligned}
+$$
+This can be reformulated with a single nonconvex constraint as
+$$
+\begin{array}{cl}
+\min & c^\top x \\
+\text { s.t. } & A x \leq b \\
+& -1 \leq x_j \leq 1, \quad 1 \leq j \leq n, \\
+& \|x\|^2\geq n .
+\end{array}
+$$
+
+
 \subsection{Machine Learning}
 \todo[inline]{Many machine learning problems fall into this catrgory.  Todo: describe applications, give references, etc.}
 
@@ -196,16 +227,63 @@ where \( C_j \) represents the j-th cluster and \( \mathbf{c}_j \) is the centro
 This encapsulation presents a glimpse into how ML problems are framed mathematically. In practice, numerous algorithms, constraints, and regularizations add complexity to these basic formulations.
 
 
-\section{Mixed-Integer Non-Linear Programming (MINLP)}
-\todo[inline]{Fill in this section with formulas and discuss applications.  Most notable applications are Electrical Grid problems and Pooling problems. Find applications at Optimization and Engineering \url{https://link.springer.com/journal/11081/volumes-and-issues/21-4}}
-\subsection{Convex Mixed-Integer Non-Linear Programming}
+%\section{Mixed-Integer Non-Linear Programming (MINLP)}
+%\todo[inline]{Fill in this section with formulas and discuss applications.  Most notable applications are Electrical Grid problems and Pooling problems. Find applications at Optimization and Engineering \url{https://link.springer.com/journal/11081/volumes-and-issues/21-4}}
+\section{Mixed Integer Non-Linear Programming (MINLP)}
 
+\begin{general}{MINLP}{\nphard}
+Mixed Integer Nonlinear Programming (MINLP) combines elements of integer programming and nonlinear programming. In MINLP, some or all of the decision variables are constrained to be integers, and the objective function or constraints are nonlinear. A general MINLP problem can be formulated as:
+\begin{equation}
+\label{eq:minlp}
+\begin{split}
+\min \quad & f(x, y)\\
+\st  \quad & g_i(x, y) \leq 0  \quad  \text{ for } i=1, \dots, m\\
+           & h_j(x, y) = 0    \quad  \text{ for } j=1, \dots, p\\
+           & x \in \R^n, y \in \Z^k
+\end{split}
+\end{equation}
+where $f$ is the objective function, $g_i$ and $h_j$ are constraint functions, $x$ is a vector of continuous variables, and $y$ is a vector of integer variables.
+\end{general}
 
+MINLP is particularly challenging due to the nonlinearity in the objective and/or constraints and the discrete nature of some decision variables. It finds applications in various fields such as industry for process optimization, computational geometry, and machine learning for hyperparameter tuning.
 
+\subsection{Convex MINLP}
+In the convex case, both the objective function and the constraints are convex functions. This subclass is easier to solve compared to its non-convex counterpart.
+\begin{general}{Convex MINLP}{\nphard, but \polynomial\ in fixed dimension\  (typically)}
+For a convex MINLP, the problem is defined as:
+\begin{equation}
+\label{eq:convex-minlp}
+\begin{split}
+\min \quad & f(x, y) \quad \text{(convex)}\\
+\st  \quad & g_i(x, y) \leq 0  \quad  \text{(convex constraints)}\\
+           & x \in \R^n, y \in \Z^k
+\end{split}
+\end{equation}
+\end{general}
+Convex MINLPs, while still challenging, are typically more tractable due to the properties of convexity, which allow for more efficient solution methods.
 
-\subsection{Non-Convex Mixed-Integer Non-Linear Programming}
+\subsection{Non-Convex MINLP}
+Non-convex MINLPs are significantly harder due to the presence of non-convex functions, which can lead to multiple local minima.
+\begin{general}{Non-Convex MINLP}{\nphard (in fact, undecidable)}
+The non-convex MINLP problem is formulated as:
+\begin{equation}
+\label{eq:nonconvex-minlp}
+\begin{split}
+\min \quad & f(x, y) \quad
+\text{(non-convex)}\\
+\st \quad & g_i(x, y) \leq 0 \quad \text{(possibly non-convex constraints)}\\
+& x \in \R^n, y \in \Z^k
+\end{split}
+\end{equation}
+\end{general}
+Non-convex MINLPs pose significant computational challenges due to the possibility of multiple local optima and the inherent complexity of integer constraints. These problems are common in real-world applications where decisions are discrete, and the system behavior is non-linear and complex.
 
+\subsection*{Complexity and Applications}
+MINLP problems are known for their computational complexity, primarily due to the combination of non-linearity and integrality. The non-convex variants, in particular, are \nphard, making them some of the most challenging problems in optimization.
 
+In practice, MINLP models find extensive applications across various domains. In industry, they are used for complex decision-making processes like supply chain optimization and production planning. In computational geometry, MINLP techniques help in solving problems like optimal packing or layout design. Furthermore, in the realm of machine learning, MINLPs are crucial for tasks like feature selection and hyperparameter optimization where discrete choices and nonlinear relationships are involved.
+
+The versatility of MINLP models, combined with their inherent complexity, makes them a fascinating and essential area of study in the field of optimization.
 
 
 
