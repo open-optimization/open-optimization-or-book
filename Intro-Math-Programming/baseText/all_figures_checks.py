@@ -1,3 +1,8 @@
+
+## PART 1
+# look through all metabib entries and create a text file that lists all possible figures.
+##
+
 import re
 
 # Define the path to your .bib file
@@ -32,9 +37,13 @@ write_figures_to_latex(figure_filenames, output_latex_file)
 
 print(f'Figures have been written to {output_latex_file}')
 
-
-
+#####
+## PART 2
 #################
+
+# look through the folder of images and find any image without a bib entry.  
+# Make a separate file of bib entries for any image that doesn't have one.
+# then we can manually move entries to the correct file after adding information about them.
 
 # Correcting and integrating the entire process into a single execution block
 
