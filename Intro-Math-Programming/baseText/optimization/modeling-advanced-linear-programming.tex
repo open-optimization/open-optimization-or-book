@@ -1,0 +1,167 @@
+% Copyright 2020 by Robert Hildebrand
+%This work is licensed under a
+%Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0)
+%See http://creativecommons.org/licenses/by-sa/4.0/
+\chapter{Advanced Models}
+In this chapter, we consider some models where binary varibales are used as an "on/off" switch.  
+
+
+
+
+
+
+
+
+\section{Advanced Models}
+\subsection{Work Scheduling}
+\subsection{Multi period Models}
+\todo[inline]{Fill in this subsection}
+
+\subsubsection{Production Planning}
+
+\subsubsection{Crop Planning}
+
+
+\subsection{Mixing Problems}
+
+\subsection{Financial Planning}
+
+\todo[inline]{Fill in this subsection}
+
+
+
+
+\subsection{Network Flow}
+\begin{resource}
+\begin{itemize}
+\item \href{https://ocw.mak.ac.ug/courses/electrical-engineering-and-computer-science/6-046j-design-and-analysis-of-algorithms-spring-2012/lecture-notes/MIT6_046JS12_lec13.pdf}{MIT - CC BY NC SA 4.0 license}
+\item \href{https://www.cs.princeton.edu/~wayne/kleinberg-tardos/pearson/}{Slides for Algorithms book by Kleinberg-Tardos}
+\end{itemize}
+\end{resource}
+
+
+
+
+
+\paragraph{Sets}
+A finite network $G$ is described by a finite set of vertices $V$ and a finite set $\mathcal{A}$ of arcs. Each arc $(i,j)$ has two key attributes, namely its tail $j \in V$ and its head $i \in V$. 
+
+
+We think of a (single) commodity as being allowed to "flow" along each arc, from its tail to its head. 
+\paragraph{Variables}
+Indeed, we have "flow" variables
+$$
+x_{ij}:=\text { amount of flow on } \operatorname{arc} (i,j) \text{ from vertex $i$ to vertex $j$},
+$$
+for all $(i,j) \in \mathcal{A}$. 
+
+
+
+\subsubsection{Maximum Flow Problem}
+
+\begin{tcolorbox}
+\begin{align}
+\max \ \ & \sum_{(s, i) \in \mathcal{A}} x_{si} &
+\text{max total flow from source}\\
+s.t.\ \ 
+&\sum_{i : (i,v) \in \mathcal A} x_{i v}-\sum_{j : (v,j) \in \mathcal{A}} x_{v j} =0  &  v \in V \backslash\{s, t\}\\
+%[a constraint per edge and a constraint per nonterminal node]\\
+&0 \leq x_{ij} \leq  u_{ij} \quad \forall(i,j) \in \mathcal{A}
+\end{align}
+
+\end{tcolorbox}
+%\documentclass[border=4mm]{standalone}
+%\usepackage{tikz}
+%\usetikzlibrary{arrows.meta,positioning}
+%\begin{document}
+
+\paragraph{Shortest Path Problem}
+~\\
+
+\begin{tcolorbox}
+$$
+\begin{aligned}
+& \text { minimize } & \sum_{u \rightarrow v} \ell_{u \rightarrow v} \cdot x_{u \rightarrow v} & \\
+\text { subject to } & \sum_{u} x_{u \rightarrow s}-\sum_{w} x_{s \rightarrow w} &=1 & \\
+\sum_{u} x_{u \rightarrow t}-\sum_{w} x_{t \rightarrow w} &=-1 & \\
+\sum_{u} x_{u \rightarrow v}-\sum_{w} x_{v \rightarrow w} &=0 & \text { for every vertex } v \neq s, t \\
+x_{u \rightarrow v} & \geq 0 & \text { for every edge } u \rightarrow v
+\end{aligned}
+$$
+\end{tcolorbox}
+
+Or maybe write it like this:
+\begin{align}
+\text{min} \sum_{(i, j) \in A} c_{i j} x_{i j} \\
+s.t. 
+\sum_{(i, j) \in \delta^{+}(i)} x_{i j} = 0 \forall i \in V\setminus\{s,t\} \\
+\sum_{(i, j) \in \delta^{+}(s)} x_{i j} = -1 \\
+\sum_{(i, j) \in \delta^{+}(t)} x_{i j} = 1 \\
+% _decvars_
+x_{i j} \in\{0,1\} \forall(i, j) \in A, 
+\end{align}
+
+\subsubsection{Minimum Cost Network Flow}
+\paragraph{Parameters}
+
+We assume that flow on arc $(i,j)$ should be non-negative and should not exceed
+$$
+u_{ij}:=\text { the flow upper bound on } \operatorname{arc} (i,j) \text {, }
+$$
+for $(i,j) \in \mathcal{A}$. Associated with each arc $(i,j)$ is a cost
+$$
+c_{ij}:=\text { cost per-unit-flow on arc } (i,j),
+$$
+for $(i,j) \in \mathcal{A}$. The (total) cost of the flow $x$ is defined to be
+$$
+\sum_{(i,j) \in \mathcal{A}} c_{ij} x_{ij} .
+$$
+
+We assume that we have further data for the nodes. Namely,
+$$
+b_{v}:=\text { the net supply at node } v,
+$$
+for $v \in V$. 
+
+A flow is conservative if the net flow out of node $v$, minus the net flow into node $v$, is equal to the net supply at node $v$, for all nodes $v \in V$.
+
+The (single-commodity min-cost) network-flow problem is to find a minimumcost conservative flow that is non-negative and respects the flow upper bounds on the arcs. 
+
+
+
+
+
+\paragraph{Objective and Constraints}
+We can formulate this as follows:
+\begin{tcolorbox}
+$$
+\begin{aligned}
+\min & \sum_{(i,j) \in \mathcal{A}} c_{ij}\, x_{ij} & \text{ minimize cost}\\
+& \sum_{(i,v) \in \mathcal{A}} x_{iv}-\sum_{(v,i)  \in \mathcal{A} } x_{vi}=b_{v}, \quad \text{ for all }  v \in V,  & \text{ flow conservation}\\
+& 0 \leq x_{ij} \leq u_{ij}, \quad \text{ for all }  (i,j) \in \mathcal{A} .
+\end{aligned}
+$$
+\end{tcolorbox}
+
+\begin{theorem}{Integrality of Network Flow}{integralitynetworkflow}
+If the capacities and demands are all integer values, then there always exists an optimal solution to the LP that has integer values.
+\end{theorem}
+
+\subsection{Multi-Commodity Network Flow}
+In the same vein as the Network Flow Problem
+\begin{align*}
+\min~& \sum_{k=1}^{K} \sum_{e \in \mathcal{A}} c^k_e x^k_e \\
+&\sum_{e\in \mathcal{A} ~:~ t(e)=v} x^k_e - \sum_{e\in \mathcal{A} ~:~ h(e)=v} x^k_e 
+= b^k_v,~ \mbox{ for } v \in \mathcal{N},~ k=1,2,\ldots,K;\\
+& \sum_{k=0}^{K}  x^k_{e} \leq u_e,~ \mbox{ for } e \in \mathcal{A};\\
+&  x^k_{e}\geq 0,~ \mbox{ for } e \in \mathcal{A},~ k=1,2,\ldots,K\\
+\end{align*}
+
+Notes:
+
+K=1 is ordinary single-commodity network flow. Integer solutions for free when node-supplies and arc capacities are integer.
+K=2 example below with integer data gives a fractional basic optimum. This example doesn't have any feasible integer flow at all.
+
+\begin{remark}{}{}
+Unfortunately, the same integrality theorem does not hold in the multi-commodity network flow probem.  Nontheless, if the quanties in each flow are very large, then the LP solution will likely be very close to an integer valued solution.
+\end{remark}

@@ -1,0 +1,245 @@
+\chapter{Case Study -- Designing a Campground Using the Simplex Method}
+\label{ch:campground_simplex}
+
+\section{Introduction}
+The Simplex Method is a classic technique for solving constrained optimization problems. We will use it repeatedly throughout this course, not just in this chapter.
+
+\begin{outcome}
+\textbf{You will learn:}
+\begin{itemize}
+    \item How to recognize linear programming (LP) problems
+    \item The vocabulary of LP problems
+    \item How to solve problems graphically
+    \item How to solve problems algebraically using the Simplex Method
+    \item How to solve problems using Excel’s Solver
+\end{itemize}
+\end{outcome}
+
+\section{Designing a Campground -- Problem Description}
+You are opening a campground in the Florida Keys and want to maximize daily profit. You own 10 acres and plan to have a mix of RV sites, tent sites, and yurts. Assume the following profits:
+\[
+\text{Profit per RV site} = \$80 \text{ per day}, \quad 
+\text{Profit per tent site} = \$20 \text{ per day}, \quad 
+\text{Profit per yurt} = \$200 \text{ per day}.
+\]
+
+There are several constraints:
+\begin{enumerate}
+    \item Infrastructure (roads, bathhouses, etc.) takes up 20\% of the site, leaving you with $10 \times 0.8 = 8$ acres available for camping units.
+    \item You can have at most:
+    \begin{itemize}
+        \item 20 RVs per acre, or
+        \item 40 tents per acre, or
+        \item 10 yurts per acre.
+    \end{itemize}
+    \item You have a budget of \$100,000 for development.
+    \begin{itemize}
+        \item Each RV site costs \$1000 to develop.
+        \item Each tent site costs \$200 to develop.
+        \item Each yurt costs \$8000 to develop.
+    \end{itemize}
+    \item Maintenance for bathhouses and related facilities is 15 minutes per week per camper-unit. You can afford 70 hours per week of maintenance help (70 hours/week = 4200 minutes/week).
+    \item Zoning ordinance requires at least 20 tent sites.
+\end{enumerate}
+
+The question: \textbf{What is the best layout of RV sites, tent sites, and yurts to maximize daily profit?}\footnote{
+This case study is inspired by the Knights Key RV park in Florida. For more information:
+\begin{itemize}
+    \item \url{http://www.knightskeyrvresortandmarina.com/news/}
+    \item \url{http://www.miaminewtimes.com/news/developers-plan-to-replace-rv-park-with-fivestar-resort-stirs-fears-hopes-in-keys-8038648}
+\end{itemize}}
+
+\section{Solution Approach -- Two Variables (RV and Tents Only)}
+First, consider a simplified problem ignoring yurts. Let:
+\[
+r = \text{number of RV sites}, \quad t = \text{number of tent sites}.
+\]
+The profit is:
+\[
+P(r,t) = 80r + 20t.
+\]
+
+\underline{\textbf{Constraints for the Simplified Problem.}} 
+From the given conditions:
+
+\begin{enumerate}
+\item  Available land: $8$ acres.
+   \[
+   \frac{r}{20} + \frac{t}{40} \leq 8.
+   \]
+   Multiply by 40:
+   \[
+   2r + t \leq 320.
+   \]
+
+\item  Budget: 
+   \[
+   1000r + 200t \leq 100{,}000.
+   \]
+   Divide by 200:
+   \[
+   5r + t \leq 500.
+   \]
+
+\item  Maintenance (70 hours/week = 4200 min/week):
+   Each unit requires 15 min/week. Thus:
+   \[
+   15(r + t) \leq 4200 \implies r + t \leq 280.
+   \]
+
+\item  At least 20 tent sites:
+   \[
+   t \geq 20.
+   \]
+
+\item  Non-negativity:
+   \[
+   r \geq 0, \quad t \geq 0.
+   \]
+
+Also, from the individual density constraints, we know:
+\[
+r \leq 160 \quad (\text{since } 20 \times 8 = 160), \quad t \leq 320 \quad (\text{since } 40 \times 8 = 320).
+\]
+\end{enumerate}
+
+\underline{\textbf{Summary of Constraints:}}
+\begin{align*}
+2r + t &\leq 320 \\
+r &\leq 160 \\
+t &\leq 320 \\
+r + t &\leq 280 \\
+5r + t &\leq 500\\
+\\
+t &\geq 20 \\
+r, t &\geq 0 \\
+\end{align*}
+
+These are linear constraints, and the objective function is also linear, so this is a Linear Programming (LP) problem.
+
+\underline{\textbf{Assumptions of Linear Programming}}
+\begin{description}
+    \item[Proportionality:] Changes in a decision variable produce proportional changes in the objective and constraints.\checkmark
+
+    \item[Additivity:] The objective and constraints are additive combinations of the decision variables (no products of variables).
+    \item[Divisibility:] Decision variables can take on fractional (non-integer) values.\checkmark
+    \item[Certainty:] All parameters are known and constant.\checkmark
+\end{description}
+
+\section{Graphical Simplex Solution Procedure (Two-Variable Case)}
+We begin by sketching the feasible region defined by the inequalities. The feasible region is the set of all points $(r,t)$ that satisfy the constraints.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.35]{2022_07_05_5945264bba2a5f6ba667g-28}
+\caption{Initial feasible region boundary (partial).}
+\end{figure}
+
+After adding all constraints:
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.5]{2022_07_05_5945264bba2a5f6ba667g-29}
+\caption{Feasible region with all constraints.}
+\end{figure}
+
+To find the optimal solution, we also consider lines of constant profit $P(r,t) = 80r + 20t$. Lines of constant profit are parallel lines. As we increase profit, these lines move up and to the right.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.5]{2022_07_05_5945264bba2a5f6ba667g-29(1)}
+\caption{Lines of constant profit overlaid on the feasible region.}
+\end{figure}
+
+The optimal solution will occur at a corner (intersection of constraint lines) of the feasible region. By inspection from the graph, the optimal solution is at the intersection of constraints $2r+t=320$ and $5r+t=500$.
+
+Solving these two equations simultaneously:
+\[
+2r + t = 320 \quad\text{and}\quad 5r + t = 500.
+\]
+Subtracting the first from the second:
+\[
+(5r+t) - (2r+t) = 500 - 320 \implies 3r = 180 \implies r = 60.
+\]
+Then:
+\[
+2(60) + t = 320 \implies 120 + t = 320 \implies t = 200.
+\]
+
+Thus, the optimal solution is $(r,t) = (60,200)$.
+
+The maximum profit:
+\[
+P(60,200) = 80(60) + 20(200) = 4800 + 4000 = \$8800.
+\]
+
+\subsection{Stating the Solution}
+\textbf{Interpretation:} To maximize profit, have 60 RV sites and 200 tent sites. This gives a daily profit of \$8800, assuming full occupancy. The limiting factors are available land and budget, not maintenance or zoning (beyond the minimum tents).
+
+You will need to hire 65 hours/week of help since:
+\[
+60 + 200 = 260 \text{ units}, \quad 260 \times 15\text{ min} = 3900 \text{ min} = 65\text{ hours/week}.
+\]
+
+\section{Refinements to the Graphical Solution}
+While we found the solution by inspection, one can systematically check all corner points or use an algebraic process that mirrors the logic of moving from one corner to another. This leads us to the algebraic Simplex Method.
+
+\section{Algebraic Simplex Method}
+The key idea: the optimal solution is at a corner point. We transform inequalities into equalities with slack variables, then iteratively move from one corner to a better adjacent corner until no improvement is possible.
+
+The detailed algebraic steps (including slack variables) were demonstrated above. After applying the Simplex Method, we confirm the solution $(r,t)=(60,200)$ and $P=8800$ matches our graphical solution.
+
+\section{Solving the Full Problem with Yurts}
+Now reintroduce yurts. Suppose we got a larger budget (\$346,000). The constraints and objective become more complex. Following the same procedure:
+\[
+r,t,y \geq 0,
+\]
+\[
+\text{Profit: } P = 80r + 20t + 200y.
+\]
+
+Constraints now include:
+\begin{enumerate}
+    \item Land: $\frac{r}{20} + \frac{t}{40} + \frac{y}{10} \leq 8$.  
+    Multiply by 40: $2r + t + 4y \leq 320$.
+    \item Budget: $1000r + 200t + 8000y \leq 346{,}000$.  
+    Divide by 200: $5r + t + 40y \leq 1730$.
+    \item Maintenance: $(r + t + y)/4 \leq 70$.  
+    $r + t + y \leq 280$.
+    \item Minimum tents: $t \geq 20$.
+\end{enumerate}
+
+By applying the Simplex Method (details shown in the original text), we eventually find:
+\[
+r = 86, \quad t = 20, \quad y = 32,
+\]
+with a profit:
+\[
+P = 80(86) + 20(20) + 200(32) = 6880 + 400 + 6400 = 13{,}680.
+\]
+
+\subsection{Stating the Final Solution}
+“To maximize potential profit, the campground should have 86 RV sites, 20 tent sites, and 32 yurts. This requires an investment of \$346,000. The maximum daily profit is \$13,680, assuming full occupancy. We are constrained by land, budget, and the zoning requirement for tents. Weekly maintenance will be $138 \times 15\text{ min} = 2070 \text{ min} = 34.5\text{ hours/week}$.”
+
+\section{Using Excel}
+You can use Excel’s Solver to avoid the manual labor:
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.5]{2022_07_05_5945264bba2a5f6ba667g-37}
+\caption{Example Excel setup for LP problem.}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.5]{2022_07_05_5945264bba2a5f6ba667g-37-1}
+\caption{Accessing Excel’s Solver.}
+\end{figure}
+
+By choosing to “Show Iteration Results,” you can see the steps the solver takes, mirroring the corners and logic of the Simplex Method.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.5]{2022_07_05_5945264bba2a5f6ba667g-37(3)}
+\caption{Solver options configuration.}
+\end{figure}
+
+Excel (or any standard LP solver) will quickly yield the optimal solution found analytically.

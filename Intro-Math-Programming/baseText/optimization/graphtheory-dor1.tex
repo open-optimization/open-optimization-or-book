@@ -1,5 +1,7 @@
 \newcommand{\sout}{}
-
+\chapter{Graph Algorithms}
+\todoChapter{ {\color{gray}10\% complete. Goal 80\% completion date: August 20}\\
+Notes: .}
 \section{Graph Theory and Network Flows}
 In the modern world, planning efficient routes is essential for business and industry, with applications as varied as product distribution, laying new fiber optic lines for broadband internet, and suggesting new friends within social network websites like Facebook.
 
@@ -57,9 +59,12 @@ You probably already noticed that we are using the term graph differently than y
 
 \begin{example}{}{}
 
-Back in the 18th century in the Prussian city of K\"onigsberg, a river ran through the city and seven bridges crossed the forks of the river.  The river and the bridges are highlighted in the picture to the right%\footnote{Bogdan Giusc\u{a}. \url{http://en.wikipedia.org/wiki/File:Konigsberg\_bridges.png}}.
+Back in the 18th century in the Prussian city of K\"onigsberg, a river ran through the city and seven bridges crossed the forks of the river.  The river and the bridges are highlighted in the picture to the right
+\begin{center}
+\includegraphics[scale = 0.7]{Figures/Konigsberg_bridges}
+%\footnote{Bogdan Giusc\u{a}. \url{http://en.wikipedia.org/wiki/File:Konigsberg\_bridges.png} (Public Domain, CC-BY-SA 3.0)}.
+\end{center}
 
-\textcolor{red}{Picture}
 
 As a weekend amusement, townsfolk would see if they could find a route that would take them across every bridge once and return them to where they started.
 
@@ -85,20 +90,30 @@ Leonard Euler (pronounced OY-lur), one of the most prolific mathematicians ever,
 \end{center}
 Since the size of each land mass it is not relevant to the question of bridge crossings, each can be shrunk down to a vertex representing the location:
 \begin{center}
-\begin{tikzpicture}
-\draw(0,1)--(2,1);
-\draw(0,2)--(2,1);
-\draw(0,0)--(2,1);
-\draw(0,0) to [out=40] (0.1,1);
-\draw(0,0) to [out=135] (0.1,1);
-\draw(0,1) to [out=40] (0.1,2);
-\draw(0,1) to [out=135] (0.1,2);
-\draw[fill] (0,0) circle[radius=.1] node [left]{SB};
-\draw[fill] (0,1) circle[radius=.1] node [left]{I   };
-\draw[fill] (0,2) circle[radius=.1] node [left]{NB};
-\draw[fill] (2,1) circle[radius=.1] node [right]{EB};
+\begin{tikzpicture}[
+  every node/.style={circle, draw, fill=yellow!20, minimum size=6mm, inner sep=1pt},
+  >=latex
+]
+  % Nodes
+  \node (SB) at (0,0) {SB};
+  \node (I)  at (0,1.8) {I};
+  \node (NB) at (0,3.6) {NB};
+  \node (EB) at (3,1.8) {EB};
+
+  % Straight edges
+  \draw (SB) -- (EB);
+  \draw (I)  -- (EB);
+  \draw (NB) -- (EB);
+
+  % Curved arcs with spacing from node boundaries
+    \draw[->, shorten >=2pt, shorten <=2pt] (I) to[out=45, in=-45] (NB);
+  \draw[->, shorten >=2pt, shorten <=2pt] (NB) to[out=225, in=135] (I);
+  \draw[->, shorten >=2pt, shorten <=2pt] (SB) to[out=45, in=-45] (I);
+  \draw[->, shorten >=2pt, shorten <=2pt] (I) to[out=225, in=135] (SB);
+
 \end{tikzpicture}
 \end{center}
+
 
 Notice that in this graph there are \textit{two} edges connecting the north bank and island, corresponding to the two bridges in the original drawing.  Depending upon the interpretation of edges and vertices appropriate to a scenario, it is entirely possible and reasonable to have more than one edge connecting two vertices.
 
@@ -182,7 +197,7 @@ Degree 0 & Degree 1 & Degree 2 & Degree 3 & Degree 4\\
 
 \begin{definition}{Path}{}
 A path is a sequence of vertices using the edges.  Usually we are interested in a path between two vertices.  For example, a path from vertex A to vertex M is shown below.  It is one of many possible paths in this graph. 
-
+\begin{center}
 \begin{tikzpicture}
 \draw[fill] (0,2) circle[radius=.1] node[above]{A};
 \draw[fill] (1,2) circle[radius=.1] node[above]{B};
@@ -218,7 +233,7 @@ A path is a sequence of vertices using the edges.  Usually we are interested in 
 \draw(1,2)--(2,2);
 \draw(2,2)--(3,2);
 \end{tikzpicture}
-
+\end{center}
  \end{definition}
 
 
@@ -226,6 +241,7 @@ A path is a sequence of vertices using the edges.  Usually we are interested in 
 \begin{definition}{Circuit (a.k.a. cycle)}{}
 A circuit  (a.k.a. cycle) is a path that begins and ends at the same vertex.  A circuit  (a.k.a. cycle) starting and ending at vertex A is shown below.
 
+\begin{center}
 \begin{tikzpicture}
 \draw[fill] (0,2) circle[radius=.1] node[above]{A};
 \draw[fill] (1,2) circle[radius=.1] node[above]{B};
@@ -261,7 +277,7 @@ A circuit  (a.k.a. cycle) is a path that begins and ends at the same vertex.  A 
 \draw(1,2)--(2,2);
 \draw(2,2)--(3,2);
 \end{tikzpicture}
-
+\end{center}
 \end{definition}
 
 
@@ -311,7 +327,8 @@ A graph is connected if there is a path from any vertex to any other vertex.  Ev
 Depending upon the problem being solved, sometimes weights are assigned to the edges.  The weights could represent the distance between two locations, the travel time, or the travel cost.  It is important to note that the distance between vertices in a graph does not necessarily correspond to the weight of an edge.
  \end{definition}
 
-\begin{exercise}{}{}
+\begin{learningcheckpoint}{}{}
+\label{ex:5cities}
 The graph below shows 5 cities.  The weights on the edges represent the airfare for a one-way flight between the cities.
  \begin{enumerate}[label=\alph*.]
  \item How many vertices and edges does the graph have?
@@ -321,6 +338,7 @@ The graph below shows 5 cities.  The weights on the edges represent the airfare 
  \item If you fly from LA to Chicago to Dallas to LA, is that a path or a circuit?
  \end{enumerate}
  
+ \begin{center}
  \begin{tikzpicture}
  \draw[fill] (0,0) circle[radius=.1] node[left]{LA};
 \draw[fill] (2,-2) circle[radius=.1] node[below]{Chicago};
@@ -348,7 +366,8 @@ The graph below shows 5 cities.  The weights on the edges represent the airfare 
 \draw(6,-2)--(8,0);
 \node at (7.5,-1){\$85};
  \end{tikzpicture}
- \end{exercise}
+ \end{center}
+ \end{learningcheckpoint}
 
 
 \section{Shortest Path}
@@ -370,6 +389,54 @@ When you visit a website like Google Maps or use your Smartphone to ask for dire
 
 While often it is possible to find a shortest path on a small graph by guess-and-check, our goal in this chapter is to develop methods to solve complex problems in a systematic way by following \textbf{algorithms}.  An algorithm is a step-by-step procedure for solving a problem.  Dijkstra's (pronounced dike-stra) algorithm will find the shortest path between two vertices.
 
+\newcommand{\dijkstra}[6]{
+\begin{center}
+\begin{tikzpicture}[scale=1.7,
+  graphNode/.style={circle, draw, fill=blue!20, minimum size=8mm, inner sep=0pt, font=\bfseries},
+  aboveLabel/.style={rectangle, draw=green!60!black, fill=green!20, font=\small, minimum height=4mm},
+  edgeLabel/.style={font=\small}
+]
+
+% Nodes with green boxed labels
+\node[graphNode] (T) at (0,0) {T};
+\node[aboveLabel, above=2pt of T] {0};
+
+\node[graphNode] (E) at (2,-2) {E};
+\node[aboveLabel, above=2pt of E] {#5};
+
+\node[graphNode] (A) at (2,1) {A};
+\node[aboveLabel, above=2pt of A] {#4};
+
+\node[graphNode] (NB) at (4,2) {NB};
+\node[aboveLabel, above=2pt of NB] {#3};
+
+\node[graphNode] (MR) at (4,0) {MR};
+\node[aboveLabel, above=2pt of MR] {#2};
+
+\node[graphNode] (P) at (4,-1) {P};
+\node[aboveLabel, below=2pt of P] {#1};
+
+\node[graphNode] (Y) at (8,0) {Y};
+\node[aboveLabel, above=2pt of Y] {#6};
+
+% Edges with plain text labels
+\draw (T) -- (E) node[midway, left, edgeLabel] {57};
+\draw (T) -- (A) node[midway, left, edgeLabel] {20};
+\draw (A) -- (NB) node[midway, left, edgeLabel] {36};
+\draw (NB) -- (Y) node[midway, above, edgeLabel] {120};
+\draw (E) -- (P) node[midway, below, edgeLabel] {27};
+\draw (P) -- (Y) node[midway, below, edgeLabel] {76};
+\draw (A) -- (MR) node[midway, above, edgeLabel] {79};
+\draw (MR) -- (P) node[midway, left, edgeLabel] {10};
+\draw (MR) -- (Y) node[midway, above, edgeLabel] {90};
+\end{tikzpicture}
+\end{center}
+}
+
+\newcommand{\ph}{\phantom{$\infty$}}
+
+
+
 
 %\begin{algorithm}{Dijkstra's Algorithm}{}{}
 {\Large \textbf{Dijkstra's Algorithm} } \\
@@ -377,6 +444,9 @@ While often it is possible to find a shortest path on a small graph by guess-and
 
 \begin{enumerate}
 \item	Mark the ending vertex with a distance of zero.  Designate this vertex as current.
+
+\dijkstra{$\infty$}{$\infty$}{$\infty$}{$\infty$}{$\infty$}{$\infty$}
+
 \item Find all vertices leading to the current vertex.  Calculate their distances to the end.  Since we already know the distance the current vertex is from the end, this will just require adding the most recent edge.  Don't record this distance if it is longer than a previously recorded distance.
 \item	Mark the current vertex as visited.  We will never look at this vertex again.
 \item	Mark the vertex with the smallest distance as current, and repeat from step 2.
@@ -387,7 +457,11 @@ While often it is possible to find a shortest path on a small graph by guess-and
 \begin{example}{}{}
 Suppose you need to travel from Yakima, WA (vertex Y) to Tacoma, WA (vertex T)  Looking at a map, it looks like driving through Auburn (A) then Mount Rainier (MR) might be shortest, but it's not totally clear since that road is probably slower than taking the major highway through North Bend (NB).  A graph with travel times in minutes is shown below.  An alternate route through Eatonville (E) and Packwood (P) is also shown.
 
-\begin{tikzpicture}
+\begin{tikzpicture}[scale=1.7,
+  graphNode/.style={circle, draw, fill=blue!20, minimum size=8mm, inner sep=0pt, font=\bfseries},
+  aboveLabel/.style={rectangle, draw=green!60!black, fill=green!20, font=\small, minimum height=4mm},
+  edgeLabel/.style={font=\small}
+]
 \draw[fill] (0,0) circle[radius=.1] node[left]{T};
 \draw[fill] (2,-2) circle[radius=.1] node[left]{E};
 \draw[fill] (2,1) circle[radius=.1];
@@ -911,41 +985,17 @@ Dallas&& \cellcolor{yellow}&*&18&15&\cellcolor{yellow}25\\
 The shortest route from Baltimore to Bakersfield will take 52 hours, and will route through Chicago and Denver.
 \end{example}
 
-\begin{exercise}{}{} %2
-Find the shortest path between vertices A and G in the graph below.\\
+\subsection{Run time improvements}
 
-\begin{tikzpicture}
-\draw[fill] (0,0) circle[radius=.1] node[left]{A};
-\draw[fill] (2,2) circle[radius=.1] node[left]{B};
-\draw[fill] (2,-2) circle[radius=.1] node[left]{C};
-\draw[fill] (4,0) circle[radius=.1] node[left]{D};
-\draw[fill] (6,2) circle[radius=.1] node[right]{E};
-\draw[fill] (6,-2) circle[radius=.1] node[right]{F};
-\draw[fill] (8,0) circle[radius=.1] node[right]{G};
-\draw(0,0)--(2,2);
-\node at (0.7,1){1};
-\draw(0,0)--(2,-2);
-\node at (0.7,-1){4};
-\draw(2,2)--(4,0);
-\node at (2.7,1){3};
-\draw(2,-2)--(4,0);
-\node at (2.7,-1){2};
-\draw(4,0)--(6,2);
-\node at (4.7,1){2};
-\draw(4,0)--(6,-2);
-\node at (4.7,-1){4};
-\draw(6,2)--(8,0);
-\node at (6.7,1){7};
-\draw(6,-2)--(8,0);
-\node at (6.7,-1){6};
-\draw(2,2)--(6,2);
-\node at (4,2.3){6};
-\draw(2,-2)--(6,-2);
-\node at (4,-2.3){5};
-\draw(6,2)--(6,-2);
-\node at (6.3,0){2};
-\end{tikzpicture}
-\end{exercise}
+\paragraph{Instance Generation.}
+For each problem size \(n\), we generate a random directed graph \(G=(V,E)\) with \(V=\{0,1,\dots,n-1\}\) using an Erd\H{o}s--R\'enyi model for digraphs. For every ordered pair \((i,j)\) with \(i\neq j\), the arc \((i,j)\) is included independently with probability \(p\) and assigned an integer weight \(w_{ij}\) sampled uniformly from a fixed range \([\underline{w},\overline{w}]\). The source and sink are fixed as \(s=0\) and \(t=n-1\). We measure wall-clock solve time for three approaches: NetworkX’s Dijkstra implementation, a binary MILP formulation solved via PuLP’s default solver, and the same MILP solved with Gurobi. To reduce variance, each size is replicated across several independently drawn graphs and the reported time is the mean over replications. To summarize performance trends, we fit simple runtime laws \(T(n)\) by least squares and report the best (highest \(R^2\)) among (i) power law \(T(n)\approx c\,n^{\alpha}\), (ii) exponential \(T(n)\approx c\,e^{\beta n}\), and (iii) quadratic \(T(n)\approx a n^2+ b n + c\).
+
+\paragraph{Solver and Library Versions.}
+The experiments were run with NetworkX version~2.5, PuLP version~2.4, and Gurobi runtime version~(10,\,0,\,3).  
+The default PuLP solver was CBC.
+
+
+
 
 
 
@@ -958,7 +1008,7 @@ Find the shortest path between vertices A and G in the graph below.\\
 
 \begin{resource}
 \begin{itemize}
-\item \href{https://youtu.be/d9GcoLAA-dU}{YouTube Video: Kruskal's algorithm to find a minimum weight spanning tree}
+\item \href{https://www.youtube.com/watch?v=SfyrD-ktYew&ab_channel=KimberlyBrehm}{YouTube Video: Kruskal's algorithm to find a minimum weight spanning tree}
 \end{itemize}
 \end{resource}
 
@@ -1066,30 +1116,170 @@ Some examples of spanning trees are shown below.  Notice there are no circuits i
 
 Usually we have a starting graph to work from, like in the phone example above.  In this case, we form our spanning tree by finding a \textbf{subgraph} -- a new graph formed using all the vertices but only some of the edges from the original graph.  No edges will be created where they didn't already exist.
 
+\textbf{Question: How many edges are in a spanning tree of a connected graph?}
+
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}[scale=1, every node/.style={circle, draw, fill=yellow!20, minimum size=6mm, inner sep=1pt}]
+
+% n = 1
+\node (A1) at (0,0) {A};
+
+% n = 2
+\node (A2) at (3,0) {A};
+\node (B2) at (3,1) {B};
+\draw (A2) -- (B2);
+
+% n = 3
+\node (A3) at (5,0) {A};
+\node (B3) at (5,1) {B};
+\node (C3) at (6,1) {C};
+\draw (A3) -- (B3);
+\draw (B3) -- (C3);
+
+% n = 4
+\node (A4) at (9,0) {A};
+\node (B4) at (9,1) {B};
+\node (C4) at (10,1) {C};
+\node (D4) at (8,1) {D};
+\draw (A4) -- (B4);
+\draw (B4) -- (C4);
+\draw (B4) -- (D4);
+
+% n = 5
+\node (A5) at (13,0) {A};
+\node (B5) at (13,1) {B};
+\node (C5) at (14,1) {C};
+\node (D5) at (12,1) {D};
+\node (E5) at (13,2) {E};
+\draw (A5) -- (B5);
+\draw (B5) -- (C5);
+\draw (B5) -- (D5);
+\draw (B5) -- (E5);
+
+\end{tikzpicture}\\
+\vspace{1cm}
+
+
+\caption{Examples of spanning trees with \( n = 1, 2, 3, 4, 5 \) nodes and exactly \( n-1 \) edges}
+\end{figure}
+
+
+
+\begin{lemma}{Number of Edges in a Spanning Tree}{}
+Let \( G = (V, E) \) be a connected undirected graph with \( |V| = n \).  
+Then every spanning tree of \( G \) contains exactly \( n - 1 \) edges.
+\end{lemma}
+
+\begin{proof}[Proof idea]
+We prove this by induction on the number of vertices \( n \).
+
+\textbf{Base case (\( n = 1 \)):}  
+A tree with one vertex and no edges trivially satisfies the property \( |E| = 1 - 1 = 0 \).
+
+\begin{center}
+\begin{tikzpicture}
+    \node[circle, draw, fill=yellow!20] (A) at (0,0) {A};
+\end{tikzpicture}
+\captionof{figure}{Base case: A single vertex with no edges}
+\end{center}
+
+\textbf{Inductive step:}  
+Assume that every tree with \( k \) vertices has exactly \( k - 1 \) edges.
+
+Now consider a tree with \( k + 1 \) vertices. Every tree has at least one leaf (a vertex of degree 1). Remove a leaf and its single incident edge. The resulting graph is still a tree (connected and acyclic) with \( k \) vertices.
+
+By the inductive hypothesis, this smaller tree has \( k - 1 \) edges. Adding back the removed leaf and its edge gives \( k \) edges total, which equals \( (k + 1) - 1 \).
+
+\begin{center}
+\begin{tikzpicture}[scale=1]
+    \node[circle, draw, fill=yellow!20] (A) at (0,1) {A};
+    \node[circle, draw, fill=yellow!20] (B) at (-1,0) {B};
+    \node[circle, draw, fill=yellow!20] (C) at (0,0) {C};
+    \node[circle, draw, fill=yellow!20] (D) at (1,0) {D};
+    \node[circle, draw, fill=blue!30] (L) at (2,0) {L};
+
+    \draw (A) -- (C);
+    \draw (B) -- (C);
+    \draw (D) -- (C);
+    \draw[dashed, thick] (D) -- (L);
+\end{tikzpicture}
+\vspace{1cm}
+\captionof{figure}{Inductive step: Removing the leaf \( L \) and its dashed edge reduces the tree to 4 vertices and 3 edges}
+\end{center}
+
+Thus, by induction, any tree with \( n \) vertices has exactly \( n - 1 \) edges.
+\end{proof}
+
+
+
+
+
 Of course, any random spanning tree isn't really what we want.  We want the \textbf{minimum cost spanning tree (MCST)}.
+
+
+
 
 \begin{definition}{Minimum Cost Spanning Tree (MCST)}{}
 The minimum cost spanning tree is the spanning tree with the smallest total edge weight.  
 \end{definition}
 
-
-A nearest neighbor style approach doesn't make as much sense here since we don't need a circuit, so instead we will take an approach similar to sorted edges.
-
-{\Large \textbf{Kruskal's Algorithm} } \\
-%\begin{algorithm}{}{}[Kruskal's Algorithm]
-\hspace{3in}
+\textbf{Applications of the Minimum Cost Spanning Tree (MCST):}
 \begin{enumerate}
-\item Select the cheapest unused edge in the graph.
-\item Repeat step 1, adding the cheapest unused edge, unless:
-\begin{itemize}
-\item adding the edge would create a circuit.
-\end{itemize}
-\item Repeat until a spanning tree is formed.
+    \item \textbf{Network Design:} When laying fiber optic cables, water pipes, or electrical wires to connect a set of cities or buildings, we want to ensure full connectivity at the lowest installation cost. An MCST gives the cheapest way to connect all locations without creating loops.
+
+    \item \textbf{Transportation Infrastructure:} A transportation planner may need to connect a set of towns with roads while minimizing total construction cost. The MCST provides a plan to connect all towns with no redundant roads.
+
+    \item \textbf{Clustering in Machine Learning:} In hierarchical clustering, data points can be viewed as nodes in a graph, with edges weighted by pairwise distances. The MCST captures the structure of the data, and removing the largest edges can reveal natural clusters.
+
+    \item \textbf{Reliable Communication Networks:} For basic connectivity in communication systems (e.g., computer networks or telecommunications), an MCST ensures all devices are connected with minimal total wiring cost, serving as a base network.
+
+    \item \textbf{Subroutines in Approximation Algorithms:} The MCST is used as a key subroutine in approximation algorithms for NP-hard problems, such as the Traveling Salesperson Problem (TSP). For instance, the 2-approximation for metric TSP begins by constructing a minimum spanning tree to guide tour construction.
 \end{enumerate}
-%\end{algorithm}
 
 
+\subsection{Kruskal's Algorithm for Minimum Cost Spanning Tree}
+Krukal's algorithm is a surprisingly simple algorithm.  It builds a spanning tree one edge at a time by choosing the cheapest next edge to add.  But!  It skips the edge if this edge would create a cycle.
 
+Here is an algorithm description:
+\begin{algorithm}[H]
+\caption{Kruskal's Algorithm (Descriptive Version)}
+\begin{algorithmic}[1]
+\State \textbf{Input:} A connected, undirected graph \( G = (V, E) \) with edge weights \( w(e) \).
+\State \textbf{Initialization:} Mark all edges as unused. Set \( T \gets \emptyset \).
+\Repeat
+  \State Select the cheapest unused edge in the graph.
+  \If{adding the edge would create a cycle}
+    \State Skip this edge.
+  \Else
+    \State Add the edge to \( T \).
+  \EndIf
+\Until{\( T \) contains \( |V| - 1 \) edges  (i.e., a spanning tree has been formed).}
+\State \textbf{Output:} The set \( T \), forming a minimum spanning tree of \( G \).
+\end{algorithmic}
+\end{algorithm}
+
+In pseudocode,  the algorithm looks like this:
+\begin{algorithm}[H]
+\caption{Kruskal's Algorithm}
+\begin{algorithmic}[1]
+\State \textbf{Input:} A connected, undirected graph \( G = (V, E) \) with weights \( w(e) \) on each edge \( e \in E \).
+\State \textbf{Initialization:}
+  \begin{itemize}
+    \item Set \( T \gets \emptyset \).
+    \item Sort all edges \( E \) in non-decreasing order by weight.
+  \end{itemize}
+\For{each edge \( e \in E \) in sorted order}
+  \If{adding \( e \) to \( T \) does not form a cycle}
+    \State Add \( e \) to \( T \).
+  \EndIf
+  \If{\( T \) contains \( |V| - 1 \) edges}
+    \State \textbf{break}
+  \EndIf
+\EndFor
+\State \textbf{Output:} The set \( T \), which forms a minimum spanning tree.
+\end{algorithmic}
+\end{algorithm}
 \begin{example}{}{} %22
 Using our phone line graph from above, begin adding edges:\\
 \begin{minipage}{.5\textwidth}
@@ -1266,40 +1456,94 @@ This connects the graph.  The total length of cable to lay would be 695 miles.
 
 
 
-\begin{exercise}{Min Cost Spanning Tree}{kruskal_exercise} %7
+\begin{ex}{Min Cost Spanning Tree}{kruskal-exercise}{}{} 
+\label{ex:kruskal_exercise}
 Find a minimum cost spanning tree on the graph below using Kruskal's algorithm.\\
-\begin{tikzpicture}
-\draw[fill] (0,0) circle[radius=.1] node[left]{A};
-\draw[fill] (2,2) circle[radius=.1] node[above]{B};
-\draw[fill] (2,-2) circle[radius=.1] node[below]{C};
-\draw[fill] (4,2) circle[radius=.1] node[above]{E};
-\draw[fill] (4,-2) circle[radius=.1] node[below]{F};
-\draw[fill] (6,0) circle[radius=.1] node[right]{G};
-\draw(0,0) to node[above]{11} (2,2);
-\draw(0,0) to node[below]{33}(2,-2);
-\draw(0,0) to node[pos=0.3, fill=ocre!10]{14}(4,2);
-\draw(0,0) to node[pos=0.3, fill=ocre!10]{41}(4,-2);
-\draw(0,0) to node[near start, fill=ocre!10]{15}(6,0);
-\draw(2,2) to node[pos=0.37, fill=ocre!10]{25}(2,-2);
-\draw(2,2) to node[above]{43}(4,2);
-\draw(2,2) to node[pos=0.7, fill=ocre!10]{23}(4,-2);
-\draw(2,2) to node[pos=0.7, fill=ocre!10]{13}(6,0);
-\draw(2,-2) to node[pos=0.35, fill=ocre!10]{17} (4,2);
-\draw(2,-2) to node[below]{37}(4,-2);
-\draw(2,-2) to node[pos=0.7, fill=ocre!10]{36}(6,0);
-\draw(4,2) to node[pos=0.38, fill=ocre!10]{16}(4,-2);
-\draw(4,2) to node[above]{45}(6,0);
-\draw(4,-2) to node[below]{19}(6,0);
-\end{tikzpicture}
-\end{exercise}
+\begin{center}
+\begin{tikzpicture}[
+  every node/.style={circle, draw, fill=yellow!20, minimum size=6mm, inner sep=1pt},
+  edge label/.style={font=\scriptsize, rectangle, draw = white, fill=white, inner sep=2pt}
+]
 
+% Nodes
+\node (A) at (0,0) {A};
+\node (B) at (3,3) {B};
+\node (C) at (3,-3) {C};
+\node (E) at (6,3) {E};
+\node (F) at (6,-3) {F};
+\node (G) at (9,0) {G};
+
+% Edges with separate edge label style
+\draw (A) -- (B) node[midway, edge label] {11};
+\draw (A) -- (C) node[midway, edge label] {33};
+\draw (A) -- (E) node[pos=0.3, edge label] {14};
+\draw (A) -- (F) node[pos=0.3, edge label] {41};
+\draw (A) -- (G) node[pos=0.2, edge label] {15};
+
+\draw (B) -- (C) node[pos=0.4, edge label] {25};
+\draw (B) -- (E) node[midway, edge label] {43};
+\draw (B) -- (F) node[pos=0.7, edge label] {23};
+\draw (B) -- (G) node[pos=0.7, edge label] {13};
+
+\draw (C) -- (E) node[pos=0.35, edge label] {17};
+\draw (C) -- (F) node[midway, edge label] {37};
+\draw (C) -- (G) node[pos=0.7, edge label] {36};
+
+\draw (E) -- (F) node[pos=0.4, edge label] {16};
+\draw (E) -- (G) node[midway, edge label] {45};
+\draw (F) -- (G) node[midway, edge label] {19};
+
+\end{tikzpicture}
+\end{center}
+\end{ex}
+
+\begin{ex}{Networkx}{}
+Use the code below to load the prior exercise's graph into Python.  Then solve this problem using the Networkx package.
+
+\begin{lstlisting}[language=Python, caption={Loading the graph into NetworkX}]
+import networkx as nx
+
+# Create an undirected graph
+G = nx.Graph()
+
+# Add nodes (optional, as adding edges adds nodes implicitly)
+nodes = ['A', 'B', 'C', 'E', 'F', 'G']
+G.add_nodes_from(nodes)
+
+# Add weighted edges
+edges = [
+    ('A', 'B', 11),
+    ('A', 'C', 33),
+    ('A', 'E', 14),
+    ('A', 'F', 41),
+    ('A', 'G', 15),
+    ('B', 'C', 25),
+    ('B', 'E', 43),
+    ('B', 'F', 23),
+    ('B', 'G', 13),
+    ('C', 'E', 17),
+    ('C', 'F', 37),
+    ('C', 'G', 36),
+    ('E', 'F', 16),
+    ('E', 'G', 45),
+    ('F', 'G', 19)
+]
+
+G.add_weighted_edges_from(edges)
+
+# Optionally, visualize it
+# nx.draw(G, with_labels=True)
+# or use spring_layout or manual positions for a better view
+\end{lstlisting}
+
+\end{ex}
 
 
 
 
 \section{Exercise Answers}
-\begin{enumerate}
-\item  \begin{enumerate}
+\begin{enumerate}[label={}, leftmargin=3.5em, labelwidth=3em, align=left]
+\item[Exercise~\ref{ex:5cities}] \begin{enumerate}
 \item 5 vertices, 10 edges
 \item Yes, it is connected.
 \item The vertex is degree 4.
@@ -1307,94 +1551,94 @@ Find a minimum cost spanning tree on the graph below using Kruskal's algorithm.\
 \item  A circuit\\
 \end{enumerate}
 
-\item The shortest path is ABDEG, with length 13.\\
+\item[Exercise~\ref{ex:shortest-path}] The shortest path is ABDEG, with length 13.\\
 
-\item Yes, all vertices have even degree so this graph has an Euler Circuit.  There are several possibilities.  One is:  ABEGFCDFEDBCA\\
+%\item[Exercise~\ref{ex:5cities}] Yes, all vertices have even degree so this graph has an Euler Circuit.  There are several possibilities.  One is:  ABEGFCDFEDBCA\\
 
-
-\item \hspace{.2in}\\
-\begin{minipage}{0.5\textwidth}
-This graph can be eulerized by duplicating the edge BC, as shown.  One possible Euler circuit on the eulerized graph is ACDBCBA.
-\end{minipage}
 %
-\begin{minipage}{0.5\textwidth}
-\scalebox{.7}{
-\begin{tikzpicture}
-\draw[fill] (0,0) circle[radius=.1] node [left]{B};
-\draw[fill] (4,0) circle[radius=.1] node [right]{C};
-\draw[fill] (2,2) circle[radius=.1] node [above]{D};
-\draw[fill] (2,4) circle[radius=.1] node [above]{A};
-\draw(0,0)--(4,0);
-\draw(0,0)--(2,2);
-\draw(0,0)--(2,4);
-\draw(4,0)--(2,2);
-\draw(4,0)--(2,4);
-\draw[very thick, red](0,0) to [bend right] (4,0);
-\end{tikzpicture}
-}
-\end{minipage}
-
-\item At each step, we look for the nearest location we haven't already visited.  \\
-From B the nearest computer is E with time 24.  \\
-From E, the nearest computer is D with time 11.  \\
-From D the nearest is A with time 12. \\
-From A the nearest is C with time 34.  \\
-From C, the only computer we haven't visited is F with time 27.\\
-From F, we return back to B with time 50.\\
-
-\noindent The NNA circuit from B is BEDACFB with time 158 milliseconds.\\
-
-\noindent Using NNA again from other starting vertices:\\
-Starting at A: ADEBCFA: time 146\\
-Starting at C: CDEBAFC: time 167\\
-Starting at D: DEBCFAD: time 146\\
-Starting at E: EDACFBE: time 158\\
-Starting at F: FDEBCAF: time 158\\
-
-\noindent The RNNA found a circuit with time 146 milliseconds:  ADEBCFA.  We could also write this same circuit starting at B if we wanted:  BCFADEB or BEDAFCB.\\
-
-\item \hspace{.2in}\\
-\begin{minipage}{0.5\textwidth}
-AB: Add, cost 11\\
-BG: Add, cost 13\\
-AE: Add, cost 14\\
-EF: Add, cost 15\\
-EC: Skip (degree 3 at E)\\
-FG: Skip (would create a circuit not including C)\\
-BF, BC, AG, AC: Skip (would cause a vertex to have degree 3)\\
-GC: Add, cost 36\\
-CF: Add, cost 37, completes the circuit\\
-
-\noindent Final circuit:  ABGCFEA\\
-\end{minipage}
+%\item[Exercise~\ref{ex:5cities}] \hspace{.2in}\\
+%\begin{minipage}{0.5\textwidth}
+%This graph can be eulerized by duplicating the edge BC, as shown.  One possible Euler circuit on the eulerized graph is ACDBCBA.
+%\end{minipage}
+%%
+%\begin{minipage}{0.5\textwidth}
+%\scalebox{.7}{
+%\begin{tikzpicture}
+%\draw[fill] (0,0) circle[radius=.1] node [left]{B};
+%\draw[fill] (4,0) circle[radius=.1] node [right]{C};
+%\draw[fill] (2,2) circle[radius=.1] node [above]{D};
+%\draw[fill] (2,4) circle[radius=.1] node [above]{A};
+%\draw(0,0)--(4,0);
+%\draw(0,0)--(2,2);
+%\draw(0,0)--(2,4);
+%\draw(4,0)--(2,2);
+%\draw(4,0)--(2,4);
+%\draw[very thick, red](0,0) to [bend right] (4,0);
+%\end{tikzpicture}
+%}
+%\end{minipage}
 %
-\begin{minipage}{0.5\textwidth}
-\begin{tikzpicture}
-\draw[fill] (0,0) circle[radius=.1] node[left]{A};
-\draw[fill] (2,2) circle[radius=.1] node[above]{B};
-\draw[fill] (2,-2) circle[radius=.1] node[below]{C};
-\draw[fill] (4,2) circle[radius=.1] node[above]{E};
-\draw[fill] (4,-2) circle[radius=.1] node[below]{F};
-\draw[fill] (6,0) circle[radius=.1] node[right]{G};
-\draw[very thick, red](0,0) to node[above]{11} (2,2);
-\draw(0,0) to node[below]{33}(2,-2);
-\draw[very thick, red](0,0) to node[pos=0.3, fill=white]{14}(4,2);
-\draw(0,0) to node[pos=0.3, fill=white]{41}(4,-2);
-\draw(0,0) to node[near start, fill=white]{27}(6,0);
-\draw(2,2) to node[pos=0.37, fill=white]{25}(2,-2);
-\draw(2,2) to node[above]{43}(4,2);
-\draw(2,2) to node[pos=0.7, fill=white]{23}(4,-2);
-\draw[very thick, red](2,2) to node[pos=0.7, fill=white]{13}(6,0);
-\draw(2,-2) to node[pos=0.35, fill=white]{17} (4,2);
-\draw[very thick, red](2,-2) to node[below]{37}(4,-2);
-\draw[very thick, red](2,-2) to node[pos=0.7, fill=white]{36}(6,0);
-\draw[very thick, red](4,2) to node[pos=0.38, fill=white]{15}(4,-2);
-\draw(4,2) to node[above]{45}(6,0);
-\draw(4,-2) to node[below]{19}(6,0);
-\end{tikzpicture}
-\end{minipage}
+%\item[Exercise~\ref{ex:5cities}] At each step, we look for the nearest location we haven't already visited.  \\
+%From B the nearest computer is E with time 24.  \\
+%From E, the nearest computer is D with time 11.  \\
+%From D the nearest is A with time 12. \\
+%From A the nearest is C with time 34.  \\
+%From C, the only computer we haven't visited is F with time 27.\\
+%From F, we return back to B with time 50.\\
+%
+%\noindent The NNA circuit from B is BEDACFB with time 158 milliseconds.\\
+%
+%\noindent Using NNA again from other starting vertices:\\
+%Starting at A: ADEBCFA: time 146\\
+%Starting at C: CDEBAFC: time 167\\
+%Starting at D: DEBCFAD: time 146\\
+%Starting at E: EDACFBE: time 158\\
+%Starting at F: FDEBCAF: time 158\\
+%
+%\noindent The RNNA found a circuit with time 146 milliseconds:  ADEBCFA.  We could also write this same circuit starting at B if we wanted:  BCFADEB or BEDAFCB.\\
+%
+%\item[Exercise~\ref{ex:5cities}] \hspace{.2in}\\
+%\begin{minipage}{0.5\textwidth}
+%AB: Add, cost 11\\
+%BG: Add, cost 13\\
+%AE: Add, cost 14\\
+%EF: Add, cost 15\\
+%EC: Skip (degree 3 at E)\\
+%FG: Skip (would create a circuit not including C)\\
+%BF, BC, AG, AC: Skip (would cause a vertex to have degree 3)\\
+%GC: Add, cost 36\\
+%CF: Add, cost 37, completes the circuit\\
+%
+%\noindent Final circuit:  ABGCFEA\\
+%\end{minipage}
+%%
+%\begin{minipage}{0.5\textwidth}
+%\begin{tikzpicture}
+%\draw[fill] (0,0) circle[radius=.1] node[left]{A};
+%\draw[fill] (2,2) circle[radius=.1] node[above]{B};
+%\draw[fill] (2,-2) circle[radius=.1] node[below]{C};
+%\draw[fill] (4,2) circle[radius=.1] node[above]{E};
+%\draw[fill] (4,-2) circle[radius=.1] node[below]{F};
+%\draw[fill] (6,0) circle[radius=.1] node[right]{G};
+%\draw[very thick, red](0,0) to node[above]{11} (2,2);
+%\draw(0,0) to node[below]{33}(2,-2);
+%\draw[very thick, red](0,0) to node[pos=0.3, fill=white]{14}(4,2);
+%\draw(0,0) to node[pos=0.3, fill=white]{41}(4,-2);
+%\draw(0,0) to node[near start, fill=white]{27}(6,0);
+%\draw(2,2) to node[pos=0.37, fill=white]{25}(2,-2);
+%\draw(2,2) to node[above]{43}(4,2);
+%\draw(2,2) to node[pos=0.7, fill=white]{23}(4,-2);
+%\draw[very thick, red](2,2) to node[pos=0.7, fill=white]{13}(6,0);
+%\draw(2,-2) to node[pos=0.35, fill=white]{17} (4,2);
+%\draw[very thick, red](2,-2) to node[below]{37}(4,-2);
+%\draw[very thick, red](2,-2) to node[pos=0.7, fill=white]{36}(6,0);
+%\draw[very thick, red](4,2) to node[pos=0.38, fill=white]{15}(4,-2);
+%\draw(4,2) to node[above]{45}(6,0);
+%\draw(4,-2) to node[below]{19}(6,0);
+%\end{tikzpicture}
+%\end{minipage}
 
-\item (\ref{exa:kruskal_exercise})\hspace{.2in}\\
+\item[Exercise~\ref{ex:kruskal_exercise}] \hspace{.2in}\\
 \begin{minipage}{0.5\textwidth}
 AB: Add, cost 11\\
 BG: Add, cost 13\\
@@ -1434,7 +1678,92 @@ EC: Add, cost 17\\
 \end{minipage}
 \end{enumerate}
 
-\section{Prim's Algorithm}
+\subsection{Prim's Algorithm for Minimum Cost Spanning Tree}
+
+\begin{algorithm}[H]
+\caption{Prim's Algorithm (Descriptive Version)}
+\begin{algorithmic}[1]
+\State \textbf{Input:} A connected, undirected graph \( G = (V, E) \) with edge weights \( w(e) \).
+\State \textbf{Initialization:} Start with any vertex \( v \in V \). Let \( T \gets \{v\} \) and \( E_T \gets \emptyset \).
+\Repeat
+  \State Find the cheapest edge with one endpoint in \( T \) and one endpoint not in \( T \).
+  \State Add that edge to \( E_T \) and its other endpoint to \( T \).
+\Until{\( T \) includes all vertices.}
+\State \textbf{Output:} The set \( E_T \), forming a minimum spanning tree of \( G \).
+\end{algorithmic}
+\end{algorithm}
+
+In pseudocode, the algorithm looks like this:
+
+\begin{algorithm}[H]
+\caption{Prim's Algorithm}
+\begin{algorithmic}[1]
+\State \textbf{Input:} A connected, undirected graph \( G = (V, E) \) with weights \( w(e) \) on each edge.
+\State \textbf{Initialization:}
+  \begin{itemize}
+    \item Pick an arbitrary starting vertex \( v_0 \).
+    \item Let \( T \gets \{v_0\} \), \( E_T \gets \emptyset \).
+  \end{itemize}
+\While{\( |T| < |V| \)}
+  \State Among all edges \( (u, v) \in E \) with \( u \in T \) and \( v \notin T \), find the one with minimum weight.
+  \State Add \( v \) to \( T \), and \( (u,v) \) to \( E_T \).
+\EndWhile
+\State \textbf{Output:} The set \( E_T \), which forms a minimum spanning tree.
+\end{algorithmic}
+\end{algorithm}
+
+\begin{example}{}{} %24
+Using our phone line graph from above, begin with vertex A and grow the tree:\\
+\begin{minipage}{.5\textwidth}
+\begin{tabular}{lll}
+Start at A&&\\
+AB&	\$4&	add AB\\
+AE	&\$5	&add AE\\
+BE	&\$6&	reject -- E already added\\
+DC	&\$7&	add DC\\
+AC&\$8&	add AC\\
+\end{tabular}
+\end{minipage}
+%
+\begin{minipage}{.5\textwidth}
+\begin{tikzpicture}
+\draw[fill] (0,0) circle[radius=.1] node[below]{D};
+\draw[fill] (3,0) circle[radius=.1] node[below]{C};
+\draw[fill] (-1,1.5) circle[radius=.1] node[left]{E};
+\draw[fill] (2,3) circle[radius=.1] node[above]{A};
+\draw[fill] (5,1.5) circle[radius=.1] node[right]{B};
+\draw[very thick, red](0,0)--(3,0);
+\draw(0,0)--(2,3);
+\draw(0,0)--(-1,1.5);
+\draw(0,0)--(5,1.5);
+\draw(3,0)--(-1,1.5);
+\draw[very thick, red](3,0)--(2,3);
+\draw(3,0)--(5,1.5);
+\draw[very thick, red](-1,1.5)--(2,3);
+\draw(-1,1.5)--(5,1.5);
+\draw[very thick, red](2,3)--(5,1.5);
+\node at (1.5, -0.2){\$7};
+\node at (-0.9, 0.7){\$13};
+\node at (4.6,0.7){\$10};
+\node at (3.5, 2.5){\$4};
+\node at (0.5,2.5){\$5};
+\node at (1.7,1.3){\$6};
+\node at (1.15,2.15){\$9};
+\node at (2.5,2.15){\$8};
+\node at (0,0.9){\$11};
+\node at (3.4,0.85){\$14};
+\end{tikzpicture}
+\end{minipage}
+
+The same minimum cost spanning tree is produced, and we stop once all vertices have been added to the tree.
+\end{example}
+
+Just like Kruskal's algorithm, Prim’s algorithm is guaranteed to find the optimal minimum spanning tree. However, it grows the tree from a single root and adds the cheapest connecting edge at each step—making it especially efficient when implemented with a priority queue (e.g., using a Fibonacci heap for near-linear time in sparse graphs).
+
+\begin{exercise}{Min Cost Spanning Tree (Prim's Algorithm)}{prim_exercise} %8
+Use Prim's algorithm to find a minimum cost spanning tree on the same graph as in Exercise~\ref{ex:kruskal_exercise}, starting from vertex A. Show the steps as you add edges and vertices to the growing tree.
+\end{exercise}
+
 
 
 
@@ -1499,7 +1828,46 @@ EC: Add, cost 17\\
 
 \end{figure}
 
-\section{Additional Exercises}
+\section{Exercises}
+
+\begin{ex}{}{} %2
+\label{ex:shortest-path}
+Find the shortest path between vertices A and G in the graph below.\\
+
+\begin{tikzpicture}
+\draw[fill] (0,0) circle[radius=.1] node[left]{A};
+\draw[fill] (2,2) circle[radius=.1] node[left]{B};
+\draw[fill] (2,-2) circle[radius=.1] node[left]{C};
+\draw[fill] (4,0) circle[radius=.1] node[left]{D};
+\draw[fill] (6,2) circle[radius=.1] node[right]{E};
+\draw[fill] (6,-2) circle[radius=.1] node[right]{F};
+\draw[fill] (8,0) circle[radius=.1] node[right]{G};
+\draw(0,0)--(2,2);
+\node at (0.7,1){1};
+\draw(0,0)--(2,-2);
+\node at (0.7,-1){4};
+\draw(2,2)--(4,0);
+\node at (2.7,1){3};
+\draw(2,-2)--(4,0);
+\node at (2.7,-1){2};
+\draw(4,0)--(6,2);
+\node at (4.7,1){2};
+\draw(4,0)--(6,-2);
+\node at (4.7,-1){4};
+\draw(6,2)--(8,0);
+\node at (6.7,1){7};
+\draw(6,-2)--(8,0);
+\node at (6.7,-1){6};
+\draw(2,2)--(6,2);
+\node at (4,2.3){6};
+\draw(2,-2)--(6,-2);
+\node at (4,-2.3){5};
+\draw(6,2)--(6,-2);
+\node at (6.3,0){2};
+\end{tikzpicture}
+\end{ex}
+
+
 
 \textbf{Skills}
 \begin{enumerate}
@@ -3782,9 +4150,30 @@ Find the circuit produced by the Sorted Edges algorithm using the graph below.\\
 
 \subsection{Notes}
 
-A paper entitled 'A Note on Two Problems in Connexion with Graphs' was published in the journal 'Numerische Mathematik' in 1959. It was in this paper where the computer scientist named Edsger W. Dijkstra proposed the Dijkstra's Algorithm for the shortest path problem; a fundamental graph theoretic problem. This algorithm can be used to find the shortest path between two nodes or a more common variant of this algorithm is to find the shortest path between a specific 'source' node to any other nodes in the network. \href{Thanks Jerrin baby}{https://www.overleaf.com/project/62472837411e2ce1b881337f}
+A paper entitled 'A Note on Two Problems in Connexion with Graphs' was published in the journal 'Numerische Mathematik' in 1959. It was in this paper where the computer scientist named Edsger W. Dijkstra proposed the Dijkstra's Algorithm for the shortest path problem; a fundamental graph theoretic problem. This algorithm can be used to find the shortest path between two nodes or a more common variant of this algorithm is to find the shortest path between a specific 'source' node to any other nodes in the network. \href{https://www.overleaf.com/project/62472837411e2ce1b881337f}{Thanks Jerrin}
 
 \subsection*{Notes, References, and Resources}
 \begin{resource}
 \href{https://www.youtube.com/watch?v=09_LlHjoEiY}{Youtube!  Video of many graph algorithms by Google engineer (6+ hours)}
 \end{resource}
+
+
+\section*{Graph Libraries in Python}
+
+Several graph libraries are available in Python, each with distinct strengths depending on your needs. \texttt{NetworkX} is widely used for its ease of use and flexibility, especially for small to medium-sized graphs. For high-performance analysis on large graphs, \texttt{graph-tool} and \texttt{NetworKit} offer optimized implementations of common graph algorithms. \texttt{igraph} strikes a balance between speed and usability, while libraries like \texttt{PyTorch Geometric} and \texttt{DGL} are specifically designed for machine learning on graphs. The table below compares key features across several popular graph libraries.
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+\textbf{Library} & \textbf{Speed} & \textbf{Ease of Use} & \textbf{Graph Size} & \textbf{Algorithms} & \textbf{Visualization} \\
+\midrule
+\texttt{NetworkX} & Low & High & Small–Medium & Basic & Moderate \\
+\texttt{graph-tool} & Very High & Low & Large & Advanced & Basic \\
+\texttt{igraph} & High & Moderate & Medium–Large & Strong & Limited \\
+\texttt{NetworKit} & Very High & Low & Very Large & Advanced & None \\
+\texttt{PyTorch Geometric} & Very High & Low & Large & ML-Specific & None \\
+\bottomrule
+\end{tabular}
+\caption{Comparison of Python Graph Libraries}
+\end{table}

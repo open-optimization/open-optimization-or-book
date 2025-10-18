@@ -1,0 +1,925 @@
+\section{Working with Python Packages}
+
+Python's power comes from its extensive ecosystem of packages. For linear programming and optimization work, several packages are essential. This section covers how to import and use the key packages you'll need.
+
+\subsection{Import Statements and Package Management}
+
+\subsubsection{Basic Import Syntax}
+Python provides several ways to import packages and their components:
+
+\begin{lstlisting}[language=Python]
+# Import entire package
+import numpy
+import pandas
+import matplotlib.pyplot
+
+# Import with alias (common practice)
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Import specific functions or classes
+from numpy import array, dot, sum
+from pandas import DataFrame, read_csv
+from matplotlib.pyplot import plot, show, xlabel, ylabel
+
+# Import all functions (generally not recommended)
+from numpy import *
+\end{lstlisting}
+
+\subsubsection{Package Installation}
+Before importing, packages must be installed. Using Anaconda (recommended), you can install packages via conda or pip:
+
+\begin{lstlisting}[language=bash]
+# Using conda (preferred for scientific packages)
+conda install numpy pandas matplotlib
+
+# Using pip (when conda version unavailable)
+pip install pulp
+pip install geopandas
+
+# Install specific versions
+conda install numpy=1.21.0
+pip install pandas>=1.3.0
+\end{lstlisting}
+
+\subsection{NumPy: Numerical Computing Foundation}
+
+NumPy provides the foundation for numerical computing in Python, essential for linear algebra operations in optimization.
+
+\begin{lstlisting}[language=Python]
+import numpy as np
+
+# Array creation for LP problems
+# Coefficient matrix for constraints: Ax <= b
+A = np.array([
+    [2, 1, 3],    # First constraint coefficients
+    [1, 2, 1],    # Second constraint coefficients
+    [3, 1, 2]     # Third constraint coefficients
+])
+
+# Right-hand side vector
+b = np.array([100, 150, 200])
+
+# Objective function coefficients: minimize cx
+c = np.array([3, 4, 2])
+
+# Common NumPy operations for optimization
+print(f"Constraint matrix shape: {A.shape}")
+print(f"Matrix rank: {np.linalg.matrix_rank(A)}")
+
+# Vector operations
+x = np.array([20, 30, 10])  # Decision variable values
+objective_value = np.dot(c, x)  # Calculate objective function value
+constraint_values = np.dot(A, x)  # Calculate left-hand side of constraints
+
+# Check constraint satisfaction
+feasible = np.all(constraint_values <= b)
+print(f"Solution feasible: {feasible}")
+
+# Matrix operations
+A_transpose = A.T
+A_inverse = np.linalg.inv(A) if np.linalg.det(A) != 0 else None
+
+# Statistical operations useful for data analysis
+demand_data = np.array([80, 120, 95, 110, 130])
+mean_demand = np.mean(demand_data)
+std_demand = np.std(demand_data)
+percentiles = np.percentile(demand_data, [25, 50, 75])
+\end{lstlisting}
+
+\subsection{Pandas: Data Analysis and Management}
+
+Pandas excels at handling structured data, making it perfect for managing optimization problem data and analyzing results.
+
+\begin{lstlisting}[language=Python]
+import pandas as pd
+
+# Reading data from files (common in real optimization problems)
+# Assume we have CSV files with problem data
+try:
+    plants_df = pd.read_csv('plants.csv')
+    markets_df = pd.read_csv('markets.csv')
+    costs_df = pd.read_csv('transportation_costs.csv')
+except FileNotFoundError:
+    # Create sample data if files don't exist
+    plants_df = pd.DataFrame({
+        'Plant_ID': ['P1', 'P2', 'P3'],
+        'Location': ['Chicago', 'Denver', 'Atlanta'],
+        'Capacity': [100, 150, 200],
+        'Fixed_Cost': [10000, 12000, 8000]
+    })
+    
+    markets_df = pd.DataFrame({
+        'Market_ID': ['M1', 'M2', 'M3', 'M4'],
+        'Location': ['New York', 'Los Angeles', 'Houston', 'Miami'],
+        'Demand': [80, 120, 90, 110],
+        'Price': [50, 55, 48, 52]
+    })
+
+# Data exploration and validation
+print("Plant Summary:")
+print(plants_df.describe())
+print(f"\nTotal Capacity: {plants_df['Capacity'].sum()}")
+print(f"Total Demand: {markets_df['Demand'].sum()}")
+
+# Data manipulation for optimization
+# Create all possible plant-market combinations
+import itertools
+routes = []
+for plant_id in plants_df['Plant_ID']:
+    for market_id in markets_df['Market_ID']:
+        routes.append({
+            'From': plant_id,
+            'To': market_id,
+            'Distance': np.random.randint(100, 1000),  # Example distances
+            'Cost_per_Unit': np.random.uniform(1, 5)   # Example costs
+        })
+
+routes_df = pd.DataFrame(routes)
+
+# Pivot tables for matrix representation
+cost_matrix = routes_df.pivot(index='From', columns='To', values='Cost_per_Unit')
+distance_matrix = routes_df.pivot(index='From', columns='To', values='Distance')
+
+print("\nCost Matrix:")
+print(cost_matrix)
+
+# Data filtering and grouping
+high_cost_routes = routes_df[routes_df['Cost_per_Unit'] > 3.0]
+routes_by_plant = routes_df.groupby('From')['Cost_per_Unit'].agg(['mean', 'min', 'max'])
+
+# After solving optimization problem, analyze results
+# Example solution data
+solution_data = pd.DataFrame({
+    'Variable': ['x_P1_M1', 'x_P1_M2', 'x_P2_M1', 'x_P2_M3', 'x_P3_M2', 'x_P3_M4'],
+    'Value': [50, 30, 80, 70, 90, 110],
+    'Cost': [3.2, 2.8, 4.1, 3.5, 2.9, 3.8]
+})
+
+# Analysis of solution
+active_routes = solution_data[solution_data['Value'] > 0]
+total_cost = (solution_data['Value'] * solution_data['Cost']).sum()
+routes_per_plant = solution_data.groupby(solution_data['Variable'].str[:3])['Value'].sum()
+
+print(f"\nSolution Summary:")
+print(f"Total Cost: ${total_cost:.2f}")
+print(f"Active Routes: {len(active_routes)}")
+\end{lstlisting}
+
+\subsection{Matplotlib: Visualization}
+
+Visualization helps understand problem structure and communicate results effectively.
+
+\begin{lstlisting}[language=Python]
+import matplotlib.pyplot as plt
+
+# Basic plotting setup
+plt.style.use('default')  # or 'seaborn', 'ggplot', etc.
+
+# Plot supply and demand comparison
+plants = ['Plant 1', 'Plant 2', 'Plant 3']
+supply = [100, 150, 200]
+markets = ['Market 1', 'Market 2', 'Market 3', 'Market 4']
+demand = [80, 120, 90, 110]
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
+
+# Supply bar chart
+ax1.bar(plants, supply, color='steelblue', alpha=0.7)
+ax1.set_title('Supply Capacity by Plant')
+ax1.set_ylabel('Capacity (units)')
+ax1.grid(axis='y', alpha=0.3)
+
+# Demand bar chart
+ax2.bar(markets, demand, color='orange', alpha=0.7)
+ax2.set_title('Demand by Market')
+ax2.set_ylabel('Demand (units)')
+ax2.grid(axis='y', alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+
+# Heatmap of cost matrix
+plt.figure(figsize=(8, 6))
+cost_data = np.array([
+    [3.2, 2.8, 4.1, 3.9],
+    [4.5, 3.1, 2.9, 3.2],
+    [2.1, 3.8, 4.2, 2.7]
+])
+
+plt.imshow(cost_data, cmap='RdYlBu_r', aspect='auto')
+plt.colorbar(label='Transportation Cost per Unit')
+plt.xticks(range(len(markets)), markets, rotation=45)
+plt.yticks(range(len(plants)), plants)
+plt.title('Transportation Cost Matrix')
+
+# Add text annotations
+for i in range(len(plants)):
+    for j in range(len(markets)):
+        plt.text(j, i, f'{cost_data[i,j]:.1f}', 
+                ha='center', va='center', fontweight='bold')
+
+plt.tight_layout()
+plt.show()
+
+# Solution flow visualization
+solution_flows = np.array([
+    [50, 30, 0, 20],    # Plant 1 to markets
+    [0, 80, 70, 0],     # Plant 2 to markets
+    [30, 10, 20, 90]    # Plant 3 to markets
+])
+
+plt.figure(figsize=(10, 6))
+plt.imshow(solution_flows, cmap='Blues', aspect='auto')
+plt.colorbar(label='Flow Quantity')
+plt.xticks(range(len(markets)), markets)
+plt.yticks(range(len(plants)), plants)
+plt.title('Optimal Transportation Flows')
+
+# Add flow values as text
+for i in range(len(plants)):
+    for j in range(len(markets)):
+        if solution_flows[i,j] > 0:
+            plt.text(j, i, f'{solution_flows[i,j]}', 
+                    ha='center', va='center', fontweight='bold', color='white')
+
+plt.tight_layout()
+plt.show()
+
+# Time series plot for demand forecasting
+days = range(1, 31)
+demand_forecast = 100 + 10 * np.sin(np.array(days) * 2 * np.pi / 7) + np.random.normal(0, 5, 30)
+
+plt.figure(figsize=(12, 6))
+plt.plot(days, demand_forecast, 'b-', linewidth=2, label='Demand Forecast')
+plt.axhline(y=np.mean(demand_forecast), color='r', linestyle='--', label='Average Demand')
+plt.fill_between(days, demand_forecast - 10, demand_forecast + 10, alpha=0.2, label='Uncertainty Band')
+plt.xlabel('Day')
+plt.ylabel('Demand')
+plt.title('30-Day Demand Forecast')
+plt.legend()
+plt.grid(True, alpha=0.3)
+plt.show()
+\end{lstlisting}
+
+\subsection{GeoPandas: Geospatial Analysis (Optional)}
+
+For location-based optimization problems, GeoPandas adds spatial analysis capabilities.
+
+\begin{lstlisting}[language=Python]
+# Note: GeoPandas requires additional dependencies and may need special installation
+try:
+    import geopandas as gpd
+    from shapely.geometry import Point
+    
+    # Create geographic data for facilities and customers
+    facilities = pd.DataFrame({
+        'Facility_ID': ['F1', 'F2', 'F3'],
+        'Name': ['Chicago Plant', 'Denver Plant', 'Atlanta Plant'],
+        'Longitude': [-87.6298, -104.9903, -84.3880],
+        'Latitude': [41.8781, 39.7392, 33.7490],
+        'Capacity': [100, 150, 200]
+    })
+    
+    customers = pd.DataFrame({
+        'Customer_ID': ['C1', 'C2', 'C3', 'C4'],
+        'Name': ['New York', 'Los Angeles', 'Houston', 'Miami'],
+        'Longitude': [-74.0060, -118.2437, -95.3698, -80.1918],
+        'Latitude': [40.7128, 34.0522, 29.7604, 25.7617],
+        'Demand': [80, 120, 90, 110]
+    })
+    
+    # Convert to GeoDataFrames
+    facilities_gdf = gpd.GeoDataFrame(
+        facilities,
+        geometry=[Point(xy) for xy in zip(facilities['Longitude'], facilities['Latitude'])]
+    )
+    
+    customers_gdf = gpd.GeoDataFrame(
+        customers,
+        geometry=[Point(xy) for xy in zip(customers['Longitude'], customers['Latitude'])]
+    )
+    
+    # Calculate distances between facilities and customers
+    def calculate_distance(point1, point2):
+        """Calculate distance between two points in kilometers"""
+        return point1.distance(point2) * 111.32  # Rough conversion to km
+    
+    # Create distance matrix
+    distance_matrix = pd.DataFrame(index=facilities['Facility_ID'], columns=customers['Customer_ID'])
+    
+    for i, facility in facilities_gdf.iterrows():
+        for j, customer in customers_gdf.iterrows():
+            distance = calculate_distance(facility.geometry, customer.geometry)
+            distance_matrix.loc[facility['Facility_ID'], customer['Customer_ID']] = distance
+    
+    print("Distance Matrix (km):")
+    print(distance_matrix.round(0))
+    
+    # Simple map visualization (requires matplotlib and contextily for basemaps)
+    fig, ax = plt.subplots(figsize=(12, 8))
+    
+    # Plot facilities and customers
+    facilities_gdf.plot(ax=ax, color='red', markersize=100, label='Facilities')
+    customers_gdf.plot(ax=ax, color='blue', markersize=80, label='Customers')
+    
+    # Add labels
+    for idx, row in facilities_gdf.iterrows():
+        ax.annotate(row['Name'], (row.geometry.x, row.geometry.y), 
+                   xytext=(5, 5), textcoords='offset points', fontsize=8)
+    
+    for idx, row in customers_gdf.iterrows():
+        ax.annotate(row['Name'], (row.geometry.x, row.geometry.y), 
+                   xytext=(5, 5), textcoords='offset points', fontsize=8)
+    
+    ax.set_title('Facility and Customer Locations')
+    ax.legend()
+    plt.show()
+    
+except ImportError:
+    print("GeoPandas not available. Install with: conda install geopandas")
+    print("For basic optimization problems, GeoPandas is optional.")
+\end{lstlisting}
+
+\subsection{NetworkX: Graph Analysis and Network Optimization}
+
+NetworkX is a powerful Python package for creating, manipulating, and analyzing complex networks and graphs. It's particularly valuable for network flow problems, shortest path optimization, and supply chain network analysis.
+
+\begin{lstlisting}[language=Python]
+import networkx as nx
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Installation note: pip install networkx
+
+# Creating graphs for optimization problems
+# Example: Supply chain network
+G = nx.DiGraph()  # Directed graph for flow problems
+
+# Add nodes with attributes (supply/demand, costs, capacities)
+# Supply nodes (sources)
+G.add_node('Plant1', node_type='supply', capacity=100, cost=0)
+G.add_node('Plant2', node_type='supply', capacity=150, cost=0)
+G.add_node('Plant3', node_type='supply', capacity=200, cost=0)
+
+# Intermediate nodes (warehouses/distribution centers)
+G.add_node('Warehouse1', node_type='intermediate', capacity=200, cost=50)
+G.add_node('Warehouse2', node_type='intermediate', capacity=180, cost=45)
+
+# Demand nodes (sinks)
+G.add_node('Market1', node_type='demand', demand=80, cost=0)
+G.add_node('Market2', node_type='demand', demand=120, cost=0)
+G.add_node('Market3', node_type='demand', demand=90, cost=0)
+G.add_node('Market4', node_type='demand', demand=110, cost=0)
+
+# Add edges with attributes (capacity, cost, distance)
+# Plant to warehouse connections
+plant_warehouse_edges = [
+    ('Plant1', 'Warehouse1', {'capacity': 100, 'cost': 2.5, 'distance': 200}),
+    ('Plant1', 'Warehouse2', {'capacity': 80, 'cost': 3.2, 'distance': 250}),
+    ('Plant2', 'Warehouse1', {'capacity': 120, 'cost': 1.8, 'distance': 150}),
+    ('Plant2', 'Warehouse2', {'capacity': 150, 'cost': 2.1, 'distance': 180}),
+    ('Plant3', 'Warehouse1', {'capacity': 90, 'cost': 4.1, 'distance': 400}),
+    ('Plant3', 'Warehouse2', {'capacity': 200, 'cost': 2.8, 'distance': 300})
+]
+
+# Warehouse to market connections
+warehouse_market_edges = [
+    ('Warehouse1', 'Market1', {'capacity': 100, 'cost': 1.5, 'distance': 100}),
+    ('Warehouse1', 'Market2', {'capacity': 120, 'cost': 1.8, 'distance': 120}),
+    ('Warehouse1', 'Market3', {'capacity': 90, 'cost': 2.2, 'distance': 180}),
+    ('Warehouse2', 'Market2', {'capacity': 80, 'cost': 1.2, 'distance': 80}),
+    ('Warehouse2', 'Market3', {'capacity': 100, 'cost': 1.9, 'distance': 140}),
+    ('Warehouse2', 'Market4', {'capacity': 110, 'cost': 1.6, 'distance': 110})
+]
+
+G.add_edges_from(plant_warehouse_edges)
+G.add_edges_from(warehouse_market_edges)
+
+print(f"Network has {G.number_of_nodes()} nodes and {G.number_of_edges()} edges")
+
+# Network analysis for optimization insights
+print("\nNetwork Analysis:")
+print(f"Is the graph connected? {nx.is_weakly_connected(G)}")
+print(f"Number of strongly connected components: {nx.number_strongly_connected_components(G)}")
+
+# Find shortest paths (useful for transportation problems)
+try:
+    shortest_path = nx.shortest_path(G, 'Plant1', 'Market1', weight='cost')
+    shortest_cost = nx.shortest_path_length(G, 'Plant1', 'Market1', weight='cost')
+    print(f"Shortest cost path from Plant1 to Market1: {shortest_path}")
+    print(f"Total cost: {shortest_cost}")
+except nx.NetworkXNoPath:
+    print("No path exists between Plant1 and Market1")
+
+# All shortest paths from all plants to all markets
+supply_nodes = [n for n, d in G.nodes(data=True) if d['node_type'] == 'supply']
+demand_nodes = [n for n, d in G.nodes(data=True) if d['node_type'] == 'demand']
+
+print("\nShortest Cost Paths:")
+path_costs = {}
+for supply in supply_nodes:
+    for demand in demand_nodes:
+        try:
+            cost = nx.shortest_path_length(G, supply, demand, weight='cost')
+            path = nx.shortest_path(G, supply, demand, weight='cost')
+            path_costs[(supply, demand)] = cost
+            print(f"{supply} -> {demand}: Cost = {cost:.2f}, Path = {' -> '.join(path)}")
+        except nx.NetworkXNoPath:
+            print(f"{supply} -> {demand}: No path exists")
+
+# Visualize the network
+plt.figure(figsize=(14, 10))
+
+# Create layout
+pos = {}
+# Position supply nodes on the left
+supply_nodes = [n for n, d in G.nodes(data=True) if d['node_type'] == 'supply']
+for i, node in enumerate(supply_nodes):
+    pos[node] = (0, i * 2)
+
+# Position intermediate nodes in the middle
+intermediate_nodes = [n for n, d in G.nodes(data=True) if d['node_type'] == 'intermediate']
+for i, node in enumerate(intermediate_nodes):
+    pos[node] = (2, i * 2 + 0.5)
+
+# Position demand nodes on the right
+demand_nodes = [n for n, d in G.nodes(data=True) if d['node_type'] == 'demand']
+for i, node in enumerate(demand_nodes):
+    pos[node] = (4, i * 1.5)
+
+# Draw nodes with different colors by type
+node_colors = {'supply': 'lightblue', 'intermediate': 'lightgreen', 'demand': 'lightcoral'}
+for node_type in ['supply', 'intermediate', 'demand']:
+    nodes = [n for n, d in G.nodes(data=True) if d['node_type'] == node_type]
+    nx.draw_networkx_nodes(G, pos, nodelist=nodes, 
+                          node_color=node_colors[node_type], 
+                          node_size=1000, alpha=0.8)
+
+# Draw edges with thickness proportional to capacity
+edges = G.edges()
+capacities = [G[u][v]['capacity'] for u, v in edges]
+max_capacity = max(capacities)
+edge_widths = [3 * (cap / max_capacity) for cap in capacities]
+
+nx.draw_networkx_edges(G, pos, width=edge_widths, alpha=0.6, 
+                      edge_color='gray', arrows=True, arrowsize=20)
+
+# Add labels
+nx.draw_networkx_labels(G, pos, font_size=8, font_weight='bold')
+
+# Add edge labels with costs
+edge_labels = {(u, v): f"${d['cost']:.1f}" for u, v, d in G.edges(data=True)}
+nx.draw_networkx_edge_labels(G, pos, edge_labels, font_size=6)
+
+plt.title('Supply Chain Network\n(Edge thickness = Capacity, Labels = Cost per unit)', size=14)
+plt.axis('off')
+plt.tight_layout()
+plt.show()
+
+# Network flow analysis - Maximum flow problem
+# Find maximum flow from all supply to all demand nodes
+# Create a super source and super sink
+G_flow = G.copy()
+G_flow.add_node('SuperSource', node_type='super_source')
+G_flow.add_node('SuperSink', node_type='super_sink')
+
+# Connect super source to all supply nodes
+for node in supply_nodes:
+    capacity = G.nodes[node]['capacity']
+    G_flow.add_edge('SuperSource', node, capacity=capacity, cost=0)
+
+# Connect all demand nodes to super sink
+for node in demand_nodes:
+    demand = G.nodes[node]['demand']
+    G_flow.add_edge(node, 'SuperSink', capacity=demand, cost=0)
+
+# Calculate maximum flow
+try:
+    max_flow_value, max_flow_dict = nx.maximum_flow(G_flow, 'SuperSource', 'SuperSink', 
+                                                   capacity='capacity')
+    print(f"\nMaximum Flow Analysis:")
+    print(f"Maximum possible flow: {max_flow_value}")
+    
+    # Check if demand can be satisfied
+    total_demand = sum(G.nodes[node]['demand'] for node in demand_nodes)
+    total_supply = sum(G.nodes[node]['capacity'] for node in supply_nodes)
+    
+    print(f"Total supply: {total_supply}")
+    print(f"Total demand: {total_demand}")
+    print(f"Supply meets demand: {total_supply >= total_demand}")
+    
+except:
+    print("Could not calculate maximum flow")
+
+# Minimum cost flow (if NetworkX version supports it)
+try:
+    # Set demand/supply for nodes
+    for node in supply_nodes:
+        G_flow.nodes[node]['demand'] = -G.nodes[node]['capacity']  # Negative for supply
+    
+    for node in demand_nodes:
+        G_flow.nodes[node]['demand'] = G.nodes[node]['demand']  # Positive for demand
+    
+    # Set demand for intermediate nodes to 0
+    for node in intermediate_nodes:
+        G_flow.nodes[node]['demand'] = 0
+    
+    # Note: This is a simplified example. Real min-cost flow requires careful setup
+    print("\nFor minimum cost flow optimization, consider using:")
+    print("- OR-Tools (Google's optimization suite)")
+    print("- NetworkX with specialized algorithms")
+    print("- Integration with PuLP for more complex formulations")
+    
+except Exception as e:
+    print(f"Min cost flow calculation not available: {e}")
+
+# Centrality analysis for identifying critical nodes
+betweenness = nx.betweenness_centrality(G)
+closeness = nx.closeness_centrality(G)
+
+print("\nNode Importance Analysis:")
+print("Betweenness Centrality (critical for flow):")
+for node, centrality in sorted(betweenness.items(), key=lambda x: x[1], reverse=True):
+    print(f"  {node}: {centrality:.3f}")
+
+print("\nCloseness Centrality (accessibility):")
+for node, centrality in sorted(closeness.items(), key=lambda x: x[1], reverse=True):
+    print(f"  {node}: {centrality:.3f}")
+\end{lstlisting}
+
+\subsubsection{NetworkX for Specialized Optimization Problems}
+
+\begin{lstlisting}[language=Python]
+# Example: Facility Location Network Analysis
+def analyze_facility_locations(facilities, customers, max_distance=500):
+    """
+    Analyze potential facility locations using network analysis
+    """
+    # Create bipartite graph for facility location problem
+    G = nx.Graph()
+    
+    # Add facility nodes
+    for i, (fid, capacity, cost) in enumerate(facilities):
+        G.add_node(f'F_{fid}', bipartite=0, node_type='facility', 
+                  capacity=capacity, fixed_cost=cost)
+    
+    # Add customer nodes
+    for i, (cid, demand, location) in enumerate(customers):
+        G.add_node(f'C_{cid}', bipartite=1, node_type='customer', 
+                  demand=demand, location=location)
+    
+    # Add edges based on distance constraints
+    for fid, f_cap, f_cost in facilities:
+        for cid, c_demand, c_location in customers:
+            # Calculate distance (simplified - in practice use geographic distance)
+            distance = np.random.uniform(100, 600)  # Example distances
+            
+            if distance <= max_distance:
+                service_cost = distance * 0.01  # Cost per unit distance
+                G.add_edge(f'F_{fid}', f'C_{cid}', 
+                          distance=distance, cost=service_cost)
+    
+    # Analyze network properties
+    print("Facility Location Network Analysis:")
+    print(f"Number of feasible facility-customer connections: {G.number_of_edges()}")
+    
+    # Find customers with limited facility options
+    customer_nodes = [n for n, d in G.nodes(data=True) if d['node_type'] == 'customer']
+    limited_options = []
+    
+    for customer in customer_nodes:
+        connections = len(list(G.neighbors(customer)))
+        if connections <= 2:
+            limited_options.append((customer, connections))
+    
+    if limited_options:
+        print("Customers with limited facility options:")
+        for customer, count in limited_options:
+            print(f"  {customer}: {count} facilities within range")
+    
+    # Find facilities serving many customers (high degree)
+    facility_nodes = [n for n, d in G.nodes(data=True) if d['node_type'] == 'facility']
+    facility_coverage = [(f, len(list(G.neighbors(f)))) for f in facility_nodes]
+    facility_coverage.sort(key=lambda x: x[1], reverse=True)
+    
+    print("Facilities by customer coverage:")
+    for facility, coverage in facility_coverage:
+        print(f"  {facility}: serves {coverage} customers")
+    
+    return G
+
+# Example usage
+facilities = [
+    ('F1', 200, 10000),  # (ID, capacity, fixed_cost)
+    ('F2', 150, 8000),
+    ('F3', 300, 12000),
+    ('F4', 100, 6000)
+]
+
+customers = [
+    ('C1', 50, (10, 20)),   # (ID, demand, location)
+    ('C2', 80, (15, 25)),
+    ('C3', 60, (20, 10)),
+    ('C4', 90, (25, 30)),
+    ('C5', 70, (30, 15))
+]
+
+facility_network = analyze_facility_locations(facilities, customers)
+
+# Shortest path analysis for routing problems
+def analyze_routing_network():
+    """
+    Create and analyze a routing network for vehicle routing problems
+    """
+    # Create a city network
+    cities = ['A', 'B', 'C', 'D', 'E', 'F']
+    G = nx.Graph()
+    
+    # Add cities with demand
+    demands = {'A': 0, 'B': 20, 'C': 30, 'D': 15, 'E': 25, 'F': 10}  # A is depot
+    for city in cities:
+        G.add_node(city, demand=demands[city])
+    
+    # Add roads with distances
+    roads = [
+        ('A', 'B', 25), ('A', 'C', 30), ('A', 'D', 15),
+        ('B', 'C', 20), ('B', 'E', 35), ('C', 'D', 10),
+        ('C', 'F', 40), ('D', 'E', 30), ('D', 'F', 25),
+        ('E', 'F', 15)
+    ]
+    
+    for city1, city2, distance in roads:
+        G.add_edge(city1, city2, weight=distance, distance=distance)
+    
+    # Find shortest paths from depot to all customers
+    depot = 'A'
+    customers = [city for city in cities if demands[city] > 0]
+    
+    print("Routing Network Analysis:")
+    print("Shortest distances from depot:")
+    
+    shortest_paths = {}
+    for customer in customers:
+        distance = nx.shortest_path_length(G, depot, customer, weight='weight')
+        path = nx.shortest_path(G, depot, customer, weight='weight')
+        shortest_paths[customer] = (distance, path)
+        print(f"  To {customer}: {distance} km via {' -> '.join(path)}")
+    
+    # Find minimum spanning tree (useful for lower bounds in routing)
+    mst = nx.minimum_spanning_tree(G, weight='weight')
+    mst_weight = sum(d['weight'] for u, v, d in mst.edges(data=True))
+    print(f"\nMinimum Spanning Tree weight: {mst_weight} km")
+    
+    # Analyze graph properties for routing insights
+    print(f"Graph density: {nx.density(G):.3f}")
+    print(f"Average clustering coefficient: {nx.average_clustering(G):.3f}")
+    
+    return G, shortest_paths
+
+routing_network, paths = analyze_routing_network()
+\end{lstlisting}
+
+\subsubsection{Integration with Optimization Models}
+
+\begin{lstlisting}[language=Python]
+def networkx_to_pulp_data(G):
+    """
+    Convert NetworkX graph to data structures suitable for PuLP optimization
+    """
+    # Extract nodes by type
+    supply_nodes = [n for n, d in G.nodes(data=True) if d.get('node_type') == 'supply']
+    demand_nodes = [n for n, d in G.nodes(data=True) if d.get('node_type') == 'demand']
+    
+    # Extract supplies and demands
+    supplies = {node: G.nodes[node].get('capacity', 0) for node in supply_nodes}
+    demands = {node: G.nodes[node].get('demand', 0) for node in demand_nodes}
+    
+    # Extract costs and capacities for edges
+    costs = {}
+    capacities = {}
+    
+    for u, v, data in G.edges(data=True):
+        costs[(u, v)] = data.get('cost', 0)
+        capacities[(u, v)] = data.get('capacity', float('inf'))
+    
+    return supplies, demands, costs, capacities
+
+# Example: Convert network to optimization data
+supplies, demands, costs, capacities = networkx_to_pulp_data(G)
+
+print("Data extracted for optimization:")
+print(f"Supplies: {supplies}")
+print(f"Demands: {demands}")
+print(f"Number of cost entries: {len(costs)}")
+print(f"Sample costs: {dict(list(costs.items())[:3])}")
+\end{lstlisting}
+
+\begin{info}
+\textbf{NetworkX Applications in Optimization:}
+\begin{itemize}
+\item \textbf{Network Flow Problems}: Transportation, maximum flow, minimum cost flow
+\item \textbf{Shortest Path Problems}: Routing, logistics planning, supply chain design
+\item \textbf{Facility Location}: Analyzing service coverage and accessibility
+\item \textbf{Vehicle Routing}: Network analysis for route optimization insights
+\item \textbf{Supply Chain Design}: Multi-echelon network analysis and bottleneck identification
+\item \textbf{Graph Visualization}: Understanding problem structure before optimization
+\end{itemize}
+\end{info}
+
+\begin{warn}
+\textbf{NetworkX Limitations for Optimization:}
+\begin{itemize}
+\item NetworkX focuses on analysis, not optimization solving
+\item For large-scale optimization, use NetworkX for preprocessing and analysis
+\item Combine with PuLP, OR-Tools, or other solvers for actual optimization
+\item NetworkX algorithms may not scale well for very large networks
+\item Some specialized network optimization algorithms may need external solvers
+\end{itemize}
+\end{warn}
+
+\subsection{Package Integration Best Practices}
+
+\begin{lstlisting}[language=Python]
+# Complete example integrating all packages
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import pulp
+
+def solve_transportation_problem():
+    """
+    Complete transportation problem solution using multiple packages
+    """
+    
+    # Data setup with pandas
+    plants_df = pd.DataFrame({
+        'Plant': ['Chicago', 'Denver', 'Atlanta'],
+        'Supply': [100, 150, 200]
+    })
+    
+    markets_df = pd.DataFrame({
+        'Market': ['NYC', 'LA', 'Houston', 'Miami'],
+        'Demand': [80, 120, 90, 110]
+    })
+    
+    # Cost matrix using numpy
+    costs = np.array([
+        [3.2, 4.8, 2.1, 3.9],  # Chicago to markets
+        [4.5, 2.1, 3.1, 4.2],  # Denver to markets
+        [2.8, 5.1, 2.9, 1.7]   # Atlanta to markets
+    ])
+    
+    # Convert to DataFrame for easier handling
+    cost_df = pd.DataFrame(costs, 
+                          index=plants_df['Plant'], 
+                          columns=markets_df['Market'])
+    
+    print("Problem Setup:")
+    print(f"Total Supply: {plants_df['Supply'].sum()}")
+    print(f"Total Demand: {markets_df['Demand'].sum()}")
+    print("\nCost Matrix:")
+    print(cost_df)
+    
+    # Create PuLP problem (covered in next section)
+    prob = pulp.LpProblem("Transportation", pulp.LpMinimize)
+    
+    # Decision variables
+    plants = plants_df['Plant'].tolist()
+    markets = markets_df['Market'].tolist()
+    
+    # Create variable dictionary
+    x = {}
+    for plant in plants:
+        for market in markets:
+            x[(plant, market)] = pulp.LpVariable(f"x_{plant}_{market}", 
+                                               lowBound=0, cat='Continuous')
+    
+    # Objective function
+    prob += pulp.lpSum([cost_df.loc[plant, market] * x[(plant, market)] 
+                       for plant in plants for market in markets])
+    
+    # Supply constraints
+    for i, plant in enumerate(plants):
+        prob += pulp.lpSum([x[(plant, market)] for market in markets]) <= plants_df.iloc[i]['Supply']
+    
+    # Demand constraints
+    for j, market in enumerate(markets):
+        prob += pulp.lpSum([x[(plant, market)] for plant in plants]) >= markets_df.iloc[j]['Demand']
+    
+    # Solve the problem
+    prob.solve()
+    
+    # Extract and analyze solution
+    if prob.status == pulp.LpStatusOptimal:
+        print(f"\nOptimal solution found!")
+        print(f"Total cost: ${pulp.value(prob.objective):.2f}")
+        
+        # Create solution DataFrame
+        solution_data = []
+        for plant in plants:
+            for market in markets:
+                value = x[(plant, market)].varValue
+                if value > 0:
+                    solution_data.append({
+                        'From': plant,
+                        'To': market,
+                        'Flow': value,
+                        'Cost': cost_df.loc[plant, market],
+                        'Total_Cost': value * cost_df.loc[plant, market]
+                    })
+        
+        solution_df = pd.DataFrame(solution_data)
+        print("\nOptimal Flows:")
+        print(solution_df)
+        
+        # Visualize solution
+        plt.figure(figsize=(12, 8))
+        
+        # Create flow matrix for visualization
+        flow_matrix = np.zeros((len(plants), len(markets)))
+        for _, row in solution_df.iterrows():
+            i = plants.index(row['From'])
+            j = markets.index(row['To'])
+            flow_matrix[i, j] = row['Flow']
+        
+        # Heatmap of flows
+        plt.subplot(2, 2, 1)
+        plt.imshow(flow_matrix, cmap='Blues', aspect='auto')
+        plt.colorbar(label='Flow Quantity')
+        plt.xticks(range(len(markets)), markets, rotation=45)
+        plt.yticks(range(len(plants)), plants)
+        plt.title('Optimal Transportation Flows')
+        
+        # Add flow values
+        for i in range(len(plants)):
+            for j in range(len(markets)):
+                if flow_matrix[i, j] > 0:
+                    plt.text(j, i, f'{flow_matrix[i,j]:.0f}', 
+                            ha='center', va='center', fontweight='bold')
+        
+        # Cost breakdown
+        plt.subplot(2, 2, 2)
+        cost_by_plant = solution_df.groupby('From')['Total_Cost'].sum()
+        plt.bar(cost_by_plant.index, cost_by_plant.values, color='orange', alpha=0.7)
+        plt.title('Total Cost by Plant')
+        plt.ylabel('Cost ($)')
+        plt.xticks(rotation=45)
+        
+        # Flow distribution
+        plt.subplot(2, 2, 3)
+        flow_by_market = solution_df.groupby('To')['Flow'].sum()
+        plt.bar(flow_by_market.index, flow_by_market.values, color='green', alpha=0.7)
+        plt.title('Total Flow by Market')
+        plt.ylabel('Flow Quantity')
+        plt.xticks(rotation=45)
+        
+        # Supply utilization
+        plt.subplot(2, 2, 4)
+        supply_used = solution_df.groupby('From')['Flow'].sum()
+        supply_available = plants_df.set_index('Plant')['Supply']
+        utilization = (supply_used / supply_available * 100).fillna(0)
+        
+        plt.bar(utilization.index, utilization.values, color='purple', alpha=0.7)
+        plt.title('Supply Utilization (%)')
+        plt.ylabel('Utilization Percentage')
+        plt.xticks(rotation=45)
+        plt.axhline(y=100, color='red', linestyle='--', alpha=0.7)
+        
+        plt.tight_layout()
+        plt.show()
+        
+        return solution_df, prob
+    
+    else:
+        print("No optimal solution found")
+        return None, prob
+
+# Example usage combining all packages
+if __name__ == "__main__":
+    solution, problem = solve_transportation_problem()
+\end{lstlisting}
+
+\begin{info}
+\textbf{Package Import Guidelines:}
+\begin{itemize}
+\item Always import packages at the top of your script
+\item Use standard aliases (np, pd, plt) for commonly used packages
+\item Import only what you need to keep code clean and avoid conflicts
+\item Check if packages are installed before importing in production code
+\item Use virtual environments to manage package dependencies for different projects
+\end{itemize}
+\end{info}
+
+\begin{warn}
+\textbf{Common Import Issues:}
+\begin{itemize}
+\item \textbf{ModuleNotFoundError}: Package not installed - use conda install or pip install
+\item \textbf{ImportError}: Package installed but missing dependencies
+\item \textbf{Version conflicts}: Different packages requiring incompatible versions
+\item \textbf{Namespace conflicts}: Importing * from multiple packages can cause conflicts
+\end{itemize}
+\end{warn}
+
+This comprehensive overview of Python packages provides the foundation needed for optimization work. The next section will dive deep into PuLP for optimization modeling, building on these package management and data handling skills.
