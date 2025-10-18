@@ -1,34 +1,200 @@
 \chapter{Software - Excel}
 \todoChapter{ {\color{gray}10\% complete. Goal 80\% completion date: January 20, 2023}\\
 Notes: }
-\begin{resource}
+
+\begin{outcome}
 \begin{itemize}
+\item Learn relevant excel functions
+\item Setup  linear programs in excel
+\item Solve linear programs in excel
+\end{itemize}
+\end{outcome}
+
+\section{Using Excel Solver}
+
+Excel Solver is a powerful tool for solving optimization problems with linear and nonlinear constraints. Before diving into using Solver, it is essential to understand some basic Excel functions and techniques that are commonly used when setting up optimization problems. These functions help organize data, compute intermediate values, and define objective functions and constraints.
+
+\subsection{Useful Excel Functions and Techniques}
+
+\paragraph{Using Formulas in Cells}
+In Excel, formulas begin with an equals sign (\texttt{=}). For example, typing \texttt{=A1+B1} in a cell will calculate the sum of the values in cells \texttt{A1} and \texttt{B1}.
+
+\paragraph{\texttt{SUM()}}
+The \texttt{SUM()} function adds a range of numbers. For example, \texttt{=SUM(A1:A10)} calculates the sum of all values in the range \texttt{A1} to \texttt{A10}.
+
+\paragraph{\texttt{SUMPRODUCT()}}
+The \texttt{SUMPRODUCT()} function multiplies corresponding elements in two or more arrays and returns the sum of those products. This is particularly useful for computing dot products or weighted sums. For example, \texttt{=SUMPRODUCT(A1:A10, B1:B10)} computes \( \sum_{i=1}^{10} A_i B_i \).
+
+\paragraph{\texttt{COUNT()}}
+The \texttt{COUNT()} function counts the number of numeric entries in a range. For example, \texttt{=COUNT(A1:A10)} returns the number of numeric cells in the range \texttt{A1} to \texttt{A10}.
+
+\paragraph{\texttt{COUNTIF()}}
+The \texttt{COUNTIF()} function counts the number of cells in a range that meet a specific condition. For example, \texttt{=COUNTIF(A1:A10, ">5")} counts the number of cells in \texttt{A1:A10} with values greater than 5.
+
+\paragraph{Duplicating Formulas Across Rows or Columns}
+To apply a formula to multiple cells, you can drag the fill handle (a small square at the bottom-right corner of the selected cell) across the desired range. Excel automatically adjusts cell references based on the relative position (relative referencing). To keep a reference constant, use the dollar sign (\texttt{\$}) in the cell reference (absolute referencing). For example, \texttt{\$A\$1} always refers to cell \texttt{A1}.
+
+\paragraph{Conditional Formatting}
+Conditional formatting allows you to highlight cells that meet specific criteria. For example, you can format cells with values above a threshold in bold or a particular color to identify important data visually.
+
+\paragraph{Data Validation}
+Data validation helps restrict the type of data entered in a cell. For example, you can set a rule that only allows numbers within a specific range or text from a predefined list.
+
+\paragraph{Naming Ranges}
+Naming ranges makes formulas easier to read and maintain. Instead of \texttt{=SUM(A1:A10)}, you can name the range \texttt{"Sales"} and write \texttt{=SUM(Sales)}.
+
+\paragraph{Using Logical Functions}
+
+Logical functions like \texttt{IF()}, \texttt{AND()}, and \texttt{OR()} are helpful for decision-making within formulas. For example, \texttt{=IF(A1>10, \"High\", \"Low\")} returns \"High\" if \texttt{A1} is greater than 10, and \"Low\" otherwise.
+
+With these foundational tools, setting up optimization problems becomes much more manageable. In the next section, we will explore how to use these functions in combination with Excel Solver to define and solve optimization models.
+
+Logical functions like \texttt{IF()}, \texttt{AND()}, and \texttt{OR()} are helpful for decision-making within formulas. For example, \texttt{=IF(A1>10, \"High\", \"Low\")} returns \"High\" if \texttt{A1} is greater than 10, and \"Low\" otherwise.
+
+With these foundational tools, setting up optimization problems becomes much more manageable. In the next section, we will explore how to use these functions in combination with Excel Solver to define and solve optimization models.
+
+\subsection{How to Use Excel Solver}
+
+Excel Solver is a powerful add-in that allows users to define and solve optimization problems. This section provides a step-by-step guide on how to effectively layout data and use Solver for optimization.
+
+\paragraph{Step 1: Layout the Data}
+Organizing your data clearly is crucial for using Solver effectively. Use color coding to distinguish between different types of cells:
+\begin{itemize}
+    \item \textbf{Data:} Cells containing fixed input values, such as coefficients or constants, should be highlighted in \textcolor{blue!50!white}{light blue}.
+    \item \textbf{Variables:} Cells representing decision variables should be highlighted in \textcolor{yellow}{yellow}.
+        \item \textbf{Formulas:} Cells with formulas, such as the objective function or summarizing constraints values should be highlighted in \textcolor{green!50!white}{light green}.
+\end{itemize}
+Other color combinations are also acceptable, as long as they consistently distinguish between these components.
+
+\begin{center}
+\includegraphics[width = 0.95\textwidth]{Figures/excel-solver-layout}
+\end{center}
+
+\paragraph{Step 2: Define the Objective Function}
+Identify the cell that represents the objective function. This cell should contain a formula that calculates the value to be maximized or minimized, such as total profit or cost.
+
+\paragraph{Step 3: Set Up Constraints}
+Clearly specify the constraints of the problem. Constraints can be represented using formulas that involve the variables, coefficients, and right-hand side values. For example, a constraint ensuring that total production does not exceed capacity can be written as \texttt{=SUMPRODUCT(Production, Coefficients) <= Capacity}.
+
+
+\paragraph{Step 4: Open Solver}
+Ensure Solver is enabled in Excel. If not, you can activate it by navigating to \texttt{File > Options > Add-Ins > Manage Excel Add-ins} and checking the box for Solver.
+
+Once Solver is enabled, go to \texttt{Data > Solver} to open the Solver Parameters dialog box.
+\begin{center}
+\includegraphics[width = 0.95\textwidth]{Figures/excel-solver-button}
+\end{center}
+
+\paragraph{Step 5: Define Solver Parameters}
+In the Solver Parameters dialog box:
+\begin{itemize}
+    \item Set the \textbf{Objective} to the cell containing the objective function.
+    \item Choose \textbf{Max} or \textbf{Min} to indicate whether the objective is to be maximized or minimized.
+    \item Specify the \textbf{Variable Cells} by selecting the range of cells representing decision variables.
+    \item Add \textbf{Constraints} by specifying the relationship (e.g., \texttt{<=}, \texttt{>=}, \texttt{=}) and the cells involved.
+    \item When the variables are non-negative, you can select \texttt{Make Unconstrainted Variables Non-Negative}.
+\end{itemize}
+
+\begin{center}
+\includegraphics[scale = 0.25]{Figures/excel-solver-solve}
+\end{center}
+
+\paragraph{Step 6: Choose a Solving Method}
+Solver provides three solving methods:
+\begin{itemize}
+    \item \textbf{GRG Nonlinear:} For smooth nonlinear problems.
+    \item \textbf{Simplex LP:} For linear programming problems.
+    \item \textbf{Evolutionary:} For non-smooth problems or those with integer constraints.
+\end{itemize}
+Select the method that matches the problem type.
+\begin{center}
+\includegraphics[scale = 0.3]{Figures/excel-solver-method}
+\end{center}
+
+\paragraph{Step 7: Solve the Problem}
+Click \texttt{Solve} to run Solver. 
+If Solver finds a solution, it will display the results and allow you to keep or discard them. Analyze the solution to ensure it meets the problem's requirements.
+
+\begin{center}
+\includegraphics[scale = 0.2]{Figures/excel-solver-select}
+\end{center}
+
+\paragraph{Step 8: Interpret the Results}
+Review the values of the decision variables and the objective function. Check that all constraints are satisfied and assess the solution's feasibility and quality.
+\begin{itemize}
+\item Answer report
+\begin{center}
+\includegraphics[scale = 0.3]{Figures/excel-solver-answer-report}
+\end{center}
+\item Sensitivity report
+\begin{center}
+\includegraphics[scale = 0.3]{Figures/excel-solver-sensitivity}
+\end{center}
+\item Solution on spreadsheet
+\begin{center}
+\includegraphics[scale = 0.3]{Figures/excel-solver-solution}
+\end{center}
+\end{itemize}
+
+
+\begin{resource}
+Examples and guides
+\begin{itemize}
+\item \href{https://www.youtube.com/watch?v=LKV6fT8xApA&ab_channel=JoshuaEmmanuel}{Installing Excel Solver on Windows}
 \item \url{https://www.excel-easy.com/data-analysis/solver.html}
 \item \href{https://www.youtube.com/watch?v=dRm5MEoA3OI&ab_channel=LeilaGharani}{Excel Solver - Introduction on Youtube}
 
 \item \href{https://ocw.mit.edu/courses/sloan-school-of-management/15-053-optimization-methods-in-management-science-spring-2013/tutorials/MIT15_053S13_tut03.pdf}{Some notes from MIT}
 \end{itemize}
+Some videos
+\begin{itemize}
+\item \href{https://www.youtube.com/watch?v=V5DmekIFenA}{Solving a linear program}
+\item \href{https://www.youtube.com/watch?v=6xa1x_Iqjzg}{Optimal product mix}
+\item \href{https://www.youtube.com/watch?v=vpodCzRtUMU}{Set Cover}
+
+\item \href{https://www.youtube.com/watch?v=tKV24jzZ10s}{Introduction to Designing Optimization Models Using Excel Solver}
+
+\item \href{https://www.youtube.com/watch?v=-E3rSoClgMI}{Traveling Salesman Problem}
+
+\item \href{https://www.youtube.com/watch?v=UQYJvSjXE6I}{Also Travelin Salesman Problem}
+
+\item \href{https://www.youtube.com/watch?v=owHq3Mbniqo}{Multiple Traveling Salesman Problem}
+
+\item \href{https://www.youtube.com/watch?v=JkZkGxVZ8ao}{Shortest Path}
+
+\end{itemize}
+Some other links
+\begin{itemize}
+\item \href{https://github.com/lobodemonte/excel-solver-loan-example}{Loan Example}
+
+\item \href{https://github.com/Bhargavanarasimhan/Excel-Solver-Files}{Several Examples including TSP}
+\end{itemize}
 \end{resource}
 
-\subsection{Excel Solver}
-\subsection{Videos}
-\href{https://www.youtube.com/watch?v=V5DmekIFenA}{Solving a linear program}
-\href{https://www.youtube.com/watch?v=6xa1x_Iqjzg}{Optimal product mix}
-\href{https://www.youtube.com/watch?v=vpodCzRtUMU}{Set Cover}
+\section{Exercises}
+\begin{ex}
+Consider the following table indicating the nutritional value of different food types:\\
+\begin{center}
+\begin{tabular}%{lccccc}
+{|p{0.2\linewidth} | p{0.14\linewidth} | p{0.14\linewidth} | p{0.14\linewidth} | p{0.14\linewidth} | p{0.14\linewidth} |}
+\hline & Price $(\$)$ per serving & Calories per serving & Fat $(\mathrm{g})$ per serving & Protein $(\mathrm{g})$ per serving & Carbohydrate $(\mathrm{g})$ per serving \\
+\hline Raws carrots & $0.14$ & 23 & $0.1$ & $0.6$ & 6 \\
+Baked potatoes & $0.12$ & 171 & $0.2$ & $3.7$ & 30 \\
+Wheat bread & $0.2$ & 65 & 0 & $2.2$ & 13 \\
+Cheddar cheese & $0.75$ & 112 & $9.3$ & 7 & 0 \\
+Peanut butter & $0.15$ & 188 & 16 & $7.7$ & 2 \\
+\hline
+\end{tabular}
+\end{center}
+You need to decide how many servings of each food to buy each day so that you minimize the total cost of buying your food while satisfying the following daily nutritional requirements:
+\begin{itemize}
+\item calories must be at least 2000,
+\item fat must be at least $50 \mathrm{~g}$,
+\item protein must be at least $100 \mathrm{~g}$,
+\item carbohydrates must be at least $250 \mathrm{~g}$.
+\end{itemize}
+Write an LP that will help you decide how many servings of each of the aforementioned foods are needed to meet all the nutritional requirement, while minimizing the total cost of the food (you may buy fractional numbers of servings).
 
-\href{https://www.youtube.com/watch?v=tKV24jzZ10s}{Introduction to Designing Optimization Models Using Excel Solver}
+Solve this problem using Excel Solver.  Provide a screenshot of your spreadsheet with the optimal solution.
 
-\href{https://www.youtube.com/watch?v=-E3rSoClgMI}{Traveling Salesman Problem}
-
-\href{https://www.youtube.com/watch?v=UQYJvSjXE6I}{Also Travelin Salesman Problem}
-
-\href{https://www.youtube.com/watch?v=owHq3Mbniqo}{Multiple Traveling Salesman Problem}
-
-\href{https://www.youtube.com/watch?v=JkZkGxVZ8ao}{Shortest Path}
-
-\subsection{Links}
-\href{https://github.com/lobodemonte/excel-solver-loan-example}{Loan Example}
-
-\href{https://github.com/Bhargavanarasimhan/Excel-Solver-Files}{Several Examples including TSP}
-
-
+\end{ex}

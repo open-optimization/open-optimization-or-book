@@ -109,15 +109,18 @@
 \newcounter{general}
 
   % Test Environment
-  \newcounter{exo}
+ \newcounter{exo}[chapter] % Reset 'exo' counter at every new section
+\renewcommand{\theexo}{\thechapter.\arabic{exo}} % Format as SectionNumber.ExerciseNumber
+
 \makeatletter
 \newenvironment{exo}[1]%
 {\refstepcounter{exo}%
-\protected@edef\@currentlabelname{Exercise \theexo: #1}% addition here
-\vspace{0.5cm}\noindent
-{\large\bfseries{Exercise \theexo~: #1} \par}
-{\par\vspace{0.5cm}}}
+ \protected@edef\@currentlabelname{Exercise \theexo: #1}% addition here
+ \vspace{0.5cm}\noindent
+ {\large\bfseries{Exercise this one \theexo~: #1} \par}
+ {\par\vspace{0.5cm}}}
 \makeatother
+
 
 \newcounter{codeCell}
 \makeatletter
@@ -141,71 +144,97 @@
    \par}
  {\endgroup\end{framed}
   \medskip}
-  
+ 
 
- % Example Environment
-  \newenvironment{optexample}
-  {\par\medskip
-  \refstepcounter{exo}%
-  \protected@edef\@currentlabelname{Example \theexo}
-   \begin{framed}
-   \begingroup\color{blue}%
-   \textbf{Example \theexo: }\ignorespaces}
- {\endgroup\end{framed}
-  \medskip}
-  
-  
-  % Example with code Environment
-   \newenvironment{examplewithcode}[2]
-  {\par\medskip
-   \refstepcounter{exo}%
-  \protected@edef\@currentlabelname{Example \theexo}
-  \begin{center}
+% Example Environment
+\newenvironment{optexample}
+{\par\medskip
+ \refstepcounter{exo}% Increment shared counter
+ \protected@edef\@currentlabelname{Example \theexo}% Update label for referencing
+ \begin{framed}
+ \begingroup\color{blue}%
+ \textbf{Example \theexo: }\ignorespaces}
+{\endgroup\end{framed}
+ \medskip}
+
+
+% Example with code Environment
+\newenvironment{examplewithcode}[2]
+{\par\medskip
+ \refstepcounter{exo}% Increment the shared counter and set reference anchor
+ \protected@edef\@currentlabelname{Example \theexo}% Update label for referencing
+ \begingroup
+ \begin{center}
  \rule{\textwidth}{0.4pt}\\
  \vspace{-0.2cm}
  \rule{\textwidth}{0.4pt}
  \end{center}
-   %\begin{framed}
-   \begingroup\color{black}%
-   \textbf{Example: #1}
-   \hfill \protect\href{#2}{Gurobipy}% code link somehow
-    \ignorespaces
-    \par}
- { \endgroup
- %\end{framed}
-   \begin{center}
+ \color{black}%
+ \textbf{Example \theexo: #1} % Include example number
+ \hfill \protect{#2}% Code link
+ \ignorespaces
+ \par}
+{\endgroup
+ \begin{center}
  \rule{\textwidth}{1.8pt}
  \end{center}
-  \medskip}
-  
-    % Example with all code Environment
-   \newenvironment{examplewithallcode}[4]
-  {\par\medskip
-   \refstepcounter{exo}%
-  \protected@edef\@currentlabelname{Example \theexo}
-   \begin{framed}
-   \begingroup\color{black}%
-   \textbf{Example: #1}
-   \hfill \protect\href{#2}{ \ Excel \ }\protect\href{#3}{ \ PuLP \ }\protect\href{#4}{\ Gurobipy \ }% code link somehow
-    \ignorespaces
-    \par}
- { \endgroup
+ \medskip}
+ 
+ % Define a tcolorbox-based exercise environment reusing the exo counter
+% Define tcolorbox-based exercise environment
+
+ 
+%% Example with code Environment
+%\newenvironment{examplewithcode}[2]
+%{\par\medskip
+% \refstepcounter{exo}% Increment shared counter
+% \protected@edef\@currentlabelname{Example \theexo}% Update label for referencing
+% \begin{center}
+% \rule{\textwidth}{0.4pt}\\
+% \vspace{-0.2cm}
+% \rule{\textwidth}{0.4pt}
+% \end{center}
+% \begingroup\color{black}%
+% \textbf{Example \theexo: #1} % Include example number
+% \hfill \protect\href{#2}{Gurobipy}% Code link
+% \ignorespaces
+% \par}
+%{\endgroup
+% \begin{center}
+% \rule{\textwidth}{1.8pt}
+% \end{center}
+% \medskip}
+
+% Example with all code Environment
+\newenvironment{examplewithallcode}[4]
+{\par\medskip
+ \refstepcounter{exo}% Increment shared counter
+ \protected@edef\@currentlabelname{Example \theexo}% Update label for referencing
+ \begin{framed}
+ \begingroup\color{black}%
+ \textbf{Example \theexo: #1} % Include example number
+ \hfill \protect\href{#2}{\ Excel \ }\protect\href{#3}{\ PuLP \ }\protect\href{#4}{\ Gurobipy \ }% Code links
+ \ignorespaces
+ \par}
+{\endgroup
  \end{framed}
-  \medskip}
-  
-    % Example without code Environment
-   \newenvironment{examplewithoutcode}[2]
-  {\par\medskip
-   \refstepcounter{exo}%
-  \protected@edef\@currentlabelname{Example \theexo}
-   \begin{framed}
-   \begingroup\color{black}%
-   \textbf{Example: #1}
-    \ignorespaces
-    \par}
- { \endgroup
+ \medskip}
+
+% Example without code Environment
+\newenvironment{examplewithoutcode}[2]
+{\par\medskip
+ \refstepcounter{exo}% Increment shared counter
+ \protected@edef\@currentlabelname{Example \theexo}% Update label for referencing
+ \begin{framed}
+ \begingroup\color{black}%
+ \textbf{Example \theexo: #1} % Include example number
+ \ignorespaces
+ \par}
+{\endgroup
  \end{framed}
-  \medskip}
+ \medskip}
+ 
+ 
   
 
 \newcommand{\floor}[1]{\lfloor #1 \rfloor}

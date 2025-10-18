@@ -1,0 +1,365 @@
+
+\section{Other text}
+\subsection{Other text}
+\noindent
+Below is a short example illustrating how different types of constraints are converted (``augmented'') so the simplex or two-phase simplex method can handle them in standard form.
+
+\[
+\begin{aligned}
+&\textbf{Example Constraints:}\\
+&1.\quad 2x_{1} + 3x_{2} \;\le\; 12,\\
+&2.\quad x_{1} + x_{2} \;=\; 5,\\
+&3.\quad 4x_{1} + 3x_{2} \;\ge\; 10,\\
+&\qquad x_{1} \ge 0,\quad x_{2} \ge 0.
+\end{aligned}
+\]
+
+\paragraph{Augmented Forms}
+
+1. \(\boldsymbol{\le}\)-type constraint:
+\[
+   2x_{1} + 3x_{2} \;\le\; 12.
+\]
+Since this is a ``\(\le\)'' inequality, we add a \emph{slack} variable \(s_{1}\) to convert it into an equality:
+\[
+   2x_{1} + 3x_{2} + s_{1} \;=\; 12
+   \quad \text{with} \; s_{1} \ge 0.
+\]
+When \(s_{1} = 0\), the constraint is exactly tight.
+
+2. \(\boldsymbol{=}\)-type constraint:
+\[
+   x_{1} + x_{2} \;=\; 5.
+\]
+This is already an equality. However, in a \emph{two-phase} simplex procedure (or any time we need to find an initial feasible solution that might not be obvious), we introduce an \emph{artificial} variable \(a_{1}\):
+\[
+   x_{1} + x_{2} + a_{1} \;=\; 5 
+   \quad \text{with} \; a_{1} \ge 0.
+\]
+We typically drive \(a_{1}\) to zero in Phase I, ensuring the original equality is satisfied without the artificial variable.
+
+3. \(\boldsymbol{\ge}\)-type constraint:
+\[
+   4x_{1} + 3x_{2} \;\ge\; 10.
+\]
+For a ``\(\ge\)'' inequality, we subtract a \emph{surplus} variable \(s_{2}\), then add an \emph{artificial} variable \(a_{2}\) if needed for feasibility:
+\[
+   4x_{1} + 3x_{2} - s_{2} + a_{2} \;=\; 10
+   \quad \text{where} \; s_{2} \ge 0,\; a_{2} \ge 0.
+\]
+Again, we aim to force \(a_{2} = 0\) in Phase I of the method.
+
+4. \textbf{Nonnegativity constraints} remain:
+\[
+   x_{1} \ge 0,\quad x_{2} \ge 0.
+\]
+
+\paragraph{Resulting Augmented System}
+
+\[
+\begin{aligned}
+&2x_{1} + 3x_{2} + s_{1} \;=\; 12, 
+   \quad s_{1} \ge 0,\\
+&x_{1} + x_{2} + a_{1} \;=\; 5, 
+   \quad a_{1} \ge 0,\\
+&4x_{1} + 3x_{2} - s_{2} + a_{2} \;=\; 10, 
+   \quad s_{2} \ge 0,\; a_{2} \ge 0,\\
+&x_{1} \ge 0,\; x_{2} \ge 0.
+\end{aligned}
+\]
+
+
+
+\[
+\text{Notes:}
+\]
+\begin{enumerate}
+\item  For \(\le\) constraints, a \emph{slack} variable \(s_i\) is added so the constraint becomes an equality.  
+\item  For \(=\) constraints, an \emph{artificial} variable \(a_i\) is introduced if needed (e.g., in Phase I of the two-phase simplex).  
+\item For \(\ge\) constraints, we \emph{subtract} a surplus variable \(s_i\) (to reduce the LHS) \emph{and} typically add an artificial variable \(a_i\) to solve it via the two-phase method.  
+\item  The \(\textit{indicating variable} = 0\) exactly when the boundary condition is met (i.e., the constraint holds at equality). If it is nonzero, the boundary is \textit{not} active.
+\end{enumerate}
+
+
+
+
+
+\subsection{Standard Form for Constraints}
+
+The constraints of a linear program can be formulated in many ways.  Two standard formats are 
+\begin{align*}
+    \begin{cases}
+        A\x = \b, \quad \x \geq 0 & \text{(Standard form)} \\
+        A\x \leq\b& \text{(Inequality constraints)}
+    \end{cases}
+\end{align*}
+
+We can convert between these two formats by constructing new matrices, constucting new vectors, and adding new variables.
+
+\begin{proposition}{Converting a Standard Form LP into an Inequality Form}{}{}
+Linear program constriants in Standard Form can be converted to constraints in inequality form.
+\end{proposition}
+\begin{proof}
+Given the standard form LP:
+\[
+A\x = \b, \quad \x \geq 0,
+\]
+we first replace the equality \(A\x = \b\) with two sets of inequalities:
+\[
+A\x \leq\b\quad \text{and} \quad -A\x \leq -\b.
+\]
+Next, the nonnegativity constraint \(\x \geq 0\) can be written as:
+\[
+-I\x \leq 0,
+\]
+where \(I\) is the identity matrix. Combining these, we express the LP as:
+\[
+A'\x \leq \b',
+\]
+with
+\[
+A' = \begin{bmatrix}
+A \\
+-A \\
+-I
+\end{bmatrix}
+\quad \text{and} \quad
+\b' = \begin{bmatrix}
+\b \\
+-\b \\
+0
+\end{bmatrix}.
+\]
+\end{proof}
+
+\begin{proposition}{Converting an Inequality Form LP into Standard Form}{}
+Assume that all variables in the inequality form LP
+\[
+A'\x \le \b'
+\]
+are unrestricted. Then, by introducing nonnegative variables \(\x^+\) and \(\x^-\) satisfying
+\[
+\x = \x^+ - \x^-,
+\]
+the LP can be rewritten in standard form, and the original solution recovered via \(\x = \x^+ - \x^-\).
+\end{proposition}
+
+\begin{proof}
+Since every component \(x_i\) of \(\x\) is unrestricted, we write
+\[
+x_i = x_i^+ - x_i^-, \quad \text{with } x_i^+,\, x_i^- \ge 0.
+\]
+Define the new variable vector
+\[
+\tilde{\x} = \begin{bmatrix} \x^+ \\ \x^- \end{bmatrix},
+\]
+so that the original variable vector is recovered by
+\[
+\x = \x^+ - \x^-.
+\]
+
+Substitute \(\x = \x^+ - \x^-\) into the inequality \(A'\x \le \b'\) to obtain
+\[
+A'(\x^+ - \x^-) \le \b'.
+\]
+This expression can be rewritten as
+\[
+A'\x^+ - A'\x^- \le \b'.
+\]
+Now, define
+\[
+A^+ = A' \quad \text{and} \quad A^- = -A',
+\]
+so that the inequality becomes
+\[
+A^+ \x^+ + A^- \x^- \le \b'.
+\]
+
+By introducing slack variables if necessary, this inequality system can be converted to an equality system in standard form:
+\[
+\tilde{A}\tilde{\x} = \b',\tilde{\x} \geq 0
+\]
+with the adjusted constraint matrix given by
+\[
+\tilde{A} = \Bigl[A^+ \quad A^-\Bigr].
+\]
+Thus, the inequality form LP with unrestricted variables is converted into a standard form LP with all variables in \(\tilde{\x}\) nonnegative.
+
+After solving the standard form LP for \(\tilde{\x}\), the solution to the original LP is recovered by setting
+\[
+\x = \x^+ - \x^-.
+\]
+\end{proof}
+
+
+
+\begin{example}{Converting a Standard Form LP into an Inequality Form}{}
+
+
+Consider the LP in standard form:
+\[
+\begin{aligned}
+x_1 - 2x_2 &= 3,\\[1mm]
+4x_1 + x_2 &= 6,\\[1mm]
+x_1,\,x_2 &\ge 0.
+\end{aligned}
+\]
+
+Since all variables are nonnegative, we replace the equality \(A\x = \b\) by the two sets of inequalities:
+\[
+A\x \le\b\quad \text{and} \quad -A\x \le -\b.
+\]
+In addition, the nonnegativity constraint \(\x \ge 0\) can be written as:
+\[
+-I\x \le 0,
+\]
+where \(I\) is the identity matrix.
+
+Thus, by stacking the inequalities, we can write the LP in the unified inequality form:
+\[
+A'\x \le \b',
+\]
+with
+\[
+A' = \begin{bmatrix}
+A \\[1mm]
+-A \\[1mm]
+-I
+\end{bmatrix}
+\quad \text{and} \quad
+\b' = \begin{bmatrix}
+\b \\[1mm]
+-\b \\[1mm]
+0
+\end{bmatrix}.
+\]
+
+For our specific example, \(A\) and \(\b\) are:
+\[
+A = \begin{bmatrix}
+1 & -2 \\
+4 & \phantom{-}1
+\end{bmatrix}, \quad
+\b = \begin{bmatrix}
+3 \\[1mm]
+6
+\end{bmatrix}.
+\]
+Therefore, the combined matrices become:
+\[
+A' = \begin{bmatrix}
+1 & -2 \\[1mm]
+4 & \phantom{-}1 \\[1mm]
+-1 & \phantom{-}2 \\[1mm]
+-4 & -1 \\[1mm]
+-1 & \phantom{-}0 \\[1mm]
+0 & -1
+\end{bmatrix}
+\quad \text{and} \quad
+\b' = \begin{bmatrix}
+3 \\[1mm]
+6 \\[1mm]
+-3 \\[1mm]
+-6 \\[1mm]
+0 \\[1mm]
+0
+\end{bmatrix}.
+\]
+This formulation expresses the original standard form LP as an inequality form LP.
+\end{example}
+
+\begin{example}{Converting an Inequality Form LP into Standard Form (Handling Unrestricted Variables)}{}{}
+
+Consider the LP in inequality form:
+\[
+\begin{aligned}
+x_1 - x_2 &\le 4,\\[1mm]
+x_1 + 2x_2 &\le 5,
+\end{aligned}
+\]
+where both \(x_1\) and \(x_2\) are unrestricted. To convert these into standard form (with all variables nonnegative), we replace each unrestricted variable with the difference of two nonnegative variables:
+\[
+x_1 = x_1^+ - x_1^-, \quad x_1^+,\, x_1^- \ge 0,
+\]
+\[
+x_2 = x_2^+ - x_2^-, \quad x_2^+,\, x_2^- \ge 0.
+\]
+
+Substituting these into the inequalities yields:
+\[
+\begin{aligned}
+(x_1^+ - x_1^-) - (x_2^+ - x_2^-) &\le 4,\\[1mm]
+(x_1^+ - x_1^-) + 2(x_2^+ - x_2^-) &\le 5.
+\end{aligned}
+\]
+This simplifies to:
+\[
+\begin{aligned}
+x_1^+ - x_1^- - x_2^+ + x_2^- &\le 4,\\[1mm]
+x_1^+ - x_1^- + 2x_2^+ - 2x_2^- &\le 5.
+\end{aligned}
+\]
+
+The new variable vector is
+\[
+\tilde{\x} = \begin{bmatrix}x_1^+ \\ x_1^- \\ x_2^+ \\ x_2^-\end{bmatrix}, \quad \tilde{\x} \ge 0,
+\]
+and the system is now in standard form with all variables nonnegative.
+\end{example}
+
+
+
+\subsection{Converting a Minimization Problem to a Maximization Problem}
+
+Linear programming problems can be formulated either as maximization or minimization problems. Since the Simplex Method is typically designed for maximization problems, minimization problems need to be converted into an equivalent maximization form.
+
+\textbf{Conversion Rule:} \\
+A minimization problem of the form:
+\[
+\min \quad \c^\top \x
+\]
+subject to constraints:
+\[
+A \x \leq \b, \quad \x \geq 0
+\]
+can be converted into a maximization problem by negating the objective function:
+\[
+\max \quad (-\c^\top) \x
+\]
+while keeping the constraints unchanged.
+
+\textbf{Example:} \\
+
+\textbf{Given Minimization Problem:}
+\[
+\begin{aligned}
+    \min \quad & 3x_1 + 5x_2 \\
+    \text{subject to} \quad 
+    & x_1 + 2x_2 \leq 8, \\
+    & 4x_1 + x_2 \leq 10, \\
+    & x_1, x_2 \geq 0.
+\end{aligned}
+\]
+
+\textbf{Equivalent Maximization Problem:} \\
+Multiply the objective function by \(-1\):
+\[
+\begin{aligned}
+    \max \quad & (-3)x_1 + (-5)x_2 \\
+    \text{subject to} \quad 
+    & x_1 + 2x_2 \leq 8, \\
+    & 4x_1 + x_2 \leq 10, \\
+    & x_1, x_2 \geq 0.
+\end{aligned}
+\]
+This transformation ensures that solving the maximization problem yields the same optimal solution as the original minimization problem, but with the objective value negated.
+
+\textbf{Intuition Behind the Transformation:} \\
+Since the minimum of a function is the negation of the maximum of its negative, the optimal value of the minimization problem is given by:
+\[
+\min \c^\top \x = - \max (-\c^\top \x).
+\]
+Thus, converting a minimization problem into a maximization problem allows us to apply the Simplex Method without modification.
+
+
+
