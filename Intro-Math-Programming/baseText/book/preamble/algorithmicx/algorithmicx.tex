@@ -1,0 +1,1768 @@
+\documentclass{article}
+\usepackage{algorithmicx}
+\usepackage[ruled]{algorithm}
+\usepackage{algpseudocode}
+\usepackage{algpascal}
+\usepackage{algc}
+%\algdisablelines
+
+
+\newcommand{\alg}{\texttt{algorithmicx}}
+\newcommand{\old}{\texttt{algorithmic}}
+\newcommand{\euk}{Euclid}
+\newcommand\ASTART{\bigskip\noindent\begin{minipage}[b]{0.5\linewidth}}
+\newcommand\ACONTINUE{\end{minipage}\begin{minipage}[b]{0.5\linewidth}}
+\newcommand\AENDSKIP{\end{minipage}\bigskip}
+\newcommand\AEND{\end{minipage}}
+
+
+
+\title{The \alg\ package\footnote{This is the documentation for the version 1.2
+of the package. This package is released under LPPL.}}
+\author{Sz\'asz J\'anos\\szaszjanos@users.sourceforge.net}
+
+
+
+\begin{document}
+\maketitle
+\begin{abstract}
+The \alg\ package provides many possibilities to customize the layout of algorithms. 
+You can use one of the predefined layouts (\textbf{pseudocode}, \textbf{pascal} 
+and \textbf{c} and others), with or without modifications, or you can define a 
+completely new layout for your specific needs.
+\end{abstract}
+\tableofcontents
+
+
+
+
+\section{Introduction}
+All this has begun in my last year at the university. The only thing that I knew of 
+\LaTeX\ was that it exists, and that it is ``good''. I started using it, but I needed to typeset some 
+algorithms. So I begun searching for a good algorithmic style, and I have found the \old\ package. 
+It was a great joy for me, and I started to use it\dots\ 
+Well\dots\ Everything went nice, until I needed some block that wasn't defined in there. What to do? 
+I was no \LaTeX\ guru, in fact I only knew the few basic macros. But there was no other way, so I opened 
+the style file, and I copied one existing block, renamed a few things, and voil\`a! This (and some other 
+small changes) where enough for me\dots
+
+One year later --- for one good soul --- I had to make some really big changes on the style. And there on 
+a sunny day came the idea. What if I would write some macros to let others create blocks automatically? 
+And so I did! Since then the style was completely rewritten\dots\ several times\dots
+
+I had fun writing it, may you have fun using it! I am still no \LaTeX\ guru, so if you are, and you find 
+something really ugly in the style, please mail me! All ideas for improvements are welcome!
+
+Thanks go to Benedek Zsuzsa, Ionescu Clara, Sz\H ocs Zolt\'an, Cseke Botond, Kanoc 
+%Szotyori Zolt\'an Csaba
+and many-many others. Without them I would have never started or continued \textbf{algorithmicx}.
+
+
+
+
+\section{General informations}
+
+\subsection{The package}
+The package \textbf{algorithmicx} itself doesn't define any algorithmic commands, but gives 
+a set of macros to define such a command set. You may use only \textbf{algorithmicx}, and define 
+the commands yourself, or you may use one of the predefined command sets.
+
+These predefined command sets (layouts) are:
+\begin{description}
+\item[algpseudocode] has the same look\footnote{almost :-)} as the one defined in the
+\old\ package. The main difference is that while the \old\ package doesn't 
+allow you to modify predefined structures, or to create new ones, the \alg\ 
+package gives you full control over the definitions (ok, there are some 
+limitations --- you can not send mail with a, say, \verb:\For: command).
+\item[algcompatible] is fully compatible with the \old\ package, it should be
+used only in old documents.
+\item[algpascal] aims to create a formatted pascal program, it performs 
+automatic indentation (!), so you can transform a pascal program into an 
+\textbf{algpascal} algorithm description with some basic substitution rules.
+\item[algc] -- yeah, just like the \textbf{algpascal}\dots\ but for c\dots\ 
+This layout is incomplete.
+\end{description}
+
+To create floating algorithms you will need \verb:algorithm.sty:. This file may or may not be
+included in the \alg\ package. You can find it on CTAN, in the \old\ package.
+
+
+
+\subsection{The algorithmic block}
+Each algorithm begins with the \verb:\begin{algorithmic}[lines]: command, the 
+optional \verb:lines: controls the line numbering: $0$ means no line numbering, 
+$1$ means number every line, and $n$ means number lines $n$, $2n$, $3n$\dots\ until the
+\verb:\end{algorithmic}: command, witch ends the algorithm.
+
+
+
+\subsection{Simple lines}
+
+A simple line of text is beginned with \verb:\State:. This macro marks the begin of every 
+line. You don't need to use \verb:\State: before a command defined in the package, since 
+these commands use automatically a new line.
+
+To obtain a line that is not numbered, and not counted when counting the lines for line numbering
+(in case you choose to number lines), use the \verb:Statex: macro. This macro jumps into a new line, 
+the line gets no number, and any label will point to the previous numbered line.
+
+We will call \textit{statament\/}s the lines starting with \verb:\State:. The \verb:\Statex: 
+lines are not stataments.
+
+
+
+\subsection{Placing comments in sources}\label{Putting comments in sources}
+
+Comments may be placed everywhere in the source using the \verb:\Comment: macro 
+(there are no limitations like those in the \old\ package), feel the freedom!
+If you would like to change the form in witch comments are displayed, just 
+change the \verb:\algorithmiccomment: macro:
+
+\begin{verbatim}
+\algrenewcommand{\algorithmiccomment}[1]{\hskip3em$\rightarrow$ #1}
+\end{verbatim}
+
+will result:
+\medskip
+\begin{algorithmic}[1]
+\algrenewcommand{\algorithmiccomment}[1]{\hskip3em$\rightarrow$ #1}
+\State $x\gets x+1$\Comment{Here is the new comment}
+\end{algorithmic}
+
+
+
+\subsection{Labels and references}
+Use the \verb:\label: macro, as usual to label a line. When you use \verb:\ref: to reference 
+the line, the \verb:\ref: will be subtitued with the corresponding line number. When using the 
+\textbf{algorithmicx} package togedher with the \textbf{algorithm} package, then you can label 
+both the algorithm and the line, and use the \verb:\algref: macro to reference a given line 
+from a given algorithm:
+
+\begin{verbatim}
+\algref{<algorithm>}{<line>}
+\end{verbatim}
+
+\noindent\begin{minipage}[t]{0.5\linewidth}
+\begin{verbatim}
+The \textbf{while} in algorithm
+\ref{euclid} ends in line
+\ref{euclidendwhile}, so
+\algref{euclid}{euclidendwhile}
+is the line we seek.
+\end{verbatim}
+\end{minipage}\begin{minipage}[t]{0.5\linewidth}
+The \textbf{while} in algorithm \ref{euclid} ends in line \ref{euclidendwhile},
+so \algref{euclid}{euclidendwhile} is the line we seek.
+\end{minipage}
+
+\subsection{Breaking up long algorithms}
+
+Sometimes you have a long algorithm that needs to be broken into parts, each on a
+separate float. For this you can use the following:
+
+\begin{description}
+\item[]\verb:\algstore{<savename>}: saves the line number, indentation, open blocks of
+the current algorithm and closes all blocks. If used, then this must be the last command
+before closing the algorithmic block. Each saved algorithm must be continued later in the
+document.
+\item[]\verb:\algstore*{<savename>}: Like the above, but the algorithm must not be continued.
+\item[]\verb:\algrestore{<savename>}: restores the state of the algorithm saved under
+\verb:<savename>: in this algorithmic block. If used, then this must be the first command
+in an algorithmic block. A save is deleted while restoring.
+\item[]\verb:\algrestore*{<savename>}: Like the above, but the save will not be deleted, so it
+can be restored again.
+\end{description}
+
+See example in the \textbf{Examples} section.
+
+\subsection{Multiple layouts in the same document}
+
+You can load multiple algorithmicx layouts in the same document. You can switch between the layouts
+using the \verb:\alglanguage{<layoutname>}: command. After this command all new algorithmic
+environments will use the given layout until the layout is changed again.
+
+
+
+
+\section{The predefined layouts}
+
+\subsection{The \textbf{algpseudocode} layout}\label{algpseudocode}
+\alglanguage{pseudocode}
+If you are familiar with the \old\ package, then you'll find it easy to 
+switch. You can use the old algorithms with the \textbf{algcompatible} layout, but please
+use the \textbf{algpseudocode} layout for new algorithms.
+
+To use \textbf{algpseudocode}, simply load \verb:algpseudocode.sty::
+
+\begin{verbatim}
+\usepackage{algpseudocode}
+\end{verbatim}
+
+You don't need to manually load the \textbf{algorithmicx} package, as this is done by
+\textbf{algpseudocode}.
+
+The first algorithm one should write is the first algorithm ever (ok, 
+an improved version), \textit{\euk's algorithm}:
+
+\begin{algorithm}[H]
+\caption{\euk's algorithm}\label{euclid}
+\begin{algorithmic}[1]
+\Procedure{\euk}{$a,b$}\Comment{The g.c.d. of a and b}
+   \State $r\gets a\bmod b$
+   \While{$r\not=0$}\Comment{We have the answer if r is 0}
+      \State $a\gets b$
+      \State $b\gets r$
+      \State $r\gets a\bmod b$
+   \EndWhile\label{euclidendwhile}
+   \State \Return $b$\Comment{The gcd is b}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+
+Created with the following source:
+\begin{verbatim}
+\begin{algorithm}
+\caption{Euclid's algorithm}\label{euclid}
+\begin{algorithmic}[1]
+\Procedure{Euclid}{$a,b$}\Comment{The g.c.d. of a and b}
+   \State $r\gets a\bmod b$
+   \While{$r\not=0$}\Comment{We have the answer if r is 0}
+      \State $a\gets b$
+      \State $b\gets r$
+      \State $r\gets a\bmod b$
+   \EndWhile\label{euclidendwhile}
+   \State \textbf{return} $b$\Comment{The gcd is b}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\end{verbatim}
+
+The \verb:\State: stands at the beginning of each simple statement; the respective 
+statement is put in a new line, with the needed indentation.
+The \verb:\Procedure: \dots\verb:\EndProcedure: and 
+\verb:\While: \dots\verb:\EndWhile: blocks (like any block defined in the 
+\textbf{algpseudocode} layout) automatically indent their content.
+The indentation of the source doesn't matter, so
+
+\ASTART
+\begin{verbatim}
+\begin{algorithmic}[1]
+\Repeat
+\Comment{forever}
+\State this\Until{you die.}
+\end{algorithmic}
+\end{verbatim}
+\ACONTINUE
+\begin{algorithmic}[1]
+\Repeat
+\Comment{forever}
+\State this\Until{you die.}
+\Statex
+\end{algorithmic}
+\AENDSKIP
+
+But, generally, it is a good idea to keep the source indented, since you will find 
+errors much easier. And your tex file looks better!
+
+All examples and syntax descriptions will be shown as the previous 
+example --- the left side shows the \LaTeX\ input, and the right side 
+the algorithm, as it appears in your document. I'm cheating! Don't look 
+in the \verb:algorithmicx.tex: file! Believe what the examples state! I may use some 
+undocumented and dirty stuff to create all these examples. You might be more 
+confused after opening \verb:algorithmicx.tex: as you was before.
+
+In the case of syntax 
+descriptions the text between $<$ and $>$ is symbolic, so if you type 
+what you see on the left side, you will not get the algorithm on the 
+right side. But if you replace the text between $<$ $>$ with a proper piece of 
+algorithm, then you will probably get what you want. The parts between 
+$[$ and $]$ are optional.
+
+
+\subsubsection{The \textbf{for} block}
+The \textbf{for} block may have one of the forms:
+
+\ASTART
+\begin{verbatim}
+\For{<text>}
+   <body>
+\EndFor
+\end{verbatim}
+\ACONTINUE
+\begin{algorithmic}[1]
+\For{$<$text$>$}
+   \State $<$body$>$
+\EndFor
+\end{algorithmic}
+\AEND
+
+\ASTART
+\begin{verbatim}
+\ForAll{<text>}
+   <body>
+\EndFor
+\end{verbatim}
+\ACONTINUE
+\begin{algorithmic}[1]
+\ForAll{$<$text$>$}
+   \State $<$body$>$
+\EndFor
+\end{algorithmic}
+\AENDSKIP
+
+\noindent Example:
+
+\ASTART
+\begin{verbatim}
+\begin{algorithmic}[1]
+\State $sum\gets 0$
+\For{$i\gets 1, n$}
+   \State $sum\gets sum+i$
+\EndFor
+\end{algorithmic}
+\end{verbatim}
+\ACONTINUE
+\begin{algorithmic}[1]
+\State $sum\gets 0$
+\For{$i\gets 1, n$}
+   \State $sum\gets sum+i$
+\EndFor
+\Statex
+\end{algorithmic}
+\AEND
+
+\subsubsection{The \textbf{while} block}
+The \textbf{while} block has the form:
+
+\ASTART
+\begin{verbatim}
+\While{<text>}
+   <body>
+\EndWhile
+\end{verbatim}
+\ACONTINUE
+\begin{algorithmic}[1]
+\While{$<$text$>$}
+   \State $<$body$>$
+\EndWhile
+\end{algorithmic}
+\AENDSKIP
+
+\noindent Example:
+
+\ASTART
+\begin{verbatim}
+\begin{algorithmic}[1]
+\State $sum\gets 0$
+\State $i\gets 1$
+\While{$i\le n$}
+   \State $sum\gets sum+i$
+   \State $i\gets i+1$
+\EndWhile
+\end{algorithmic}
+\end{verbatim}
+\ACONTINUE
+\begin{algorithmic}[1]
+\State $sum\gets 0$
+\State $i\gets 1$
+\While{$i\le n$}
+   \State $sum\gets sum+i$
+   \State $i\gets i+1$
+\EndWhile
+\Statex
+\end{algorithmic}
+\AEND
+
+\subsubsection{The \textbf{repeat} block}
+The \textbf{repeat} block has the form:
+
+\ASTART
+\begin{verbatim}
+\Repeat
+   <body>
+\Until{<text>}
+\end{verbatim}
+\ACONTINUE
+\begin{algorithmic}[1]
+\Repeat
+   \State $<$body$>$
+\Until{$<$text$>$}
+\end{algorithmic}
+\AENDSKIP
+
+\noindent Example:
+
+\ASTART
+\begin{verbatim}
+\begin{algorithmic}[1]
+\State $sum\gets 0$
+\State $i\gets 1$
+\Repeat
+   \State $sum\gets sum+i$
+   \State $i\gets i+1$
+\Until{$i>n$}
+\end{algorithmic}
+\end{verbatim}
+\ACONTINUE
+\begin{algorithmic}[1]
+\State $sum\gets 0$
+\State $i\gets 1$
+\Repeat
+   \State $sum\gets sum+i$
+   \State $i\gets i+1$
+\Until{$i>n$}
+\Statex
+\end{algorithmic}
+\AEND
+
+\subsubsection{The \textbf{if} block}
+The \textbf{if} block has the form:
+
+\ASTART
+\begin{verbatim}
+\If{<text>}
+   <body>
+[
+\ElsIf{<text>}
+   <body>
+...
+]
+[
+\Else
+   <body>
+]
+\EndIf
+\end{verbatim}
+\ACONTINUE
+\begin{algorithmic}[1]
+\If{$<$text$>$}
+   \State $<$body$>$
+\Statex [
+\ElsIf{$<$text$>$}
+   \State $<$body$>$
+\Statex \dots
+\Statex ]
+\Statex [
+\Else
+   \State $<$body$>$
+\Statex ]
+\EndIf
+\end{algorithmic}
+\AENDSKIP
+
+\noindent Example:
+
+\ASTART
+\begin{verbatim}
+\begin{algorithmic}[1]
+\If{$quality\ge 9$}
+   \State $a\gets perfect$
+\ElsIf{$quality\ge 7$}
+   \State $a\gets good$
+\ElsIf{$quality\ge 5$}
+   \State $a\gets medium$
+\ElsIf{$quality\ge 3$}
+   \State $a\gets bad$
+\Else
+   \State $a\gets unusable$
+\EndIf
+\end{algorithmic}
+\end{verbatim}
+\ACONTINUE
+\begin{algorithmic}[1]
+\If{$quality\ge 9$}
+   \State $a\gets perfect$
+\ElsIf{$quality\ge 7$}
+   \State $a\gets good$
+\ElsIf{$quality\ge 5$}
+   \State $a\gets medium$
+\ElsIf{$quality\ge 3$}
+   \State $a\gets bad$
+\Else
+   \State $a\gets unusable$
+\EndIf
+\Statex
+\end{algorithmic}
+\AEND
+
+\subsubsection{The \textbf{procedure} block}
+The \textbf{procedure} block has the form:
+
+\ASTART
+\begin{verbatim}
+\Procedure{<name>}{<params>}
+   <body>
+\EndProcedure
+\end{verbatim}
+\ACONTINUE
+\begin{algorithmic}[1]
+\Procedure{$<$name$>$}{$<$params$>$}
+   \State $<$body$>$
+\EndProcedure
+\end{algorithmic}
+\AENDSKIP
+
+\noindent Example: See \euk's\ algorithm on page \pageref{euclid}.
+
+\subsubsection{The \textbf{function} block}The 
+\textbf{function} block has the same syntax as the \textbf{procedure} block:
+
+\ASTART
+\begin{verbatim}
+\Function{<name>}{<params>}
+   <body>
+\EndFunction
+\end{verbatim}
+\ACONTINUE
+\begin{algorithmic}[1]
+\Function{$<$name$>$}{$<$params$>$}
+   \State $<$body$>$
+\EndFunction
+\end{algorithmic}
+\AEND
+
+\subsubsection{The \textbf{loop} block}
+The \textbf{loop} block has the form:
+
+\ASTART
+\begin{verbatim}
+\Loop
+   <body>
+\EndLoop
+\end{verbatim}
+\ACONTINUE
+\begin{algorithmic}[1]
+\Loop
+   \State $<$body$>$
+\EndLoop
+\end{algorithmic}
+\AEND
+
+\subsubsection{Other commands in this layout}
+
+The starting conditions for the algorithm can be described with the \textbf{require} 
+instruction, and its result with the \textbf{ensure} instruction.
+
+A procedure call can be formatted with \verb:\Call:.
+
+\ASTART
+\begin{verbatim}
+\Require something
+\Ensure something
+\Statex
+\State \Call{Create}{10}
+\end{verbatim}
+\ACONTINUE
+\begin{algorithmic}[1]
+\Require something
+\Ensure something
+\Statex
+\State \Call{Create}{10}
+\end{algorithmic}
+\AENDSKIP
+
+\noindent Example:
+
+\ASTART
+\begin{verbatim}
+\begin{algorithmic}[1]
+\Require $x\ge5$
+\Ensure $x\le-5$
+\Statex
+\While{$x>-5$}
+   \State $x\gets x-1$
+\EndWhile
+\end{algorithmic}
+\end{verbatim}
+\ACONTINUE
+\begin{algorithmic}[1]
+\Require $x\ge5$
+\Ensure $x\le-5$
+\Statex
+\While{$x>-5$}
+   \State $x\gets x-1$
+\EndWhile
+\Statex
+\end{algorithmic}
+\AEND
+
+
+
+
+
+\subsubsection{Package options}\label{algpseudocode package options}
+
+The \texttt{algpseudocode} package supports the following options:
+
+\begin{description}
+\item[compatible/noncompatible]\ \textit{Obsolote, use the algcompatible layout instead.}\\
+If you would like to use old 
+algorithms, written with the \old\ package without (too much) 
+modification, then use the \textbf{compatible} option. This option 
+defines the uppercase version of the commands. Note that you still need 
+to remove the \verb:[...]: comments (these comments appeared due to some 
+limitations in the \old\ package, these limitations and comments are gone now).
+The default \textbf{noncompatible} does not define the all uppercase 
+commands.
+\item[noend/end]\ \\With \textbf{noend} specified all \textbf{end \dots} 
+lines are omitted. You get a somewhat smaller algorithm, and the ugly 
+feeling, that something is missing\dots{} The \textbf{end} value is the 
+default, it means, that all \textbf{end \dots} lines are in their right 
+place.
+\end{description}
+
+
+\subsubsection{Changing command names}
+One common thing for a pseudocode is to change the command names. Many people 
+use many different kind of pseudocode command names. In \textbf{algpseudocode} 
+all keywords are declared as \verb:\algorithmic<keyword>:. You can change them 
+to output the text you need:
+
+\bigskip\noindent\begin{minipage}[b]{0.5\linewidth}
+\begin{verbatim}
+\algrenewcommand\algorithmicwhile{\textbf{am\'\i g}}
+\algrenewcommand\algorithmicdo{\textbf{v\'egezd el}}
+\algrenewcommand\algorithmicend{\textbf{v\'ege}}
+\begin{algorithmic}[1]
+\State $x \gets 1$
+\While{$x < 10$}
+   \State $x \gets x + 1$
+\EndWhile
+\end{algorithmic}
+\end{verbatim}
+\end{minipage}
+\begin{minipage}[b]{0.5\linewidth}
+\begin{algorithmic}[1]
+\algrenewcommand\algorithmicwhile{\textbf{am\'\i g}}
+\algrenewcommand\algorithmicdo{\textbf{v\'egezd el}}
+\algrenewcommand\algorithmicend{\textbf{v\'ege}}
+\State $x \gets 1$
+\While{$x < 10$}
+   \State $x \gets x + 1$
+\EndWhile
+\Statex
+\end{algorithmic}
+\end{minipage}\bigskip
+
+In some cases you may need to change even more (in the above example 
+\textbf{am\'\i g} and \textbf{v\'ege} should be interchanged in the \verb:\EndWhile: 
+text). Maybe the number of the parameters taken by some commands must be changed too.
+this can be done with the command text customizing macros (see section 
+\ref{custom text}). Here I'll give only some examples of the most common usage:
+
+\bigskip\noindent\begin{minipage}[b]{0.5\linewidth}
+\begin{verbatim}
+\algrenewcommand\algorithmicwhile{\textbf{am\'\i g}}
+\algrenewcommand\algorithmicdo{\textbf{v\'egezd el}}
+\algrenewcommand\algorithmicend{\textbf{v\'ege}}
+\algrenewtext{EndWhile}{\algorithmicwhile\ \algorithmicend}
+\begin{algorithmic}[1]
+\State $x \gets 1$
+\While{$x < 10$}
+   \State $x \gets x - 1$
+\EndWhile
+\end{algorithmic}
+\end{verbatim}
+\end{minipage}
+\begin{minipage}[b]{0.5\linewidth}
+\begin{algorithmic}[1]
+\algrenewcommand\algorithmicwhile{\textbf{am\'\i g}}
+\algrenewcommand\algorithmicdo{\textbf{v\'egezd el}}
+\algrenewcommand\algorithmicend{\textbf{v\'ege}}
+\algrenewtext{EndWhile}{\algorithmicwhile\ \algorithmicend}
+\State $x \gets 1$
+\While{$x < 10$}
+   \State $x \gets x - 1$
+\EndWhile
+\Statex
+\end{algorithmic}
+\end{minipage}
+
+\bigskip\noindent\begin{minipage}[b]{0.5\linewidth}
+\begin{verbatim}
+\algnewcommand\algorithmicto{\textbf{to}}
+\algrenewtext{For}[3]%
+  {\algorithmicfor\ #1 \gets #2 \algorithmicto\ #3 \algorithmicdo}
+\begin{algorithmic}[1]
+\State $p \gets 1$
+\For{i}{1}{n}
+   \State $p \gets p * i$
+\EndFor
+\end{algorithmic}
+\end{verbatim}
+\end{minipage}
+\begin{minipage}[b]{0.5\linewidth}
+\begin{algorithmic}[1]
+\algnewcommand\algorithmicto{\textbf{to}}
+\algrenewtext{For}[3]%
+  {\algorithmicfor\ $#1 \gets #2$ \algorithmicto\ $#3$ \algorithmicdo}
+\State $p \gets 1$
+\For{i}{1}{n}
+   \State $p \gets p * i$
+\EndFor
+\Statex
+\end{algorithmic}
+\end{minipage}\bigskip
+
+You could create a translation package, that included after the \textbf{algpseudocode} 
+package translates the keywords to the language you need.
+
+
+
+
+
+\subsection{The \textbf{algpascal} layout}
+\alglanguage{pascal}
+
+
+
+The most important feature of the \textbf{algpascal} layout is that 
+\textit{it performs automatically the block indentation}. In 
+section \ref{algorithmicx} you will see how to define such 
+automatically indented loops. Here is an example to demonstrate this 
+feature:
+
+\ASTART
+\begin{verbatim}
+\begin{algorithmic}[1]
+\Begin
+\State $sum:=0$;
+\For{i=1}{n}\Comment{sum(i)}
+   \State $sum:=sum+i$;
+\State writeln($sum$);
+\End.
+\end{algorithmic}
+\end{verbatim}
+\ACONTINUE
+\begin{algorithmic}[1]
+\Begin
+\State $sum:=0$;
+\For{i=1}{n}\Comment{sum(i)}
+   \State $sum:=sum+i$;
+\State writeln($sum$);
+\End.
+\Statex
+\end{algorithmic}
+\AENDSKIP
+
+Note, that the \verb:\For: is not closed explicitly, its end is 
+detected automatically. Again, the indentation in the source doesn't
+affect the output. 
+In this layout every parameter passed to a command is put in 
+mathematical mode.
+
+\subsubsection{The \textbf{begin} \dots{} \textbf{end} block}
+
+\noindent\begin{minipage}[b]{0.5\linewidth}
+\begin{verbatim}
+\Begin
+   <body>
+\End
+\end{verbatim}
+\ACONTINUE
+\begin{algorithmic}[1]
+\Begin
+   \State $<$body$>$
+\End
+\end{algorithmic}
+\AENDSKIP
+
+The \verb:\Begin: \dots{} \verb:\End: block and the 
+\verb:\Repeat: \dots{} \verb:\Until: block are the only blocks in 
+the \textbf{algpascal} style (instead of \verb:\Begin: you may write 
+\verb:\Asm:). This means, that every other loop is ended automatically 
+after the following command (another loop, or a block).
+
+
+
+\subsubsection{The \textbf{for} loop}
+
+\noindent\begin{minipage}[b]{0.5\linewidth}
+\begin{verbatim}
+\For{<assign>}{<expr>}
+   <command>
+\end{verbatim}
+\ACONTINUE
+\begin{algorithmic}[1]
+\For{<$\relax$assign$\relax$>}{<$\relax$expr$\relax$>}
+   \State $<$command$>$
+\end{algorithmic}
+\AENDSKIP
+
+The \textbf{For} loop (as all other loops) ends after the following command (a block counts
+also as a single command).
+
+\ASTART
+\begin{verbatim}
+\begin{algorithmic}[1]
+\Begin
+   \State $sum:=0$;
+   \State $prod:=1$;
+   \For{i:=1}{10}
+      \Begin
+         \State $sum:=sum+i$;
+         \State $prod:=prod*i$;
+      \End
+\End.
+\end{algorithmic}
+\end{verbatim}
+\ACONTINUE
+\begin{algorithmic}[1]
+\Begin
+   \State $sum:=0$;
+   \State $prod:=1$;
+   \For{i:=1}{10}
+      \Begin
+         \State $sum:=sum+i$;
+         \State $prod:=prod*i$;
+      \End
+\End.
+\Statex
+\end{algorithmic}
+\AEND
+
+\subsubsection{The \textbf{while} loop}
+
+\noindent\begin{minipage}[b]{0.5\linewidth}
+\begin{verbatim}
+\While{<expression>}
+   <command>
+\end{verbatim}
+\ACONTINUE
+\begin{algorithmic}[1]
+\While{<$\relax$expression$\relax$>}
+   \State $<$command$>$
+\end{algorithmic}
+\AEND
+
+
+\subsubsection{The \textbf{repeat}\dots\ \textbf{until} block}
+
+\noindent\begin{minipage}[b]{0.5\linewidth}
+\begin{verbatim}
+\Repeat
+   <body>
+\Until{<expression>}
+\end{verbatim}
+\ACONTINUE
+\begin{algorithmic}[1]
+\Repeat
+   \State $<$body$>$
+\Until{<$\relax$expression$\relax$>}
+\end{algorithmic}
+\AEND
+
+\subsubsection{The \textbf{if} command}
+
+\noindent\begin{minipage}[b]{0.5\linewidth}
+\begin{verbatim}
+\If{<expression>}
+   <command>
+[
+\Else
+   <command>
+]
+\end{verbatim}
+\ACONTINUE
+\begin{algorithmic}[1]
+\If{<$\relax$expression$\relax$>}
+   \State $<$command$>$
+\Statex \hskip-\algorithmicindent\hskip-\algorithmicindent[
+\Else
+   \State $<$command$>$
+\Statex \hskip-\algorithmicindent\hskip-\algorithmicindent]
+\end{algorithmic}
+\AENDSKIP
+
+Every \verb:\Else: matches the nearest \verb:\If:.
+
+\subsubsection{The \textbf{procedure} command}
+
+\noindent\begin{minipage}[b]{0.5\linewidth}
+\begin{verbatim}
+\Procedure <some text>
+\end{verbatim}
+\ACONTINUE
+\begin{algorithmic}[1]
+\Procedure $<$some text$>$
+\end{algorithmic}
+\AENDSKIP
+
+\verb:\Procedure: just writes the ``procedure'' word on a new 
+line... You will probably put a \verb:\Begin:\dots\ \verb:\End: 
+block after it.
+
+
+\subsubsection{The \textbf{function} command}
+
+\noindent\begin{minipage}[b]{0.5\linewidth}
+\begin{verbatim}
+\Function<some text>
+\end{verbatim}
+\ACONTINUE
+\begin{algorithmic}[1]
+\Function $<$some text$>$
+\end{algorithmic}
+\AENDSKIP
+
+Just like \textbf{Procedure}.
+
+
+
+\subsection{The \textbf{algc} layout}
+
+Sorry, the \textbf{algc} layout is unfinished.
+The commands defined are:
+
+\begin{itemize}
+\item\verb:\{:\dots\ \verb:\}: block
+\item\verb:\For: with 3 params
+\item\verb:\If: with 1 param
+\item\verb:\Else: with no params
+\item\verb:\While: with 1 param
+\item\verb:\Do: with no params
+\item\verb:\Function: with 3 params
+\item\verb:\Return: with no params
+\end{itemize}
+
+
+
+
+\section{Custom algorithmic blocks}\label{algorithmicx}
+\alglanguage{default}
+
+
+
+\subsection{Blocks and loops}
+
+Most of the environments defined in the standard layouts (and most probably 
+the ones you will define) are divided in two categories:
+
+\begin{description}
+\item[Blocks] are the environments witch contain an arbitrary number of 
+commands or nested blocks. Each block has a name, begins with a starting command 
+and ends with an ending command. The commands in a block are 
+indented by \verb:\algorithmicindent: (or another amount).
+
+If your algorithm ends without closing all blocks, the \alg\ package gives
+you a nice error. So be good, and close them all!
+
+Blocks are all the environments defined in the \verb:algpseudocode: 
+package, the \verb:\Begin: \dots \verb:\End: block in the 
+\verb:algpascal: package, and some other ones.
+\item[Loops] (Let us call them loops\dots) The loops are environments 
+that include only one command, loop or block; a loop is closed 
+automatically after this command. So loops have no ending commands. If 
+your algorithm (or a block) ends before the single command of a loop, 
+then this is considered an empty command, and the loop is closed. Feel 
+free to leave open loops at the end of blocks!
+
+Loops are most of the environments in the \verb:algpascal: and 
+\verb:algc: packages.
+\end{description}
+
+For some rare constructions you can create mixtures of the two 
+environments (see section \ref{setblock}).
+Each block and loop may be continued with another one (like the \verb:If: 
+with \verb:Else:).
+
+\subsection{Defining blocks}\label{defblocks}
+
+There are several commands to define blocks. The difference is in what is defined
+beyond the block. The macro \verb:\algblock: defines a new block with starting and
+ending entity.
+
+\begin{verbatim}
+\algblock[<block>]{<start>}{<end>}
+\end{verbatim}
+
+The defined commands have no parameters, and the text displayed by them is
+\verb:\textbf{<start>}: and \verb:\textbf{<end>}:. You can change these texts later
+(\ref{custom text}). 
+
+With \verb:\algblockdefx: you can give the text to be output by the starting
+and ending command and the number of parameters for these commands. In the text
+reference with \#$n$ to the parameter number $n$. Observe that the text
+is given in the form you define or redefine macros, and really, this is what happens.
+
+\begin{verbatim}
+\algblockdefx[<block>]{<start>}{<end>}
+   [<startparamcount>][<default value>]{<start text>}
+   [<endparamcount>][<default value>]{<end text>}
+\end{verbatim}
+
+This defines a new block called \verb:<block>:, \verb:<start>: opens the block, 
+\verb:<end>: closes the block,
+\verb:<start>: displays \verb:<start text>:, and has \verb:<startparamcount>: parameters,
+\verb:<end>: displays \verb:<end text>:, and has \verb:<endparamcount>: parameters. 
+For both \verb:<start>: and \verb:<end>:, if
+\verb:<default value>: is given, then the first parameter is optional, and its default value
+is \verb:<default value>:.
+
+If you want to display different text (and to have a different number of parameters)
+for \verb:<end>: at the end of different blocks, then use
+the \verb:\algblockx: macro. Note that it is not possible to display different starting texts,
+since it is not possible to start different blocks with the same command. The \verb:<start text>:
+defined with \verb:\algblockx: has the same behavior as if defined with \verb:\algblockdefx:. All ending commands
+not defined with \verb:\algblockx: will display the same text, and the ones defined with this
+macro will display the different texts you specified.
+
+\begin{verbatim}
+\algblockx[<block>]{<start>}{<end>}
+   [<startparamcount>][<default value>]{<start text>}
+   [<endparamcount>][<default value>]{<end text>}
+\end{verbatim}
+
+If in the above definitions the \verb:<block>: is missing, then the name of the starting command
+is used as block name. If a block with the given name
+already exists, these macros don't define a new block, instead this it will be used the defined 
+block. If \verb:<start>: or \verb:<end>: is empty, then
+the definition does not define a new starting/ending command for the block, and then the
+respective text must be missing from the definition. You may have more starting and ending commands
+for one block. If the block name is missing, then a starting command must be given.
+
+
+\bigskip\noindent\begin{minipage}[b]{0.5\linewidth}
+\begin{verbatim}
+\algblock[Name]{Start}{End}
+\algblockdefx[NAME]{START}{END}%
+   [2][Unknown]{Start #1(#2)}%
+   {Ending}
+\algblockdefx[NAME]{}{OTHEREND}%
+   [1]{Until (#1)}
+\begin{algorithmic}[1]
+\Start
+   \Start
+      \START[One]{x}
+      \END
+      \START{0}
+      \OTHEREND{\texttt{True}}
+   \End
+   \Start
+   \End
+\End
+\end{algorithmic}
+\end{verbatim}
+\end{minipage}
+\begin{minipage}[b]{0.5\linewidth}
+{
+\algblock[Name]{Start}{End}
+\algblockdefx[NAME]{START}{END}%
+   [2][Unknown]{Start #1(#2)}%
+   {Ending}
+\algblockdefx[NAME]{}{OTHEREND}%
+   [1]{Until (#1)}
+\begin{algorithmic}[1]
+\Start
+   \Start
+      \START[One]{x}
+      \END
+      \START{0}
+      \OTHEREND{\texttt{True}}
+   \End
+   \Start
+   \End
+\End
+\Statex
+\end{algorithmic}
+}
+\end{minipage}
+
+\subsection{Defining loops}
+
+The loop defining macros are similar to the block defining macros. A loop has no ending command
+and ends after the first state, block or loop that follows the loop.
+Since loops have no ending command, the macro \verb:\algloopx: would not have mutch sense.
+The loop defining macros are:
+
+\begin{verbatim}
+\algloop[<loop>]{<start>}
+
+\algloopdefx[<loop>]{<start>}
+   [<startparamcount>][<default value>]{<start text>}
+\end{verbatim}
+
+Both create a loop named \verb:<loop>: with the starting command \verb:<start>:.
+The second also sets the number of parameters, and the text displayed by the starting command.
+
+\bigskip\noindent\begin{minipage}[b]{0.5\linewidth}
+\begin{verbatim}
+\algloop{For}
+\algloopdefx{If}[1]{\textbf{If} #1 \textbf{then}}
+\algblock{Begin}{End}
+\begin{algorithmic}[1]
+\For
+   \Begin
+   \If{$a < b$}
+      \For
+         \Begin
+         \End
+   \Begin
+   \End
+   \End
+\end{algorithmic}
+\end{verbatim}
+\end{minipage}
+\begin{minipage}[b]{0.5\linewidth}
+{
+\algloop{For}
+\algloopdefx{If}%
+   [1]{\textbf{If} #1 \textbf{then}}
+\algblock{Begin}{End}
+\begin{algorithmic}[1]
+\For
+   \Begin
+   \If{$a < b$}
+      \For
+         \Begin
+         \End
+   \Begin
+   \End
+   \End
+\Statex
+\end{algorithmic}
+}
+\end{minipage}
+
+\subsection{Continuing blocks and loops}
+
+For each block/loop you may give commands that close the block or loop and open another
+block or loop. A good example for this is the \textbf{if}~\dots~\textbf{then}~\dots~\textbf{else}
+construct. The new block or loop can be closed or continued, as any other blocks and loops.
+
+To create a continuing block use one of the following:
+
+\begin{verbatim}
+\algcblock[<new block>]{<old block>}{<continue>}{<end>}
+
+\algcblockdefx[<new block>]{<old block>}{<continue>}{<end>}
+   [<continueparamcount>][<default value>]{<continue text>}
+   [<endparamcount>][<default value>]{<end text>}
+
+\algcblockx[<new block>]{<old block>}{<continue>}{<end>}
+   [<continueparamcount>][<default value>]{<continue text>}
+   [<endparamcount>][<default value>]{<end text>}
+\end{verbatim}
+
+All three macros define a new block named \verb:<new block>:. If \verb:<new block>: is not given,
+then \verb:<continue>: is used as the new block name. It is not allowed to have both
+\verb:<new block>: missing, and \verb:<continue>: empty. The \verb:<continue>: command ends the
+\verb:<old block>: block/loop and opens the \verb:<new block>: block. Since \verb:<continue>: may
+end different blocks and loops, it can have different text
+at the end of the different blocks/loops. If the \verb:<continue>: command doesn't find an
+\verb:<old block>: to close, then an error is reported.
+
+Create continuing loops with the followings:
+
+\begin{verbatim}
+\algcloop[<new loop>]{<old block>}{<continue>}
+
+\algcloopdefx[<new loop>]{<old block>}{<continue>}
+   [<continueparamcount>][<default value>]{<continue text>}
+
+\algcloopx[<new loop>]{<old block>}{<continue>}
+   [<continueparamcount>][<default value>]{<continue text>}
+\end{verbatim}
+
+These macros create a continuing loop, the \verb:<continue>: closes the \verb:<old block>:
+block/loop, and opens a \verb:<new loop>: loop.
+
+\bigskip\noindent\begin{minipage}[b]{0.5\linewidth}
+\begin{verbatim}
+\algblock{If}{EndIf}
+\algcblock[If]{If}{ElsIf}{EndIf}
+\algcblock{If}{Else}{EndIf}
+\algcblockdefx[Strange]{If}{Eeee}{Oooo}
+   [1]{\textbf{Eeee} "#1"}
+   {\textbf{Wuuuups\dots}}
+\begin{algorithmic}[1]
+\If
+   \If
+   \ElsIf
+   \ElsIf
+      \If
+      \ElsIf
+      \Else
+      \EndIf
+   \EndIf
+   \If
+   \EndIf
+\Eeee{Creep}
+\Oooo
+\end{algorithmic}
+\end{verbatim}
+\end{minipage}
+\begin{minipage}[b]{0.5\linewidth}
+{
+\algblock{If}{EndIf}
+\algcblock[If]{If}{ElsIf}{EndIf}
+\algcblock{If}{Else}{EndIf}
+\algcblockdefx[Strange]{If}{Eeee}{Oooo}
+   [1]{\textbf{Eeee} "#1"}
+   {\textbf{Wuuuups\dots}}
+\begin{algorithmic}[1]
+\If
+   \If
+   \ElsIf
+   \ElsIf
+      \If
+      \ElsIf
+      \Else
+      \EndIf
+   \EndIf
+   \If
+   \EndIf
+\Eeee{Creep}
+\Oooo
+\Statex
+\end{algorithmic}
+}
+\end{minipage}\bigskip
+
+\bigskip\noindent\begin{minipage}[b]{0.5\linewidth}
+\begin{verbatim}
+\algloop{If}
+\algcloop{If}{Else}
+\algblock{Begin}{End}
+\begin{algorithmic}[1]
+\If
+   \Begin
+   \End
+\Else
+   \If
+      \Begin
+      \End
+\end{algorithmic}
+\end{verbatim}
+\end{minipage}
+\begin{minipage}[b]{0.5\linewidth}
+{
+\algloop{If}
+\algcloop{If}{Else}
+\algblock{Begin}{End}
+\begin{algorithmic}[1]
+\If
+   \Begin
+   \End
+\Else
+   \If
+      \Begin
+      \End
+\Statex
+\end{algorithmic}
+}
+\end{minipage}\bigskip
+
+
+
+\subsection{Even more customisation}\label{setblock}
+
+With the following macros you can give the indentation used by the new block (or loop),
+and the number of stataments after that the "block" is automatically closed. This value is $\infty$
+for blocks, 1 for loops, and 0 for stataments. There is a special value, 65535, meaning that the
+defined "block" does not end automatically, but if it is enclosed in a block, then the ending
+command of the block closes this "block" as well.
+
+\begin{verbatim}
+\algsetblock[<block>]{<start>}{<end>}
+   {<lifetime>}{<indent>}
+
+\algsetblockdefx[<block>]{<start>}{<end>}
+   {<lifetime>}{<indent>}
+   [<startparamcount>][<default value>]{<start text>}
+   [<endparamcount>][<default value>]{<end text>}
+
+\algsetblockx[<block>]{<start>}{<end>}
+   {<lifetime>}{<indent>}
+   [<startparamcount>][<default value>]{<start text>}
+   [<endparamcount>][<default value>]{<end text>}
+
+\algcsetblock[<new block>]{<old block>}{<continue>}{<end>}
+   {<lifetime>}{<indent>}
+
+\algcsetblockdefx[<new block>]{<old block>}{<continue>}{<stop>}
+   {<lifetime>}{<indent>}
+   [<continueparamcount>][<default value>]{<continue text>}
+   [<endparamcount>][<default value>]{<end text>}
+
+\algcsetblockx[<new block>]{<old block>}{<continue>}{<stop>}
+   {<lifetime>}{<indent>}
+   [<continueparamcount>][<default value>]{<continue text>}
+   [<endparamcount>][<default value>]{<end text>}
+\end{verbatim}
+
+The \verb:<lifetime>: is the number of stataments after that the block is closed. An empty
+\verb:<lifetime>: field means $\infty$. The \verb:<indent>: gives the indentation of the block.
+Leave this field empty for the default indentation. The rest of the parameters has the same
+function as for the previous macros.
+
+\bigskip\noindent\begin{minipage}[b]{0.5\linewidth}
+\begin{verbatim}
+\algsetblock[Name]{Start}{Stop}{3}{1cm}
+\algsetcblock[CName]{Name}{CStart}{CStop}{2}{2cm}
+\begin{algorithmic}[1]
+\Start
+   \State 1
+   \State 2
+   \State 3
+\State 4
+\Start
+   \State 1
+\Stop
+\State 2
+\Start
+   \State 1
+\CStart
+   \State 1
+   \State 2
+\State 3
+\Start
+   \State 1
+\CStart
+   \State 1
+\CStop
+\end{algorithmic}
+\end{verbatim}
+\end{minipage}
+\begin{minipage}[b]{0.5\linewidth}
+{
+\algsetblock[Name]{Start}{Stop}{3}{1cm}
+\algsetcblock[CName]{Name}{CStart}{CStop}{2}{2cm}
+\begin{algorithmic}[1]
+\Start
+   \State 1
+   \State 2
+   \State 3
+\State 4
+\Start
+   \State 1
+\Stop
+\State 2
+\Start
+   \State 1
+\CStart
+   \State 1
+   \State 2
+\State 3
+\Start
+   \State 1
+\CStart
+   \State 1
+\CStop
+\Statex
+\end{algorithmic}
+}
+\end{minipage}\bigskip
+
+The created environments behave as follows:
+
+\begin{itemize}
+\item It starts with \verb:\Start:. The nested environments are 
+indented by 1 cm.
+\item If it is followed by at least 3 environments (stataments), then it closes 
+automatically after the third one.
+\item If you put a \verb:\Stop: before the automatic closure, then this 
+\verb:\Stop: closes the environment. \verb:CStart: closes a block called \verb:Name:
+and opens a new one called \verb:CName: and having an indentaion of 2 cm.
+\item \verb:CName: can be closed with \verb:CStop: or it is closed automatically after
+2 environments.
+\end{itemize}
+
+
+
+\subsection{Parameters, custom text}\label{custom text}
+
+With \verb:\algrenewtext: you can change the number of parameters, and the text displayed by the
+commands. With \verb:algnotext: you can makes the vole output line disappear, but
+it works only for ending commands, for beginning commands you will get an incorrect output.
+
+\begin{verbatim}
+\algrenewcommand[<block>]{<command>}
+   [<paramcount>][<default value>]{<text>}
+
+\algnotext[<block>]{<ending command>}
+\end{verbatim}
+
+If \verb:<block>: is missing, then the default text is changed, and if \verb:<block>: is given,
+then the text displayed at the end of \verb:<block>: is changed.
+
+To make a command output the default text at the end of a block (say, you have changed the text
+for this block), use \verb:\algdefaulttext:.
+
+\begin{verbatim}
+\algdefaulttext[<block>]{<command>}
+\end{verbatim}
+
+If the \verb:<block>: is missing, than the default text itself will be set to the default value
+(this is \verb:\textbf{<command>}:).
+
+
+
+\subsection{The ONE defining macro}
+
+All block and loop defining macros call the same macro. You may use this macro to gain a
+better acces to what will be defined. This macro is \verb:\algdef:.
+
+\begin{verbatim}
+\algdef{<flags>}...
+\end{verbatim}
+
+Depending on the flags the macro can have many forms.
+
+\begin{center}
+\begin{tabular}{|c|l|}
+\hline
+\textbf{Flag}&\textbf{Meaning}\\
+\hline
+s&starting command, without text\\
+S&starting command with text\\
+c&continuing command, without text\\
+C&continuing command, with default text\\
+xC&continuing command, with block specific text\\
+\hline
+e&ending command, without text\\
+E&continuing command, with default text\\
+xE&continuing command, with block specific text\\
+N&ending command, with default "no text"\\
+xN&ending command, with no text for this block\\
+\hline
+b&block(default)\\
+l&loop\\
+L&loop closes after the given number of stataments\\
+\hline
+i&indentation specified\\
+\hline
+\end{tabular}
+\end{center}
+
+The \verb:<new block>: may be given for any combination of flags, and it is not allowed to have
+\verb:<new block>: missing and \verb:<start>: missing/empty.
+For c, C, xC an old block is expected. For s, S, c, C, xC the \verb:<start>: must be given.
+For e, E, xE, N, xN the \verb:<end>: must be given. For L the \verb:<lifetime>: must be given. 
+For i the \verb:<indent>: must be given.
+For S, C, xC the starting text and related infos must be given. For E, xE the ending text must be given.
+For each combination of flags give only the needed parameters, in the following order:
+
+\begin{verbatim}
+\algdef{<flags>}[<new block>]{<old block>}{<start>}{<end>}
+   {<lifetime>}{<indent>}
+   [<startparamcount>][<default value>]{<start text>}
+   [<endparamcount>][<default value>]{<end text>}
+\end{verbatim}
+
+The block and loop defining macros call \verb:\algdef: with the following flags:
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Macro}&\textbf{Meaning}\\
+\hline
+\verb:\algblock:&\verb:\algdef{se}:\\
+\hline
+\verb:\algcblock:&\verb:\algdef{ce}:\\
+\hline
+\verb:\algloop:&\verb:\algdef{sl}:\\
+\hline
+\verb:\algcloop:&\verb:\algdef{cl}:\\
+\hline
+\verb:\algsetblock:&\verb:\algdef{seLi}:\\
+\hline
+\verb:\algsetcblock:&\verb:\algdef{ceLi}:\\
+\hline
+\verb:\algblockx:&\verb:\algdef{SxE}:\\
+\hline
+\verb:\algblockdefx:&\verb:\algdef{SE}:\\
+\hline
+\verb:\algcblockx:&\verb:\algdef{CxE}:\\
+\hline
+\verb:\algcblockdefx:&\verb:\algdef{CE}:\\
+\hline
+\verb:\algsetblockx:&\verb:\algdef{SxELi}:\\
+\hline
+\verb:\algsetblockdefx:&\verb:\algdef{SELi}:\\
+\hline
+\verb:\algsetcblockx:&\verb:\algdef{CxELi}:\\
+\hline
+\verb:\algsetcblockdefx:&\verb:\algdef{CELi}:\\
+\hline
+\verb:\algloopdefx:&\verb:\algdef{Sl}:\\
+\hline
+\verb:\algcloopx:&\verb:\algdef{Cxl}:\\
+\hline
+\verb:\algcloopdefx:&\verb:\algdef{Cl}:\\
+\hline
+\end{tabular}
+\end{center}
+
+
+\vfill
+\section{Examples}
+\subsection{A full example using \textbf{algpseudocode}}
+
+
+\begin{verbatim}
+\documentclass{article}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\begin{document}
+\begin{algorithm}
+\caption{The Bellman-Kalaba algorithm}
+\begin{algorithmic}[1]
+\Procedure {BellmanKalaba}{$G$, $u$, $l$, $p$}
+   \ForAll {$v \in V(G)$}
+      \State $l(v) \leftarrow \infty$
+   \EndFor
+   \State $l(u) \leftarrow 0$
+   \Repeat
+      \For {$i \leftarrow 1, n$}
+         \State $min \leftarrow l(v_i)$
+         \For {$j \leftarrow 1, n$}
+            \If {$min > e(v_i, v_j) + l(v_j)$}
+               \State $min \leftarrow e(v_i, v_j) + l(v_j)$
+               \State $p(i) \leftarrow v_j$
+            \EndIf
+         \EndFor
+         \State $l'(i) \leftarrow min$
+      \EndFor
+      \State $changed \leftarrow l \not= l'$
+      \State $l \leftarrow l'$
+   \Until{$\neg changed$}
+\EndProcedure
+\Statex
+\Procedure {FindPathBK}{$v$, $u$, $p$}
+   \If {$v = u$}
+      \State \textbf{Write} $v$
+   \Else
+      \State $w \leftarrow v$
+      \While {$w \not= u$}
+         \State \textbf{Write} $w$
+         \State $w \leftarrow p(w)$
+      \EndWhile
+   \EndIf
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\end{document}
+\end{verbatim}
+\eject
+
+
+\alglanguage{pseudocode}
+\begin{algorithm}[h]
+\caption{The Bellman-Kalaba algorithm}
+\begin{algorithmic}[1]
+\Procedure {BellmanKalaba}{$G$, $u$, $l$, $p$}
+   \ForAll {$v \in V(G)$}
+      \State $l(v) \leftarrow \infty$
+   \EndFor
+   \State $l(u) \leftarrow 0$
+   \Repeat
+      \For {$i \leftarrow 1, n$}
+         \State $min \leftarrow l(v_i)$
+         \For {$j \leftarrow 1, n$}
+            \If {$min > e(v_i, v_j) + l(v_j)$}
+               \State $min \leftarrow e(v_i, v_j) + l(v_j)$
+               \State $p(i) \leftarrow v_j$
+            \EndIf
+         \EndFor
+         \State $l'(i) \leftarrow min$
+      \EndFor
+      \State $changed \leftarrow l \not= l'$
+      \State $l \leftarrow l'$
+   \Until{$\neg changed$}
+\EndProcedure
+\Statex
+\Procedure {FindPathBK}{$v$, $u$, $p$}
+   \If {$v = u$}
+      \State \textbf{Write} $v$
+   \Else
+      \State $w \leftarrow v$
+      \While {$w \not= u$}
+         \State \textbf{Write} $w$
+         \State $w \leftarrow p(w)$
+      \EndWhile
+   \EndIf
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\eject
+
+
+
+
+\subsection{Breaking up an algorithm}
+
+
+\begin{verbatim}
+\documentclass{article}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\begin{document}
+\begin{algorithm}
+\caption{Part 1}
+\begin{algorithmic}[1]
+\Procedure {BellmanKalaba}{$G$, $u$, $l$, $p$}
+   \ForAll {$v \in V(G)$}
+      \State $l(v) \leftarrow \infty$
+   \EndFor
+   \State $l(u) \leftarrow 0$
+   \Repeat
+      \For {$i \leftarrow 1, n$}
+         \State $min \leftarrow l(v_i)$
+         \For {$j \leftarrow 1, n$}
+            \If {$min > e(v_i, v_j) + l(v_j)$}
+               \State $min \leftarrow e(v_i, v_j) + l(v_j)$
+               \State \Comment For some reason we need to break here!
+\algstore{bkbreak}
+\end{algorithmic}
+\end{algorithm}
+
+And we need to put some additional text between\dots
+
+\begin{algorithm}[h]
+\caption{Part 2}
+\begin{algorithmic}[1]
+\algrestore{bkbreak}
+               \State $p(i) \leftarrow v_j$
+            \EndIf
+         \EndFor
+         \State $l'(i) \leftarrow min$
+      \EndFor
+      \State $changed \leftarrow l \not= l'$
+      \State $l \leftarrow l'$
+   \Until{$\neg changed$}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\end{document}
+\end{verbatim}
+\eject
+
+
+\alglanguage{pseudocode}
+\begin{algorithm}[h]
+\caption{Part 1}
+\begin{algorithmic}[1]
+\Procedure {BellmanKalaba}{$G$, $u$, $l$, $p$}
+   \ForAll {$v \in V(G)$}
+      \State $l(v) \leftarrow \infty$
+   \EndFor
+   \State $l(u) \leftarrow 0$
+   \Repeat
+      \For {$i \leftarrow 1, n$}
+         \State $min \leftarrow l(v_i)$
+         \For {$j \leftarrow 1, n$}
+            \If {$min > e(v_i, v_j) + l(v_j)$}
+               \State $min \leftarrow e(v_i, v_j) + l(v_j)$
+               \State \Comment For some reason we need to break here!
+\algstore{bkbreak}
+\end{algorithmic}
+\end{algorithm}
+
+And we need to put some additional text between\dots
+
+\begin{algorithm}[h]
+\caption{Part 2}
+\begin{algorithmic}[1]
+\algrestore{bkbreak}
+               \State $p(i) \leftarrow v_j$
+            \EndIf
+         \EndFor
+         \State $l'(i) \leftarrow min$
+      \EndFor
+      \State $changed \leftarrow l \not= l'$
+      \State $l \leftarrow l'$
+   \Until{$\neg changed$}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\eject
+
+
+
+
+\subsection{Using multiple layouts}
+
+
+\begin{verbatim}
+\documentclass{article}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{algpascal}
+\begin{document}
+
+\alglanguage{pseudocode}
+\begin{algorithm}
+\caption{A small pseudocode}
+\begin{algorithmic}[1]
+\State $s \gets 0$
+\State $p \gets 0$
+\For{$i \gets 1,\, 10$}
+   \State $s \gets s + i$
+   \State $p \gets p + s$
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+\alglanguage{pascal}
+\begin{algorithm}
+\caption{The pascal version}
+\begin{algorithmic}[1]
+\State $s := 0$
+\State $p := 0$
+\For{i = 1}{10}
+   \Begin
+   \State $s := s + i$
+   \State $p := p + s$
+   \End
+\end{algorithmic}
+\end{algorithm}
+
+\end{document}
+\end{verbatim}
+\eject
+
+
+\alglanguage{pseudocode}
+\begin{algorithm}
+\caption{A small pseudocode}
+\begin{algorithmic}[1]
+\State $s \gets 0$
+\State $p \gets 0$
+\For{$i \gets 1,\, 10$}
+   \State $s \gets s + i$
+   \State $p \gets p + s$
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+\alglanguage{pascal}
+\begin{algorithm}
+\caption{The pascal version}
+\begin{algorithmic}[1]
+\State $s := 0$
+\State $p := 0$
+\For{i = 1}{10}
+   \Begin
+   \State $s := s + i$
+   \State $p := p + s$
+   \End
+\end{algorithmic}
+\end{algorithm}
+\eject
+
+
+
+\section{Bugs}
+
+If you have a question or find a bug you can contact me on:
+
+\medskip
+\textbf{szaszjanos@users.sourceforge.net}
+
+\medskip
+\noindent If possible, please create a small \LaTeX{} example related to your problem.
+
+
+
+\end{document}
