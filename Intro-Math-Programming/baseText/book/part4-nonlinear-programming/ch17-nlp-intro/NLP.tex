@@ -1,0 +1,481 @@
+
+% Copyright 2020 by Robert Hildebrand
+%This work is licensed under a
+%Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0)
+%See http://creativecommons.org/licenses/by-sa/4.0/
+
+%\documentclass[../open-optimization/open-optimization.tex]{subfiles}
+%
+%\begin{document}
+\chapter{Nonlinear Programming (NLP)}
+\todoChapter{ 50\% complete. Goal 80\% completion date: November 20\\
+Notes: }
+
+In our last chapter, we covered integer programming, focusing on problems with discrete variables. This chapter will explore \textit{nonlinear (continuous) optimization}, where we deal with continuous variables and now the objective and/or constaints might be nonlinear.
+
+The foundation of continuous optimization is multi-variable calculus. By understanding its basic concepts, we can analyze whether problems are convex or non-convex. This understanding helps in creating efficient algorithms to tackle them.
+
+Our approach in this chapter will be structured. We'll start with key definitions and then move to applications, especially in machine learning. It's worth noting that the problems in this area can vary widely in scale. Some might have millions of variables, while others only a few dozen. This means the choice of algorithm and approach can vary significantly based on the problem.
+
+Our goals for this chapter are:
+\begin{itemize}
+    \item Seeing practical applications of continuous optimization.
+    \item Understanding the structure of problems.
+    \item Recognizing the strengths and limits of different algorithms.
+    \item Implementing solutions using Python tools like \texttt{scipy.optimize} and \texttt{scikitlearn}.
+\end{itemize}
+
+In the next chapter, we'll combine the continuous optimization techniques from this chapter with the integer programming methods from the last chapter. This combination will help us tackle more advanced problems and techniques.
+
+We will provide a number of proofs throughout this chapter for completeness, although, memorizing these proofs may not be essential to fulfilling the outcomes of this chapter.
+
+\section{Definitions and Theorems}
+
+We consider a general mathematical formulation for the optimization problem.  We will begin with the context of unconstrained optimization and then discuss later how some of the theorems can be altered to manage  constrained versions of the problem.
+
+    \begin{definition}{Unconstrained Minimization}{unconstrained}
+        Consider a function $f: \R^n \to \R$. The problem is given by:
+        \[
+        \min_{x \in \R^n} f(x)
+        \]
+    \end{definition}
+
+
+
+
+%\begin{center}
+%\begin{tabular}{|c|c|}
+%\hline
+%$
+%\min_{x \in \R^n} f(x)
+%$
+%& 
+%$\min_{x \in \R^n} f(x)$ \\
+%&$ f_i(x) \leq 0  \ \ \text{ for } i=1, \dots, m$\\
+%&\\
+%Unconstrained Minimization & Constrained Minimization\\
+%\hline
+%\end{tabular}
+%\end{center}
+
+Note that we may change any maximization probelm to a minimization problem by simply minimizing the function $g(x):= -f(x)$.
+
+
+
+\begin{definition}{Global and local optima}{}
+For Problem~\ref{def:unconstrained}, a vector $x^*$ is a
+\begin{itemize}
+\item  \emph{global minimizer} if $f(x^*) \leq f(x) \ \text{ for all } x \in \R^n$.
+\item  \emph{local minimizer} if $f(x^*) \leq f(x) \ \text{for all } x \text{ satisfying } \| x- x^*\| \leq \epsilon \text{ for some } \epsilon > 0$.
+\item \emph{strict local minimizer} if $f(x^*) < f(x) \ \text{for all } x \neq x^* \text{ satisfying } \| x- x^*\| \leq \epsilon \text{ for some } \epsilon > 0$.
+\end{itemize}
+\end{definition}
+
+\begin{center}
+\includegraphicstatic[scale = 1]{local-min}
+\end{center}
+
+
+\begin{theorem}{Attaining a minimum}{}
+Let $S$ be a nonempty set that is closed and bounded.  Suppose that $f \colon S \to \R$ is continuous.  Then the problem $\min\{ f(x) : x \in S\}$ attains its minimum.
+\end{theorem}
+\begin{proof}
+By the \href{https://en.wikipedia.org/wiki/Extreme_value_theorem}{Extreme Value Theorem}, if a function \( f \) is continuous on a closed and bounded interval, then \( f \) attains both its maximum and minimum values, i.e., there exist points \( c, d \in S \) such that:
+\[
+f(c) \leq f(x) \leq f(d) \quad \text{for all} \quad x \in S
+\]
+
+Given that \( S \) is nonempty, closed, and bounded, and \( f \) is continuous on \( S \), it follows from the theorem that \( f \) attains its minimum on \( S \).
+
+Thus, there exists an \( x^* \in S \) such that:
+\[
+f(x^*) \leq f(x) \quad \text{for all} \quad x \in S
+\]
+
+This means that the problem \( \min\{ f(x) : x \in S\} \) attains its minimum at \( x^* \).
+
+This completes the proof.
+\end{proof}
+
+\subsection{Calculus: Derivatives}
+We generalize the notion a derivative from single variable calculus to multi-variable calculus.
+
+\begin{definition}{Partial Derivative}{}
+Let \( f: \mathbb{R}^n \rightarrow \mathbb{R} \) be a function defined on an open set containing a point \( \mathbf{a} = (a_1, a_2, \dots, a_n) \). The \emph{partial derivative} of \( f \) with respect to its \( i \)-th variable, \( x_i \), at the point \( \mathbf{a} \) is defined as:
+\[
+\frac{\partial f}{\partial x_i} (\mathbf{a}) = \lim_{{h} \to 0} \frac{f(a_1, \dots, a_{i-1}, a_i + h, a_{i+1}, \dots, a_n) - f(a_1, \dots, a_n)}{h}
+\]
+provided the limit exists. It represents the rate of change of the function with respect to the variable \( x_i \) while keeping all other variables constant.
+\end{definition}
+
+We can then combine these into a vector called the \emph{Gradient}.
+
+\begin{definition}{Gradient}{}
+Given a scalar-valued differentiable function \( f: \mathbb{R}^n \rightarrow \mathbb{R} \), the gradient of \( f \) at a point \( x \in \mathbb{R}^n \) is a vector of its first order partial derivatives. It is denoted by \( \nabla f(x) \) and is given by:
+\[
+\nabla f(x) = \begin{bmatrix}
+\frac{\partial f}{\partial x_1} \\
+\frac{\partial f}{\partial x_2} \\
+\vdots \\
+\frac{\partial f}{\partial x_n}
+\end{bmatrix}
+\]
+The gradient points in the direction of the steepest ascent of the function at the point \( x \).
+\end{definition}
+
+
+\begin{definition}{Critical Point}{}
+A \emph{critical point} is a point $\bar x$ where $\nabla f(\bar x) = 0$.
+\end{definition}
+
+\begin{theorem}{}{}
+Suppose that $f\colon \R^n \to \R$ is differentiable.  If $\min\{ f(x) : x \in \R^n\}$ has an optimizer $x^*$, then $x^*$ is a critical point of $f$ (i.e., $\nabla f(x^*) = 0$).
+\end{theorem}
+\begin{proof}
+Suppose \( x^* \) is an optimizer of \( f \) but \( \nabla f(x^*) \neq 0 \). Without loss of generality, let's assume that the first component of \( \nabla f(x^*) \) is positive (the argument for a negative component is similar).
+
+Then, the directional derivative of \( f \) at \( x^* \) in the direction of the standard basis vector \( e_1 \) (which is the vector with a 1 in the first position and 0 elsewhere) is positive. Formally, this is:
+\[
+D_{e_1} f(x^*) = \nabla f(x^*) \cdot e_1 > 0
+\]
+
+This means that for sufficiently small \( t > 0 \), we have:
+\[
+f(x^* + te_1) < f(x^*)
+\]
+
+This contradicts the assumption that \( x^* \) is an optimizer of \( f \), since we've found a point \( x^* + te_1 \) where \( f \) takes a smaller value than at \( x^* \).
+
+Therefore, our initial assumption that \( \nabla f(x^*) \neq 0 \) must be incorrect, and we conclude that \( \nabla f(x^*) = 0 \).
+
+This completes the proof.
+\end{proof}
+
+
+\subsection{Calculus: Second derivatives}
+We can also generalize multi-variate valuva
+
+\begin{definition}{Hessian}{}
+For a scalar-valued function \( f: \mathbb{R}^n \rightarrow \mathbb{R} \) that has continuous second order partial derivatives, the Hessian matrix of \( f \) at a point \( x \in \mathbb{R}^n \) is a square matrix of its second order partial derivatives. It is denoted by \( \nabla^2 f(x) \) or \( H_f(x) \) and is defined as:
+\[
+H_f(x) = \begin{bmatrix}
+\frac{\partial^2 f}{\partial x_1^2} & \frac{\partial^2 f}{\partial x_1 \partial x_2} & \dots & \frac{\partial^2 f}{\partial x_1 \partial x_n} \\
+\frac{\partial^2 f}{\partial x_2 \partial x_1} & \frac{\partial^2 f}{\partial x_2^2} & \dots & \frac{\partial^2 f}{\partial x_2 \partial x_n} \\
+\vdots & \vdots & \ddots & \vdots \\
+\frac{\partial^2 f}{\partial x_n \partial x_1} & \frac{\partial^2 f}{\partial x_n \partial x_2} & \dots & \frac{\partial^2 f}{\partial x_n^2}
+\end{bmatrix}
+\]
+The Hessian provides information about the local curvature of the function at the point \( x \).
+\end{definition}
+
+
+
+\begin{definition}{Positive Semidefinite}{}
+A square matrix \( A \) is said to be positive semidefinite if, for all non-zero vectors \( x \in \mathbb{R}^n \), the quadratic form \( x^\top A x \) is non-negative, i.e.,
+\[
+x^\top A x \geq 0
+\]
+for all \( x \in \mathbb{R}^n \). Equivalently, all the eigenvalues of \( A \) are non-negative.
+\end{definition}
+
+
+
+\subsection{Multivariate Calculus Examples}
+
+\begin{example}{2D Function: Gradient and Hessian}{}
+Consider the function:
+\[ f(x, y) = x^2 + 2xy + y^2 \]
+
+1. Gradient of \( f \):
+\[
+\nabla f(x, y) = \begin{bmatrix}
+\frac{\partial f}{\partial x} \\
+\frac{\partial f}{\partial y}
+\end{bmatrix}
+= \begin{bmatrix}
+2x + 2y \\
+2x + 2y
+\end{bmatrix}
+\]
+
+2. Hessian of \( f \):
+\[
+H_f(x, y) = \begin{bmatrix}
+\frac{\partial^2 f}{\partial x^2} & \frac{\partial^2 f}{\partial x \partial y} \\
+\frac{\partial^2 f}{\partial y \partial x} & \frac{\partial^2 f}{\partial y^2}
+\end{bmatrix}
+= \begin{bmatrix}
+2 & 2 \\
+2 & 2
+\end{bmatrix}
+\]
+The eigenvalues of this Hessian are \( 4 \) and \( 0 \), both non-negative. Therefore, the Hessian is positive semidefinite.
+\end{example}
+
+
+\begin{example}{Non-Quadratic 2D Function: Gradient and Hessian}{}
+Consider the function:
+\[ h(x, y) = x^3y + xy^2 \]
+
+1. Gradient of \( h \):
+\[
+\nabla h(x, y) = \begin{bmatrix}
+\frac{\partial h}{\partial x} \\
+\frac{\partial h}{\partial y}
+\end{bmatrix}
+= \begin{bmatrix}
+3x^2y + y^2 \\
+x^3 + 2xy
+\end{bmatrix}
+\]
+
+2. Hessian of \( h \):
+\[
+H_h(x, y) = \begin{bmatrix}
+\frac{\partial^2 h}{\partial x^2} & \frac{\partial^2 h}{\partial x \partial y} \\
+\frac{\partial^2 h}{\partial y \partial x} & \frac{\partial^2 h}{\partial y^2}
+\end{bmatrix}
+= \begin{bmatrix}
+6xy + 2y & 3x^2 + 2x \\
+3x^2 + 2x & 2x
+\end{bmatrix}
+\]
+
+Note that the entries of the Hessian are not constant and vary depending on the point \((x, y)\). The positive semidefiniteness of the Hessian will vary depending on the values of \(x\) and \(y\), and cannot be determined globally for this function without further analysis.
+\end{example}
+
+
+
+\begin{example}{3D Function: Gradient and Hessian}{}
+Consider the function:
+\[ g(x, y, z) = x^2 + y^2 + z^2 + 2xz \]
+
+1. Gradient of \( g \):
+\[
+\nabla g(x, y, z) = \begin{bmatrix}
+\frac{\partial g}{\partial x} \\
+\frac{\partial g}{\partial y} \\
+\frac{\partial g}{\partial z}
+\end{bmatrix}
+= \begin{bmatrix}
+2x + 2z \\
+2y \\
+2z + 2x
+\end{bmatrix}
+\]
+
+2. Hessian of \( g \):
+\[
+H_g(x, y, z) = \begin{bmatrix}
+\frac{\partial^2 g}{\partial x^2} & \frac{\partial^2 g}{\partial x \partial y} & \frac{\partial^2 g}{\partial x \partial z} \\
+\frac{\partial^2 g}{\partial y \partial x} & \frac{\partial^2 g}{\partial y^2} & \frac{\partial^2 g}{\partial y \partial z} \\
+\frac{\partial^2 g}{\partial z \partial x} & \frac{\partial^2 g}{\partial z \partial y} & \frac{\partial^2 g}{\partial z^2}
+\end{bmatrix}
+= \begin{bmatrix}
+2 & 0 & 2 \\
+0 & 2 & 0 \\
+2 & 0 & 2
+\end{bmatrix}
+\]
+The eigenvalues of this Hessian are approximately \( 4.73 \), \( 2 \), and \( -0.73 \). Since one eigenvalue is negative, the Hessian is not positive semidefinite.
+\end{example}
+
+
+
+
+
+\begin{lemma}{Gradient of Quadratic in Matrix Notation}{}
+Given a multivariate quadratic function in the form:
+\[ f(x) = x^\top Q x \]
+where \( x = [x_1, x_2, \ldots, x_n]^\top \) and \( Q \) is an \( n \times n \) symmetric matrix. 
+The gradient is given by
+\[ \nabla f(x) = 2Qx \]
+
+\end{lemma}
+\begin{proof}
+We can expand the function in terms of individual elements as:
+\[ f(x) = \sum_{i=1}^{n} \sum_{j=1}^{n} Q_{ij} x_i x_j \]
+
+Now, let's differentiate with respect to \( x_k \), for some \( k \in \{1, 2, \ldots, n\} \):
+\[ \frac{\partial f}{\partial x_k} = \frac{\partial}{\partial x_k} \left( \sum_{i=1}^{n} \sum_{j=1}^{n} Q_{ij} x_i x_j \right) \]
+
+For terms where \( i = k \):
+\[ \frac{\partial}{\partial x_k} (Q_{kj} x_k x_j) = Q_{kj} x_j \]
+And for terms where \( j = k \):
+\[ \frac{\partial}{\partial x_k} (Q_{ik} x_i x_k) = Q_{ik} x_i \]
+
+Given that \( Q \) is symmetric, we have \( Q_{kj} = Q_{jk} \). So, the sum of the two derivatives above for any given \( k \) is:
+\[ Q_{kj} x_j + Q_{jk} x_i = 2Q_{kj} x_j \]
+
+Thus, the k-th component of the gradient vector is:
+\[ \frac{\partial f}{\partial x_k} = 2 \sum_{j=1}^{n} Q_{kj} x_j \]
+
+In matrix notation, the gradient is:
+\[ \nabla f(x) = 2Qx \]
+\end{proof}
+
+
+\subsection{Taylor's Theorem}
+
+\begin{theorem}{Taylor's Theorem: Univariate Case}{}
+Let \( f: \mathbb{R} \rightarrow \mathbb{R} \) be a function such that \( f \) and its first \( n \) derivatives are continuous on an interval containing \( c \) and \( x \), and its \( (n+1) \)-th derivative exists on this interval. Then, for each \( x \) in the interval, there exists a point \( z \) between \( c \) and \( x \) such that:
+\[ 
+f(x) = f(c) + f'(c)(x-c) + \frac{f''(c)}{2!}(x-c)^2 + \dots + \frac{f^{(n)}(c)}{n!}(x-c)^n + R_n(x)
+\]
+where the remainder term is given by:
+\[ 
+R_n(x) = \frac{f^{(n+1)}(z)}{(n+1)!}(x-c)^{n+1}
+\]
+\end{theorem}
+
+This can be generalized the the multivariate case.  We present here just the version up to quadratic terms since this tends to be the most used version of the result.
+\begin{theorem}{Taylor's Theorem: Multivariate Case (Quadratic Terms)}{}
+Let \( f\colon \mathbb{R}^n \rightarrow \mathbb{R} \) be a scalar-valued function with continuous partial derivatives up to order 3 in a neighborhood of a point \( \mathbf{a} \) in \( \mathbb{R}^n \). Then, for a vector \( \mathbf{h} \) in this neighborhood, the function can be expressed as:
+\[ 
+f(\mathbf{a} + \mathbf{h}) = f(\mathbf{a}) + \nabla f(\mathbf{a})^\top \mathbf{h} + \frac{1}{2} \mathbf{h}^\top \nabla^2 f(\mathbf{a}) \mathbf{h} + R(\mathbf{h})
+\]
+where the remainder term is:
+\[ 
+R(\mathbf{h}) = O(\| \mathbf{h} \|^3)
+\]
+and \( R(\mathbf{h}) \) depends on the third order derivatives of \( f \), which are evaluated at some point between \( \mathbf{a} \) and \( \mathbf{a} + \mathbf{h} \).
+\end{theorem}
+
+
+
+
+\begin{lemma}{2nd Derivative and Critical Points}{}
+If \( f''(a) > 0 \) at a critical point \( a \) of a function \( f \), then \( a \) is a local minimum of \( f \).
+\end{lemma}
+
+\begin{proof}
+A point \( a \) is a critical point of \( f \) if and only if \( f'(a) = 0 \). Using Taylor's theorem, we can expand \( f \) about the point \( x = a \):
+
+\[
+f(x) = f(a) + f'(a)(x - a) + \frac{f''(c)}{2!}(x - a)^2
+\]
+
+for some \( c \) between \( a \) and \( x \).
+
+Given that \( f'(a) = 0 \), the expansion reduces to:
+
+\[
+f(x) = f(a) + \frac{f''(c)}{2!}(x - a)^2
+\]
+
+Now, if \( f''(a) > 0 \), then by the continuity of the second derivative, there exists an open interval \( (a - \delta, a + \delta) \) around \( a \) such that for all \( x \) in this interval (except possibly at \( x = a \)), \( f''(x) > 0 \).
+
+For \( x \) in this interval, the term \((x - a)^2\) is always non-negative. Given that \( f''(c) > 0 \) for \( c \) between \( a \) and \( x \), we deduce that:
+
+\[
+f(x) - f(a) = \frac{f''(c)}{2}(x - a)^2 > 0
+\]
+
+This implies that \( f(x) > f(a) \) for \( x \) in \( (a - \delta, a + \delta) \), except possibly at \( x = a \). Therefore, \( a \) is a local minimum of \( f \).
+\end{proof}
+
+Now let's look at the multivariate version of this.
+
+
+\begin{lemma}{Hessian and Local Minima}{}
+Let \( f\colon \mathbb{R}^n \rightarrow \mathbb{R} \) be a twice continuously differentiable function. If \( \nabla f(\mathbf{a}) = \mathbf{0} \) (i.e., \( \mathbf{a} \) is a critical point) and the Hessian matrix \( \nabla^2 f(\mathbf{a}) \) is positive semidefinite at \( \mathbf{a} \), then \( \mathbf{a} \) is a local minimum of \( f \).
+\end{lemma}
+
+\begin{proof}
+At the point \( \mathbf{a} \), since \( \nabla f(\mathbf{a}) = \mathbf{0} \), the first order Taylor expansion of \( f \) about \( \mathbf{a} \) is simply \( f(\mathbf{a}) \).
+
+The second order Taylor expansion of \( f \) about \( \mathbf{a} \) is:
+
+\[
+f(\mathbf{x}) \approx f(\mathbf{a}) + \frac{1}{2} (\mathbf{x}-\mathbf{a})^\top \nabla^2 f(\mathbf{a}) (\mathbf{x}-\mathbf{a})
+\]
+
+Given that the Hessian \( \nabla^2 f(\mathbf{a}) \) is positive semidefinite, for any vector \( \mathbf{v} \), we have:
+
+\[
+\mathbf{v}^\top \nabla^2 f(\mathbf{a}) \mathbf{v} \geq 0
+\]
+
+Choosing \( \mathbf{v} = \mathbf{x}-\mathbf{a} \), we get:
+
+\[
+(\mathbf{x}-\mathbf{a})^T \nabla^2 f(\mathbf{a}) (\mathbf{x}-\mathbf{a}) \geq 0
+\]
+
+Thus, for \( \mathbf{x} \) near \( \mathbf{a} \):
+
+\[
+f(\mathbf{x}) \geq f(\mathbf{a})
+\]
+
+This shows that \( f(\mathbf{a}) \) is less than or equal to the values of \( f \) near \( \mathbf{a} \), and hence \( \mathbf{a} \) is a local minimum of \( f \).
+\end{proof}
+
+
+
+\subsection{Constrained Minimization and the KKT Conditions}
+
+ \begin{definition}{Constrained Minimization}{def:constrained}
+        Given functions $f\colon \R^n \to \R$ and $g_i\colon \R^n \to \R$ for $i = 1, \dots, m$. The problem is formulated as:
+        \begin{align*}
+            &\min_{x \in \R^n} &&f(x) \\
+            &\text{subject to } && g_i(x) \leq 0 &\text{ for } i=1, \dots, m
+        \end{align*}
+    \end{definition}
+    
+
+The KKT conditions use the augmented Lagrangian problem to describe sufficient conditions for optimality of a convex program.  
+
+
+\begin{general}{KKT Conditions for Optimality}{}
+Given a convex function $f(x)\colon \R^d \to \R$ and convex functions $g_i(x)\colon \R^d \to \R$ for $i=1, \dots, m$,  the \emph{convex programming} problem is
+\begin{equation}
+\label{eq:convex-programming-KKT}
+\begin{split}
+\min \quad & f(x)\\
+\st  \quad & g_i(x) \leq 0  \quad  \text{ for } i=1, \dots, m\\
+& x \in \R^d
+\end{split}
+\end{equation}
+
+Given $(\bar x, \bar \lambda)$ with $\bar x \in \R^d$ and $\bar \lambda \in \R^m$, if the KKT conditions hold, then $\bar x$ is optimal for the convex programming problem.  
+
+The KKT conditions are
+\begin{enumerate}
+\item (Stationary).   
+\begin{equation}
+- \nabla f(\bar x) = \sum_{i=1}^m \bar \lambda_i \nabla g_i(\bar x)
+\end{equation}
+\item (Complimentary Slackness).   
+\begin{equation}
+ \bar \lambda_i  g_i(\bar x) = 0 \text{ for } i=1, \dots, m
+\end{equation}
+\item (Primal Feasibility).   
+\begin{equation}
+  g_i(\bar x) \leq 0 \text{ for } i=1, \dots, m
+\end{equation}
+\item (Dual Feasibility).   
+\begin{equation}
+ \bar \lambda_i \geq 0 \text{ for } i=1, \dots, m
+\end{equation}
+\end{enumerate}
+\end{general}
+
+If certain properties are true of the convex program, then every optimizer has these properties.   In particular, this holds for Linear Programming.
+
+
+\includegraphicsource[width = 0.6\textwidth]{tikz/kkt-optimal}
+
+\begin{minipage}{0.5\textwidth}
+\includegraphicsource[width = 1\textwidth]{tikz/kkt-non-optimal1}
+\end{minipage}
+\begin{minipage}{0.5\textwidth}
+\includegraphicsource[width = 1\textwidth]{tikz/kkt-non-optimal2}
+\end{minipage}
+
+
+
+
+
+
+

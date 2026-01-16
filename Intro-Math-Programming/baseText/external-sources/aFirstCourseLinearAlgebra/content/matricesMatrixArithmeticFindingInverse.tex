@@ -1,0 +1,538 @@
+
+\subsection{Finding the Inverse of a Matrix}
+
+In Example \ref{exa:verifyinginverse}, we were given $A^{-1}$ and asked to verify that this matrix
+was in fact the inverse of $A$. In this section, we explore how to find $A^{-1}$. 
+
+Let 
+\begin{equation*}
+A=\leftB
+\begin{array}{rr}
+1 & 1 \\
+1 & 2
+\end{array}
+\rightB
+\end{equation*}
+as in Example \ref{exa:verifyinginverse}. 
+In order to find $A^{-1}$, we need to find
+a matrix $\leftB
+\begin{array}{rr}
+x & z \\
+y & w
+\end{array}
+\rightB $ such that
+\begin{equation*}
+\leftB
+\begin{array}{rr}
+1 & 1 \\
+1 & 2
+\end{array}
+\rightB \leftB
+\begin{array}{rr}
+x & z \\
+y & w
+\end{array}
+\rightB =\leftB
+\begin{array}{rr}
+1 & 0 \\
+0 & 1
+\end{array}
+\rightB 
+\end{equation*}
+We can multiply these two matrices, and see that in order for this equation to be true, we must find the solution to the systems of equations,
+\begin{equation*}
+\begin{array}{c}
+x+y=1 \\
+x+2y=0
+\end{array}
+\end{equation*}
+and
+\begin{equation*}
+\begin{array}{c}
+z+w=0 \\
+z+2w=1
+\end{array}
+\end{equation*}
+Writing the augmented matrix for these two systems gives
+\begin{equation*}
+\leftB
+\begin{array}{rr|r}
+1 & 1 & 1 \\
+1 & 2 & 0
+\end{array}
+\rightB  
+%\label{inverse1a}
+\end{equation*}
+for the first system and
+\begin{equation}
+\leftB
+\begin{array}{rr|r}
+1 & 1 & 0 \\
+1 & 2 & 1
+\end{array}
+\rightB  \label{inverse2a}
+\end{equation}
+for the second. 
+
+Let's solve the first system. Take $-1$ times
+the first row and add to the second to get
+\begin{equation*}
+\leftB
+\begin{array}{rr|r}
+1 & 1 & 1 \\
+0 & 1 & -1
+\end{array}
+\rightB
+\end{equation*}
+Now take $-1$ times the second row and add to the first to
+get
+\begin{equation*}
+\leftB
+\begin{array}{rr|r}
+1 & 0 & 2 \\
+0 & 1 & -1
+\end{array}
+\rightB 
+\end{equation*}
+Writing in terms of variables, this says $x=2$ and $y=-1.$
+
+Now solve the second system, \ref{inverse2a} to find $z$ and $w.$ You will find that 
+$z = -1$ and $w = 1$.
+
+If we take the values found for $x,y,z,$ and $w$
+ and put them into our inverse matrix, we see that the inverse
+is
+\begin{equation*}
+A^{-1} = 
+\leftB
+\begin{array}{rr}
+x & z \\
+y & w
+\end{array}
+\rightB
+=
+\leftB
+\begin{array}{rr}
+2 & -1 \\
+-1 & 1
+\end{array}
+\rightB 
+\end{equation*}
+
+After taking the time to solve the second system, you may have noticed that exactly the same row
+operations were used to solve both systems. In each case, the end result was
+something of the form $\leftB I|X\rightB $ where $I$ is the
+identity and $X$ gave a column of the inverse. In the above, 
+\begin{equation*}
+\leftB
+\begin{array}{c}
+x \\
+y
+\end{array}
+\rightB
+\end{equation*}
+ the first column of the inverse was obtained by solving the first system and then the
+second column 
+\begin{equation*}
+\leftB
+\begin{array}{c}
+z \\
+w
+\end{array}
+\rightB 
+\end{equation*}
+
+To simplify this procedure, we could have solved both systems at once!
+To do so, we could have written
+\begin{equation*}
+\leftB
+\begin{array}{rr|rr}
+1 & 1 & 1 & 0 \\
+1 & 2 & 0 & 1
+\end{array}
+\rightB
+\end{equation*}
+
+and row reduced until we obtained
+\begin{equation*}
+\leftB
+\begin{array}{rr|rr}
+1 & 0 & 2 & -1 \\
+0 & 1 & -1 & 1
+\end{array}
+\rightB
+\end{equation*}
+and read off the inverse as the $2\times 2$ matrix on the right side.
+
+This exploration motivates the following important algorithm.
+
+\begin{algorithm}{Matrix Inverse Algorithm}{matrixinversionalgorithm}
+Suppose $A$ is an $n\times n$ matrix. \index{matrix!finding the inverse} To find $A^{-1}$ if it exists, form
+the augmented $n\times 2n$ matrix
+\begin{equation*}
+\leftB A|I\rightB
+\end{equation*}
+If possible do row operations until you obtain an $n\times 2n$
+matrix of the form
+\begin{equation*}
+\leftB I|B\rightB  
+\end{equation*}
+When this has been done, $B=A^{-1}.$ In this case, we say that $A$ is \textbf{invertible}. 
+If it is impossible to row reduce to a
+matrix of the form $\leftB I|B\rightB ,$ then $A$ has no inverse.
+\end{algorithm}
+
+This algorithm shows how to find the inverse if it exists. It will also tell you if
+$A$ does not have an inverse. 
+
+Consider the following example.
+
+\begin{example}{Finding the Inverse}{findinginverse}
+Let $A=\leftB
+\begin{array}{rrr}
+1 & 2 & 2 \\
+1 & 0 & 2 \\
+3 & 1 & -1
+\end{array}
+\rightB $. Find $A^{-1}$ if it exists.
+\end{example}
+
+\begin{solution} Set up the augmented matrix
+\begin{equation*}
+\leftB A|I\rightB =  
+\leftB
+\begin{array}{rrr|rrr}
+1 & 2 & 2 & 1 & 0 & 0 \\
+1 & 0 & 2 & 0 & 1 & 0 \\
+3 & 1 & -1 & 0 & 0 & 1
+\end{array}
+\rightB
+\end{equation*}
+
+Now we row reduce, with the goal of obtaining the $3 \times 3$ identity matrix on the left hand side.
+First, take $-1 $ times the first row and add to the second
+followed by $-3 $ times the first row added to the third row. This
+yields
+\begin{equation*}
+\allowbreak \leftB
+\begin{array}{rrr|rrr}
+1 & 2 & 2 & 1 & 0 & 0 \\
+0 & -2 & 0 & -1 & 1 & 0 \\
+0 & -5 & -7 & -3 & 0 & 1
+\end{array}
+\rightB 
+\end{equation*}
+Then take 5 times the second row and add to -2 times the third row.
+\begin{equation*}
+\leftB
+\begin{array}{rrr|rrr}
+1 & 2 & 2 & 1 & 0 & 0 \\
+0 & -10 & 0 & -5 & 5 & 0 \\
+0 & 0 & 14 & 1 & 5 & -2
+\end{array}
+\rightB
+\end{equation*}
+Next take the third row and add to $ -7$ times the first row.
+This yields
+\begin{equation*}
+\leftB 
+\begin{array}{rrr|rrr}
+-7 & -14 & 0 & -6 & 5 & -2 \\
+0 & -10 & 0 & -5 & 5 & 0 \\
+0 & 0 & 14 & 1 & 5 & -2
+\end{array}
+\rightB 
+\end{equation*}
+Now take $ -\frac{7}{5}$ times the second row and add to the first row.
+\begin{equation*}
+ \leftB
+\begin{array}{rrr|rrr}
+-7 & 0 & 0 & 1 & -2 & -2 \\
+0 & -10 & 0 & -5 & 5 & 0 \\
+0 & 0 & 14 & 1 & 5 & -2
+\end{array}
+\rightB 
+\end{equation*}
+Finally divide the first row by -7, the second row by -10 and the third row
+by 14 which yields
+\begin{equation*}
+\leftB 
+\begin{array}{rrr|rrr}
+1 & 0 & 0 & -\vspace{0.05in}\frac{1}{7} & \vspace{0.05in}\frac{2}{7} & \vspace{0.05in}\frac{2}{7} \\
+0 & 1 & 0 & \vspace{0.05in}\frac{1}{2} & -\vspace{0.05in}\frac{1}{2} & 0
+\\
+0 & 0 & 1 & \vspace{0.05in}\frac{1}{14} & \vspace{0.05in}\frac{5}{14} & -
+\vspace{0.05in}\frac{1}{7}
+\end{array}
+\rightB 
+\end{equation*}
+Notice that the left hand side of this matrix is now the $3 \times 3$ identity matrix $I_3$. 
+Therefore, the inverse is the $3 \times 3$ matrix on the right hand side, given by
+\begin{equation*}
+\leftB
+\begin{array}{rrr}
+-\vspace{0.05in}\frac{1}{7} & \vspace{0.05in}\frac{2}{7} & \vspace{0.05in}
+\frac{2}{7} \\
+\vspace{0.05in}\frac{1}{2} & -\vspace{0.05in}\frac{1}{2} & 0 \\
+\vspace{0.05in}\frac{1}{14} & \vspace{0.05in}\frac{5}{14} & -\vspace{0.05in}
+\frac{1}{7}
+\end{array}
+\rightB
+\end{equation*}
+\end{solution}
+
+It may happen that through this algorithm, you discover that the left hand side cannot 
+be row reduced to the identity matrix. Consider the following example of this situation. 
+
+\begin{example}{A Matrix Which Has No Inverse}{matrixnoinverse}
+Let $A=\leftB
+\begin{array}{rrr}
+1 & 2 & 2 \\
+1 & 0 & 2 \\
+2 & 2 & 4
+\end{array}
+\rightB $. Find $A^{-1}$ if it exists.
+\end{example}
+
+\begin{solution} Write the augmented matrix $\leftB A|I\rightB $
+\begin{equation*}
+\leftB
+\begin{array}{rrr|rrr}
+1 & 2 & 2 & 1 & 0 & 0 \\
+1 & 0 & 2 & 0 & 1 & 0 \\
+2 & 2 & 4 & 0 & 0 & 1
+\end{array}
+\rightB
+\end{equation*}
+and proceed to do row operations attempting to obtain $\leftB
+I|A^{-1}\rightB .$ Take $-1$ times the first row and add to the
+second. Then take $ -2 $ times the first row and add to the
+third row.
+\begin{equation*}
+\leftB 
+\begin{array}{rrr|rrr}
+1 & 2 & 2 & 1 & 0 & 0 \\
+0 & -2 & 0 & -1 & 1 & 0 \\
+0 & -2 & 0 & -2 & 0 & 1
+\end{array}
+\rightB
+\end{equation*}
+Next add $-1 $ times the second row to the third row.
+\begin{equation*}
+\leftB 
+\begin{array}{rrr|rrr}
+1 & 2 & 2 & 1 & 0 & 0 \\
+0 & -2 & 0 & -1 & 1 & 0 \\
+0 & 0 & 0 & -1 & -1 & 1
+\end{array}
+\rightB
+\end{equation*}
+At this point, you can see there will be no way to obtain $I$ on the
+left side of this augmented matrix.  Hence, there is no way to
+complete this algorithm, and therefore the inverse of $A$ does not
+exist. In this case, we say that $A$ is not invertible.
+\end{solution}
+
+If the algorithm provides an inverse for the original matrix, it is always possible to check your answer.
+To do so, use the method demonstrated in Example \ref{exa:verifyinginverse}. Check that the products $AA^{-1}$ and $A^{-1}A$ both equal the 
+identity matrix. Through this method, you can always be sure that you have calculated $A^{-1}$ properly!
+
+One way in which the inverse of a matrix is useful is to find the solution of a system of linear equations.
+Recall from Definition \ref{def:matrixform} that we can write a system of equations in matrix form, 
+which is of the form $AX=B$. Suppose you find the
+inverse of the matrix $A^{-1}$. Then you could multiply both sides of this
+equation on the left by $A^{-1}$ and simplify to obtain
+\begin{equation*}
+\begin{array}{c}
+\left( A^{-1} \right) AX =A^{-1}B \\
+\left(A^{-1}A\right) X = A^{-1}B \\
+IX = A^{-1}B \\
+X = A^{-1}B
+\end{array}
+\end{equation*}
+Therefore we can find $X$, the solution to the system, by computing $X=A^{-1}B$. 
+Note that once you
+have found $A^{-1}$, you can easily get the solution for different right
+hand sides (different $B$). It is always just $A^{-1}B$. 
+ 
+We will explore this method of finding the solution to a system in the following example. 
+
+\begin{example}{Using the Inverse to Solve a System of Equations}{inversetosolvesystem}
+ Consider the following system of
+equations. Use the inverse of a suitable matrix to give the solutions to
+this system.
+\begin{equation*}
+\begin{array}{c}
+x+z=1 \\
+x-y+z=3 \\
+x+y-z=2
+\end{array}
+\end{equation*}
+\end{example}
+
+\begin{solution} First, we can write the system of equations in matrix form
+\begin{equation}
+AX = 
+\leftB
+\begin{array}{rrr}
+1 & 0 & 1 \\
+1 & -1 & 1 \\
+1 & 1 & -1
+\end{array}
+\rightB \leftB
+\begin{array}{r}
+x \\
+y \\
+z
+\end{array}
+\rightB =\leftB
+\begin{array}{r}
+1 \\
+3 \\
+2
+\end{array}
+\rightB  = B  \label{inversesystem1}
+\end{equation}
+
+The inverse of the matrix 
+\begin{equation*}
+A = \leftB
+\begin{array}{rrr}
+1 & 0 & 1 \\
+1 & -1 & 1 \\
+1 & 1 & -1
+\end{array}
+\rightB
+\end{equation*}
+is
+\begin{equation*}
+A^{-1} = \leftB
+\begin{array}{rrr}
+0 & \vspace{0.05in}\frac{1}{2} & \vspace{0.05in}\frac{1}{2} \\
+1 & -1 & 0 \\
+1 & -\vspace{0.05in}\frac{1}{2} & -\vspace{0.05in}\frac{1}{2}
+\end{array}
+\rightB
+\end{equation*}
+
+Verifying this inverse is left as an exercise.
+
+From here, the solution to the given system \ref{inversesystem1} is
+found by
+\begin{equation*}
+\leftB
+\begin{array}{r}
+x \\
+y \\
+z
+\end{array}
+\rightB = A^{-1}B = \leftB
+\begin{array}{rrr}
+0 & \vspace{0.05in}\frac{1}{2} & \vspace{0.05in}\frac{1}{2} \\
+1 & -1 & 0 \\
+1 & -\vspace{0.05in}\frac{1}{2} & -\vspace{0.05in}\frac{1}{2}
+\end{array}
+\rightB \leftB
+\begin{array}{r}
+1 \\
+3 \\
+2
+\end{array}
+\rightB =\leftB
+\begin{array}{r}
+\vspace{0.05in}\frac{5}{2} \\
+-2 \\
+-\vspace{0.05in}\frac{3}{2}
+\end{array}
+\rightB 
+\end{equation*}
+\end{solution}
+
+What if the right side, $B$,  of \ref{inversesystem1} had been $\leftB
+\begin{array}{r}
+0 \\
+1 \\
+3
+\end{array}
+\rightB ?$ In other words, what would be the solution to
+\begin{equation*}
+\leftB
+\begin{array}{rrr}
+1 & 0 & 1 \\
+1 & -1 & 1 \\
+1 & 1 & -1
+\end{array}
+\rightB \leftB
+\begin{array}{r}
+x \\
+y \\
+z
+\end{array}
+\rightB =\leftB
+\begin{array}{r}
+0 \\
+1 \\
+3
+\end{array}
+\rightB ?
+\end{equation*}
+By the above discussion, the solution is given by 
+\begin{equation*}
+\leftB
+\begin{array}{r}
+x \\
+y \\
+z
+\end{array}
+\rightB = A^{-1}B = \leftB
+\begin{array}{rrr}
+0 & \vspace{0.05in}\frac{1}{2} & \vspace{0.05in}\frac{1}{2} \\
+1 & -1 & 0 \\
+1 & -\vspace{0.05in}\frac{1}{2} & -\vspace{0.05in}\frac{1}{2}
+\end{array}
+\rightB \leftB
+\begin{array}{r}
+0 \\
+1 \\
+3
+\end{array}
+\rightB =\leftB
+\begin{array}{r}
+2 \\
+-1 \\
+-2
+\end{array}
+\rightB 
+\end{equation*}
+This illustrates that for a system $AX=B$ where $A^{-1}$ exists, 
+it is easy to find the solution when the vector $B$ is changed.
+%
+%We conclude this section with some important properties of the inverse. 
+%
+%\begin{theorem}{Inverses of Transposes and Products}{inversetransposeprod}
+%Let $A, B$, and $A_i$ for $i=1,...,k$ be $n \times n$ matrices. 
+%\begin{enumerate}
+%\item
+%If $A$ is an invertible matrix, then $(A^{T})^{-1} = (A^{-1})^{T}$
+%\item
+%If $A$ and $B$ are invertible matrices, then $AB$ is invertible and $(AB)^{-1} = B^{-1}A^{-1}$
+%\item
+%If $A_1, A_2, ..., A_k$ are invertible, then the product $A_1A_2 \cdots A_k$ is invertible, and $(A_1A_2 \cdots A_k)^{-1} = A_k^{-1}A_{k-1}^{-1} \cdots A_2^{-1}A_1^{-1}$
+%\end{enumerate}
+%\end{theorem}
+%
+%Consider the following theorem.
+%
+%\begin{theorem}{Properties of the Inverse}{inverseproperties}
+%Let $A$ be an $n \times n$ matrix and $I$ the usual identity matrix. 
+%\begin{enumerate}
+%\item
+%$I$ is invertible and $I^{-1} = I$
+%\item
+%If $A$ is invertible then so is $A^{-1}$, and $(A^{-1})^{-1} = A$
+%\item
+%If $A$ is invertible then so is $A^k$, and $(A^k)^{-1} = (A^{-1})^k$
+%\item
+%If $A$ is invertible and $p$ is a nonzero real number, then $pA$ is invertible and $(pA)^{-1} = \frac{1}{p}A^{-1}$
+%\end{enumerate}
+%\end{theorem}

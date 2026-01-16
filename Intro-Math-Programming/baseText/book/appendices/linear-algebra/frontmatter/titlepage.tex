@@ -1,0 +1,356 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%Background colour
+\newpagecolor{titlemainbgcolour}
+\thispagestyle{empty}
+
+%%Calculations
+\newlength{\logoleft}
+\ifthenelse{\equal{\detokenize{print-cover}}{\jobname}}{
+% Start frontsideleft is set to inside the printing margin (0.125in), so subtract off
+% then add the desired 4cm inwards.  Multiply by 2 because of tikz scale factor.
+\setlength{\logoleft}{(\frontsideleft*2) + 4cm}
+}{
+\setlength{\logoleft}{4cm}
+}
+
+%%Top Banner and Lyryx Logo
+
+% We use scale=0.5 to make the lyryx logo a sane size without
+% needing very small coordinates to draw the logo below
+% NOTE: This makes measurements in cm half of the value shown
+\begin{tikzpicture}[overlay,remember picture,scale=0.5]
+
+\fill[lyryxcolour] (current page.north west) rectangle ([yshift=-9cm]current page.north east);
+
+% Grid is 4 units high, assuming the blue box is 6cm high, we want to leave 0.5cm on top and bottom of logo
+% yshift is measuring from the bottom of the letter l
+\draw [line width=5.75,color=white,shift={([xshift=\logoleft,yshift=-7cm]current page.north west)}]
+(0,0.05) -- (0,3.77) %L
+(1.48,2.92) -- (1.48,1.8) to [out=275,in=180] (2.3,1.08) to [out=0,in=265] (3.1,1.8) -- (3.1,2.92) %main curve of first Y
+(3.1,1.8) -- (3.1,0.9) to [out=265,in=359] (2.09,0.26) %lower curve of first Y
+(4.54,0.85) -- (4.54,1.9) to [out=89,in=178] (5.57,2.7) %R
+(6.8,2.92) -- (6.8,1.8) to [out=275,in=180] (7.62,1.08) to [out=0,in=265] (8.42,1.8) -- (8.42,2.92) %main curve of second Y
+(8.42,1.8) -- (8.42,0.9) to [out=265,in=359] (7.41,0.26) %lower curve of second Y
+(9.7,2.8) -- (12.02,0.17) %NW-SE arm of X
+(9.7,1.4) -- (11.65,3.65); %SW-NE arm of X
+\node [color=white,anchor=east] at ([xshift=-4cm,yshift=-5cm]current page.north east) {\fontencoding{T1}\fontfamily{lmr}\fontsize{40}{40}\fontseries{b}\selectfont with Open Texts};
+\end{tikzpicture}
+
+%%Include back cover on print-cover option
+\ifthenelse{\equal{\detokenize{print-cover}}{\jobname}}{
+\begin{tikzpicture}[overlay,remember picture,scale=0.5]
+% Main Lyryx logo with website address (on back cover)
+\node at ([xshift=9in,yshift=5in]current page.west) {\includegraphics[scale=0.5]{figures/LyryxLogo.eps}};
+\draw [line width=2,color=white,shift={([xshift=8.75in,yshift=4in]current page.west)}] (-9.5,0)--(10.5,0); 
+\node[font=\logofont] at ([xshift=8.75in,yshift=3.25in]current page.west) {\textcolor{white}{\fontsize{36}{48}\selectfont{\textbf{LYRYX.COM}}}};
+% Lyryx icons in banner of back cover
+% Left icon with 'adapted open text'
+\node (NDbook) at ([xshift=4in,yshift=-1.875in,anchor=north]current page.north west) {\includegraphics[height=0.75in]{figures/component-book.eps}};
+\node[componentnode] at ([xshift=-0.5cm,yshift=-1cm,anchor=north]NDbook.south) {\fontsize{10}{12}\selectfont{ADAPTED}\\\fontsize{10}{12}\selectfont{OPEN TEXT}};
+% Mid-left icon with 'formative online assessment'
+\node (NDassess) at ([xshift=7in,yshift=-1.875in,anchor=north]current page.north west) {\includegraphics[height=0.75in]{figures/component-assess.eps}};
+\node[componentnode] at ([yshift=-1cm,anchor=north]NDassess.south) {\fontsize{10}{12}\selectfont{FORMATIVE ONLINE}\\\fontsize{10}{12}\selectfont{ASSESSMENT}};
+% Mid-right icon with 'course supplements'
+\node (NDsupp) at ([xshift=10in,yshift=-1.875in,anchor=north]current page.north west) {\includegraphics[height=0.75in]{figures/component-supplement.eps}};
+\node[componentnode] at ([yshift=-1cm,anchor=north]NDsupp.south) {\fontsize{10}{12}\selectfont{COURSE}\\\fontsize{10}{12}\selectfont{SUPPLEMENTS}};
+% Right icon with 'course logistics & support'
+\node (NDlogis) at ([xshift=13in,yshift=-1.875in,anchor=north]current page.north west) {\includegraphics[height=0.75in]{figures/component-support.eps}};
+\node[componentnode] at ([yshift=-1cm,anchor=north]NDlogis.south) {\fontsize{10}{12}\selectfont{COURSE LOGISTICS}\\\fontsize{10}{12}\selectfont{\& SUPPORT}};
+\end{tikzpicture}
+
+\begin{tikzpicture}[overlay,remember picture,scale=0.5]
+\filldraw[titlemainboxcolour] ([yshift=-1cm]current page.west) rectangle ([yshift=-17cm]current page.east);
+\end{tikzpicture}
+
+%%Lyryx Icon for Back Cover
+%% set position
+\newlength{\biconx} %%back icon x coordinate
+\setlength{\biconx}{12.47in}
+\newlength{\bicony} %%back icon y coordinate
+\setlength{\bicony}{-4.33in}
+%% draw icon
+\begin{tikzpicture}[overlay,remember picture,scale=0.35, shift={([xshift=\biconx,yshift=\bicony]current page.west)}]
+%%Pencil
+\draw [color=lyryxcolour, fill=lyryxcolour]
+($(0,0)+(30:6.75cm)$) arc (30:330:6.75cm)
+--
+($(0,0)+(330:8.5cm)$) arc (330:30:8.5cm)
+--cycle;
+
+\draw [color=white, fill=white]
+($(0,0)+(330:6.75cm)$) arc (330:335:6.75cm)
+--
+($(0,0)+(335:8.5cm)$) arc (335:330:8.5cm)
+--cycle;
+
+\draw [color=gray, fill=gray]
+($(0,0)+(335:6.75cm)$) arc (335:342:6.75cm)
+--
+($(0,0)+(342:8.5cm)$) arc (342:335:8.5cm)
+--cycle;
+
+\draw [color=white, fill=white]
+($(0,0)+(30:6.75cm)$)
+--
+($(0,0)+(30:8.5cm)$)
+--
+($(0,0)+(18:7.75cm)$) 
+--cycle;
+
+%To make tip wavy
+\draw [color=white, fill=white]
+($(0,0)+(30:6.75cm)$).. controls ($(0,0)+(31.5:7cm)$) and ($(0,0)+(31.5:7.1cm)$)..($(0,0)+(30:7.333cm)$).. controls ($(0,0)+(31.5:7.57cm)$) and ($(0,0)+(31.5:7.67cm)$)..($(0,0)+(30:7.917cm)$)..controls ($(0,0)+(31.5:8.157cm)$) and ($(0,0)+(31.5:8.257cm)$)..($(0,0)+(30:8.5cm)$);
+
+\draw [color=lyryxcolour, fill=lyryxcolour]
+($(0,0)+(23:7.25cm)$)
+--
+($(0,0)+(23:8cm)$)
+--
+($(0,0)+(18:7.75cm)$) 
+--cycle;
+
+%To make lead curved
+\draw [color=lyryxcolour, fill=lyryxcolour]
+($(0,0)+(23:7.25cm)$) .. controls ($(0,0)+(24:7.525cm)$) and ($(0,0)+(24:7.725cm)$) .. ($(0,0)+(23:8cm)$);
+
+
+%%Book
+\draw [line width=0.4cm, color=lyryxcolour, shift={([xshift=\biconx,yshift=\bicony-1.38in]current page.west)}, rounded corners]
+(-4,0) .. controls (-2,0.75) and (2,0.75) .. (4,0) .. controls (4,2) .. (4,6.5) .. controls (3,6.75) and (1,6.5) .. (0,4.4).. controls (-1,6.5) and (-3,6.75) .. (-4,6.5).. controls (-4,2) .. (-4,0) -- cycle;
+\draw [line width=0.4cm, color=lyryxcolour, shift={([xshift=\biconx,yshift=\bicony-1.38in]current page.west)}]
+(0,5.24)--(0,4);
+
+%%Wireless 
+%Background 
+\draw [color=titlemainboxcolour, fill=titlemainboxcolour, shift={([xshift=\biconx,yshift=\bicony-1.58in]current page.west)}]
+($(0,-1)+(45:4.5cm)$) arc (45:135:4.5cm)
+--
+($(0,-1)+(135:4.5cm)$) 
+--(0,-1)
+--cycle;
+
+\draw [color=lyryxlogoy, fill=lyryxlogoy, shift={([xshift=\biconx,yshift=\bicony-1.58in]current page.west)}]   circle [radius=0.4cm];
+
+\draw [color=lyryxlogoy, fill=lyryxlogoy, shift={([xshift=\biconx,yshift=\bicony-1.58in]current page.west)}]
+($(0,0)+(45:1cm)$) arc (45:135:1cm)
+--
+($(0,0)+(135:1.5cm)$) arc (135:45:1.5cm)
+--cycle;
+
+\draw [color=lyryxlogoy, fill=lyryxlogoy,shift={([xshift=\biconx,yshift=\bicony-1.58in]current page.west)}]
+($(0,0)+(45:2cm)$) arc (45:135:2cm)
+--
+($(0,0)+(135:2.5cm)$) arc (135:45:2.5cm)
+--cycle;
+
+\draw [color=lyryxlogoy, fill=lyryxlogoy, shift={([xshift=\biconx,yshift=\bicony-1.58in]current page.west)}]
+($(0,0)+(45:3cm)$) arc (45:135:3cm)
+--
+($(0,0)+(135:3.5cm)$) arc (135:45:3.5cm)
+--cycle;
+
+\node [font=\logofont] at ([xshift=\biconx+0.1in,yshift=\bicony-4.13in]current page.west) {\textcolor{lyryxcolour}{\fontsize{22}{26}\selectfont{\textbf{CHAMPIONS OF}}} \textcolor{lyryxlogoy}{\fontsize{22}{26}\selectfont{\textbf{ACCESS}}} \textcolor{lyryxcolour}{\fontsize{22}{26}\selectfont{\textbf{TO KNOWLEDGE}}}};
+\end{tikzpicture}
+
+%%END OF BACK PRINT-COVER ICON
+}{}
+
+%% Title Information
+%%Fix spacing on print-cover
+\ifthenelse{\equal{\detokenize{print-cover}}{\jobname}}{
+\vspace{1.5em}
+}{
+\vspace{7em}
+}
+
+\begin{center}
+\textbf{
+	\fontsize{34}{36}\selectfont {\textcolor{subtitletextcolour}{\booksubtitle}}\\
+	\fontsize{54}{60}\selectfont {\textcolor{titletextcolour}{\booksubject}}\\ [.5\baselineskip]
+	\fontsize{34}{36}\selectfont {\textcolor{subtitletextcolour}{an Open Text}}\\ 
+}
+\end{center}
+
+%% Custom Edition Box for Samples
+\ifthenelse{\equal{\detokenize{print-cover}}{\jobname}}{
+\vspace{15em}
+
+\begin{tikzpicture}[overlay,remember picture,scale=0.5]
+
+\node at ([xshift=-15cm, yshift=-9cm]current page.east)
+{
+\begin{titlemainbox}
+%	\begin{center}
+ %               \mbox{}\\ [0.2\baselineskip]
+%		\fontsize{18pt}{18pt}\selectfont{\textbf{\textcolor{white}{Adapted for}}}\\ [.8\baselineskip]
+ %              \textcolor{lyryxcolour}{
+%		\fontsize{22pt}{26pt}\selectfont{\textbf{Virginia Tech}}\\ [.5\baselineskip]
+%		\fontsize{28pt}{30pt}\selectfont{\textbf{YOUR LINEAR ALGEBRA \\ COURSE}}\\ [1\baselineskip]
+ %               \textcolor{sampletextcolour}{\fontsize{28}{30}\selectfont{\textbf{TEXTBOOK SAMPLE}}}
+%}
+%	\end{center}
+	\begin{center}
+		\textcolor{lyryxcolour}{
+		\fontsize{28pt}{30pt}\selectfont{\textbf{ BASE TEXTBOOK - Hildebrand }}\\ [.5\baselineskip]
+		\fontsize{28pt}{30pt}\selectfont{\textbf{ VERSION 2017 REVISION A }}\\ [.3\baselineskip]
+		}
+	\end{center}
+\end{titlemainbox}
+};
+\end{tikzpicture}
+}{
+
+
+%%Custom Edition Box for Adaptations
+\ifthenelse{\equal{\detokenize{base-text}}{\jobname}\or\equal{\detokenize{print-cover-front}}{\jobname}}{
+\vspace{15em}
+
+\begin{tikzpicture}[overlay,remember picture,scale=0.5]
+
+\filldraw[titlemainboxcolour] ([yshift=-1cm]current page.west) rectangle ([yshift=-17cm]current page.east);
+
+\node at ([xshift=29cm, yshift=-9cm]current page.west)
+{
+\begin{titlemainbox}
+	\begin{center}
+		\textcolor{lyryxcolour}{
+		\fontsize{28pt}{30pt}\selectfont{\textbf{ BASE TEXTBOOK }}\\ [.5\baselineskip]
+		\fontsize{28pt}{30pt}\selectfont{\textbf{ VERSION 2017 -- REVISION A }}\\ [.3\baselineskip]
+		}
+	\end{center}
+\end{titlemainbox}
+};
+
+\end{tikzpicture}
+}{
+\vspace{15em}
+
+\begin{tikzpicture}[overlay,remember picture,scale=0.5]
+
+\filldraw[titlemainboxcolour] ([yshift=-1cm]current page.west) rectangle ([yshift=-17cm]current page.east);
+
+\node at ([xshift=28cm, yshift=-8cm]current page.west)
+{
+\begin{titlemainbox}
+	\begin{center}
+		\fontsize{18pt}{18pt}\selectfont{\textbf{\textcolor{white}{Adapted for}}}\\ [.8\baselineskip]
+		\textcolor{lyryxcolour}{
+		\fontsize{22pt}{26pt}\selectfont{\textbf{\institution}}\\ [.5\baselineskip]
+		\fontsize{18pt}{22pt}\selectfont{\textbf{\courseCode  \courseName}}\\ [.3\baselineskip]
+		\fontsize{18pt}{22pt}\selectfont{\textbf{\courseSection  \courseSession}}\\ [.3\baselineskip]
+		}
+	\end{center}
+\end{titlemainbox}};
+
+\end{tikzpicture}
+}
+}
+
+%%Lyryx Icon for All Types
+%% set position
+\newlength{\ficonx} %%front icon x coordinate
+\setlength{\ficonx}{-17.32in}
+\newlength{\ficony} %%front icon y coordinate
+\setlength{\ficony}{-4.13in}
+%% draw icon
+\begin{tikzpicture}[overlay,remember picture,scale=0.4, shift={([xshift=\ficonx,yshift=\ficony]current page.east)}]
+
+%%Pencil
+\draw [color=lyryxcolour, fill=lyryxcolour]
+($(0,0)+(30:6.75cm)$) arc (30:330:6.75cm)
+--
+($(0,0)+(330:8.5cm)$) arc (330:30:8.5cm)
+--cycle;
+
+\draw [color=white, fill=white]
+($(0,0)+(330:6.75cm)$) arc (330:335:6.75cm)
+--
+($(0,0)+(335:8.5cm)$) arc (335:330:8.5cm)
+--cycle;
+
+\draw [color=gray, fill=gray]
+($(0,0)+(335:6.75cm)$) arc (335:342:6.75cm)
+--
+($(0,0)+(342:8.5cm)$) arc (342:335:8.5cm)
+--cycle;
+
+\draw [color=white, fill=white]
+($(0,0)+(30:6.75cm)$)
+--
+($(0,0)+(30:8.5cm)$)
+--
+($(0,0)+(18:7.75cm)$) 
+--cycle;
+
+%To make tip wavy
+\draw [color=white, fill=white]
+($(0,0)+(30:6.75cm)$).. controls ($(0,0)+(31.5:7cm)$) and ($(0,0)+(31.5:7.1cm)$)..($(0,0)+(30:7.333cm)$).. controls ($(0,0)+(31.5:7.57cm)$) and ($(0,0)+(31.5:7.67cm)$)..($(0,0)+(30:7.917cm)$)..controls ($(0,0)+(31.5:8.157cm)$) and ($(0,0)+(31.5:8.257cm)$)..($(0,0)+(30:8.5cm)$);
+
+\draw [color=lyryxcolour, fill=lyryxcolour]
+($(0,0)+(23:7.25cm)$)
+--
+($(0,0)+(23:8cm)$)
+--
+($(0,0)+(18:7.75cm)$) 
+--cycle;
+
+%To make lead curved
+\draw [color=lyryxcolour, fill=lyryxcolour]
+($(0,0)+(23:7.25cm)$) .. controls ($(0,0)+(24:7.525cm)$) and ($(0,0)+(24:7.725cm)$) .. ($(0,0)+(23:8cm)$);
+
+
+%%Book
+\draw [line width=0.4cm, color=lyryxcolour, shift={([xshift=\ficonx,yshift=\ficony-1.38in]current page.east)}, rounded corners]
+(-4,0) .. controls (-2,0.75) and (2,0.75) .. (4,0) .. controls (4,2) .. (4,6.5) .. controls (3,6.75) and (1,6.5) .. (0,4.4).. controls (-1,6.5) and (-3,6.75) .. (-4,6.5).. controls (-4,2) .. (-4,0) -- cycle;
+\draw [line width=0.4cm, color=lyryxcolour, shift={([xshift=\ficonx,yshift=-14cm]current page.east)}]
+(0,5.24)--(0,4);
+
+%%Wireless 
+%Background 
+\draw [color=titlemainboxcolour, fill=titlemainboxcolour, shift={([xshift=\ficonx,yshift=\ficony-1.38in]current page.east)}]
+($(0,-1)+(45:4.5cm)$) arc (45:135:4.5cm)
+--
+($(0,-1)+(135:4.5cm)$) 
+--(0,-1)
+--cycle;
+
+\draw [color=lyryxlogoy, fill=lyryxlogoy, shift={([xshift=\ficonx,yshift=\ficony-1.38in]current page.east)}]   circle [radius=0.4cm];
+
+\draw [color=lyryxlogoy, fill=lyryxlogoy, shift={([xshift=\ficonx,yshift=\ficony-1.38in]current page.east)}]
+($(0,0)+(45:1cm)$) arc (45:135:1cm)
+--
+($(0,0)+(135:1.5cm)$) arc (135:45:1.5cm)
+--cycle;
+
+\draw [color=lyryxlogoy, fill=lyryxlogoy, shift={([xshift=\ficonx,yshift=\ficony-1.38in]current page.east)}]
+($(0,0)+(45:2cm)$) arc (45:135:2cm)
+--
+($(0,0)+(135:2.5cm)$) arc (135:45:2.5cm)
+--cycle;
+
+\draw [color=lyryxlogoy, fill=lyryxlogoy, shift={([xshift=\ficonx,yshift=\ficony-1.38in]current page.east)}]
+($(0,0)+(45:3cm)$) arc (45:135:3cm)
+--
+($(0,0)+(135:3.5cm)$) arc (135:45:3.5cm)
+--cycle;
+
+\node [font=\logofont] at ([xshift=\ficonx+0.2in, yshift=\ficony-3.74in]current page.east) {\textcolor{lyryxcolour}{\fontsize{12}{26}\selectfont{\textbf{ADAPTABLE | ACCESSIBLE | AFFORDABLE}}}};
+
+
+\end{tikzpicture}
+
+\vfill
+
+% License 
+\begin{center*}
+        {\fontsize{16pt}{18pt}\selectfont \textcolor{subtitletextcolour}{\textbf {by Robert Hildebrand}}}
+        \smallskip \\
+        {\fontsize{16pt}{18pt}\selectfont \textcolor{subtitletextcolour}{\textbf{based on the original text by Robert Hildebrand}}}
+        \smallskip \\
+	{\fontsize{12pt}{12pt}\selectfont \textcolor{cctextcolour}{\textbf{Creative Commons License (CC BY SA 4.0)}}}
+\end{center*}
+
+%\setlength{\parskip}{\baselineskip}
+\afterpage{\restorepagecolor}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
