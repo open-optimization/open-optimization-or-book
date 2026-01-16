@@ -1,0 +1,226 @@
+\subsubsection{Power Methods}
+
+While the $QR$ algorithm can be used to compute eigenvalues, there is a useful and fairly elementary technique for
+finding the eigenvector and associated eigenvalue nearest to a given complex number which
+is called the {\em shifted inverse power method}. It tends to work extremely well provided you
+start with something which is fairly close to an eigenvalue.
+
+Power methods are based the consideration of powers of a given matrix. Let $
+\left\{ 
+\vect{x}_{1},\cdots ,\vect{x}_{n}\right\} $ be a basis of eigenvectors for $
+\mathbb{C}^{n}$ such that $A\vect{x}_{n}=\lambda _{n}\vect{x}_{n}.$ Now let $
+\vect{u}_{1}$ be some nonzero vector. Since $\left\{ \vect{x}_{1},\cdots ,\vect{x}_{n}\right\} $ is a basis, there exists unique scalars, $c_{i}$ such that 
+\begin{equation*}
+\vect{u}_{1}=\sum_{k=1}^{n}c_{k}\vect{x}_{k}
+\end{equation*}
+Assume you have not been so unlucky as to pick $\vect{u}_{1}$ in such a way
+that $c_{n}=0.$ Then let $A\vect{u}_{k}=\vect{u}_{k+1}$ so that 
+\begin{equation}
+\vect{u}_{m}=A^{m}\vect{u}_{1}=\sum_{k=1}^{n-1}c_{k}\lambda _{k}^{m}\vect{x}
+_{k}+\lambda _{n}^{m}c_{n}\vect{x}_{n}.  \label{20maye1}
+\end{equation}
+For large $m$ the last term, $\lambda _{n}^{m}c_{n}\vect{x}_{n},$ determines
+quite well the direction of the vector on the right. This is because $
+\left\vert \lambda _{n}\right\vert $ is larger than $\left\vert \lambda
+_{k}\right\vert $ for $k<n$ and so for a large $m,$ the sum, $\sum_{k=1}^{n-1}c_{k}\lambda _{k}^{m}\vect{x}_{k},$ on the right is fairly
+insignificant. Therefore, for large $m,$ $\vect{u}_{m}$ is essentially a
+multiple of the eigenvector $\vect{x}_{n},$ the one which goes with $\lambda
+_{n}.$ The only problem is that there is no control of the size of the
+vectors $\vect{u}_{m}.$ You can fix this by scaling. Let $S_{2}$ denote the
+entry of $A\vect{u}_{1}$ which is largest in absolute value. We call this a 
+\index{scaling factor} \textbf{scaling factor}. Then $\vect{u}_{2}$ will not be just $A\vect{u}_{1}$ but $A\vect{u}_{1}/S_{2}.$ Next
+let $S_{3}$ denote the entry of $A\vect{u}_{2}$ which has largest absolute
+value and define $\vect{u}_{3}\equiv A\vect{u}_{2}/S_{3}.$ Continue this way.
+The scaling just described does not destroy the relative insignificance of
+the term involving a sum in \ref{20maye1}. Indeed it amounts to nothing more
+than changing the units of length. Also note that from this scaling
+procedure, the absolute value of the largest element of $\vect{u}_{k}$ is
+always equal to 1. Therefore, for large $m,$
+\begin{equation*}
+\vect{u}_{m}=\vspace{0.05in}\frac{\lambda _{n}^{m}c_{n}\vect{x}_{n}}{S_{2}S_{3}\cdots S_{m}}+\left( \text{relatively insignificant term}\right) .
+\end{equation*}
+Therefore, the entry of $A\vect{u}_{m}$ which has the largest absolute value
+is essentially equal to the entry having largest absolute value of 
+\begin{equation*}
+A\left( \vspace{0.05in}\frac{\lambda _{n}^{m}c_{n}\vect{x}_{n}}{S_{2}S_{3}\cdots S_{m}}\right) =\vspace{0.05in}\frac{\lambda _{n}^{m+1}c_{n}
+\vect{x}_{n}}{S_{2}S_{3}\cdots S_{m}}\approx \lambda _{n}\vect{u}_{m}
+\end{equation*}%
+and so for large $m,$ it must be the case that $\lambda _{n}\approx S_{m+1}.$
+This suggests the following procedure.
+
+\begin{procedure}{Finding the Largest Eigenvalue with its Eigenvector}{}
+\begin{enumerate}
+\item Start with a vector $\vect{u}_{1}$ which you hope has a component in
+the direction of $\vect{x}_{n}.$ The vector $\left( 1,\cdots ,1\right) ^{T}$
+is usually a pretty good choice.
+
+\item If $\vect{u}_{k}$ is known, 
+\begin{equation*}
+\vect{u}_{k+1}=\frac{A\vect{u}_{k}}{S_{k+1}}
+\end{equation*}
+where $S_{k+1}$ is the entry of $A\vect{u}_{k}$ which has largest absolute
+value.
+
+\item When the scaling factors, $S_{k}$ are not changing much, $S_{k+1}$
+will be close to the eigenvalue and $\vect{u}_{k+1}$ will be close to an
+eigenvector.
+
+\item Check your answer to see if it worked well.
+\end{enumerate}
+\end{procedure}
+
+The shifted inverse power method involves finding the eigenvalue closest to
+a given complex number along with the associated eigenvalue. If $\mu $ is a
+complex number and you want to find $\lambda $ which is closest to $\mu ,$
+you could consider the eigenvalues and eigenvectors of $\left( A-\mu
+I\right) ^{-1}$. Then $A\vect{x}=\lambda \vect{x}$ if and only if 
+\begin{equation*}
+\left( A-\mu I\right) \vect{x}=\left( \lambda -\mu \right) \vect{x}
+\end{equation*}
+If and only if 
+\begin{equation*}
+\frac{1}{\lambda -\mu }\vect{x}=\left( A-\mu I\right) ^{-1}\vect{x}
+\end{equation*}
+Thus, if $\lambda $ is the closest eigenvalue of $A$ to $\mu $ then out of
+all eigenvalues of $\left( A-\mu I\right) ^{-1},$ you would have $\frac{1}{
+\lambda -\mu }$ would be the largest. Thus all you have to do is apply the
+power method to $\left( A-\mu I\right) ^{-1}$ and the eigenvector you get
+will be the eigenvector which corresponds to $\lambda $ where $\lambda $ is
+the closest to $\mu $ of all eigenvalues of $A$. You could use the
+eigenvector to determine this directly.
+
+\begin{example}{Finding Eigenvalue and Eigenvector}{}
+Find the eigenvalue and eigenvector for 
+\begin{equation*}
+\leftB 
+\begin{array}{rrr}
+3 & 2 & 1 \\ 
+-2 & 0 & -1 \\ 
+-2 & -2 & 0
+\end{array}
+\rightB
+\end{equation*}
+which is closest to $.9+.9i$.
+\end{example}
+
+\begin{solution}
+Form 
+\begin{eqnarray*}
+&&\left( \leftB 
+\begin{array}{rrr}
+3 & 2 & 1 \\ 
+-2 & 0 & -1 \\ 
+-2 & -2 & 0
+\end{array}
+\rightB -\left( .9+.9i\right) \leftB 
+\begin{array}{rrr}
+1 & 0 & 0 \\ 
+0 & 1 & 0 \\ 
+0 & 0 & 1
+\end{array}
+\rightB \right) ^{-1} \\
+&=&\leftB 
+\begin{array}{ccc}
+-0.619\,19-10.\,\allowbreak 545i & -5.\,\allowbreak 524\,9-4.\,\allowbreak
+972\,4i & -0.370\,57-5.\,\allowbreak 821\,3i \\ 
+5.\,\allowbreak 524\,9+4.\,\allowbreak 972\,4i & 5.\,\allowbreak
+276\,2+0.248\,62i & 2.\,\allowbreak 762\,4+2.\,\allowbreak 486\,2i \\ 
+0.741\,14+11.\,\allowbreak 643i & 5.\,\allowbreak 524\,9+4.\,\allowbreak
+972\,4i & 0.492\,52+6.\,\allowbreak 918\,9i%
+\end{array}%
+\rightB
+\end{eqnarray*}
+Then pick an initial guess an multiply by this matrix raised to a large
+power. 
+\begin{equation*}
+\leftB 
+\begin{array}{ccc}
+-0.619\,19-10.\,\allowbreak 545i & -5.\,\allowbreak 524\,9-4.\,\allowbreak
+972\,4i & -0.370\,57-5.\,\allowbreak 821\,3i \\ 
+5.\,\allowbreak 524\,9+4.\,\allowbreak 972\,4i & 5.\,\allowbreak
+276\,2+0.248\,62i & 2.\,\allowbreak 762\,4+2.\,\allowbreak 486\,2i \\ 
+0.741\,14+11.\,\allowbreak 643i & 5.\,\allowbreak 524\,9+4.\,\allowbreak
+972\,4i & 0.492\,52+6.\,\allowbreak 918\,9i%
+\end{array}
+\rightB ^{15}\leftB 
+\begin{array}{c}
+1 \\ 
+1 \\ 
+1
+\end{array}
+\rightB
+\end{equation*}
+This equals 
+\begin{equation*}
+\leftB 
+\begin{array}{c}
+1.\,\allowbreak 562\,9\times 10^{13}-3.\,\allowbreak 899\,3\times 10^{12}i
+\\ 
+-5.\,\allowbreak 864\,5\times 10^{12}+9.\,\allowbreak 764\,2\times 10^{12}i
+\\ 
+-1.\,\allowbreak 562\,9\times 10^{13}+3.\,\allowbreak 899\,9\times 10^{12}i
+\end{array}
+\rightB
+\end{equation*}
+Now divide by an entry to make the vector have reasonable size. This yields 
+\begin{equation*}
+\leftB 
+\begin{array}{c}
+-0.999\,99-3.\,\allowbreak 614\,0\times 10^{-5}i \\ 
+0.499\,99-0.499\,99i \\ 
+1.0
+\end{array}
+\rightB
+\end{equation*}
+which is close to 
+\begin{equation*}
+\leftB 
+\begin{array}{c}
+-1 \\ 
+0.5-0.5i \\ 
+1.0
+\end{array}
+\rightB
+\end{equation*}
+Then 
+\begin{equation*}
+\leftB 
+\begin{array}{rrr}
+3 & 2 & 1 \\ 
+-2 & 0 & -1 \\ 
+-2 & -2 & 0
+\end{array}
+\rightB \leftB 
+\begin{array}{c}
+-1 \\ 
+0.5-0.5i \\ 
+1.0
+\end{array}
+\rightB =\leftB 
+\begin{array}{c}
+-1.0-1.0i \\ 
+1.0 \\ 
+1.0+1.0i
+\end{array}
+\rightB 
+\end{equation*}
+Now to determine the eigenvalue, you could just take the ratio of
+corresponding entries. Pick the two corresponding entries which have the
+largest absolute values. In this case, you would get the eigenvalue is $1+i$
+which happens to be the exact eigenvalue. Thus an eigenvector and eigenvalue
+are 
+\begin{equation*}
+\leftB 
+\begin{array}{c}
+-1 \\ 
+0.5-0.5i \\ 
+1.0
+\end{array}
+\rightB, 1+i
+\end{equation*}
+\end{solution}
+
+Usually it won't work out so well but you can still find what is desired.
+Thus, once you have obtained approximate eigenvalues using the $QR$
+algorithm, you can find the eigenvalue more exactly along with an
+eigenvector associated with it by using the shifted inverse power method.

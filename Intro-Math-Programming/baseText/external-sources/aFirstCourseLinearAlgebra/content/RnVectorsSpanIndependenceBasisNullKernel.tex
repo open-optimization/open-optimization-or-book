@@ -1,0 +1,719 @@
+\subsection{Row Space, Column Space, and Null Space of a Matrix}
+
+We begin this section with a new definition.
+
+\begin{definition}{Row and Column Space}{rowcolumnspace}
+Let $A$ be an $m\times n$ matrix. The \textbf{column space} of $A$, written $\func{col}(A)$, is the
+span of the columns. The \textbf{row space} of $A$, written $\func{row}(A)$, is the span of the rows.
+\index{column space}\index{row space}
+\index{matrix!column space}\index{matrix!row space}
+\end{definition}
+
+Using the \rref \;, we can obtain an efficient description of the row and column space of
+a matrix. Consider the following lemma.
+
+\begin{lemma}{Effect of Row Operations on Row Space}{rowoperationsrowspace}
+Let $A$ and $B$ be $m\times n$ matrices such that $A$ can be carried to $B$ by elementary row $\left[ \mbox{column} \right]$ operations. Then $\func{row}(A)=\func{row}(B)$ $\left[\func{col}(A)=\func{col}(B) \right]$.
+\end{lemma}
+
+\begin{proof}
+We will prove that the above is true for row operations, which can be easily applied to column operations. 
+
+Let $\vect{r}_1, \vect{r}_2, \ldots, \vect{r}_m$ denote the rows of $A$.
+
+\begin{itemize}
+\item If $B$ is obtained from $A$ by a interchanging two rows of $A$, then
+$A$ and $B$ have exactly the same rows, so $\func{row}(B)=\func{row}(A)$.
+
+\item
+Suppose $p\neq 0$, and suppose that for some $j$, $1\leq j\leq m$,
+$B$ is obtained from $A$ by multiplying row $j$ by $p$.
+Then 
+
+\[ \func{row}(B)=\func{span}\{ \vect{r}_1, \ldots, 
+p\vect{r}_{j}, \ldots, \vect{r}_m\}.  \]
+
+Since
+\[ \{ \vect{r}_1, \ldots, 
+p\vect{r}_{j}, \ldots, \vect{r}_m\} \subseteq\func{row}(A),\]
+
+it follows that $\func{row}(B)\subseteq\func{row}(A)$.
+Conversely, since
+
+\[ \{ \vect{r}_1, \ldots, \vect{r}_m\}\subseteq\func{row}(B),\]
+
+it follows that $\func{row}(A)\subseteq\func{row}(B)$.
+Therefore, $\func{row}(B)=\func{row}(A)$.
+
+\item
+Suppose $p\neq 0$, and suppose that for some $i$ and $j$,
+$1\leq i,j\leq m$,
+$B$ is obtained from $A$ by adding $p$ time row $j$ to row $i$.
+Without loss of generality, we may assume $i<j$.
+
+Then 
+
+\[ \func{row}(B)=\func{span}\{ \vect{r}_1, \ldots, \vect{r}_{i-1},
+\vect{r}_i+p\vect{r}_j, \ldots,\vect{r}_j,\ldots, \vect{r}_m\}.  \]
+
+Since
+
+\[ \{ \vect{r}_1, \ldots, \vect{r}_{i-1}, 
+\vect{r}_i+p\vect{r}_{j}, \ldots, \vect{r}_m\} \subseteq\func{row}(A),\]
+
+it follows that $\func{row}(B)\subseteq\func{row}(A)$.
+
+Conversely, since
+
+\[ \{ \vect{r}_1, \ldots, \vect{r}_m\}\subseteq\func{row}(B),\]
+
+it follows that $\func{row}(A)\subseteq\func{row}(B)$.
+Therefore, $\func{row}(B)=\func{row}(A)$.
+\end{itemize}
+\end{proof}
+
+Consider the following lemma. 
+
+\begin{lemma}{Row Space of a \EF\;Matrix}{echelonformrowspace}
+Let $A$ be an $m \times n$ matrix and let $R$ be its \ef. Then the nonzero rows of $R$ form a basis of $\func{row}(R)$, and consequently of $\func{row}(A)$. 
+\end{lemma}
+
+This lemma suggests that we can examine the \ef\;of a matrix in order to obtain the row space. Consider now the column space. The column space can be obtained by simply saying that
+it equals the span of all the columns. However, you can often get the column
+space as the span of fewer columns than this. A variation of the previous lemma provides a solution. Suppose $A$ is row reduced to its \ef\;$R$. Identify the pivot columns of $R$ (columns which have leading ones), and take the corresponding columns of $A$. It turns out that this forms a basis of $\func{col}(A)$. 
+
+Before proceeding to an example of this concept, we revisit the definition of rank. 
+
+\begin{definition}{Rank of a Matrix}{rankrowspace}
+Previously, we defined $\func{rank}(A)$ to be the number of leading entries in the \ef\;of $A$. Using an understanding of dimension and row space, we can now define rank as follows:
+\[
+\mbox{rank}(A) = \dim(\func{row}(A))
+\]
+\end{definition}
+
+Consider the following example. 
+
+\begin{example}{Rank, Column and Row Space}{rankcolumnrowspace}
+Find the rank of the following matrix and describe the column and row spaces.
+\begin{equation*}
+A = 
+\leftB
+\begin{array}{rrrrr}
+1 & 2 & 1 & 3 & 2 \\
+1 & 3 & 6 & 0 & 2 \\
+3 & 7 & 8 & 6 & 6
+\end{array}
+\rightB  
+\end{equation*}
+\end{example}
+
+\begin{solution}
+The \rref \;of $A$ is 
+\begin{equation*}
+\leftB 
+\begin{array}{rrrrr}
+1 & 0 & -9 & 9 & 2 \\ 
+0 & 1 & 5 & -3 & 0 \\ 
+0 & 0 & 0 & 0 & 0
+\end{array}
+\rightB 
+\end{equation*}
+Therefore, the rank is $2$.
+
+Notice that the first two columns of $R$ are pivot columns. By the discussion following Lemma \ref{lem:echelonformrowspace}, we find the corresponding columns of $A$, in this case the first two columns. Therefore a basis for $\func{col}(A)$ is given by
+\[
+\left\{\leftB 
+\begin{array}{r}
+1 \\ 
+1 \\ 
+3
+\end{array}
+\rightB , \leftB 
+\begin{array}{r}
+2 \\ 
+3 \\ 
+7
+\end{array}
+\rightB
+\right\}
+\] 
+
+ For
+example, consider the third column of the original matrix. It can be written as a linear combination of the first two columns of the original matrix as follows.
+\begin{equation*}
+\leftB 
+\begin{array}{r}
+1 \\ 
+6 \\ 
+8
+\end{array}
+\rightB =-9\leftB 
+\begin{array}{r}
+1 \\ 
+1 \\ 
+3
+\end{array}
+\rightB +5\leftB 
+\begin{array}{r}
+2 \\ 
+3 \\ 
+7
+\end{array}
+\rightB 
+\end{equation*}
+
+What about an efficient description of the row space? By Lemma \ref{lem:echelonformrowspace} we know that the nonzero rows of $R$ create a basis of $\func{row}(A)$.  For the above matrix, the row space equals 
+\[
+\func{row}(A) = 
+\func{span} \left\{
+\leftB 
+\begin{array}{rrrrr}
+1 & 0 & -9 & 9 & 2
+\end{array}
+\rightB, \leftB 
+\begin{array}{rrrrr}
+0 & 1 & 5 & -3 & 0
+\end{array}
+\rightB
+\right\}
+\]
+\end{solution}
+
+Notice that the column space of $A$ is given as the span of columns of the original matrix, while the row space of $A$ is the span of rows of the \rref \; of $A$. 
+
+Consider another example.
+
+\begin{example}{Rank, Column and Row Space}{rankcolumnrowspace2}
+Find the rank of the following matrix and describe the
+column and row spaces.
+\begin{equation*}
+\leftB
+\begin{array}{rrrrrr}
+1 & 2 & 1 & 3 & 2 \\
+1 & 3 & 6 & 0 & 2 \\
+1 & 2 & 1 & 3 & 2 \\
+1 & 3 & 2 & 4 & 0
+\end{array}
+\rightB
+\end{equation*}
+\end{example}
+
+\begin{solution}
+The \rref \;is 
+\begin{equation*}
+\leftB 
+\begin{array}{rrrrrr}
+1 & 0 & 0 & 0 & \vspace{0.05in}\frac{13}{2} \\ 
+0 & 1 & 0 & 2 & -\vspace{0.05in}\frac{5}{2} \\ 
+0 & 0 & 1 & -1 & \vspace{0.05in}\frac{1}{2} \\ 
+0 & 0 & 0 & 0 & 0
+\end{array}
+\rightB 
+\end{equation*}
+and so the rank is $3$. The row space is given by 
+\begin{equation*}
+\func{row}(A) = \func{span} \left\{ 
+\leftB 
+\begin{array}{ccccc}
+1 & 0 & 0 & 0 & \frac{13}{2}
+\end{array}
+\rightB,
+\leftB 
+\begin{array}{rrrrr}
+0 & 1 & 0 & 2 & -\frac{5}{2}
+\end{array}
+\rightB , 
+\leftB 
+\begin{array}{rrrrr}
+0 & 0 & 1 & -1 & \frac{1}{2}
+\end{array}
+\rightB
+ \right\}
+\end{equation*}
+Notice that the first three columns of the \rref \;are pivot columns. The column space is the span of the first three columns in the \textbf{original matrix}, 
+\begin{equation*}
+\func{col}(A) = \func{span} \left\{ \leftB 
+\begin{array}{r}
+1 \\ 
+1 \\ 
+1 \\ 
+1
+\end{array}
+\rightB, \; \leftB 
+\begin{array}{r}
+2 \\ 
+3 \\ 
+2 \\ 
+3
+\end{array}
+\rightB , \; \leftB 
+\begin{array}{r}
+1 \\ 
+6 \\ 
+1 \\ 
+2
+\end{array}
+\rightB \right\}
+\end{equation*}
+
+\end{solution}
+
+Consider the solution given above for Example
+\ref{exa:rankcolumnrowspace2}, where the rank of $A$ equals
+$3$. Notice that the row space and the column space each had dimension
+equal to $3$. It turns out that this is not a coincidence, and this
+essential result is referred to as the Rank Theorem and is given
+now. Recall that we defined $\func{rank}(A) = \func{dim}(\func{row}(A))$. 
+
+\begin{theorem}{Rank Theorem}{ranktheorem}
+Let $A$ be an $m \times n$ matrix. Then $\func{dim}(\func{col} (A))$, the dimension of the column space, is equal to the dimension of the row space, $\func{dim}(\func{row}(A))$.
+\end{theorem}
+
+The following statements all follow from the Rank Theorem.
+
+\begin{corollary}{Results of the Rank Theorem}{ranktheorem}
+Let $A$ be a matrix. Then the following are true:
+\begin{enumerate}
+\item
+ $\func{rank}(A) = \func{rank}(A^T)$.
+\item
+For $A$ of size $m \times n$, $\func{rank}(A) \leq m$ and $\func{rank}(A) \leq n$.
+\item
+For $A$ of size $n \times n$,  $A$ is invertible if and only if $\func{rank}(A) = n$.
+\item
+For invertible matrices $B$ and $C$ of appropriate size, 
+$\func{rank}(A) = \func{rank}(BA) = \func{rank}(AC)$. 
+\end{enumerate}
+\end{corollary}
+
+Consider the following example.
+
+\begin{example}{Rank of the Transpose}{ranktranspose}
+Let \[
+A = 
+\leftB
+\begin{array}{rr}
+1 & 2 \\
+-1 & 1 
+\end{array} \rightB
+\]
+Find $\func{rank}(A)$ and $\func{rank}(A^T)$.
+\end{example}
+
+\begin{solution}
+To find $\func{rank}(A)$ we first row reduce to find the \rref.
+\[
+A = 
+\leftB
+\begin{array}{rr}
+1 & 2 \\
+-1 & 1 
+\end{array} \rightB
+\rightarrow \cdots \rightarrow
+\leftB \begin{array}{rr}
+1 & 0 \\
+0 & 1 
+\end{array}\rightB
+\]
+
+Therefore the rank of $A$ is $2$. Now consider $A^T$ given by 
+\[
+A^T = \leftB \begin{array}{rr}
+1 & -1 \\
+2 & 1 
+\end{array} \rightB
+\]
+Again we row reduce to find the \rref.
+\[
+\leftB \begin{array}{rr}
+1 & -1 \\
+2 & 1 
+\end{array} \rightB
+\rightarrow \cdots \rightarrow
+\leftB \begin{array}{rr}
+1 & 0 \\
+0 & 1 
+\end{array} \rightB
+\]
+
+You can see that $\func{rank}(A^T) = 2$, the same as $\func{rank}(A)$. 
+\end{solution}
+
+We now define what is meant by the null space of a general $m\times n$ matrix.
+
+\begin{definition}{Null Space, or Kernel, of $A$}{nullspace}
+The null space of a matrix $A$, also referred to as the kernel of $A$, 
+is defined as follows. \index{kernel} \index{matrix!kernel}
+\index{null space} \index{matrix!null space}
+\begin{equation*}
+\func{null} \left( A\right) =\left\{ \vect{x} :A \vect{x} =\vect{0}\right\}
+\end{equation*}
+\end{definition}
+
+It can also be referred to using the notation $\ker \left(
+A\right) $. 
+Similarly, we can discuss the image of $A$, denoted by
+$\func{im}\left( A\right)$. The image of $A$ consists of the vectors
+of $\mathbb{R}^{m}$ which ``get hit'' by $A$.  The formal definition
+is as follows.
+
+\begin{definition}{Image of $A$}{image}
+The image of $A$, written $\func{im}\left( A\right)$ is given by
+\[
+\func{im}\left( A \right) = \left\{ A\vect{x} : \vect{x} \in \mathbb{R}^n \right\}
+\]
+\end{definition}
+
+Consider
+$A$ as a mapping from $\mathbb{R}^{n}$ to $\mathbb{R}^{m}$ whose action is given by multiplication. The following diagram displays this scenario. 
+\begin{equation*}
+\overset{\func{null} \left( A\right) }{\mathbb{R}^{n}}\ \overset{A}{\rightarrow }\ 
+\overset{
+\func{im}\left( A\right) }{\mathbb{R}^{m}}
+\end{equation*}
+As indicated, $\func{im}\left( A\right) $ is a subset of $\mathbb{R}^{m}$
+while $\func{null} \left( A\right) $ is a subset of $\mathbb{R}^{n}$.
+
+It turns out that the null space and image of $A$ are both subspaces. Consider the following example.
+
+\begin{example}{Null Space}{nullsubspace}
+Let $A$ be an $m\times n$ matrix. Then the null space of $A$, $\func{null}(A)$ is 
+a subspace of $\mathbb{R}^n$.
+\end{example}
+
+\begin{solution}
+\begin{itemize}
+\item Since $A\vect{0}_n=\vect{0}_m$, 
+$\vect{0}_n\in\func{null}(A)$.
+
+\item Let $\vect{x},\vect{y}\in\func{null}(A)$. 
+Then $A\vect{x}=\vect{0}_m$ and $A\vect{y}=\vect{0}_m$, so
+\[ A(\vect{x}+\vect{y})=A\vect{x}+A\vect{y} = \vect{0}_m+\vect{0}_m=\vect{0}_m,\]
+and thus $\vect{x}+\vect{y}\in\func{null}(A)$.
+\item Let $\vect{x}\in\func{null}(A)$ and $k\in\mathbb{R}$.
+Then $A\vect{x}=\vect{0}_m$, so
+
+\[ A(k\vect{x}) = k(A\vect{x})=k\vect{0}_m=\vect{0}_m,\]
+
+and thus $k\vect{x}\in\func{null}(A)$.
+\end{itemize}
+Therefore by the subspace test, $\func{null}(A)$ is a subspace of $\mathbb{R}^n$.
+
+\end{solution}
+
+The proof that $\func{im}(A)$ is a subspace of $\mathbb{R}^m$ is similar and is left as an exercise to the reader. 
+
+We now wish to find a way to describe $\func{null}(A)$ for a matrix $A$. However, finding $\func{null} \left( A\right)$ is not new! There is just some new
+terminology being used, as $\func{null} \left( A\right) $ is simply the solution
+to the system $A\vect{x}=\vect{0}$.
+
+\begin{theorem}{Basis of $\func{null}(A)$}{nullspacebasis}
+Let $A$ be an $m \times n$ matrix such that $\func{rank}(A) = r$. Then the system $A\vect{x}=\vect{0}_m$ has $n-r$ basic solutions, providing a basis of $\func{null}(A)$ with $\dim(\func{null}(A))=n-r$.
+\end{theorem}
+
+Consider the following example. 
+
+\begin{example}{Null Space of $A$}{nullspace}
+Let
+\begin{equation*}
+A=\leftB
+\begin{array}{rrr}
+1 & 2 & 1 \\
+0 & -1 & 1 \\
+2 & 3 & 3
+\end{array}
+\rightB 
+\end{equation*}
+Find $\func{null} \left( A\right) $ and $\func{im}\left( A\right)$.
+\end{example}
+
+\begin{solution}
+In order to find $\func{null} \left( A\right) $, we simply need to solve the
+equation $A\vect{x}=\vect{0}$. This is the usual procedure of writing
+the augmented matrix, finding the \rref \;and then the solution. The
+augmented matrix and corresponding \rref \;are
+\begin{equation*}
+\leftB 
+\begin{array}{rrr|r}
+1 & 2 & 1 & 0 \\ 
+0 & -1 & 1 & 0 \\ 
+2 & 3 & 3 & 0
+\end{array}
+\rightB
+\rightarrow \cdots \rightarrow
+\leftB 
+\begin{array}{rrr|r}
+1 & 0 & 3 & 0 \\ 
+0 & 1 & -1 & 0 \\ 
+0 & 0 & 0 & 0
+\end{array}
+\rightB
+\end{equation*}
+The third column is not a pivot column, and therefore the solution
+will contain a parameter. The solution to the system
+$A\vect{x}=\vect{0}$ is given by
+\begin{equation*}
+\leftB 
+\begin{array}{r}
+-3t \\ 
+t \\ 
+t
+\end{array}
+\rightB :t\in \mathbb{R}
+\end{equation*}
+which can be written as 
+\begin{equation*}
+t
+\leftB 
+\begin{array}{r}
+-3 \\ 
+1 \\ 
+1
+\end{array}
+\rightB :t\in \mathbb{R}
+\end{equation*}
+
+Therefore, the null space of $A$ is all multiples of this vector, which we can write as
+\begin{equation*}
+\func{null} (A) = \func{span} \left\{ \leftB 
+\begin{array}{r}
+-3 \\ 
+1 \\ 
+1
+\end{array}
+\rightB
+\right\}
+\end{equation*}
+
+Finally $\func{im}\left( A\right) $ is just $\left\{ A\vect{x} :
+\vect{x} \in \mathbb{R}^n \right\}$ and hence consists of the span of
+all columns of $A$, that is $\func{im}\left( A\right) = \func{col} (A)$. 
+
+Notice from the above calculation that that the first two columns of the \rref \; are pivot
+columns. Thus the  column space is the span of the first two  columns in
+the \textbf{original matrix}, and we get 
+\begin{equation*}
+\func{im}\left( A\right) = \func{col}(A) =
+\func{span} \left\{ \leftB 
+\begin{array}{r}
+1 \\ 
+0 \\ 
+2 
+\end{array}
+\rightB, \; \leftB 
+\begin{array}{r}
+2 \\ 
+-1 \\ 
+3 
+\end{array}
+\rightB  \right\}
+\end{equation*}
+
+\end{solution}
+
+Here is a larger example, but the method is entirely similar.
+
+\begin{example}{Null Space of $A$}{nullspace2}
+Let
+\begin{equation*}
+A=\leftB
+\begin{array}{rrrrr}
+1 & 2 & 1 & 0 & 1 \\
+2 & -1 & 1 & 3 & 0 \\
+3 & 1 & 2 & 3 & 1 \\
+4 & -2 & 2 & 6 & 0
+\end{array}
+\rightB
+\end{equation*}
+Find the null space of $A$.
+\end{example}
+
+\begin{solution}
+To find the null space, we need to solve the equation $AX=0$. The augmented matrix and corresponding \rref \;are given by 
+\begin{equation*}
+\leftB 
+\begin{array}{rrrrr|r}
+1 & 2 & 1 & 0 & 1 & 0 \\ 
+2 & -1 & 1 & 3 & 0 & 0 \\ 
+3 & 1 & 2 & 3 & 1 & 0 \\ 
+4 & -2 & 2 & 6 & 0 & 0
+\end{array}
+\rightB
+\rightarrow \cdots \rightarrow
+\leftB 
+\begin{array}{rrrrr|r}
+1 & 0 & \vspace{0.05in}\frac{3}{5} & \vspace{0.05in}\frac{6}{5} & \vspace{0.05in}\frac{1}{5} & 0 \\ 
+0 & 1 & \vspace{0.05in}\frac{1}{5} & -\vspace{0.05in}\frac{3}{5} & \vspace{0.05in}\frac{2}{5} & 0 \\ 
+0 & 0 & 0 & 0 & 0 & 0 \\ 
+0 & 0 & 0 & 0 & 0 & 0
+\end{array}
+\rightB
+\end{equation*}
+It follows that the first two columns are pivot columns, and the next three correspond to parameters. Therefore, $\func{null} \left( A\right) $ is given by 
+\begin{equation*}
+\leftB 
+\begin{array}{c}
+\left( -\vspace{0.05in}\frac{3}{5}\right) s +\left( -\vspace{0.05in}\frac{6}{5}\right) t+\left( 
+\vspace{0.05in}\frac{1}{5}\right) r \\ 
+\left( -\vspace{0.05in}\frac{1}{5}\right) s +\left( \vspace{0.05in}\frac{3}{5}\right) t +\left( -
+\vspace{0.05in}\frac{2}{5}\right) r \\ 
+s \\ 
+t \\ 
+r
+\end{array}
+\rightB :s ,t ,r\in \mathbb{R}\text{.}
+\end{equation*}
+We write this in the form 
+\begin{equation*}
+s \leftB 
+\begin{array}{r}
+-\vspace{0.05in}\frac{3}{5} \\ 
+-\vspace{0.05in}\frac{1}{5} \\ 
+1 \\ 
+0 \\ 
+0
+\end{array}
+\rightB + t \leftB 
+\begin{array}{r}
+-\vspace{0.05in}\frac{6}{5} \\ 
+\vspace{0.05in}\frac{3}{5} \\ 
+0 \\ 
+1 \\ 
+0
+\end{array}
+\rightB + r \leftB 
+\begin{array}{r}
+\vspace{0.05in}\frac{1}{5} \\ 
+-\vspace{0.05in}\frac{2}{5} \\ 
+0 \\ 
+0 \\ 
+1
+\end{array}
+\rightB :s , t , r\in \mathbb{R}\text{.}
+\end{equation*}
+In other words, the null space of this matrix equals the span of the three
+vectors above. Thus 
+\begin{equation*}
+\func{null} \left( A\right) =\func{span}\left\{ \leftB 
+\begin{array}{r}
+-\vspace{0.05in}\frac{3}{5} \\ 
+-\vspace{0.05in}\frac{1}{5} \\ 
+1 \\ 
+0 \\ 
+0
+\end{array}
+\rightB ,\leftB 
+\begin{array}{r}
+-\vspace{0.05in}\frac{6}{5} \\ 
+\vspace{0.05in}\frac{3}{5} \\ 
+0 \\ 
+1 \\ 
+0
+\end{array}
+\rightB ,\leftB 
+\begin{array}{r}
+\vspace{0.05in}\frac{1}{5} \\ 
+-\vspace{0.05in}\frac{2}{5} \\ 
+0 \\ 
+0 \\ 
+1
+\end{array}
+\rightB \right\} 
+\end{equation*}
+\end{solution}
+
+Notice also that the three vectors above are linearly independent and
+so the dimension of $\func{null} \left( A\right) $ is 3. The following is
+true in general, the number of parameters in the solution of $AX=0$
+equals the dimension of the null space. Recall also that the number of
+leading ones in the \rref equals the number of pivot columns, which is
+the rank of the matrix, which is the same as the dimension of either
+the column or row space.
+
+Before we proceed to an important theorem, we first define what is meant by the nullity of a matrix. 
+
+\begin{definition}{Nullity}{nullity}
+The dimension of the null space of a matrix is called the \textbf{nullity}, denoted $\dim( \func{null}\left(A\right))$.
+\index{nullity}
+\end{definition}
+
+From our observation above we can now state an important theorem.
+
+\begin{theorem}{Rank and Nullity}{ranknullity}
+Let $A$ be an $m\times n$ matrix. Then $\func{rank}\left( A\right) + \dim( \func{null}\left(A\right)) =n$. 
+\end{theorem}
+
+Consider the following example, which we first explored above in Example \ref{exa:nullspace}
+
+\begin{example}{Rank and Nullity}{ranknullity}
+Let
+\begin{equation*}
+A=\leftB
+\begin{array}{rrr}
+1 & 2 & 1 \\
+0 & -1 & 1 \\
+2 & 3 & 3
+\end{array}
+\rightB 
+\end{equation*}
+
+Find $\func{rank}\left( A\right)$ and $\dim( \func{null}\left(A\right))$. 
+\end{example}
+
+\medskip
+\begin{solution}
+In the above Example \ref{exa:nullspace} we determined that the \rref \;of $A$ is given by 
+\[
+\leftB 
+\begin{array}{rrr}
+1 & 0 & 3 \\ 
+0 & 1 & -1  \\
+0 & 0 & 0 
+\end{array}
+\rightB
+\]
+
+Therefore the rank of $A$ is $2$. We also determined that the null space of $A$ is given by 
+\[
+\func{null} (A) = \func{span} \left\{ \leftB 
+\begin{array}{r}
+-3 \\ 
+1 \\ 
+1
+\end{array}
+\rightB
+\right\}
+\]
+
+Therefore the nullity of $A$ is $1$. It follows from Theorem \ref{thm:ranknullity} that $\func{rank}\left( A\right) + \dim( \func{null}\left(A\right)) = 2 + 1 = 3$, which is the number of columns of $A$.
+\end{solution} 
+
+We conclude this section with two similar, and important, theorems.
+
+\begin{theorem}{}{}
+Let $A$ be an $m\times n$ matrix.
+The following are equivalent.
+\begin{enumerate}
+\item $\func{rank}(A)=n$.
+\item $\func{row}(A)=\mathbb{R}^n$, i.e., the rows of $A$ span $\mathbb{R}^n$.
+\item The columns of $A$ are independent in $\mathbb{R}^m$.
+\item The $n\times n$ matrix $A^TA$ is invertible.
+\item There exists an $n\times m$ matrix $C$ so that $CA=I_n$.
+\item If $A\vect{x}=\vect{0}_m$ for some $\vect{x}\in\mathbb{R}^n$,
+then $\vect{x}=\vect{0}_n$.
+\end{enumerate}
+\end{theorem}
+
+\begin{theorem}{}{}
+Let $A$ be an $m\times n$ matrix.
+The following are equivalent.
+\begin{enumerate}
+\item $\func{rank}(A)=m$.
+\item $\func{col}(A)=\mathbb{R}^m$, i.e., the columns of $A$ span $\mathbb{R}^m$.
+\item The rows of $A$ are independent in $\mathbb{R}^n$.
+\item The $m\times m$ matrix $AA^T$ is invertible.
+\item There exists an $n\times m$ matrix $C$ so that $AC=I_m$.
+\item The system $A\vect{x}=\vect{b}$ is consistent for
+every $\vect{b}\in\mathbb{R}^m$.
+\end{enumerate}
+\end{theorem}
