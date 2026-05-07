@@ -1,15 +1,32 @@
-all:
-	$(MAKE) --print-directory --directory=content/intro-mathprog-or/open-optimization
+# Top-level Makefile for the OR book series.
+# Books live under Intro-Math-Programming/baseText/book/.
+
+BOOK_DIR := Intro-Math-Programming/baseText/book
+BOOKS    := book1-main
+# Append book2-main here when ready:
+# BOOKS  := book1-main book2-main
+
+LATEXMK_FLAGS := -pdf -interaction=nonstopmode -halt-on-error -file-line-error
+
+.PHONY: all check list-products clean $(BOOKS)
+
+all: $(BOOKS)
 	@echo "############################"
 	@echo "#### Available products ####"
 	@echo "############################"
-	@$(MAKE) list-products
+	@$(MAKE) --no-print-directory list-products
 
-# This target is used by the CI infrastructure
+# Build a book by name (e.g. `make book1-main`). Run latexmk from inside the
+# book directory so relative \input paths resolve.
+$(BOOKS):
+	cd $(BOOK_DIR) && latexmk $(LATEXMK_FLAGS) $@.tex
+
+# Used by CI to discover artifacts.
 list-products:
-	@echo content/intro-mathprog-or/open-optimization/open-optimization.pdf
+	@for b in $(BOOKS); do echo $(BOOK_DIR)/$$b.pdf; done
 
-.PHONY: check
-
-# This target is used by the CI infrastructure
+# CI entry point.
 check: all
+
+clean:
+	cd $(BOOK_DIR) && latexmk -C
