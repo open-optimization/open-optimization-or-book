@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Checkout submodules
       run: |
         auth_header="$(git config --local --get http.https://github.com/.extraheader)"
@@ -22,9 +22,9 @@ jobs:
     - name: Get product file name
       id: get_product_info
       run: |
-        echo ::set-output name=file_path::$(make list-products | head -n1)
-        echo ::set-output name=file_name::$(basename $(make list-products | head -n1))
-    - uses: actions/upload-artifact@v1
+        echo "file_path=$(make list-products | head -n1)" >> "$GITHUB_OUTPUT"
+        echo "file_name=$(basename $(make list-products | head -n1))" >> "$GITHUB_OUTPUT"
+    - uses: actions/upload-artifact@v4
       with:
         path: ${{ steps.get_product_info.outputs.file_path }}
         name: ${{ steps.get_product_info.outputs.file_name }}
