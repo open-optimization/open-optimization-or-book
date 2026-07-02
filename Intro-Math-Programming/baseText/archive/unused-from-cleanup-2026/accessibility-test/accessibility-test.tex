@@ -1,0 +1,276 @@
+%%% accessibility-test.tex
+%%% Example document demonstrating accessible graphics with alt text
+%%%
+%%% IMPORTANT: This document requires:
+%%%   - TeX Live 2025 or newer
+%%%   - LuaLaTeX compiler (recommended) or pdfLaTeX
+%%%   - Biber for bibliography processing
+%%%
+%%% Compile with:
+%%%   lualatex accessibility-test.tex
+%%%   biber accessibility-test
+%%%   lualatex accessibility-test.tex
+%%%   lualatex accessibility-test.tex
+
+%% ============================================================================
+%% CRITICAL: DocumentMetadata MUST come before \documentclass
+%% This enables PDF tagging for accessibility
+%% ============================================================================
+%% Note: Use testphase for TeX Live 2025 (Jan), tagging=on for later releases
+\DocumentMetadata{
+  lang=en-US,
+  pdfversion=2.0,
+  testphase={phase-III}
+}
+
+\documentclass[12pt,letterpaper]{article}
+
+%% ============================================================================
+%% Packages
+%% ============================================================================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{csquotes}
+\usepackage{etoolbox}
+
+% BibLaTeX setup
+\usepackage[
+  backend=biber,
+  giveninits=true,
+  maxnames=100,
+  maxcitenames=5,
+  sorting=nyt,
+  backref=true
+]{biblatex}
+
+% Load our test metadata
+\addbibresource{test-metadata.bib}
+% Load figures-source metadata for \includegraphicsource test
+\addbibresource{../book/optimization/figures/figures-source/00_METADATA.bib}
+% Load figures-static metadata for \includegraphicstatic test
+\addbibresource{../book/optimization/figures/figures-static/00_METADATA.bib}
+
+% Graphics path - include both direct paths and paths used by macros
+\graphicspath{{../optimization/figures/figures-static/}{../optimization/figures/figures-source/}{../}}
+
+%% ============================================================================
+%% Load the accessible graphics macros
+%% ============================================================================
+\input{preamble-accessible-graphics}
+
+%% ============================================================================
+%% Document Info
+%% ============================================================================
+\title{Accessibility Test Document\\{\large Alt Text for Images via BibLaTeX Metadata}}
+\author{Robert Hildebrand}
+\date{\today}
+
+%% ============================================================================
+%% Document Body
+%% ============================================================================
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This document demonstrates the use of accessible graphics commands that automatically
+pull alt text descriptions from BibLaTeX metadata files. The alt text is stored in
+the \texttt{abstract} field of each bibliography entry and is embedded into the PDF
+for screen reader compatibility.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+%% ============================================================================
+\section{Introduction}
+%% ============================================================================
+
+This document tests the accessible graphics functionality. Each image command
+automatically:
+\begin{enumerate}
+  \item Includes the image from the appropriate figures folder
+  \item Adds alt text from the \texttt{abstract} field in the \texttt{.bib} file
+  \item Displays copyright attribution
+  \item Adds a footnote with full metadata (title, URL, author, date)
+\end{enumerate}
+
+%% ============================================================================
+\section{Inline Graphics (No Figure Environment)}
+%% ============================================================================
+
+The \verb|\includegraphicstatic| command includes an image inline (centered, but
+not in a float). Here is an example showing a linear programming feasible region:
+
+\includegraphicstatic[width=0.6\linewidth]{LP-feasible-region.png}
+
+The alt text for this image (stored in the bib file) describes the polygonal
+feasible region and constraint lines.
+
+%% ============================================================================
+\section{Inline Graphics from figures-source}
+%% ============================================================================
+
+The \verb|\includegraphicsource| command includes an image from the figures-source folder.
+Here is an example showing an undirected graph:
+
+\includegraphicsource[width=0.5\linewidth]{tikz-modeling-sums-continued-01-0564d3a1}
+
+This tests that the alt text and metadata are correctly pulled from the figures-source
+metadata file.
+
+%% ============================================================================
+\section{No-Cite Versions (No Attribution)}
+%% ============================================================================
+
+For graphics you created yourself where attribution isn't needed, use the ``nocite''
+versions. These still include alt text for accessibility but omit the copyright line
+and footnote metadata.
+
+\subsection{Inline No-Cite (figures-source)}
+
+The \verb|\includegraphicsourcenocite| command:
+
+\includegraphicsourcenocite[width=0.5\linewidth]{tikz-modeling-sums-continued-01-0564d3a1}
+
+Notice there's no copyright line or footnote below the image.
+
+\subsection{Inline No-Cite (figures-static)}
+
+The \verb|\includegraphicstaticnocite| command works the same way for images in the figures-static folder:
+
+\includegraphicstaticnocite[width=0.5\linewidth]{wiki-File-integer-programming.png}
+
+This shows the IP polytope with LP relaxation, with alt text but no attribution.
+
+\subsection{Figure Environment No-Cite}
+
+The \verb|\includefiguresourcenocite| command creates a figure with caption but no attribution:
+
+\includefiguresourcenocite[Undirected graph example without attribution][width=0.5\linewidth][ht]{tikz-modeling-sums-continued-01-0564d3a1}
+
+%% ============================================================================
+\section{Figure Environment with Auto-Caption}
+%% ============================================================================
+
+The \verb|\includefigurestatic| command creates a proper figure environment with
+a caption pulled from the bibliography title field.
+
+% Arguments: [caption][graphics options][float placement]{bibkey}
+\includefigurestatic[][width=0.6\linewidth][ht]{IP-feasible-region.png}
+
+You can reference this figure using \verb|\autoref{fig:IP-feasible-region.png}|,
+which produces: \autoref{fig:IP-feasible-region.png}.
+
+%% ============================================================================
+\section{Figure with Custom Caption}
+%% ============================================================================
+
+You can also provide a custom caption as the first optional argument:
+
+% Arguments: [caption][graphics options][float placement]{bibkey}
+\includefigurestatic[A support vector machine separating two classes of data][width=0.5\linewidth][ht]{SVM-plot.png}
+
+The alt text still comes from the bib file's abstract field, but the caption
+is overridden.
+
+%% ============================================================================
+\section{Manual Alt Text Override}
+%% ============================================================================
+
+For cases where you need to provide alt text directly (perhaps context-specific),
+use the \verb|\includegraphicstaticalt| command:
+
+\includegraphicstaticalt[width=0.5\linewidth]{LP-feasible-region.png}{A simple 2D plot showing the intersection of linear constraints forming a bounded polygon. The optimal point is at the top-right vertex where two constraint lines meet.}
+
+This overrides the alt text from the bib file while keeping all other metadata.
+
+%% ============================================================================
+\section{How It Works}
+%% ============================================================================
+
+\subsection{The Metadata File}
+
+Alt text is stored in the \texttt{abstract} field of each bib entry:
+
+\begin{verbatim}
+@Online{LP-feasible-region.png,
+  author = {{Robert Hildebrand [CC BY-SA 4.0]}},
+  title = {Linear Programming Feasible Region},
+  abstract = {A two-dimensional coordinate system
+    showing a shaded polygonal region representing
+    the feasible region of a linear program...},
+  year = {2023},
+  options = {skipbib=true},
+}
+\end{verbatim}
+
+\subsection{The Document Setup}
+
+The key requirement is the \verb|\DocumentMetadata| command \emph{before}
+\verb|\documentclass|:
+
+\begin{verbatim}
+% For TeX Live 2025 (January release):
+\DocumentMetadata{
+  lang=en-US,
+  pdfversion=2.0,
+  testphase={phase-III}
+}
+\documentclass{article}
+
+% For later releases (2025-11-01+), use:
+% \DocumentMetadata{lang=en-US, pdfversion=2.0, tagging=on}
+\end{verbatim}
+
+\subsection{Available Commands}
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{llll}
+\hline
+\textbf{Command} & \textbf{Folder} & \textbf{Float} & \textbf{Citation} \\
+\hline
+\verb|\includegraphicstatic| & figures-static/ & No & Yes \\
+\verb|\includegraphicsource| & figures-source/ & No & Yes \\
+\verb|\includegraphicstaticnocite| & figures-static/ & No & No \\
+\verb|\includegraphicsourcenocite| & figures-source/ & No & No \\
+\verb|\includefigurestatic| & figures-static/ & Yes & Yes \\
+\verb|\includefiguresource| & figures-source/ & Yes & Yes \\
+\verb|\includefigurestaticnocite| & figures-static/ & Yes & No \\
+\verb|\includefiguresourcenocite| & figures-source/ & Yes & No \\
+\verb|\refincludefigurestatic| & figures-static/ & Yes + autoref & Yes \\
+\verb|\refincludefiguresource| & figures-source/ & Yes + autoref & Yes \\
+\verb|\includegraphicstaticalt| & figures-static/ & No (manual alt) & Yes \\
+\verb|\includegraphicsourcealt| & figures-source/ & No (manual alt) & Yes \\
+\hline
+\end{tabular}
+\caption{Summary of accessible graphics commands}
+\end{table}
+
+%% ============================================================================
+\section{Verifying Accessibility}
+%% ============================================================================
+
+To verify that alt text is correctly embedded:
+
+\begin{enumerate}
+  \item Open the PDF in Adobe Acrobat Pro
+  \item Go to \textbf{View} $\rightarrow$ \textbf{Navigation Panels} $\rightarrow$ \textbf{Tags}
+  \item Expand the tag tree and find \texttt{<Figure>} tags
+  \item Right-click and select \textbf{Properties} to see the alt text
+  \item Or use \textbf{Accessibility} $\rightarrow$ \textbf{Full Check} to run an accessibility audit
+\end{enumerate}
+
+Alternatively, use a screen reader (NVDA, JAWS, VoiceOver) to test that
+images are announced with their descriptions.
+
+%% ============================================================================
+%% Bibliography (optional - we use skipbib=true for figures)
+%% ============================================================================
+
+\printbibliography
+
+\end{document}

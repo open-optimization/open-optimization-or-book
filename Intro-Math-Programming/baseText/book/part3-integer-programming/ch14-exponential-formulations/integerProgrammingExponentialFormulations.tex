@@ -3,14 +3,13 @@
 %Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0)
 %See http://creativecommons.org/licenses/by-sa/4.0/
 
-%\documentclass[../open-optimization/open-optimization.tex]{subfiles}
+\documentclass[../open-optimization/open-optimization.tex]{subfiles}
 %
-%\begin{document}
+\begin{document}
 
 \chapter{Exponential Size Formulations}
 \label{sec:exponential-IP-forumulations}
-\todoChapter{ 60\% complete. Goal 80\% completion date: August 20\\
-Notes: }
+
 \begin{outcome}
 We will learn two fundamental tools to be used in optimization.  The desired outcomes are:
 \begin{itemize}
@@ -46,7 +45,7 @@ How should these lengths be cut from standard stock pipes so as to minimize
 the number of standard pipes used?
 \end{example}
 \begin{center}
-%\includegraphics[scale = 0.1]{pipes}
+\includegraphics[scale = 0.1]{pipes}
 %https://www.freeimages.com/search/sawing-pipe
 \end{center}
 
@@ -112,8 +111,6 @@ pattern model time (s) & 0.0269&
  \caption{Table comparing computaional time in the two models.  We stopped computations at 600 seconds.   Notice that the pattern model does not care how large the demand is - it still solves in the same amount of time!  The demand multiplier $k$ here means that we multiply $k$ times the demand vector used in the example.  This grows the number of variables in the Board based model, but doesn't change much in the pattern based model.}
 \end{table}
 
-
-
 \subsection{Pattern formulation}
 We could instead list all patterns that are possible to cut each pipe.   A pattern is an vector $a \in \Z^k_+$ such that for each $i$, $a_i$ lengths of $L_i$ can be cut from a pipe of length $L$.  That is
 \begin{equation}
@@ -129,7 +126,6 @@ In our running example, we have
 &a_i \in \Z_+ \ \text{for all } i=1, \dots, 3
 \end{split}
 \end{equation}
-
 
 For visualization purposes, consider the patterns where $a_3 = 0$.  That is, only patterns with cuts of length 4m or 5m.  All patterns of this type are represented by an integer point in the polytope 
 \begin{equation}
@@ -181,11 +177,8 @@ Now, we can recast the optimization problem as
  
 \end{example}
 
-
-
 \subsection{Column Generation}
 Consider the linear program\eqref{LP:basis-solution}, but in this case we are instead minimizing.  
-
 
 Thus we can write it as 
  \begin{equation}
@@ -269,7 +262,6 @@ A =
 
  
 
-
 \begin{equation}
 \begin{split}
 \max\quad  & \tfrac14 a_1 + \tfrac 13 a_2 + \tfrac 13 a_3\\
@@ -284,40 +276,36 @@ See \href{https://github.com/Gurobi/modeling-examples/blob/master/colgen-cutting
 
 \subsection{Cutting Stock - Multiple widths}
 
-
-
 Here are some solutions:
 \begin{itemize}
 \item  \url{https://github.com/fzsun/cutstock-gurobi}.
 \item \url{http://www.dcc.fc.up.pt/~jpp/mpa/cutstock.py}
 \end{itemize}
 
-
 Here is an AIMMS description of the problem: 
 \href{https://download.aimms.com/aimms/download/manuals/AIMMS3OM_CuttingStock.pdf}{AIMMS Cutting Stock}
 
-% \beign{bmatrix} 1 \\ 1 \\ 1\end{bmatrix}
+\beign{bmatrix} 1 \\ 1 \\ 1\end{bmatrix}
 
-
-%\section{Spanning Trees}
-%\label{sec:spanning-tree-models}
-%\subsection{2.1 Cycle Prevention in MST}
+\section{Spanning Trees}
+\label{sec:spanning-tree-models}
+\subsection{2.1 Cycle Prevention in MST}
 %
 %The Cycle Elimination Model presents a concise mathematical representation of the Minimum Spanning Tree (MST). In this formulation, we introduce a binary decision variable, \(x_a\), which denotes whether an arc \(a \in \mathcal{A}\) will be a part of the tree (\(x_a=1\)) or if it will be excluded (\(x_a=0\)). The model is articulated as:
 %
-%\textbf{Objective:}
-%\[
-%\text{Minimize} \ \sum_{a \in \mathcal{A}} l_a x_a
-%\]
+\modelhead{Objective}
+\[
+\text{Minimize} \ \sum_{a \in \mathcal{A}} l_a x_a
+\]
 %
-%\textbf{Constraints:}
-%\begin{align*}
+\modelhead{Constraints}
+\begin{align*}
 %&x_a \in\{0,1\} &\forall a \in \mathcal{A} \\
 %&\sum_{a \in \mathcal{A}} x_a=n-1 \\
 %&\sum_{a \in A(S)} x_a \leq |S|-1 &\forall S \subset \mathcal{N}, |S|>1
-%\end{align*}
+\end{align*}
 %
-%\section{2.2 Node-Level MILP Formulation}
+\section{2.2 Node-Level MILP Formulation}
 %
 %Delving into a more sophisticated representation, we introduce a model inspired by the conceptual link between the branching structure of trees and the flow patterns observed in rivers. In this comparison, rivers, originating from multiple sources and culminating into a single end-point, mirror the branching nature of trees. Fundamental to both is the absence of cycles.
 %
@@ -325,39 +313,35 @@ Here is an AIMMS description of the problem:
 %
 %To capture the 'water level' at each node, decision variables \(V_i\) are defined for every \(i \in \mathcal{N}\). By default, the sink node has the minimum level (zero), while all other nodes possess a level greater than zero. The relationship between \(z_d\) variables and node levels is maintained using specific constraints. The formulation is presented below:
 %
-%\textbf{Objective:}
-%\[
-%\text{Minimize} \ \sum_{d \in \mathcal{D}} l_d z_d
-%\]
+\modelhead{Objective}
+\[
+\text{Minimize} \ \sum_{d \in \mathcal{D}} l_d z_d
+\]
 %
-%\textbf{Constraints:}
-%\begin{align*}
+\modelhead{Constraints}
+\begin{align*}
 %&\sum_{(i, j) \in \mathcal{D}} z_{(i, j)}=1 &\forall i \in \mathcal{N}-\{\omega\} \\
 %&\sum_{(\omega, j) \in \mathcal{D}} z_{(\omega, j)}=0 \\
 %&V_i \geq V_j+z_{(i, j)}-n\left(1-z_{(i, j)}\right) &\forall(i, j) \in \mathcal{D} \\
 %&V_\omega=0 \\
 %&z_d \in\{0,1\} &\forall d \in \mathcal{D}
-%\end{align*}
+\end{align*}
 
-
-%\includegraphics[scale = 0.6]{minimum-weight-spanning-tree}
+\includegraphics[scale = 0.6]{minimum-weight-spanning-tree}
 %~\cite{MARTIN1991119}
 %
 %
-%\includegraphics[scale = 0.5]{minimum-spanning-tree-ip-model}
+\includegraphics[scale = 0.5]{minimum-spanning-tree-ip-model}
 %
-%\includegraphics[scale = 0.5]{minimum-spanning-tree-model-comparison}
+\includegraphics[scale = 0.5]{minimum-spanning-tree-model-comparison}
 %
-%\includegraphics[scale = 0.5]{minimum-spanning-tree-list-of-models}
-
+\includegraphics[scale = 0.5]{minimum-spanning-tree-list-of-models}
 
 \section{Traveling Salesman Problem}
 \label{sec:tsp-models}
 The Traveling Salesman Problem (TSP) stands as one of the most iconic and studied problems in the realm of operations research and combinatorial optimization. At its core, the TSP asks a seemingly simple question: Given a list of cities and the distances between each pair, what is the shortest possible route a salesman can take to visit each city exactly once and return to the original city? While the problem statement is straightforward, finding an optimal solution, especially for a large number of cities, is computationally challenging.
 
 The significance of the TSP extends far beyond its basic premise. It has a myriad of practical applications, ranging from logistics and transportation planning to microchip manufacturing and DNA sequencing. The TSP has been a cornerstone in highlighting the challenges of optimization in real-world scenarios. Moreover, the quest to solve the TSP has led to the development of numerous groundbreaking algorithmic techniques and heuristics. These methods, inspired by the intricacies of the TSP, have found applications in a wide array of other optimization problems, further emphasizing the TSP's foundational role in the evolution of operations research.
-
-
 
 \href{https://www.google.com/maps/dir/(38.2222341,+-85.75750389999999)/(39.0972041,+-84.52636389999999)/(38.0493956,+-84.4940986)/(37.1967465,+-80.4296817)/(37.2049884,+-79.9237747)/(37.5110489,+-77.40769019999999)/(35.2019605,+-80.81365720000001)/(36.1303318,+-86.78998039999999)/(38.2222341,+-85.75750389999999)/@36.8110947,-84.2113181,7.02z/data=!4m37!4m36!1m3!2m2!1d-85.7575039!2d38.2222341!1m3!2m2!1d-84.5263639!2d39.0972041!1m3!2m2!1d-84.4940986!2d38.0493956!1m3!2m2!1d-80.4296817!2d37.1967465!1m3!2m2!1d-79.9237747!2d37.2049884!1m3!2m2!1d-77.4076902!2d37.5110489!1m3!2m2!1d-80.8136572!2d35.2019605!1m3!2m2!1d-86.7899804!2d36.1303318!1m3!2m2!1d-85.7575039!2d38.2222341}{Google Maps!}
 
@@ -385,23 +369,19 @@ Aside from actual vehicle routing, the TSP has many applications.  For example, 
     \item \textbf{Inventory Management}: In large warehouses, picking operations can be optimized using the TSP. When a list of items needs to be picked from various locations in the warehouse, the TSP can help determine the shortest route for the pickers, reducing the time taken to fulfill orders.
 \end{enumerate}
 
-
-
 \subsection*{Problem statement}
 We consider a directed graph, graph $G = (N,A)$ of nodes $N$ and arcs $A$.   Arcs are directed edges.  Hence the arc $(i,j)$ is the directed path $i \to j$.
 
 A \emph{tour}, or Hamiltonian cycle %(see \refincludefigurestatic{wiki/File/William_Rowan_Hamilton_painting.jpg}), 
 is a cycle that visits all the nodes in $N$ exactly once and returns back to the starting node. 
 
-
 Given costs $c_{ij}$ for each arc $(i,j) \in A$, the goal is to find a minimum cost tour.
-
 
 \begin{general}{Traveling Salesman Problem}{\nphard}
 Given a directed graph $G = (N,A)$ and costs $c_{ij}$ for all $(i,j) \in A$, find a tour of minimum cost.
 \end{general}
 \begin{center}
-%\includegraphics[scale = 0.4]{tsp-solution}\footnotemark
+\includegraphics[scale = 0.4]{tsp-solution}\footnotemark
 \end{center}
 In the figure, the nodes $N$ are the cities and the arcs $A$ are the directed paths $\text{city} i \to \text{city} j$.
 
@@ -426,15 +406,15 @@ Unfortunately, these constraints are not enough to completely describe the probl
     \centering
     
     % First Graph: Complete directed graph on 7 nodes
-%    \begin{tikzpicture}[shorten >=1pt, auto, node distance=2cm, thick]
-%        \tikzstyle{vertex}=[circle, draw, minimum size=17pt, inner sep=0pt]
+\begin{tikzpicture}[shorten >=1pt, auto, node distance=2cm, thick]
+\tikzstyle{vertex}=[circle, draw, minimum size=17pt, inner sep=0pt]
 %        
-%        \foreach \name/\angle in {A/0, B/51.428, C/102.857, D/154.286, E/205.714, F/257.143, G/308.571}
-%            \node[vertex] (\name) at (\angle:2cm) {$\name$};
+\foreach \name/\angle in {A/0, B/51.428, C/102.857, D/154.286, E/205.714, F/257.143, G/308.571}
+\node[vertex] (\name) at (\angle:2cm) {$\name$};
 %        
-%        \foreach \from/\to in {A/B, B/C, C/D, D/E, E/F, F/G, G/A, A/C, B/D, C/E, D/F, E/G, F/A, G/B, A/D, B/E, C/F, D/G, E/A, F/B, G/C, A/E, B/F, C/G, D/A, E/B, F/C, G/D, A/F, B/G, C/A, D/B, E/C, F/D, G/E, A/G, B/A, C/B, D/C, E/D, F/E, G/F}
-%            \draw[->] (\from) to[bend right=15] (\to);
-%    \end{tikzpicture}
+\foreach \from/\to in {A/B, B/C, C/D, D/E, E/F, F/G, G/A, A/C, B/D, C/E, D/F, E/G, F/A, G/B, A/D, B/E, C/F, D/G, E/A, F/B, G/C, A/E, B/F, C/G, D/A, E/B, F/C, G/D, A/F, B/G, C/A, D/B, E/C, F/D, G/E, A/G, B/A, C/B, D/C, E/D, F/E, G/F}
+\draw[->] (\from) to[bend right=15] (\to);
+\end{tikzpicture}
     % Second Graph: One 3-cycle and two 2-cycles
     \begin{tikzpicture}[shorten >=1pt, auto, node distance=2cm, thick]
         \tikzstyle{vertex}=[circle, draw, minimum size=17pt, inner sep=0pt]
@@ -508,8 +488,6 @@ u_1 &= 1\\
 \end{align}
 \end{general}
 
-
-
 \begin{example}{MTZ model for TSP with 4 nodes}{}
 Consider the distance matrix:
 \begin{center}
@@ -560,7 +538,6 @@ Here is the full MTZ model:
  & u_{i} \in \mathbb{Z}, \quad\forall i \in \{1,2,3,4\}\\
 \end{align*}
 \end{example}
-
 
 \begin{example}{MTZ model for TSP with 5 nodes}{TSP5node}
 
@@ -651,7 +628,6 @@ $$
 This inequality is invalid, and hence no solution can have the values $x_{2,4} = x_{4,5} = x_{5,2} = 1$.
 \end{example}
 
-
 \begin{example}{Weak Model}{}
 Consider again the same tour in the last example, that is, the subtour $2 \to 4 \to 5 \to 2$.  
 We are interested to know how strong the inequalties of the problem description are if we allow the variables to be continuous variables.  That is, suppose we relax $x_{ij} \in \{0,1\}$ to be $x_{ij} \in [0,1]$.
@@ -670,7 +646,6 @@ u_4 = 3\\
 u_5 = 4\\
 \end{align*}
 
-
 \begin{align*}
 3 &\leq  3 + 5 (1-x_{2,4} )\\
 4 &\leq  4 + 5 (1-x_{4,5})\\
@@ -683,21 +658,17 @@ u_5 = 4\\
 3 /5&\leq 1-x_{5,2} .
 \end{align*}
 
-
 \begin{align*}
 2+1 &\leq  3 + 5 (1-x_{2,4} )\\
 3 +1 &\leq  4 + 5 (1-x_{4,5})\\
 4 +1 &\leq  2 + 5 (1-x_{5,2} ).
 \end{align*}
 
-
-
 \end{example}
 
 \begin{comment}
 
 \end{comment}
-
 
 \subsection{Dantzig-Fulkerson-Johnson (DFJ) Model}
 \begin{resource}
@@ -733,7 +704,6 @@ x_{ii} &= 0 & \text{ for all } i \in N \ \ \text{ [no self loops]} \\
 \end{align}
 \end{general}
 
-
 \begin{example}{DFJ Model for $n=4$ nodes}{}
 Consider the distance matrix:
 \begin{center}
@@ -752,15 +722,13 @@ Consider the distance matrix:
 \end{tabular}
 \end{center}
 
-%\begin{center}
-%\tikz[nodes={draw, circle}]
-%\graph { subgraph K_n [n=4,clockwise,radius=3cm] };
-%\end{center}
+\begin{center}
+\tikz[nodes={draw, circle}]
+\graph { subgraph K_n [n=4,clockwise,radius=3cm] };
+\end{center}
 
-
-
-%\begin{align}\min\quad & x_{1,2} + 2 x_{1,3} + 3 x_{1,4} + x_{2,1} + x_{2,3} + 2 x_{2,4} + 2 x_{3,1} + x_{3,2} + 4 x_{3,4} + 3 x_{4,1} + 2 x_{4,2} + 4 x_{4,3}\\
-%\text{Subject to} \quad & x_{1,1} + x_{2,1} + x_{3,1} + x_{4,1} = 1\\
+\begin{align}\min\quad & x_{1,2} + 2 x_{1,3} + 3 x_{1,4} + x_{2,1} + x_{2,3} + 2 x_{2,4} + 2 x_{3,1} + x_{3,2} + 4 x_{3,4} + 3 x_{4,1} + 2 x_{4,2} + 4 x_{4,3}\\
+\text{Subject to} \quad & x_{1,1} + x_{2,1} + x_{3,1} + x_{4,1} = 1\\
 % & x_{1,2} + x_{2,2} + x_{3,2} + x_{4,2} = 1\\
 % & x_{1,3} + x_{2,3} + x_{3,3} + x_{4,3} = 1\\
 % & x_{1,4} + x_{2,4} + x_{3,4} + x_{4,4} = 1\\
@@ -773,8 +741,7 @@ Consider the distance matrix:
 % & x_{3,3} = 0\\
 % & x_{4,4} = 0\\
 % & x_{i,j} \in \{0,1\} \quad\forall i \in \{1,2,3,4\}, j \in \{1,2,3,4\}\\
-%\end{align}
-
+\end{align}
 
 \begin{align*}\min\quad & x_{1,2} + 2 x_{1,3} + 3 x_{1,4} + x_{2,1} + x_{2,3} + 2 x_{2,4} \\& + 2 x_{3,1} + x_{3,2} + 4 x_{3,4} + 3 x_{4,1} + 2 x_{4,2} + 4 x_{4,3}\\
 \\
@@ -811,31 +778,26 @@ Consider the distance matrix:
  \\
  & x_{i,j} \in \{0,1\} \quad\forall i \in \{1,2,3,4\}, j \in \{1,2,3,4\}\\
 \end{align*}
-%\includegraphics[scale = 0.5]{CompleteGraph4Nodes}
+\includegraphics[scale = 0.5]{CompleteGraph4Nodes}
 
-
-
-%\includegraphics[scale = 0.5]{CompleteGraphCycles4-850}\footnotemark
-%\footnotetext{\url{http://mathworld.wolfram.com/CompleteGraph.html}}
+\includegraphics[scale = 0.5]{CompleteGraphCycles4-850}\footnotemark
+\footnotetext{\url{http://mathworld.wolfram.com/CompleteGraph.html}}
 
 \end{example}
-
 
 \begin{example}{}{}
 
 Consider a graph on 5 nodes.
 
-%\begin{center}
-%\tikz[nodes={draw, circle}]
-%\graph { subgraph K_n [n=5,clockwise,radius=3cm] };
-%\end{center}
+\begin{center}
+\tikz[nodes={draw, circle}]
+\graph { subgraph K_n [n=5,clockwise,radius=3cm] };
+\end{center}
 
 Here are all the subtours of length at least 3 and also including the full length tours.
 
-
 Hence, there are many subtours to consider.
 \end{example}
-
 
 \paragraph{Pros of this model}
 \begin{itemize}
@@ -855,7 +817,6 @@ We will see in the next section
 \item A way to use branch and bound (the topic of the next section) in order to avoid subtours.
 \end{enumerate}
 
-
 \subsection{Traveling Salesman Problem Variants}
 
 \subsubsection{Many salespersons (m-TSP)}
@@ -872,7 +833,6 @@ x_{ii} &= 0 & \text{ for all } i \in N\cup\{D\} \ \ \text{ [no self loops]} \\
 & x_{ij} \in \{0,1\} & \text{ for all } i,j \in N\cup\{D\}
 \end{align}
 \end{general}
-
 
 When using the MTZ model, you can also easily add in a constraint that restricts any subtour through the deopt to have at most $T$ stops on the tour.  This is done by restricting $u_i \leq T$.  
 This could also be done in the DFJ model above, but the algorithm for subtour elimination cuts would need to be modified.
@@ -911,7 +871,6 @@ $$
 \subsection{Multi vehicle model with capacities}
 In this version, we explicitly add extra variable to discuss the routes of each vehicle.   This means that we add another index to the $x$ variable.
 
-
 Let:
 \begin{align*}
 c_{ij} & : \text{cost of travel from } i \text{ to } j \\
@@ -922,7 +881,7 @@ x_{ijk} & :
 \end{cases}
 \end{align*}
 
-\textbf{Objective:}
+\modelhead{Objective}
 \begin{equation}
 \min \sum_{i,j} c_{ij} \sum_k x_{ijk}
 \end{equation}
@@ -936,7 +895,6 @@ x_{ijk} & :
 \sum_{ijk} x_{ijk} &= |S| - 1 & \forall S \subseteq P(N), \ 0 \notin S & \quad \text{(Subtour elimination)} \\
 x_{ijk} &\in \{0,1\}
 \end{align}
-
 
 \section{TSP with Time Windows}
 Let $G = (V, A)$ be a directed graph where $V$ is the set of nodes (including the depot) and $A$ is the set of arcs. Each arc $(i,j) \in A$ has a cost $c_{ij}$ associated with it which represents the cost of traveling from node $i$ to node $j$. The problem is to find a minimum-cost tour that visits each node within its time window.
@@ -1000,11 +958,9 @@ While the traveling salesman problem was built predominantly for applications of
 There are a couple of interesting features of this supply chain optimization problem which distinguish this against a normal traveling salesman problem. To start, we have to consider numerous factors other than the geographic distance that the product travels. We have to consider factors including cost of process, time to ship (shipping by boat requires time compared to shipping by air) and quality of the manufacturing process. For a phone, electronic robot manufacturing would be reliable compared to human manufacturing, however the cost of human manufacturing in poorer countries would be lower. Phones manufactured in Asia would be cheaper than phones manufactured in the USA, however shipping times would be longer. These features would mathematically have to be built into the model through constraints. Each manufacturing facility could have a specific group of features assigned to the facility. Some electronic manufacturing facilities in the USA could have a quality (Q) = 8, cost (C) = 9 and shipment time (S) = 3. A human manufacturing facility in India could have a quality (Q) = 4, cost (C) = 3 and shipment time (S) = 8. The shipment time scores could be built into the objective function of the model and the quality and cost scores could be built into the constraints. We could have constraints which would decide if a location would be selected if the cost and quality score are there inside a specific target number. I would mathematically incorporate a DFJ model. 
 Some other feature that would have to be considered would be if we could have numerous ‘salesmen’ for the supply chain. For highly complex supply chains including cars, there are numerous supply chains for each component of the car. For this supply chain, we could disassemble the car into numerous components (including engines, wheels and electronic components) and build out traveling salesmen algorithms for each of those components. This could be considered a vehicle routing algorithm because of the fact that we are allowed to have numerous supply chains. Furthermore, I could consider the situation if numerous supply chains each require a specific manufacturing facility. We would have to combine the traveling salesman problem and the network flow problem to create a method for managing this. The network flow could figure out if the manufacturing facility has the capacity to create the product. 
 
-\textbf{Data}
+\modelhead{Data}
 I have attached to this paper a Excel data that would be good for building a supply chain optimization model through the TSP. The data includes data of shipment times, expense and throughput rates for manufacturing facilities and which things could be produced by which manufacturing facility. I would build the traveling salesman model to start by figuring out which manufacturing facility is required before the others. I would create the model for the product to go through each manufacturing facility while minimizing cost through shipments and manufacturing cost. I have attached some simple code for the supply chain that includes the cost and capacity constraints, however this model could be extended for other features. We could include that a certain quality score has to be maintained for a facility to be selected. 
 The code demonstrates that two subtours could be generated. One subtour is going to be Singapore to Thailand to Mumbai. The other subtour is NY to Chicago to LA. We could then attach a route for LA to Singapore to attach the subtours together. This would lead to a total distance of around 15000 kilometers. I built constraints to this model to ensure that shipment time, cost and quality satisfied constraints.
-
-
 
 This supply chain optimization problem differs from a standard TSP in several ways. It involves factors beyond geographic distance, including manufacturing cost, shipping time (e.g., air vs. sea transport), and manufacturing process quality. For instance, electronic robot manufacturing may offer higher reliability but at a greater cost compared to human manufacturing in lower-wage countries. These factors must be incorporated mathematically through constraints. Each manufacturing facility can be assigned specific quality (Q), cost (C), and shipment time (S) scores, which influence the model's objective function and constraints.
 
@@ -1015,9 +971,7 @@ The model can incorporate a Decision, Features, and Juxtaposition (DFJ) approach
 
 Attached to this paper is Excel data suitable for building a TSP-based supply chain optimization model. The data includes shipment times, expenses, throughput rates, and manufacturing facility-product compatibility. The TSP model starts by identifying the required manufacturing facility and then routes the product through each facility, minimizing costs and considering quality constraints.
 
-
 \paragraph{Model}
-
 
 \paragraph{Sets}
 \begin{itemize}
@@ -1070,27 +1024,16 @@ The objective is to minimize the total distance traveled while considering the q
 \paragraph{Solution}
 The Gurobi optimizer is used to solve the TSP model. The optimal solution provides the sequence of facility visits that minimizes the total distance traveled, while meeting quality, cost, and shipment time constraints.
 
-
-
 \paragraph{Code}
 
 A simple code sample for the supply chain, incorporating cost and capacity constraints, is provided. This code can be extended to include other features, such as maintaining a specific quality score for facility selection. The code generates two subtours: Singapore to Thailand to Mumbai and NY to Chicago to LA. To connect these subtours, an additional route from LA to Singapore is added, resulting in a total distance of approximately 15,000 kilometers. Constraints ensure that shipment time, cost, and quality meet specified criteria.
-
-
 
 \paragraph{Enhancements}
 
 To improve this implementation, the TSP should account for international travel by increasing shipment time constraints.
 
-
-
 \section{Vehicle Routing Problem (VRP)}
-\todoSection{10\% complete.\\
-Add discussion and examples of solving VRP using Google OR tools.
-\url{https://www.youtube.com/watch?v=AJ6LeiMe_PQ&t=757s&ab_channel=MixedIntegerProgramming}\\
-Add description and link to code for Clark-Wright Algorithm\\
-Discuss that there are many many variations of this problem and it is somewhat endless to work on.
-}
+
 \begin{resource}
 Software:
 \begin{itemize}
@@ -1117,13 +1060,7 @@ To read about the many variants, see:
 Vehicle Routing: Problems, Methods, and Applications, Second Edition. 
 Editor(s): Paolo Toth and Daniele Vigo.  MOS-SIAM Series on Optimization.}
 
-
 For one example of a VRP model, see \href{https://github.com/Gurobi/modeling-examples/tree/master/technician_routing_scheduling}{GUROBI Modeling Examples - technician routing scheduling}.
-
-
-
-
-
 
 \subsection{The Clarke-Wright Saving Algorithm for VRP}
 \begin{warn}
@@ -1167,44 +1104,58 @@ Where:
 
 While the Clarke-Wright Saving Algorithm is computationally efficient and can provide good solutions for the VRP, it is not guaranteed to find the optimal solution. It works best as a starting solution, which can be further improved using other optimization techniques.
 
+The Clarke-Wright savings heuristic, introduced by Clarke and Wright in 1964~\cite{clarke1964scheduling}, is among the most widely known constructive heuristics for the VRP.  The key idea is to begin with the most expensive feasible solution---separate round trips from the depot to each customer---and then iteratively combine routes whenever doing so yields a cost reduction.
 
+\subsubsection{Algorithm Description}
 
-\begin{quote}
-Borrowed from \url{https://www.researchgate.net/publication/285833854_Chapter_4_Heuristics_for_the_Vehicle_Routing_Problem} \\
+\begin{enumerate}
+\item \textbf{Initialization.}  Start with $n$ individual routes, one for each customer: $(0, i, 0)$ for $i = 1, \ldots, n$, where $0$ denotes the depot.  The total cost of this initial solution is $2\sum_{i=1}^n c_{0i}$.
 
-The Clarke and Wright Savings Heuristic
-The Clarke and Wright heuristic [12] initially constructs back and forth routes $(0, i, 0)$ for $(i=1, \ldots, n)$ and gradually merges them by applying a saving criterion. More specifically, merging the two routes $(0, \ldots, i, 0)$ and $(0, j, \ldots, 0)$ into a single route $(0, \ldots, i, j, \ldots, 0)$ generates a saving $s_{i j}=c_{i 0}+c_{0 j}-c_{i j}$. Since the savings remain the same throughout the algorithm, they can be computed a priori. In the so-called parallel version of the algorithm which appears to be the best (see Laporte and Semet [46]), the feasible route merger yielding the largest saving is implemented at each iteration, until no more merger is feasible. This simple algorithm possesses the advantages of being intuitive, easy to implement, and fast. It is often used to generate an initial solution in more sophisticated algorithms. Several enhancements and acceleration procedures have been proposed for this algorithm (see, e.g., Nelson et al. [59] and Paessens [62]), but given the speed of today's computers and the robustness of the latest metaheuristics, these no longer seem justified.
+\item \textbf{Compute savings.}  For every pair of customers $i$ and $j$ ($i \neq j$), define the \emph{saving} obtained by visiting $i$ and $j$ on the same route instead of on separate routes:
+\[
+s_{ij} = c_{i0} + c_{0j} - c_{ij}.
+\]
+A positive saving $s_{ij}$ indicates that linking customer $i$ directly to customer $j$ is cheaper than returning to the depot between them.  Since the savings depend only on the distance data, they can all be precomputed before the merging phase begins.
 
-[12] G. CLARKE AND J. W. WRIGHT, Scheduling of vehicles from a central depot to a number of delivery points, Operations Research, 12 (1964), pp. 568-581.
-\end{quote}
+\item \textbf{Sort savings.}  Arrange all customer pairs in decreasing order of their savings.
 
+\item \textbf{Merge routes.}  Process the sorted list from largest to smallest saving.  For each pair $(i, j)$, check whether $i$ is the last customer on one route and $j$ is the first customer on a different route (or vice versa), and whether merging these two routes into $(0, \ldots, i, j, \ldots, 0)$ satisfies the vehicle capacity and any other side constraints.  If so, perform the merge.
 
+\item \textbf{Termination.}  Continue until no further feasible merges remain.
+\end{enumerate}
 
-%\section{Steiner Tree Problem}
+The version described above, where the best feasible merge across all routes is performed at each step, is known as the \emph{parallel} variant.  An alternative \emph{sequential} variant builds one route at a time before moving to the next.  Computational experiments have generally found the parallel version to produce better solutions.
+
+This heuristic is valued for its simplicity, speed, and ease of implementation.  In practice, it frequently serves as an initialization method whose output is then refined by local search or metaheuristic algorithms.
+
+\medskip
+\noindent\textbf{Reference:}  G.~Clarke and J.W.~Wright. ``Scheduling of vehicles from a central depot to a number of delivery points.'' \textit{Operations Research}, 12(4):568--581, 1964.
+
+\section{Steiner Tree Problem}
 %% GUROBI Vodafone talk
 %
 %
 %Model 1
-%\begin{align*}
-%\min \ \ \ & \sum_{(u,v) \in E} w_{uv} x_{uv}\\
-%\text{ such that }  \ \ \ \\
+\begin{align*}
+\min \ \ \ & \sum_{(u,v) \in E} w_{uv} x_{uv}\\
+\text{ such that }  \ \ \ \\
 %x_t & = 1 & \forall t \in T \\
 %2x_{uv} - x_u - x_v &\leq 0 &   \forall (u,v) \in E\\
 %x_v - \sum_{(u,v) \in E} x_{uv} \leq 0 \forall v \in V\\
-%\sum_{(u,v) \in \delta(S)} x_{uv} \geq x_w \forall S \subseteq V, \forall w \in S\\
-%\end{align*}
+\sum_{(u,v) \in \delta(S)} x_{uv} \geq x_w \forall S \subseteq V, \forall w \in S\\
+\end{align*}
 %
 %Model 2
-%\begin{align*}
-%\min &\sum_{(u,v) \in E} w_{uv} x_{uv}\\
+\begin{align*}
+\min &\sum_{(u,v) \in E} w_{uv} x_{uv}\\
 %x_t &= 1 &\forall t \in T\\
 %2x_{uv} - x_u - x_v &\leq 0 & \forall (u,v) \in E\\
 %x_v - \sum_{(u,v) \in E} x_{uv} &\leq 0 &\forall v \in V\\
 %x_{uv} + x_{vu} &\leq 1\\
-%\sum_{v \in V} x_v - \sum_{(u,v) \in E} x_{uv} &=1&\\
+\sum_{v \in V} x_v - \sum_{(u,v) \in E} x_{uv} &=1&\\
 %n x_{uv} + l_v - l_u &\geq 1 - n(1-x_{vu}) &\forall (u,v) \in E\\
 %n x_{vu} + l_u - l_v &\geq 1 - n(1-x_{uv}) &\forall (u,v) \in E
-%\end{align*}
+\end{align*}
 %
 %
 %
@@ -1212,7 +1163,6 @@ The Clarke and Wright heuristic [12] initially constructs back and forth routes 
 %
 
 \section{Tools to solve VRP}
-
 
  There are several tools and software packages available to solve VRPs, ranging from commercial software to open-source libraries. Here are some recommended tools:
 
@@ -1264,10 +1214,7 @@ When choosing a tool, consider the following factors:
 
 Remember that the VRP is NP-hard, which means that as the problem size grows, the time required to find an optimal solution can increase exponentially. In many cases, especially for large problems, heuristic or metaheuristic approaches are used to find good (but not necessarily optimal) solutions in a reasonable amount of time.
 
-
-
 \section{Literature and other notes}
-
 
 \begin{itemize}
 \item Gilmore-Gomory Cutting Stock~\cite{Gilmore-Gomory}
@@ -1277,17 +1224,12 @@ Remember that the VRP is NP-hard, which means that as the problem size grows, th
 HYPERGRAPH VERTEX SEPARATION}
 \end{itemize}
 
-
-
-
-%\begin{resource}
+\begin{resource}
 %See~\cite{Abdelmaguid2018} for a list of 11 models for the minimum spanning tree and a comparison using CPLEX.
-%\end{resource}
+\end{resource}
 \subsection{TSP In Excel}
 
-
-
-%\end{document}
+\end{document}
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "../open-optimization/open-optimization"
@@ -1314,7 +1256,6 @@ Google maps data:
 \url{https://pubsonline.informs.org/doi/abs/10.1287/inte.2019.1015}
 
 \url{https://www.informs.org/Resource-Center/Video-Library/Edelman-Competition-Videos/2019-Edelman-Competition-Videos/2019-Edelman-Finalist-Boston-Public-Schools}
-
 
 \url{https://www.youtube.com/watch?v=LFeeaNP_rbY}
 

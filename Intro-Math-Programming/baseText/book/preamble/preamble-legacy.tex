@@ -1,0 +1,395 @@
+% =============================================================================
+% LEGACY PREAMBLE - Packages and Commands Removed from Simplified Preamble
+% =============================================================================
+% This file contains packages and commands that were removed from the
+% simplified preamble. Include this file AFTER preamble-simplified.tex if
+% you need any of these legacy features.
+%
+% Reasons for removal:
+%   - Duplicate definitions (already in simplified preamble)
+%   - Conflicting with other packages
+%   - Rarely used features
+%   - Print-specific features not needed for digital
+%   - Deprecated or commented-out code
+%
+% To use: \input{preamble-legacy}
+% =============================================================================
+
+% =============================================================================
+% SECTION 1: PRINT COVER GEOMETRY (for print-cover job only)
+% =============================================================================
+% These settings were used for print cover generation via CreateSpace/Lulu.
+% They are not needed for regular book compilation.
+
+%% Print Setup (uncomment if creating print covers)
+\newlength{\coverwidth}
+\newlength{\frontsideleft}
+\newlength{\pagethickness}
+%
+% % Page count for spine calculation
+\newcommand{\numpages}{604}
+%
+% % Color interior: 0.0025in per page
+% % B+W interior: 0.002252in per page
+\setlength{\pagethickness}{0.0025in}
+%
+% % LULU dimensions (2017-01-16)
+\setlength{\coverwidth}{44.229cm}
+\setlength{\frontsideleft}{21.905cm+0.419cm+0.3cm}
+%
+% % Apply print-cover geometry only for print-cover job
+\ifthenelse{\equal{\detokenize{print-cover}}{\jobname}}{
+\geometry{papersize={\coverwidth,28.571cm},layoutsize={21.3cm,27.3cm},layoutoffset={\frontsideleft,0.3cm},body={18.4cm,24.7cm}}
+% }{}
+
+% =============================================================================
+% SECTION 2: ALTERNATIVE FONTS (commented out in original)
+% =============================================================================
+
+% Alternative math font
+\usepackage{mathpazo}
+
+% Roboto for Lyryx Icon font (requires roboto package)
+\usepackage{roboto}
+
+% BBM for indicator function (requires bbm package - "Travis hates this")
+\usepackage{bbm}
+\newcommand{\indicator}{\mathbbm{1}}
+
+% =============================================================================
+% SECTION 3: LICENSE AND DOCUMENTATION PACKAGES (may not be available)
+% =============================================================================
+
+% Creative Commons license (requires doclicense and ccicons packages)
+% These are often not available in minimal TeX Live installations
+\usepackage[type={CC},modifier={by-sa},version={4.0},imagewidth=2cm]{doclicense}
+\usepackage{ccicons}
+
+% =============================================================================
+% SECTION 4: PACKAGE LOADER (for complex dependency resolution)
+% =============================================================================
+
+% Use pkgloader for automatic package dependency resolution
+% Uncomment if you have complex package conflicts
+\usepackage{pkgloader}
+% ... load packages ...
+\LoadPackagesNow
+
+% =============================================================================
+% SECTION 5: ENUMERATE ITEM PACKAGES (may conflict with paralist)
+% =============================================================================
+
+% These may conflict with paralist/mdwlist in the simplified preamble
+\usepackage{enumerate}
+\usepackage[inline]{enumitem}
+
+% =============================================================================
+% SECTION 6: UNDERLINE FOR STRIKETHROUGH (rarely used)
+% =============================================================================
+
+% ulem package for strikethrough text
+% normalem option keeps italics as italics, not underlines
+\usepackage[normalem]{ulem}
+
+% =============================================================================
+% SECTION 7: ALTERNATIVE INPUT ENCODING (for non-biblatex mode)
+% =============================================================================
+
+% Extended unicode support (may conflict with biblatex)
+\usepackage[utf8x]{inputenc}
+\usepackage[mathletters]{ucs}
+
+% =============================================================================
+% SECTION 8: BACK REFERENCE FOR CITATIONS (biblatex handles this now)
+% =============================================================================
+
+% Back reference settings (now handled by biblatex backref=true option)
+\renewcommand*{\backref}[1]{}
+\renewcommand*{\backrefalt}[4]{%
+\ifcase #1 (Not cited.)%
+\or        (Cited on page~#2.)%
+\else      (Cited on pages~#2.)%
+\fi}
+
+% =============================================================================
+% SECTION 9: ALTERNATIVE GEOMETRY SETTINGS
+% =============================================================================
+
+% Alternative margin settings (commented out in original)
+\usepackage[inner=1.0\marg,top=\marg,outer=1.0\marg, bottom=\marg, marginparsep = 0.25em, marginparwidth = .7\marg]{geometry}
+
+% Interior job geometry (different margins for printed book)
+\ifthenelse{\equal{\detokenize{interior}}{\jobname}}{
+\usepackage[headheight=15pt,top=1in, bottom=0.75in, outer=0.65in, inner=0.85in]{geometry}
+% }{}
+
+% =============================================================================
+% SECTION 10: JUPYTER PYGMENTS DEFINITIONS (full version)
+% =============================================================================
+% The simplified preamble includes basic syntax highlighting.
+% These are the full Pygments definitions from preamble-jupyter.tex.
+
+\makeatletter
+\def\PY@reset{\let\PY@it=\relax \let\PY@bf=\relax%
+    \let\PY@ul=\relax \let\PY@tc=\relax%
+    \let\PY@bc=\relax \let\PY@ff=\relax}
+\def\PY@tok#1{\csname PY@tok@#1\endcsname}
+\def\PY@toks#1+{\ifx\relax#1\empty\else%
+    \PY@tok{#1}\expandafter\PY@toks\fi}
+\def\PY@do#1{\PY@bc{\PY@tc{\PY@ul{%
+    \PY@it{\PY@bf{\PY@ff{#1}}}}}}}
+\def\PY#1#2{\PY@reset\PY@toks#1+\relax+\PY@do{#2}}
+
+\expandafter\def\csname PY@tok@w\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.73,0.73}{##1}}}
+\expandafter\def\csname PY@tok@c\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@cp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.74,0.48,0.00}{##1}}}
+\expandafter\def\csname PY@tok@k\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kt\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.69,0.00,0.25}{##1}}}
+\expandafter\def\csname PY@tok@o\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@ow\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.67,0.13,1.00}{##1}}}
+\expandafter\def\csname PY@tok@nb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@nf\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@nc\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@nn\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@ne\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.82,0.25,0.23}{##1}}}
+\expandafter\def\csname PY@tok@nv\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@no\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.53,0.00,0.00}{##1}}}
+\expandafter\def\csname PY@tok@nl\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.63,0.63,0.00}{##1}}}
+\expandafter\def\csname PY@tok@ni\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.60,0.60,0.60}{##1}}}
+\expandafter\def\csname PY@tok@na\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.49,0.56,0.16}{##1}}}
+\expandafter\def\csname PY@tok@nt\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@nd\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.67,0.13,1.00}{##1}}}
+\expandafter\def\csname PY@tok@s\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@sd\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@si\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.53}{##1}}}
+\expandafter\def\csname PY@tok@se\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.13}{##1}}}
+\expandafter\def\csname PY@tok@sr\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.53}{##1}}}
+\expandafter\def\csname PY@tok@ss\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@sx\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@m\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@gh\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,0.50}{##1}}}
+\expandafter\def\csname PY@tok@gu\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.50,0.00,0.50}{##1}}}
+\expandafter\def\csname PY@tok@gd\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.63,0.00,0.00}{##1}}}
+\expandafter\def\csname PY@tok@gi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.63,0.00}{##1}}}
+\expandafter\def\csname PY@tok@gr\endcsname{\def\PY@tc##1{\textcolor[rgb]{1.00,0.00,0.00}{##1}}}
+\expandafter\def\csname PY@tok@ge\endcsname{\let\PY@it=\textit}
+\expandafter\def\csname PY@tok@gs\endcsname{\let\PY@bf=\textbf}
+\expandafter\def\csname PY@tok@gp\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,0.50}{##1}}}
+\expandafter\def\csname PY@tok@go\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.53,0.53,0.53}{##1}}}
+\expandafter\def\csname PY@tok@gt\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.27,0.87}{##1}}}
+\expandafter\def\csname PY@tok@err\endcsname{\def\PY@bc##1{\setlength{\fboxsep}{0pt}\fcolorbox[rgb]{1.00,0.00,0.00}{1,1,1}{\strut ##1}}}
+\expandafter\def\csname PY@tok@kc\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kd\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kn\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kr\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@bp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@fm\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@vc\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@vg\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@vi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@vm\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@sa\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@sb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@sc\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@dl\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@s2\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@sh\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@s1\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@mb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@mf\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@mh\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@mi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@il\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@mo\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@ch\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@cm\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@cpf\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@c1\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@cs\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+
+% Pygments character definitions
+\def\PYZbs{\char`\\}
+\def\PYZus{\char`\_}
+\def\PYZob{\char`\{}
+\def\PYZcb{\char`\}}
+\def\PYZca{\char`\^}
+\def\PYZam{\char`\&}
+\def\PYZlt{\char`\<}
+\def\PYZgt{\char`\>}
+\def\PYZsh{\char`\#}
+\def\PYZpc{\char`\%}
+\def\PYZdl{\char`\$}
+\def\PYZhy{\char`\-}
+\def\PYZsq{\char`\'}
+\def\PYZdq{\char`\"}
+\def\PYZti{\char`\~}
+\def\PYZat{@}
+\def\PYZlb{[}
+\def\PYZrb{]}
+\makeatother
+
+% =============================================================================
+% SECTION 11: FANCY VERBATIM LINE WRAPPING (for Jupyter notebooks)
+% =============================================================================
+% Advanced line breaking for Verbatim environments.
+% Only needed if you have very long lines in code cells.
+
+\makeatletter
+\newbox\Wrappedcontinuationbox
+\newbox\Wrappedvisiblespacebox
+\newcommand*\Wrappedvisiblespace {\textcolor{red}{\textvisiblespace}}
+\newcommand*\Wrappedcontinuationsymbol {\textcolor{red}{\llap{\tiny$\m@th\hookrightarrow$}}}
+\newcommand*\Wrappedcontinuationindent {3ex }
+\newcommand*\Wrappedafterbreak {\kern\Wrappedcontinuationindent\copy\Wrappedcontinuationbox}
+
+\newcommand*\Wrappedbreaksatspecials {%
+    \def\PYGZus{\discretionary{\char`\_}{\Wrappedafterbreak}{\char`\_}}%
+    \def\PYGZob{\discretionary{}{\Wrappedafterbreak\char`\{}{\char`\{}}%
+    \def\PYGZcb{\discretionary{\char`\}}{\Wrappedafterbreak}{\char`\}}}%
+    \def\PYGZca{\discretionary{\char`\^}{\Wrappedafterbreak}{\char`\^}}%
+    \def\PYGZam{\discretionary{\char`\&}{\Wrappedafterbreak}{\char`\&}}%
+    \def\PYGZlt{\discretionary{}{\Wrappedafterbreak\char`\<}{\char`\<}}%
+    \def\PYGZgt{\discretionary{\char`\>}{\Wrappedafterbreak}{\char`\>}}%
+    \def\PYGZsh{\discretionary{}{\Wrappedafterbreak\char`\#}{\char`\#}}%
+    \def\PYGZpc{\discretionary{}{\Wrappedafterbreak\char`\%}{\char`\%}}%
+    \def\PYGZdl{\discretionary{}{\Wrappedafterbreak\char`\$}{\char`\$}}%
+    \def\PYGZhy{\discretionary{\char`\-}{\Wrappedafterbreak}{\char`\-}}%
+    \def\PYGZsq{\discretionary{}{\Wrappedafterbreak\textquotesingle}{\textquotesingle}}%
+    \def\PYGZdq{\discretionary{}{\Wrappedafterbreak\char`\"}{\char`\"}}%
+    \def\PYGZti{\discretionary{\char`\~}{\Wrappedafterbreak}{\char`\~}}%
+}
+
+\newcommand*\Wrappedbreaksatpunct {%
+    \lccode`\~`\.\lowercase{\def~}{\discretionary{\hbox{\char`\.}}{\Wrappedafterbreak}{\hbox{\char`\.}}}%
+    \lccode`\~`\,\lowercase{\def~}{\discretionary{\hbox{\char`\,}}{\Wrappedafterbreak}{\hbox{\char`\,}}}%
+    \lccode`\~`\;\lowercase{\def~}{\discretionary{\hbox{\char`\;}}{\Wrappedafterbreak}{\hbox{\char`\;}}}%
+    \lccode`\~`\:\lowercase{\def~}{\discretionary{\hbox{\char`\:}}{\Wrappedafterbreak}{\hbox{\char`\:}}}%
+    \lccode`\~`\?\lowercase{\def~}{\discretionary{\hbox{\char`\?}}{\Wrappedafterbreak}{\hbox{\char`\?}}}%
+    \lccode`\~`\!\lowercase{\def~}{\discretionary{\hbox{\char`\!}}{\Wrappedafterbreak}{\hbox{\char`\!}}}%
+    \lccode`\~`\/\lowercase{\def~}{\discretionary{\hbox{\char`\/}}{\Wrappedafterbreak}{\hbox{\char`\/}}}%
+    \catcode`\.\active
+    \catcode`\,\active
+    \catcode`\;\active
+    \catcode`\:\active
+    \catcode`\?\active
+    \catcode`\!\active
+    \catcode`\/\active
+    \lccode`\~`\~
+}
+
+% Redefine Verbatim with line wrapping (uncomment to enable)
+\let\OriginalVerbatim=\Verbatim
+\renewcommand{\Verbatim}[1][1]{%
+\sbox\Wrappedcontinuationbox {\Wrappedcontinuationsymbol}%
+\sbox\Wrappedvisiblespacebox {\FV@SetupFont\Wrappedvisiblespace}%
+\def\FancyVerbFormatLine ##1{\hsize\linewidth
+\vtop{\raggedright\hyphenpenalty\z@\exhyphenpenalty\z@
+\doublehyphendemerits\z@\finalhyphendemerits\z@
+\strut ##1\strut}%
+%     }%
+\def\FV@Space {%
+\nobreak\hskip\z@ plus\fontdimen3\font minus\fontdimen4\font
+\discretionary{\copy\Wrappedvisiblespacebox}{\Wrappedafterbreak}
+%         {\kern\fontdimen2\font}%
+%     }%
+\Wrappedbreaksatspecials
+\OriginalVerbatim[#1,codes*=\Wrappedbreaksatpunct]%
+% }
+\makeatother
+
+% =============================================================================
+% SECTION 12: STANDALONE TIKZ SUPPORT
+% =============================================================================
+% For including standalone TikZ files with \includestandalone
+
+% Uncomment if you use standalone TikZ figures
+\usepackage{standalone}
+
+% =============================================================================
+% SECTION 13: DEPRECATED COMMANDS (kept for backward compatibility)
+% =============================================================================
+
+% Old \R and \I commands (conflicts with blackboard R)
+\def\R{\Re e}
+\def\I{\Im m}
+
+% Toggle for showing proofs
+\def \showproofs {If commented, many proofs will not be shown}
+
+% Toggle for NLP text
+\newcommand \nlptext{Show NLP text}
+
+% Toggle for old stuff
+\newcommand \oldstuff{Show old text}
+
+% =============================================================================
+% SECTION 14: BOOK INFO AND COURSE INFO
+% =============================================================================
+% These input files contain metadata about the book.
+% The simplified preamble includes path searching for these.
+
+% Course information (for adapted versions)
+\input{courseInfo.txt}
+
+% =============================================================================
+% SECTION 15: TITLE PAGE SETUP
+% =============================================================================
+% The title.tex file contains title page formatting.
+% This is loaded via path searching in the simplified preamble.
+
+% If you need to customize title page, uncomment:
+\input{preamble/title}
+
+% =============================================================================
+% SECTION 16: OLD EXERCISE ENVIRONMENT (replaced by exo)
+% =============================================================================
+% This was replaced by the 'exo' environment that shares counter with examples
+
+\newcounter{ex}[chapter]
+\renewcommand{\theex}{\thesection.\arabic{ex}}
+
+% =============================================================================
+% SECTION 17: OLD PROBLEM ENVIRONMENT WITH MDFRAMED
+% =============================================================================
+% Commented out in original - problem environment now uses tcolorbox
+
+\newcounter{problemnum}[chapter]
+\newenvironment{problem}{\begin{mdframed}[style=problem]\begin{problemnum}}{\end{problemnum}\end{mdframed}}
+\newtheorem{problemnum}{Problem}
+%
+\newenvironment{problem*}{\begin{mdframed}[style=problem]\begin{problemnum*}}{\end{problemnum*}\end{mdframed}}
+\newtheorem{problemnum*}[problemnum]{*Problem}
+
+% =============================================================================
+% SECTION 18: LISTINGS WITH MDFRAMED (for colored code backgrounds)
+% =============================================================================
+% Uncomment to surround lstlisting with mdframed for background color
+
+\surroundwithmdframed[
+%     hidealllines=true,
+%     backgroundcolor=codebase,
+%     innerleftmargin=-5pt,
+%     innertopmargin=-1pt,
+%     innerrightmargin=0pt,
+%     innerbottommargin=-5pt
+% ]{lstlisting}
+
+% =============================================================================
+% SECTION 19: ADJUSTBOX WITH EXPORT (for constrained images)
+% =============================================================================
+% Used for constraining images to maximum size
+
+\usepackage[Export]{adjustbox}
+\adjustboxset{max size={0.9\linewidth}{0.9\paperheight}}
+
+% =============================================================================
+% SECTION 20: DATE FORMATTING
+% =============================================================================
+% Automatic date from version.txt file
+
+\date{Version \IfFileExists{version.txt}{\input{version.txt}}{Compilation date: \today}}
+
+% =============================================================================
+% END OF LEGACY PREAMBLE
+% =============================================================================

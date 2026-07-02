@@ -1,10 +1,17 @@
 
 %\def \oldstuff {add old stuff}
 
-% Add local package paths
+% Add local package paths - paths relative to the compiling document
+% Works when compiled from book/ folder (main.tex) or base folder (LinearProgramming.tex)
 \makeatletter
-\def\input@path{{book/preamble/}{book/preamble/algorithmicx/}}
+\def\input@path{{preamble/}{preamble/algorithmicx/}{book/preamble/}{book/preamble/algorithmicx/}}
 \makeatother
+
+% Pre-pass options to packages that are loaded multiple times from different preamble files
+% This prevents "Option clash" errors when the same package is loaded with different options
+\PassOptionsToPackage{table}{xcolor}
+\PassOptionsToPackage{mathletters}{ucs}
+\PassOptionsToPackage{Export}{adjustbox}
 
 \usepackage[english]{babel}
 \usepackage{fancyhdr}
@@ -28,7 +35,7 @@
 
 % \usepackage{pkgloader}            % Use this to resolve package dependencies
 
-\usepackage{book/preamble/algorithmicx/algorithmicx}
+\usepackage{algorithmicx}
 \usepackage{amsmath, amsfonts, amscd, amssymb}
 \usepackage{appendix}
 \usepackage{array}
@@ -50,7 +57,7 @@
 \usepackage{makeidx}
 \usepackage{multicol}
 \usepackage{multirow}
-\usepackage{paralist}
+%\usepackage{paralist} % removed: conflicts with enumitem[inline] (duplicate * environments)
 \usepackage{relsize}
 \usepackage{subcaption}
 \usepackage{textcomp}
@@ -60,8 +67,8 @@
 \usepackage{xcolor}
 \usepackage{url}
 
-\usepackage[plain]{book/preamble/algorithm}
-\usepackage[noend]{book/preamble/algorithmicx/algpseudocode}
+\usepackage[plain]{algorithm}
+\usepackage[noend]{algpseudocode}
 % \usepackage[style=alphabetic,refsection=chapter,backref=true,backend=bibtex]{biblatex}
 \usepackage[customcolors]{hf-tikz}
 \usepackage[framemethod=tikz]{mdframed}
@@ -346,7 +353,8 @@
 
 % Various other shortcuts =====================================================
 
-\renewcommand{\epsilon}{\varepsilon}                    % curly epsilon
+% Moved to after all package loads to avoid conflict with mathpazo
+% \renewcommand{\epsilon}{\varepsilon}                    % curly epsilon
 \newcommand{\argmax}{\mbox{argmax}}
 \newcommand{\indicator}{\boldsymbol{1}}
 % \newcommand{\indicator}{\mathbbm{1}} % characteristic (indicator) function
@@ -416,12 +424,12 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-\input{book/preamble/preamble-optimization}
+\input{preamble-optimization}
 %\input{optimization/merged_preamble}
 %\input{optimization/preamble_merged_restructured}
-\input{book/preamble/preamble0}
-\input{book/preamble/preamble0-biblatex}
-\input{book/preamble/preamble-jupyter.tex}
+\input{preamble0-biblatex}
+\input{preamble0}
+\input{preamble-jupyter}
 
 
 \usepackage{pdfpages}
@@ -482,7 +490,7 @@
 \usepackage{epsfig}
 
 % Additional features for lists
-\usepackage{mdwlist}
+%\usepackage{mdwlist} % removed: conflicts with enumitem[inline] (both define enumerate*)
 
 % Coloured titlepage setup
 \usepackage{afterpage}
@@ -526,6 +534,64 @@
 
 \definecolor{ocre}{RGB}{243,102,25} % Define the orange color used for highlighting throughout the book
 
+%% ============================================================================
+%% OPTIMIZATION MODEL SETUP HEADERS
+%% Standardized section labels for optimization-model examples:
+%%   Sets / Parameters / Variables / Model  (and any other label via \modelhead).
+%% Edit \modelheadcolor or the \modelhead definition to restyle ALL examples.
+%%   \modelhead{Sets}      -> colored bold "Sets:" label (drop-in for \textbf{Sets:})
+%%   \modelsets etc.       -> convenience wrappers for the four standard labels
+%% The macro adds no vertical space and no indentation change, so surrounding
+%% spacing in each example is preserved.
+%% Color tracks the book's theme accent (Lyryx chaptertitlecolour, maroon #840125),
+%% so it matches chapter/section titles and box frames. To restyle, either change
+%% chaptertitlecolour or redefine \modelheadcolor below and point \modelhead at it.
+%% ============================================================================
+% Fallback so the macro still compiles if the Lyryx style isn't loaded.
+\makeatletter
+\@ifundefined{color@chaptertitlecolour}{\definecolor{chaptertitlecolour}{HTML}{840125}}{}
+\makeatother
+% To restyle ALL model headers, change chaptertitlecolour, or swap the color name below.
+\newcommand{\modelhead}[1]{\noindent{\bfseries\color{chaptertitlecolour}#1:}}
+\newcommand{\modelsets}{\modelhead{Sets}}
+\newcommand{\modelparams}{\modelhead{Parameters}}
+\newcommand{\modelvars}{\modelhead{Variables}}
+\newcommand{\modelmodel}{\modelhead{Model}}
+
+%% ============================================================================
+%% ALGORITHM CARDS — colored step-by-step boxes (used for the Simplex algorithms).
+%%   \begin{algocard}{Title} ... \algostep{color}{icon}{Step title}{body} ... \end{algocard}
+%% Step colors: algenter (choose), algleave (ratio test), algpivot, algopt (optimal).
+%% Restyle by editing the colors or the \algostep macro below.
+%% ============================================================================
+\usepackage{pifont}
+\tcbuselibrary{skins}                   % needed for the step-panel left rule (enhanced/borderline)
+\definecolor{algenter}{HTML}{1B7F4B}   % green  — entering variable
+\definecolor{algleave}{HTML}{C9700A}   % orange — ratio test / leaving
+\definecolor{algpivot}{HTML}{1F5FA8}   % blue   — pivot
+\definecolor{algopt}{HTML}{6A1B9A}     % purple — optimal / repeat
+% Neutral (non-theme) container so algorithms read differently from the example boxes.
+\definecolor{algcharcoal}{HTML}{33373D} % title text
+\definecolor{algslate}{HTML}{5A6270}    % frame
+\definecolor{alggraybar}{HTML}{ECECEC}  % title-bar background
+\newtcolorbox{algocard}[1]{colback=white,colframe=algslate,coltitle=algcharcoal,
+  colbacktitle=alggraybar,fonttitle=\bfseries,title={\ding{228}\ #1},
+  sharp corners,boxrule=0.8pt,breakable,left=5pt,right=5pt,top=4pt,bottom=4pt}
+\newcommand{\algostep}[4]{%
+  \begin{tcolorbox}[colframe=#1,colback=#1!7,boxrule=0.7pt,arc=2pt,
+    left=6pt,right=6pt,top=3pt,bottom=3pt,before skip=5pt,after skip=3pt]%
+  {\large\color{#1}#2}\enspace{\bfseries\color{#1}#3}\enspace #4%
+  \end{tcolorbox}}
+
+%% Worked-example step panels: tinted left-rule strip in a step color, so a
+%% worked calculation visibly maps back to the algorithm card step.
+%%   \begin{steppanel}{algenter} \slab{algenter}{43}{Entering} text ... \end{steppanel}
+%% Colors reuse algenter/algleave/algpivot/algopt; icons 43/47/114/52 match the card.
+\newtcolorbox{steppanel}[1]{enhanced,colback=#1!5,frame hidden,
+  borderline west={2.5pt}{0pt}{#1},sharp corners,
+  left=9pt,right=5pt,top=3pt,bottom=3pt,before skip=5pt,after skip=5pt}
+\newcommand{\slab}[3]{{\color{#1}\ding{#2}\ \bfseries #3.}\ }
+
 % Thew following passes on paperheight to ps2pdf... bug fix  
 \pdfpageheight=\paperheight 
 
@@ -544,16 +610,41 @@
 
 
 % Inputs information regarding book Title, Authors, Version and Revision
-\input{external-sources/aFirstCourseLinearAlgebra/frontmatter/bookinfo.txt}
+% Path works from both base directory and book/ directory
+\IfFileExists{external-sources/aFirstCourseLinearAlgebra/frontmatter/bookinfo.txt}{%
+  \input{external-sources/aFirstCourseLinearAlgebra/frontmatter/bookinfo.txt}%
+}{%
+  \IfFileExists{../external-sources/aFirstCourseLinearAlgebra/frontmatter/bookinfo.txt}{%
+    \input{../external-sources/aFirstCourseLinearAlgebra/frontmatter/bookinfo.txt}%
+  }{%
+    \input{appendices/linear-algebra/frontmatter/bookinfo.txt}%
+  }%
+}
 
 % Inputs information regarding Institution,Course Code, Name, Session and Section (for adapted text)
 %\input{external-sources/aFirstCourseLinearAlgebra/courseInfo.txt}
 
-% Lyryx Math Style
-\usepackage{external-sources/aFirstCourseLinearAlgebra/LyryxMathStyle}
+% Lyryx Math Style - check both paths
+\IfFileExists{external-sources/aFirstCourseLinearAlgebra/LyryxMathStyle.sty}{%
+  \usepackage{external-sources/aFirstCourseLinearAlgebra/LyryxMathStyle}%
+}{%
+  \IfFileExists{../external-sources/aFirstCourseLinearAlgebra/LyryxMathStyle.sty}{%
+    \usepackage{../external-sources/aFirstCourseLinearAlgebra/LyryxMathStyle}%
+  }{%
+    \usepackage{appendices/linear-algebra/LyryxMathStyle}%
+  }%
+}
 
-% Lyryx Linear Algebra Style
-\usepackage{external-sources/aFirstCourseLinearAlgebra/LyryxLinAlgStyle}
+% Lyryx Linear Algebra Style - check both paths
+\IfFileExists{external-sources/aFirstCourseLinearAlgebra/LyryxLinAlgStyle.sty}{%
+  \usepackage{external-sources/aFirstCourseLinearAlgebra/LyryxLinAlgStyle}%
+}{%
+  \IfFileExists{../external-sources/aFirstCourseLinearAlgebra/LyryxLinAlgStyle.sty}{%
+    \usepackage{../external-sources/aFirstCourseLinearAlgebra/LyryxLinAlgStyle}%
+  }{%
+    \usepackage{appendices/linear-algebra/LyryxLinAlgStyle}%
+  }%
+}
 
 
 \renewcommand{\b}{\mathbf{b}}
@@ -649,7 +740,16 @@
 \makeindex
 
 
-\input{optimization/title} 
+% Load title definition - works from both base and book/ directories
+\IfFileExists{preamble/title.tex}{%
+  \input{preamble/title}%
+}{%
+  \IfFileExists{book/preamble/title.tex}{%
+    \input{book/preamble/title}%
+  }{%
+    \input{archive/orphaned-content/title}%
+  }%
+} 
 
 \def\lt{<}
 \def\gt{>}
@@ -659,7 +759,28 @@
 \newcommand{\mm}[1]{\mathbf{#1}}
 
 \renewcommand{\vec}[1]{\mathbf{#1}}
-\graphicspath{{external-sources/aFirstCourseLinearAlgebra/},{external-sources/lineqlpbook/},{optimization/figures/figures-static/},{external-sources/Christopher_Griffin_Penn_State_University/},{external-sources/OR-Book-Vorwerk/images/}}
+% Graphics paths - includes both base and book/ relative paths
+\graphicspath{%
+  {Figures/},%
+  {../Figures/},%
+  {graph-theory-graphics/},%
+  {../graph-theory-graphics/},%
+  {external-sources/aFirstCourseLinearAlgebra/},%
+  {external-sources/lineqlpbook/},%
+  {external-sources/Christopher_Griffin_Penn_State_University/},%
+  {external-sources/OR-Book-Vorwerk/images/},%
+  {external-sources/foundationsAppliedMathematicsLabs/},%
+  {external-sources/foundationsAppliedMathematicsLabs/Volume2/Simplex/figures/},%
+  {optimization/figures/figures-static/},%
+  {optimization/figures/figures-source/},%
+  {../external-sources/aFirstCourseLinearAlgebra/},%
+  {../external-sources/lineqlpbook/},%
+  {../external-sources/Christopher_Griffin_Penn_State_University/},%
+  {../external-sources/OR-Book-Vorwerk/images/},%
+  {../external-sources/foundationsAppliedMathematicsLabs/},%
+  {../external-sources/foundationsAppliedMathematicsLabs/Volume2/Simplex/figures/},%
+  {part1-linear-programming/figures/},%
+}
 
 
 \usetikzlibrary{arrows.meta,positioning}
@@ -706,12 +827,15 @@
    
 
   \newtcolorbox{pioneerspotlight}[1]{
-  colback=green!5!white, 
-  colframe=green!75!black, 
-  rounded corners, 
-  boxrule=1pt, 
-  width=\textwidth, 
+  colback=green!5!white,
+  colframe=green!75!black,
+  rounded corners,
+  boxrule=1pt,
+  width=\textwidth,
   title=\large\textbf{Pioneer Spotlight:} \begin{center} \underline{{#1}} \end{center}, % Makes the title bold and larger
   breakable
 }
+
+% Deferred command overrides - must come AFTER all packages are loaded
+\renewcommand{\epsilon}{\varepsilon}                    % curly epsilon
 

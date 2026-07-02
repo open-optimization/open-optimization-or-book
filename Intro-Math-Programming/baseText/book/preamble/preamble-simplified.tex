@@ -1,0 +1,1321 @@
+% =============================================================================
+% SIMPLIFIED PREAMBLE FOR INTRO TO MATHEMATICAL PROGRAMMING
+% =============================================================================
+% This is a unified, simplified preamble that consolidates all the scattered
+% package loading and command definitions from the original preamble files.
+%
+% Original files consolidated:
+%   - packages-and-commands.tex
+%   - preamble-optimization.tex
+%   - preamble0.tex
+%   - preamble0-biblatex.tex
+%   - preamble-jupyter.tex
+%   - LyryxMathStyle.sty
+%   - LyryxLinAlgStyle.sty
+%
+% Package loading order matters! This file is organized to avoid conflicts.
+% =============================================================================
+
+% =============================================================================
+% SECTION 1: CORE PACKAGES (must load early)
+% =============================================================================
+
+% Language and encoding
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+
+% Conditional statements (needed early for conditional loading)
+\usepackage{ifthen}
+\usepackage{iftex}
+\usepackage{etoolbox}
+
+% Font packages
+\usepackage{mathptmx}  % Times-like math font
+\usepackage[EULERGREEK]{sansmath}
+
+% Simple arithmetic
+\usepackage{calc}
+
+% =============================================================================
+% SECTION 2: MATH PACKAGES
+% =============================================================================
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{amscd}
+\usepackage{mathtools}
+\usepackage{mathrsfs}
+\usepackage{gensymb}
+
+% =============================================================================
+% SECTION 3: GRAPHICS AND COLOR
+% =============================================================================
+
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{epsfig}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{rotating}
+
+% Color definitions - consolidated from all preambles
+\definecolor{red}{cmyk}{0, 1.00, 0.62, 0}
+\definecolor{blue}{cmyk}{1.00, 0.34, 0.0, 0.02}
+\definecolor{green}{cmyk}{0.7, 0, 1.0, 0.09}
+\definecolor{yellow}{cmyk}{0, 0.16, 1.0, 0}
+\definecolor{gray}{cmyk}{0, 0, 0, 0.65}
+\definecolor{purple}{cmyk}{0.333, 0.867, 0, 0.059}
+\definecolor{ocre}{RGB}{243,102,25}
+
+% Link and URL colors
+\definecolor{urlcolor}{rgb}{0, 0.145, 0.698}
+\definecolor{linkcolor}{rgb}{0.71, 0.21, 0.01}
+\definecolor{citecolor}{rgb}{0.12, 0.54, 0.11}
+\definecolor{linkcolour}{HTML}{013030}
+
+% Title page and header colors
+\definecolor{headersquarecolour}{HTML}{BDBDBD}
+\definecolor{lyryxcolour}{HTML}{000033}
+\definecolor{lyryxlogoy}{HTML}{E2970A}
+\definecolor{titletextcolour}{HTML}{044155}
+\definecolor{subtitletextcolour}{HTML}{F8EAC2}
+\definecolor{titlemainbgcolour}{HTML}{E2AB0A}
+\definecolor{titlemainboxcolour}{HTML}{F9D876}
+\definecolor{sampletextcolour}{HTML}{B19545}
+\definecolor{lscshdrboxcolour}{HTML}{E2AB0A}
+\definecolor{lscstextcolour}{HTML}{044155}
+
+% Section colors
+\definecolor{chaptertitlecolour}{HTML}{840125}
+\definecolor{sectiontitlecolour}{HTML}{0C164B}
+\definecolor{subsectiontitlecolour}{HTML}{003835}
+\definecolor{subsubsectiontitlecolour}{HTML}{F5AE2A}
+
+% Standardized optimization-model setup headers (see packages-and-commands.tex).
+% Color tracks the theme accent chaptertitlecolour (maroon #840125).
+\makeatletter
+\@ifundefined{color@chaptertitlecolour}{\definecolor{chaptertitlecolour}{HTML}{840125}}{}
+\makeatother
+\providecommand{\modelhead}[1]{\noindent{\bfseries\color{chaptertitlecolour}#1:}}
+\providecommand{\modelsets}{\modelhead{Sets}}
+\providecommand{\modelparams}{\modelhead{Parameters}}
+\providecommand{\modelvars}{\modelhead{Variables}}
+\providecommand{\modelmodel}{\modelhead{Model}}
+
+% Box colors
+\definecolor{theoremcolour}{HTML}{840125}
+\definecolor{definitioncolour}{HTML}{0C164B}
+\definecolor{examplecolour}{HTML}{ADD8E6}
+\definecolor{solutioncolour}{HTML}{005F3F}
+\definecolor{outcomecolour}{HTML}{E0B659}
+\definecolor{resourcecolour}{HTML}{4f8f03}
+
+% Code highlighting colors
+\colorlet{shadecolor}{blue!10}
+\colorlet{warning}{red!20}
+\colorlet{warnline}{red}
+\colorlet{information}{green!20}
+\colorlet{infoline}{green}
+\colorlet{codebase}{yellow!30}
+\colorlet{codekeyword}{blue}
+\colorlet{codecomment}{green}
+\colorlet{codestring}{red}
+\colorlet{notgreen}{blue!50!yellow}
+
+% Additional colors
+\definecolor{olive}{rgb}{0.3, 0.4, 0.1}
+\definecolor{fore}{RGB}{249,242,215}
+\definecolor{back}{RGB}{51,51,51}
+\definecolor{title}{RGB}{255,0,90}
+\definecolor{dgreen}{rgb}{0, 0.6, 0}
+\definecolor{gold}{rgb}{1, 0.84, 0}
+\definecolor{JungleGreen}{cmyk}{0.99, 0, 0.52, 0}
+\definecolor{bluegreen}{cmyk}{0.85, 0, 0.33, 0}
+\definecolor{RawSienna}{cmyk}{0, 0.72, 1, 0.45}
+\definecolor{Magenta}{cmyk}{0, 1, 0, 0}
+\definecolor{capri}{rgb}{0.0, 0.75, 1.0}
+\definecolor{cherryblossompink}{rgb}{1.0, 0.72, 0.77}
+
+% ANSI colors for code output
+\definecolor{ansi-black}{HTML}{3E424D}
+\definecolor{ansi-black-intense}{HTML}{282C36}
+\definecolor{ansi-red}{HTML}{E75C58}
+\definecolor{ansi-red-intense}{HTML}{B22B31}
+\definecolor{ansi-green}{HTML}{00A250}
+\definecolor{ansi-green-intense}{HTML}{007427}
+\definecolor{ansi-yellow}{HTML}{DDB62B}
+\definecolor{ansi-yellow-intense}{HTML}{B27D12}
+\definecolor{ansi-blue}{HTML}{208FFB}
+\definecolor{ansi-blue-intense}{HTML}{0065CA}
+\definecolor{ansi-magenta}{HTML}{D160C4}
+\definecolor{ansi-magenta-intense}{HTML}{A03196}
+\definecolor{ansi-cyan}{HTML}{60C6C8}
+\definecolor{ansi-cyan-intense}{HTML}{258F8F}
+\definecolor{ansi-white}{HTML}{C5C1B4}
+\definecolor{ansi-white-intense}{HTML}{A1A6B2}
+\definecolor{ansi-default-inverse-fg}{HTML}{FFFFFF}
+\definecolor{ansi-default-inverse-bg}{HTML}{000000}
+\definecolor{outerrorbackground}{HTML}{FFDFDF}
+
+% Jupyter colors
+\definecolor{incolor}{HTML}{303F9F}
+\definecolor{outcolor}{HTML}{D84315}
+\definecolor{cellborder}{HTML}{CFCFCF}
+\definecolor{cellbackground}{HTML}{F7F7F7}
+
+% =============================================================================
+% SECTION 4: TABLE PACKAGES
+% =============================================================================
+
+\usepackage{array}
+\usepackage{colortbl}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{tabu}
+\usepackage{multicol}
+\usepackage{multirow}
+\usepackage{bigstrut}
+\usepackage{blkarray}
+
+% =============================================================================
+% SECTION 5: PAGE LAYOUT
+% =============================================================================
+
+% Page dimensions
+\setlength{\paperheight}{11in}
+\setlength{\paperwidth}{8.5in}
+
+% Margins and geometry
+\usepackage[headheight=15pt, top=1in, bottom=0.75in, outer=0.75in, inner=0.75in]{geometry}
+
+% Line spacing and paragraph settings
+\linespread{1.05}
+\setlength{\parskip}{2pt plus1pt minus1pt}
+
+% Fancy headers
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\renewcommand{\headrulewidth}{0pt}
+
+% Empty pages
+\usepackage{emptypage}
+
+% Margin notes
+\usepackage{marginnote}
+
+% Page colors
+\usepackage{afterpage}
+\usepackage{pagecolor}
+
+% =============================================================================
+% SECTION 6: TIKZ AND DRAWING
+% =============================================================================
+
+\usepackage{tikz}
+\usepackage[customcolors]{hf-tikz}
+\usepackage{circuitikz}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\pgfplotsset{compat=1.17}
+
+% TikZ libraries - consolidated
+\usetikzlibrary{
+    arrows, arrows.meta,
+    automata,
+    backgrounds,
+    calc,
+    calendar,
+    chains,
+    circuits.ee.IEC,
+    decorations, decorations.pathreplacing, decorations.text,
+    intersections,
+    matrix,
+    mindmap,
+    patterns,
+    petri,
+    positioning,
+    shadows,
+    shapes, shapes.geometric, shapes.callouts,
+    trees
+}
+
+% TikZ styles
+\tikzstyle{arrowstyle}=[scale=2.5]
+\tikzstyle{directed}=[postaction={decorate,decoration={markings,
+    mark=at position .65 with {\arrow[arrowstyle]{latex}}}}]
+\tikzstyle{directed1}=[postaction={decorate,decoration={markings,
+    mark=at position .99 with {\arrow[arrowstyle]{latex}}}}]
+\tikzstyle{vertex}=[circle,fill=black!25,minimum size=20pt,inner sep=0pt]
+
+% hf-tikz settings
+\hfsetfillcolor{red!02}
+\hfsetbordercolor{red}
+
+% =============================================================================
+% SECTION 7: BOXES AND FRAMES
+% =============================================================================
+
+\usepackage{framed}
+\usepackage[framemethod=tikz]{mdframed}
+\mdfsetup{skipabove=\topskip, skipbelow=\topskip}
+
+\usepackage{tcolorbox}
+\tcbuselibrary{theorems, breakable, skins, listingsutf8, xparse}
+
+% Define tcbfloat type for floating tcolorboxes
+\newfloat{tcbfloat}{htbp}{lot}
+
+% mdframed styles
+\mdfdefinestyle{problem}{
+    backgroundcolor=shadecolor,
+    skipabove=10pt,
+    skipbelow=10pt,
+    leftmargin=20pt,
+    rightmargin=20pt,
+    innertopmargin=10pt,
+    innerbottommargin=10pt,
+    innerleftmargin=10pt,
+    middlelinewidth=0pt,
+    everyline=true,
+    linecolor=blue,
+    linewidth=2pt
+}
+
+\newmdenv[
+    skipabove=10pt,
+    skipbelow=10pt,
+    leftmargin=20pt,
+    rightmargin=20pt,
+    backgroundcolor=warning,
+    innertopmargin=10pt,
+    innerbottommargin=10pt,
+    innerleftmargin=10pt,
+    middlelinewidth=0pt,
+    everyline=true,
+    linecolor=warnline,
+    linewidth=2pt,
+    font=\normalfont\normalsize,
+    frametitlefont=\large\bfseries,
+    frametitleaboveskip=1em,
+    frametitlerule=true,
+    frametitle={\sc Caution!}
+]{warn}
+
+\newmdenv[
+    skipabove=10pt,
+    skipbelow=10pt,
+    leftmargin=20pt,
+    rightmargin=20pt,
+    backgroundcolor=information,
+    outerlinewidth=0pt,
+    outerlinecolor=infoline,
+    innertopmargin=10pt,
+    innerbottommargin=10pt,
+    innerleftmargin=10pt,
+    middlelinewidth=0pt,
+    everyline=true,
+    linecolor=infoline,
+    linewidth=2pt,
+    font=\normalfont\normalsize,
+    frametitlefont=\large\bfseries,
+    frametitleaboveskip=1em,
+    frametitlerule=true,
+    frametitle={\sc Note}
+]{info}
+
+% tcolorbox styles
+\tcbset{
+    defstyle/.style={
+        fonttitle=\bfseries\upshape, fontupper=\slshape,
+        colback=definitioncolour!5, colframe=definitioncolour,
+        before={\par\bigskip\pagebreak[0]\parindent=0pt},
+        after={\par\bigskip}, top=1mm, bottom=1mm
+    },
+    theostyle/.style={
+        fonttitle=\bfseries\upshape, fontupper=\slshape,
+        colback=chaptertitlecolour!5, colframe=chaptertitlecolour,
+        before={\par\bigskip\pagebreak[0]\parindent=0pt},
+        after={\par\bigskip}, top=1mm, bottom=1mm
+    },
+    examstyle/.style={
+        breakable, fonttitle=\bfseries\upshape, fontupper=\slshape,
+        colback=examplecolour!5, colframe=examplecolour,
+        before={\par\bigskip\pagebreak[0]\parindent=0pt},
+        after={\par\bigskip}, top=1mm, bottom=1mm
+    },
+    solutionstyle/.style={
+        fonttitle=\bfseries\upshape, fontupper=\slshape,
+        colback=solutioncolour!5, colframe=solutioncolour,
+        before={\par\bigskip\pagebreak[0]\parindent=0pt},
+        after={\par\bigskip}, top=1mm, bottom=1mm
+    }
+}
+
+% Special tcolorboxes
+\newtcolorbox{titlemainbox}{
+    colback=titlemainboxcolour, colframe=titlemainboxcolour,
+    before={\par\bigskip\pagebreak[0]\parindent=0pt},
+    after={\par\bigskip}, top=1em, bottom=1em
+}
+
+\newtcolorbox{lscshdrbox}{
+    colback=lscshdrboxcolour, colframe=lscshdrboxcolour,
+    top=0mm, bottom=0mm, width=19em
+}
+
+\newtcolorbox{outcome}{
+    fonttitle=\bfseries\upshape, fontupper=\slshape,
+    colback=white, colframe=outcomecolour,
+    before={\par\bigskip\pagebreak[0]\parindent=0pt},
+    after={\par\bigskip}, top=1mm, bottom=1mm, title=Outcomes
+}
+
+\newtcolorbox{resource}{
+    fonttitle=\bfseries\upshape, fontupper=\slshape,
+    colback=white, colframe=resourcecolour,
+    before={\par\bigskip\pagebreak[0]\parindent=0pt},
+    after={\par\bigskip}, top=1mm, bottom=1mm, title=Resources
+}
+
+\newtcolorbox{casestudybox}[1]{
+    colback=blue!5!white, colframe=blue!75!black,
+    rounded corners, boxrule=1pt, width=\textwidth,
+    title=\large\textbf{Case Study:}\\ \underline{{#1}},
+    breakable
+}
+
+\newtcolorbox{pioneerspotlight}[1]{
+    colback=green!5!white, colframe=green!75!black,
+    rounded corners, boxrule=1pt, width=\textwidth,
+    title={\centering\large\textbf{Pioneer Spotlight:} \underline{#1}\par},
+    breakable
+}
+
+% =============================================================================
+% SECTION 8: ALGORITHMS AND CODE
+% =============================================================================
+
+% Algorithm packages - try to load, provide fallbacks if not available
+\IfFileExists{algorithmicx.sty}{%
+    \usepackage{algorithmicx}
+    \usepackage[plain]{algorithm}
+    \usepackage[noend]{algpseudocode}
+    \floatstyle{ruled}
+    \restylefloat{algorithm}
+    % Algorithm substate environment
+    \newcounter{algsubstate}
+    \renewcommand{\thealgsubstate}{\alph{algsubstate}}
+    \newenvironment{algsubstates}{%
+        \setcounter{algsubstate}{0}%
+        \renewcommand{\State}{%
+            \stepcounter{algsubstate}%
+            \Statex {\footnotesize\thealgsubstate:}\space}%
+    }{}
+    % Full line comments in Algorithmic
+    \algnewcommand{\LineComment}[1]{\State \(\triangleright\) #1}
+}{%
+    % Fallback: provide dummy environments if algorithmicx not available
+    \input{preamble/algorithm-fallback}
+}
+
+% Listings package for code
+\usepackage{listings}
+
+\lstset{
+    language=Python,
+    backgroundcolor=\color{codebase},
+    tabsize=4,
+    basewidth=.5em,
+    rulecolor=\color{yellow},
+    basicstyle=\normalsize\ttfamily,
+    upquote=true,
+    columns=fixed,
+    extendedchars=true,
+    breaklines=true,
+    prebreak=\raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+    frame=lrtb,
+    xleftmargin=5pt,
+    xrightmargin=5pt,
+    framesep=4pt,
+    framerule=2pt,
+    showtabs=false,
+    showspaces=false,
+    showstringspaces=false,
+    morestring=[s]{"""}{"""},
+    morestring=[s]{'''}{'''},
+    keywordstyle=\color{codekeyword},
+    commentstyle=\color{codecomment},
+    stringstyle=\color{codestring},
+    title=\lstname,
+    captionpos=b,
+    abovecaptionskip=-5pt,
+    belowcaptionskip=-5pt,
+    moredelim=[is][\color{black}]{<<}{>>},
+    moredelim=[is][\color{red}]{<r<}{>r>},
+    moredelim=[is][\color{blue}]{<b<}{>b>},
+    moredelim=[is][\color{green}]{<g<}{>g>},
+    moredelim=[is][\color{purple}]{<p<}{>p>},
+    morekeywords={assert, bytes, self, super, with, as, yield, True, False, None}
+}
+
+\lstdefinestyle{FromFile}{
+    language=Python, frame=single, numbers=left, numberstyle=\tiny,
+    stepnumber=2, numbersep=7pt, numberfirstline=true,
+    abovecaptionskip=2pt, belowcaptionskip=2pt
+}
+
+\lstdefinestyle{ShellOutput}{language=}
+\lstdefinestyle{ShellInput}{language=}
+\lstdefinestyle{pseudo}{
+    basicstyle=\rmfamily, upquote=true,
+    keywordstyle=\color{black}\bfseries,
+    commentstyle=\color[rgb]{0.133,0.545,0.133},
+    stringstyle=\color[rgb]{0.627,0.126,0.941}
+}
+
+% Inline code commands
+\newcommand{\pseudoli}[1]{\lstinline[style=pseudo]!#1!}
+\newcommand{\li}[1]{\lstinline[prebreak=]!#1!}
+\newcommand{\lif}[1]{\lstinline[basicstyle=\footnotesize\ttfamily,language=Python,prebreak=]!#1!}
+\newcommand{\lsql}[1]{\lstinline[language=SQL,prebreak=,morekeywords={TEXT, REAL, IF}]!#1!}
+\newcommand{\code}[1]{\texttt{#1}}
+
+% Verbatim and fancy verbatim
+\usepackage{verbatim}
+\usepackage{fancyvrb}
+\usepackage{upquote}
+
+% =============================================================================
+% SECTION 9: HYPERLINKS AND REFERENCES
+% =============================================================================
+
+\usepackage{hyperref}
+\hypersetup{
+    pdfborder=0 0 0,
+    colorlinks=true,
+    allcolors=linkcolour,
+    linkcolor=linkcolour,
+    urlcolor=linkcolour,
+    citecolor=citecolor,
+    breaklinks=true
+}
+
+\usepackage{url}
+
+% PDF border style
+\makeatletter
+\Hy@AtBeginDocument{
+    \def\@pdfborder{0 0 1}
+    \def\@pdfborderstyle{/S/U/W 1}
+}
+\makeatother
+
+% =============================================================================
+% SECTION 10: CAPTIONS AND FLOATS
+% =============================================================================
+
+\usepackage[format=hang, font=bf]{caption}
+
+% Float settings
+\renewcommand\floatpagefraction{.9}
+\renewcommand\topfraction{.9}
+\renewcommand\bottomfraction{.9}
+\renewcommand\textfraction{.1}
+\setcounter{totalnumber}{50}
+\setcounter{topnumber}{50}
+\setcounter{bottomnumber}{50}
+
+% Make all floats centered
+\makeatletter
+\g@addto@macro\@floatboxreset\centering
+\makeatother
+
+% =============================================================================
+% SECTION 11: SECTION HEADERS
+% =============================================================================
+
+\usepackage[explicit, sc, nobottomtitles]{titlesec}
+
+% Chapter Header
+\titleformat{\chapter}[display]
+    {\color{sectiontitlecolour}\bf\Huge}
+    {\hspace*{0pt}\thechapter.~#1}
+    {-20pt}
+    {\hspace*{0pt}{\color{sectiontitlecolour}\rule{\dimexpr\textwidth\relax}{2pt}}\Huge}
+\titleformat{name=\chapter,numberless}[display]
+    {\color{sectiontitlecolour}\bf\Huge}
+    {\hspace*{0pt}#1}
+    {-20pt}
+    {\hspace*{0pt}{\color{sectiontitlecolour}\rule{\dimexpr\textwidth\relax}{2pt}}\Huge}
+\titlespacing*{\chapter}{0pt}{10pt}{10pt}
+
+% Section Header
+\titleformat{\section}[display]
+    {\bigskip\bigskip\hypersetup{linkcolor=sectiontitlecolour}\color{sectiontitlecolour}\bf\LARGE}
+    {\hspace*{0pt}\thesection~#1}
+    {-15pt}
+    {\hspace*{0pt}{\color{sectiontitlecolour}\rule{\dimexpr\textwidth\relax}{2pt}}\LARGE}
+\titleformat{name=\section,numberless}[display]
+    {\bigskip\bigskip\hypersetup{linkcolor=sectiontitlecolour}\color{sectiontitlecolour}\bf\LARGE}
+    {\hspace*{0pt}#1}
+    {-15pt}
+    {\hspace*{0pt}{\color{sectiontitlecolour}\rule{\dimexpr\textwidth\relax}{2pt}}\LARGE}
+\titlespacing*{\section}{0pt}{0pt}{10pt}
+
+% Subsection header
+\titleformat{\subsection}[display]
+    {\color{sectiontitlecolour}\bf\large}
+    {\hspace*{0pt}\thesubsection.~#1}
+    {-10pt}
+    {\hspace*{0pt}{\color{sectiontitlecolour}\rule{\dimexpr\textwidth\relax}{2pt}}\large}
+\titleformat{name=\subsection,numberless}[display]
+    {\color{subsectiontitlecolour}\bf\large}
+    {\hspace*{0pt}#1}
+    {-10pt}
+    {\hspace*{0pt}{\color{sectiontitlecolour}\rule{\dimexpr\textwidth\relax}{2pt}}\large}
+\titlespacing*{\subsection}{0pt}{10pt}{10pt}
+
+% Subsubsection header
+\titleformat{\subsubsection}[display]
+    {\color{sectiontitlecolour}\bf\normalsize}
+    {\hspace*{0pt}\thesubsubsection.~#1}
+    {-10pt}
+    {\hspace*{0pt}{\color{sectiontitlecolour}\rule{\dimexpr\textwidth\relax}{2pt}}\large}
+\titleformat{name=\subsubsection,numberless}[display]
+    {\color{sectiontitlecolour}\bf\normalsize}
+    {\hspace*{0pt}#1}
+    {-10pt}
+    {\hspace*{0pt}{\color{sectiontitlecolour}\rule{\dimexpr\textwidth\relax}{2pt}}\large}
+\titlespacing*{\subsubsection}{0pt}{10pt}{10pt}
+
+% Numbering depth
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+
+% =============================================================================
+% SECTION 12: INDEX AND BIBLIOGRAPHY
+% =============================================================================
+
+\usepackage{makeidx}
+\makeindex
+
+\usepackage{appendix}
+
+% Bibliography - biblatex with fallback
+\usepackage{csquotes}
+
+\IfFileExists{biblatex.sty}{%
+    \usepackage[backend=biber, giveninits=true, maxnames=100, maxcitenames=5, sorting=nyt, backref=true]{biblatex}
+    \newif\ifbiblatexloaded
+    \biblatexloadedtrue
+    % Print url only if no doi
+    \renewbibmacro*{doi+eprint+url}{%
+        \printfield{doi}%
+        \newunit\newblock%
+        \iffieldundef{doi}{%
+            \iftoggle{bbx:eprint}{\usebibmacro{eprint}}{}%
+        }{}%
+        \newunit\newblock%
+        \iffieldundef{doi}{\usebibmacro{url+urldate}}{}%
+    }
+}{%
+    % Biblatex not available - load fallback definitions
+    \input{preamble/biblatex-fallback}
+}
+
+% =============================================================================
+% SECTION 13: THEOREM ENVIRONMENTS
+% =============================================================================
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[chapter]
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{corollary}{Corollary}[chapter]
+\newtheorem{example}{Example}[chapter]
+\newtheorem{proposition}{Proposition}[chapter]
+\newtheorem{procedure}{Procedure}[chapter]
+\newtheorem{exercise}{Exercise}[chapter]
+\newtheorem{problem}{Problem}[chapter]
+\newtheorem{lemma}{Lemma}[chapter]
+\newtheorem{observation}{Observation}[chapter]
+\newtheorem{algorithmThm}{Algorithm}[chapter]
+\newtheorem{notation}{Notation}[chapter]
+\newtheorem{solutionbox}{Solution}[chapter]
+\newtheorem{remark}{Remark}[chapter]
+\newtheorem{ICE}{ICE}
+
+% Apply tcolorbox styling
+\tcolorboxenvironment{definition}{defstyle}
+\tcolorboxenvironment{theorem}{theostyle}
+\tcolorboxenvironment{corollary}{theostyle}
+\tcolorboxenvironment{example}{examstyle}
+\tcolorboxenvironment{proposition}{theostyle}
+\tcolorboxenvironment{procedure}{solutionstyle}
+\tcolorboxenvironment{exercise}{solutionstyle}
+\tcolorboxenvironment{problem}{solutionstyle}
+\tcolorboxenvironment{lemma}{theostyle}
+\tcolorboxenvironment{observation}{examstyle}
+\tcolorboxenvironment{algorithmThm}{examstyle}
+\tcolorboxenvironment{notation}{defstyle}
+\tcolorboxenvironment{solutionbox}{solutionstyle}
+\tcolorboxenvironment{remark}{examstyle}
+
+% Solution and proof environments
+\newcommand\xqed[1]{%
+    \leavevmode\unskip\penalty9999 \hbox{}\nobreak\hfill
+    \quad\hbox{#1}}
+\def\prooffont#1{{{\bf{\textcolor{theoremcolour}{#1}}}}}
+\def\solutionfont#1{{{\bf{\textcolor{solutioncolour}{#1}}}}}
+
+\def\solution{\par\noindent{\solutionfont{\bf{\underline{Solution.}}}} \ignorespaces}
+\def\endsolution{\solutionfont{\bf\xqed{$\spadesuit$}}\par\medskip}
+\def\proof{\par\noindent{\prooffont{\bf{\underline{Proof.}}}} \ignorespaces}
+\def\endproof{\prooffont{\bf\xqed{$\spadesuit$}}\par\medskip}
+
+% =============================================================================
+% SECTION 14: EXERCISES AND SOLUTIONS
+% =============================================================================
+
+\usepackage{answers}
+
+% Exercise counter
+\newcounter{exo}[chapter]
+\renewcommand{\theexo}{\thechapter.\arabic{exo}}
+
+% Exercise environment
+\newenvironment{ex}{%
+    \par\medskip\noindent\refstepcounter{exo}\textbf{Exercise \theexo}\hspace{0.25em}\itshape
+}{\par\medskip}
+
+% Solution output environment
+\newenvironment{solout}[1]{%
+    \par\medskip\noindent\textbf{#1}\par
+}{\par\medskip}
+\newcommand{\soloutparams}{{\theexo}}
+
+% Solution association
+\Newassociation{sol}{Answer}{solutions}
+
+% =============================================================================
+% SECTION 15: MISC PACKAGES
+% =============================================================================
+
+\usepackage{import}
+\usepackage{pdfpages}
+\usepackage{textcomp}
+\usepackage{relsize}
+\usepackage{scalerel}
+\usepackage{paralist}
+\usepackage{mdwlist}
+\usepackage{eepic}
+\usepackage{wasysym}
+\usepackage[cc]{titlepic}
+\usepackage{xparse}
+\usepackage{xargs}
+\usepackage{eurosym}
+\usepackage{grffile}
+\usepackage{adjustbox}
+\usepackage{titling}
+\usepackage{parskip}
+
+% TODO notes
+\usepackage[disable]{todonotes}
+
+% =============================================================================
+% SECTION 15b: BOOK INFO (needed for license page from Lyryx)
+% =============================================================================
+
+% These commands are used by the license.tex file from the Lyryx linear algebra content
+\providecommand{\booktitle}{Mathematical Programming}
+\providecommand{\booksubtitle}{Introduction to}
+\providecommand{\bookfulltitle}{Introduction to Mathematical Programming}
+\providecommand{\booksubject}{OPTIMIZATION}
+\providecommand{\bookauthor}{Robert Hildebrand}
+\providecommand{\version}{2025}
+\providecommand{\revision}{A}
+
+% =============================================================================
+% SECTION 15c: TITLE DEFINITION
+% =============================================================================
+
+% Load title definition - works from both base and book/ directories
+\IfFileExists{preamble/title.tex}{%
+    \input{preamble/title}%
+}{%
+    \IfFileExists{book/preamble/title.tex}{%
+        \input{book/preamble/title}%
+    }{%
+        % Fallback title if no title.tex found
+        \title{Mathematical Programming and Operations Research}
+        \author{Robert Hildebrand}
+    }%
+}
+
+% =============================================================================
+% SECTION 16: MATH COMMANDS
+% =============================================================================
+
+% Bold vectors
+% Note: Some commands like \b, \c, \u are built-in LaTeX accent commands
+% so we use \renewcommand for those. Others we define fresh.
+\def\0{\mathbf{0}}
+\def\a{\mathbf{a}}
+\renewcommand{\b}{\mathbf{b}}  % Built-in: bar-under accent
+\renewcommand{\c}{\mathbf{c}}  % Built-in: cedilla accent
+\def\e{\mathbf{e}}
+\def\f{\mathbf{f}}
+\def\g{\mathbf{g}}
+\def\p{\mathbf{p}}
+\def\q{\mathbf{q}}
+\renewcommand{\u}{\mathbf{u}}  % Built-in: breve accent
+\def\v{\mathbf{v}}
+\def\w{\mathbf{w}}
+\def\x{\mathbf{x}}             % Not a built-in command
+\def\y{\mathbf{y}}
+\def\z{\mathbf{z}}
+
+% Calligraphic letters
+\def\CalL{\mathcal{L}}
+\def\CalO{\mathcal{O}}
+\def\CalV{\mathcal{V}}
+\def\CalU{\mathcal{U}}
+\def\PP{\mathcal{P}}
+\def\NN{\mathcal{N}}
+\def\II{\mathcal{I}}
+\def\ZZ{\mathcal{Z}}
+\def\SS{\mathcal{S}}
+\def\FF{\mathcal{F}}
+\def\CC{\mathcal{C}}
+\newcommand{\F}{\mathcal{F}}
+
+% Blackboard bold
+\def\nn{\mathbb{N}}
+\def\R{\mathbb{R}}
+\def\Z{\mathbb{Z}}
+\def\Q{\mathbb{Q}}
+\def\cc{\mathbb{C}}
+\def\one{\mathbb{1}}
+
+% Operators
+\DeclareMathOperator{\sign}{sign}
+\DeclareMathOperator{\sech}{sech}
+\DeclareMathOperator{\Out}{Out}
+\DeclareMathOperator{\In}{In}
+\DeclareMathOperator{\erf}{erf}
+\DeclareMathOperator{\dom}{dom}
+\DeclareMathOperator{\cl}{cl}
+\DeclareMathOperator{\intr}{intr}
+\DeclareMathOperator{\argmin}{arg\,min}
+\newcommand{\argmax}{\mbox{argmax}}
+
+% Text operators
+\def\rank{\textup{rank}}
+\def\conv{\textup{conv}}
+\def\cone{\textup{cone}}
+\def\supp{\textup{supp}}
+\def\rc{\textup{rec.cone}}
+\def\ri{\textup{rel.int}}
+\def\rb{\textup{rel.bd}}
+\def\bd{\textup{bd}}
+\def\ls{\textup{lin.space}}
+\def\aff{\textup{aff}}
+\def\st{\text{ s.t. }}
+
+% Delimiters
+\providecommand{\abs}[1]{\left\lvert#1\right\rvert}
+\providecommand{\norm}[1]{\left\lVert#1\right\rVert}
+\providecommand{\set}[1]{\lbrace#1\rbrace}
+\providecommand{\setconstruct}[2]{\lbrace#1:#2\rbrace}
+\newcommand{\floor}[1]{\lfloor #1 \rfloor}
+\newcommand{\ceil}[1]{\lceil #1 \rceil}
+
+% Matrix and vector
+\newcommand{\trp}{^{\mathsf T}}
+\newcommand{\hrm}{^{\mathsf H}}
+\newcommand{\T}{\mathsf{T}}
+\newcommand{\ipt}[2]{\langle #1,#2 \rangle}
+\newcommand{\ip}{\int_{-\infty}^{+\infty}}
+\renewcommand{\ker}[1]{\mathcal{N}(#1)}
+\newcommand{\ran}[1]{\mathcal{R}(#1)}
+\renewcommand{\vec}[1]{\mathbf{#1}}
+\newcommand{\mm}[1]{\mathbf{#1}}
+\newcommand{\vect}{\vec}
+\newcommand{\longvect}{\overrightarrow}
+\newcommand{\leftB}{\left[}
+\newcommand{\rightB}{\right]}
+\setcounter{MaxMatrixCols}{10}
+
+% Epsilon
+\renewcommand{\epsilon}{\varepsilon}
+
+% Indicator function
+\newcommand{\indicator}{\boldsymbol{1}}
+
+% Misc math
+\def\subspace{\lhd}
+\def\bU{{\bar{u}}}
+\def\M{M_n}
+\def\tq{{\,:\,}}
+\newcommand{\ssep}{~:~}
+\def\lt{<}
+\def\gt{>}
+
+% For block arrays
+\newcommand\topstrut[1][0.8ex]{\setlength\bigstrutjot{#1}{\bigstrut[t]}}
+\newcommand\botstrut[1][0.6ex]{\setlength\bigstrutjot{#1}{\bigstrut[b]}}
+\def\lvl#1{\multicolumn{1}{|c}{#1}}
+\def\rvl#1{\multicolumn{1}{c|}{#1}}
+
+% =============================================================================
+% SECTION 17: PSEUDOCODE COMMANDS
+% =============================================================================
+
+\NewDocumentCommand\allocate{m+g}{%
+    \IfNoValueTF{#2}
+        {\mathrm{empty}(#1)}
+        {\mathrm{empty}(#1, #2)}
+}
+
+\NewDocumentCommand\zeros{m+g}{%
+    \IfNoValueTF{#2}
+        {\mathrm{zeros}(#1)}
+        {\mathrm{zeros}(#1, #2)}%
+}
+
+\newcommand{\Id}[1]{\mathrm{Id}(#1)}
+\newcommand{\makecopy}[1]{\mathrm{copy}(#1)}
+\newcommand{\shape}[1]{\mathrm{shape}(#1)}
+\newcommand{\size}[1]{\mathrm{size}(#1)}
+
+% =============================================================================
+% SECTION 18: COMPLEXITY AND SPECIAL NOTATION
+% =============================================================================
+
+\newcommand{\complexity}[1]{{\color{red} \textit{#1}}}
+\newcommand{\nphard}{\complexity{NP-Hard}}
+\newcommand{\npcomplete}{\complexity{NP-Complete}}
+\newcommand{\polynomial}{{\color{ansi-green} \textit{Polynomial time (P)}}}
+\newcommand{\true}{\tgreen{\texttt{ true }}}
+\newcommand{\false}{\tred{\texttt{ false }}}
+\newcommand{\NP}{\text{NP}}
+\newcommand{\coNP}{\text{coNP}}
+\def\BQP{\mathrm{BQP}}
+\def\xLP{x^{\mathrm{LP}}}
+
+% Color text commands
+\newcommand{\tblue}[1]{{\color{blue} #1}}
+\newcommand{\tred}[1]{{\color{red} #1}}
+\newcommand{\tgreen}[1]{{\color{notgreen} #1}}
+
+% Highlight cell in tables
+\newcommand{\hi}{\cellcolor{red}}
+
+% =============================================================================
+% SECTION 19: SPECIAL ENVIRONMENTS
+% =============================================================================
+
+% Lab environment
+\renewcommand{\chaptername}{Lab}
+\newcommand{\lab}[2]{\chapter[#2]{#1}}
+\newcommand{\objective}[1]{{\bf Lab Objective: } \emph{#1} \bigskip}
+
+% General framed environment
+% Note: These environments use @ in internal commands, so we need makeatletter
+\makeatletter
+\newcounter{general}
+\newenvironment{general}[2]{%
+    \par\medskip
+    \protected@edef\@currentlabelname{#1}%
+    \begin{framed}
+    \begingroup\color{black}%
+    \textbf{#1: }\ignorespaces
+    \par #2
+    \par
+}{\endgroup\end{framed}\medskip}
+
+% Example with code environments
+\newenvironment{optexample}{%
+    \par\medskip
+    \refstepcounter{exo}%
+    \protected@edef\@currentlabelname{Example \theexo}%
+    \begin{framed}
+    \begingroup\color{blue}%
+    \textbf{Example \theexo: }\ignorespaces
+}{\endgroup\end{framed}\medskip}
+
+\newenvironment{examplewithcode}[2]{%
+    \par\medskip
+    \refstepcounter{exo}%
+    \protected@edef\@currentlabelname{Example \theexo}%
+    \begingroup
+    \begin{center}
+    \rule{\textwidth}{0.4pt}\\
+    \vspace{-0.2cm}
+    \rule{\textwidth}{0.4pt}
+    \end{center}
+    \color{black}%
+    \textbf{Example \theexo: #1}%
+    \hfill \protect{#2}%
+    \ignorespaces
+    \par
+}{%
+    \endgroup
+    \begin{center}
+    \rule{\textwidth}{1.8pt}
+    \end{center}
+    \medskip
+}
+
+\newenvironment{examplewithoutcode}[2]{%
+    \par\medskip
+    \refstepcounter{exo}%
+    \protected@edef\@currentlabelname{Example \theexo}%
+    \begin{framed}
+    \begingroup\color{black}%
+    \textbf{Example \theexo: #1}%
+    \ignorespaces
+    \par
+}{\endgroup\end{framed}\medskip}
+
+\newenvironment{examplewithallcode}[4]{%
+    \par\medskip
+    \refstepcounter{exo}%
+    \protected@edef\@currentlabelname{Example \theexo}%
+    \begin{framed}
+    \begingroup\color{black}%
+    \textbf{Example \theexo: #1}%
+    \hfill \protect\href{#2}{\ Excel \ }\protect\href{#3}{\ PuLP \ }\protect\href{#4}{\ Gurobipy \ }%
+    \ignorespaces
+    \par
+}{\endgroup\end{framed}\medskip}
+\makeatother
+
+% Contributors environment
+\newcommand{\contributor}[2]{\noindent\vtop{\hsize14pc#1\\\itshape#2}\par}
+\newenvironment{contributors}{{List of Contributors}%
+    \thispagestyle{plain}\begin{multicols}{2}\parindent0pt%
+    \parskip6pt plus2pt minus1pt%
+    \widowpenalty10000\clubpenalty10000}
+{\end{multicols}
+This project is funded in part by the National Science Foundation, grant no. TUES Phase II DUE-1323785.
+\clearpage}
+
+% Enumerate style
+\newenvironment{enumialphparenastyle}{%
+    \let\oldlabelenumi=\labelenumi
+    \renewcommand{\labelenumi}{\textrm{(\alph{enumi})}}
+}{\let\labelenumi=\oldlabelenumi}
+
+% Center without spacing
+\newenvironment{center*}[0]{\bgroup \centering}{\egroup}
+
+% =============================================================================
+% SECTION 20: TODO COMMANDS
+% =============================================================================
+
+\newcommand\getcurrentref[1]{%
+    \ifnumequal{\value{#1}}{0}
+    {??}
+    {\the\value{#1}}%
+}
+
+\newcommand{\todored}[1]{}
+
+\let\Chaptermark\chaptermark
+\def\chaptermark#1{\def\Chaptername{#1}\Chaptermark{#1}}
+\let\Sectionmark\sectionmark
+\def\sectionmark#1{\def\Sectionname{#1}\Sectionmark{#1}}
+\let\Subsectionmark\subsectionmark
+\def\subsectionmark#1{\def\Subsectionname{#1}\Subsectionmark{#1}}
+\let\Subsubsectionmark\subsubsectionmark
+\def\subsubsectionmark#1{\def\Subsubsectionname{#1}\Subsubsectionmark{#1}}
+
+\newcommand{\todoChapter}[1]{}
+\newcommand{\todoSection}[1]{}
+
+% =============================================================================
+% SECTION 21: GRAPHICS PATHS
+% =============================================================================
+
+\graphicspath{%
+    {./images/},%
+    {images/},%
+    {Figures/},%
+    {../Figures/},%
+    {figures/},%
+    {graph-theory-graphics/},%
+    {../graph-theory-graphics/},%
+    {optimization/figures/figures-static/},%
+    {optimization/figures/figures-source/},%
+    {optimization/multi-objective/images/},%
+    {external-sources/aFirstCourseLinearAlgebra/},%
+    {external-sources/lineqlpbook/},%
+    {external-sources/Christopher_Griffin_Penn_State_University/},%
+    {external-sources/OR-Book-Vorwerk/images/},%
+    {external-sources/foundationsAppliedMathematicsLabs/},%
+    {external-sources/foundationsAppliedMathematicsLabs/Volume2/Simplex/figures/},%
+    {../external-sources/aFirstCourseLinearAlgebra/},%
+    {../external-sources/lineqlpbook/},%
+    {../external-sources/Christopher_Griffin_Penn_State_University/},%
+    {../external-sources/OR-Book-Vorwerk/images/},%
+    {../external-sources/foundationsAppliedMathematicsLabs/},%
+    {../external-sources/foundationsAppliedMathematicsLabs/Volume2/Simplex/figures/},%
+    {part1-linear-programming/figures/},%
+}
+
+% =============================================================================
+% SECTION 22: LOGO AND BRAND COMMANDS
+% =============================================================================
+
+\newcommand{\julia}{\raisebox{-.2\height}{\includegraphics[scale=0.07]{julia-logo}}}
+\newcommand{\jupyter}{\raisebox{-.2\height}{\includegraphics[scale=0.09]{jupyter-logo}}}
+\newcommand{\jump}{\raisebox{-.2\height}{\includegraphics[scale=0.08]{jump-logo}}}
+\newcommand{\gurobi}{\raisebox{-.2\height}{\includegraphics[scale=0.06]{gurobi-logo}}Gurobi}
+\newcommand{\coin}{\raisebox{-.2\height}{\includegraphics[scale=0.2]{coin-or-logo}}}
+\newcommand{\ipopt}{\raisebox{-.2\height}{\texttt{Ipopt}}}
+
+% =============================================================================
+% SECTION 23: FIGURE INCLUDE COMMANDS
+% =============================================================================
+
+\DeclareRobustCommand\footnotetextmetadata[1]{%
+    \footnotetext{\citetitle*{#1}, from \citeurl{#1}.
+    \citeauthor{#1}, \citedate{#1}.
+    }
+}
+
+\newcommandx{\refincludefigurestatic}[4][1=\relax, 2={width=.4\linewidth}, 3=t, usedefault]{%
+    \begin{figure}[#3]%
+    \centering%
+    \includegraphics[#2]{optimization/figures/figures-static/#4}\\
+    \centerline{\scriptsize \copyright~\citeauthor{#4}\protect\footnotemark}
+    \caption{%
+        \ifx#1\relax \citetitle*{#4}\else #1\fi%
+    }%
+    \label{fig:#4}%
+    \end{figure}%
+    \autoref{fig:#4}\footnotetextmetadata{#4}%
+}
+
+\newcommandx{\includegraphicstatic}[2][1={width=.4\linewidth}, usedefault]{%
+    \begin{center}
+    \includegraphics[#1]{optimization/figures/figures-static/#2}\\
+    \end{center}
+    \centerline{\scriptsize \copyright~\citeauthor{#2}\protect\footnotemark}
+    \footnotetextmetadata{#2}%
+}
+
+\newcommandx{\includegraphicsource}[2][1={width=.4\linewidth}, usedefault]{%
+    \begin{center}
+    \includegraphics[#1]{optimization/figures/figures-source/#2}\\
+    \end{center}
+    \centerline{\scriptsize \copyright~\citeauthor{#2}\protect\footnotemark}
+    \footnotetextmetadata{#2}%
+}
+
+\newcommandx{\includefigurestatic}[4][1=\relax, 2={width=.4\linewidth}, 3=t, usedefault]{%
+    \begin{figure}[#3]%
+    \centering%
+    \includegraphics[#2]{optimization/figures/figures-static/#4}\\
+    \centerline{\scriptsize \copyright~\citeauthor{#4}\protect\footnotemark}
+    \caption{%
+        \ifx#1\relax \citetitle*{#4}\else #1\fi%
+    }%
+    \label{fig:#4}%
+    \end{figure}%
+    \footnotetextmetadata{#4}%
+}
+
+\newcommandx{\includefiguresource}[4][1=\relax, 2={width=.4\linewidth}, 3=t, usedefault]{%
+    \begin{figure}[#3]%
+    \centering%
+    \includegraphics[#2]{optimization/figures/figures-source/#4}\\
+    \centerline{\scriptsize \copyright~\citeauthor{#4}\protect\footnotemark}
+    \caption{%
+        \ifx#1\relax \citetitle*{#4}\else #1\fi%
+    }%
+    \label{fig:#4}%
+    \end{figure}%
+    \footnotetextmetadata{#4}%
+}
+
+% =============================================================================
+% SECTION 24: LINEARE ALGEBRA SPECIFIC
+% =============================================================================
+
+% RREF notation
+\newcommand{\RREF}{Reduced Row-Echelon Form}
+\newcommand{\rref}{reduced row-echelon form}
+\newcommand{\EF}{Row-Echelon Form}
+\newcommand{\ef}{row-echelon form}
+
+% Eigenvalue variable
+\newcommand{\eigenVar}{x}
+
+% Dot product
+\newcommand{\dotprod}{\bullet}
+\newcommand{\vectlength}{\|}
+
+% Shorthand
+\def\ds{\displaystyle}
+\def\dfont#1{{\bf{#1}}}
+\def\ifont#1{{\it{{#1}}}}
+\def\xrefn#1{\ref{#1}}
+\def\figrdef#1{\label{#1}}
+
+% Math operators
+\newcommand{\opft}{\mathgroup\symoperators}
+\newcommand{\lip}{\mathop{\opft Lip}\nolimits}
+\newcommand{\Res}{\mathop{\opft Res}\nolimits}
+\newcommand{\INT}{\mathop{\opft int}\nolimits}
+\newcommand{\spt}{\mathop{\opft spt}\nolimits}
+\newcommand{\ann}{\mathop{\opft ann}\nolimits}
+\newcommand{\diam}{\mathop{\opft diam}\nolimits}
+\newcommand{\dist}{\mathop{\opft dist}\nolimits}
+\providecommand{\text}[1]{\mbox{#1}}
+\providecommand{\func}[1]{\mbox{#1}}
+\providecommand{\limfunc}[1]{\mbox{#1}}
+
+% Lift and upper bound
+\newcommand{\lift}{\mathrm{lift}}
+\newcommand{\ub}{\mathrm{ubbest}}
+\newcommand{\mathup}[1]{#1}
+
+% =============================================================================
+% SECTION 25: PANDOC / JUPYTER COMPATIBILITY
+% =============================================================================
+
+\providecommand{\tightlist}{%
+    \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}
+}
+
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+\newenvironment{Shaded}{}{}
+
+% Syntax highlighting tokens
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{{#1}}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.56,0.13,0.00}{{#1}}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textit{{#1}}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{{#1}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.02,0.16,0.49}{{#1}}}
+\newcommand{\RegionMarkerTok}[1]{{#1}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\NormalTok}[1]{{#1}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.53,0.00,0.00}{{#1}}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.73,0.40,0.53}{{#1}}}
+\newcommand{\ImportTok}[1]{{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.73,0.13,0.13}{\textit{{#1}}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.10,0.09,0.49}{{#1}}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{{#1}}}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.40,0.40,0.40}{{#1}}}
+\newcommand{\BuiltInTok}[1]{{#1}}
+\newcommand{\ExtensionTok}[1]{{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.74,0.48,0.00}{{#1}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.49,0.56,0.16}{{#1}}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+
+% Line break command
+\def\br{\hspace*{\fill} \\* }
+
+% Jupyter prompt
+\makeatletter
+\newcommand{\boxspacing}{\kern\kvtcb@left@rule\kern\kvtcb@boxsep}
+\makeatother
+\newcommand{\prompt}[4]{%
+    {\ttfamily\llap{{\color{#2}[#3]:\hspace{3pt}#4}}\vspace{-\baselineskip}}
+}
+
+% grffile fix for old versions
+\makeatletter
+\@ifpackagelater{grffile}{2019/11/01}{}
+{
+    \def\Gread@@xetex#1{%
+        \IfFileExists{"\Gin@base".bb}%
+        {\Gread@eps{\Gin@base.bb}}%
+        {\Gread@@xetex@aux#1}%
+    }
+}
+\makeatother
+
+% Quotation fix
+\AtBeginDocument{%
+    \def\PYZsq{\textquotesingle}%
+}
+
+% Sloppy for long URLs
+\sloppy
+
+% =============================================================================
+% SECTION 26: FINAL SETTINGS
+% =============================================================================
+
+% Reset footnote counter every chapter
+\makeatletter
+\@addtoreset{footnote}{chapter}
+\makeatother
+
+% Equation numbering
+\numberwithin{equation}{section}
+\renewcommand{\theequation}{\arabic{chapter}.\arabic{equation}}
+
+% Gray square for headers
+\newcommand\graysquare{\textcolor{headersquarecolour}{\rule{1ex}{1ex}}}
+
+% Fancy headers - simplified
+\fancyhf{}
+\fancyhead[RO]{\rightmark\hspace{0.5em}\graysquare\hspace{0.5em}\thepage}
+\fancyhead[LE]{\thepage\hspace{0.5em}\graysquare\hspace{0.5em}\leftmark}
+
+% Cancel command
+\newsavebox\CBox
+\newcommand\hcancel[2][0.5pt]{%
+    \ifmmode\sbox\CBox{$#2$}\else\sbox\CBox{#2}\fi%
+    \makebox[0pt][l]{\usebox\CBox}%
+    \rule[0.5\ht\CBox-#1/2]{\wd\CBox}{#1}
+}
+
+% Code cell counter
+\newcounter{codeCell}
+\makeatletter
+\newenvironment{codeCell}{%
+    \refstepcounter{codeCell}%
+    \protected@edef\@currentlabelname{Code}%
+}{}
+\makeatother
+
+% Left/right page clearing
+\newcommand*\cleartoleftpage{%
+    \clearpage
+    \ifodd\value{page}\hbox{}\newpage\fi
+}
+
+% TikZ component node style
+\tikzset{
+    componentnode/.style={
+        font=\scriptsize,
+        align=center,
+        white,
+        execute at begin node=\setlength{\baselineskip}{1.25em}
+    }
+}
+
+% PDF page height fix
+\pdfpageheight=\paperheight
+
+% =============================================================================
+% END OF SIMPLIFIED PREAMBLE
+% =============================================================================

@@ -5,8 +5,7 @@
 %See http://creativecommons.org/licenses/by-sa/4.0/
 
 \chapter{Duality}
-\todoChapter{ {\color{gray}0\% complete. Goal 80\% completion date: January 20, 2023}\\
-Notes: This is a borrowed section.  Likely we should update this to match out CC-BY-SA 4.0 license.  Also, update all content to match notation in the book.}
+
 \begin{outcome}
 You will learn
 \begin{itemize}
@@ -111,10 +110,9 @@ So, $\b^\top \y = \sum_{i=1}^m y_i b_i$ is an upper bound on the maximum primal 
 
 This is the \emph{dual} problem. In our bakery scenario, this dual formulation corresponds to adjusting the prices (the $y$ values can be thought of as "shadow prices") you would assign to each ingredient such that if you charge yourself for using these ingredients at these shadow prices, you end up with the smallest possible "bill" that still always surpasses or equals your maximum possible profit. The beauty of the Strong Duality Theorem ensures that the optimal primal value equals the optimal dual value.
 
-
 From the above reasoning, we have shown that if $x$ is feasible for the primal and $y$ is feasible for the dual, then $c^\top x \leq b^\top y$. In other words, the value of any feasible primal solution is always bounded above by the value of any feasible dual solution.
 
-\begin{theorem}{Weak Duality}{weak-duality}
+\begin{theorem}{Weak Duality}\label{thm:weak-duality-intro}
 For any feasible $\x$ in the primal problem and any feasible $\y$ in the dual problem, we have:
 \[
 \c^\top \x \leq \b^\top \y.
@@ -168,7 +166,7 @@ From weak duality, we know that for any feasible $\x$ in (P) and any feasible $\
 
 This indicates that the optimal value of the dual problem is always an upper bound on the optimal value of the primal problem.
 
-\begin{theorem}{Weak Duality}{weak-duality}
+\begin{theorem}{Weak Duality}\label{thm:weak-duality}
 For any feasible solution $\x$ of the primal problem (P) and any feasible solution $\y$ of the dual problem (D), 
 \[
 \c^\top \x \leq \b^\top \y.
@@ -177,7 +175,7 @@ For any feasible solution $\x$ of the primal problem (P) and any feasible soluti
 
 Weak duality theorems appear in many classes of optimization problems. In the special case of linear programs (and some other structured problems), we also have a stronger result, known as the \emph{Strong Duality Theorem}. This theorem completely characterizes the relationship between the primal and dual solutions:
 
-\begin{theorem}{Strong Duality}{strong-duality}
+\begin{theorem}{Strong Duality}\label{thm:strong-duality}
 For a primal-dual pair of linear programs:
 \[
 \begin{aligned}
@@ -201,7 +199,7 @@ the following cases hold:
 \end{enumerate}
 \end{theorem}
 
-\begin{example}{Dual Infeasibility from Primal Unboundedness}{}\label{example:simplex-unbounded}
+\begin{example}{Dual Infeasibility from Primal Unboundedness}\label{example:dual-infeasibility-unbounded}
 Consider the following linear program:
 \[
 \begin{aligned}
@@ -227,7 +225,6 @@ Now, consider the dual of this problem:
 \]
 \textbf{Conclusion via Strong Duality:}  
 Because the primal problem is unbounded and the primal-dual pair satisfies the usual assumptions of linear programming, \textbf{strong duality} implies that the dual must be \textbf{infeasible}. 
-
 
 This is confirmed by the Big-M simplex pivot steps, which fail to drive the artificial variable to zero.
 To solve the dual, we apply the simplex method using the Big-M technique to initialize feasibility. The auxiliary variable \( a_1 \) is introduced to handle the infeasibility of the initial basic solution.
@@ -274,17 +271,14 @@ y_2 = 0 - y_1 - w_2
 
 In this final dictionary, all variables in the objective function have non-positive coefficients, but the artificial variable \( a_1 \) remains in the basis with a positive value. Since \( a_1 > 0 \) at termination, we conclude that the original dual problem is \emph{infeasible}.
 
-
-
 \end{example}
-
 
 \subsection{Economic Interpretation of the Dual}
 
 Duality in linear programming offers a powerful economic interpretation: the dual variables represent the \emph{value} of resources or constraints in the primal problem. These values are commonly known as \textbf{shadow prices}.
 
 \vspace{1em}
-\begin{definition}{Shadow Price}{}
+\begin{definition}{Shadow Price}
 The \emph{shadow price} of a constraint in a linear program tells us how much the optimal objective value would change if we slightly increased the right-hand side of that constraint by one unit, while keeping everything else fixed.
 
 \smallskip
@@ -416,12 +410,9 @@ Assuming the current basis remains optimal, the increase in maximum profit from 
 \item Baking Time = \$10
 \end{itemize}
 
-
 \vspace{1em}
 
-
 The dual solution not only validates the primal objective value (via strong duality), but also assigns economic meaning to each constraint. Shadow prices inform how much you’d be willing to pay for more of each resource — a foundational concept in operations, pricing, and planning.
-
 
 \paragraph{When Are Shadow Prices Meaningful?}
 Shadow prices are meaningful only when:
@@ -458,9 +449,6 @@ This ensures equilibrium: no profitable arbitrage is possible, and every unit of
 \item If a resource is fully used and limits optimality, its shadow price is positive.
 \item If a resource is unused or abundant, its shadow price is zero.
 \end{itemize}
-
-
-
 
 \section{Different Primal–Dual Forms}
 
@@ -582,9 +570,7 @@ The form of a dual problem depends on the primal's objective (maximize or minimi
 
 This structured approach helps you identify how each component in the primal affects the dual—particularly how inequality direction and sign restrictions control the dual variable domain and constraint form.
 
-
 As you can see, changing the primal’s constraints and variable domains changes the structure of the dual problem. Every such transformation has a corresponding primal-dual pair that maintains the duality principles. In each case, the weak and strong duality theorems still apply.
-
 
 \subsection*{Deriving the Dual with Equality Constraints}
 
@@ -671,7 +657,6 @@ is
 
 The absence of sign restrictions on $\y$ is a direct consequence of using equalities in the primal. Since no direction of inequality is fixed, you are free to "add" or "subtract" the given equations as you please, hence no sign constraints emerge on the dual variables.
 
-
 \subsection*{Example with Inequalities and Free Variables}
 
 Now consider a primal problem with three inequality constraints and two free variables. Suppose:
@@ -724,8 +709,6 @@ Then (P) is:
 \[
 \max \c^\top \x \quad \text{subject to } A \x \leq \b, \text{ and } \x \text{ free}.
 \]
-
-
 
 To create a bound on $3x_1 - 2x_2$, we take nonnegative combinations of the constraints. Let $y_1, y_2, y_3 \geq 0$ be the multipliers for the three constraints:
 
@@ -833,8 +816,6 @@ Summarizing, we have
 \end{tcolorbox}
 \end{multicols}
 
-
-
 Here we see the pattern: having $\x$ free in the primal forces the dual constraints to be equalities. In summary:
 \begin{itemize}
 \item Primal inequalities with $\x$ free $\Rightarrow$ Dual equality constraints.
@@ -842,7 +823,6 @@ Here we see the pattern: having $\x$ free in the primal forces the dual constrai
 \end{itemize}
 
 These relationships ensure that by choosing appropriate dual multipliers, we can always create a valid bound on the primal objective.
-
 
 The following table can help remember the above.\\
 
@@ -914,7 +894,7 @@ To derive the dual, we introduce a dual variable for each constraint:
 This example demonstrates how mixed constraint types in the primal (\( =, \geq, \leq \)) lead to a dual with mixed variable sign restrictions. The primal variable bounds also affect whether dual constraints are inequalities or equalities. Understanding these mappings is crucial for correctly constructing dual problems.
 
 \subsubsection*{Complicated Dual Derivation: A Second Look via Aggregation}
-{}\label{example:complicated-dual}
+{}\label{example:complicated-dual-aggregation}
 Consider the following primal linear program:
 \[
 \begin{aligned}
@@ -1009,11 +989,92 @@ This derivation shows how:
 \end{itemize}
 This example illustrates how careful sign and inequality management gives rise to a valid dual that bounds the primal objective from above.
 
-
-
-
-
 \textbf{Question:} What happens if variable $x_1$ instead was constrained as $x_1 \leq 0$?
 
+\section{Exercises}
 
+\begin{ex}{Formulate the Dual}{}
+Write the dual of the following linear program:
+\[
+\begin{aligned}
+\text{Maximize} \quad & 4x_1 + 5x_2 + 3x_3 \\
+\text{subject to} \quad
+& x_1 + 2x_2 + x_3 \leq 10 \\
+& 3x_1 + x_2 + 2x_3 \leq 12 \\
+& x_1, x_2, x_3 \geq 0
+\end{aligned}
+\]
+\end{ex}
+
+\begin{ex}{Weak Duality Bound}{}
+Consider the primal LP:
+\[
+\begin{aligned}
+\max \quad & 3x_1 + 2x_2 \\
+\text{s.t.} \quad & x_1 + x_2 \leq 4 \\
+& 2x_1 + x_2 \leq 6 \\
+& x_1, x_2 \geq 0
+\end{aligned}
+\]
+\begin{enumerate}
+\item Write the dual problem.
+\item Verify that $\mathbf{y} = (1, 1)$ is feasible for the dual. Compute the dual objective value $\mathbf{b}^\top \mathbf{y}$.
+\item Verify that $\mathbf{x} = (2, 2)$ is feasible for the primal. Compute the primal objective value $\mathbf{c}^\top \mathbf{x}$.
+\item Use weak duality to explain why the optimal value of the primal must lie between these two values.
+\end{enumerate}
+\end{ex}
+
+\begin{ex}{Dual with Mixed Constraints}{}
+Formulate the dual of the following LP:
+\[
+\begin{aligned}
+\text{Maximize} \quad & 2x_1 + 3x_2 \\
+\text{subject to} \quad
+& x_1 + x_2 = 5 \\
+& x_1 - x_2 \leq 2 \\
+& x_1 \geq 0, \quad x_2 \text{ free}
+\end{aligned}
+\]
+Identify the sign restrictions on each dual variable and whether each dual constraint is an inequality or an equality.
+\end{ex}
+
+\begin{ex}{Shadow Prices and Dual Variables}{}
+A bakery solves the following LP:
+\[
+\begin{aligned}
+\max \quad & 5x_1 + 4x_2 \quad \text{(profit in dollars)}\\
+\text{s.t.} \quad
+& 2x_1 + x_2 \leq 20 \quad \text{(flour in kg)} \\
+& x_1 + 2x_2 \leq 18 \quad \text{(sugar in kg)} \\
+& x_1 + x_2 \leq 12 \quad \text{(oven capacity)} \\
+& x_1, x_2 \geq 0
+\end{aligned}
+\]
+The optimal primal solution is $(x_1^*, x_2^*) = (7\tfrac{1}{3}, 5\tfrac{1}{3})$ with $z^* = 58$.
+The optimal dual solution is $(y_1^*, y_2^*, y_3^*) = (2, 1, 0)$.
+
+\begin{enumerate}
+\item Verify that strong duality holds: compute $\mathbf{b}^\top \mathbf{y}^*$ and confirm it equals $z^*$.
+\item Which constraints are binding at the optimal solution? Which are non-binding?
+\item Verify that the complementary slackness conditions are satisfied.
+\item Interpret the dual variables as shadow prices. If the bakery could acquire 1 additional kg of flour, by approximately how much would profit increase?
+\end{enumerate}
+\end{ex}
+
+\begin{ex}{Strong Duality and Infeasibility}{}
+Consider the primal LP:
+\[
+\begin{aligned}
+\max \quad & x_1 + x_2 \\
+\text{s.t.} \quad & x_1 - x_2 \leq 1 \\
+& -x_1 + x_2 \leq -3 \\
+& x_1, x_2 \geq 0
+\end{aligned}
+\]
+\begin{enumerate}
+\item Write the dual problem.
+\item Show that the primal is infeasible by arguing that no $(x_1, x_2) \geq 0$ can simultaneously satisfy both constraints.
+\item Is the dual feasible, infeasible, or unbounded? Explain using the strong duality theorem.
+\end{enumerate}
+\end{ex}
 

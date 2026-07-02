@@ -1,0 +1,1347 @@
+\chapter{Software - Python}
+\label{ch:software-python}
+
+\begin{outcome}
+\begin{itemize}
+\item Set up a Python environment for optimization work
+\item Understand essential Python data structures for modeling
+\item Use key packages: NumPy, Pandas, Matplotlib, NetworkX, GeoPandas
+\item Model and solve optimization problems with PuLP
+\end{itemize}
+\end{outcome}
+
+%==============================================================================
+\section{Why Python for Optimization?}
+%==============================================================================
+
+Python has become the dominant programming language for data science, machine learning, and increasingly, operations research and optimization. But why Python? After all, Python is an \emph{interpreted} language, meaning it runs slower than compiled languages like C++ or Java. The answer lies in Python's role as a \textbf{glue language} and its incredible ecosystem.
+
+\subsection{The Power of Python}
+
+When you solve an optimization problem in Python using a library like PuLP, here's what actually happens:
+
+\begin{enumerate}
+\item You write your model in Python's readable, intuitive syntax
+\item Python translates your model into a standard format (like LP or MPS files)
+\item Python calls a \textbf{highly optimized solver} written in C/C++ (like CBC, CPLEX, or Gurobi)
+\item The solver does the heavy computational work at near-optimal speed
+\item Python receives the results and lets you analyze them with powerful data tools
+\end{enumerate}
+
+This means you get the \textbf{best of both worlds}: the ease and flexibility of Python for modeling and analysis, combined with the raw computational power of industrial-strength solvers.
+
+\begin{info}
+\textbf{Python's Superpowers for Optimization:}
+\begin{itemize}
+\item \textbf{Readable syntax} -- Models look almost like mathematical notation
+\item \textbf{Rich ecosystem} -- NumPy, Pandas, Matplotlib for data handling and visualization
+\item \textbf{Rapid prototyping} -- Test ideas quickly without lengthy compile cycles
+\item \textbf{Integration} -- Connect to databases, web APIs, Excel files, and more
+\item \textbf{Free and open source} -- No licensing costs for Python or many solvers
+\end{itemize}
+\end{info}
+
+Compare writing a constraint in Python:
+\begin{lstlisting}[language=Python]
+prob += lpSum(cost[i,j] * x[i,j] for i in plants for j in markets) <= budget
+\end{lstlisting}
+
+To writing the same thing in a lower-level language -- Python wins hands down for clarity and development speed.
+
+\subsection{Jupyter Notebooks: A Data Analyst's Best Friend}
+
+For this course, we'll primarily use \textbf{Jupyter Notebooks}. If you haven't encountered them before, Jupyter notebooks are interactive documents that combine:
+
+\begin{itemize}
+\item \textbf{Code cells} -- Write and execute Python code
+\item \textbf{Output} -- See results, tables, and visualizations immediately below your code
+\item \textbf{Markdown cells} -- Add formatted text, equations, and explanations
+\item \textbf{Persistence} -- Save your work, including outputs, to share or revisit later
+\end{itemize}
+
+This interactive style is perfect for optimization work where you want to:
+\begin{itemize}
+\item Explore and clean your data
+\item Build your model incrementally, testing as you go
+\item Visualize results and iterate on your approach
+\item Document your analysis for others (or your future self!)
+\end{itemize}
+
+\begin{warn}
+\textbf{When Notebooks Aren't Ideal:}
+
+Jupyter notebooks excel at exploration and analysis, but they're not ideal for:
+\begin{itemize}
+\item Large, complex software projects with many modules
+\item Code that needs to run in production systems
+\item Version control (notebook files don't diff well in Git)
+\end{itemize}
+
+For serious software development, you'd move your polished code into \texttt{.py} files and use an IDE like VS Code or PyCharm. But for learning, prototyping, and one-off analyses, notebooks are hard to beat.
+\end{warn}
+
+%==============================================================================
+\section{Getting Started}
+%==============================================================================
+
+\subsection{Options for Running Python}
+
+You have several options for running Python and Jupyter notebooks:
+
+\paragraph{Google Colab (Recommended for Beginners)}
+
+Google Colab (\url{https://colab.research.google.com}) is a free, cloud-based Jupyter environment. Benefits:
+\begin{itemize}
+\item \textbf{No installation required} -- runs entirely in your browser
+\item \textbf{Free GPU access} -- useful for machine learning (not needed for this course)
+\item \textbf{Google Drive integration} -- save and share notebooks easily
+\item \textbf{Most packages pre-installed} -- NumPy, Pandas, Matplotlib ready to go
+\end{itemize}
+
+To get started:
+\begin{enumerate}
+\item Go to \url{https://colab.research.google.com}
+\item Sign in with your Google account
+\item Click ``New Notebook'' to create a blank notebook
+\item Start coding!
+\end{enumerate}
+
+\paragraph{Anaconda (Recommended for Local Installation)}
+
+Anaconda (\url{https://www.anaconda.com}) is a Python distribution designed for data science. It includes:
+\begin{itemize}
+\item Python itself
+\item Jupyter Notebook and JupyterLab
+\item Hundreds of pre-installed packages (NumPy, Pandas, Matplotlib, etc.)
+\item Conda package manager for installing additional packages
+\end{itemize}
+
+After installing Anaconda, launch ``Jupyter Notebook'' from the Anaconda Navigator or by typing \texttt{jupyter notebook} in your terminal.
+
+\paragraph{VS Code}
+
+Visual Studio Code (\url{https://code.visualstudio.com}) is a popular code editor that supports Jupyter notebooks through extensions. It's a good choice if you want a more traditional development environment but still want notebook capabilities.
+
+\subsection{Installing Packages}
+
+Most packages we need come pre-installed in Colab or Anaconda. The main package you'll need to install is \textbf{PuLP} for optimization modeling:
+
+\begin{lstlisting}[language=Python]
+# In a Jupyter cell, use ! to run shell commands
+!pip install pulp
+\end{lstlisting}
+
+\textbf{Important:} After installing a new package, you need to \textbf{restart your notebook kernel} for the changes to take effect. In Jupyter, go to Kernel $\rightarrow$ Restart. In Colab, go to Runtime $\rightarrow$ Restart runtime.
+
+Once installed, import the packages you need at the top of your notebook:
+
+\begin{lstlisting}[language=Python]
+# Standard imports for optimization work
+import numpy as np          # Numerical computing
+import pandas as pd         # Data manipulation
+import matplotlib.pyplot as plt  # Visualization
+from pulp import *          # Optimization modeling
+\end{lstlisting}
+
+\begin{resource}
+\textbf{Interactive Practice Notebooks}
+\begin{itemize}
+\item \href{https://colab.research.google.com/drive/1dqQSVfNMchIbk0k4OByve0muZeyvih6j?usp=sharing}{Python Basics on Colab}
+\item \href{https://colab.research.google.com/drive/1Ma8tQw6LU0NCF3jY62v7FAmXJOxbSph_?usp=sharing}{Loops Tutorial}
+\item \href{https://colab.research.google.com/drive/1paYp36cHf_EvZcMYfD-dN1TtJ_abkpM2?usp=sharing}{PuLP Exercises}
+\end{itemize}
+
+\textbf{Reference Materials}
+\begin{itemize}
+\item \href{https://open.umn.edu/opentextbooks/textbooks/a-byte-of-python}{A Byte of Python} (free textbook)
+\item \href{https://github.com/open-optimization/open-optimization-or-examples}{Open Optimization Examples Repository}
+\end{itemize}
+\end{resource}
+
+%==============================================================================
+\section{Python Basics}
+%==============================================================================
+
+Before diving into optimization-specific Python, let's cover the fundamental building blocks of the language. If you're completely new to programming, this section will get you started. If you have experience with other languages, you'll see how Python's syntax differs.
+
+\begin{resource}
+A companion Jupyter notebook \texttt{intro\_to\_python\_extended.ipynb} is available in the course repository's \texttt{code/python/} folder. We recommend working through this notebook interactively as you read this section.
+\end{resource}
+
+\subsection{Variables and Data Types}
+
+Python is \textbf{dynamically typed}, meaning you don't need to declare variable types explicitly---Python figures it out from context. The basic data types are:
+
+\begin{itemize}
+\item \textbf{Integers}: Whole numbers (e.g., \texttt{10}, \texttt{-5}, \texttt{0})
+\item \textbf{Floats}: Decimal numbers (e.g., \texttt{3.14}, \texttt{-2.7})
+\item \textbf{Strings}: Text, enclosed in quotes (e.g., \texttt{"Hello"}, \texttt{'Alice'})
+\item \textbf{Booleans}: Logical values (\texttt{True} or \texttt{False})
+\end{itemize}
+
+\begin{lstlisting}[language=Python]
+# Variable assignment - no type declarations needed
+x = 10           # Integer
+y = 3.14         # Float
+name = "Alice"   # String
+is_happy = True  # Boolean
+
+print(x, y, name, is_happy)
+# Output: 10 3.14 Alice True
+\end{lstlisting}
+
+\subsection{Arithmetic Operations}
+
+Python supports all standard arithmetic operations:
+
+\begin{lstlisting}[language=Python]
+a = 15
+b = 4
+
+print("Addition:", a + b)        # 19
+print("Subtraction:", a - b)     # 11
+print("Multiplication:", a * b)  # 60
+print("Division:", a / b)        # 3.75
+print("Floor division:", a // b) # 3 (rounds down)
+print("Modulus:", a % b)         # 3 (remainder)
+print("Exponentiation:", a ** b) # 50625 (15^4)
+\end{lstlisting}
+
+\begin{info}
+\textbf{Division Tip:} In Python 3, \texttt{/} always returns a float, even for integers. Use \texttt{//} for integer division that rounds down to the nearest whole number.
+\end{info}
+
+\subsection{Collections: Lists, Tuples, Dictionaries, and Sets}
+
+Python provides several built-in data structures for organizing data:
+
+\begin{lstlisting}[language=Python]
+# Lists - mutable, ordered sequences
+my_list = [1, 2, 3, 4]
+
+# Tuples - immutable sequences (can't be changed)
+my_tuple = (10, 20, 30)
+
+# Dictionaries - key-value pairs
+my_dict = {"apple": 2, "banana": 3}
+
+# Sets - unique elements only (duplicates removed)
+my_set = {1, 2, 2, 3, 4}  # becomes {1, 2, 3, 4}
+
+print("List:", my_list)
+print("Tuple:", my_tuple)
+print("Dictionary:", my_dict)
+print("Set:", my_set)
+\end{lstlisting}
+
+You can modify lists and dictionaries after creation:
+
+\begin{lstlisting}[language=Python]
+# List operations
+my_list.append(5)     # Add element: [1, 2, 3, 4, 5]
+my_list.remove(2)     # Remove element: [1, 3, 4, 5]
+my_list[0] = 100      # Change element: [100, 3, 4, 5]
+
+# Dictionary operations
+my_dict["cherry"] = 5         # Add new key-value pair
+my_dict["apple"] = 10         # Update existing value
+print(my_dict["banana"])      # Access value by key: 3
+\end{lstlisting}
+
+\subsection{Indexing and Slicing}
+
+Python uses \textbf{zero-based indexing}---the first element is at index 0, not 1. You can also use negative indices to count from the end.
+
+\begin{lstlisting}[language=Python]
+colors = ["red", "green", "blue", "yellow", "purple"]
+
+# Single element access
+print(colors[0])    # "red" (first element)
+print(colors[-1])   # "purple" (last element)
+print(colors[-2])   # "yellow" (second to last)
+
+# Slicing: [start:end] - end is exclusive!
+print(colors[1:3])  # ["green", "blue"]
+print(colors[:3])   # ["red", "green", "blue"] (from beginning)
+print(colors[2:])   # ["blue", "yellow", "purple"] (to end)
+
+# With step: [start:end:step]
+print(colors[::2])  # ["red", "blue", "purple"] (every 2nd)
+\end{lstlisting}
+
+\begin{warn}
+\textbf{Common Mistake:} Remember that slicing with \texttt{[a:b]} includes index \texttt{a} but \emph{excludes} index \texttt{b}. So \texttt{colors[1:3]} gives you elements at indices 1 and 2, not 1, 2, and 3.
+\end{warn}
+
+\subsection{Control Flow: Conditionals}
+
+Python uses \textbf{indentation} (not braces) to define code blocks. The \texttt{if}, \texttt{elif}, and \texttt{else} keywords handle conditional logic:
+
+\begin{lstlisting}[language=Python]
+num = 7
+
+if num % 2 == 0:
+    print(f"{num} is even.")
+else:
+    print(f"{num} is odd.")
+# Output: 7 is odd.
+
+# Multiple conditions with elif
+score = 85
+if score >= 90:
+    grade = "A"
+elif score >= 80:
+    grade = "B"
+elif score >= 70:
+    grade = "C"
+else:
+    grade = "F"
+print(f"Score {score} earns grade {grade}")  # Grade B
+\end{lstlisting}
+
+\begin{info}
+\textbf{f-strings:} The \texttt{f"..."} syntax creates formatted strings. Variables inside curly braces \texttt{\{var\}} are automatically converted to text. This is much cleaner than string concatenation.
+\end{info}
+
+\subsection{Control Flow: Loops}
+
+\paragraph{For Loops}
+
+For loops iterate over sequences (lists, strings, ranges, etc.):
+
+\begin{lstlisting}[language=Python]
+# Loop over a list
+fruits = ["apple", "banana", "cherry"]
+for fruit in fruits:
+    print(f"I like {fruit}")
+
+# Loop over a range of numbers
+for i in range(5):
+    print(i)  # Prints 0, 1, 2, 3, 4
+
+# Loop over dictionary items
+prices = {"apple": 1.50, "banana": 0.75, "cherry": 2.00}
+for fruit, price in prices.items():
+    print(f"{fruit} costs ${price:.2f}")
+\end{lstlisting}
+
+\paragraph{While Loops}
+
+While loops continue as long as a condition is true:
+
+\begin{lstlisting}[language=Python]
+count = 0
+while count < 5:
+    print(count)
+    count += 1  # Don't forget to update the condition!
+# Prints 0, 1, 2, 3, 4
+\end{lstlisting}
+
+\subsection{Functions}
+
+Functions are reusable blocks of code defined with the \texttt{def} keyword:
+
+\begin{lstlisting}[language=Python]
+def square(x):
+    """Return the square of x."""
+    return x * x
+
+val = 5
+print(f"The square of {val} is {square(val)}.")
+# Output: The square of 5 is 25.
+\end{lstlisting}
+
+Functions can have multiple parameters and default values:
+
+\begin{lstlisting}[language=Python]
+def greet(name, greeting="Hello"):
+    """Greet someone with a customizable greeting."""
+    return f"{greeting}, {name}!"
+
+print(greet("Alice"))           # "Hello, Alice!"
+print(greet("Bob", "Hi there")) # "Hi there, Bob!"
+\end{lstlisting}
+
+\begin{info}
+\textbf{Docstrings:} The triple-quoted string immediately after \texttt{def} is called a docstring. It documents what the function does and appears when you use \texttt{help(function\_name)}.
+\end{info}
+
+%==============================================================================
+\section{Python Essentials for Optimization}
+%==============================================================================
+
+Now that we've covered the basics, let's see how these Python features are used specifically in optimization modeling. The following patterns will appear repeatedly in your LP and IP work.
+
+\subsection{Lists: Ordered Collections}
+
+Lists are Python's workhorse data structure -- ordered collections that can hold any type of data. In optimization, we use lists to represent:
+\begin{itemize}
+\item Sets of indices (plants, customers, time periods)
+\item Sequences of data (demands, costs, capacities)
+\item Collections of variable names or constraint names
+\end{itemize}
+
+\begin{lstlisting}[language=Python]
+# Define sets for a transportation problem
+plants = ['Chicago', 'Denver', 'Atlanta']
+markets = ['NYC', 'LA', 'Houston', 'Miami']
+
+# Numerical data as lists
+supply = [100, 150, 200]
+demand = [80, 120, 90, 110]
+\end{lstlisting}
+
+Lists are \textbf{zero-indexed}, meaning the first element is at position 0:
+
+\begin{lstlisting}[language=Python]
+plants[0]     # 'Chicago' (first element)
+plants[1]     # 'Denver' (second element)
+plants[-1]    # 'Atlanta' (last element)
+len(plants)   # 3 (number of elements)
+\end{lstlisting}
+
+Common operations you'll use constantly:
+
+\begin{lstlisting}[language=Python]
+sum(supply)           # 450 (total supply)
+max(demand)           # 120 (largest demand)
+min(demand)           # 80 (smallest demand)
+plants.append('Boston')  # Add to end of list
+'Denver' in plants    # True (membership test)
+\end{lstlisting}
+
+\subsection{Dictionaries: Key-Value Mappings}
+
+Dictionaries map \textbf{keys} to \textbf{values}. They're the natural way to represent \textbf{indexed parameters} in optimization -- think of them as lookup tables.
+
+\begin{lstlisting}[language=Python]
+# Supply indexed by plant name
+supply = {
+    'Chicago': 100,
+    'Denver': 150,
+    'Atlanta': 200
+}
+
+# Access values using keys
+supply['Chicago']    # 100
+supply['Denver']     # 150
+\end{lstlisting}
+
+For parameters indexed by \textbf{multiple sets} (like transportation costs indexed by origin AND destination), use \textbf{tuple keys}:
+
+\begin{lstlisting}[language=Python]
+# Transportation cost from plant to market
+cost = {
+    ('Chicago', 'NYC'): 3.5,
+    ('Chicago', 'LA'): 4.8,
+    ('Chicago', 'Houston'): 2.1,
+    ('Denver', 'NYC'): 4.2,
+    ('Denver', 'LA'): 2.1,
+    ('Denver', 'Houston'): 3.0,
+    # ... and so on
+}
+
+# Access using tuple key
+cost[('Chicago', 'NYC')]    # 3.5
+cost[('Denver', 'LA')]      # 2.1
+\end{lstlisting}
+
+This pattern -- dictionaries with tuple keys -- is \textbf{fundamental} to optimization modeling in Python. It directly mirrors the mathematical notation $c_{ij}$ for a cost from origin $i$ to destination $j$.
+
+Useful dictionary operations:
+
+\begin{lstlisting}[language=Python]
+supply.keys()         # All keys: dict_keys(['Chicago', 'Denver', 'Atlanta'])
+supply.values()       # All values: dict_values([100, 150, 200])
+supply.items()        # Key-value pairs (for iteration)
+sum(supply.values())  # 450 (total supply)
+\end{lstlisting}
+
+\subsection{For Loops: Iteration}
+
+Loops let you repeat operations over collections. In optimization, you'll use them to:
+\begin{itemize}
+\item Create decision variables for each index
+\item Add constraints for each element of a set
+\item Process and display results
+\end{itemize}
+
+\begin{lstlisting}[language=Python]
+# Basic loop over a list
+for plant in plants:
+    print(f"Processing plant: {plant}")
+\end{lstlisting}
+
+Output:
+\begin{verbatim}
+Processing plant: Chicago
+Processing plant: Denver
+Processing plant: Atlanta
+\end{verbatim}
+
+When you need both the index and value, use \texttt{enumerate}:
+
+\begin{lstlisting}[language=Python]
+for i, plant in enumerate(plants):
+    print(f"Plant {i}: {plant}")
+\end{lstlisting}
+
+For dictionaries, iterate over key-value pairs:
+
+\begin{lstlisting}[language=Python]
+for plant, capacity in supply.items():
+    print(f"{plant} can supply {capacity} units")
+\end{lstlisting}
+
+\textbf{Nested loops} create all combinations -- essential for generating variables and constraints over multiple index sets:
+
+\begin{lstlisting}[language=Python]
+# All plant-to-market routes
+for plant in plants:
+    for market in markets:
+        print(f"Route: {plant} -> {market}")
+\end{lstlisting}
+
+This creates $|\text{plants}| \times |\text{markets}| = 3 \times 4 = 12$ route combinations.
+
+\subsection{List Comprehensions: Concise List Creation}
+
+List comprehensions are a compact way to create lists. They're Python's way of saying ``give me a list of X for each Y in Z.''
+
+\begin{lstlisting}[language=Python]
+# Create list of all routes (same as nested loop above, but one line)
+routes = [(p, m) for p in plants for m in markets]
+\end{lstlisting}
+
+This produces:
+\begin{verbatim}
+[('Chicago', 'NYC'), ('Chicago', 'LA'), ('Chicago', 'Houston'),
+ ('Chicago', 'Miami'), ('Denver', 'NYC'), ... ]
+\end{verbatim}
+
+Add conditions with \texttt{if}:
+
+\begin{lstlisting}[language=Python]
+# Only plants with capacity > 120
+large_plants = [p for p, cap in supply.items() if cap > 120]
+# Result: ['Denver', 'Atlanta']
+\end{lstlisting}
+
+You'll see comprehensions used extensively in PuLP for creating sums:
+
+\begin{lstlisting}[language=Python]
+# Total cost (will make sense after PuLP section)
+total_cost = lpSum([cost[p,m] * x[p,m] for p in plants for m in markets])
+\end{lstlisting}
+
+\subsection{Functions: Reusable Code}
+
+Functions package code for reuse. Define them with \texttt{def}:
+
+\begin{lstlisting}[language=Python]
+def calculate_total_cost(flows, costs):
+    """
+    Calculate total transportation cost.
+
+    Args:
+        flows: dict mapping (plant, market) to flow amount
+        costs: dict mapping (plant, market) to unit cost
+
+    Returns:
+        Total cost as a float
+    """
+    total = 0
+    for route, amount in flows.items():
+        total += amount * costs[route]
+    return total
+\end{lstlisting}
+
+The triple-quoted string is a \textbf{docstring} -- documentation that explains what the function does. Good practice!
+
+A simpler version using sum and a comprehension:
+
+\begin{lstlisting}[language=Python]
+def calculate_total_cost(flows, costs):
+    """Calculate total transportation cost."""
+    return sum(flows[r] * costs[r] for r in flows)
+\end{lstlisting}
+
+%==============================================================================
+\section{NumPy: Numerical Computing}
+%==============================================================================
+
+NumPy (Numerical Python) provides efficient array operations. While PuLP doesn't require NumPy, it's invaluable for:
+\begin{itemize}
+\item Processing numerical data before optimization
+\item Performing matrix/vector operations
+\item Statistical analysis of inputs and results
+\end{itemize}
+
+\begin{lstlisting}[language=Python]
+import numpy as np
+\end{lstlisting}
+
+\subsection{Creating Arrays}
+
+NumPy arrays are like lists, but optimized for numerical operations:
+
+\begin{lstlisting}[language=Python]
+# From a list
+costs = np.array([3, 5, 2, 4])
+
+# 2D array (matrix)
+A = np.array([
+    [2, 1, 3],
+    [1, 2, 1],
+    [3, 1, 2]
+])
+
+# Useful shortcuts
+zeros = np.zeros(5)          # [0, 0, 0, 0, 0]
+ones = np.ones(3)            # [1, 1, 1]
+range_arr = np.arange(10)    # [0, 1, 2, ..., 9]
+\end{lstlisting}
+
+\subsection{Array Operations}
+
+NumPy shines at element-wise and aggregate operations:
+
+\begin{lstlisting}[language=Python]
+costs = np.array([3, 5, 2, 4])
+
+# Aggregate operations
+costs.sum()      # 14
+costs.mean()     # 3.5
+costs.min()      # 2
+costs.max()      # 5
+costs.std()      # Standard deviation
+
+# Element-wise operations
+costs * 2        # array([6, 10, 4, 8])
+costs + 1        # array([4, 6, 3, 5])
+costs > 3        # array([False, True, False, True])
+\end{lstlisting}
+
+\subsection{Linear Algebra}
+
+For matrix operations (useful in understanding LP theory):
+
+\begin{lstlisting}[language=Python]
+A = np.array([[2, 1], [1, 3]])
+b = np.array([4, 5])
+c = np.array([3, 2])
+x = np.array([1, 2])
+
+# Matrix-vector product: Ax
+np.dot(A, x)       # array([4, 7])
+
+# Dot product: c'x
+np.dot(c, x)       # 7
+
+# Matrix properties
+A.shape            # (2, 2)
+A.T                # Transpose
+np.linalg.det(A)   # Determinant
+np.linalg.inv(A)   # Inverse (if exists)
+\end{lstlisting}
+
+%------------------------------------------------------------------------------
+% NumPy Visual Guide - Visualizing Array Operations
+%------------------------------------------------------------------------------
+
+\subsection{Visualizing Array Operations}
+
+NumPy array operations can be confusing at first, especially when working with slicing, stacking, and axis-specific operations. The following visual guide demonstrates key concepts that will help you understand how NumPy manipulates arrays---skills you'll use when preparing data for optimization models.
+
+\subimport{../external-sources/foundationsAppliedMathematicsLabs/Appendices/NumpyVisualGuide/}{NumpyVisualGuide}
+
+%==============================================================================
+\section{Pandas: Data Management}
+%==============================================================================
+
+Pandas is the go-to library for working with tabular data. It excels at:
+\begin{itemize}
+\item Reading data from files (CSV, Excel, databases)
+\item Cleaning and transforming data
+\item Aggregating and summarizing results
+\item Preparing data for optimization models
+\end{itemize}
+
+\begin{lstlisting}[language=Python]
+import pandas as pd
+\end{lstlisting}
+
+\subsection{DataFrames: Tables of Data}
+
+A DataFrame is like a spreadsheet or database table:
+
+\begin{lstlisting}[language=Python]
+# Create from a dictionary
+plants_df = pd.DataFrame({
+    'Plant': ['Chicago', 'Denver', 'Atlanta'],
+    'Capacity': [100, 150, 200],
+    'FixedCost': [10000, 12000, 8000]
+})
+
+print(plants_df)
+\end{lstlisting}
+
+Output:
+\begin{verbatim}
+     Plant  Capacity  FixedCost
+0  Chicago       100      10000
+1   Denver       150      12000
+2  Atlanta       200       8000
+\end{verbatim}
+
+\subsection{Reading Data from Files}
+
+Real optimization problems get data from files, not hardcoded values:
+
+\begin{lstlisting}[language=Python]
+# Read CSV file
+df = pd.read_csv('transportation_data.csv')
+
+# Read Excel file
+df = pd.read_excel('problem_data.xlsx', sheet_name='Costs')
+
+# Preview the data
+df.head()          # First 5 rows
+df.info()          # Column types and counts
+df.describe()      # Summary statistics
+\end{lstlisting}
+
+\subsection{Accessing and Filtering Data}
+
+\begin{lstlisting}[language=Python]
+# Access a column
+plants_df['Capacity']
+
+# Filter rows
+large_plants = plants_df[plants_df['Capacity'] > 120]
+
+# Multiple conditions
+selected = plants_df[(plants_df['Capacity'] > 100) &
+                     (plants_df['FixedCost'] < 11000)]
+\end{lstlisting}
+
+\subsection{From DataFrame to Optimization Data}
+
+A critical skill is converting DataFrames to the dictionaries PuLP expects:
+
+\begin{lstlisting}[language=Python]
+# DataFrame to dictionary
+supply_dict = dict(zip(plants_df['Plant'], plants_df['Capacity']))
+# Result: {'Chicago': 100, 'Denver': 150, 'Atlanta': 200}
+
+# For cost matrices, you might have data like:
+# costs_df with columns: Origin, Destination, Cost
+cost_dict = {(row['Origin'], row['Destination']): row['Cost']
+             for _, row in costs_df.iterrows()}
+\end{lstlisting}
+
+\subsection{Analyzing Results}
+
+After solving, put results back into DataFrames for analysis:
+
+\begin{lstlisting}[language=Python]
+# Create results DataFrame
+results = pd.DataFrame([
+    {'Route': f"{p}->{m}", 'Flow': x[p,m].varValue, 'Cost': cost[p,m]}
+    for p in plants for m in markets
+    if x[p,m].varValue > 0
+])
+
+# Analyze
+print(results)
+print(f"Total flow: {results['Flow'].sum()}")
+print(f"Average cost: {results['Cost'].mean():.2f}")
+\end{lstlisting}
+
+%==============================================================================
+\section{Matplotlib: Visualization}
+%==============================================================================
+
+Visualization helps you understand your data before optimization and communicate results after. Matplotlib is Python's foundational plotting library.
+
+\begin{lstlisting}[language=Python]
+import matplotlib.pyplot as plt
+\end{lstlisting}
+
+\subsection{Bar Charts: Comparing Categories}
+
+Perfect for showing supply, demand, or solution values by category:
+
+\begin{lstlisting}[language=Python]
+plants = ['Chicago', 'Denver', 'Atlanta']
+supply = [100, 150, 200]
+
+plt.figure(figsize=(8, 5))
+plt.bar(plants, supply, color='steelblue', edgecolor='black')
+plt.xlabel('Plant')
+plt.ylabel('Supply Capacity')
+plt.title('Supply Capacity by Plant')
+plt.grid(axis='y', alpha=0.3)
+plt.show()
+\end{lstlisting}
+
+\subsection{Grouped Bar Charts: Comparing Multiple Series}
+
+\begin{lstlisting}[language=Python]
+import numpy as np
+
+plants = ['Chicago', 'Denver', 'Atlanta']
+supply = [100, 150, 200]
+used = [95, 150, 170]  # After optimization
+
+x = np.arange(len(plants))
+width = 0.35
+
+fig, ax = plt.subplots(figsize=(8, 5))
+ax.bar(x - width/2, supply, width, label='Capacity', color='steelblue')
+ax.bar(x + width/2, used, width, label='Used', color='orange')
+
+ax.set_xlabel('Plant')
+ax.set_ylabel('Units')
+ax.set_title('Capacity vs. Utilization')
+ax.set_xticks(x)
+ax.set_xticklabels(plants)
+ax.legend()
+plt.show()
+\end{lstlisting}
+
+\subsection{Heatmaps: Visualizing Matrices}
+
+Great for cost matrices or flow solutions:
+
+\begin{lstlisting}[language=Python]
+# Cost matrix as 2D array
+costs = np.array([
+    [3.5, 4.8, 2.1, 3.9],
+    [4.2, 2.1, 3.0, 4.5],
+    [2.8, 5.1, 2.9, 1.7]
+])
+
+plants = ['Chicago', 'Denver', 'Atlanta']
+markets = ['NYC', 'LA', 'Houston', 'Miami']
+
+plt.figure(figsize=(8, 6))
+plt.imshow(costs, cmap='YlOrRd', aspect='auto')
+plt.colorbar(label='Cost per Unit')
+plt.xticks(range(len(markets)), markets)
+plt.yticks(range(len(plants)), plants)
+plt.xlabel('Destination')
+plt.ylabel('Origin')
+plt.title('Transportation Cost Matrix')
+
+# Add text annotations
+for i in range(len(plants)):
+    for j in range(len(markets)):
+        plt.text(j, i, f'{costs[i,j]:.1f}', ha='center', va='center')
+
+plt.tight_layout()
+plt.show()
+\end{lstlisting}
+
+%------------------------------------------------------------------------------
+% Matplotlib Customization Guide
+%------------------------------------------------------------------------------
+
+\subsection{Plot Customization Reference}
+
+Matplotlib offers extensive customization options for creating publication-quality figures. The following guide provides a reference for colors, line styles, markers, and other formatting options that you'll find useful when visualizing optimization results.
+
+\subimport{../external-sources/foundationsAppliedMathematicsLabs/Appendices/MatplotlibCustomization/}{MatplotlibCustomization}
+
+%==============================================================================
+\section{NetworkX: Graph Analysis}
+%==============================================================================
+
+NetworkX is Python's premier library for working with graphs and networks. It's essential for the discrete algorithms we'll cover in Part II, and useful for visualizing network-based optimization problems like transportation and facility location.
+
+\begin{lstlisting}[language=Python]
+import networkx as nx
+\end{lstlisting}
+
+\subsection{Why Graphs Matter for Optimization}
+
+Many optimization problems have an underlying \textbf{network structure}:
+\begin{itemize}
+\item Transportation: plants and markets connected by shipping routes
+\item Shortest path: cities connected by roads
+\item Network flow: sources, sinks, and intermediate nodes with arcs
+\item Facility location: potential sites and customers to serve
+\end{itemize}
+
+NetworkX lets you represent, analyze, and visualize these structures.
+
+\subsection{Creating Graphs}
+
+\begin{lstlisting}[language=Python]
+# Create a directed graph (edges have direction)
+G = nx.DiGraph()
+
+# Add nodes (can include attributes)
+G.add_node('Chicago', node_type='plant', supply=100)
+G.add_node('Denver', node_type='plant', supply=150)
+G.add_node('NYC', node_type='market', demand=80)
+G.add_node('LA', node_type='market', demand=120)
+
+# Add edges with attributes
+G.add_edge('Chicago', 'NYC', cost=3.5, capacity=100)
+G.add_edge('Chicago', 'LA', cost=4.8, capacity=80)
+G.add_edge('Denver', 'NYC', cost=4.2, capacity=90)
+G.add_edge('Denver', 'LA', cost=2.1, capacity=150)
+\end{lstlisting}
+
+\subsection{Accessing Graph Data}
+
+\begin{lstlisting}[language=Python]
+# Basic properties
+G.number_of_nodes()                    # 4
+G.number_of_edges()                    # 4
+list(G.nodes())                        # ['Chicago', 'Denver', 'NYC', 'LA']
+list(G.edges())                        # [('Chicago', 'NYC'), ...]
+
+# Node attributes
+G.nodes['Chicago']['supply']           # 100
+
+# Edge attributes
+G.edges['Chicago', 'NYC']['cost']      # 3.5
+
+# Neighbors (outgoing edges for DiGraph)
+list(G.successors('Chicago'))          # ['NYC', 'LA']
+\end{lstlisting}
+
+\subsection{Graph Algorithms}
+
+NetworkX includes many useful algorithms:
+
+\begin{lstlisting}[language=Python]
+# Shortest path (by cost)
+path = nx.shortest_path(G, 'Chicago', 'LA', weight='cost')
+length = nx.shortest_path_length(G, 'Chicago', 'LA', weight='cost')
+print(f"Shortest path: {path}, cost: {length}")
+
+# All shortest paths from one source
+all_paths = nx.single_source_shortest_path(G, 'Chicago')
+
+# Check connectivity
+nx.is_weakly_connected(G)    # True if underlying undirected graph is connected
+\end{lstlisting}
+
+\subsection{Visualization}
+
+Seeing your network helps understand problem structure:
+
+\begin{lstlisting}[language=Python]
+plt.figure(figsize=(10, 6))
+
+# Layout algorithm positions nodes
+pos = nx.spring_layout(G, seed=42)
+
+# Draw nodes
+nx.draw_networkx_nodes(G, pos, node_color='lightblue',
+                       node_size=1500, alpha=0.9)
+
+# Draw edges
+nx.draw_networkx_edges(G, pos, edge_color='gray',
+                       arrows=True, arrowsize=20)
+
+# Draw labels
+nx.draw_networkx_labels(G, pos, font_size=10)
+
+# Edge labels (costs)
+edge_labels = nx.get_edge_attributes(G, 'cost')
+nx.draw_networkx_edge_labels(G, pos, edge_labels, font_size=8)
+
+plt.title('Transportation Network')
+plt.axis('off')
+plt.tight_layout()
+plt.show()
+\end{lstlisting}
+
+\begin{info}
+NetworkX is particularly important for Part II of this book, where we cover graph algorithms including shortest paths, minimum spanning trees, and network flows.
+\end{info}
+
+%==============================================================================
+\section{GeoPandas: Geographic Visualization}
+%==============================================================================
+
+Many optimization problems have a geographic component -- facility locations, delivery routes, service territories. GeoPandas extends Pandas with geographic capabilities, making your models and results more tangible and easier to communicate.
+
+\begin{lstlisting}[language=Python]
+import geopandas as gpd
+from shapely.geometry import Point
+\end{lstlisting}
+
+\subsection{Why Geographic Visualization?}
+
+A transportation problem becomes much more intuitive when you can \textbf{see} the facilities and customers on a map. Benefits include:
+\begin{itemize}
+\item \textbf{Sanity checking} -- Does your solution make geographic sense?
+\item \textbf{Communication} -- Maps are universally understood
+\item \textbf{Insight} -- Spatial patterns become visible
+\item \textbf{Real data} -- Work with actual coordinates, not abstract indices
+\end{itemize}
+
+\subsection{Creating Geographic Data}
+
+\begin{lstlisting}[language=Python]
+# Facility data with coordinates
+facilities = pd.DataFrame({
+    'Name': ['Chicago Plant', 'Denver Plant', 'Atlanta Plant'],
+    'Lat': [41.88, 39.74, 33.75],
+    'Lon': [-87.63, -104.99, -84.39],
+    'Capacity': [100, 150, 200]
+})
+
+# Convert to GeoDataFrame
+geometry = [Point(lon, lat) for lon, lat in zip(facilities['Lon'], facilities['Lat'])]
+facilities_gdf = gpd.GeoDataFrame(facilities, geometry=geometry, crs='EPSG:4326')
+\end{lstlisting}
+
+\subsection{Map Visualization}
+
+\begin{lstlisting}[language=Python]
+fig, ax = plt.subplots(figsize=(12, 8))
+
+# Plot facilities (sized by capacity)
+facilities_gdf.plot(ax=ax, color='red', markersize=facilities_gdf['Capacity'],
+                    alpha=0.6, edgecolor='black')
+
+# Add labels
+for idx, row in facilities_gdf.iterrows():
+    ax.annotate(row['Name'],
+                xy=(row.geometry.x, row.geometry.y),
+                xytext=(5, 5), textcoords='offset points',
+                fontsize=9, fontweight='bold')
+
+ax.set_xlabel('Longitude')
+ax.set_ylabel('Latitude')
+ax.set_title('Facility Locations (size = capacity)')
+ax.grid(True, alpha=0.3)
+plt.show()
+\end{lstlisting}
+
+\begin{info}
+GeoPandas is optional for this course, but it transforms abstract optimization problems into concrete, visual stories. It's especially valuable when presenting results to stakeholders who may not be familiar with mathematical notation.
+\end{info}
+
+%==============================================================================
+\section{PuLP: Optimization Modeling}
+%==============================================================================
+
+Now we arrive at the main event: \textbf{PuLP}, a Python library for formulating and solving linear programs (LP) and integer programs (IP). PuLP provides a clean, Pythonic interface for expressing optimization models that reads almost like mathematical notation.
+
+\subsection{Installing PuLP}
+
+\begin{lstlisting}[language=Python]
+!pip install pulp
+\end{lstlisting}
+
+After installing, \textbf{restart your kernel}, then import:
+
+\begin{lstlisting}[language=Python]
+from pulp import *
+\end{lstlisting}
+
+PuLP comes bundled with the CBC solver (COIN-OR Branch and Cut), a capable open-source solver. For larger problems, you can connect PuLP to commercial solvers like Gurobi or CPLEX.
+
+\subsection{The PuLP Modeling Pattern}
+
+Every PuLP model follows six steps:
+
+\begin{enumerate}
+\item \textbf{Create} a problem object
+\item \textbf{Define} decision variables
+\item \textbf{Set} the objective function
+\item \textbf{Add} constraints
+\item \textbf{Solve} the problem
+\item \textbf{Extract} and analyze results
+\end{enumerate}
+
+Let's work through a complete example.
+
+\subsection{Example: Product Mix Problem}
+
+A company makes two products. Each unit of Product 1 yields \$3 profit; each unit of Product 2 yields \$2 profit. Production is limited by three resources:
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+Resource & Product 1 & Product 2 & Available \\
+\midrule
+Material & 10 & 5 & 300 \\
+Labor & 4 & 4 & 160 \\
+Machine & 2 & 6 & 180 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\modelhead{Model}
+\begin{align*}
+\max \quad & 3X_1 + 2X_2 \\
+\st        & 10X_1 + 5X_2 \leq 300 \\
+& 4X_1 + 4X_2 \leq 160 \\
+& 2X_1 + 6X_2 \leq 180 \\
+& X_1, X_2 \geq 0
+\end{align*}
+
+\paragraph{Step 1: Create the Problem}
+
+\begin{lstlisting}[language=Python]
+# Create a maximization problem
+prob = LpProblem("Product_Mix", LpMaximize)
+\end{lstlisting}
+
+The first argument is a name (used in output files), the second specifies the sense: \texttt{LpMaximize} or \texttt{LpMinimize}.
+
+\paragraph{Step 2: Define Decision Variables}
+
+\begin{lstlisting}[language=Python]
+# Create non-negative continuous variables
+x1 = LpVariable("X1", lowBound=0)
+x2 = LpVariable("X2", lowBound=0)
+\end{lstlisting}
+
+The \texttt{lowBound=0} enforces $X_1, X_2 \geq 0$. By default, variables are continuous.
+
+\paragraph{Step 3: Set the Objective Function}
+
+\begin{lstlisting}[language=Python]
+# Add objective function
+prob += 3*x1 + 2*x2, "Total_Profit"
+\end{lstlisting}
+
+The \texttt{+=} operator adds to the problem. The second argument is an optional name.
+
+\paragraph{Step 4: Add Constraints}
+
+\begin{lstlisting}[language=Python]
+# Add constraints
+prob += 10*x1 + 5*x2 <= 300, "Material"
+prob += 4*x1 + 4*x2 <= 160, "Labor"
+prob += 2*x1 + 6*x2 <= 180, "Machine"
+\end{lstlisting}
+
+Each constraint uses \texttt{<=}, \texttt{>=}, or \texttt{==}. The names help identify constraints in output.
+
+\begin{warn}
+\textbf{Common Mistake:} If you forget the comparison operator (\texttt{<=}, \texttt{>=}, \texttt{==}), you'll silently overwrite the objective function instead of adding a constraint!
+
+\textbf{Wrong:}
+\begin{lstlisting}[language=Python]
+prob += 10*x1 + 5*x2  # Overwrites objective!
+\end{lstlisting}
+
+\textbf{Correct:}
+\begin{lstlisting}[language=Python]
+prob += 10*x1 + 5*x2 <= 300  # Adds constraint
+\end{lstlisting}
+\end{warn}
+
+\paragraph{Step 5: Solve}
+
+\begin{lstlisting}[language=Python]
+# Solve the problem
+prob.solve()
+
+# Check status
+print(f"Status: {LpStatus[prob.status]}")
+\end{lstlisting}
+
+Status will be one of: \texttt{Optimal}, \texttt{Infeasible}, \texttt{Unbounded}, \texttt{Not Solved}.
+
+\paragraph{Step 6: Extract Results}
+
+\begin{lstlisting}[language=Python]
+# Optimal objective value
+print(f"Maximum Profit: ${value(prob.objective)}")
+
+# Optimal variable values
+print(f"X1 = {x1.varValue}")
+print(f"X2 = {x2.varValue}")
+
+# Loop through all variables
+for v in prob.variables():
+    print(f"{v.name} = {v.varValue}")
+\end{lstlisting}
+
+Output:
+\begin{verbatim}
+Status: Optimal
+Maximum Profit: $100.0
+X1 = 20.0
+X2 = 20.0
+\end{verbatim}
+
+\subsection{Variable Types}
+
+PuLP supports three variable types:
+
+\begin{lstlisting}[language=Python]
+# Continuous (default) - for LP
+x = LpVariable("x", lowBound=0)
+
+# Integer - for IP
+y = LpVariable("y", lowBound=0, cat='Integer')
+
+# Binary (0 or 1) - for yes/no decisions
+z = LpVariable("z", cat='Binary')
+\end{lstlisting}
+
+\subsection{Creating Multiple Variables}
+
+For problems with many variables, create them in bulk using \texttt{LpVariable.dicts}:
+
+\begin{lstlisting}[language=Python]
+plants = ['Chicago', 'Denver', 'Atlanta']
+markets = ['NYC', 'LA', 'Houston']
+
+# Create all route combinations
+routes = [(p, m) for p in plants for m in markets]
+
+# Create a dictionary of variables
+x = LpVariable.dicts("Ship", routes, lowBound=0, cat='Continuous')
+\end{lstlisting}
+
+Now \texttt{x[('Chicago', 'NYC')]} is a variable representing shipments from Chicago to NYC.
+
+\subsection{The lpSum Function}
+
+For sums over index sets, use \texttt{lpSum} (more efficient than Python's \texttt{sum}):
+
+\begin{lstlisting}[language=Python]
+# Objective: minimize total cost
+prob += lpSum([cost[p,m] * x[p,m] for p in plants for m in markets])
+
+# Supply constraint for each plant
+for p in plants:
+    prob += lpSum([x[p,m] for m in markets]) <= supply[p], f"Supply_{p}"
+
+# Demand constraint for each market
+for m in markets:
+    prob += lpSum([x[p,m] for p in plants]) >= demand[m], f"Demand_{m}"
+\end{lstlisting}
+
+\subsection{Complete Transportation Example}
+
+Here's a complete, runnable transportation problem:
+
+\begin{lstlisting}[language=Python]
+from pulp import *
+
+# === DATA ===
+plants = ['Chicago', 'Denver']
+markets = ['NYC', 'LA', 'Houston']
+
+supply = {'Chicago': 100, 'Denver': 150}
+demand = {'NYC': 80, 'LA': 90, 'Houston': 70}
+
+cost = {
+    ('Chicago', 'NYC'): 3, ('Chicago', 'LA'): 5, ('Chicago', 'Houston'): 2,
+    ('Denver', 'NYC'): 4, ('Denver', 'LA'): 2, ('Denver', 'Houston'): 3
+}
+
+# === MODEL ===
+prob = LpProblem("Transportation", LpMinimize)
+
+# Variables: x[p,m] = amount shipped from plant p to market m
+routes = [(p, m) for p in plants for m in markets]
+x = LpVariable.dicts("Ship", routes, lowBound=0)
+
+# Objective: minimize total shipping cost
+prob += lpSum([cost[r] * x[r] for r in routes]), "Total_Cost"
+
+# Supply constraints
+for p in plants:
+    prob += lpSum([x[p,m] for m in markets]) <= supply[p], f"Supply_{p}"
+
+# Demand constraints
+for m in markets:
+    prob += lpSum([x[p,m] for p in plants]) >= demand[m], f"Demand_{m}"
+
+# === SOLVE ===
+prob.solve()
+
+# === RESULTS ===
+print(f"Status: {LpStatus[prob.status]}")
+print(f"Total Cost: ${value(prob.objective)}")
+print("\nOptimal Shipments:")
+for p in plants:
+    for m in markets:
+        if x[p,m].varValue > 0:
+            print(f"  {p} -> {m}: {x[p,m].varValue}")
+\end{lstlisting}
+
+\begin{info}
+\textbf{Complete Notebooks:} For fully worked examples with data files and visualizations, see:
+\begin{itemize}
+\item \href{https://github.com/open-optimization/open-optimization-or-examples}{Open Optimization Examples Repository}
+\item \href{https://coin-or.github.io/pulp/}{PuLP Documentation and Tutorials}
+\end{itemize}
+\end{info}
+
+%==============================================================================
+\section{Putting It All Together}
+%==============================================================================
+
+A typical optimization workflow integrates all the tools we've covered:
+
+\begin{enumerate}
+\item \textbf{Load data} with Pandas (from CSV, Excel, or databases)
+\item \textbf{Explore and clean} data, checking for issues
+\item \textbf{Transform} data into dictionaries for PuLP
+\item \textbf{Build the model} (variables, objective, constraints)
+\item \textbf{Solve} and verify status is optimal
+\item \textbf{Extract results} back into Pandas for analysis
+\item \textbf{Visualize} with Matplotlib, NetworkX, or GeoPandas
+\item \textbf{Communicate} findings to stakeholders
+\end{enumerate}
+
+\begin{lstlisting}[language=Python]
+# Typical workflow skeleton
+import pandas as pd
+import matplotlib.pyplot as plt
+from pulp import *
+
+# 1. Load data
+plants_df = pd.read_csv('plants.csv')
+markets_df = pd.read_csv('markets.csv')
+costs_df = pd.read_csv('costs.csv')
+
+# 2-3. Process into dictionaries
+supply = dict(zip(plants_df['Name'], plants_df['Capacity']))
+demand = dict(zip(markets_df['Name'], markets_df['Demand']))
+cost = {(row['From'], row['To']): row['Cost']
+        for _, row in costs_df.iterrows()}
+
+# 4-5. Build and solve model
+prob = LpProblem("MyProblem", LpMinimize)
+# ... define variables, objective, constraints ...
+prob.solve()
+
+# 6. Analyze results
+results_df = pd.DataFrame([...])  # Extract solution
+print(results_df.describe())
+
+# 7. Visualize
+results_df.plot(kind='bar')
+plt.show()
+\end{lstlisting}
+
+The power of Python is that all these tools work seamlessly together, letting you go from raw data to optimized solution to presentation-ready visualization in a single, reproducible notebook.
+
+\begin{resource}
+\textbf{Additional Resources}
+\begin{itemize}
+\item \href{https://coin-or.github.io/pulp/}{PuLP Documentation}
+\item \href{https://numpy.org/doc/}{NumPy Documentation}
+\item \href{https://pandas.pydata.org/docs/}{Pandas Documentation}
+\item \href{https://matplotlib.org/stable/contents.html}{Matplotlib Documentation}
+\item \href{https://networkx.org/documentation/}{NetworkX Documentation}
+\item \href{https://geopandas.org/}{GeoPandas Documentation}
+\end{itemize}
+\end{resource}

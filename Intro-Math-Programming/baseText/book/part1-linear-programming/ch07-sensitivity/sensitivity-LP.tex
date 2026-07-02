@@ -7,12 +7,9 @@
 \end{itemize}
 \end{outcome}
 
-
 Sensitivity analysis examines how changes in the parameters (objective function coefficients, constraint right-hand sides) affect the optimal solution. This can be computed from the final simplex dictionary, often provided by optimization software such as Excel Solver.
 
 We begin this section with an interactive desmos example.  Go to \href{https://www.desmos.com/calculator/xz1f0tdjf9}{Desmos LP Sensitivity!}.
-
-
 
 \subsection{Mathematical details of sensitivity analysis}
 
@@ -134,7 +131,6 @@ In this section, we analyze the sensitivity of the optimal basis to changes in d
 \end{enumerate}
 We determine the range of values these parameters can take while preserving the current optimal basis.
 
-
 Note that we could also have written this as 
 \[
 \begin{aligned}
@@ -163,8 +159,6 @@ s_1 \\
 s_2 \\
 s_3
 \end{bmatrix}\]
-
-
 
 \section{Sensitivity Analysis: Right-Hand Side Perturbations}
 
@@ -273,7 +267,6 @@ Equivalently, since \( b_2 = 16 + \Delta \), we require:
 \boxed{b_2 \geq 13}.
 \]
 
-
 \subsection*{Conclusion}
 
 The current basis \( B = \{x, y, s_2\} \) remains optimal under the RHS perturbation \( b_2 = 16 + \Delta \) as long as:
@@ -282,7 +275,6 @@ The current basis \( B = \{x, y, s_2\} \) remains optimal under the RHS perturba
 \]
 
 Beyond this range, \( s_2 < 0 \), and the current dictionary becomes infeasible — triggering a new pivot in the simplex method.
-
 
 \subsection{Perturbing \( b_1 \): A Nonbasic Slack Variable}
 
@@ -367,7 +359,6 @@ z = 23 + \Delta.
 \item Outside this range, one or more basic variables becomes negative, and the current solution becomes infeasible, prompting a new pivot in the simplex method.
 \end{itemize}
 
-
 \subsection{Perturbing \( b_3 \): Another Nonbasic Slack Variable}
 
 The third constraint corresponds to slack variable \( s_3 \), which is currently \emph{nonbasic} and equal to 0 in the optimal solution. Its original right-hand side is \( b_3 = 14 \). We now perturb it to \( 14 + \Delta \), where \( \Delta \in \mathbb{R} \), and examine how this affects the dictionary.
@@ -447,8 +438,6 @@ z = 23 + \Delta.
 \]
 \item Outside this range, \( x < 0 \) or \( s_2 < 0 \), and the dictionary becomes infeasible.
 \end{itemize}
-
-
 
 \subsection{Perturbing \( c_1 \) and \( c_2 \): Objective Coefficients of Basic Variables}
 
@@ -550,7 +539,6 @@ z = 23 + 5\delta_2.
 
 Outside these ranges, the reduced costs of nonbasic variables become positive, violating optimality. In such cases, the simplex method would require a new pivot.
 
-
 \section{Sensitivity with Matrix Notation}
 
 \begin{tcolorbox}[colback=green!5!white, colframe=green!75!black,    
@@ -607,7 +595,7 @@ s_1 \\
 s_3
 \end{bmatrix}.
 $$
-or equivalentely
+or equivalently
 $$
 \begin{bmatrix}
 x \\
@@ -635,7 +623,6 @@ s_1
 \end{bmatrix}.$$
 \end{tcolorbox}
 
-
 The basis matrix is 
 $$
 A_B = \begin{bmatrix}
@@ -650,7 +637,6 @@ A_B^{-1} = \begin{bmatrix}
 -3 & 1 & 1
 \end{bmatrix}.
 $$
-
 
 \begin{remark}{Recovering $A_B^{-1}$}{}
 \[
@@ -696,11 +682,7 @@ b =
 A_s = A_B^{-1}
 \]
 
-
 \end{remark}
-
-
-
 
 \subsubsection{1. Changing the Right-Hand Side \( b_1 \) of the First Constraint}
 We modify the right-hand side of the first constraint and analyze its impact on feasibility:
@@ -751,10 +733,46 @@ is the feasible range for \( b_1 \) that preserves the optimal basis.
 
 In the image here, we show changing $b_1$ to the values of $7,9,10$.
 \begin{center}
-\includegraphics[scale = 0.17]{Figures/sensitivity-changing-b}
+% --- TikZ recreation of Figures/sensitivity-changing-b ---
+% Original LP:  max 2x + 3y  s.t.  x + y <= b_1, 2x + y <= 16, x + 2y <= 14, x, y >= 0
+% The plot shows the feasible region (for b_1 = 9) shaded and the constraint
+% x + y <= b_1 drawn for the three values b_1 = 7, 9, 10.
+\begin{tikzpicture}[scale=0.55, >=Stealth,
+    every node/.style={font=\small}]
+  % Axes
+  \draw[->] (-1,0) -- (15,0) node[right] {$x$};
+  \draw[->] (0,-1) -- (0,11) node[above] {$y$};
+  % Grid
+  \draw[help lines, gray!30, very thin, step=1] (-1,-0.5) grid (14.5,10.5);
+  % Tick labels
+  \foreach \x in {2,4,6,8,10,12,14}
+    \draw (\x,0.1) -- (\x,-0.1) node[below, font=\scriptsize] {\x};
+  \foreach \y in {2,4,6,8,10}
+    \draw (0.1,\y) -- (-0.1,\y) node[left, font=\scriptsize] {\y};
+
+  % Constraint  2x + y = 16  (passes through (8,0) and (0,16))
+  \draw[green!60!black, thick] (4,8) -- (8.5,-1) node[pos=0.1, sloped, above, font=\scriptsize] {$2x+y=16$};
+
+  % Constraint  x + 2y = 14  (passes through (14,0) and (0,7))
+  \draw[brown!80!black, thick] (-0.5,7.25) -- (14.5,-0.25);
+
+  % Three values of b_1: x + y = 7, 9, 10
+  \draw[red, thick] (-0.5,7.5) -- (8,-1) node[pos=0.05, above right, font=\scriptsize] {$x+y=7$};
+  \draw[red, thick] (-0.5,9.5) -- (10,-1) node[pos=0.05, above right, font=\scriptsize] {$x+y=9$};
+  \draw[red, thick] (-0.5,10.5) -- (11,-1) node[pos=0.05, above right, font=\scriptsize] {$x+y=10$};
+
+  % Feasible region for b_1 = 9: vertices (0,0), (8,0), (7,2), (4,5), (0,7)
+  \fill[blue!30, opacity=0.45]
+        (0,0) -- (8,0) -- (7,2) -- (4,5) -- (0,7) -- cycle;
+
+  % Vertex markers and labels
+  \fill[blue] (0,0) circle (3pt) node[below left, font=\scriptsize, fill=none] {$(0,0)$};
+  \fill[blue] (8,0) circle (3pt) node[below, font=\scriptsize, fill=none] {$(8,0)$};
+  \fill[blue] (4,5) circle (3pt) node[above right, font=\scriptsize, fill=none] {$(4,5)$};
+  \fill[red]  (0,7) circle (3pt) node[above left, font=\scriptsize, fill=none] {$(0,7)$};
+  \fill[green!50!black] (7,2) circle (3pt) node[right, font=\scriptsize, fill=none] {$(7,2)$};
+\end{tikzpicture}
 \end{center}
-
-
 
 \subsubsection{Sensitivity Analysis on the Objective Coefficient \(c_x\)}
 
@@ -823,7 +841,7 @@ Thus, the reduced costs are:
     \bar{c}_{s_3} = 0 - \begin{bmatrix} c_x & 3 & 0 \end{bmatrix} \cdot \begin{bmatrix} -1 \\ 1 \\ 1 \end{bmatrix}
     = 0 - (-c_x + 3).
 \]
-To retain optimality, we want $\bar{c}_{s_1}$ anr $\bar{c}_{s_3}$ to be $\leq 0$.
+To retain optimality, we want $\bar{c}_{s_1}$ and $\bar{c}_{s_3}$ to be $\leq 0$.
 
 \[
     -2c_x + 3 \leq 0 \quad \Rightarrow \quad c_x \geq \frac{3}{2} = 1.5.
@@ -838,19 +856,18 @@ For the current basis to remain optimal, \( c_x \) must satisfy:
     1.5 \leq c_x \leq 3.
 \]
 
-Thus, we have confirmed that the coefficient \( c_x \) can range between1.5 and 3 while maintaining the current optimal basis.
+Thus, we have confirmed that the coefficient \( c_x \) can range between 1.5 and 3 while maintaining the current optimal basis.
 
 \begin{center}
-\includegraphics[scale = 0.3]{Figures/sensitivity-objective}
+\altincludegraphics[scale = 0.3]{Figures/sensitivity-objective}{Feasible region in the x-y plane with several level curves of the objective z = c_x x + 3y drawn for different slopes. The figure shows that as long as c_x lies in the interval [1.5, 3], the level curves tilt within the cone defined by the active constraints at the current optimum, so the optimal vertex (and basis) does not change.}
 \end{center}
-
 
 \subsection{Excel Solver Sensitivity Analysis}
 
 When solving a problem in excel, you can ask for a sensitivity analysis.
 
 \begin{center}
-\includegraphics[scale =0.3]{Figures/excel-sensitivity}
+\altincludegraphics[scale =0.3]{Figures/excel-sensitivity}{Screenshot of Excel's Solver Results dialog with the option to generate a Sensitivity report selected, illustrating how to request post-optimal sensitivity output after solving a linear program.}
 \end{center}
 This will generate a report that will show the following:
 \begin{itemize}
@@ -861,9 +878,131 @@ This will generate a report that will show the following:
 \item \textbf{Constraint Status:} The report shows which constraints are binding (active) and which are non-binding. A binding constraint has a positive shadow price and restricts the optimal solution, while a non-binding constraint has a shadow price of zero.
 \end{itemize}
 
-\includegraphics[scale = 0.3]{Figures/excel-setup}
-\includegraphics[scale = 0.3]{Figures/excel-sensitivity-report}
+For concreteness, the figures below show a worksheet set up for Solver and the
+sensitivity report it produces. Figure~\ref{fig:excel-setup} shows the model
+layout --- decision-variable cells, a SUMPRODUCT objective cell, and the
+constraint formulas --- and Figure~\ref{fig:excel-sensitivity-report} shows the
+resulting report, with the allowable ranges, shadow prices, and binding status
+described above.
 
+\begin{figure}[h!]
+\centering
+\altincludegraphics[scale = 0.3]{Figures/excel-setup}{Screenshot of an Excel worksheet set up for a linear program: decision-variable cells, an objective-function cell using SUMPRODUCT, and constraint left-hand-side formulas alongside their right-hand-side values, ready for Solver.}
+\caption{An Excel worksheet laid out for Solver, with decision-variable cells, a SUMPRODUCT objective, and constraint formulas.}
+\label{fig:excel-setup}
+\end{figure}
 
+\begin{figure}[h!]
+\centering
+\altincludegraphics[scale = 0.3]{Figures/excel-sensitivity-report}{Screenshot of an Excel Solver sensitivity report. The Variable Cells table lists each decision variable's final value, reduced cost, objective coefficient, and allowable increase/decrease; the Constraints table lists each constraint's final value, shadow price, RHS, and allowable increase/decrease, identifying binding versus non-binding constraints.}
+\caption{The Solver sensitivity report: variable cells (final value, reduced cost, objective coefficient, allowable increase/decrease) and constraints (final value, shadow price, RHS, allowable increase/decrease).}
+\label{fig:excel-sensitivity-report}
+\end{figure}
 
+\section{Exercises}
+
+\begin{ex}{RHS Sensitivity Range}{}
+Consider the following linear program and its optimal dictionary:
+\[
+\begin{aligned}
+\text{Maximize} \quad & 4x_1 + 3x_2 \\
+\text{subject to} \quad
+& x_1 + x_2 \leq 10 \\
+& 2x_1 + x_2 \leq 16 \\
+& x_1, x_2 \geq 0
+\end{aligned}
+\]
+The optimal dictionary is:
+\[
+\begin{aligned}
+z &= 34 - s_1 - s_2 \\
+x_1 &= 6 + s_1 - s_2 \\
+x_2 &= 4 - 2s_1 + s_2 \\
+\end{aligned}
+\]
+with basis $B = \{x_1, x_2\}$ and nonbasic variables $N = \{s_1, s_2\}$.
+
+Determine the range of values for $b_1$ (the RHS of the first constraint) for which the current basis remains optimal.
+\end{ex}
+
+\begin{ex}{Objective Coefficient Sensitivity}{}
+Using the same linear program and optimal dictionary from the previous exercise, determine the range of values for the objective coefficient $c_1$ (the coefficient of $x_1$ in the objective function) such that the current basis remains optimal. How does the optimal objective value change as $c_1$ varies within this range?
+\end{ex}
+
+\begin{ex}{Shadow Price Interpretation}{}
+A furniture workshop produces tables and chairs. The linear program is:
+\[
+\begin{aligned}
+\text{Maximize} \quad & 50x_1 + 30x_2 \quad \text{(profit in dollars)}\\
+\text{subject to} \quad
+& 4x_1 + 2x_2 \leq 40 \quad \text{(wood in board-feet)} \\
+& 2x_1 + 3x_2 \leq 30 \quad \text{(labor in hours)} \\
+& x_1, x_2 \geq 0
+\end{aligned}
+\]
+The optimal solution is $x_1 = 7.5$, $x_2 = 5$, with optimal profit $z^* = 525$.  The dual solution is $y_1 = 11.25$, $y_2 = 2.50$.
+
+\begin{enumerate}
+\item Interpret each shadow price in terms of the resources (wood and labor).
+\item If the workshop could acquire 2 additional board-feet of wood, by approximately how much would the optimal profit increase?
+\item Which resource is more valuable at the margin? Explain.
+\end{enumerate}
+\end{ex}
+
+\begin{ex}{Sensitivity from the Basis Inverse}{}
+Consider the LP:
+\[
+\begin{aligned}
+\text{Maximize} \quad & 5x_1 + 4x_2 \\
+\text{subject to} \quad
+& x_1 + x_2 + s_1 = 6 \\
+& 3x_1 + 2x_2 + s_2 = 15 \\
+& x_1, x_2, s_1, s_2 \geq 0
+\end{aligned}
+\]
+The optimal basis is $B = \{x_1, x_2\}$ with basis matrix and its inverse:
+\[
+A_B = \begin{bmatrix} 1 & 1 \\ 3 & 2 \end{bmatrix}, \quad
+A_B^{-1} = \begin{bmatrix} -2 & 1 \\ 3 & -1 \end{bmatrix}.
+\]
+\begin{enumerate}
+\item Compute $\mathbf{x}_B = A_B^{-1}\mathbf{b}$ and verify this gives a feasible basic solution.
+\item For the RHS vector $\mathbf{b} = \begin{bmatrix} 6 \\ 15 \end{bmatrix}$, find the range of $b_1$ for which the current basis remains feasible.
+\item Compute the reduced costs of the nonbasic variables. For what range of $c_1$ does the current basis remain optimal?
+\end{enumerate}
+\end{ex}
+
+\begin{ex}{Reading a Sensitivity Report}{}
+The following is a sensitivity report from Excel Solver for a maximization LP with two decision variables $x_1$ and $x_2$ and three constraints:
+
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\textbf{Variable} & \textbf{Value} & \textbf{Obj.\ Coeff.} & \textbf{Allow.\ Increase} & \textbf{Allow.\ Decrease} \\
+\hline
+$x_1$ & 8 & 6 & 2 & 3 \\
+$x_2$ & 4 & 5 & 4 & 1 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\textbf{Constraint} & \textbf{Shadow Price} & \textbf{RHS} & \textbf{Allow.\ Increase} & \textbf{Allow.\ Decrease} \\
+\hline
+1 & 2.5 & 20 & 4 & 6 \\
+2 & 0 & 30 & $\infty$ & 5 \\
+3 & 1.0 & 12 & 3 & 2 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{enumerate}
+\item What is the current optimal objective value?
+\item If the objective coefficient of $x_1$ changes from 6 to 7.5, does the optimal basis change?
+\item Which constraint is non-binding? How can you tell from the report?
+\item If 2 additional units of the first resource become available (RHS increases from 20 to 22), what is the new approximate optimal objective value?
+\end{enumerate}
+\end{ex}
 

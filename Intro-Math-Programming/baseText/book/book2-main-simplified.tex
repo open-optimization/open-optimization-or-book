@@ -1,0 +1,188 @@
+% Book 2: Integer and Nonlinear Programming (Simplified Version)
+% Integer Programming (full) + Nonlinear Programming
+% Author: Robert Hildebrand
+%
+% This is Book 2 of a two-book series.
+% Book 1 covers Linear Programming, Discrete Algorithms, and Introduction to IP.
+%
+% This version uses the simplified, unified preamble.
+
+\documentclass[letter,12pt]{book}
+
+% =============================================================================
+% PREAMBLE
+% =============================================================================
+
+% Load the simplified unified preamble
+\input{preamble/preamble-simplified}
+
+% Uncomment to include legacy features if needed
+\input{preamble/preamble-legacy}
+
+% =============================================================================
+% BOOK-SPECIFIC SETTINGS
+% =============================================================================
+
+% Additional TikZ libraries used in this book
+\usetikzlibrary{tikzmark, decorations.pathreplacing, calc}
+
+% tcolorbox settings for this book
+\tcbset{colback=purple!3, colframe=purple!30, boxrule=0.6pt, arc=2pt}
+
+% Learning checkpoint environment
+\newtcolorbox[auto counter, number within=section]{learningcheckpoint}[1][]{%
+    title=Learning Checkpoint~\thetcbcounter, #1,
+    fonttitle=\bfseries,
+    coltitle=black
+}
+
+% Cleveref setup (must be loaded after hyperref)
+\usepackage[nameinlink]{cleveref}
+\crefname{learningcheckpoint}{Learning Checkpoint}{Learning Checkpoints}
+\Crefname{learningcheckpoint}{Learning Checkpoint}{Learning Checkpoints}
+
+% Toggle: true = use TikZ, false = use PDF for figures
+\newboolean{usetikz}
+\setboolean{usetikz}{false}
+
+\newcommand{\includetikz}[2][]{%
+    \ifthenelse{\boolean{usetikz}}{%
+        \includestandalone[#1]{#2}%
+    }{%
+        \includegraphics[#1]{#2.pdf}%
+    }%
+}
+
+% Bibliography resource (only if biblatex is loaded)
+\ifbiblatexloaded
+    \addbibresource{../references.bib}
+\fi
+
+% =============================================================================
+% DOCUMENT
+% =============================================================================
+\begin{document}
+
+%=============================================================================
+% FRONT MATTER
+%=============================================================================
+\input{frontmatter/book2-front-matter.tex}
+
+\cleardoublepage
+
+% Table of Contents
+{
+    \hypersetup{hidelinks}
+    \phantomsection
+    \addcontentsline{toc}{chapter}{Contents}
+    \setlength{\parskip}{3.5pt}
+    \addtocontents{toc}{\protect\hypertarget{toc}{}}
+    \tableofcontents
+    \cleardoublepage
+    \listoftodos{}
+}
+\cleardoublepage
+\mainmatter
+
+%=============================================================================
+% BRIEF INTRODUCTION / REVIEW
+%=============================================================================
+\input{frontmatter/book2-introduction.tex}
+
+%=============================================================================
+% PART I: INTEGER PROGRAMMING
+%=============================================================================
+\part{Integer Programming}
+\label{part:IntegerProgramming}
+
+% Chapter: IP Formulations (Book 2 version - refresher + complete)
+\input{part3-integer-programming/ch11-ip-formulations/integerProgrammingFormulations-LP-notes.tex}
+
+% Chapter: Solvers
+\input{part3-integer-programming/ch12-solvers/solvers.tex}
+
+% Chapter: IP Algorithms
+\input{part3-integer-programming/ch13-ip-algorithms/integerProgrammingAlgorithms.tex}
+
+% Chapter: Exponential Formulations
+\input{part3-integer-programming/ch14-exponential-formulations/integerProgrammingExponentialFormulations.tex}
+
+% Chapter: Complexity
+\input{part3-integer-programming/ch15-complexity/complexity.tex}
+\input{part3-integer-programming/ch11-ip-formulations/linearProgrammingIntegerLinearProgramming.tex}
+\input{part3-integer-programming/ch15-complexity/discreteOptimization.tex}
+
+% Chapter: Heuristics
+\input{part3-integer-programming/ch16-heuristics/heuristics.tex}
+
+%=============================================================================
+% PART II: NONLINEAR PROGRAMMING
+%=============================================================================
+\part{Nonlinear Programming}
+\label{part:NonlinearProgramming}
+
+% Chapter: NLP Introduction and Theory
+\input{part4-nonlinear-programming/ch17-nlp-intro/NLP.tex}
+
+% Chapter: NLP Algorithms
+\input{part4-nonlinear-programming/ch18-nlp-algorithms/NLP-algorithms.tex}
+
+% Chapter: One-Dimensional Optimization
+\subimport{part4-nonlinear-programming/OneD_Optimization/}{OneD_Optimization}
+
+% Chapter: Gradient Methods
+\subimport{part4-nonlinear-programming/GradientMethods/}{GradientMethods}
+
+%=============================================================================
+% APPENDICES
+%=============================================================================
+\appendix
+
+% Appendix: Review of Linear Algebra Essentials (abbreviated for Book 2)
+% Include only the most relevant sections for IP/NLP
+
+% Appendix: Linear Algebra - Matrices (essential for NLP)
+\input{appendices/linear-algebra/matrices.tex}
+\input{appendices/linear-algebra/matricesMatrixArithmetic.tex}
+\input{appendices/linear-algebra/matricesMatrixArithmeticAddition.tex}
+\input{appendices/linear-algebra/matricesMatrixArithmeticScalarMultiplication.tex}
+\input{appendices/linear-algebra/matricesMatrixArithmeticMultiplication.tex}
+\input{appendices/linear-algebra/matricesMatrixArithmeticProductEntry.tex}
+\input{appendices/linear-algebra/matricesMatrixArithmeticMultiplicationProperties.tex}
+\input{appendices/linear-algebra/matricesMatrixArithmeticTranspose.tex}
+\input{appendices/linear-algebra/matricesMatrixArithmeticIdentityInverses.tex}
+\input{appendices/linear-algebra/matricesMatrixArithmeticFindingInverse.tex}
+
+% Appendix: Linear Algebra - Vectors (essential for gradients)
+\input{appendices/linear-algebra/RnVectors.tex}
+\input{appendices/linear-algebra/RnVectorsRn.tex}
+\input{appendices/linear-algebra/RnVectorsAlgebra.tex}
+\input{appendices/linear-algebra/RnVectorsAlgebraAddition.tex}
+\input{appendices/linear-algebra/RnVectorsAlgebraScalarMult.tex}
+\input{appendices/linear-algebra/RnVectorsAdditionMeaning.tex}
+\input{appendices/linear-algebra/RnVectorsLength.tex}
+\input{appendices/linear-algebra/RnVectorsScalarMultMeaning.tex}
+\input{appendices/linear-algebra/RnVectorsDotProduct.tex}
+\input{appendices/linear-algebra/RnVectorsDotProductDot.tex}
+\input{appendices/linear-algebra/RnVectorsDotProductSignificance.tex}
+
+\cleardoublepage
+
+%=============================================================================
+% BACK MATTER
+%=============================================================================
+\section{Contributors}
+\input{appendices/linear-algebra/LyryxOpenTexts.tex}
+\cleardoublepage
+
+% License
+\input{appendices/linear-algebra/license.tex}
+\input{frontmatter/contributors-foundations.tex}
+
+% Index
+\cleardoublepage
+\phantomsection
+\addcontentsline{toc}{chapter}{\indexname}
+\printindex
+
+\end{document}

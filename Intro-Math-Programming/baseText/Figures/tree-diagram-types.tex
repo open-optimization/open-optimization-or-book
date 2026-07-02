@@ -1,32 +1,89 @@
-\documentclass[tikz, border=2mm]{standalone}
+\documentclass[tikz, border=5mm]{standalone}
 \usepackage{tikz}
-\usetikzlibrary{shapes.geometric, arrows}
-
-\tikzstyle{box} = [rectangle, rounded corners, minimum width=2.5cm, minimum height=1cm, text centered, draw=black, fill=blue!30]
-\tikzstyle{arrow} = [thick,->,>=stealth]
+\usetikzlibrary{arrows.meta, positioning, calc}
 
 \begin{document}
 
-\begin{tikzpicture}[node distance=2cm and 2.5cm]
+\begin{tikzpicture}[
+    % Node styles
+    root/.style={
+        rectangle, rounded corners=4pt,
+        minimum width=4.2cm, minimum height=1.1cm,
+        text centered, font=\sffamily\bfseries\large,
+        draw=blue!60!black, line width=0.8pt,
+        fill=blue!15,
+    },
+    mid/.style={
+        rectangle, rounded corners=4pt,
+        minimum width=3.4cm, minimum height=1cm,
+        text centered, font=\sffamily\bfseries,
+        draw=blue!50!black, line width=0.6pt,
+        fill=blue!10,
+    },
+    leaf/.style={
+        rectangle, rounded corners=4pt,
+        minimum width=2.6cm, minimum height=0.9cm,
+        text centered, font=\sffamily\bfseries,
+        draw=#1!60!black, line width=0.6pt,
+        fill=#1!12,
+    },
+    leaf/.default=blue,
+    desc/.style={
+        font=\sffamily\small, text=black!70,
+        text width=3.0cm, align=center,
+    },
+    complexity/.style={
+        font=\sffamily\footnotesize\itshape, text=black!55,
+    },
+    edge label/.style={
+        font=\sffamily\footnotesize, text=black!65,
+        midway, fill=white, inner sep=1.5pt,
+    },
+    line/.style={
+        draw=black!50, line width=0.6pt, -{Stealth[length=5pt]},
+    },
+]
 
-% Nodes
-\node (optimization) [box] {Optimization models};
-\node (convex) [box, below left of=optimization, xshift=-2.5cm] {Convex models};
-\node (convex) [box, below left of=optimization, xshift=-2.5cm] {Convex models};
-\node (nonconvex) [box, below right of=optimization, xshift=2.5cm] {Non-convex models};
-\node (lp) [box, below left of=convex, xshift=-1cm] {LP};
-\node (convexity) [box, below right of=convex, xshift=1cm] {SOCP, QP, SDP, ...};
-%\node (milp) [box, below right of=convex, xshift=1cm] {MILP};
-\node (nlp) [box, below left of=nonconvex, xshift=-1cm] {NLP};
-\node (minlp) [box, below right of=nonconvex, xshift=1cm] {MINLP};
+% === Root ===
+\node[root] (opt) {Optimization Models};
 
-% Arrows
-\draw [arrow] (optimization) -- (convex);
-\draw [arrow] (optimization) -- (nonconvex);
-\draw [arrow] (convex) -- (lp);
-\draw [arrow] (convex) -- (convexity);
-\draw [arrow] (nonconvex) -- (nlp);
-\draw [arrow] (nonconvex) -- (minlp);
+% === Level 2: Linear vs Nonlinear ===
+\node[mid] (lin)    [below left=1.8cm and 2.4cm of opt]  {Linear};
+\node[mid] (nonlin) [below right=1.8cm and 2.4cm of opt] {Nonlinear};
+
+% === Level 3: The four problem classes ===
+\node[leaf=green!60!blue] (lp)    [below left=1.8cm and 0.6cm of lin]    {LP};
+\node[leaf=teal]          (milp)  [below right=1.8cm and 0.6cm of lin]   {MILP};
+\node[leaf=orange]        (nlp)   [below left=1.8cm and 0.6cm of nonlin] {NLP};
+\node[leaf=red!70!orange] (minlp) [below right=1.8cm and 0.6cm of nonlin]{MINLP};
+
+% === Descriptions under leaves ===
+\node[desc, below=4pt of lp]    {Linear objective \&\\constraints,\\continuous variables};
+\node[desc, below=4pt of milp]  {Linear objective \&\\constraints,\\some integer variables};
+\node[desc, below=4pt of nlp]   {Nonlinear objective\\or constraints,\\continuous variables};
+\node[desc, below=4pt of minlp] {Nonlinear objective\\or constraints,\\some integer variables};
+
+% === Complexity annotations ===
+\node[complexity, below=32pt of lp]    {(polynomial time)};
+\node[complexity, below=32pt of milp]  {(NP-hard)};
+\node[complexity, below=32pt of nlp]   {(varies)};
+\node[complexity, below=32pt of minlp] {(NP-hard)};
+
+% === Edges: root to level 2 ===
+\draw[line] (opt.south) -- (lin.north)
+    node[edge label, pos=0.45, left=2pt] {linear functions};
+\draw[line] (opt.south) -- (nonlin.north)
+    node[edge label, pos=0.45, right=2pt] {nonlinear functions};
+
+% === Edges: level 2 to level 3 ===
+\draw[line] (lin.south) -- (lp.north)
+    node[edge label, pos=0.5, left=1pt] {continuous};
+\draw[line] (lin.south) -- (milp.north)
+    node[edge label, pos=0.5, right=1pt] {integer};
+\draw[line] (nonlin.south) -- (nlp.north)
+    node[edge label, pos=0.5, left=1pt] {continuous};
+\draw[line] (nonlin.south) -- (minlp.north)
+    node[edge label, pos=0.5, right=1pt] {integer};
 
 \end{tikzpicture}
 
