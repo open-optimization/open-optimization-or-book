@@ -2,18 +2,23 @@
 \usepackage{mdframed}
 \usepackage{longtable}
 
-\cellcolor{red}
+%\cellcolor{red} % removed: cannot use \cellcolor outside a table in the preamble
 
-%\newcommand{\cr}[1]{\mathbf{#1}} % change to \mathbb
+% \cr is a TeX primitive used in tables - DO NOT redefine it!
+% Use \mm{} (defined in packages-and-commands.tex) or \mathbf{} instead.
+%\newcommand{\crbold}[1]{\mathbf{#1}} % available if needed
 
 \newcommand{\rc}{\cellcolor{red}} % change cell color red in table
 \newcommand{\hi}{\cellcolor{red}} % change cell color red in table
 
+% Theorem environments are defined in LyryxLinAlgStyle.sty with tcolorbox styling
+% Do not redefine them here to avoid "already defined" errors
 %\newtheorem{example}{Example}%[section]
 \newtheorem{ICE}{ICE}%[section]
-%\newtheorem{problem}{Problem}%[section]
-%\newtheorem{solution}{Solution}%[section]
+%\newtheorem{problem}{Problem}%[section]  % defined in LyryxLinAlgStyle.sty
+%\newtheorem{solution}{Solution}%[section]  % solutionbox defined in LyryxLinAlgStyle.sty
 
+% Removed conflicting \input@path definitions - these are set in packages-and-commands.tex
 %\def\input@path{{/figures/}}
 %\def\input@path{{/path/to/folder/}{/path/to/other/folder/}}
 
@@ -26,7 +31,6 @@
      \Statex {\footnotesize\thealgsubstate:}\space}}
   {}
 
-
 \numberwithin{equation}{section}
 
 \graphicspath{{figures/}{optimization/figures/figures-static/}}
@@ -34,7 +38,7 @@
 \newsavebox\CBox
 \newcommand\hcancel[2][0.5pt]{%
   \ifmmode\sbox\CBox{$#2$}\else\sbox\CBox{#2}\fi%
-  \makebox[0pt][l]{\usebox\CBox}%  
+  \makebox[0pt][l]{\usebox\CBox}%
   \rule[0.5\ht\CBox-#1/2]{\wd\CBox}{#1}}
 
 \usepackage[cc]{titlepic}
@@ -53,13 +57,12 @@
 \newcommand{\false}{\tred{\texttt{ false }}}
 
 \usepackage{scalerel}
-\newcommand{\julia}{\raisebox{-.2\height}{\includegraphics[scale = 0.07]{julia-logo}}  }
-\newcommand{\jupyter}{\raisebox{-.2\height}{\includegraphics[scale = 0.09]{jupyter-logo}}  }
-\newcommand{\jump}{\raisebox{-.2\height}{\includegraphics[scale = 0.08]{jump-logo}}  }
-\newcommand{\gurobi}{\raisebox{-.2\height}{\includegraphics[scale = 0.06]{gurobi-logo}}Gurobi  }
-\newcommand{\coin}{\raisebox{-.2\height}{\includegraphics[scale = 0.2]{coin-or-logo}}  }
+\newcommand{\julia}{\raisebox{-.2\height}{\altincludegraphics[scale = 0.07]{julia-logo}{Julia programming language logo: three colored dots (red, green, purple) arranged in a triangle.}}  }
+\newcommand{\jupyter}{\raisebox{-.2\height}{\altincludegraphics[scale = 0.09]{jupyter-logo}{Jupyter project logo: stylized orange planet circled by three gray orbital rings.}}  }
+\newcommand{\jump}{\raisebox{-.2\height}{\altincludegraphics[scale = 0.08]{jump-logo}{JuMP modeling language logo: the letters 'JuMP' rendered in a bold serif typeface.}}  }
+\newcommand{\gurobi}{\raisebox{-.2\height}{\altincludegraphics[scale = 0.06]{gurobi-logo}{Gurobi Optimization logo: stylized red sun-rays emblem next to the Gurobi wordmark.}}Gurobi  }
+\newcommand{\coin}{\raisebox{-.2\height}{\altincludegraphics[scale = 0.2]{coin-or-logo}{COIN-OR Foundation logo: blue circular coin emblem alongside the 'COIN-OR' wordmark.}}  }
 \newcommand{\ipopt}{\raisebox{-.2\height}{\texttt{Ipopt}}}
-
 
 \usepackage{subcaption}
 
@@ -82,13 +85,13 @@
 
 \def \rank{\textup{rank}}
 \def \size{\textup{size}}
-%\def \dist{\textup{dist}}
+%\def \dist{\textup{dist}} % defined in LyryxLinAlgStyle.sty
 \def \sign{\textup{sign}}
 \def \deg{\textup{deg}}
 \def \conv{\textup{conv}}
 \def \cone{ {\textup{cone}}}
 \def \supp{\textup{supp}}
-\def \int{ {\textup{int}}}
+\newcommand{\interior}{ {\textup{int}}} % renamed from \int to avoid overriding the integral sign
 \def \rc{\textup{rec.cone}}
 \def \ri{\textup{rel.int}}
 \def \rb{ {\textup{rel.bd}}}
@@ -101,10 +104,11 @@
 
 \def \BQP{\mathrm{BQP}}
 \def \xLP{x^{\mathrm{LP}}}
-\DeclareMathOperator    \argmin         {arg\,min}
-%\DeclareMathOperator    \argmax         {arg\,max}
+\providecommand{\argmin}{}% ensure \argmin exists before \renewcommand
+\renewcommand    \argmin         {\operatorname*{arg\,min}}
+\renewcommand    \argmax         {\operatorname*{arg\,max}}
 
-
+% Removed duplicate \newcounter{example} - already created by \newtheorem{example} above
 %\newcounter{example}
 \newcounter{general}
 
@@ -121,7 +125,6 @@
  {\par\vspace{0.5cm}}}
 \makeatother
 
-
 \newcounter{codeCell}
 \makeatletter
 \newenvironment{codeCell}%
@@ -135,7 +138,7 @@
 % General environment
 \newenvironment{general}[2]
   {\par\medskip
-   %\refstepcounter{exo}%
+   \refstepcounter{exo}%
   \protected@edef\@currentlabelname{#1}
    \begin{framed}
    \begingroup\color{black}%
@@ -144,7 +147,7 @@
    \par}
  {\endgroup\end{framed}
   \medskip}
- 
+
 
 % Example Environment
 \newenvironment{optexample}
@@ -156,7 +159,6 @@
  \textbf{Example \theexo: }\ignorespaces}
 {\endgroup\end{framed}
  \medskip}
-
 
 % Example with code Environment
 \newenvironment{examplewithcode}[2]
@@ -179,31 +181,12 @@
  \rule{\textwidth}{1.8pt}
  \end{center}
  \medskip}
- 
+
  % Define a tcolorbox-based exercise environment reusing the exo counter
 % Define tcolorbox-based exercise environment
 
- 
-%% Example with code Environment
-%\newenvironment{examplewithcode}[2]
-%{\par\medskip
-% \refstepcounter{exo}% Increment shared counter
-% \protected@edef\@currentlabelname{Example \theexo}% Update label for referencing
-% \begin{center}
-% \rule{\textwidth}{0.4pt}\\
-% \vspace{-0.2cm}
-% \rule{\textwidth}{0.4pt}
-% \end{center}
-% \begingroup\color{black}%
-% \textbf{Example \theexo: #1} % Include example number
-% \hfill \protect\href{#2}{Gurobipy}% Code link
-% \ignorespaces
-% \par}
-%{\endgroup
-% \begin{center}
-% \rule{\textwidth}{1.8pt}
-% \end{center}
-% \medskip}
+
+% Removed duplicate examplewithcode environment definition (was causing LaTeX error)
 
 % Example with all code Environment
 \newenvironment{examplewithallcode}[4]
@@ -233,13 +216,12 @@
 {\endgroup
  \end{framed}
  \medskip}
- 
- 
-  
+
+
+
 
 \newcommand{\floor}[1]{\lfloor #1 \rfloor}
 \newcommand{\ceil}[1]{\lceil #1 \rceil}
-
 
 \newcommand{\mathup}[1]{#1}
 \newcommand{\NP}{\text{NP}}
@@ -248,4 +230,4 @@
 \newcommand{\lift}{\mathrm{lift}}
 \newcommand{\ub}{\mathrm{ubbest}}
 \newcommand{\F}{{\mathcal F}}
-  
+

@@ -11,13 +11,12 @@ Network flow models are used to optimize the movement of commodities, resources,
     \item \textbf{Assignment and Matching Problems}: Assigning resources to tasks, such as employees to projects or students to schools, in an optimal manner.
 \end{itemize}
 
-
 To begin a discussion on Network flow, we first need to discuss graphs.   
 
 \subsection{Graphs}
 
 \subsubsection{Undirected Graphs}
-\begin{definition}{}{}
+\begin{definition}{}
 A (undirected) graph $G = (V,E)$ is defined by a set of vertices $V$ and a set of edges $E$ that contains pairs of vertices. 
 \end{definition}
 
@@ -37,20 +36,18 @@ For example, the following graph $G$ can be described by:
   \node (n2) at (9,6)  {2};
   \node (n3) at (5,5)  {3};
 
-  \foreach \from/\to in {n6/n4, n4/n5,n5/n1,n1/n2,n2/n5,n2/n3,n3/n4}
-    \draw (\from) -- (\to);
+  \foreach \src/\dst in {n6/n4, n4/n5,n5/n1,n1/n2,n2/n5,n2/n3,n3/n4}
+    \draw (\src) -- (\dst);
 
 \end{tikzpicture}
 \end{center}
 
 In an undirected graph, we do not distinguish the direction of the edge.  That is, for two vertices $i,j \in V$, we can equivalently write $(i,j)$ or $(j,i)$ to represent the edge.
 
-
-
 \subsubsection{Directed Graphs}
 Alternatively, we will want to consider directed graphs.  
-\begin{definition}{}{}{}
-A \emph{directed graph} (or di-graph for short) is denoted as $G = (V, A)$ where $V$ is a set of vertices and $A$ is a set of ordred pairs of vertices called arcs.  That is, an arc is like an edge, but the direction of it matters.
+\begin{definition}{}{}
+A \emph{directed graph} (or di-graph for short) is denoted as $G = (V, A)$ where $V$ is a set of vertices and $A$ is a set of ordered pairs of vertices called arcs.  That is, an arc is like an edge, but the direction of it matters.
 \end{definition}
 For example, the following directed graph $G$ can be described by
 \begin{itemize}
@@ -67,18 +64,19 @@ For example, the following directed graph $G$ can be described by
   \node (n2) at (9,6)  {2};
   \node (n3) at (5,5)  {3};
 
-  \foreach \from/\to in {n6/n4,n4/n6,n4/n5,n5/n1,n1/n2,n2/n5,n2/n3,n3/n4}
+  \foreach \src/\dst in {n6/n4,n4/n6,n4/n5,n5/n1,n1/n2,n2/n5,n2/n3,n3/n4}
   	\path[every node/.style={font=\sffamily\small}]
-    	(\from) edge[->, bend left] node [left] {} (\to);
-   % \draw[->] (\from) to [out=15,in=-15] (\to);
+    	(\src) edge[->, bend left] node [left] {} (\dst);
 
 \end{tikzpicture}
 \end{center}
 
 \subsection{Example: Minimum-Cost Flow in a Transportation Network}
 
-\begin{examplewithallcode}{}{}{}{}{}
-{}
+\begin{examplewithallcode}{Minimum-Cost Network Flow}
+{https://github.com/open-optimization/open-optimization-or-book/blob/master/Intro-Math-Programming/baseText/optimization/optimization-examples/network-flow-excel.xlsx}
+{https://github.com/open-optimization/open-optimization-or-book/tree/master/Intro-Math-Programming/baseText/optimization/optimization-examples/network_flow_pulp.ipynb}
+{https://github.com/open-optimization/open-optimization-or-book/tree/master/Intro-Math-Programming/baseText/optimization/optimization-examples/network_flow_gurobi.ipynb}
 
 To illustrate the minimum-cost network flow problem, consider a company that wants to transport goods from two warehouses to two retail stores at the lowest possible cost. The company can send goods through a network of transportation routes, each with a given capacity and per-unit transportation cost.
 
@@ -120,18 +118,18 @@ The network data is summarized in the following table:
         \hline
     \end{tabular}
 
-\textbf{Mathematical Formulation}
+\modelhead{Model}
 
 Let \( x_{ij} \) represent the amount of goods transported from warehouse \( i \) to store \( j \). The problem is formulated as:
 
 \begin{align}
-    \min \quad & 4x_{W_1,S_1} + 6x_{W_1,S_2} + 5x_{W_2,S_1} + 2x_{W_2,S_2} \label{eq:example_objective} \\
-    \text{s.t.} \quad
-    & x_{W_1,S_1} + x_{W_1,S_2} \leq 20,  && \text{(Supply constraint for Warehouse 1)} \label{eq:supply1} \\
-    & x_{W_2,S_1} + x_{W_2,S_2} \leq 30,  && \text{(Supply constraint for Warehouse 2)} \label{eq:supply2} \\
-    & x_{W_1,S_1} + x_{W_2,S_1} = 25,  && \text{(Demand constraint for Store 1)} \label{eq:demand1} \\
-    & x_{W_1,S_2} + x_{W_2,S_2} = 25,  && \text{(Demand constraint for Store 2)} \label{eq:demand2} \\
-    & 0 \leq x_{ij} \leq u_{ij}, && \forall (i,j) \in A. \label{eq:capacity_constraint_example}
+\min \quad & 4x_{W_1,S_1} + 6x_{W_1,S_2} + 5x_{W_2,S_1} + 2x_{W_2,S_2}\label{eq:example_objective} \\
+    \st \quad
+    & x_{W_1,S_1} + x_{W_1,S_2} \leq 20   \tag{Supply constraint for Warehouse 1}\label{eq:supply1} \\
+    & x_{W_2,S_1} + x_{W_2,S_2} \leq 30   \tag{Supply constraint for Warehouse 2}\label{eq:supply2} \\
+    & x_{W_1,S_1} + x_{W_2,S_1} = 25   \tag{Demand constraint for Store 1}\label{eq:demand1} \\
+    & x_{W_1,S_2} + x_{W_2,S_2} = 25   \tag{Demand constraint for Store 2}\label{eq:demand2} \\
+    & 0 \leq x_{ij} \leq u_{ij} &&\quad \text{for all } (i,j) \in A.\label{eq:capacity_constraint_example}
 \end{align}
 
 \textbf{Solution}
@@ -148,7 +146,6 @@ Solving the linear program, we obtain the following optimal flow values:
         Warehouse 2 to Store 2 & 20 \\
         \hline
     \end{tabular}
-
 
 The total minimum cost is given by:
 \[
@@ -169,6 +166,7 @@ This solution meets all constraints while ensuring goods are transported at the 
 \newpage
 
 \subsection{Minimum Cost Network Flow Problem}
+\label{sec:min-cost-network-flow}
 
 The \emph{minimum cost network flow problem} generalizes basic flow models by incorporating arc capacities, arc costs, and supply/demand at the nodes. The goal is to determine how to route flow through a network at the lowest possible cost while meeting demand and respecting all constraints.
 
@@ -225,28 +223,28 @@ The figure below shows a small example. There are:
 
 \noindent The problem is to determine how many units to send along each route to minimize the total shipping cost.
 
-\smallskip \underline{Sets:}
+\smallskip \modelhead{Sets}
 \begin{itemize}
 \item \( V \): set of nodes in the network (warehouses, distribution centers, stores)
 \item \( A \): set of directed arcs \( (i,j) \) representing shipment routes
 \end{itemize}
 
-\smallskip \underline{Parameters:}
+\smallskip \modelhead{Parameters}
 \begin{itemize}
 \item \( c_{ij} \): cost per unit shipped on arc \( (i, j) \in A \)
 \item \( u_{ij} \): maximum capacity of arc \( (i, j) \in A \)
 \item \( d_i \): net demand at node \( i \in V \) (positive = demand, negative = supply)
 \end{itemize}
 
-\smallskip \underline{Decision Variables:} \\
+\smallskip \modelhead{Variables} \\
 \( x_{ij} \): amount of flow shipped along arc \( (i, j) \in A \)
 
-\smallskip \underline{Objective and Constraints:}
+\smallskip \modelhead{Model}
 \begin{align*}
 \min \quad & \sum_{(i,j) \in A} c_{ij} \cdot x_{ij} \\
-\text{s.t.} \quad 
-& \sum_{i : (i,k) \in A} x_{ik} - \sum_{j : (k,j) \in A} x_{kj} = d_k & \forall k \in V \quad \text{(flow balance)} \\
-& 0 \leq x_{ij} \leq u_{ij} & \forall (i,j) \in A \quad \text{(capacity constraints)}
+\st \quad 
+& \sum_{i : (i,k) \in A} x_{ik} - \sum_{j : (k,j) \in A} x_{kj} = d_k &&\quad \text{for all } k \in V   \tag{flow balance} \\
+& 0 \leq x_{ij} \leq u_{ij} &&\quad \text{for all } (i,j) \in A   \tag{capacity constraints}
 \end{align*}
 
 \noindent This problem can be solved using linear programming, and efficient specialized algorithms exist due to its structure. Applications span:
@@ -255,7 +253,6 @@ The figure below shows a small example. There are:
     \item Supply chain optimization,
     \item Scheduling and telecommunications.
 \end{itemize}
-
 
 \subsection{(Unstructured) Minimum Cost Network Flow Problem}
 The minimum cost network flow problem is an extension of the network flow problem that considers not only the capacities of the arcs, but also the costs associated with sending flow along the arcs and the demands at the nodes. The objective is to find the flow of minimum cost that satisfies the demands at the nodes and the capacity constraints on the arcs.
@@ -354,44 +351,42 @@ A = \{ (b,a), (a,c), (b,d), (b,e), (c,e), (c,f), (h,d), (g,e), (e,h), (g,f) \}
 \end{table}
 The minimum cost network flow problem can be defined as follows: Given a network \( G = (V, A) \), capacities \( u_{ij} \) and costs \( c_{ij} \) on the arcs, and demands \( d_i \) at the nodes, find the flow \( x_{ij} \) on the arcs that minimizes the total cost of the flow, while satisfying the demands at the nodes and the capacity constraints on the arcs.
 
-\noindent \textbf{Sets:}
+\modelhead{Sets}
 \begin{itemize}
 \item \( V \): Set of nodes in the network.
 \item \( A \): Set of arcs in the network.
 \end{itemize}
 
-\noindent \textbf{Parameters:}
+\modelhead{Parameters}
 \begin{itemize}
 \item \( u_{ij} \): Capacity of arc \( (i, j) \in A \).
 \item \( c_{ij} \): Cost per unit of flow on arc \( (i, j) \in A \).
 \item \( d_i \): Change at node \( i \in V \).
 \end{itemize}
 
-\noindent \textbf{Variables:}
+\modelhead{Variables}
 \begin{itemize}
 \item \( x_{ij} \): Flow on arc \( (i, j) \in A \).
 \end{itemize}
 
-\noindent \textbf{Model:}
+\modelhead{Model}
 The minimum cost network flow problem can be formulated as a linear programming problem as follows:
 
 \begin{align*}
-\text{Minimize} \quad & \sum_{(i, j) \in A} c_{ij} x_{ij} \\
-\text{Subject to} \quad & \sum_{i:(i, k) \in A} x_{ij} - \sum_{j:(k, j) \in A} x_{ji} = d_k, \quad \forall k \in V \\
-& 0 \leq x_{ij} \leq u_{ij}, \quad \forall (i, j) \in A
+\min \quad & \sum_{(i, j) \in A} c_{ij} x_{ij} \\
+\st        & \sum_{i:(i, k) \in A} x_{ij} - \sum_{j:(k, j) \in A} x_{ji} = d_k &&\quad \text{for all } k \in V \\
+& 0 \leq x_{ij} \leq u_{ij} &&\quad \text{for all } (i, j) \in A
 \end{align*}
 
-\noindent \textbf{Objective Function}
+\modelhead{Objective}
 - The objective is to minimize the total cost of the flow.
 
-\noindent \textbf{Constraints}
+\modelhead{Constraints}
 - Flow Conservation: The first set of constraints ensures that the flow into each node minus the flow out of the node is equal to the demand at the node.
 
 - Capacity Constraints: The second set of constraints ensures that the flow on each arc does not exceed its capacity.
 
-
 Minimum-cost network flow problems are widely used in transportation planning, supply chain logistics, and production scheduling, where the goal is to efficiently allocate resources at the lowest possible cost.
-
 
 \subsection{Maximum flow}
 
@@ -433,8 +428,10 @@ For example, consider the directed graph here with capacities on the arcs.
 \end{tikzpicture}
 \end{center}
 
-
-\begin{examplewithallcode}{Airline Transfer Network: Maximizing Passenger Throughput}{}{}{}
+\begin{examplewithallcode}{Airline Transfer Network: Maximizing Passenger Throughput}
+{https://github.com/open-optimization/open-optimization-or-book/blob/master/Intro-Math-Programming/baseText/optimization/optimization-examples/airline-maxflow-excel.xlsx}
+{https://github.com/open-optimization/open-optimization-or-book/tree/master/Intro-Math-Programming/baseText/optimization/optimization-examples/airline_maxflow_pulp.ipynb}
+{https://github.com/open-optimization/open-optimization-or-book/tree/master/Intro-Math-Programming/baseText/optimization/optimization-examples/airline_maxflow_gurobi.ipynb}
 An airline is trying to reroute as many stranded passengers as possible from an origin city (\(s\)) to a destination city (\(t\)) using a network of connecting flights. Each flight has a known number of available seats, and passengers may transfer at intermediate airports. The objective is to determine the maximum number of passengers that can be routed from origin to destination, using available seat capacity and respecting flight routes.
 
 \vspace{0.5em}
@@ -447,20 +444,20 @@ The network includes:
     \item Directed flight legs (arcs) with known seat availability.
 \end{itemize}
 
-\smallskip \underline{Sets and Parameters:}
+\smallskip \modelhead{Sets and Parameters}
 \begin{itemize}
     \item \( V = \{s, a, b, c, d, e, t\} \): set of airports.
     \item \( A = \{(s,a), (s,b), (s,c), (a,c), (a,d), (b,c), (b,e), (c,d), (c,e), (c,t), (d,e), (e,t)\} \): set of flight legs.
     \item \( u_{ij} \): number of available seats on flight from airport \( i \) to \( j \) for all $(i,j) \in A$.
 \end{itemize}
 
-\smallskip \underline{Decision Variables:} \\
+\smallskip \modelhead{Variables} \\
 \( x_{ij} \): number of passengers assigned to fly from airport \( i \) to \( j \) for all $(i,j) \in A$
 
-\smallskip \underline{Objective and Constraints:}
+\smallskip \modelhead{Model}
 \begin{align*}
 \max \quad & x_{sa} + x_{sb} + x_{sc} & \text{(max passengers from origin)} \\
-\text{s.t.} \quad 
+\st \quad 
 & x_{ac} + x_{ad} - x_{sa} = 0 & \text{(flow balance at \( a \))} \\
 & x_{bc} + x_{be} - x_{sb} = 0 & \text{(at \( b \))} \\
 & x_{cd} + x_{ce} + x_{ct} - x_{ac} - x_{bc} - x_{sc} = 0 & \text{(at \( c \))} \\
@@ -476,12 +473,10 @@ In compact summation notation form,  we have
 $$
 \begin{aligned}
 \max \quad & \sum_{j \in V : (s,j) \in A} x_{sj} \\
-\text{s.t.} \quad 
-& \sum_{j \in V : (k,j) \in A} x_{kj} - \sum_{i \in V : (i,k) \in A} x_{ik} = 0 \quad && \forall k \in V \setminus \{s,t\} \\
-& 0 \leq x_{ij} \leq u_{ij} \quad && \forall (i,j) \in A
+\st        & \sum_{j \in V : (k,j) \in A} x_{kj} - \sum_{i \in V : (i,k) \in A} x_{ik} = 0 &&\quad \text{for all } k \in V \setminus \{s,t\} \\
+           & 0 \leq x_{ij} \leq u_{ij} &&\quad \text{for all } (i,j) \in A
 \end{aligned}
 $$
-
 
 \vspace{0.5em}
 \noindent This model helps the airline determine how to assign passengers to flight legs in a way that makes maximum use of the network’s available capacity. It is especially useful during disruption scenarios like:
@@ -494,27 +489,26 @@ $$
 The same framework can be extended to include priorities, time windows, or rebooking costs.
 \end{examplewithallcode}
 
-
 %
 %
-%\begin{example}{}{}
-%\textbf{Sets and Parameters}
-%\begin{itemize}
-%    \item \textbf{\underline{nodes}}: $V = \{s, a, b, c, d, e, t\}$
-%    \item \textbf{\underline{arcs}}: $A = \{(s,a), (s,b), (s,c), (a,c), (a,d), (b,c), (b,e), (c,d), (c,e), (c,t), (d,e), (e,t)\}$
-%    \item \textbf{\underline{capacities}}: $u_{ij}$ for each $(i,j) \in A$
-%\end{itemize}
+\begin{example}{}
+\textbf{Sets and Parameters}
+\begin{itemize}
+\item \textbf{\underline{nodes}}: $V = \{s, a, b, c, d, e, t\}$
+\item \textbf{\underline{arcs}}: $A = \{(s,a), (s,b), (s,c), (a,c), (a,d), (b,c), (b,e), (c,d), (c,e), (c,t), (d,e), (e,t)\}$
+\item \textbf{\underline{capacities}}: $u_{ij}$ for each $(i,j) \in A$
+\end{itemize}
 %
-%\textbf{Decision Variables}
-%\begin{itemize}
-%    \item \textbf{\underline{flow on arcs}}: $x_{ij}$ represents the flow on arc $(i,j) \in A$
-%\end{itemize}
+\modelhead{Variables}
+\begin{itemize}
+\item \textbf{\underline{flow on arcs}}: $x_{ij}$ represents the flow on arc $(i,j) \in A$
+\end{itemize}
 %
 %
-%\textbf{Explicit Model}
-%\begin{align*}
-%    \max \quad & x_{sa} + x_{sb} + x_{sc} \\
-%    \text{s.t.} \quad 
+\textbf{Explicit Model}
+\begin{align*}
+\max \quad & x_{sa} + x_{sb} + x_{sc} \\
+\st \quad 
 %    & x_{ac} + x_{bc} - x_{sa} - x_{sb} - x_{sc} = 0 \\
 %    & x_{ad} + x_{cd} - x_{ac} = 0 \\
 %    & x_{bc} + x_{be} + x_{ce} - x_{ac} = 0 \\
@@ -524,9 +518,9 @@ The same framework can be extended to include priorities, time windows, or reboo
 %     &0 \leq x_{sa} \leq 4, \quad 0 \leq x_{sb} \leq 2, \quad 0 \leq x_{sc} \leq 8 \\
 %    & 0 \leq x_{ac} \leq 5, \quad 0 \leq x_{ad} \leq 2, \quad 0 \leq x_{bc} \leq 6, \quad 0 \leq x_{be} \leq 9 \\
 %    & 0 \leq x_{cd} \leq 1, \quad 0 \leq x_{ce} \leq 3, \quad 0 \leq x_{ct} \leq 4, \quad 0 \leq x_{de} \leq 7, \quad 0 \leq x_{et} \leq 5 \\
-%\end{align*}
+\end{align*}
 %
-%\end{example}
+\end{example}
 
 The solution is shown here in bold values on the graph.  There is a total flow of 12.
 \begin{center}
@@ -576,53 +570,46 @@ The solution is shown here in bold values on the graph.  There is a total flow o
 \end{tikzpicture}
 \end{center}
 
-
 The maximum flow problem can be written mathematically in the following way.\\
 
-\noindent \textbf{Sets:}
+\modelhead{Sets}
 \begin{itemize}
 \item \( V \): Set of nodes in the network.
 \item \( A \): Set of arcs in the network.
 \end{itemize}
 
-\noindent \textbf{Parameters:}
+\modelhead{Parameters}
 \begin{itemize}
 \item \( u_{ij} \): Capacity of arc \( (i, j) \in A \), which is the maximum amount of flow that can traverse the arc from node \( i \) to node \( j \).
 \item \( s \): Source node.
 \item \( t \): Sink node.
 \end{itemize}
 
-\noindent \textbf{Variables:}
+\modelhead{Variables}
 \begin{itemize}
 \item \( x_{ij} \): Flow on arc \( (i, j) \in A \).
 \end{itemize}
 
-\noindent \textbf{Model:}
+\modelhead{Model}
 The network flow problem can be formulated as a linear programming problem as follows:
 
 \begin{align*}
-\text{Maximize} \quad & \sum_{j:(s, j) \in A} x_{sj} \\
-\text{Subject to} \quad & \sum_{i:(i, k) \in A} x_{ik} - \sum_{j:(k, j) \in A} x_{kj} = 0, \quad \forall k \in V \setminus \{s, t\} \\
+\max \quad & \sum_{j:(s, j) \in A} x_{sj} \\
+\st        & \sum_{i:(i, k) \in A} x_{ik} - \sum_{j:(k, j) \in A} x_{kj} = 0 &&\quad \text{for all } k \in V \setminus \{s, t\} \\
 %& \sum_{j:(s, j) \in A} x_{sj} - \sum_{j:(j, s) \in A} x_{js} = \sum_{j:(j, t) \in A} x_{jt} - \sum_{j:(t, j) \in A} x_{tj} \\
-& 0 \leq x_{ij} \leq u_{ij}, \quad \forall (i, j) \in A
+& 0 \leq x_{ij} \leq u_{ij} &&\quad \text{for all } (i, j) \in A
 \end{align*}
 
-\noindent \textbf{Objective Function}
+\modelhead{Objective}
 - The objective is to maximize the total flow from the source node \( s \) to the sink node \( t \).
 
-\noindent \textbf{Constraints}
+\modelhead{Constraints}
 - Flow Balance: The first set of constraints ensures that the flow into each node is equal to the flow out of the node, except for the source and sink nodes.
-
 
 - Capacity Constraints: The third set of constraints ensures that the flow on each arc does not exceed its capacity.
 
-
-
-
-
-
 We will discuss duality later.  But duality is a concept that helps create bounds on a problem.
-For this particular proble, we can think of a dual as a \emph{cut} in the graph - somthing that separtes $s$ from $t$.  For example:
+For this particular problem, we can think of a dual as a \emph{cut} in the graph - something that separates $s$ from $t$.  For example:
 \begin{center}
 \begin{tikzpicture}[>=stealth, node distance=2cm]
 
@@ -644,7 +631,7 @@ For this particular proble, we can think of a dual as a \emph{cut} in the graph 
     \draw[->] (s) -- (c) node[midway, above, text=orange] {8};
     \draw[->] (s) -- (b) node[midway, below, text=orange] {2};
     \draw[->] (a) -- (c) node[midway, above, text=orange] {5};
-    %\draw[->] (a) -- (d) node[ midway, above, text=orange] {2};
+    \draw[->] (a) -- (d) node[ midway, above, text=orange] {2};
 \draw[->] (a) -- (d) node[midway, above] {
     \tikz[baseline]{
         \node[draw=red, fill=gray!20, circle, inner sep=1pt, text = orange] {\textbf{2}};
@@ -665,13 +652,13 @@ For this particular proble, we can think of a dual as a \emph{cut} in the graph 
         \node[draw=red, fill=gray!20, circle, inner sep=1pt, text = orange] {\textbf{5}};
     }
 };
-    %\draw[->] (c) -- (d) node[midway, above, text=orange] {1};
-    %\draw[->] (c) -- (t) node[midway, above, text=orange] {4};
+    \draw[->] (c) -- (d) node[midway, above, text=orange] {1};
+    \draw[->] (c) -- (t) node[midway, above, text=orange] {4};
     \draw[->] (c) -- (e) node[midway, below, text=orange] {6};
     \draw[->] (b) -- (c) node[midway, above, text=orange] {6};
     \draw[->] (b) -- (e) node[midway, below, text=orange] {9};
     \draw[->] (d) -- (t) node[midway, above, text=orange] {7};
-    %\draw[->] (e) -- (t) node[midway, above, text=orange] {5};
+    \draw[->] (e) -- (t) node[midway, above, text=orange] {5};
 
 \end{tikzpicture}
 \end{center}
@@ -679,314 +666,349 @@ The selected arcs are a cut that separates $s$ from $t$.  The sum of their weigh
 
 This bound is a form of \emph{duality}.  We will explore the concept more in later chapters.  This duality is captured in the following theorem.
 
-\begin{theorem}{}{}
+\begin{theorem}{}
 The maximum flow amount is equal to the size if the minimum cut.
 \end{theorem}
 
+%
+%
+\subsection{Multi-Commodity Minimum Cost Network Flow with Integrality Constraints}
+\label{sec:multicommodity-flow}
 
-%
-%
-%\subsection{Multi-Commodity Minimum Cost Network Flow with Integrality Constraints}
-%
-%The multi-commodity minimum cost network flow problem is a generalization of the minimum cost network flow problem that considers multiple commodities flowing through the network. Each commodity has its own demand at each node and its own cost on each arc. The objective is to find the integer flow of minimum cost that satisfies the demands of all commodities at the nodes and the capacity constraints on the arcs.
-%
-%A network can be described as a directed graph \( G = (N, A) \), where \( N \) is the set of nodes and \( A \) is the set of arcs. Each arc \( (i, j) \in A \) has a capacity \( u_{ij} \). Each commodity \( k \) has a demand \( d_{ik} \) at each node \( i \in N \) and a cost \( c_{ijk} \) on each arc \( (i, j) \in A \).
-%
-%The multi-commodity minimum cost network flow problem can be defined as follows: Given a network \( G = (N, A) \), capacities \( u_{ij} \) on the arcs, demands \( d_{ik} \) and costs \( c_{ijk} \) for each commodity \( k \), find the integer flow \( f_{ijk} \) on the arcs for each commodity \( k \) that minimizes the total cost of the flow, while satisfying the demands of all commodities at the nodes and the capacity constraints on the arcs.
-%
-%\noindent \textbf{Sets:}
-%\begin{itemize}
-%\item \( N \): Set of nodes in the network.
-%\item \( A \): Set of arcs in the network.
-%\item \( K \): Set of commodities.
-%\end{itemize}
-%
-%\noindent \textbf{Parameters:}
-%\begin{itemize}
-%\item \( u_{ij} \): Capacity of arc \( (i, j) \in A \).
-%\item \( c_{ijk} \): Cost per unit of flow of commodity \( k \) on arc \( (i, j) \in A \).
-%\item \( d_{ik} \): Demand of commodity \( k \) at node \( i \in N \).
-%\end{itemize}
-%
-%\noindent \textbf{Variables:}
-%\begin{itemize}
-%\item \( f_{ijk} \): Flow of commodity \( k \) on arc \( (i, j) \in A \).
-%\end{itemize}
-%
-%\noindent \textbf{Model:}
-%The multi-commodity minimum cost network flow problem can be formulated as an integer linear programming problem as follows:
-%
-%\begin{align*}
-%\text{Minimize} \quad & \sum_{k \in K} \sum_{(i, j) \in A} c_{ijk} f_{ijk} \\
-%\text{Subject to} \quad & \sum_{k \in K} \sum_{j:(i, j) \in A} f_{ijk} - \sum_{k \in K} \sum_{j:(j, i) \in A} f_{jik} \leq u_{ij}, \quad \forall (i, j) \in A \\
-%& \sum_{j:(i, j) \in A} f_{ijk} - \sum_{j:(j, i) \in A} f_{jik} = d_{ik}, \quad \forall i \in N, k \in K \\
-%& f_{ijk} \in \mathbb{Z}^+, \quad \forall (i, j) \in A, k \in K
-%\end{align*}
-%
-%\noindent \textbf{Objective Function}
-%- The objective is to minimize the total cost of the flow.
-%
-%\noindent \textbf{Constraints}
-%- Capacity Constraints: The first set of constraints ensures that the total flow on each arc does not exceed its capacity.
-%
-%- Flow Conservation: The second set of constraints ensures that the flow into each node minus the flow out of the node is equal to the demand of each commodity at the node.
-%
-%- Integrality Constraints: The third set of constraints ensures that the flow on each arc for each commodity is an integer.
-%
-%\begin{examplewithcode}{Multi-commodity network flow}{https://github.com/open-optimization/open-optimization-or-examples/blob/master/integer-programming/MultiCommodityNetworkFlow.ipynb}
-%\begin{verbatim}
-%# Sample data
-%nodes = [1, 2, 3, 4]
-%arcs = [(1, 2), (1, 3), (2, 4), (3, 4)]
-%commodities = [1, 2]
-%capacities = {(1, 2): 20, (1, 3): 15, (2, 4): 25, (3, 4): 20}
-%costs = {(1, 2, 1): 2, (1, 2, 2): 3, (1, 3, 1): 3, 
-%(1, 3, 2): 2, (2, 4, 1): 1, (2, 4, 2): 2, (3, 4, 1): 2, (3, 4, 2): 1}
-%demands = {(1, 1): -10, (1, 2): -5, (2, 1): 0, (2, 2): 0, (3, 1): 0, (3, 2): 0, 
-%(4, 1): 10, (4, 2): 5}
-%\end{verbatim}
-%
-%\includefigurestatic{multi-network-flow-data.png}
-%\includefigurestatic{multi-network-flow-solution.png}
-%
-%\end{examplewithcode}
-%
-%\subsection{Example - Multicommodity Flow}
-%
-%\url{https://en.wikipedia.org/wiki/Multi-commodity_flow_problem}
-%The \textbf{multi-commodity flow problem} is a
-%\href{flow_network}{network flow} problem with multiple commodities
-%(flow demands) between different source and sink nodes.
-%
-%\paragraph{Problem Definition}
-%
-%Given a flow network \(\,G(V,E)\), where edge \((u,v) \in E\) has
-%capacity \(\,c(u,v)\). There are \(\,k\) commodities
-%\(K_1,K_2,\dots,K_k\), defined by \(\,K_i=(s_i,t_i,d_i)\), where
-%\(\,s_i\) and \(\,t_i\) is the \textbf{source} and \textbf{sink} of
-%commodity \(\,i\), and \(\,d_i\) is its demand. The variable
-%\(\,f_i(u,v)\) defines the fraction of flow \(\,i\) along edge
-%\(\,(u,v)\), where \(\,f_i(u,v) \in [0,1]\) in case the flow can be
-%split among multiple paths, and \(\,f_i(u,v) \in \{0,1\}\) otherwise
-%(i.e. "single path routing"). Find an assignment of all flow variables
-%which satisfies the following four constraints:
-%
-%\textbf{(1) Link capacity:} The sum of all flows routed over a link does
-%not exceed its capacity.
-%
-%\[\forall (u,v)\in E:\,\sum_{i=1}^{k} f_i(u,v)\cdot d_i \leq c(u,v)\]
-%
-%\textbf{(2) Flow conservation on transit nodes:} The amount of a flow
-%entering an intermediate node \(u\) is the same that exits the node.
-%
-%\[\,\sum_{w \in V} f_i(u,w) - \sum_{w \in V} f_i(w,u) = 0 \quad \mathrm{when} \quad u \neq s_i, t_i\]
-%
-%\textbf{(3) Flow conservation at the source:} A flow must exit its
-%source node completely.
-%
-%\[\,\sum_{w \in V} f_i(s_i,w) - \sum_{w \in V} f_i(w,s_i) = 1\]
-%
-%\textbf{(4) Flow conservation at the destination:} A flow must enter its
-%sink node completely.
-%
-%\[\,\sum_{w \in V} f_i(w,t_i) - \sum_{w \in V} f_i(t_i,w) = 1\]
-%
-%\hypertarget{corresponding-optimization-problems}{%
-%\subsection{Corresponding optimization
-%problems}\label{corresponding-optimization-problems}}
-%
-%\textbf{Load balancing} is the attempt to route flows such that the
-%utilization \(U(u,v)\) of all links \((u,v)\in E\) is even, where
-%
-%\[U(u,v)=\frac{\sum_{i=1}^{k} f_i(u,v)\cdot d_i}{c(u,v)}\]
-%
-%The problem can be solved e.g. by minimizing
-%\(\sum_{u,v\in V} (U(u,v))^2\). A common linearization of this problem
-%is the minimization of the maximum utilization \(U_{max}\), where
-%
-%\[\forall (u,v)\in E:\, U_{max} \geq U(u,v)\]
-%
-%In the \textbf{minimum cost multi-commodity flow problem}, there is a
-%cost \(a(u,v) \cdot f(u,v)\) for sending a flow on \(\,(u,v)\). You then
-%need to minimize
-%
-%\[\sum_{(u,v) \in E} \left( a(u,v) \sum_{i=1}^{k} f_i(u,v) \right)\]
-%
-%In the \textbf{maximum multi-commodity flow problem}, the demand of each
-%commodity is not fixed, and the total throughput is maximized by
-%maximizing the sum of all demands \(\sum_{i=1}^{k} d_i\)
-%
-%\hypertarget{relation-to-other-problems}{%
-%\subsection{Relation to other
-%problems}\label{relation-to-other-problems}}
-%
-%The minimum cost variant of the multi-commodity flow problem is a
-%generalization of the \href{minimum_cost_flow_problem}{minimum cost flow
-%problem} (in which there is merely one source \(s\) and one sink \(t\).
-%Variants of the \href{circulation_problem}{circulation problem} are
-%generalizations of all flow problems. That is, any flow problem can be
-%viewed as a particular circulation problem.\footnote{}
+The multi-commodity minimum cost network flow problem is a generalization of the minimum cost network flow problem that considers multiple commodities flowing through the network. Each commodity has its own demand at each node and its own cost on each arc. The objective is to find the integer flow of minimum cost that satisfies the demands of all commodities at the nodes and the capacity constraints on the arcs.
 
-%\hypertarget{usage}{%
-%\textbf{Usage}\label{usage}}
+A network can be described as a directed graph \( G = (N, A) \), where \( N \) is the set of nodes and \( A \) is the set of arcs. Each arc \( (i, j) \in A \) has a capacity \( u_{ij} \). Each commodity \( k \) has a demand \( d_{ik} \) at each node \( i \in N \) and a cost \( c_{ijk} \) on each arc \( (i, j) \in A \).
+
+The multi-commodity minimum cost network flow problem can be defined as follows: Given a network \( G = (N, A) \), capacities \( u_{ij} \) on the arcs, demands \( d_{ik} \) and costs \( c_{ijk} \) for each commodity \( k \), find the integer flow \( f_{ijk} \) on the arcs for each commodity \( k \) that minimizes the total cost of the flow, while satisfying the demands of all commodities at the nodes and the capacity constraints on the arcs.
+
+\modelhead{Sets}
+\begin{itemize}
+\item \( N \): Set of nodes in the network.
+\item \( A \): Set of arcs in the network.
+\item \( K \): Set of commodities.
+\end{itemize}
 %
-%\href{Routing_and_wavelength_assignment}{Routing and wavelength
-%assignment} (RWA) in \href{optical_burst_switching}{optical burst
-%switching} of \href{SONET}{Optical Network} would be approached via
-%multi-commodity flow formulas.
+\modelhead{Parameters}
+\begin{itemize}
+\item \( u_{ij} \): Capacity of arc \( (i, j) \in A \).
+\item \( c_{ijk} \): Cost per unit of flow of commodity \( k \) on arc \( (i, j) \in A \).
+\item \( d_{ik} \): Demand of commodity \( k \) at node \( i \in N \).
+\end{itemize}
+%
+\modelhead{Variables}
+\begin{itemize}
+\item \( f_{ijk} \): Flow of commodity \( k \) on arc \( (i, j) \in A \).
+\end{itemize}
+%
+\modelhead{Model}
+The multi-commodity minimum cost network flow problem can be formulated as an integer linear programming problem as follows:
+
+\begin{align*}
+\min \quad & \sum_{k \in K} \sum_{(i, j) \in A} c_{ijk} f_{ijk} \\
+\st        & \sum_{k \in K} \left( \sum_{j:(i, j) \in A} f_{ijk} \right) \leq u_{ij} &&\quad \text{for all } (i, j) \in A \\
+& \sum_{j:(i, j) \in A} f_{ijk} - \sum_{j:(j, i) \in A} f_{jik} = d_{ik} &&\quad \text{for all } i \in N, \; \forall k \in K \\
+& f_{ijk} \in \mathbb{Z}_{\geq 0} &&\quad \text{for all } (i, j) \in A, \; \forall k \in K
+\end{align*}
+
+\modelhead{Objective}
+The objective is to minimize the total cost of the flow, summed over all commodities and all arcs.
+
+\modelhead{Constraints}
+\begin{itemize}
+\item \textbf{Capacity Constraints:} The first set of constraints ensures that the total flow on each arc (summed across all commodities) does not exceed its capacity.
+\item \textbf{Flow Conservation:} The second set of constraints ensures that, for each commodity, the net flow into each node equals the demand of that commodity at the node.
+\item \textbf{Integrality Constraints:} The third set of constraints ensures that the flow on each arc for each commodity is a non-negative integer.
+\end{itemize}
 
 
-%\section{Transportation Problem}
-%\todoSection{}
-%\todo[inline]{
-%Add discussion of transportation problem and picture.
-%}
-%
-%\href{https://www.youtube.com/watch?v=Jr7LI-sUEmo}{Youtube! - TRANSPORTATION PROBLEM with PuLP in PYTHON}
-%
-%\href{https://nbviewer.jupyter.org/github/Pyomo/PyomoGallery/blob/master/transport/transport.ipynb}{Notebook: Solution with Pyomo}
-%
-%
-%
-%The transportation problem involves determining the optimal way to transport goods from a set of suppliers to a set of markets. The goal is to minimize total transportation costs while satisfying supply availabilities at the suppliers and demand requirements at the markets.
-%
-%Let $I$ be the set of suppliers and $J$ be the set of markets. Parameters include:
-%
-%\begin{itemize}
-%\item $s_i$: supply available at supplier $i$ 
-%\item $d_j$: demand required at market $j$
-%\item $c_{ij}$: cost of shipping one unit from $i$ to $j$
-%\end{itemize}
-%
-%Decision variables are:
-%
-%\begin{itemize}
-%\item $x_{ij}$: units shipped from supplier $i$ to market $j$
-%\end{itemize}
-%
-%The optimization model is:
-%
-%\begin{align*}
-%\text{minimize: } &\sum_{i\in I}\sum_{j \in J} c_{ij}x_{ij} && \text{(total shipping cost)}\\
-%\text{subject to: } &\sum_{j\in J} x_{ij} = s_i && \forall i \in I \\
-%& \sum_{i\in I} x_{ij} = d_j && \forall j \in J\\
-%& x_{ij} \geq 0 &&\forall i\in I, j\in J
-%\end{align*}
-%
-%The objective is to minimize total shipping costs. The constraints ensure that supply at each supplier and demand at each market are satisfied. The decision variables $x_{ij}$ determine the optimal shipment quantities.
+\begin{examplewithallcode}{Multi-commodity network flow}
+{}
+{https://github.com/open-optimization/open-optimization-or-book/tree/master/Intro-Math-Programming/baseText/optimization/optimization-examples/multicommodity_flow_pulp.ipynb}
+{https://github.com/open-optimization/open-optimization-or-book/tree/master/Intro-Math-Programming/baseText/optimization/optimization-examples/multicommodity_flow_gurobi.ipynb}
+\label{ex:multicommodity-network-flow}
 
+Consider a small network with 4 nodes and 4 arcs, transporting 2 commodities. Each arc has a shared capacity, and each commodity has its own per-unit cost on each arc and its own supply/demand pattern at the nodes (negative values indicate supply, positive values indicate demand).
+\begin{verbatim}
+# Sample data
+nodes = [1, 2, 3, 4]
+arcs = [(1, 2), (1, 3), (2, 4), (3, 4)]
+commodities = [1, 2]
+capacities = {(1, 2): 20, (1, 3): 15, (2, 4): 25, (3, 4): 20}
+costs = {(1, 2, 1): 2, (1, 2, 2): 3, (1, 3, 1): 3,
+         (1, 3, 2): 2, (2, 4, 1): 1, (2, 4, 2): 2,
+         (3, 4, 1): 2, (3, 4, 2): 1}
+demands = {(1, 1): -10, (1, 2): -5, (2, 1): 0, (2, 2): 0,
+           (3, 1): 0,   (3, 2): 0,  (4, 1): 10, (4, 2): 5}
+\end{verbatim}
+
+The two figures below show the input network (left) and the optimal flow assignment (right). Each arc is labelled with the commodity flows it carries; the arc capacity constraint requires the sum of those commodity flows to stay within the arc's capacity.
+
+% --- TikZ recreation of networkx figure: multi-network-flow-data.png ---
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+    every node/.style={circle, draw=black, fill=cyan!40, minimum size=8mm, inner sep=1pt, font=\small},
+    every edge/.style={draw, thick},
+    >=Stealth,
+    node distance=2.5cm and 3cm
+  ]
+  % Node positions match the networkx layout: 1 top-center, 2 top-right, 3 left, 4 bottom-center
+  \node (n1) at (3,3) {1};
+  \node (n2) at (6,3) {2};
+  \node (n3) at (0,1.8) {3};
+  \node (n4) at (3.5,0) {4};
+
+  % Supply/demand annotations (commodity 1, commodity 2)
+  \node[draw=black, fill=white, rectangle, font=\scriptsize, inner sep=2pt] at (3,3.9) {$-10,\,-5$};
+  \node[draw=black, fill=white, rectangle, font=\scriptsize, inner sep=2pt] at (6,3.9) {$0,\,0$};
+  \node[draw=black, fill=white, rectangle, font=\scriptsize, inner sep=2pt] at (-0.9,1.8) {$0,\,0$};
+  \node[draw=black, fill=white, rectangle, font=\scriptsize, inner sep=2pt] at (3.5,-0.9) {$10,\,5$};
+
+  % Arcs with shared capacities
+  \draw[->, thick] (n3) -- (n1) node[midway, sloped, above, font=\scriptsize, fill=none, draw=none, rectangle] {15};
+  \draw[->, thick] (n1) -- (n2) node[midway, above, font=\scriptsize, fill=none, draw=none, rectangle] {20};
+  \draw[->, thick] (n2) -- (n4) node[midway, sloped, above, font=\scriptsize, fill=none, draw=none, rectangle] {25};
+  \draw[->, thick] (n3) -- (n4) node[midway, sloped, above, font=\scriptsize, fill=none, draw=none, rectangle] {20};
+\end{tikzpicture}
+\caption{Data for multi-commodity network flow example: four nodes with paired supplies/demands $(d_{i1}, d_{i2})$ and four arcs labelled with their shared capacities.}
+\label{fig:multi-network-flow-data.png}
+\end{figure}
+
+% --- TikZ recreation of networkx figure: multi-network-flow-solution.png ---
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+    every node/.style={circle, draw=black, fill=cyan!40, minimum size=8mm, inner sep=1pt, font=\small},
+    every edge/.style={draw, thick},
+    >=Stealth,
+    node distance=2.5cm and 3cm
+  ]
+  \node (n1) at (3,3) {1};
+  \node (n2) at (6,3) {2};
+  \node (n3) at (0,1.8) {3};
+  \node (n4) at (3.5,0) {4};
+
+  % Supply/demand annotations
+  \node[draw=black, fill=white, rectangle, font=\scriptsize, inner sep=2pt] at (3,3.9) {$[-10,\,-5]$};
+  \node[draw=black, fill=white, rectangle, font=\scriptsize, inner sep=2pt] at (6,3.9) {$[0,\,0]$};
+  \node[draw=black, fill=white, rectangle, font=\scriptsize, inner sep=2pt] at (-0.9,1.8) {$[0,\,0]$};
+  \node[draw=black, fill=white, rectangle, font=\scriptsize, inner sep=2pt] at (3.5,-0.9) {$[10,\,5]$};
+
+  % Arcs with optimal commodity flows [f_{ij1}, f_{ij2}]
+  \draw[->, thick] (n3) -- (n1) node[midway, sloped, above, font=\scriptsize, fill=none, draw=none, rectangle] {$[5.0,\,5.0]$};
+  \draw[->, thick] (n1) -- (n2) node[midway, above, font=\scriptsize, fill=none, draw=none, rectangle] {$[10.0,\,0.0]$};
+  \draw[->, thick] (n2) -- (n4) node[midway, sloped, above, font=\scriptsize, fill=none, draw=none, rectangle] {$[10.0,\,0.0]$};
+  \draw[->, thick] (n3) -- (n4) node[midway, sloped, above, font=\scriptsize, fill=none, draw=none, rectangle] {$[-0.0,\,5.0]$};
+\end{tikzpicture}
+\caption{Solution to multi-commodity network flow: each arc is labelled with the optimal flow of each commodity $[f_{ij1}, f_{ij2}]$.}
+\label{fig:multi-network-flow-solution.png}
+\end{figure}
+
+\end{examplewithallcode}
 %
-%\section*{Concluding Comments}
-%
-%- Min cost network flow:
-%
-%\subsubsection{Explanation}
-%
-%
-%
-%\subsection{Solving the Minimum-Cost Network Flow Problem}
-%
-%This problem can be efficiently solved using specialized algorithms such as:
-%\begin{itemize}
-%    \item \textbf{Successive Shortest Path Algorithm}: Iteratively sends flow along the shortest cost paths.
-%    \item \textbf{Cycle-Canceling Algorithm}: Identifies negative-cost cycles and eliminates them to reach optimality.
-%    \item \textbf{Network Simplex Method}: An adaptation of the simplex method designed specifically for network flow problems.
-%    \item \textbf{Linear Programming Solvers}: General-purpose solvers such as the Simplex or Interior-Point methods can handle large instances.
-%\end{itemize}
-%
-%
-%
-%\begin{resource}
+\subsection{Multicommodity Flow: Source--Sink Formulation}
+\label{sec:multicommodity-source-sink}
+
+A common alternative formulation of the multi-commodity flow problem expresses each commodity in terms of a single source node, a single sink node, and a demand value, with flow variables that represent the fraction of the demand routed on each arc. The formulation below follows the description on the Wikipedia article \url{https://en.wikipedia.org/wiki/Multi-commodity_flow_problem}.
+
+\paragraph{Problem Definition}
+Given a flow network \(G(V,E)\), where each edge \((u,v) \in E\) has capacity \(c(u,v)\), suppose there are \(k\) commodities
+\(K_1,K_2,\dots,K_k\), defined by \(K_i=(s_i,t_i,d_i)\), where \(s_i\) and \(t_i\) are the \textbf{source} and \textbf{sink} of commodity \(i\), and \(d_i\) is its demand. The variable \(f_i(u,v)\) denotes the fraction of commodity \(i\) routed along edge \((u,v)\); we take \(f_i(u,v) \in [0,1]\) when flow may be split among multiple paths, and \(f_i(u,v) \in \{0,1\}\) when each commodity must follow a single path (``single path routing''). The problem is to find an assignment of all flow variables that satisfies the following four conditions.
+
+\textbf{(1) Link capacity.} The total flow routed over any link, weighted by demands, does not exceed the link's capacity:
+\[
+\forall (u,v)\in E:\quad \sum_{i=1}^{k} f_i(u,v)\cdot d_i \;\leq\; c(u,v).
+\]
+
+\textbf{(2) Flow conservation on transit nodes.} For any intermediate node \(u\) (other than the source or sink of commodity \(i\)), the flow of commodity \(i\) entering \(u\) equals the flow leaving \(u\):
+\[
+\sum_{w \in V} f_i(u,w) - \sum_{w \in V} f_i(w,u) \;=\; 0 \quad \text{whenever } u \neq s_i, t_i.
+\]
+
+\textbf{(3) Flow conservation at the source.} The full unit of commodity \(i\) must leave its source:
+\[
+\sum_{w \in V} f_i(s_i,w) - \sum_{w \in V} f_i(w,s_i) \;=\; 1.
+\]
+
+\textbf{(4) Flow conservation at the destination.} The full unit of commodity \(i\) must arrive at its sink:
+\[
+\sum_{w \in V} f_i(w,t_i) - \sum_{w \in V} f_i(t_i,w) \;=\; 1.
+\]
+
+\paragraph{Corresponding optimization problems.}
+Three natural objective functions can be paired with the constraints above:
+\begin{itemize}
+\item \textbf{Load balancing} minimizes the variation in link utilization \(U(u,v) = \tfrac{\sum_{i=1}^{k} f_i(u,v) \cdot d_i}{c(u,v)}\); a common linearization is to minimize the maximum utilization \(U_{\max}\) subject to \(U_{\max} \geq U(u,v)\) for every arc.
+\item \textbf{Minimum cost multi-commodity flow} attaches a per-unit cost \(a(u,v)\) to each arc and minimizes \(\sum_{(u,v)\in E} a(u,v) \sum_{i=1}^{k} f_i(u,v) \cdot d_i\).
+\item \textbf{Maximum multi-commodity flow} leaves the demands \(d_i\) variable and maximizes the total throughput \(\sum_{i=1}^{k} d_i\).
+\end{itemize}
+
+\paragraph{Relation to other problems.}
+The minimum-cost variant generalizes the (single-commodity) minimum cost flow problem of Section~\ref{sec:min-cost-network-flow} (which has only one source \(s\) and one sink \(t\)). More broadly, every flow problem can be cast as a special case of the \emph{circulation problem}.
+
+\begin{examplewithallcode}{Source--Sink Multicommodity Flow}
+{}
+{https://github.com/open-optimization/open-optimization-or-book/tree/master/Intro-Math-Programming/baseText/optimization/optimization-examples/multicommodity_sourcesink_pulp.ipynb}
+{https://github.com/open-optimization/open-optimization-or-book/tree/master/Intro-Math-Programming/baseText/optimization/optimization-examples/multicommodity_sourcesink_gurobi.ipynb}
+Consider the directed network on nodes \(V=\{1,2,3,4\}\) with the arc capacities \(c(u,v)\) and per-unit costs \(a(u,v)\) listed below. Two commodities must be routed from source node \(1\) to sink node \(4\): commodity~1 with demand \(d_1=10\) and commodity~2 with demand \(d_2=5\).
+
+\begin{center}
+\begin{tabular}{c|c|c}
+Arc \((u,v)\) & Capacity \(c(u,v)\) & Cost \(a(u,v)\) \\
+\hline
+\((1,2)\) & 10 & 1 \\
+\((1,3)\) &  8 & 2 \\
+\((2,3)\) &  4 & 1 \\
+\((2,4)\) &  7 & 3 \\
+\((3,4)\) &  9 & 1 \\
+\end{tabular}
+\end{center}
+
+Using the fractional flow variables \(f_i(u,v)\in[0,1]\) with the minimum-cost objective and constraints (1)--(4), the optimal routing sends all of commodity~2 along \(1\to 3\to 4\) and splits commodity~1 across the \(1\to 2\to 4\) and \(1\to 3\to 4\) paths (routing a small share through arc \((2,3)\)), for a minimum total cost of \(\mathbf{51}\).
+\end{examplewithallcode}
+
+\section{Transportation Problem}
+\label{sec:transportation-problem}
+
+The transportation problem involves determining the optimal way to transport goods from a set of suppliers to a set of markets. The goal is to minimize total transportation costs while satisfying supply availabilities at the suppliers and demand requirements at the markets.
+
+\noindent Additional resources:
+\begin{itemize}
+\item \href{https://www.youtube.com/watch?v=Jr7LI-sUEmo}{YouTube: Transportation problem with PuLP in Python}
+\item \href{https://nbviewer.jupyter.org/github/Pyomo/PyomoGallery/blob/master/transport/transport.ipynb}{Notebook: Solution with Pyomo}
+\end{itemize}
+
+Let $I$ be the set of suppliers and $J$ be the set of markets.
+
+\modelhead{Parameters}
+\begin{itemize}
+\item $s_i$: supply available at supplier $i$
+\item $d_j$: demand required at market $j$
+\item $c_{ij}$: cost of shipping one unit from supplier $i$ to market $j$
+\end{itemize}
+
+\modelhead{Variables}
+\begin{itemize}
+\item $x_{ij}$: units shipped from supplier $i$ to market $j$
+\end{itemize}
+
+\modelhead{Model}
+\begin{align*}
+\text{minimize:} \quad &\sum_{i\in I}\sum_{j \in J} c_{ij}\,x_{ij} && \text{(total shipping cost)}\\
+\text{subject to:} \quad &\sum_{j\in J} x_{ij} \leq s_i && \forall i \in I && \text{(supply limit at each supplier)}\\
+&\sum_{i\in I} x_{ij} = d_j && \forall j \in J && \text{(demand met at each market)}\\
+& x_{ij} \geq 0 && \forall i\in I,\; j\in J && \text{(non-negativity)}
+\end{align*}
+
+The objective minimizes total shipping cost; the constraints ensure that the shipment from each supplier does not exceed its available supply, and that the demand at each market is satisfied. The decision variables $x_{ij}$ specify the optimal shipment quantities.
+
+\section*{Concluding Comments}
+
+\subsection*{Solving the Minimum-Cost Network Flow Problem}
+This problem can be efficiently solved using specialized algorithms such as:
+\begin{itemize}
+\item \textbf{Successive Shortest Path Algorithm}: Iteratively sends flow along the shortest-cost paths.
+\item \textbf{Cycle-Canceling Algorithm}: Identifies negative-cost cycles and eliminates them to reach optimality.
+\item \textbf{Network Simplex Method}: An adaptation of the simplex method designed specifically for network flow problems.
+\item \textbf{Linear Programming Solvers}: General-purpose solvers such as the Simplex or Interior-Point methods can handle large instances.
+\end{itemize}
+
+\begin{resource}
 %Other examples:
-%\begin{itemize}
-%\item \href{https://gurobi.github.io/modeling-examples/food_manufacturing_1_2/food_manufacture_1.html}{Food manfacturing - GUROBI}
-%\item \href{https://www.andrew.cmu.edu/user/gc0v/webpub/book.pdf}{Optimization Methods in Finance - Corneujols, T\"ut\"unc\"u}
-%\end{itemize}
-%\end{resource}
+\begin{itemize}
+\item \href{https://gurobi.github.io/modeling-examples/food_manufacturing_1_2/food_manufacture_1.html}{Food manfacturing - GUROBI}
+\item \href{https://www.andrew.cmu.edu/user/gc0v/webpub/book.pdf}{Optimization Methods in Finance - Corneujols, T\"ut\"unc\"u}
+\end{itemize}
+\end{resource}
 %
 %
-%\section{Something Else}
-%\begin{examplewithallcode}{Multi-Period Capital Investment Problem}
-%{}
-%{https://github.com/open-optimization/open-optimization-or-book/tree/master/Intro-Math-Programming/baseText/optimization/optimization-examples/multi-period-capital-allocation-pulp.ipynb}
-%{https://github.com/open-optimization/open-optimization-or-book/tree/master/Intro-Math-Programming/baseText/optimization/optimization-examples/multi-period-capital-allocation-gurobi.ipynb}
-%
-%You are managing a multi-period investment fund with \$50,000 to start. Over the course of four periods, you can allocate capital to a set of investment opportunities. Each investment requires an upfront cost and offers an expected payout at the beginning of the following period, which can then be reinvested. The goal is to maximize the total funds available at the end of the fourth period.
-%
-%The following table lists the available investments, the required initial investment for each period, and their respective payouts for the next period.
-%
-%Formulate an LP to determine the optimal investment strategy over the four periods.
-%
-%\end{examplewithallcode}
-%
-%\begin{table}[h!] 
-%\begin{center} 
-%\begin{tabular} {|c|l|l|l|} 
-%\hline 
-%Period & Investment & Investment Required (\$) & Payout in Next Period (\$) \\ 
-%\hline
-%\hline  
-%1 & A & 10,000 & 15,000 \\ 
-%1 & B & 20,000 & 30,000 \\ 
-%1 & C & 15,000 & 22,000 \\ 
-%\hline  
-%2 & D & 12,000 & 18,000 \\ 
-%2 & E & 25,000 & 35,000 \\ 
-%2 & F & 18,000 & 26,000 \\ 
-%\hline  
-%3 & G & 15,000 & 20,000 \\ 
-%3 & H & 10,000 & 14,000 \\ 
-%3 & I & 20,000 & 28,000 \\ 
-%\hline  
-%4 & J & 8,000 & 10,000 \\ 
-%4 & K & 16,000 & 22,000 \\ 
-%4 & L & 12,000 & 16,000 \\ 
-%\hline 
-%\end{tabular} 
-%\caption{Investment Opportunities Over Four Periods}
-%\label{tab:multi_period_investments}
-%\end{center} 
-%\end{table}
-%
-%\begin{solution}
-%
-%\underline{Decision variables:} \\
-%$x_{i,t}$ : whether to invest in opportunity $i$ during period $t$, where $x_{i,t} = 1$ if investment $i$ is chosen in period $t$, and $x_{i,t} = 0$ otherwise.
-%
-%\underline{Parameters:} \\
-%$c_{i,t}$ : investment required for opportunity $i$ in period $t$. \\
-%$p_{i,t}$ : payout from investment $i$ in the next period.
-%
-%\smallskip \underline{Objective:}
-%\[
-%\mbox{Maximize } z = 10,000x_{J} + 22,000x_{K} + 16,000x_{L}.
-%\]
-%
-%\smallskip \underline{Constraints:}
-%\begin{itemize}
-%    \item \textbf{Period 1 budget constraint:} 
-%    \[
-%    10,000x_A + 20,000x_B + 15,000x_C \leq 50,000.
-%    \]
-%    \item \textbf{Period 2 budget constraint:} 
-%    \[
-%    12,000x_D + 25,000x_E + 18,000x_F \leq 15,000x_A + 30,000x_B + 22,000x_C.
-%    \]
-%    \item \textbf{Period 3 budget constraint:} 
-%    \[
-%    15,000x_G + 10,000x_H + 20,000x_I \leq 18,000x_D + 35,000x_E + 26,000x_F.
-%    \]
-%    \item \textbf{Period 4 budget constraint:} 
-%    \[
-%    8,000x_J + 16,000x_K + 12,000x_L \leq 20,000x_G + 14,000x_H + 28,000x_I.
-%    \]
-%    \item \textbf{Binary decision variables:} 
-%    \[
-%    x_{i,t} \in \{0,1\}, \; \forall i, \; \forall t.
-%    \]
-%\end{itemize}
-%
-%\end{solution}
+\section{Multi-Period Capital Investment}
+\label{sec:multi-period-capital-investment}
+
+\begin{examplewithallcode}{Multi-Period Capital Investment Problem}
+{https://github.com/open-optimization/open-optimization-or-book/blob/master/Intro-Math-Programming/baseText/optimization/optimization-examples/multi-period-investment-excel.xlsx}
+{https://github.com/open-optimization/open-optimization-or-book/tree/master/Intro-Math-Programming/baseText/optimization/optimization-examples/multi_period_investment_pulp.ipynb}
+{https://github.com/open-optimization/open-optimization-or-book/tree/master/Intro-Math-Programming/baseText/optimization/optimization-examples/multi_period_investment_gurobi.ipynb}
+\label{ex:multi-period-capital-investment}
+
+You are managing a multi-period investment fund with \$50,000 to start. Over the course of four periods, you can allocate capital to a set of investment opportunities. Each investment requires an upfront cost and offers an expected payout at the beginning of the following period, which can then be reinvested. The goal is to maximize the total funds available at the end of the fourth period.
+
+The following table lists the available investments, the required initial investment for each period, and their respective payouts for the next period. Formulate an LP to determine the optimal investment strategy over the four periods.
+
+\end{examplewithallcode}
+
+\begin{table}[h!]
+\begin{center}
+\begin{tabular} {|c|l|r|r|}
+\hline
+Period & Investment & Investment Required (\$) & Payout in Next Period (\$) \\
+\hline\hline
+1 & A & 10{,}000 & 15{,}000 \\
+1 & B & 20{,}000 & 30{,}000 \\
+1 & C & 15{,}000 & 22{,}000 \\
+\hline
+2 & D & 12{,}000 & 18{,}000 \\
+2 & E & 25{,}000 & 35{,}000 \\
+2 & F & 18{,}000 & 26{,}000 \\
+\hline
+3 & G & 15{,}000 & 20{,}000 \\
+3 & H & 10{,}000 & 14{,}000 \\
+3 & I & 20{,}000 & 28{,}000 \\
+\hline
+4 & J &  8{,}000 & 10{,}000 \\
+4 & K & 16{,}000 & 22{,}000 \\
+4 & L & 12{,}000 & 16{,}000 \\
+\hline
+\end{tabular}
+\caption{Investment Opportunities Over Four Periods}
+\label{tab:multi_period_investments}
+\end{center}
+\end{table}
+
+\begin{solution}
+
+\modelhead{Variables} \\
+$x_{i,t}$: whether to invest in opportunity $i$ during period $t$, where $x_{i,t} = 1$ if investment $i$ is chosen in period $t$, and $x_{i,t} = 0$ otherwise.
+
+\modelhead{Parameters} \\
+$c_{i,t}$: investment required for opportunity $i$ in period $t$. \\
+$p_{i,t}$: payout from investment $i$ in the next period.
+
+\smallskip \modelhead{Objective} The cash on hand at the end of period 4 is the payout of the period-4 investments:
+\[
+\max \quad z = 10{,}000\,x_{J} + 22{,}000\,x_{K} + 16{,}000\,x_{L}.
+\]
+
+\smallskip \modelhead{Constraints}
+\begin{itemize}
+\item \textbf{Period 1 budget constraint:}
+\[
+10{,}000\,x_A + 20{,}000\,x_B + 15{,}000\,x_C \;\leq\; 50{,}000.
+\]
+\item \textbf{Period 2 budget constraint:}
+\[
+12{,}000\,x_D + 25{,}000\,x_E + 18{,}000\,x_F \;\leq\; 15{,}000\,x_A + 30{,}000\,x_B + 22{,}000\,x_C.
+\]
+\item \textbf{Period 3 budget constraint:}
+\[
+15{,}000\,x_G + 10{,}000\,x_H + 20{,}000\,x_I \;\leq\; 18{,}000\,x_D + 35{,}000\,x_E + 26{,}000\,x_F.
+\]
+\item \textbf{Period 4 budget constraint:}
+\[
+8{,}000\,x_J + 16{,}000\,x_K + 12{,}000\,x_L \;\leq\; 20{,}000\,x_G + 14{,}000\,x_H + 28{,}000\,x_I.
+\]
+\item \textbf{Binary decision variables:}
+\[
+x_{i,t} \in \{0,1\}, \quad \forall i,\; \forall t.
+\]
+\end{itemize}
+
+% TODO(author): the 0--1 formulation above assumes each investment opportunity
+% can be chosen at most once. Consider whether a continuous (LP) formulation
+% with $x_{i,t} \in [0,1]$ or an unbounded investment level would be preferred
+% for this example, and add the resulting numerical solution / interpretation.
+
+\end{solution}
 
 \section{Exercises}
 \begin{ex}{\textbf{Fair Housing Assignment for 12 Families:}}{}
@@ -1060,8 +1082,6 @@ Formulate a max-flow optimization problem for this scenario. Define your decisio
 
 \end{ex}
 
-
-
 \begin{ex}\textbf{Max flow.}{}
 
 Write out the explicit constraints that define the max flow problem given in the picture.  
@@ -1118,11 +1138,10 @@ Solve this problem as a linear program using Excel.
       c2.70/c4.290/1/below}
        \draw [myarrow] (\i) -- node[sloped,font=\small,\p] {\txt} (\j);
 
-
      % draw this outside loop to get proper orientation of 10
      \draw [myarrow] (c4.250) -- node[sloped,font=\small,above,rotate=180] {10} (c2.110);
     \end{tikzpicture}
-%\end{document}
+%\end{document} % removed: this was prematurely ending the document
 \end{center}
 \end{ex}
 
@@ -1181,14 +1200,15 @@ Use the picture below to formulate the corresponding capacitated min cost networ
       c2.70/c4.290/1/2/below}
        \draw [myarrow] (\i) -- node[sloped,font=\small,\p] {\txt, {\color{red} \txtr}} (\j);
 
-%    \foreach \i/\txt/\p in {% start node/end node/text/position
+% Commented-out foreach (all list entries were removed)
+%\foreach \i/\txt/\p in {%
 %      c1/8/left,
 %      c2/11/above,
 %      c3/2/below,
 %      c4/9/above,
 %      c5/2/above,
 %      c6/1/below}
-%       \node[\p] (\i) {\txt};
+%\node[\p] (\i) {\txt};
 
      % draw this outside loop to get proper orientation of 10
      \draw [myarrow] (c4.250) -- node[sloped,font=\small,above,rotate=180] {10, {\color{red} 1}} (c2.110);
@@ -1196,11 +1216,64 @@ Use the picture below to formulate the corresponding capacitated min cost networ
    \end{center}
    \end{ex}
 
+% --- TikZ recreation of networkx figure: network-flow.png ---
+% TODO(author): The edges and labels below were inferred by visual inspection
+% of the original networkx-rendered PNG. Please verify edge directions and
+% label values (each edge label is rendered as [capacity, cost]).
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+    every node/.style={circle, draw=black, fill=cyan!40, minimum size=8mm, inner sep=1pt, font=\small},
+    >=Stealth, thick
+  ]
+  \node (n1) at (0,2.5) {1};
+  \node (n2) at (1.5,0) {2};
+  \node (n3) at (3.5,0) {3};
+  \node (n4) at (5.5,2) {4};
+  \node (n5) at (4.5,4.5) {5};
+  \node (n6) at (1,5) {6};
 
-%\todo[inline]{Make tikz/python graphs uniform.}
-%\includefigurestatic[][scale = 0.5][h]{network-flow.png}
+  % Edges (capacity, cost) -- inferred from the original networkx PNG
+  \draw[->] (n1) -- (n2) node[midway, sloped, below, font=\scriptsize, fill=none, draw=none, rectangle] {$[6.0,\,2]$};
+  \draw[->] (n1) -- (n3) node[midway, sloped, below, font=\scriptsize, fill=none, draw=none, rectangle] {$[8.0,\,-5]$};
+  \draw[->] (n2) -- (n5) node[pos=0.55, sloped, above, font=\scriptsize, fill=none, draw=none, rectangle] {$[7.0,\,12]$};
+  \draw[->] (n2) -- (n6) node[pos=0.6, sloped, above, font=\scriptsize, fill=none, draw=none, rectangle] {$[5.0,\,0]$};
+  \draw[->] (n3) -- (n4) node[midway, sloped, above, font=\scriptsize, fill=none, draw=none, rectangle] {$[5.0,\,3]$};
+  \draw[->] (n3) -- (n5) node[pos=0.6, sloped, above, font=\scriptsize, fill=none, draw=none, rectangle] {$[5.0,\,-9]$};
+  \draw[->] (n4) -- (n5) node[midway, sloped, above, font=\scriptsize, fill=none, draw=none, rectangle] {$[8.0,\,2]$};
+  \draw[->] (n5) -- (n6) node[midway, above, font=\scriptsize, fill=none, draw=none, rectangle] {$[5.0,\,4]$};
+\end{tikzpicture}
+\caption{Network flow example: directed graph with six nodes; each edge is labelled $[\text{capacity},\,\text{cost}]$.}
+\label{fig:network-flow.png}
+\end{figure}
 
+% --- TikZ recreation of networkx figure: network-flow-solution.png ---
+% TODO(author): Node net-flow values and edge flows below were inferred by
+% visual inspection of the original networkx-rendered PNG. Please verify.
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+    every node/.style={circle, draw=black, fill=cyan!40, minimum size=9mm, inner sep=1pt, font=\small},
+    >=Stealth, thick
+  ]
+  \node (n1) at (0,2.5) {$1\!:\!12.0$};
+  \node (n2) at (1.5,0) {$2\!:\!6.0$};
+  \node (n3) at (3.5,0) {$3\!:\!{-}2.0$};
+  \node (n4) at (5.5,2) {$4\!:\!0.0$};
+  \node (n5) at (4.5,4.5) {$5\!:\!{-}9.0$};
+  \node (n6) at (1,5) {$6\!:\!{-}7.0$};
 
-%\includefigurestatic[][scale = 0.5][h]{network-flow-solution}
-
+  % Optimal flows on each arc
+  \draw[->] (n1) -- (n2) node[midway, sloped, below, font=\scriptsize, fill=none, draw=none, rectangle] {$5.0$};
+  \draw[->] (n1) -- (n3) node[midway, sloped, below, font=\scriptsize, fill=none, draw=none, rectangle] {$7.0$};
+  \draw[->] (n2) -- (n5) node[pos=0.55, sloped, above, font=\scriptsize, fill=none, draw=none, rectangle] {$6.0$};
+  \draw[->] (n2) -- (n6) node[pos=0.6, sloped, above, font=\scriptsize, fill=none, draw=none, rectangle] {$5.0$};
+  \draw[->] (n3) -- (n4) node[midway, sloped, above, font=\scriptsize, fill=none, draw=none, rectangle] {$5.0$};
+  \draw[->] (n3) -- (n5) node[pos=0.6, sloped, above, font=\scriptsize, fill=none, draw=none, rectangle] {$0.0$};
+  \draw[->] (n4) -- (n5) node[midway, sloped, above, font=\scriptsize, fill=none, draw=none, rectangle] {$0.0$};
+  \draw[->] (n5) -- (n6) node[midway, above, font=\scriptsize, fill=none, draw=none, rectangle] {$2.0$};
+\end{tikzpicture}
+\caption{Network flow solution: nodes are annotated with their net-flow values (positive $=$ supply, negative $=$ demand); each arc carries the optimal flow value.}
+\label{fig:network-flow-solution}
+\end{figure}
 

@@ -3,13 +3,12 @@
 %Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0)
 %See http://creativecommons.org/licenses/by-sa/4.0/
 
-%\documentclass[../open-optimization/open-optimization.tex]{subfiles}
+\documentclass[../open-optimization/open-optimization.tex]{subfiles}
 %
-%\begin{document}
+\begin{document}
 
 \chapter{Algorithms to Solve Integer Programs}
-\todoChapter{ 50\% complete. Goal 80\% completion date: September 20\\
-Notes: }
+
 \label{sec:IP-algorithms}
 
 \begin{outcome}
@@ -34,7 +33,6 @@ Although there are many tricks used to imrove the solve time, there are thee cor
 \paragraph{Cutting planes} are ways to improve the description by adding additional inequalities.  There are many ways to derive cutting planes.  We will learn just a couple to get an idea of how these work.  
 
 \paragraph{Brach and bound} is a method to decompose the problem into smaller subproblems and also to certify optimality (or at least provide a bound to how close to optimal a solution is) by removing sets of subproblems that can be argued to be suboptimal.   We will look at an elementary branch and bound approach.  \underline{Understanding this technique is key to explaining the ouput of an integer programming solver.}
-
 
 We will being this chapter with a comparison of solving the linear programming relaxation comparted to solving an integer program.  We will then use this understanding as fundamental to both the techniques of cutting planes and branch and bound.
 We will end this section with an example of output from GUROBI and explain how to interpret this information.
@@ -68,9 +66,9 @@ x^*_{LP} = x^*_{IP} \ \ \text{ and } z^*_{LP} = z^*_{IP}.
 \begin{example}{}{}
 
 %%second column
-%\begin{minipage}[t]{0.1\textwidth}
-%\includegraphics[scale = 0.3]{LP-equals-IP.png}
-%\end{minipage}
+\begin{minipage}[t]{0.1\textwidth}
+\includegraphics[scale = 0.3]{LP-equals-IP.png}
+\end{minipage}
 %
 %Here is some text.\\
 % first column
@@ -89,8 +87,7 @@ Consider the problem
 \end{minipage}
 \end{example}
 
-
-%  \includegraphics[width=2cm,height=2cm]{LP-equals-IP.png}\fbox{\LARGE J}
+\includegraphics[width=2cm,height=2cm]{LP-equals-IP.png}\fbox{\LARGE J}
   
   
   \subsection{Rounding LP Solution can be bad!}
@@ -126,8 +123,6 @@ Consider the problem
   In $n$-dimensions, there are potentially $2^n$ integer points to round to, making rounding very complicated in some cases.
  
 
-
-
 \section{Branch and Bound}
 \subsection{Binary Integer Programming}
 Our goal is to decompose the problem until one of three things happens:
@@ -137,7 +132,6 @@ Our goal is to decompose the problem until one of three things happens:
 \item We prove that a subproblem is \textbf{infeasible}.
 \end{enumerate}
 Throughout the decomposition process, we will store Lower Bounds.  These bounds are created by finding feasible integer solutions.  Using these lower bounds, we can prove that other branches are suboptimal.
-
 
 Here is the full algorithm.  We will look at an example next.
 \begin{algorithm}[H]
@@ -174,18 +168,17 @@ Here is the full algorithm.  We will look at an example next.
 \end{algorithmic}
 \end{algorithm}
 
-
 Let's look at a nice example.  This is the smallest example that exhibits all the interesting behavior of branch and bound.  Typically these branch and bound trees are much much much bigger.
 
 We will use the result from Subsection~\ref{subsection:fractional-knapsack} that demonstrates that in the single inequality case, the solution to the LP can be easy to write down.
 
-%\textbf{Example: Binary Knapsack}
+\textbf{Example: Binary Knapsack}
 \begin{example}{Binary Knapsack Example}{}
 Solve the following problem with branch and bound.
 \begin{align*}
-\max\ \ \   z&=11x_1+15x_2+6x_3+2x_4 + x_5\\
-\text{Subject to:} \ \ \ 	 &5x_1+7x_2+4x_3+3x_4 + 15x_5\leq15\\
-		&x_i  \text{  binary},i=1,\dots,5
+\max \quad & 11x_1+15x_2+6x_3+2x_4 + x_5   \tag{Total value}\\
+\st        & 5x_1+7x_2+4x_3+3x_4 + 15x_5 \leq 15   \tag{Capacity}\\
+           & x_i \text{ binary} &&\quad \text{for all } i=1,\dots,5
 \end{align*}
 
 \input{optimization/figures/figures-source/branch-and-bound-tree-max-knapsack.tex}
@@ -231,45 +224,42 @@ We can apply this concept of branch and bound thinking about general integer var
 \end{algorithmic}
 \end{algorithm}
 
-%\begin{algorithm}[H]
-%\algorithmicrequire{Integer Linear Problem with max objective}\\
-%\algorithmicensure{Exact Optimal Solution $x^*$}
-%\caption{Branch and Bound - Maximization}\label{alg:branch-and-bound-max}
-%\begin{algorithmic}[1]
-%	\State Set $LB = - \infty$.
-% 	\State Solve LP relaxation. 
-%	\begin{algsubstates}
-%        		\State If $x^*$ is integer, stop!
-%        		\State Otherwise, choose fractional entry $x_i^*$ and branch onto subproblems:
+\begin{algorithm}[H]
+\algorithmicrequire{Integer Linear Problem with max objective}\\
+\algorithmicensure{Exact Optimal Solution $x^*$}
+\caption{Branch and Bound - Maximization}\label{alg:branch-and-bound-max}
+\begin{algorithmic}[1]
+\State Set $LB = - \infty$.
+\State Solve LP relaxation. 
+\begin{algsubstates}
+\State If $x^*$ is integer, stop!
+\State Otherwise, choose fractional entry $x_i^*$ and branch onto subproblems:
 %		(i) $x_i \leq \lfloor x^*_i \rfloor$ and 
 %		(ii) $x_i \geq \lceil x^*_i \rceil$.    
-%	   \end{algsubstates}
-%	\State Solve LP relaxation of any subproblem.
-%		\begin{algsubstates}
-%		\State If LP relaxation is infeasible, prune this node as \textbf{"Infeasible"}
-%        		\State If $z^* < LB$, prune this node as \textbf{"Suboptimal"}
-%		\State $x^*$ is integer, prune this nodes as \textbf{"Integer"} and update $LB = \max(LB, z^*)$.
-%		\State Otherwise, choose fractional entry $x_i^*$ and branch onto subproblems:  (i) $x_i \leq \lfloor x^*_i \rfloor$ and (ii) $x_i \geq \lceil x^*_i \rceil$.     Return to step 2 until all subproblems are pruned.
-%      \end{algsubstates}
-%      \State Return best integer solution found.
-%	\end{algorithmic}
-%\end{algorithm}
+\end{algsubstates}
+\State Solve LP relaxation of any subproblem.
+\begin{algsubstates}
+\State If LP relaxation is infeasible, prune this node as \textbf{"Infeasible"}
+\State If $z^* < LB$, prune this node as \textbf{"Suboptimal"}
+\State $x^*$ is integer, prune this nodes as \textbf{"Integer"} and update $LB = \max(LB, z^*)$.
+\State Otherwise, choose fractional entry $x_i^*$ and branch onto subproblems:  (i) $x_i \leq \lfloor x^*_i \rfloor$ and (ii) $x_i \geq \lceil x^*_i \rceil$.     Return to step 2 until all subproblems are pruned.
+\end{algsubstates}
+\State Return best integer solution found.
+\end{algorithmic}
+\end{algorithm}
 
-%\url{http://www.sce.carleton.ca/faculty/chinneck/po/Chapter12.pdf}
+\url{http://www.sce.carleton.ca/faculty/chinneck/po/Chapter12.pdf}
 %
-%\url{http://www.sce.carleton.ca/faculty/chinneck/po/Chapter13.pdf}
+\url{http://www.sce.carleton.ca/faculty/chinneck/po/Chapter13.pdf}
 %
-%\includegraphics[scale = 0.5]{branch-and-bound-problem}
+\includegraphics[scale = 0.5]{branch-and-bound-problem}
 %
-%\includegraphics[scale = 0.5]{branch-and-bound}
-
-
-
+\includegraphics[scale = 0.5]{branch-and-bound}
 
 Here is an example of branching on general integer variables.
 
 \begin{example}{Branching on general integer variables}{}
-%\textbf{Example: Branching on general integer variables}
+\textbf{Example: Branching on general integer variables}
 Consider the two variable example with
  
  \begin{align*}
@@ -296,9 +286,6 @@ Consider the two variable example with
   S/.style = {draw, rectangle, rounded corners=0.1cm, minimum size = 8mm,  top color=blue!10, bottom color=blue!10},% top color=white, bottom color=blue!20},
 }
 
-
-
-
 \tikzset{
   S/.style = {
     draw, rectangle, rounded corners=0.1cm,  
@@ -307,8 +294,6 @@ Consider the two variable example with
     inner sep=5pt
   },
 }
-
-
 
 \begin{tikzpicture}[-,thick]
 \node[S, sibling distance=5cm, level distance=6.5cm, label={[blue]left:$t = 1$}, label = {above:\textbf{Root Node}}] 
@@ -373,108 +358,99 @@ An optimal solution is concluded to be $x^* = (0,4)$ with objective value $z^* =
 %
 %
 %$x =  [1.33, 5.167]$,   $\textrm{objective}  =  16.664$\\
-%\noindent \includegraphicstatic[scale = 0.3]{branch-and-bound1}
+\noindent \includegraphicstatic[scale = 0.3]{branch-and-bound1}
 %$x =  [1,  4.9]$,  $\textrm{objective} =  16.5998$\\
 %$x =  [2,  4.5]$,  $\text{objective} =  12.0$\\
-%\includegraphicstatic[scale = 0.3]{branch-and-bound2.png}
+\includegraphicstatic[scale = 0.3]{branch-and-bound2.png}
 %
 %Infeasible Region\\
 %$x =  [0, 4]$,   $\text{objective} =  16.0$\\
 %$x =  [2,  4.5]  \text{objective} =  12.0$\\
-%\includegraphicstatic[scale = 0.3]{branch-and-bound3.png}
+\includegraphicstatic[scale = 0.3]{branch-and-bound3.png}
 %
 %This creates the following branch and bound tree.
 %
-%\input{optimization/figures/figures-source/branch-and-bound-tree-first-example.tex}
+\input{optimization/figures/figures-source/branch-and-bound-tree-first-example.tex}
 
-%\end{example}
+\end{example}
 
-
-
-
-
-
-
-%\begin{algorithm}[H]
-%\caption{Branch and Bound for Binary Integer Program - Maximization}\label{alg:branch-and-bound-bip}
-%\begin{algorithmic}[1]
-%    \renewcommand{\algorithmicrequire}{\textbf{Input:}}
-%    \renewcommand{\algorithmicensure}{\textbf{Output:}}
-%    \algorithmicrequire Binary Integer Problem with max objective
-%    \algorithmicensure Exact Optimal Solution \( x^* \)
-%    \State Set \( LB = - \infty \).
-%    \State Solve LP relaxation. 
-%    \If{\( x^* \) is binary}
-%        \State Stop!
-%    \Else
-%        \State Choose fractional entry \( x_i^* \).
-%        \State Branch onto subproblems:
-%        \Statex \hspace{2em} (i) \( x_i = 0 \)
-%        \Statex \hspace{2em} (ii) \( x_i = 1 \)
-%    \EndIf
-%    \State Solve LP relaxation of any subproblem.
-%    \If{LP relaxation is infeasible}
-%        \State Prune this node as \textbf{"Infeasible"}
-%    \ElsIf{\( z^* < LB \)}
-%        \State Prune this node as \textbf{"Suboptimal"}
-%    \ElsIf{\( x^* \) is binary}
-%        \State Prune this node as \textbf{"Binary"}
-%        \State Update \( LB = \max(LB, z^*) \).
-%    \Else
-%        \State Choose fractional entry \( x_i^* \).
-%        \State Branch onto subproblems:
-%        \Statex \hspace{2em} (i) \( x_i = 0 \)
-%        \Statex \hspace{2em} (ii) \( x_i = 1 \)
-%        \State Return to step 2 until all subproblems are pruned.
-%    \EndIf
-%    \State Return best binary solution found.
-%\end{algorithmic}
-%\end{algorithm}
+\begin{algorithm}[H]
+\caption{Branch and Bound for Binary Integer Program - Maximization}\label{alg:branch-and-bound-bip}
+\begin{algorithmic}[1]
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+\algorithmicrequire Binary Integer Problem with max objective
+\algorithmicensure Exact Optimal Solution \( x^* \)
+\State Set \( LB = - \infty \).
+\State Solve LP relaxation. 
+\If{\( x^* \) is binary}
+\State Stop!
+\Else
+\State Choose fractional entry \( x_i^* \).
+\State Branch onto subproblems:
+\Statex \hspace{2em} (i) \( x_i = 0 \)
+\Statex \hspace{2em} (ii) \( x_i = 1 \)
+\EndIf
+\State Solve LP relaxation of any subproblem.
+\If{LP relaxation is infeasible}
+\State Prune this node as \textbf{"Infeasible"}
+\ElsIf{\( z^* < LB \)}
+\State Prune this node as \textbf{"Suboptimal"}
+\ElsIf{\( x^* \) is binary}
+\State Prune this node as \textbf{"Binary"}
+\State Update \( LB = \max(LB, z^*) \).
+\Else
+\State Choose fractional entry \( x_i^* \).
+\State Branch onto subproblems:
+\Statex \hspace{2em} (i) \( x_i = 0 \)
+\Statex \hspace{2em} (ii) \( x_i = 1 \)
+\State Return to step 2 until all subproblems are pruned.
+\EndIf
+\State Return best binary solution found.
+\end{algorithmic}
+\end{algorithm}
 
 %
-%\subsection{Knapsack Problem  and 0/1 branching}
+\subsection{Knapsack Problem  and 0/1 branching}
 %
 %Consider the problem 
 %
-%\begin{align*}
-%\max \quad & 16x_1 + 22x_2 + 12x_3 + 8 x_4\\
-%\st & 5x_1 + 7x_2 + 4x_3 + 3x_4 \leq 14\\
+\begin{align*}
+\max \quad & 16x_1 + 22x_2 + 12x_3 + 8 x_4 \\
+\st        & 5x_1 + 7x_2 + 4x_3 + 3x_4 \leq 14 \\
 %& 0 \leq x_i \leq 1 \ \ i=1,2,3,4\\
 %& x_i \in \{0,1\} \ \ i=1,2,3,4
-%\end{align*}
+\end{align*}
 %
-%\textbf{Question: What is the optimal solution if we remove the binary constraints?}
+\textbf{Question: What is the optimal solution if we remove the binary constraints?}
 
-
-
-
-%\begin{align*}
-%\max \quad & c_1 x_1 + c_2 x_2 + c_3 x_3 + c_4 x_4\\
-%\st & a_1 x_1 + a_2 x_2 + a_3 x_3 + a_4 x_4 \leq b\\
+\begin{align*}
+\max \quad & c_1 x_1 + c_2 x_2 + c_3 x_3 + c_4 x_4 \\
+\st        & a_1 x_1 + a_2 x_2 + a_3 x_3 + a_4 x_4 \leq b \\
 %& 0 \leq x_i \leq 1 \ \ i=1,2,3,4\\
-%\end{align*}
+\end{align*}
 %
-%\textbf{Question: How do I find the solution to this problem?}
+\textbf{Question: How do I find the solution to this problem?}
 %
 %
-%\begin{align*}
-%\max \quad & c_1 x_1 + c_2 x_2 + c_3 x_3 + c_4 x_4\\
-%\st & (a_1 - A)x_1 + (a_2-A) x_2 + (a_3-A) x_3 + (a_4-A) x_4 \leq 0\\
+\begin{align*}
+\max \quad & c_1 x_1 + c_2 x_2 + c_3 x_3 + c_4 x_4 \\
+\st        & (a_1 - A)x_1 + (a_2-A) x_2 + (a_3-A) x_3 + (a_4-A) x_4 \leq 0 \\
 %& 0 \leq x_i \leq m_i \ \ i=1,2,3,4\\
-%\end{align*}
+\end{align*}
 
-%\textbf{Question: How do I find the solution to this problem?}
+\textbf{Question: How do I find the solution to this problem?}
 %
 %
 %
 %Consider the problem 
 %
-%\begin{align*}
-%\max \quad & 16x_1 + 22x_2 + 12x_3 + 8 x_4\\
-%\st & 5x_1 + 7x_2 + 4x_3 + 3x_4 \leq 14\\
+\begin{align*}
+\max \quad & 16x_1 + 22x_2 + 12x_3 + 8 x_4 \\
+\st        & 5x_1 + 7x_2 + 4x_3 + 3x_4 \leq 14 \\
 %& 0 \leq x_i \leq 1 \ \ i=1,2,3,4\\
 %& x_i \in \{0,1\} \ \ i=1,2,3,4
-%\end{align*}
+\end{align*}
 %
 %We can solve this problem with branch and bound.
 %
@@ -482,10 +458,6 @@ An optimal solution is concluded to be $x^* = (0,4)$ with objective value $z^* =
 %The optimal solution was found at $t=5$ at subproblem 6 to be $x^* = (0,1,1,1)$, $z^* = 42$.
 %
 %
-
-
-
-
 
 \section{Cutting Planes}
 Cutting planes are additional inequalities that are valid for the feasible integer solutions that  cut off part of the LP relaxation.  Cutting planes can create a tighter description of the feasible region that allows for the optimal solution to be obtained by simply solving a strengthened linear relaxation. 
@@ -495,8 +467,8 @@ We begin with an example of problem specific inequalites that apply only to cert
 \subsection{Cover Inequalities}
 Consider the binary knapsack problem
 \begin{align*}
-\max \ \ & x_1 + 2x_2 + x_3 + 7 x_4\\
-\text{s.t.} \ \ & 100 x_1 + 70x_2 + 50 x_3 + 60 x_4 \leq 150\\
+\max \quad & x_1 + 2x_2 + x_3 + 7 x_4 \\
+\st        & 100 x_1 + 70x_2 + 50 x_3 + 60 x_4 \leq 150 \\
 & x_i  \text{ binary  for } i =1, \dots, 4
 \end{align*}
 
@@ -528,15 +500,9 @@ S = \{2,3,4\} \ \ \Rightarrow \ \ \ x_2 + x_3 + x_4 \leq 2
 \end{equation}
 \end{solution}
 
-
-
-
-
 \subsection{Chv\'atal Cuts}
 
-
 Chv\'atal Cuts are a general technique to produce new inequalities that are valid for feasible integer points.  
-
 
 \begin{general}{Chv\'atal Cuts}{}
 Suppose 
@@ -551,17 +517,15 @@ is a valid inequality for the polyhedron $P = \{ x \in \R^n : Ax \leq b, x \geq 
 is valid for the integer points in $P$, that is, it is valid for the set $P \cap \Z^n$.  Equation~\eqref{eq:chvatal} is called a Chv\'atal Cut.
 \end{general}
 
-
 We will illustrate this idea with an example.
-
 
 \begin{example}{}{}
 Recall example~\ref{ex:min-coins}.  The model was\\
-\textbf{Model}
+\modelhead{Model}
 \begin{align*}
-\min \quad & p + n + d + q & \text{ total number of coins used}\\
-\text{ s.t. } \quad & p + 5n + 10d + 25 q = 83 & \text{sums to } 83 \cent\\
-& p,d,n,q \in \Z_+ & \text{each is a non-negative integer}
+\min \quad & p + n + d + q   \tag{total number of coins used} \\
+\st        & p + 5n + 10d + 25 q = 83 & \text{sums to } 83 \cent \\
+& p,d,n,q \in \Z_+   \tag{each is a non-negative integer}
 \end{align*}
 
 From the equality constraint we can derive several inequalities.
@@ -587,13 +551,13 @@ These new inequalities are all valid for the integer solutions.  Consider the ne
 
 \textbf{New Model}
 \begin{align*}
-\min \quad & p + n + d + q & \text{ total number of coins used}\\
-\text{ s.t. } \quad & p + 5n + 10d + 25 q = 83 & \text{sums to } 83 \cent\\
-& q \leq 3\\
+\min \quad & p + n + d + q   \tag{total number of coins used} \\
+\st        & p + 5n + 10d + 25 q = 83 & \text{sums to } 83 \cent \\
+& q \leq 3 \\
 & d + 2q \leq 8 \\
-& n + 2d  + 5q \leq 16\\
-& d  + 3q \leq 9\\
-& p,d,n,q \in \Z_+ & \text{each is a non-negative integer}
+& n + 2d  + 5q \leq 16 \\
+& d  + 3q \leq 9 \\
+& p,d,n,q \in \Z_+   \tag{each is a non-negative integer}
 \end{align*}
 
 The solution to the LP relaxation is exactly $q = 3, d = 0, n = 1, p = 3$, which is an integral feasible solution, and hence it is an optimal solution.
@@ -627,29 +591,29 @@ Here is the basic algorithm.
 
 %Refer to the cutting plane procedure in Figure~\ref{alg:cutting-plane-procedure}.
 %
-%\begin{figure}[H]
-%\includegraphics[scale = 0.4]{optimization/figures/figures-static/figureCutttingPlane1.pdf} 
-%\hspace{0.3cm}
-%\includegraphics[scale = 0.4]{optimization/figures/figures-static/figureCutttingPlane2}
-%\hspace{0.3cm}
-%\includegraphics[scale = 0.4]{optimization/figures/figures-static/figureCutttingPlane3}
-%\hspace{0.3cm}
-%\includegraphics[scale = 0.4]{optimization/figures/figures-static/figureCutttingPlane4}
-%\hspace{0.3cm}
-%\includegraphics[scale = 0.4]{optimization/figures/figures-static/figureCutttingPlane5}
-%\hspace{0.3cm}
-%\includegraphics[scale = 0.4]{optimization/figures/figures-static/figureCutttingPlane6}
-%\vspace{0.3cm}
-%\includegraphics[scale = 0.4]{optimization/figures/figures-static/figureCutttingPlane7}
-%\caption{The cutting plane procedure.}
-%\label{fig:cutting-plane-procudure}
-%\end{figure}
+\begin{figure}[H]
+\includegraphics[scale = 0.4]{optimization/figures/figures-static/figureCutttingPlane1.pdf} 
+\hspace{0.3cm}
+\includegraphics[scale = 0.4]{optimization/figures/figures-static/figureCutttingPlane2}
+\hspace{0.3cm}
+\includegraphics[scale = 0.4]{optimization/figures/figures-static/figureCutttingPlane3}
+\hspace{0.3cm}
+\includegraphics[scale = 0.4]{optimization/figures/figures-static/figureCutttingPlane4}
+\hspace{0.3cm}
+\includegraphics[scale = 0.4]{optimization/figures/figures-static/figureCutttingPlane5}
+\hspace{0.3cm}
+\includegraphics[scale = 0.4]{optimization/figures/figures-static/figureCutttingPlane6}
+\vspace{0.3cm}
+\includegraphics[scale = 0.4]{optimization/figures/figures-static/figureCutttingPlane7}
+\caption{The cutting plane procedure.}
+\label{fig:cutting-plane-procudure}
+\end{figure}
 
 In practice, this procedure is integrated in some  with branch and bound and also other primal heuristics.
 
-%\begin{table}
-%\centering\begin{tabular}{|>{\centering\arraybackslash}m{3cm}|>{\centering\arraybackslash}m{5cm}|} \hline\textbf{Topic} & \textbf{Paragraph} \\\hline \hlineTopic 1 & This is a paragraph. This is a paragraph. This is a paragraph.\\\hline\end{tabular}
-%\end{table}
+\begin{table}
+\centering\begin{tabular}{|>{\centering\arraybackslash}m{3cm}|>{\centering\arraybackslash}m{5cm}|} \hline\textbf{Topic} & \textbf{Paragraph} \\\hline \hlineTopic 1 & This is a paragraph. This is a paragraph. This is a paragraph.\\\hline\end{tabular}
+\end{table}
 
 Here is a concrete example of how this could play out.
 
@@ -668,7 +632,7 @@ $$
 \end{array} 
 $$
 &
-%\includegraphicstatic[scale = 0.5]{cutting-plane-1-picture}\\
+\includegraphicstatic[scale = 0.5]{cutting-plane-1-picture}\\
 \includegraphics[scale = 0.75]{Figures/cutting-planes0}\\
 $$
 \begin{array}{lrl}
@@ -716,9 +680,7 @@ The Gomory cut corresponding to the tableau row ~\eqref{eq:tableau-row} is
 \sum_{i\in N} (\tilde a_i - \lfloor \tilde a_i \rfloor) x_i \geq \tilde b_j - \lfloor \tilde b_j\rfloor
 \end{equation}
 
-
 \end{general}
-
 
 We will solve the following problem using only Gomory Cuts.
 \begin{equation*}
@@ -744,7 +706,7 @@ We will solve the following problem using only Gomory Cuts.
 We can apply the simplex method to solve the LP relaxation.\\
 \begin{tabular}{cc}
 Initial Basis & 
-%\begin{center}
+\begin{center}
 \begin{tabular}{|lr|rrrr|}
 \hline
  Basis & RHS & $x_1$ & $x_2$ & $s_1$ & $s_2$ \\
@@ -755,11 +717,11 @@ Initial Basis &
  $s_2$ & 4.0 & 1.0   & 1.0   & 0.0   & 1.0   \\
 \hline
 \end{tabular}\\
-%\end{center}\\
+\end{center}\\
 \vdots & \vdots  \\
 Optimal Basis & 
 %Pivoting to the optimal basis, we have
-%\begin{center}
+\begin{center}
 \begin{tabular}{|lr|rrrr|}
 \hline
  Basis & RHS  & $x_1$ & $x_2$ & $s_1$ & $s_2$ \\
@@ -770,11 +732,10 @@ Optimal Basis &
  $x_2$ & 2.5  & 0.0   & 1.0   & 0.1   & 0.4   \\
 \hline
 \end{tabular}
-%\end{center}
+\end{center}
 \end{tabular}
 
 This LP relaxation produces the fractional basic solution $x_{LP} = (1.5, 2.5)$.
-
 
 \begin{example}{}{}\textbf{(Gomory cut  removes LP solution)}{}
  We now identify an integer variable $x_i$ that has a fractional basic solution.  Since both variables have fractional values, we can choose either row to make a cut.  Let's focus on the row corresponding to $x_1$.
@@ -813,20 +774,19 @@ or equivalently
 \label{eq:gomory-cut-ex1-original}
 - 3.2 x_1 + 5.8 x_2 \leq 9.2.
 \end{equation}
-%\textbf{Check!} We can now check if this inequality cuts off the current LP optimal solution.
+\textbf{Check!} We can now check if this inequality cuts off the current LP optimal solution.
 %To see this, let's plug in $(x_{LP}, s_{LP}) = (1.5, 2.5,0,0)$.
 %
-%\begin{equation}
-%\label{eq:gomory-cut-ex1-original}
+\begin{equation}
+\label{eq:gomory-cut-ex1-original}
 %- 3.2 x_1 + 5.8 x_2 = - 3.2 (1.5) + 5.8 (2.5) = 9.7 > 9.2
-%\end{equation}
+\end{equation}
 %Thus, this LP solution is violated by the new Gomory Cut.
 
 As you can see, this inequality does cut off the current LP relaxation.
-%\includegraphics[scale = 0.5]{this-graphic.}
+\includegraphics[scale = 0.5]{this-graphic.}
 
 \end{example}
-
 
 \begin{example}{\textbf{(Gomory  cuts plus new tableau)}}{}
 Now we add the slack variable $s_3 \geq 0$ to make the equation
@@ -834,12 +794,9 @@ Now we add the slack variable $s_3 \geq 0$ to make the equation
 0.9 s_1 + 0.4 s_2 - s_3 = 0.5.
 \end{equation}
 
-
 \end{example}
 
-
 Next, we need to solve the new linear programming relaxation and continue the cutting plane procedure.
-
 
 \begin{refsection}
 \begin{pioneerspotlight}{Egon Balas}
@@ -853,16 +810,12 @@ Although Egon created an algorithm to solve small-scale problems, he wanted to d
 
 Egon began working at Carnegie Mellon University as a professor in 1987 \parencite{cornuejols_2019_egon}. He was awarded the Alexander von Humboldt Foundation US Senior Scientist Award, along with many other awards, and was given honorary doctorates from three universities after his death in 2019. Before his death, he wrote a memoir, \textit{Will to Freedom}, discussing his life and studies. At the age of 96, he published his textbook, \textit{Disjunctive Programming}. Egon made huge developments towards operations research, even after facing a treacherous life. Egon’s binary integer programming would start his long history of creating algorithms to solve complex problems. His branch-and-bound and additive algorithms, along with disjunctive programming, were utilized in various industries for scheduling problems. 
 
-\begin{center}
-{\small \textbf{This spotlight was contributed by Irma Adams}}
-\end{center}
+\noindent{\centering\small \textbf{This spotlight was contributed by Irma Adams}\par}
 \printbibliography[heading=subbibliography]
 \end{pioneerspotlight}
 \end{refsection} 
 
 \section{Interpreting Output Information and Progress}
-\todoSection{Write this section.  Include screenshot of a solver log}
-
 
 \includefigurestatic[This shows the progress of the solver over time.][width=0.90\linewidth][h]{solve_progress1.png}
 
@@ -899,14 +852,11 @@ While traditional branching is binary, considering multi-way branching—where a
 
 In essence, delving into a problem's specific structure and reformulations can pave the way for innovative and more efficient branching strategies.
 
-
 \paragraph{Advanced Branching Techniques with Machine Learning}
 
 Branching algorithms in commercial solvers are highly tuned for performance. They often incorporate advanced strategies, including periodic restarts, to improve the branching tree's structure and efficiency. In recent years, machine learning techniques have been employed and studied to devise better branching rules. These techniques can be tailored for specific problem classes or designed for general use cases. Machine learning can be applied in an offline setting, where the algorithm learns from a set of instances and then applies the knowledge to new instances, or in an online fashion, where the algorithm refines its branching rules during the branching process. Furthermore, machine learning has been utilized to estimate the overall size of the branch-and-bound tree required to reach optimality. Notably, such techniques have been implemented in the open-source solver SCIP.
 
-
 The choice of branching rule is crucial in determining the efficiency of the branch-and-bound algorithm for integer programming. With the advent of machine learning and continuous advancements in optimization techniques, the landscape of branching strategies is rapidly evolving, offering promising avenues for even more efficient integer programming solutions.
-
 
 There is a few clever ideas out there on how to choose which variables to branch on.  We will not go into this here.  But for the interested reader, look into 
 \begin{itemize}
@@ -919,14 +869,11 @@ There is a few clever ideas out there on how to choose which variables to branch
 A thorough study of the decompsition approaches discussed in this section are not necessary at this point, but we add some high level discussion here regarding the techniques to give the reader a sense of what approaches can be taken when the models chosen are not solving fast enough.  
 \end{outcome}
 
-
 We will discuss briefly three key decomposition approaches: Lagrangian Relaxation, Dantzig-Wolfe Reformulation (with column generation and branch and price), and Benders Decomposition.
 
 We will give more attention to these approaches in a much later part of this book on Advanced Integer Programming Techniques.
 
 \subsection{Lagrangian Relaxation}
-
-
 
 Lagrangian relaxation is a powerful technique in integer programming designed to simplify complex problems by moving certain complicating constraints into the objective function. The essence of this method lies in "relaxing" these constraints, allowing them to be violated at a cost. This is achieved by associating each relaxed constraint with a Lagrange multiplier, which then penalizes the objective function based on the degree of violation.
 
@@ -936,10 +883,7 @@ Within a branch-and-bound framework, Lagrangian relaxation can be particularly e
 
 In summary, Lagrangian relaxation offers a strategic approach to handle complicating constraints in integer programming, facilitating the generation of strong relaxations and enhancing the efficiency of algorithms like branch-and-bound.
 
-
-
 See~\cite{Fisher2004}  \href{https://my.eng.utah.edu/~kalla/phy_des/lagrange-relax-tutorial-fisher.pdf}{(link)} for a tutorial on Lagrangian Relaxations.
-
 
 \subsection{Dantzig-Wolfe Reformulation and Column Generation}
 
@@ -952,7 +896,6 @@ The primary advantage of Dantzig-Wolfe reformulation is that it transforms the o
 \paragraph{Branch-and-Price} is an extension of the branch-and-bound method that incorporates column generation. In a branch-and-price algorithm, the branching process is applied to the master problem, but at each node of the branching tree, column generation is used to dynamically generate the necessary columns. This approach combines the power of Dantzig-Wolfe reformulation and column generation with the systematic search of branch-and-bound, allowing for the efficient solution of large-scale integer programming problems with a decomposable structure.
 
 In summary, Dantzig-Wolfe reformulation provides a foundation for decomposing complex optimization problems. When combined with column generation and the branch-and-price framework, it offers a potent toolkit for tackling large-scale, structured integer programming challenges.
-
 
 Dantzig-Wolfe reformulation, combined with column generation and branch-and-price techniques, has been instrumental in solving a variety of large-scale combinatorial optimization problems. Some of the key applications include:
 
@@ -972,8 +915,6 @@ Dantzig-Wolfe reformulation, combined with column generation and branch-and-pric
 
 These applications underscore the versatility and power of Dantzig-Wolfe reformulation and associated techniques. By decomposing complex problems into more manageable subproblems, these methods provide a structured and efficient approach to tackle large-scale, real-world optimization challenges.
 
-
-
 \subsection{Benders Decomposition}
 
 Benders' decomposition is a mathematical optimization technique designed to tackle problems with a specific structure, where decision variables can be partitioned into two sets, often referred to as the "master" and "subproblem" variables. The primary idea behind Benders' decomposition is to solve the problem iteratively, addressing the master problem and subproblem separately, and then linking them through optimality and feasibility cuts.
@@ -984,9 +925,7 @@ One of the most notable applications of Benders' decomposition is in Stochastic 
 
 In summary, Benders' decomposition offers a strategic approach to decompose and solve complex optimization problems, with its application in Stochastic Programming standing out as a testament to its efficacy in handling uncertainty and multi-stage decision-making.
 
-
 \section{Literature and Resources}
-
 
 \begin{resource}
 LP Rounding
@@ -1020,5 +959,4 @@ Benders Decomposition
 \end{itemize}
 \end{resource}
 
-
-%\end{document}
+\end{document}

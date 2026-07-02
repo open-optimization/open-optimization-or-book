@@ -1,0 +1,19 @@
+% Accessibility wrapper for \includegraphics.
+% Caller syntax: \altincludegraphics[<graphicx opts>]{<image path>}{<alt text>}
+%
+% IMPORTANT: this file deliberately does NOT load the `pdfcomment` package.
+% pdfcomment transitively loads soulpos, which requires soul. The soul
+% package redefines \st as a strikethrough macro, but the book already
+% defines \st for "subject to" in preamble-optimization.tex -- the
+% collision breaks compilation everywhere \st is used (many places).
+% See LaTeX log: "soul-ori.sty:98: Command \st already defined."
+%
+% The alt text is preserved as the third argument so that PDF/UA tagging
+% can consume it later. When `\DocumentMetadata{tagging=on}` in
+% `book1-main.tex` is eventually re-enabled (currently disabled because
+% of a TeX Live 2025 amsmath/align conflict with tagpdf), this macro can
+% be updated to wire the alt text into the tagging system. For now the
+% image renders normally and the alt text sits in source.
+\newcommand{\altincludegraphics}[3][]{%
+  \includegraphics[#1]{#2}%
+}

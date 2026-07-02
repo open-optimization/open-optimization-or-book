@@ -1,0 +1,85 @@
+%%% accessibility-test-simple.tex
+%%% Simplified example demonstrating accessible graphics with alt text
+%%% This version does NOT require biblatex - alt text is provided directly
+%%%
+%%% IMPORTANT: This document requires:
+%%%   - TeX Live 2025 or newer
+%%%   - LuaLaTeX compiler (recommended) or pdfLaTeX
+%%%
+%%% Compile with:
+%%%   lualatex accessibility-test-simple.tex
+
+%% ============================================================================
+%% CRITICAL: DocumentMetadata MUST come before \documentclass
+%% This enables PDF tagging for accessibility
+%% ============================================================================
+%% Note: Use testphase for TeX Live 2025 (Jan), tagging=on for later releases
+\DocumentMetadata{
+  lang=en-US,
+  pdfversion=2.0,
+  testphase={phase-III}
+}
+
+\documentclass[12pt,letterpaper]{article}
+
+%% ============================================================================
+%% Packages
+%% ============================================================================
+\usepackage{graphicx}
+\usepackage{hyperref}
+
+% Graphics path
+\graphicspath{{../optimization/figures/figures-static/}{../optimization/figures/figures-source/}}
+
+%% ============================================================================
+%% Document Info
+%% ============================================================================
+\title{Accessibility Test Document (Simplified)\\{\large Testing Alt Text for Images}}
+\author{Robert Hildebrand}
+\date{\today}
+
+%% ============================================================================
+%% Document Body
+%% ============================================================================
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+This document tests the basic alt text functionality using the modern LaTeX
+tagging system. The key feature is the \texttt{alt=\{\}} option in
+\verb|\includegraphics|.
+
+\section{Image with Alt Text}
+
+Here is an image with embedded alt text:
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.6\linewidth, alt={A two-dimensional coordinate system showing a shaded polygonal region representing the feasible region of a linear program. The polygon is bounded by several linear constraint lines forming a convex shape.}]{LP-feasible-region.png}
+  \caption{Linear Programming Feasible Region}
+  \label{fig:lp-feasible}
+\end{figure}
+
+The alt text above will be embedded in the PDF structure and read by screen readers.
+
+\section{Another Example}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.5\linewidth, alt={A scatter plot showing two classes of data points separated by a linear decision boundary. Red circles represent one class and blue squares represent another. The margin between classes is shown as the region between two parallel dashed lines.}]{SVM-plot.png}
+  \caption{Support Vector Machine Classification}
+  \label{fig:svm}
+\end{figure}
+
+\section{Verifying Accessibility}
+
+To verify alt text is embedded:
+\begin{enumerate}
+  \item Open the PDF in Adobe Acrobat
+  \item View $\rightarrow$ Navigation Panels $\rightarrow$ Tags
+  \item Find Figure tags and check their properties
+\end{enumerate}
+
+\end{document}

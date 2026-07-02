@@ -1,0 +1,60 @@
+\documentclass[tikz,border=6pt]{standalone}
+
+\usepackage{amsmath,amssymb}
+\usetikzlibrary{calc,arrows.meta,shapes.geometric}
+
+\begin{document}
+
+\begin{tikzpicture}[scale=1.0]
+  % axes
+  \draw[-{Latex[length=2mm]}] (-0.2,0) -- (5.4,0) node[below right] {$x_1$};
+  \draw[-{Latex[length=2mm]}] (0,-0.2) -- (0,5.4) node[above left] {$x_2$};
+
+  % light grid guides + tick labels (drawn first)
+  \foreach \i in {1,...,5} {
+    \draw[gray!35] (\i,0) -- (\i,5);
+    \draw[gray!35] (0,\i) -- (5,\i);
+    \node[below] at (\i,-0.03) {\small \i};
+    \node[left]  at (-0.03,\i) {\small \i};
+  }
+
+  % === Halfspace cut: x_1 <= 3 (shade in gray and draw the cut line) ===
+  \def\cutx{3}
+  \path[fill=gray!40,opacity=0.25]
+    (-0.2,-0.2) -- (\cutx,-0.2) -- (\cutx,5.4) -- (-0.2,5.4) -- cycle;
+  \draw[gray!70,very thick,dashed] (\cutx,-0.15) -- (\cutx,5.4)
+    node[above,black] {$x_1=3$};
+
+  % feasible polygon vertices (original)
+  \def\vAD{(0.375,1.25)}           % A ∩ D
+  \def\vCD{(0.833333,0.333333)}    % C ∩ D
+  \def\vBC{(3.833333,3.333333)}    % B ∩ C
+  \def\vAB{(1.9,4.3)}              % A ∩ B
+\coordinate (optcut) at (3,3.75);
+  % --- Original feasible region fill (changed blue tone) + red outline kept
+  \fill[blue!50!cyan,opacity=0.3] \vAD -- \vCD --   (3,2.5)-- (optcut) --\vAB -- cycle;
+  \draw[red]                 \vAD -- \vCD -- \vBC -- \vAB -- cycle;
+
+  % --- Lattice points: draw AFTER the polygon so they are in front
+  \foreach \i in {0,...,5} {
+    \foreach \j in {0,...,5} {
+      \fill[black] (\i,\j) circle (1.5pt);
+    }
+  }
+
+  % Feasible integer grid points (same set, drawn on top)
+  \foreach \P in {(1,1),(1,2),(2,2),(2,3),(3,3),(2,4)}{
+    \fill[blue] \P circle (1.5pt);
+  }
+
+  % === New LP optimum with the cut x_1 <= 3 ===
+  % Intersections on x_1 = 3 with constraints:
+  %   with x1+2x2=10.5  -> (3, 3.75)
+  %   with x1-x2=0.5    -> (3, 2.5)  (lower intersection; not optimal)
+  % The maximizer of x1+x2 under x1<=3 is (3, 3.75).
+  
+  \node[star,star points=5,star point ratio=2.0,fill=red,draw=red,scale=0.35] at (optcut) {};
+
+\end{tikzpicture}
+
+\end{document}

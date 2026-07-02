@@ -1,0 +1,267 @@
+%%% preamble-accessible-graphics.tex
+%%% Accessible graphics commands with alt text support
+%%% Uses modern LaTeX tagging (TeX Live 2025+) and BibLaTeX metadata
+%%%
+%%% Alt text is pulled from the 'abstract' field in the .bib metadata files.
+%%%
+%%% Requirements:
+%%%   - \DocumentMetadata{tagging=on} before \documentclass
+%%%   - BibLaTeX with biber backend
+%%%   - TeX Live 2025 or newer (for alt= key support)
+
+\usepackage{xargs}
+\usepackage{xstring}
+
+%% ============================================================================
+%% Helper command to get alt text from bib entry
+%% Uses the 'abstract' field which stores our alt text descriptions
+%% ============================================================================
+
+% Command to extract alt text using BibLaTeX's internal mechanisms
+\makeatletter
+
+% Storage macro for the extracted alt text
+\newcommand{\OO@alttext}{}
+
+% Create a format that stores instead of prints
+\DeclareFieldFormat{OOalttext}{%
+  \gdef\OO@alttext{#1}%
+}
+
+% Command to extract alt text from a bib entry
+% Uses a custom cite command to access the abstract field
+\DeclareCiteCommand{\OOgetabstract}
+  {}
+  {\printfield[OOalttext]{abstract}}
+  {}
+  {}
+
+% Helper to include graphics with expanded alt text
+% This uses \expanded to force expansion of \OO@alttext before passing to \includegraphics
+\newcommand{\OO@includegraphicswithalt}[3]{%
+  % #1 = options, #2 = alt text macro, #3 = file path
+  \expanded{\noexpand\includegraphics[#1, alt={#2}]{#3}}%
+}
+
+\makeatother
+
+%% ============================================================================
+%% Footnote metadata command (same as original)
+%% ============================================================================
+
+\DeclareRobustCommand\footnotetextmetadata[1]{%
+  \footnotetext{\citetitle*{#1}, from \citeurl{#1}.
+    \citeauthor{#1}, \citedate{#1}.
+  }
+}
+
+%% ============================================================================
+%% ACCESSIBLE INLINE GRAPHICS (no figure environment)
+%% ============================================================================
+
+% \includegraphicstatic[options]{bibkey}
+% Includes image from figures-static/ folder with alt text from .bib abstract field
+\makeatletter
+\newcommandx{\includegraphicstatic}[2][1={width=.4\linewidth}, usedefault]{%
+  \OOgetabstract{#2}%
+  \begin{center}
+  \OO@includegraphicswithalt{#1}{\OO@alttext}{optimization/figures/figures-static/#2}\\
+  \end{center}
+  \centerline{\scriptsize \copyright~\citeauthor{#2}\protect\footnotemark}
+  \footnotetextmetadata{#2}%
+}
+
+% \includegraphicsource[options]{bibkey}
+% Includes image from figures-source/ folder with alt text from .bib abstract field
+\newcommandx{\includegraphicsource}[2][1={width=.4\linewidth}, usedefault]{%
+  \OOgetabstract{#2}%
+  \begin{center}
+  \OO@includegraphicswithalt{#1}{\OO@alttext}{optimization/figures/figures-source/#2}\\
+  \end{center}
+  \centerline{\scriptsize \copyright~\citeauthor{#2}\protect\footnotemark}
+  \footnotetextmetadata{#2}%
+}
+\makeatother
+
+%% ============================================================================
+%% NO-CITE VERSIONS (no copyright line or footnote metadata)
+%% Use these for your own graphics where attribution isn't needed
+%% ============================================================================
+
+\makeatletter
+% \includegraphicstaticnocite[options]{bibkey}
+% Includes image from figures-static/ with alt text but no citation/metadata
+\newcommandx{\includegraphicstaticnocite}[2][1={width=.4\linewidth}, usedefault]{%
+  \OOgetabstract{#2}%
+  \begin{center}
+  \OO@includegraphicswithalt{#1}{\OO@alttext}{optimization/figures/figures-static/#2}%
+  \end{center}
+}
+
+% \includegraphicsourcenocite[options]{bibkey}
+% Includes image from figures-source/ with alt text but no citation/metadata
+\newcommandx{\includegraphicsourcenocite}[2][1={width=.4\linewidth}, usedefault]{%
+  \OOgetabstract{#2}%
+  \begin{center}
+  \OO@includegraphicswithalt{#1}{\OO@alttext}{optimization/figures/figures-source/#2}%
+  \end{center}
+}
+\makeatother
+
+%% ============================================================================
+%% ACCESSIBLE FIGURE ENVIRONMENTS (with caption and label)
+%% ============================================================================
+
+% \includefigurestatic[caption][options][placement]{bibkey}
+% Full figure with caption (from argument or bib title), label, and alt text
+\makeatletter
+\newcommandx{\includefigurestatic}[4][1=\relax,2={width=.4\linewidth},3=t, usedefault]{%
+  \OOgetabstract{#4}%
+  \begin{figure}[#3]%
+    \centering%
+    \OO@includegraphicswithalt{#2}{\OO@alttext}{optimization/figures/figures-static/#4}\\
+    \centerline{\scriptsize \copyright~\citeauthor{#4}\protect\footnotemark}
+    \caption{%
+      \ifx#1\relax % Caption from TITLE field in .bib
+      \citetitle*{#4}%
+      \else        % Caption provided as an argument to the macro
+      #1%
+      \fi%
+    }%
+    \label{fig:#4}%
+  \end{figure}%
+  \footnotetextmetadata{#4}%
+}
+
+% \includefiguresource[caption][options][placement]{bibkey}
+% Full figure from figures-source/ folder
+\newcommandx{\includefiguresource}[4][1=\relax,2={width=.4\linewidth},3=t, usedefault]{%
+  \OOgetabstract{#4}%
+  \begin{figure}[#3]%
+    \centering%
+    \OO@includegraphicswithalt{#2}{\OO@alttext}{optimization/figures/figures-source/#4}\\
+    \centerline{\scriptsize \copyright~\citeauthor{#4}\protect\footnotemark}
+    \caption{%
+      \ifx#1\relax % Caption from TITLE field in .bib
+      \citetitle*{#4}%
+      \else        % Caption provided as an argument to the macro
+      #1%
+      \fi%
+    }%
+    \label{fig:#4}%
+  \end{figure}%
+  \footnotetextmetadata{#4}%
+}
+
+%% --- NO-CITE FIGURE ENVIRONMENTS ---
+%% These create figures with captions but no copyright line or footnote metadata
+
+% \includefigurestaticnocite[caption][options][placement]{bibkey}
+% Figure with caption but no citation/metadata - for your own graphics
+\newcommandx{\includefigurestaticnocite}[4][1=\relax,2={width=.4\linewidth},3=t, usedefault]{%
+  \OOgetabstract{#4}%
+  \begin{figure}[#3]%
+    \centering%
+    \OO@includegraphicswithalt{#2}{\OO@alttext}{optimization/figures/figures-static/#4}%
+    \caption{%
+      \ifx#1\relax % Caption from TITLE field in .bib
+      \citetitle*{#4}%
+      \else        % Caption provided as an argument to the macro
+      #1%
+      \fi%
+    }%
+    \label{fig:#4}%
+  \end{figure}%
+}
+
+% \includefiguresourcenocite[caption][options][placement]{bibkey}
+% Figure from figures-source/ with caption but no citation/metadata
+\newcommandx{\includefiguresourcenocite}[4][1=\relax,2={width=.4\linewidth},3=t, usedefault]{%
+  \OOgetabstract{#4}%
+  \begin{figure}[#3]%
+    \centering%
+    \OO@includegraphicswithalt{#2}{\OO@alttext}{optimization/figures/figures-source/#4}%
+    \caption{%
+      \ifx#1\relax % Caption from TITLE field in .bib
+      \citetitle*{#4}%
+      \else        % Caption provided as an argument to the macro
+      #1%
+      \fi%
+    }%
+    \label{fig:#4}%
+  \end{figure}%
+}
+\makeatother
+
+%% ============================================================================
+%% ACCESSIBLE FIGURE WITH AUTO-REFERENCE
+%% ============================================================================
+
+% \refincludefigurestatic[caption][options][placement]{bibkey}
+% Same as includefigurestatic but also auto-references the figure
+\makeatletter
+\newcommandx{\refincludefigurestatic}[4][1=\relax,2={width=.4\linewidth},3=t, usedefault]{%
+  \OOgetabstract{#4}%
+  \begin{figure}[#3]%
+    \centering%
+    \OO@includegraphicswithalt{#2}{\OO@alttext}{optimization/figures/figures-static/#4}\\
+    \centerline{\scriptsize \copyright~\citeauthor{#4}\protect\footnotemark}
+    \caption{%
+      \ifx#1\relax
+      \citetitle*{#4}%
+      \else
+      #1%
+      \fi%
+    }%
+    \label{fig:#4}%
+  \end{figure}%
+  \autoref{fig:#4}\footnotetextmetadata{#4}%
+}
+
+% \refincludefiguresource[caption][options][placement]{bibkey}
+% Same as includefiguresource but also auto-references the figure
+\newcommandx{\refincludefiguresource}[4][1=\relax,2={width=.4\linewidth},3=t, usedefault]{%
+  \OOgetabstract{#4}%
+  \begin{figure}[#3]%
+    \centering%
+    \OO@includegraphicswithalt{#2}{\OO@alttext}{optimization/figures/figures-source/#4}\\
+    \centerline{\scriptsize \copyright~\citeauthor{#4}\protect\footnotemark}
+    \caption{%
+      \ifx#1\relax
+      \citetitle*{#4}%
+      \else
+      #1%
+      \fi%
+    }%
+    \label{fig:#4}%
+  \end{figure}%
+  \autoref{fig:#4}\footnotetextmetadata{#4}%
+}
+\makeatother
+
+%% ============================================================================
+%% MANUAL ALT TEXT OVERRIDE VERSIONS
+%% For cases where you want to specify alt text directly instead of from .bib
+%% ============================================================================
+
+% \includegraphicstaticalt[options]{bibkey}{alt text}
+% Same as includegraphicstatic but with manual alt text
+\newcommandx{\includegraphicstaticalt}[3][1={width=.4\linewidth}, usedefault]{%
+  \begin{center}
+  \includegraphics[#1, alt={#3}]{optimization/figures/figures-static/#2}\\
+  \end{center}
+  \centerline{\scriptsize \copyright~\citeauthor{#2}\protect\footnotemark}
+  \footnotetextmetadata{#2}%
+}
+
+% \includegraphicsourcealt[options]{bibkey}{alt text}
+% Same as includegraphicsource but with manual alt text
+\newcommandx{\includegraphicsourcealt}[3][1={width=.4\linewidth}, usedefault]{%
+  \begin{center}
+  \includegraphics[#1, alt={#3}]{optimization/figures/figures-source/#2}\\
+  \end{center}
+  \centerline{\scriptsize \copyright~\citeauthor{#2}\protect\footnotemark}
+  \footnotetextmetadata{#2}%
+}
+
+%%% End of preamble-accessible-graphics.tex
