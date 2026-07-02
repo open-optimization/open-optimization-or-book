@@ -134,8 +134,8 @@ We determine the range of values these parameters can take while preserving the 
 Note that we could also have written this as 
 \[
 \begin{aligned}
-\text{Maximize} \quad & \mathbf{c}^\top \mathbf{x} \\
-\text{subject to} \quad & A_x\mathbf{x} + I\mathbf{s}  = \mathbf{b}, \\
+\max \quad & \mathbf{c}^\top \mathbf{x} \\
+\st \quad & A_x\mathbf{x} + I\mathbf{s}  = \mathbf{b}, \\
 & \mathbf{x}, \mathbf{s} \geq \mathbf{0}
 \end{aligned}
 \]
@@ -164,15 +164,15 @@ s_3
 
 After applying the simplex method, we obtain the following optimal dictionary:
 
-\begin{tcolorbox}[colback=green!5!white, colframe=green!75!black,    
+\begin{tcolorbox}[colback=algopt!6, colframe=algopt, coltitle=white, fonttitle=\bfseries, sharp corners,
     width=1\textwidth,
     box align=center, 
     title=\textbf{Final Dictionary}]
 \[
 \begin{aligned}
-\text{Maximize} \quad 
+\max \quad 
 & z = 23 - s_1 - s_3 \\
-\text{subject to} \quad 
+\st \quad 
 & x = 4 - 2s_1 + s_3, \\
 & y = 5 + s_1 - s_3, \\
 & s_2 = 3 + 3s_1 - s_3, \\
@@ -206,14 +206,14 @@ We consider changes to each component of the RHS independently, starting with th
 
 The second constraint (corresponding to slack variable \( s_2 \)) originally has RHS value \( b_2 = 16 \). We now perturb this to \( 16 + \Delta \), where \( \Delta \in \mathbb{R} \), and investigate the effect.
 
-\begin{tcolorbox}[colback=gray!5!white, colframe=pink!75!black,    
+\begin{tcolorbox}[colback=sensbox!6, colframe=sensbox, coltitle=white, fonttitle=\bfseries, sharp corners,
     width=0.9\textwidth,
     box align=center, 
     title=\textbf{Perturbed Standard Form (RHS of Constraint 2)}]
 \[
 \begin{aligned}
-\text{Maximize} \quad & 2x + 3y \\
-\text{subject to} \quad 
+\max \quad & 2x + 3y \\
+\st \quad 
 & x + y + s_1 = 9 \quad & \text{(hours)} \\
 & 2x + y + s_2 = 16 + \Delta \quad & \text{(flour)} \\
 & x + 2y + s_3 = 14 \quad & \text{(sugar)} \\
@@ -229,8 +229,8 @@ s_2:= s_2' + \Delta \quad \Rightarrow \quad s_2' = s_2 - \Delta.
 Substituting into the system yields:
 \[
 \begin{aligned}
-\text{Maximize} \quad & 2x + 3y \\
-\text{subject to} \quad 
+\max \quad & 2x + 3y \\
+\st \quad 
 & x + y + s_1 = 9 \\
 & 2x + y + s_2= 16 + \Delta  & \Rightarrow &&  2x + y + s_2'= 16\\
 & x + 2y + s_3 = 14 \\
@@ -239,15 +239,16 @@ Substituting into the system yields:
 \]
 \end{tcolorbox}
 
-\subsubsection*{Adapting the Final Dictionary}
+\begin{steppanel}{sensbox}
+\sslab{Adapt the final dictionary}
 
 Since the structure of the problem remains the same in terms of the new variable \( s_2' \), we can substitute into the final dictionary:
 
 \[
 \begin{aligned}
-\text{Maximize} \quad 
+\max \quad 
 & z = 23 - s_1 - s_3 \\
-\text{subject to} \quad 
+\st \quad 
 & x = 4 - 2s_1 + s_3 \\
 & y = 5 + s_1 - s_3 \\
 & s_2'  = 3 + 3s_1 - s_3 
@@ -267,27 +268,30 @@ Equivalently, since \( b_2 = 16 + \Delta \), we require:
 \boxed{b_2 \geq 13}.
 \]
 
-\subsection*{Conclusion}
+\end{steppanel}
 
+\begin{steppanel}{sensbox}
+\sslab{Conclusion}
 The current basis \( B = \{x, y, s_2\} \) remains optimal under the RHS perturbation \( b_2 = 16 + \Delta \) as long as:
 \[
 \boxed{\Delta \geq -3} \Rightarrow b_2 \geq 13
 \]
 
-Beyond this range, \( s_2 < 0 \), and the current dictionary becomes infeasible — triggering a new pivot in the simplex method.
+Beyond this range, \( s_2 < 0 \), and the current dictionary becomes infeasible --- triggering a new pivot in the simplex method.
+\end{steppanel}
 
 \subsection{Perturbing \( b_1 \): A Nonbasic Slack Variable}
 
 The first constraint corresponds to slack variable \( s_1 \), which is currently \emph{nonbasic} and set to 0 in the optimal solution. Its original right-hand side is \( b_1 = 9 \). We now perturb it to \( 9 + \Delta \), where \( \Delta \in \mathbb{R} \), and examine how this affects the dictionary.
 
-\begin{tcolorbox}[colback=gray!5!white, colframe=pink!75!black,    
+\begin{tcolorbox}[colback=sensbox!6, colframe=sensbox, coltitle=white, fonttitle=\bfseries, sharp corners,
     width=0.9\textwidth,
     box align=center, 
     title=\textbf{Perturbed Standard Form (RHS of Constraint 1)}]
 \[
 \begin{aligned}
-\text{Maximize} \quad & 2x + 3y \\
-\text{subject to} \quad 
+\max \quad & 2x + 3y \\
+\st \quad 
 & x + y + s_1 = 9 + \Delta \quad & \text{(hours)} \\
 & 2x + y + s_2 = 16 \quad & \text{(flour)} \\
 & x + 2y + s_3 = 14 \quad & \text{(sugar)} \\
@@ -317,7 +321,7 @@ We substitute \( s_1 = s_1' - \Delta \) into the optimal dictionary:
 
 \[
 \begin{aligned}
-\text{Maximize} \quad 
+\max \quad 
 z &= 23 - s_1 - s_3 = 23 - (s_1' - \Delta) - s_3 = (23 + \Delta) - s_1' - s_3 \\
 x &= 4 - 2s_1 + s_3 = 4 - 2(s_1' - \Delta) + s_3 = (4 + 2\Delta) - 2s_1' + s_3 \\
 y &= 5 + s_1 - s_3 = 5 + (s_1' - \Delta) - s_3 = (5 - \Delta) + s_1' - s_3 \\
@@ -363,14 +367,14 @@ z = 23 + \Delta.
 
 The third constraint corresponds to slack variable \( s_3 \), which is currently \emph{nonbasic} and equal to 0 in the optimal solution. Its original right-hand side is \( b_3 = 14 \). We now perturb it to \( 14 + \Delta \), where \( \Delta \in \mathbb{R} \), and examine how this affects the dictionary.
 
-\begin{tcolorbox}[colback=gray!5!white, colframe=pink!75!black,    
+\begin{tcolorbox}[colback=sensbox!6, colframe=sensbox, coltitle=white, fonttitle=\bfseries, sharp corners,
     width=0.9\textwidth,
     box align=center, 
     title=\textbf{Perturbed Standard Form (RHS of Constraint 3)}]
 \[
 \begin{aligned}
-\text{Maximize} \quad & 2x + 3y \\
-\text{subject to} \quad 
+\max \quad & 2x + 3y \\
+\st \quad 
 & x + y + s_1 = 9 \quad & \text{(hours)} \\
 & 2x + y + s_2 = 16 \quad & \text{(flour)} \\
 & x + 2y + s_3 = 14 + \Delta \quad & \text{(sugar)} \\
@@ -396,7 +400,7 @@ Substitute \( s_3 = s_3' - \Delta \) into the optimal dictionary:
 
 \[
 \begin{aligned}
-\text{Maximize} \quad 
+\max \quad 
 z &= 23 - s_1 - s_3 = 23 - s_1 - (s_3' - \Delta) = (23 + \Delta) - s_1 - s_3' \\
 x &= 4 - 2s_1 + s_3 = 4 - 2s_1 + (s_3' - \Delta) = (4 - \Delta) - 2s_1 + s_3' \\
 y &= 5 + s_1 - s_3 = 5 + s_1 - (s_3' - \Delta) = (5 + \Delta) + s_1 - s_3' \\
@@ -443,11 +447,11 @@ z = 23 + \Delta.
 
 We now examine how changes to the objective function coefficients affect the optimality of the current basis. In the original problem, the objective is:
 \[
-\text{Maximize} \quad 2x + 3y.
+\max \quad 2x + 3y.
 \]
 We now perturb these coefficients to:
 \[
-\text{Maximize} \quad (2 + \delta_1)x + (3 + \delta_2)y,
+\max \quad (2 + \delta_1)x + (3 + \delta_2)y,
 \]
 where \( \delta_1, \delta_2 \in \mathbb{R} \).
 
@@ -541,7 +545,7 @@ Outside these ranges, the reduced costs of nonbasic variables become positive, v
 
 \section{Sensitivity with Matrix Notation}
 
-\begin{tcolorbox}[colback=green!5!white, colframe=green!75!black,    
+\begin{tcolorbox}[colback=algopt!6, colframe=algopt, coltitle=white, fonttitle=\bfseries, sharp corners,
     width=1\textwidth, % adjust width as desired
     box align=center, 
     title=\textbf{Final Dictionary in Matrix Notation}]
@@ -905,8 +909,8 @@ described above.
 Consider the following linear program and its optimal dictionary:
 \[
 \begin{aligned}
-\text{Maximize} \quad & 4x_1 + 3x_2 \\
-\text{subject to} \quad
+\max \quad & 4x_1 + 3x_2 \\
+\st \quad
 & x_1 + x_2 \leq 10 \\
 & 2x_1 + x_2 \leq 16 \\
 & x_1, x_2 \geq 0
@@ -933,8 +937,8 @@ Using the same linear program and optimal dictionary from the previous exercise,
 A furniture workshop produces tables and chairs. The linear program is:
 \[
 \begin{aligned}
-\text{Maximize} \quad & 50x_1 + 30x_2 \quad \text{(profit in dollars)}\\
-\text{subject to} \quad
+\max \quad & 50x_1 + 30x_2 \quad \text{(profit in dollars)}\\
+\st \quad
 & 4x_1 + 2x_2 \leq 40 \quad \text{(wood in board-feet)} \\
 & 2x_1 + 3x_2 \leq 30 \quad \text{(labor in hours)} \\
 & x_1, x_2 \geq 0
@@ -953,8 +957,8 @@ The optimal solution is $x_1 = 7.5$, $x_2 = 5$, with optimal profit $z^* = 525$.
 Consider the LP:
 \[
 \begin{aligned}
-\text{Maximize} \quad & 5x_1 + 4x_2 \\
-\text{subject to} \quad
+\max \quad & 5x_1 + 4x_2 \\
+\st \quad
 & x_1 + x_2 + s_1 = 6 \\
 & 3x_1 + 2x_2 + s_2 = 15 \\
 & x_1, x_2, s_1, s_2 \geq 0
