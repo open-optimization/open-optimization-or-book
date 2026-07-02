@@ -16,7 +16,11 @@ jobs:
         git submodule sync --recursive
         git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive
     - name: install texlive
-      run: sudo DEBIAN_FRONTEND=noninteractive apt-get install texlive latexmk texlive-latex-extra texlive-science texlive-fonts-extra texlive-extra-utils texlive-bibtex-extra biber
+      run: |
+        sudo apt-get update
+        sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
+          texlive latexmk texlive-latex-extra texlive-science texlive-fonts-extra \
+          texlive-extra-utils texlive-bibtex-extra biber
     - name: make check
       run: make check
     - name: Get product file name
