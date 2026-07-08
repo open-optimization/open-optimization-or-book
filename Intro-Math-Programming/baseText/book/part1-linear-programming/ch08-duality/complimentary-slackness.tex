@@ -111,6 +111,10 @@ Thus, complementary slackness allowed us to determine the dual solution directly
 \item These conditions allow us to find missing solutions and verify optimality efficiently.
 \end{itemize}
 
+\begin{learningcheckpoint}[label={lc:cs-leftover}]
+At an optimal solution of the bakery problem, suppose two units of flour are left over (the flour constraint is not tight).  What does complementary slackness say about the shadow price of flour?  Explain in one sentence why this makes economic sense.
+\end{learningcheckpoint}
+
 \subsection*{Bakery 2.0 Example Revisited}
 
 \begin{example}{Verifying Optimality with Complementary Slackness}
@@ -216,37 +220,17 @@ Substitute back: \( 3(10) + y_3 = 40 \Rightarrow y_3 = 10 \)
 Thus, the dual solution is fully recovered using complementary slackness.
 \end{example}
 
-\section{Summary: Why Learn Duality?}
+\subsection{Summary: Why Learn Duality?}
 
-\begin{tcolorbox}[colback=gray!5!white, colframe=black!75!white, title=\textbf{Duality in Practice: Why It Matters}]
-Most students and practitioners rarely write down the dual linear program explicitly. 
-However, understanding duality is essential to interpreting the output of optimization solvers 
-and making informed decisions. Here's why:
+Most students and practitioners rarely write down the dual linear program explicitly.
+However, understanding duality is essential to interpreting the output of optimization solvers
+and making informed decisions.
 
-\begin{enumerate}
-    \item \textbf{Shadow Prices (Dual Variables):}  
-    Solvers report shadow prices for each constraint—these are the dual variables. 
-    They tell you how much the objective function would improve if you relaxed a constraint by one unit.
-    
-    \item \textbf{No Need to Write the Dual LP:}  
-    In practice, you solve the primal LP. But the solver uses duality internally, and reports dual variables.
-    You don't have to formulate the dual LP yourself to benefit from duality.
-    
-    \item \textbf{Interpretation Comes from Duality Theory:}  
-    The economic meaning of shadow prices, the reasoning behind zero vs.\ nonzero values, and the marginal value of resources 
-    all rely on duality concepts such as dual feasibility and complementary slackness.
-    
-    \item \textbf{Sensitivity Analysis:}  
-    Duality enables rapid “what-if” analysis. With dual values, you can estimate the impact of changes to the RHS of constraints
-    without re-solving the LP.
+In practice, you solve the primal LP, but the solver uses duality internally and reports the dual variables as \emph{shadow prices} on each constraint---how much the objective would improve if you relaxed that constraint by one unit.  The economic meaning of those numbers, the reasoning behind zero versus nonzero values, and the marginal value of resources all rest on the duality concepts developed in this chapter: dual feasibility, strong duality, and complementary slackness.  Shadow prices also power rapid ``what-if'' sensitivity analysis, letting you estimate the impact of changing a right-hand side without re-solving the LP.
 
-    \item \textbf{Advanced Applications:}  
-    Duality is deeply embedded in advanced topics such as decomposition methods (e.g., Benders, Dantzig-Wolfe), primal-dual interior point methods, approximation algorithms, network flow problems, and large-scale linear and nonlinear optimization.
-\end{enumerate}
+As a small illustration, consider the LP below alongside typical solver output:
 
 \medskip
-
-\noindent\textbf{Example:}
 
 \begin{minipage}{0.48\textwidth}
 \textbf{Primal LP:}
@@ -275,17 +259,9 @@ and making informed decisions. Here's why:
 
 \medskip
 
-\noindent\textbf{Takeaway:}
-Even though the student or practitioner doesn't write or solve the dual LP, duality is \emph{crucial} to:
-\begin{itemize}
-    \item Understanding shadow prices
-    \item Explaining optimality conditions
-    \item Making informed managerial decisions
-    \item Building more advanced optimization tools and algorithms
-\end{itemize}
+Without ever writing the dual, the solver output already speaks its language: labor is the scarce resource (an extra hour is worth \$10), while material is not fully used (its shadow price is zero---exactly what complementary slackness predicts).
 
-For students continuing in optimization, operations research, or algorithms, duality will return again and again—not as a side topic, but as a core idea that enables algorithmic design and decomposition for solving large and complex problems.
-\end{tcolorbox}
+For students continuing in optimization, operations research, or algorithms, duality will return again and again---not as a side topic, but as a core idea behind decomposition methods (e.g., Benders, Dantzig--Wolfe), primal-dual interior point methods, approximation algorithms, and large-scale optimization.
 
 \section{Exercises}
 
@@ -576,7 +552,7 @@ $$
 \end{ex}
 
 \begin{ex}
-
+\label{ex:cs-claimed-optimal}
 Suppose a linear program has the following primal and dual formulations:
 
 \textbf{Primal:}
@@ -601,12 +577,22 @@ $$
 \end{aligned}
 $$
 
-Suppose the optimal primal solution is $x_1^* = 2, x_2^* = 0$.
+A student claims that the optimal primal solution is $x_1^* = 2, x_2^* = 0$.
 
 (a) Write down the complementary slackness conditions for this problem.
 
-(b) Use them to derive conditions on $y_1$ and $y_2$, and solve for the dual optimal solution $\y^*$.
+(b) Assuming the student's claim, use the conditions to derive requirements on $y_1$ and $y_2$.
 
-(c) Verify whether the resulting $\y^*$ is dual feasible.
+(c) Show that no feasible dual solution satisfies these requirements, and conclude that the student's claimed solution cannot be optimal.  What is the actual optimal solution?
 \end{ex}
+
+\subsubsection*{Selected Solutions}
+
+\begin{solution}(Exercise~\ref{ex:cs-claimed-optimal})
+(a) The conditions are $y_1(x_1 + x_2 - 4) = 0$, $y_2(2x_1 + x_2 - 5) = 0$, $x_1(y_1 + 2y_2 - 3) = 0$, and $x_2(y_1 + y_2 - 2) = 0$.
+
+(b) At $(x_1, x_2) = (2, 0)$: the first primal constraint gives $2 < 4$ (slack), forcing $y_1 = 0$; the second gives $4 < 5$ (slack), forcing $y_2 = 0$.  But $x_1 = 2 > 0$ requires the first dual constraint to be tight: $y_1 + 2y_2 = 3$.
+
+(c) With $y_1 = y_2 = 0$ we get $0 = 3$, a contradiction---no dual solution is compatible, so $(2,0)$ is not optimal.  (It is feasible, but both constraints have slack, so we can do better.)  The actual optimum is $(x_1, x_2) = (1, 3)$ with value $9$: both primal constraints are tight, and solving $y_1 + 2y_2 = 3$, $y_1 + y_2 = 2$ gives the dual optimum $\y^* = (1,1)$ with matching value $4(1) + 5(1) = 9$.
+\end{solution}
 

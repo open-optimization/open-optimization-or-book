@@ -5,6 +5,7 @@
 %See http://creativecommons.org/licenses/by-sa/4.0/
 
 \chapter{Duality}
+\label{ch:duality}
 
 \begin{outcome}
 You will learn
@@ -14,6 +15,10 @@ You will learn
 \item Correspondence between the primal (original) and dual problems
 \end{itemize}
 \end{outcome}
+
+\begin{quote}
+\itshape A rival baker knocks on your door with an offer: ``Don't bake tomorrow. Sell me your whole pantry---every unit of flour and sugar---and take the day off.'' You would only accept if the payment beats every plan you could bake yourself, so the rival must price each ingredient carefully: the ingredients that go into one cake must fetch at least a cake's profit, and likewise for cookies---otherwise you would simply say no and bake. The rival, of course, wants the cheapest offer that convinces you. Remarkably, that cheapest convincing offer turns out to equal your best baking profit \emph{exactly}. Finding the rival's prices is a linear program too---the \emph{dual} of yours.
+\end{quote}
 
 \section{Duality Theory}
 
@@ -68,6 +73,41 @@ Why? Because if the coefficients on $x_1$ and $x_2$ in our combined inequality d
 
 Thus, by choosing $y_1$ and $y_2$, we obtain a valid upper bound on the maximum profit. If we try to minimize $4y_1 + 5y_2$ over all $y_1, y_2 \geq 0$ that satisfy these inequalities, we find the best (smallest) upper bound on our original problem.
 
+The whole argument is a pipeline that starts from the constraints you already have and ends at a brand-new optimization problem.  Figure~\ref{fig:duality-pipeline} summarizes it.  The key realization is in the last step: searching for the \emph{best} certificate is itself a linear program.
+
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}[
+    node distance=1.05cm,
+    box/.style={rectangle, rounded corners=3pt, draw=blue!60!black, fill=blue!5,
+                text width=8.2cm, align=center, inner sep=7pt, font=\small},
+    dualbox/.style={rectangle, rounded corners=3pt, draw=green!60!black, fill=green!5,
+                text width=8.2cm, align=center, inner sep=7pt, font=\small},
+    lbl/.style={font=\scriptsize\itshape, text=black!70, align=left},
+    arr/.style={-{Stealth}, thick, draw=black!70}
+]
+\node[box] (constraints) {\textbf{Start with the primal constraints}\\[2pt]
+  $x_1 + x_2 \leq 4$ (flour) \qquad $2x_1 + x_2 \leq 5$ (sugar)};
+\node[box, below=of constraints] (combine) {\textbf{Combine them into one inequality}\\[2pt]
+  $(y_1 + 2y_2)\,x_1 + (y_1 + y_2)\,x_2 \;\leq\; 4y_1 + 5y_2$};
+\node[box, below=of combine] (dominate) {\textbf{Make the left side dominate the profit}\\[2pt]
+  $y_1 + 2y_2 \geq 3$ \qquad $y_1 + y_2 \geq 2$\\[2pt]
+  $\Longrightarrow\; 3x_1 + 2x_2 \;\leq\; 4y_1 + 5y_2$ \quad (a certificate!)};
+\node[dualbox, below=of dominate] (dual) {\textbf{Hunt for the best certificate}\\[2pt]
+  $\min\; 4y_1 + 5y_2$ \; s.t. \; $y_1 + 2y_2 \geq 3$, \; $y_1 + y_2 \geq 2$, \; $y \geq 0$\\[2pt]
+  \emph{This is the dual LP!}};
+\draw[arr] (constraints) -- node[lbl, right=3pt] {multiply by $y_1, y_2 \geq 0$ and add} (combine);
+\draw[arr] (combine) -- node[lbl, right=3pt] {choose $y$ so coefficients cover $3$ and $2$} (dominate);
+\draw[arr] (dominate) -- node[lbl, right=3pt] {minimize the bound over all valid $y$} (dual);
+\end{tikzpicture}
+\caption{From constraints to the dual: every feasible $y$ certifies an upper bound on profit, and the dual LP finds the best certificate.}
+\label{fig:duality-pipeline}
+\end{figure}
+
+\begin{learningcheckpoint}[label={lc:duality-certificate}]
+In the bakery problem, take multipliers $y_1 = 3$ and $y_2 = 0$.  Verify that this choice satisfies both dominance conditions, and compute the resulting upper bound on profit.  Then compare it with the bound from $y_1 = 1,\, y_2 = 1$.  Which certificate is better?  Can you find one better still?
+\end{learningcheckpoint}
+
 \subsection*{General Derivation of the Dual}
 
 We started with the primal problem in a general form:
@@ -108,7 +148,7 @@ So, $\b^\top \y = \sum_{i=1}^m y_i b_i$ is an upper bound on the maximum primal 
 \end{aligned}
 \]
 
-This is the \emph{dual} problem. In our bakery scenario, this dual formulation corresponds to adjusting the prices (the $y$ values can be thought of as "shadow prices") you would assign to each ingredient such that if you charge yourself for using these ingredients at these shadow prices, you end up with the smallest possible "bill" that still always surpasses or equals your maximum possible profit. The beauty of the Strong Duality Theorem ensures that the optimal primal value equals the optimal dual value.
+This is the \emph{dual} problem. In our bakery scenario, this dual formulation corresponds to adjusting the prices (the $y$ values can be thought of as "shadow prices") you would assign to each ingredient such that if you charge yourself for using these ingredients at these shadow prices, you end up with the smallest possible "bill" that still always surpasses or equals your maximum possible profit. The beauty of the Strong Duality Theorem ensures that the optimal primal value equals the optimal dual value. This is precisely the rival baker's problem from the start of the chapter: the constraints $A^\top \y \geq \c$ say the offer must beat baking, product by product, and the objective $\min \b^\top \y$ is the rival shopping for the cheapest offer that still convinces you.
 
 From the above reasoning, we have shown that if $x$ is feasible for the primal and $y$ is feasible for the dual, then $c^\top x \leq b^\top y$. In other words, the value of any feasible primal solution is always bounded above by the value of any feasible dual solution.
 
@@ -334,7 +374,34 @@ If the optimal dual solution is $y_1^* = 1, y_2^* = 1$, then:
 \item The shadow price of sugar is 1 — each extra unit of sugar increases profit by \$1.
 \end{itemize}
 
-\noindent \textbf{Example: Bakery 2.0}
+\subsubsection*{The Dual of the Running Example}
+
+We can now close the loop with the running example of Chapters~\ref{ch:simplex-dictionary}--\ref{ch:sensitivity}. Its primal and dual are:
+\[
+\begin{aligned}
+\max \quad & 2x + 3y \\
+\st \quad
+& x + y \leq 9 \quad & \text{(hours)} \\
+& 2x + y \leq 16 \quad & \text{(flour)} \\
+& x + 2y \leq 14 \quad & \text{(sugar)} \\
+& x, y \geq 0
+\end{aligned}
+\qquad\qquad
+\begin{aligned}
+\min \quad & 9y_1 + 16y_2 + 14y_3 \\
+\st \quad
+& y_1 + 2y_2 + y_3 \geq 2 \quad & \text{($x$ column)} \\
+& y_1 + y_2 + 2y_3 \geq 3 \quad & \text{($y$ column)} \\
+& y_1, y_2, y_3 \geq 0.
+\end{aligned}
+\]
+In Chapter~\ref{ch:sensitivity} we computed the shadow prices of this problem from the final dictionary: \$1 per hour, \$0 per unit of flour, \$1 per unit of sugar. Try that vector, $\y^* = (1, 0, 1)$, in the dual. It is feasible---the first constraint gives $1 + 0 + 1 = 2 \geq 2$ and the second gives $1 + 0 + 2 = 3 \geq 3$, both tight---and its objective value is
+\[
+9(1) + 16(0) + 14(1) = 23,
+\]
+exactly the optimal primal profit. By weak duality no dual solution can do better, so the shadow prices \emph{are} the optimal dual solution. Note also that flour, the resource with slack at the optimum ($s_2 = 3$), is precisely the one priced at zero---a pattern we will formalize as \emph{complementary slackness}.
+
+You can experiment with this yourself: drag the multipliers on the three constraints in the \href{https://www.desmos.com/calculator/d2d5c861c3}{Desmos duality explorer} (\href{https://open-optimization.github.io/open-optimization-or-book/Intro-Math-Programming/baseText/interactive-figures/lp-duality-explorer.html}{backup interactive plot}) and watch the combined inequality sweep across the feasible region---every valid combination of multipliers gives an upper bound on the profit, and the best one touches the optimal vertex.
 
 The primal problem describes a bakery optimizing the production of cakes, cookies, and muffins to maximize profit. The constraints represent limited resources: flour, sugar, and baking time. The dual problem attaches a shadow price to each of these resources, reflecting their marginal value.
 
@@ -452,9 +519,10 @@ This ensures equilibrium: no profitable arbitrage is possible, and every unit of
 
 \section{Different Primal–Dual Forms}
 
-The form of a dual problem depends on the primal's objective (maximize or minimize), inequality directions, and sign constraints on variables. The following layout uses paired boxes to clearly compare each primal and its dual.
+The form of a dual problem depends on the primal's objective (maximize or minimize), inequality directions, and sign constraints on variables.  Rather than memorizing a separate rule for every combination, it helps to see a few representative primal--dual pairs side by side and notice the pattern: constraint types in one problem control variable signs in the other, and vice versa.  We walk through four common cases below.
 
-\subsection*{1. Maximization with $=$ Constraints (Standard Form)}
+\paragraph{Case 1: Maximization with $=$ constraints (standard form).}
+When the primal constraints are equalities, we may combine them with multipliers of \emph{any} sign, so the dual variables come out free.  This is the form produced by adding slack variables, so it is the version most often seen inside the simplex method.
 
 \begin{multicols}{2}
 \begin{tcolorbox}[title=Primal (P), colback=blue!5, colframe=blue!40!black]
@@ -480,7 +548,8 @@ The form of a dual problem depends on the primal's objective (maximize or minimi
 \end{tcolorbox}
 \end{multicols}
 
-\subsection*{2. Minimization with $\leq$ Constraints}
+\paragraph{Case 2: Minimization with $\leq$ constraints.}
+Duality is symmetric: a minimization primal produces a maximization dual, and the roles of $\b$ and $\c$ swap.  Note how the direction of the constraints and the sign restrictions mirror the maximization case.
 
 \begin{multicols}{2}
 \begin{tcolorbox}[title=Primal (P), colback=blue!5, colframe=blue!40!black]
@@ -506,7 +575,8 @@ The form of a dual problem depends on the primal's objective (maximize or minimi
 \end{tcolorbox}
 \end{multicols}
 
-\subsection*{3. Equality Constraints in the Primal}
+\paragraph{Case 3: Free variables in the primal.}
+If a primal variable is free, we lose the ability to relax its coefficient---the bound argument only works when the dual coefficients match the objective exactly.  Free primal variables therefore force \emph{equality} constraints in the dual.
 
 \begin{multicols}{2}
 \begin{tcolorbox}[title=Primal (P), colback=blue!5, colframe=blue!40!black]
@@ -532,7 +602,8 @@ The form of a dual problem depends on the primal's objective (maximize or minimi
 \end{tcolorbox}
 \end{multicols}
 
-\subsection*{4. Sign Variations in Primal Variables and Constraints}
+\paragraph{Case 4: Sign variations in primal variables and constraints.}
+The remaining variations all follow from the same bounding logic.  Each rule below can be checked by asking: what must be true of the multipliers for the combined constraint to bound the objective?
 
 \begin{itemize}
   \item If a primal variable \( x_j \) is unrestricted (free), the corresponding dual constraint is an \emph{equality}.
@@ -540,37 +611,17 @@ The form of a dual problem depends on the primal's objective (maximize or minimi
   \item If a primal constraint \( a_i^\top \mathbf{x} \leq b_i \) is changed to \( \geq b_i \), then the sign constraint on the corresponding dual variable \( y_i \) flips.
 \end{itemize}
 
-\textbf{Example: Primal with Free Variables and Equalities}
-
-\begin{multicols}{2}
-\begin{tcolorbox}[title=Primal (P), colback=blue!5, colframe=blue!40!black]
-\[
-\begin{aligned}
-\max\ & \mathbf{c}^\top \mathbf{x} \\
-\text{s.t.} \quad & A \mathbf{x} \leq \mathbf{b} \\
-& \mathbf{x} \text{ free}
-\end{aligned}
-\]
-\end{tcolorbox}
-
-\columnbreak
-
-\begin{tcolorbox}[title=Dual (D), colback=green!5, colframe=green!40!black]
-\[
-\begin{aligned}
-\min\ & \mathbf{b}^\top \mathbf{y} \\
-\text{s.t.} \quad & A^\top \mathbf{y} = \mathbf{c} \\
-& \mathbf{y} \geq 0
-\end{aligned}
-\]
-\end{tcolorbox}
-\end{multicols}
-
-\bigskip
-
 This structured approach helps you identify how each component in the primal affects the dual—particularly how inequality direction and sign restrictions control the dual variable domain and constraint form.
 
 As you can see, changing the primal’s constraints and variable domains changes the structure of the dual problem. Every such transformation has a corresponding primal-dual pair that maintains the duality principles. In each case, the weak and strong duality theorems still apply.
+
+\begin{learningcheckpoint}[label={lc:dual-forms}]
+Without writing out a full derivation, predict the form of the dual of
+\[
+\min\; \c^\top \x \quad \text{s.t.}\quad A\x \geq \b,\ \x \geq 0.
+\]
+Is the dual a maximization or minimization?  Are the dual variables sign-restricted or free?  Are the dual constraints inequalities or equalities?
+\end{learningcheckpoint}
 
 \subsection*{Deriving the Dual with Equality Constraints}
 
@@ -994,6 +1045,7 @@ This example illustrates how careful sign and inequality management gives rise t
 \section{Exercises}
 
 \begin{ex}{Formulate the Dual}{}
+\label{ex:formulate-dual}
 Write the dual of the following linear program:
 \[
 \begin{aligned}
@@ -1007,6 +1059,7 @@ Write the dual of the following linear program:
 \end{ex}
 
 \begin{ex}{Weak Duality Bound}{}
+\label{ex:weak-duality-bound}
 Consider the primal LP:
 \[
 \begin{aligned}
@@ -1077,4 +1130,27 @@ Consider the primal LP:
 \item Is the dual feasible, infeasible, or unbounded? Explain using the strong duality theorem.
 \end{enumerate}
 \end{ex}
+
+\subsubsection*{Selected Solutions}
+
+\begin{solution}(Exercise~\ref{ex:formulate-dual})
+There are two constraints, so the dual has two variables $y_1, y_2 \geq 0$, one per constraint.  Each of the three primal variables produces a dual constraint whose right-hand side is that variable's objective coefficient:
+\[
+\begin{aligned}
+\text{Minimize} \quad & 10y_1 + 12y_2 \\
+\text{subject to} \quad
+& y_1 + 3y_2 \geq 4 \\
+& 2y_1 + y_2 \geq 5 \\
+& y_1 + 2y_2 \geq 3 \\
+& y_1, y_2 \geq 0.
+\end{aligned}
+\]
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:weak-duality-bound})
+The dual is $\min\, 4y_1 + 6y_2$ subject to $y_1 + 2y_2 \geq 3$, $y_1 + y_2 \geq 2$, $y_1, y_2 \geq 0$.
+For $\y = (1,1)$: $1 + 2 = 3 \geq 3$ and $1 + 1 = 2 \geq 2$, so $\y$ is dual feasible with objective $4(1) + 6(1) = 10$.
+For $\x = (2,2)$: $2 + 2 = 4 \leq 4$ and $4 + 2 = 6 \leq 6$, so $\x$ is primal feasible with objective $3(2) + 2(2) = 10$.
+By weak duality, every primal value is at most every dual value, so the optimal value $z^*$ satisfies $10 \leq z^* \leq 10$.  Since the two bounds coincide, both solutions are in fact optimal and $z^* = 10$.
+\end{solution}
 

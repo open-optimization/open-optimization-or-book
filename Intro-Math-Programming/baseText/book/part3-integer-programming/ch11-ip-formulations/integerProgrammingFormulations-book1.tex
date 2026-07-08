@@ -18,6 +18,11 @@
 \item[C.]  Demonstrate the format for modeling an optimization problem with sets, parameters, variables, and the model.
 \end{enumerate}
 \end{outcome}
+
+\begin{quote}
+\itshape Your linear program says to build 2.7 warehouses and route 3.4 trucks. Rounding up to 3 warehouses might blow the budget; rounding down to 2 might leave demand unmet; and neither rounded plan is necessarily anywhere near the best whole-number plan. Worse, many decisions are not quantities at all but choices---open this facility or don't, assign this job to that machine or not---where ``0.7 of a yes'' means nothing. Requiring variables to take integer values looks like a small change to a linear program. It is not: it buys enormous modeling power, and this chapter is a tour of what that power can express.
+\end{quote}
+
 %\begin{comment}
 %We will learn about complexity theory in a subsequent section.  But take note of the complexity classification of each problem ( \polynomial,\npcomplete, \nphard) to get a sense of how difficult the problem is.  We will define these terms later.
 %\end{comment}
@@ -296,7 +301,7 @@ Center 3 & 180,000 & 90  & \$65 & \$80 & \$40 & \$60 \\
 \textbf{Model Formulation:}
 The capacitated facility location model described earlier can be applied to this scenario with the given data to determine the optimal number and location of distribution centers to open, and which stores each center should serve.
 \begin{center}
-\includegraphicstatic[scale = 0.75]{facility-location}
+\includegraphicbook[scale = 0.75]{facility-location}
 \end{center}
 \end{examplewithcode}
 
@@ -433,9 +438,11 @@ In the fire station problem, we seek to choose locations for fire stations such 
 \end{align}
 \end{examplewithcode}
 
-\includefiguresource[Layout of districts and possible locations of fire stations.][][h]{tikz-Illustration1.pdf}
-\includefiguresource[Set cover representation of fire station problem.  For example, choosing district 16 to have a fire station covers districts 13, 15, and 16.]{tikz-Illustration2.pdf}
-\includefiguresource[Graph representation of fire station problem.  Every node is connected to a chosen node by an edge]{tikz-Illustration3.pdf}
+\includefigurebooksource[Layout of districts and possible locations of fire stations.][][h]{tikz-Illustration1.pdf}
+\includefigurebooksource[Set cover representation of fire station problem.  For example, choosing district 16 to have a fire station covers districts 13, 15, and 16.]{tikz-Illustration2.pdf}
+\includefigurebooksource[Graph representation of fire station problem.  Every node is connected to a chosen node by an edge.]{tikz-Illustration3.pdf}
+
+Figure~\ref{fig:tikz-Illustration2.pdf} shows how the neighborhood structure translates into a set cover instance, and Figure~\ref{fig:tikz-Illustration3.pdf} gives an equivalent graph view of the same solution.
 
 
 \input{../optimization/open-optimization-examples/example-set-covering.tex}
@@ -720,7 +727,7 @@ The objective is to route flow from a source node \(s\) to a sink node \(t\) at 
 
 \end{example}
 
-\subsection*{NYC Transportation Network with Tolls}
+\subsubsection{Application: NYC Transportation Network with Tolls}
 
 Figure~\ref{fig:nyc_network} illustrates a simplified transportation network over the five boroughs of New York City, with selected connections to model bridges and tunnels. Each node represents a borough, and directed arcs represent feasible travel routes. Some of these arcs include tolls, which are incurred only in one direction, mimicking real-world tolling policies.
 
@@ -765,7 +772,7 @@ In the figure, solid green arrows represent toll-free travel, while dashed red a
 
 \begin{figure}[h!]
 \centering
-\includegraphicstatic[scale = 0.4]{new-york-tolls}
+\includegraphics[scale = 0.4]{optimization/figures/figures-static/new-york-tolls}
 \caption{Simplified NYC Transportation Network with Directional Tolls}
 \label{fig:nyc_network}
 \end{figure}
@@ -774,13 +781,13 @@ In the figure, solid green arrows represent toll-free travel, while dashed red a
 
 
 \subsection{Either Or Constraints}
-\emph{``At least one of these constraints holds"} is what we would like to model.  Equivalently, we can phrase this as an \emph{inclusive or} constraint.  This can be molded with a pair of Big-M constraints.
+The Big-M technique from the previous subsection activated a single constraint.  A closely related situation is when we have two constraints and we need \emph{at least one} of them to hold---an \emph{inclusive or}.  For example, a delivery might need to arrive either before a morning deadline or after an afternoon opening, or a budget must be satisfied in at least one of two currencies.  The trick is to use one binary variable to decide \emph{which} constraint is enforced, and a pair of Big-M constraints to relax whichever one is not selected.
 \begin{general}{Either Or}{}{}
 
 \begin{equation}
-\text{Either} \ \ \ a^\top x \leq b\ \  \text{  or  } \ \  c^\top x \leq d \ \ \text{holds} 
+\text{Either} \ \ \ a^\top x \leq b\ \  \text{  or  } \ \  c^\top x \leq d \ \ \text{holds}
 \end{equation}
-can be modeled as 
+can be modeled as
 \begin{equation}
 \begin{split}
 a^\top x - b &\leq M_1 \delta\\
@@ -796,9 +803,29 @@ where $M_1$ is an upper bound on $a^\top x - b$ and $M_2$ is an upper bound on $
     \item If \(\delta = 0\), then the first constraint becomes \(a^\top x \leq b\), and the second becomes \(c^\top x \leq d + M_2\), which is trivially satisfied if \(M_2\) is large enough.
     \item If \(\delta = 1\), then the second constraint becomes \(c^\top x \leq d\), while the first is relaxed as \(a^\top x \leq b + M_1\).
 \end{itemize}
+Either way, at least one of the two original constraints is enforced; the binary variable $\delta$ simply selects which one.
+
+Let's apply this recipe to a small example.
+
+\begin{example}{Buses or Cars}{}
+To shuttle students to the football game, we need either at least $2$ buses or at least $10$ cars.
+\begin{itemize}
+\item Let $x$ be the number of buses we have and
+\item let $y$ be the number of cars that we have.
+\end{itemize}
+We want to enforce that $x \geq 2$ or $y \geq 10$.  Writing these in the form used above, we need $-x \leq -2$ or $-y \leq -10$.  Since $x, y \geq 0$, we may take $M_1 = 2$ as an upper bound on $-x - (-2) = 2 - x$ and $M_2 = 10$ as an upper bound on $10 - y$.  The recipe gives
+\begin{equation}
+\begin{split}
+2 - x &\leq 2\delta\\
+10 - y &\leq 10 (1-\delta)\\
+\delta &\in \{0,1\},
+\end{split}
+\end{equation}
+which simplifies to $x \geq 2(1-\delta)$ and $y \geq 10\delta$.  If $\delta = 0$ we must have at least $2$ buses; if $\delta = 1$ we must have at least $10$ cars.
+\end{example}
 
 \paragraph{Choosing Big-M Values.}
-The constants \(M_1\) and \(M_2\) should be chosen as valid upper bounds on the expressions \(a^\top x - b\) and \(c^\top x - d\), respectively, over the feasible region. Overly large values may weaken the LP relaxation and cause numerical instability, so careful bounding is recommended whenever possible.
+The constants \(M_1\) and \(M_2\) should be chosen as valid upper bounds on the expressions \(a^\top x - b\) and \(c^\top x - d\), respectively, over the feasible region. Overly large values may weaken the LP relaxation and cause numerical instability, so careful bounding is recommended whenever possible.  In the example above, the bounds $M_1 = 2$ and $M_2 = 10$ are as tight as possible.
 
 \paragraph{Use Cases.}
 Either-or constraints naturally arise in problems with conditional decisions, such as:
@@ -807,26 +834,7 @@ Either-or constraints naturally arise in problems with conditional decisions, su
     \item In facility planning, either a site must be built with one configuration or another.
     \item In piecewise models where a variable must fall into one of two feasible regions.
 \end{itemize}
-
-
-
-\begin{example}{}{}
-Either $2$ buses or $10$ cars are needed shuttle students to the football game.  
-\begin{itemize}
-\item Let $x$ be the number of buses we have and 
-\item let $y$ be the number of cars that we have.  
-\end{itemize}
-Suppose that there are at most $M_1 = 5$ buses that could be rented an at most $M_2 = 20$ cars that could be available.
-
-This constraint can be modeled as 
-\begin{equation}
-\begin{split}
-x - 2 &\leq 5\delta\\
-y - 10 &\leq 20 (1-\delta)\\
-\delta &\in \{0,1\},
-\end{split}
-\end{equation}
-\end{example}
+We will see a substantial application of this idea---with more than two constraints in the disjunction---when we study 2D packing problems in Section~\ref{subsec:multi-term-disjunction}.
 \subsection{If then implications - opposite direction}
 Suppose that we want to model the fact that if we have at most 10 students attending this course, then we must switch to a smaller classroom.   
 
@@ -843,10 +851,11 @@ $$
 $$
 \end{quote}
 
-We can model this as 
+Using the recipe below with $b = 10$, $\epsilon = 1$ (the data are integer), and lower bound $m = -10$ on $\sum_{i \in I} x_i - 10$, we can model this as
 \begin{equation}
-\sum_{i \in I} x_i \geq 10 + 1 + M\delta.
+\sum_{i \in I} x_i \geq 10 + 1(1-\delta) + (-10)\delta = 11(1 - \delta).
 \end{equation}
+If $\delta = 0$, the constraint forces at least $11$ students; equivalently (by the contrapositive), whenever $10$ or fewer students attend, the model must set $\delta = 1$.
 
 
 \begin{general}{If inequality, then indicator}{}
@@ -864,7 +873,7 @@ a^\top x -b  \geq  \epsilon(1-\delta) + m \delta.
 
 
 
-\begin{proof}We not justify the statement above.
+\begin{proof}We now justify the statement above.
 
 A simple way to understand this constraint is to consider the \emph{contrapositive} of the if then statement that we want to model.  The contrapositive says that 
 \begin{equation}
@@ -956,6 +965,7 @@ $$
 If $\delta = 1$ does not effect the rest of the optimization problem, then adding the constraint regarding $\delta = 1$ is not necessary.  Hence, typically, in this scenario, we only need to add the constraint $a^\top x \leq b + M \delta$.
 
 \subsection{Multi Term Disjunction with application to 2D packing}
+\label{subsec:multi-term-disjunction}
 
 %\section{Generalized $k$-of-$n$ Disjunction}
 A disjunction is a generalization of an ``or'' statement. Suppose that we have $n$ constraints 
@@ -967,25 +977,25 @@ and we want to enforce at least $k$ of them. This can be accomplished linearly b
 	\mathbf{a}_1^\top\mathbf{x} &\leq b_1+M(1-\delta_1) \\
 	\mathbf{a}_2^\top\mathbf{x} &\leq b_2+M(1-\delta_2) \\
 								&\vdots 				\\
-	\mathbf{a}_n^\top\mathbf{x} &\leq b_n+M(1-\delta_1) \\
+	\mathbf{a}_n^\top\mathbf{x} &\leq b_n+M(1-\delta_n) \\
 	\sum_{i=1}^n\delta_i &\geq k
 	\end{align*}
-If $\delta_i = 1$, then the $i^\text{th}$ disjunctive constraint is actively enforced. The last constraint $\left(\sum_{i=1}^n\delta_i \geq 1\right)$ ensures that at least $k$ of the constraints is active.
+If $\delta_i = 1$, then the $i^\text{th}$ disjunctive constraint is actively enforced. The last constraint $\left(\sum_{i=1}^n\delta_i \geq k\right)$ ensures that at least $k$ of the constraints are active.
 
 \subsubsection{Strip Packing Problem}
-Suppose we a selection of rectangles $I$ and a 2-dimensional strip with width $W$ and infinite height. Each rectangle $i \in I$ has width $w_i$ and 
-height $h_i$ and we want to pack the rectangles into the strip so that \eqref{mod:StripPackingObj-simple} overall height is minimized, \eqref{mod:StripPackingWidth-simple} overall width is less than $W$, and \eqref{mod:StripPackingOverlap-simple} none of the rectangles overlap. See Figure \ref{fig:StripPacking} for an example.
+Suppose we have a collection of rectangles $I$ and a 2-dimensional strip with width $W$ and infinite height. Each rectangle $i \in I$ has width $w_i$ and
+height $h_i$ and we want to pack the rectangles into the strip so that \eqref{mod:StripPackingObj-simple} overall height is minimized, \eqref{mod:StripPackingWidth-simple} overall width is less than $W$, and \eqref{mod:StripPackingOverlap-simple} none of the rectangles overlap. See Figure \ref{fig:StripPacking} for an example: Figure \ref{fig:StripPacking-PackStrip} shows the rectangles to be packed, and Figure \ref{fig:StripPacking-MinHeight} shows a packing whose overall height $H$ we wish to minimize.
 	\begin{figure}[h!]
 	\begin{subfigure}[b]{.6\textwidth}
 	\centering
-	\includegraphicstatic[height=.4\textheight]{StripPacking0}
+	\includegraphics[height=.4\textheight]{optimization/figures/figures-static/StripPacking0}
 	\caption{Pack the rectangles into the strip}
 	\label{fig:StripPacking-PackStrip}
 	\end{subfigure}
 	\hfill
 	\begin{subfigure}[b]{.3\textwidth}
 	\centering
-	\includegraphicstatic[height=.4\textheight]{StripPacking1}
+	\includegraphics[height=.4\textheight]{optimization/figures/figures-static/StripPacking1}
 	\caption{Minimize overall height $H$.}
 	\label{fig:StripPacking-MinHeight}
 	\end{subfigure}
@@ -993,7 +1003,7 @@ height $h_i$ and we want to pack the rectangles into the strip so that \eqref{mo
 	\label{fig:StripPacking}
 	\end{figure}
 
-Let $(x_i,y_i)$ denote the position of the lower-left-hand corner of each rectangle $i \in I$. The overlapping constraint \eqref{mod:StripPackingOverlap-simple} is the trickiest part. Consider a pair of rectangles $i$ and $j$: rectangle $j$ is located entirely to the left of rectangle $i$ if $x_j$ has a value larger than $x_j+w_j$. That is, if $x_j \geq x_j+w_j$. On the other hand, if $y_j \geq y_i+h_i$, then rectangle $j$ is located entirely above rectangle $i$. If either of these constraints is satisfied then rectangles $i$ and $j$ do not overlap. We could also place $i$ above or to the right of $j$. This gives four constraints that we need to satisfy at least one of. The model can be thought of thusly:
+Let $(x_i,y_i)$ denote the position of the lower-left-hand corner of each rectangle $i \in I$. The overlapping constraint \eqref{mod:StripPackingOverlap-simple} is the trickiest part. Consider a pair of rectangles $i$ and $j$: rectangle $j$ is located entirely to the left of rectangle $i$ if $x_i$ has a value larger than $x_j+w_j$. That is, if $x_j + w_j \leq x_i$. On the other hand, if $y_j \geq y_i+h_i$, then rectangle $j$ is located entirely above rectangle $i$. If either of these constraints is satisfied then rectangles $i$ and $j$ do not overlap. We could also place $i$ above or to the right of $j$. This gives four constraints that we need to satisfy at least one of. The model can be thought of thusly:
 
 	\begin{subequations}
 	\begin{alignat}{4}
@@ -1024,8 +1034,8 @@ Constraint \eqref{mod:StripPackingOverlap-simple} is a set of four \textit{disju
 If $\delta_{ijk} = 1$, then the $k^\text{th}$ disjunctive constraint is actively enforced. The last constraint $\left(\sum_{k=1}^4\delta_{ijk} \geq 1\right)$ ensures that at least one of the constraints is active. An optimal solution to the example is given in Figure \ref{fig:StripPacking-Opt}; it was found via GurobiPy.
 	\begin{figure}[h!]
 	\centering
-	\includegraphicstatic[height=.4\textheight]{StripPacking2}
-	\caption{The Optimal Solution to the example problem}
+	\includegraphics[height=.4\textheight]{optimization/figures/figures-static/StripPacking2}
+	\caption{An optimal solution to the strip packing example.}
 	\label{fig:StripPacking-Opt}
 	\end{figure}
 
@@ -1037,10 +1047,13 @@ This problem is considered strongly NP-Hard.
 
 
 \subsection{SOS1 Constraints}
+The modeling tricks so far in this section were built by hand out of binary variables and Big-M constraints.  Certain logical structures come up so often, however, that modern solvers accept them directly as \emph{special ordered sets} (SOS).  Declaring an SOS constraint tells the solver about the structure explicitly, which both simplifies the model you write and lets the solver use specialized branching rules.
 \begin{definition}{Special Ordered Sets of Type 1 (SOS1)}
-A Special Ordered Sets of type 1 (SOS1) constraint on a vector indicates that \emph{at most one element of the vector can non-zero}.
+A Special Ordered Sets of type 1 (SOS1) constraint on a vector indicates that \emph{at most one element of the vector can be non-zero}.
 \end{definition}
-We next give an example of how to use binary variables to model this and then show how much simpler it can be coded using the SOS1 constraint.
+SOS1 constraints arise whenever a set of options is mutually exclusive: choosing one supplier out of several, operating a machine in one of several modes, or assigning a shipment to one of several routes.  If each $x_i$ has an upper bound $U_i$, we could model this ourselves by introducing a binary variable $z_i$ for each $x_i$ and writing $x_i \leq U_i z_i$ together with $\sum_i z_i \leq 1$.  Declaring an SOS1 constraint achieves the same effect with a single line of code and no extra variables.
+
+The following small example is deliberately simple---the point is not the optimization problem itself, but seeing both modeling styles side by side in code.
 
 \begin{examplewithcode}{SOS1 Constraints}{\href{https://github.com/open-optimization/open-optimization-or-examples/blob/master/nonlinear-programming/Gurobi-SOS-Examples.ipynb}{Gurobipy}}
 \label{example:sos1}
@@ -1049,12 +1062,16 @@ Solve the following optimization problem: \[\begin{aligned}
 \st \quad & 0 \le x_i \le 5 \\
 & \text{at most one of the $x_i$ can be nonzero}
 \end{aligned}\]
+Since only one variable may be nonzero, the best choice is to push the variable with the largest objective coefficient, $x_4$, to its upper bound: the optimal solution is $x_4 = 5$ with value $25$.
 \end{examplewithcode}
 \subsection{SOS2 Constraints}
 \begin{definition}{Special Ordered Sets of Type 2 (SOS2)}{}
-A \emph{Special Ordered Set of Type 2 (SOS2)} constraint on a vector indicates that \emph{at most two elements of the vector can non-zero AND the non-zero elements must appear consecutively}.
+A \emph{Special Ordered Set of Type 2 (SOS2)} constraint on a vector indicates that \emph{at most two elements of the vector can be non-zero AND the non-zero elements must appear consecutively}.
 \end{definition}
-We next give an example of how to use binary variables to model this and then show how much simpler it can be coded using the SOS2 constraint.
+At first glance this looks like a strange condition to single out, but it is exactly what is needed to model \emph{piecewise linear functions}: a point on a piecewise linear curve lies on one segment, and can therefore be written as a weighted average of the two \emph{consecutive} breakpoints at the ends of that segment.  We develop that application in the next subsection; here we first get comfortable with the constraint itself.
+
+The example below modifies the SOS1 example in only one way---two consecutive nonzeros are now allowed---so the two examples are easy to compare.  As before, the accompanying code shows both a binary-variable formulation and the one-line SOS2 declaration.
+
 \begin{examplewithcode}{SOS2}{\href{https://github.com/open-optimization/open-optimization-or-examples/blob/master/nonlinear-programming/Gurobi-SOS-Examples.ipynb}{Gurobipy}}
 \label{example:SOS2}
 Solve the following optimization problem: \[\begin{aligned}
@@ -1063,6 +1080,7 @@ Solve the following optimization problem: \[\begin{aligned}
 & \text{at most two of the $x_i$ can be nonzero} \\
 & \text{and the nonzero $x_i$ must be consecutive}
 \end{aligned}\]
+The pairs of consecutive variables are $(x_1,x_2)$, $(x_2,x_3)$, and $(x_3,x_4)$.  Comparing the objective coefficients, the best pair is $(x_3, x_4)$ at $x_3 = x_4 = 5$, giving value $(1+5)\cdot 5 = 30$.  Note that the SOS1 solution $x_4=5$ alone would give only $25$.
 \end{examplewithcode}
 
 \subsection{Piecewise linear functions with SOS2 constraint}
@@ -1079,7 +1097,7 @@ c(x) =
 \end{cases}
 $$
 \begin{center}
-\includegraphicstatic[scale = 1]{pwl-plot.pdf}
+\includegraphicbook[scale = 1]{pwl-plot}
 \end{center}
 %See \refincludefigurestatic[scale = 0.35]{pwl-plot.png}.
 
@@ -1431,7 +1449,7 @@ The optimal value is 11.
 \includetikz[width = 0.8\textwidth]{optimization/figures/figures-static/jssp-duplo}
 %\includegraphicstatic[scale = 0.5]{jssp-duplo}
 
-\includegraphicstatic[scale=0.07, angle=180]{jssp-duplo-actual}
+\includegraphicbook[scale=0.07, angle=180]{jssp-duplo-actual}
 \end{center}
 \end{examplewithallcode}
 
@@ -1834,6 +1852,7 @@ Camera & 2 & 4 \\
 \end{ex}
 
 \begin{ex}{Either-Or Constraints}{}
+\label{ex:either-or-modes}
 A company produces two products, $x_1$ and $x_2$. Production of product~1 requires a special machine that can either run in mode~A or mode~B, but not both simultaneously.  The constraints are:
 \begin{itemize}
 \item Mode A: $2x_1 + x_2 \leq 10$
@@ -1845,6 +1864,7 @@ Introduce a binary variable and a big-$M$ parameter to formulate this either-or 
 \end{ex}
 
 \begin{ex}{Fixed-Charge Production}{}
+\label{ex:fixed-charge}
 A factory can produce a product in any quantity $x \geq 0$, but starting up production incurs a fixed cost of $\$500$.  The variable production cost is $\$8$ per unit, and each unit sells for $\$15$.  The factory has capacity to produce at most 200 units.
 
 \begin{enumerate}
@@ -1852,6 +1872,33 @@ A factory can produce a product in any quantity $x \geq 0$, but starting up prod
 \item Explain the role of the constraint that links $x$ and $y$.
 \end{enumerate}
 \end{ex}
+
+\subsubsection*{Selected Solutions}
+
+\begin{solution}(Exercise~\ref{ex:either-or-modes})
+Introduce $\delta \in \{0,1\}$, where $\delta = 0$ selects mode~A and $\delta = 1$ selects mode~B.  Valid big-$M$ values can be read from the problem: relaxing each constraint by $M = 20$ (any upper bound on the left-hand sides over reasonable production levels works).  The formulation is
+\[
+\begin{aligned}
+\max\quad & 5x_1 + 4x_2\\
+\text{s.t.}\quad & 2x_1 + x_2 \leq 10 + M\delta\\
+& x_1 + 3x_2 \leq 12 + M(1-\delta)\\
+& x_1, x_2 \geq 0, \quad \delta \in \{0,1\}.
+\end{aligned}
+\]
+If $\delta = 0$, mode~A's constraint is enforced and mode~B's is relaxed; if $\delta = 1$, the roles are reversed.
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:fixed-charge})
+Let $x \geq 0$ be the production quantity and $y \in \{0,1\}$ indicate whether production is started:
+\[
+\begin{aligned}
+\max\quad & 15x - 8x - 500y = 7x - 500y\\
+\text{s.t.}\quad & x \leq 200\,y\\
+& x \geq 0, \quad y \in \{0,1\}.
+\end{aligned}
+\]
+The linking constraint $x \leq 200y$ plays two roles: if $y = 0$ it forces $x = 0$ (no production without paying the startup cost), and if $y = 1$ it enforces the capacity limit of $200$ units.  Since producing at capacity earns $7(200) - 500 = 900 > 0$, the optimal solution is $y = 1$, $x = 200$.
+\end{solution}
 
 \section{Literature and Resources}
 

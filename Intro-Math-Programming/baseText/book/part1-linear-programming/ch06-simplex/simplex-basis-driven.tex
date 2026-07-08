@@ -3,6 +3,7 @@
 %Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0)
 %See http://creativecommons.org/licenses/by-sa/4.0/
 \chapter{Simplex Method}
+\label{ch:simplex-dictionary}
 \begin{outcome}
 \begin{itemize}
 \item Convert linear programs to standard form
@@ -12,6 +13,11 @@
 \item Develop the \emph{Simplex Method} that \emph{pivots} through basic feasible solutions
 \end{itemize}
 \end{outcome}
+
+\begin{quote}
+\itshape Picture hiking to the highest point of a fenced field on a moonless night. Your flashlight shows only the ground at your feet: the corner you are standing on and the fence lines leading away from it. A sensible strategy suggests itself: shine the light along each fence line; if one leads uphill, follow it to the next corner and look again; if none does, stop. The remarkable fact of this chapter is that for linear programs this nearsighted strategy is guaranteed to end at the highest point of the entire field. The algebra of ``shining the flashlight'' is a reformulation of the linear program called a \emph{dictionary}.
+\end{quote}
+
 In this section, we will develop the \emph{Simplex Method}.  This algorithm has been lauded as one of the most important algorithms of the 20th century.  It will iteratively find better vertex solutions to a linear program until it can prove optimality.
 
 To implement the simplex algorithm, we must first discuss a \emph{Standard Form} with which to represent linear programs.   After, we will discuss structure of linear programs in this form using matrix notation and demonstrate how a linear program can be transformed to new representations.  These new representations will be the backbone of the simplex algorithm.  We will \emph{pivot} between vertices, and each vertex will have a new representation of the linear program that will help us understand how to choose a new vertex to move to.
@@ -419,8 +425,8 @@ which is a basic feasible solution. It is feasible because all variables are non
 Geometrically, this solution corresponds to the intersection of the two axes (i.e., the origin) in the \( (x_1, x_2) \) plane — a corner point of the feasible region.
 \end{example}
 
-\begin{learningcheckpoint}{Basic Feasible Solutions}
-In a basic feasible solution (BFS) to a linear program in standard form, how many components of the decision vector \(\x\) can be nonzero?  
+\begin{learningcheckpoint}[label={lc:bfs-nonzero}]
+In a basic feasible solution (BFS) to a linear program in standard form, how many components of the decision vector \(\x\) can be nonzero?
 
 \emph{[Hint: Relate your answer to the number of linearly independent constraints in the system.]}
 \end{learningcheckpoint}
@@ -1519,8 +1525,8 @@ We dive a little deeper into what the ratio test is here:
     The Ratio Test guarantees that we always select the proper constraint to maintain feasibility while pivoting towards an improved solution.
 \end{itemize}
 
-\begin{learningcheckpoint}{Ratio Test and Infeasible Solutions}
-When applying the simplex method, why might choosing the wrong leaving variable during the ratio test lead you to an \emph{infeasible} basic solution?  
+\begin{learningcheckpoint}[label={lc:ratio-test}]
+When applying the simplex method, why might choosing the wrong leaving variable during the ratio test lead you to an \emph{infeasible} basic solution?
 
 \emph{Hint: Think about what the ratio test is meant to guarantee for the nonnegativity of variables after the pivot.}
 \end{learningcheckpoint}
@@ -1931,7 +1937,7 @@ Let’s analyze this dictionary:
 \end{tikzpicture}
 \end{remark}
 
-\begin{learningcheckpoint}
+\begin{learningcheckpoint}[label={lc:artificial-removal}]
 Why can the artificial variable be removed from this system?
 \end{learningcheckpoint}
 
@@ -1980,134 +1986,97 @@ Complete the simplex method for this problem by carrying out 3 more pivots using
 
 %
 \section{No feasible initial basis}
-%
-%
+
+Every worked example so far started from the origin $x=y=0$, where the slack variables handed us an obvious basic feasible solution. That convenience disappears the moment the problem has a ``$\ge$'' constraint: at the origin the corresponding slack is negative, so the natural starting dictionary is \emph{infeasible} and there is no basis from which to launch the simplex method. This section shows how to manufacture a feasible starting basis with an \emph{artificial variable} penalized by a large constant $M$---the \emph{Big-M method}---and how the same device reveals when a problem has no feasible solution at all.
+
+Consider
 \[
 \begin{aligned}
 \max\quad & 2x + 3y \\
-\st\quad & 2x + y \;\;\;\;\;\;\;\;\;\;\; \geq 5, \\
-& 2x + y \;\;\;\;\;\;\;\;\;\; \leq 16, \\
-& x + 2y \;\;\;\;\;\;\;\;\; \leq 14, \\
+\st\quad & 2x + y \geq 5, \\
+& 2x + y \leq 16, \\
+& x + 2y \leq 14, \\
 & x, y \geq 0.
 \end{aligned}
 \]
-%
-%
+The first constraint points the wrong way for an easy start, so the origin is infeasible and we cannot simply read off a starting basis.
+
+\begin{steppanel}{algslate}
+\cstep{1}{Put every constraint in ``$\le$'' form} Multiplying the $\ge$ constraint by $-1$ turns it into a $\le$ constraint:
 \[
 \begin{aligned}
 \max\quad & 2x + 3y \\
-\st\quad & -2x - y \;\;\;\;\;\;\;\;\;\;\; \leq -5, \\
-& 2x + y \;\;\;\;\;\;\;\;\;\; \leq 16, \\
-& x + 2y \;\;\;\;\;\;\;\;\; \leq 14, \\
+\st\quad & -2x - y \leq -5, \\
+& 2x + y \leq 16, \\
+& x + 2y \leq 14, \\
 & x, y \geq 0.
 \end{aligned}
 \]
-%
-%
-%
+\end{steppanel}
+
+\begin{steppanel}{algslate}
+\cstep{2}{Form the slack dictionary and spot the infeasibility} Introducing slack variables gives
 \[
 \begin{aligned}
-\max\quad & + 2x + 3y \\
-\st\quad & s_1 = -5 + 2x + y,\\ 
-& s_2 = 16 - 2x - y,\\ 
-& s_3 = 14 - x - 2y,\\ 
+\max\quad & 2x + 3y \\
+\st\quad & s_1 = -5 + 2x + y,\\
+& s_2 = 16 - 2x - y,\\
+& s_3 = 14 - x - 2y,\\
 & x, y, s_1, s_2, s_3 \ge 0.
 \end{aligned}
 \]
-%
-Add an artificial variable!
-%
+At $x=y=0$ this gives $s_1=-5<0$, so the dictionary is infeasible and the usual simplex start is unavailable.
+\end{steppanel}
+
+\begin{steppanel}{algslate}
+\cstep{3}{Introduce an artificial variable} Add a nonnegative artificial variable $a_1$ to the offending equation and penalize it heavily in the objective (here $M=1000$), so the simplex method is driven to push it back to zero:
 \[
 \begin{aligned}
-\max\quad & + 2x + 3y - 1000a_1 \\
-\st\quad & s_1 = -5 + 2x + y + a_1,\\ 
-& s_2 = 16 - 2x - y,\\ 
-& s_3 = 14 - x - 2y,\\ 
+\max\quad & 2x + 3y - 1000a_1 \\
+\st\quad & s_1 = -5 + 2x + y + a_1,\\
+& s_2 = 16 - 2x - y,\\
+& s_3 = 14 - x - 2y,\\
 & x, y, s_1, s_2, s_3, a_1 \ge 0.
 \end{aligned}
 \]
-Now we can change the basis to something feasible (without thinking too hard).
-%
+\end{steppanel}
+
+\begin{steppanel}{algslate}
+\cstep{4}{Pivot to a feasible basis} Swapping $a_1$ into the basis in place of $s_1$ makes every right-hand side nonnegative at $x=y=0$, giving a genuine starting point:
 \[
 \begin{aligned}
 \max\quad & -5000 + 2002x + 1003y - 1000s_1 \\
-\st\quad & a_1 = 5 - 2x - y + s_1,\\ 
-& s_2 = 16 - 2x - y,\\ 
-& s_3 = 14 - x - 2y,\\ 
+\st\quad & a_1 = 5 - 2x - y + s_1,\\
+& s_2 = 16 - 2x - y,\\
+& s_3 = 14 - x - 2y,\\
 & x, y, s_1, s_2, s_3, a_1 \ge 0.
 \end{aligned}
 \]
-Now we can pivot as we usually would:
-%
+\end{steppanel}
+
+With a feasible basis in hand, we run the simplex method as usual. Letting $x$ enter drives the artificial variable back out of the basis:
 \[
 \begin{aligned}
 \max\quad & 5 + 2y + s_1 - 1001a_1 \\
-\st\quad & x = 2.50 - 0.50y + 0.50s_1 - 0.50a_1,\\ 
-& s_2 = 11 - s_1 + a_1,\\ 
-& s_3 = 11.50 - 1.50y - 0.50s_1 + 0.50a_1,\\ 
+\st\quad & x = 2.50 - 0.50y + 0.50s_1 - 0.50a_1,\\
+& s_2 = 11 - s_1 + a_1,\\
+& s_3 = 11.50 - 1.50y - 0.50s_1 + 0.50a_1,\\
 & x, y, s_1, s_2, s_3, a_1 \ge 0.
 \end{aligned}
 \]
-%
-Yay! Now $a_1$ is a non-basic variable. And the basis is feasible!  So we can remove the $a_1$ and start as we would.
-%
+Now $a_1$ is nonbasic, so the basis is feasible for the \emph{original} problem. We may discard the artificial variable and continue from the feasible dictionary
 \[
 \begin{aligned}
 \max\quad & 5 + 2y + s_1 \\
-\st\quad & x = 2.50 - 0.50y + 0.50s_1,\\ 
-& s_2 = 11 - s_1,\\ 
-& s_3 = 11.50 - 1.50y - 0.50s_1,\\ 
+\st\quad & x = 2.50 - 0.50y + 0.50s_1,\\
+& s_2 = 11 - s_1,\\
+& s_3 = 11.50 - 1.50y - 0.50s_1,\\
 & x, y, s_1, s_2, s_3 \ge 0.
 \end{aligned}
 \]
 %
 %
-\subsubsection{Example that is infeasible}
-Consider next this example.   This was designed to be infeasible.
-%
-\[
-\begin{aligned}
-\max\quad & 2x + 3y \\
-\st\quad & 2x + y \;\;\;\;\;\;\;\;\;\;\; \geq 22, \\
-& 2x + y \;\;\;\;\;\;\;\;\;\; \leq 16, \\
-& x + 2y \;\;\;\;\;\;\;\;\; \leq 14, \\
-& x, y \geq 0.
-\end{aligned}
-\]
-We can set this up just as before by adding an artificial variable, and pivoting the artifical variable into the basis.
-\[
-\begin{aligned}
-\max\quad & -22000 + 2002x + 1003y - 1000s_1 \\
-\st\quad & a_1 = 22 - 2x - y + s_1,\\ 
-& s_2 = 16 - 2x - y,\\ 
-& s_3 = 14 - x - 2y,\\ 
-& x, y, s_1, s_2, s_3, a_1 \ge 0.
-\end{aligned}
-\]
-Next we pivot $x$ into the basis, but this time, $s_2$ leaves the basis.
-\[
-\begin{aligned}
-\max\quad & -5984 + 2y - 1000s_1 - 1001s_2 \\
-\st\quad & a_1 = 6 + s_1 + s_2,\\ 
-& x = 8 - 0.50y - 0.50s_2,\\ 
-& s_3 = 6 - 1.50y + 0.50s_2,\\ 
-& x, y, s_1, s_2, s_3, a_1 \ge 0.
-\end{aligned}
-\]
-%
-Next we pivot $y$ into the basis, and $s_3$ leaves the basis.
-%
-\[
-\begin{aligned}
-\max\quad & -5976 - 1000s_1 - 1000.33s_2 - 1.33s_3 \\
-\st\quad & a_1 = 6 + s_1 + s_2,\\ 
-& x = 6 - 0.67s_2 + 0.33s_3,\\ 
-& y = 4 + 0.33s_2 - 0.67s_3,\\ 
-& x, y, s_1, s_2, s_3, a_1 \ge 0.
-\end{aligned}
-\]
-
-\section*{Detecting Infeasibility via the Big-M Method}
+\subsection{Detecting Infeasibility via the Big-M Method}
 
 Consider the linear program
 \begin{tcolorbox}[colback=orange!5!white, colframe=orange!75!black,    
@@ -2152,9 +2121,9 @@ s_1  = -22 + 2x + y + a_1.
 \]
 
 This produces the dictionary
-\begin{tcolorbox}[colback=pink!5!white, colframe=pink!75!black,    
+\begin{tcolorbox}[colback=sensbox!5!white, colframe=sensbox!75!black,
     width=0.6\textwidth, % adjust width as desired
-    box align=center, 
+    box align=center,
     title=\textbf{Infeasible Artificial Dictionary}]
 \[
 \begin{aligned}
@@ -2166,11 +2135,11 @@ This produces the dictionary
 \end{aligned}
 \]
 \end{tcolorbox}
-\textbf{Pivot artificial variables into basis to create feasible basis]} 
+\textbf{[Pivot the artificial variable into the basis to create a feasible basis]} 
 Next, we pivot to swap $a_1$ and $s_1$
-    \begin{tcolorbox}[colback=blue!5!white, colframe=pink!75!black,    
+    \begin{tcolorbox}[colback=sensbox!5!white, colframe=sensbox!75!black,
     width=0.6\textwidth, % adjust width as desired
-    box align=center, 
+    box align=center,
     title=\textbf{First Feasible Artificial Dictionary}]
 \[
 \begin{aligned}
@@ -2184,7 +2153,7 @@ Next, we pivot to swap $a_1$ and $s_1$
 \end{tcolorbox}
 
 \textbf{[Apply simplex pivots]} Next, we hope to drive out the artificial variable.  We pivot to let $x$ enter the basis and $s_2$ leaves.
-\begin{tcolorbox}[colback=blue!5!white, colframe=pink!75!black,    
+\begin{tcolorbox}[colback=sensbox!5!white, colframe=sensbox!75!black,    
     width=0.6\textwidth, % adjust width as desired
     box align=center, 
     title=\textbf{Second Artificial Dictionary}]
@@ -2199,7 +2168,7 @@ Next, we pivot to swap $a_1$ and $s_1$
 \]
 \end{tcolorbox}
 Finally, we pivot to let $y$ enter the basis and $s_3$ leaves.
-\begin{tcolorbox}[colback=green!5!white, colframe=red!75!black,    
+\begin{tcolorbox}[colback=red!5!white, colframe=red!75!black,    
     width=0.6\textwidth, % adjust width as desired
     box align=center, 
     title=\textbf{Final Artificial Dictionary}]
@@ -2314,9 +2283,9 @@ This contradiction implies that no feasible solution \((\mathbf{x}',\mathbf{0})\
 Hence, if in the optimal solution of the Big‑M problem any artificial variable remains positive, the original linear programming problem must be infeasible.
 \end{proof}
 
-\subsection{Let's see another example}
+\subsection{A second example: two artificial variables}
 
-Consider the linear program  
+When several constraints point the ``wrong'' way, we simply add one artificial variable per offending constraint. Consider
 \[
 \begin{aligned}
 \max\quad & 3x + y \\
@@ -2326,116 +2295,64 @@ Consider the linear program
 & x, y \geq 0.
 \end{aligned}
 \]
+Two constraints are of ``$\ge$'' type, so the origin violates both and we will need two artificial variables.
 
-Again, the origin is not feasible!!!
-
-We rewrite the inequalities to all be of the form “$\le$”:
-
+\begin{steppanel}{algslate}
+\cstep{1}{Rewrite in ``$\le$'' form and build the dictionary} Flipping the two $\ge$ constraints gives $-2x-y\le-5$ and $-x-2y\le-3$, and the slack dictionary is
 \[
 \begin{aligned}
--2x - y &\leq -5, \\
-2x + y &\leq 16, \\
--x - 2y &\leq -3.
-\end{aligned}
-\]
-
-Now, we introduce slack and artificial variables to write the system as equalities:
-\[
-\begin{aligned}
-s_1 &= -5 + 2x + y + a_1, \\
+s_1 &= -5 + 2x + y, \\
 s_2 &= 16 - 2x - y, \\
-s_3 &= -3 + x + 2y + a_3.
+s_3 &= -3 + x + 2y.
 \end{aligned}
 \]
+At the origin $s_1=-5<0$ and $s_3=-3<0$, so two equations lack a valid basic variable.
+\end{steppanel}
 
-The modified objective function with the Big-M penalty (using \( M = 1000 \)) becomes:
-\[
-\max \quad 3x + y - 1000a_1 - 1000a_3.
-\]
-
-So the initial system is:
+\begin{steppanel}{algslate}
+\cstep{2}{Introduce one artificial variable per offending constraint} Add $a_1$ to the $s_1$ equation and $a_3$ to the $s_3$ equation, each penalized by $M=1000$ in the objective:
 \[
 \begin{aligned}
 \max\quad & 3x + y - 1000a_1 - 1000a_3 \\
-\st\quad 
+\st\quad
 & s_1 = -5 + 2x + y + a_1, \\
 & s_2 = 16 - 2x - y, \\
 & s_3 = -3 + x + 2y + a_3, \\
-& x,\, y,\, s_1,\, s_2,\, s_3,\, a_1,\, a_3 \geq 0.
+& x, y, s_1, s_2, s_3, a_1, a_3 \geq 0.
 \end{aligned}
 \]
-We then swap the constraints with negative values for the basic variables ($s_1, s_3$) for our artificial variables.
+\end{steppanel}
 
+\begin{steppanel}{algslate}
+\cstep{3}{Pivot the artificial variables into the basis} Swapping $a_1$ with $s_1$ and $a_3$ with $s_3$ produces a feasible starting dictionary (every right-hand side is nonnegative at $x=y=0$). Substituting the artificials into the objective gives its Big-M form:
 \[
 \begin{aligned}
-\max\quad & -8000 + 3003x + 1002y - 1000s_1 - 1000s_3 \\
-\st\quad 
-& a_1 = 5 - 2x - y + s_1,\\ 
-& s_2 = 16 - 3x - y,\\ 
-& a_3 = 3 - x + s_3,\\ 
+\max\quad & -8000 + 3003x + 3001y - 1000s_1 - 1000s_3 \\
+\st\quad
+& a_1 = 5 - 2x - y + s_1,\\
+& s_2 = 16 - 2x - y,\\
+& a_3 = 3 - x - 2y + s_3,\\
 & x, y, s_1, s_2, s_3, a_1, a_3 \ge 0.
 \end{aligned}
 \]
+\end{steppanel}
 
-Now we can run the simplex method.  Here is the sequence of pivots:
+The large penalties make $x$ and $y$ attractive to increase, and successive pivots drive both artificial variables out of the basis. Once $a_1=a_3=0$ the basis is feasible for the original problem, and we discard the artificial variables and continue improving the true objective $3x+y$ until every reduced cost is nonpositive. This yields the optimal dictionary
 \[
 \begin{aligned}
-\max\quad & -492.50 - 499.50y + 501.50s_1 - 1000s_3 - 1501.50a_1 \\
-\st\quad 
-& x = 2.50 - 0.50y + 0.50s_1 - 0.50a_1,\\ 
-& s_2 = 8.50 + 0.50y - 1.50s_1 + 1.50a_1,\\ 
-& a_3 = 0.50 + 0.50y - 0.50s_1 + s_3 + 0.50a_1,\\ 
-& x, y, s_1, s_2, s_3, a_1, a_3 \ge 0.
+\max\quad & 24 - 0.5\,y - 1.5\,s_2 \\
+\st\quad
+& x  = 8 - 0.5\,y - 0.5\,s_2,\\
+& s_1 = 11 - s_2,\\
+& s_3 = 5 + 1.5\,y - 0.5\,s_2,\\
+& x, y, s_1, s_2, s_3 \ge 0.
 \end{aligned}
 \]
-
+Every objective coefficient is now nonpositive, so we stop. Setting the nonbasic variables $y=s_2=0$ gives the optimal solution
 \[
-\begin{aligned}
-\max\quad & 9 + 2y + 3s_3 - 1000a_1 - 1003a_3 \\
-\st\quad 
-& x = 3 + s_3 - a_3,\\ 
-& s_2 = 7 - y - 3s_3 + 3a_3,\\ 
-& s_1 = 1 + y + 2s_3 + a_1 - 2a_3,\\ 
-& x, y, s_1, s_2, s_3, a_1, a_3 \ge 0.
-\end{aligned}
+x = 8,\quad y = 0,\quad z = 3x + y = 24,
 \]
-
-Now that the artificial variables are out of the basis, we can remove them.
-
-\[
-\begin{aligned}
-\max\quad & 9 + 2y + 3s_3 \\
-\st\quad 
-& x = 3 + s_3,\\ 
-& s_2 = 7 - y - 3s_3,\\ 
-& s_1 = 1 + y + 2s_3,\\ 
-& x, y, s_1, s_2, s_3, a_1, a_3 \ge 0.
-\end{aligned}
-\]
-Now we can continue simplex until we reach an optimal solution.
-\[
-\begin{aligned}
-\max\quad & 16 + y - s_2 \\
-\st\quad 
-& x = 5.33 - 0.33y - 0.33s_2,\\ 
-& s_3 = 2.33 - 0.33y - 0.33s_2,\\ 
-& s_1 = 5.67 + 0.33y - 0.67s_2,\\ 
-& x, y, s_1, s_2, s_3, a_1, a_2 \ge 0.
-\end{aligned}
-\]
-
-\[
-\begin{aligned}
-\max\quad & 23 - 2s_2 - 3s_3 \\
-\st\quad 
-& x = 3 + s_3,\\ 
-& y = 7 - s_2 - 3s_3,\\ 
-& s_1 = 8 - s_2 - s_3,\\ 
-& x, y, s_1, s_2, s_3, a_1, a_2 \ge 0.
-\end{aligned}
-\]
-
-Since all coefficients in the objective are negative, we have reached the optimal solution!
+with the first and third constraints slack ($s_1=11$, $s_3=5$) and the second constraint tight ($s_2=0$).
 
 \section{Degeneracy, Cycling, and Bland's Rule}
 
