@@ -1,4 +1,10 @@
+% Copyright 2026 by Robert Hildebrand
+%This work is licensed under a
+%Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0)
+%See http://creativecommons.org/licenses/by-sa/4.0/
+
 \chapter{Sensitivity Analysis}
+\label{ch:sensitivity}
 \begin{outcome}
 \begin{itemize}
 \item Understand what happens to the optimal solution as we slightly vary the parameters
@@ -7,172 +13,35 @@
 \end{itemize}
 \end{outcome}
 
-Sensitivity analysis examines how changes in the parameters (objective function coefficients, constraint right-hand sides) affect the optimal solution. This can be computed from the final simplex dictionary, often provided by optimization software such as Excel Solver.
+\begin{quote}
+\itshape Your bakery's production plan is set, and the profit works out to \$23. Then the phone rings twice. A neighboring shop offers to rent you one more hour of oven time; a supplier offers a deal on extra flour. Should you take either offer---and what is the most you would pay? Sensitivity analysis answers before you spend a dime: the extra hour would raise your profit by exactly \$1, while the extra flour is worth nothing to you at all---you already have three units you aren't using.
+\end{quote}
 
-We begin this section with an interactive desmos example.  Go to \href{https://www.desmos.com/calculator/xz1f0tdjf9}{Desmos LP Sensitivity!}.
+Every resource in a linear program has a price tag like this, telling you what one more unit of it is worth to your bottom line, and every such price tag comes with an expiration: it is only valid until the data move far enough that the optimal plan itself changes. Solving a linear program answers one question about one set of numbers. In practice the numbers---objective coefficients, resource limits---are estimates: prices move, machines break, a supplier delivers more flour than promised. \emph{Sensitivity analysis} asks how the optimal solution and the optimal value respond when the data change, and, crucially, \emph{how far} the data can move before the answer changes structurally. Remarkably, all of this---including both claims in the story above---can be read from the final simplex dictionary, which is why optimization software such as Excel Solver reports it alongside the solution.
 
-\subsection{Mathematical details of sensitivity analysis}
-
-We now analyze how changes in different parameters affect the optimal solution.
-
-\subsection{Effect of Changing an Objective Coefficient \( c_i \)}
-
-\textbf{How it appears in the dictionary:}  
-The objective function in the revised dictionary is:
-\[
-z = \mathbf{c}_B^\top A_B^{-1} \mathbf{b} + (\mathbf{c}_N^\top - \mathbf{c}_B^\top A_B^{-1} A_N) \mathbf{x}_N.
-\]
-The coefficients of \( \mathbf{x}_N \) are known as the \textbf{reduced costs}:
-\[
-\mathbf{c}_N^\top - \mathbf{c}_B^\top A_B^{-1} A_N.
-\]
-
-\textbf{Analysis:}
-\begin{itemize}
-    \item If \( i \) is a \textbf{basic variable}, \( c_i \) appears in \( \mathbf{c}_B \), and since \( z^* \) contains \( \mathbf{c}_B^\top A_B^{-1} \mathbf{b} \), a change in \( c_i \) directly affects the optimal objective function in a linear manner.
-    \item If \( i \) is a \textbf{non-basic variable}, \( c_i \) appears in \( \mathbf{c}_N \). The optimal basis remains unchanged, so the optimal objective function does \textbf{not} change. However, if the reduced cost \( (\mathbf{c}_N^\top - \mathbf{c}_B^\top A_B^{-1} A_N) \) changes sign, the variable may enter the basis.
-\end{itemize}
-
-\textbf{Key Takeaways:}
-\begin{itemize}
-    \item Changing the coefficient of a \textbf{basic variable} shifts the objective function \textbf{linearly}.
-    \item Changing the coefficient of a \textbf{non-basic variable} does not affect the objective value \textbf{unless it becomes negative}, triggering a basis change.
-\end{itemize}
-
-\subsection{Effect of Changing the Right-Hand Side \( \mathbf{b} \)}
-
-\textbf{How it appears in the dictionary:}  
-The basic solution is:
-\[
-\mathbf{x}_B = A_B^{-1} \mathbf{b}.
-\]
-
-\textbf{Analysis:}
-\begin{itemize}
-    \item \textbf{Direct effect on feasibility:} Since \( \mathbf{x}_B \geq 0 \) is a feasibility condition, changes in \( \mathbf{b} \) directly affect feasibility.
-    \item \textbf{Basis stability:}
-    \begin{itemize}
-        \item If \( \mathbf{b} \) changes slightly, the basis may remain optimal, but \( \mathbf{x}_B \) is rescaled accordingly.
-        \item If \( \mathbf{b} \) changes significantly, one or more basic variables may become \textbf{negative}, requiring a pivot to restore feasibility.
-    \end{itemize}
-    \item \textbf{Impact on objective function:}
-    \begin{itemize}
-        \item Since \( z^* = \mathbf{c}_B^\top A_B^{-1} \mathbf{b} \), the objective value scales with \( \mathbf{b} \).
-        \item Small changes in \( \mathbf{b} \) result in proportional changes in \( z^* \), assuming the basis remains optimal.
-    \end{itemize}
-\end{itemize}
-
-\textbf{Key Takeaways:}
-\begin{itemize}
-    \item Changing \( \mathbf{b} \) \textbf{directly modifies} the basic solution.
-    \item Large changes can force a \textbf{basis change} or make the problem \textbf{infeasible}.
-    \item The \textbf{objective value scales} with \( \mathbf{b} \).
-\end{itemize}
-
-\subsection{Effect of Changing the Coefficients \( a_{ij} \) of the Constraint Matrix \( A \)}
-
-\textbf{How it appears in the dictionary:}  
-The basic variables satisfy:
-\[
-\mathbf{x}_B = A_B^{-1} \mathbf{b}.
-\]
-
-If \( A \) changes, then \( A_B^{-1} \) changes, which affects:
-\begin{enumerate}
-    \item \textbf{The basic solution \( \mathbf{x}_B \).}
-    \item \textbf{The reduced costs \( \mathbf{c}_N^\top - \mathbf{c}_B^\top A_B^{-1} A_N \)} in the objective function.
-\end{enumerate}
-
-\textbf{Analysis:}
-\begin{itemize}
-    \item \textbf{Geometric Interpretation:} Changing \( a_{ij} \) \textbf{tilts} the corresponding constraint, altering the feasible region.
-    \item \textbf{If \( i \) is a non-basic variable:}
-    \begin{itemize}
-        \item The structure of \( A_B^{-1} \) remains unchanged.
-        \item The optimal basis remains unchanged.
-        \item The optimal solution \textbf{does not change}.
-    \end{itemize}
-    \item \textbf{If \( i \) is a basic variable:}
-    \begin{itemize}
-        \item Since \( A_B^{-1} \) depends on the inverse of the basis matrix, \textbf{even small changes in \( A_B \) can have large effects}.
-        \item The optimal solution and reduced costs change, potentially leading to a basis change.
-    \end{itemize}
-\end{itemize}
-
-\textbf{Key Takeaways:}
-\begin{itemize}
-    \item If \( a_{ij} \) belongs to a \textbf{non-basic variable}, the optimal solution \textbf{remains unchanged}.
-    \item If \( a_{ij} \) belongs to a \textbf{basic variable}, it \textbf{modifies \( A_B^{-1} \)}, causing significant changes to the optimal solution.
-    \item The constraints are \textbf{tilted}, altering the feasible region.
-\end{itemize}
-
-\subsection{Summary Table: Sensitivity Effects in the Revised Simplex Dictionary}
-
-\[
-\begin{array}{|c|c|c|c|}
-\hline
-\textbf{Change Type} & \textbf{Effect on Basic Solution} & \textbf{Effect on Objective} & \textbf{Basis Change?} \\
-\hline
-c_i \text{ (objective coefficient)} & \text{Only if \( i \) is in basis} & \text{Yes, if \( i \) is basic} & \text{If reduced cost changes sign} \\
-\hline
-\mathbf{b} \text{ (RHS vector)} & \text{Always changes} & \text{Always scales} & \text{If infeasibility occurs} \\
-\hline
-a_{ij} \text{ (constraint matrix)} & \text{Only if \( i \) is in basis} & \text{Changes reduced costs} & \text{If basis becomes infeasible} \\
-\hline
-\end{array}
-\]
-
-\subsection{Computing the Range of Parameters That Maintain the Optimal Basis}
-
-In this section, we analyze the sensitivity of the optimal basis to changes in different problem parameters. Specifically, we examine:
-\begin{enumerate}
-    \item Changes in the right-hand side (RHS) value of the first constraint.
-    \item Changes in one of the objective function coefficients.
-\end{enumerate}
-We determine the range of values these parameters can take while preserving the current optimal basis.
-
-Note that we could also have written this as 
+We return to the linear program solved by dictionaries in Chapter~\ref{ch:simplex-dictionary} and by tableaus in Chapter~\ref{ch:simplex-tableau},
+\begin{tcolorbox}[colback=algslate!6, colframe=algslate, coltitle=white, fonttitle=\bfseries, sharp corners,
+    title=\textbf{Running Example}]
 \[
 \begin{aligned}
-\max \quad & \mathbf{c}^\top \mathbf{x} \\
-\st \quad & A_x\mathbf{x} + I\mathbf{s}  = \mathbf{b}, \\
-& \mathbf{x}, \mathbf{s} \geq \mathbf{0}
+\max \quad & z = 2x + 3y \\
+\st \quad
+& x + y \leq 9 \quad & \text{(hours)} \\
+& 2x + y \leq 16 \quad & \text{(flour)} \\
+& x + 2y \leq 14 \quad & \text{(sugar)} \\
+& x, y \geq 0,
 \end{aligned}
 \]
-where 
-\[
-A_x =
-\begin{bmatrix}
-1 & 1 \\
-2 & 1 \\
-1 & 2 
-\end{bmatrix},
-\text{ and }
-\mathbf{x} = 
-\begin{bmatrix}
-x \\
-y \\
-\end{bmatrix},
-\mathbf{s} = 
-\begin{bmatrix}
-s_1 \\
-s_2 \\
-s_3
-\end{bmatrix}\]
-
-\section{Sensitivity Analysis: Right-Hand Side Perturbations}
-
-After applying the simplex method, we obtain the following optimal dictionary:
+\end{tcolorbox}
+\noindent so that every range we compute here can be checked against the dictionaries and tableaus computed there. After applying the simplex method, we obtain the following optimal dictionary:
 
 \begin{tcolorbox}[colback=algopt!6, colframe=algopt, coltitle=white, fonttitle=\bfseries, sharp corners,
-    width=1\textwidth,
-    box align=center, 
     title=\textbf{Final Dictionary}]
 \[
 \begin{aligned}
-\max \quad 
+\max \quad
 & z = 23 - s_1 - s_3 \\
-\st \quad 
+\st \quad
 & x = 4 - 2s_1 + s_3, \\
 & y = 5 + s_1 - s_3, \\
 & s_2 = 3 + 3s_1 - s_3, \\
@@ -187,33 +56,69 @@ The optimal solution is:
 \]
 \end{tcolorbox}
 
-\subsection*{Goal: Understanding Sensitivity to RHS Changes}
+\begin{tcolorbox}[colback=sensbox!6, colframe=sensbox, coltitle=white, fonttitle=\bfseries, sharp corners,
+    title={\ding{228}\ Interactive: drag the constraints}]
+Before any algebra, build intuition by dragging the right-hand sides and the objective slope in the \href{https://www.desmos.com/calculator/xz1f0tdjf9}{Desmos sensitivity explorer} (\href{https://open-optimization.github.io/open-optimization-or-book/Intro-Math-Programming/baseText/interactive-figures/lp-sensitivity-explorer.html}{backup interactive explorer}) and watching when the optimal vertex jumps to a different corner of the feasible region.
+\end{tcolorbox}
 
-In standard form, a linear program is written as \( A\mathbf{x} = \mathbf{b}, \ \mathbf{x} \geq 0 \). Sensitivity analysis explores how the optimal solution and objective value change when we perturb entries of \( \mathbf{b} \), while holding the objective coefficients and constraint matrix fixed.
+\section{What can change, and what happens}
+\label{sec:sensitivity-overview}
 
-\bigskip
+Three kinds of data appear in a linear program: the objective coefficients \(c\), the right-hand sides \(\mathbf{b}\), and the constraint matrix \(A\). Before computing exact ranges, it is worth understanding qualitatively how each one enters the final dictionary.
 
-In particular, we want to answer:
+\subsection{Changing an objective coefficient \( c_i \)}
+
+The objective row of the revised dictionary is
+\[
+z = \mathbf{c}_B^\top A_B^{-1} \mathbf{b} + (\mathbf{c}_N^\top - \mathbf{c}_B^\top A_B^{-1} A_N) \mathbf{x}_N,
+\]
+where the coefficients of \( \mathbf{x}_N \), namely \( \mathbf{c}_N^\top - \mathbf{c}_B^\top A_B^{-1} A_N \), are the \emph{reduced costs}. A change in \(c_i\) lands in one of two places. If \(i\) is a \textbf{basic} variable, then \(c_i\) sits inside \(\mathbf{c}_B\), so it moves the constant term \(\mathbf{c}_B^\top A_B^{-1}\mathbf{b}\): the optimal value changes \emph{linearly} in \(c_i\) for as long as the basis stays optimal. If \(i\) is a \textbf{nonbasic} variable, then \(c_i\) appears only in its own reduced cost: the current solution and objective value do not move at all---until the change is large enough to flip the sign of that reduced cost, at which point variable \(i\) wants to enter the basis and the current dictionary is no longer optimal.
+
+\subsection{Changing a right-hand side \( b_i \)}
+
+The basic solution is \( \mathbf{x}_B = A_B^{-1}\mathbf{b} \), so a change in \(\mathbf{b}\) moves the basic variables directly. Small changes rescale \(\mathbf{x}_B\) while keeping it nonnegative, and the objective value \( z^* = \mathbf{c}_B^\top A_B^{-1}\mathbf{b} \) moves linearly along with it. A large enough change drives some basic variable negative: the dictionary becomes infeasible, and restoring feasibility requires a pivot to a different basis (or reveals that the problem has become infeasible altogether).
+
+\subsection{Changing a constraint coefficient \( a_{ij} \)}
+
+Geometrically, changing \(a_{ij}\) \emph{tilts} the corresponding constraint, reshaping the feasible region. Algebraically, the effect depends on which column is touched. If column \(j\) is \textbf{nonbasic}, then \(A_B^{-1}\) is untouched; only the reduced cost of variable \(j\) changes, and the current solution survives unless that reduced cost changes sign. If column \(j\) is \textbf{basic}, the change alters \(A_B\) itself---and since the entire dictionary is built from \(A_B^{-1}\), even a small change can move the basic solution, every reduced cost, and the optimal value all at once.
+
+\subsection{Summary}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Change & Basic solution & Objective value & Basis change when\ldots\\
+\midrule
+$c_i$ (objective) & unchanged & moves if $i$ basic & a reduced cost changes sign\\
+$b_i$ (RHS)       & always moves & moves linearly & a basic variable hits $0$\\
+$a_{ij}$ (matrix) & moves if $j$ basic & via reduced costs & feasibility or optimality breaks\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+In the remainder of the chapter we make these statements quantitative for the running example: for each parameter we compute the exact \emph{range} of values over which the current basis \( B = \{x,y,s_2\} \) remains optimal, and how \(z\) moves inside that range. We treat the right-hand sides first, then the objective coefficients, then redo both computations in matrix notation.
+
+\section{Ranging the right-hand side}
+\label{sec:sensitivity-rhs}
+
+In standard form, a linear program is written as \( A\mathbf{x} = \mathbf{b}, \ \mathbf{x} \geq 0 \). We perturb one entry of \( \mathbf{b} \) at a time, holding the objective coefficients and constraint matrix fixed, and answer three questions:
 \begin{enumerate}
     \item For which changes in the RHS does the current basis remain optimal?
     \item How does the optimal solution vary with these changes?
     \item How does the objective value change?
 \end{enumerate}
-
-We consider changes to each component of the RHS independently, starting with the second constraint.
+Each case follows the same three moves: perturb the standard form, adapt the final dictionary, and read off the range.
 
 \subsection{Perturbing \( b_2 \): A Basic Slack Variable}
 
 The second constraint (corresponding to slack variable \( s_2 \)) originally has RHS value \( b_2 = 16 \). We now perturb this to \( 16 + \Delta \), where \( \Delta \in \mathbb{R} \), and investigate the effect.
 
-\begin{tcolorbox}[colback=sensbox!6, colframe=sensbox, coltitle=white, fonttitle=\bfseries, sharp corners,
-    width=0.9\textwidth,
-    box align=center, 
-    title=\textbf{Perturbed Standard Form (RHS of Constraint 2)}]
+\begin{sensdisplay}{Perturbed Standard Form (RHS of Constraint 2)}
 \[
 \begin{aligned}
 \max \quad & 2x + 3y \\
-\st \quad 
+\st \quad
 & x + y + s_1 = 9 \quad & \text{(hours)} \\
 & 2x + y + s_2 = 16 + \Delta \quad & \text{(flour)} \\
 & x + 2y + s_3 = 14 \quad & \text{(sugar)} \\
@@ -230,68 +135,56 @@ Substituting into the system yields:
 \[
 \begin{aligned}
 \max \quad & 2x + 3y \\
-\st \quad 
+\st \quad
 & x + y + s_1 = 9 \\
 & 2x + y + s_2= 16 + \Delta  & \Rightarrow &&  2x + y + s_2'= 16\\
 & x + 2y + s_3 = 14 \\
 & x, y, s_1, s_2', s_3 \geq 0
 \end{aligned}
 \]
-\end{tcolorbox}
+\end{sensdisplay}
 
 \begin{steppanel}{sensbox}
 \sslab{Adapt the final dictionary}
-
 Since the structure of the problem remains the same in terms of the new variable \( s_2' \), we can substitute into the final dictionary:
-
 \[
 \begin{aligned}
-\max \quad 
+\max \quad
 & z = 23 - s_1 - s_3 \\
-\st \quad 
+\st \quad
 & x = 4 - 2s_1 + s_3 \\
 & y = 5 + s_1 - s_3 \\
-& s_2'  = 3 + 3s_1 - s_3 
+& s_2'  = 3 + 3s_1 - s_3
 \quad \Rightarrow \quad
 s_2 - \Delta = 3  + 3s_1 - s_3 \\
 & x, y, s_1, s_2', s_3 \geq 0
 \end{aligned}
 \]
-
-To remain optimal, the dictionary must still satisfy feasibility: all basic variables must remain nonnegative when \( s_1 = s_3 = 0 \). So:
-
-\[
-s_2' = 3 + \Delta \geq 0 \quad \Longleftrightarrow \quad \boxed{\Delta \geq -3}.
-\]
-Equivalently, since \( b_2 = 16 + \Delta \), we require:
-\[
-\boxed{b_2 \geq 13}.
-\]
-
+Only the row of \( s_2 \) is affected: \( s_2 = (3 + \Delta) + 3s_1 - s_3 \).
 \end{steppanel}
 
 \begin{steppanel}{sensbox}
-\sslab{Conclusion}
-The current basis \( B = \{x, y, s_2\} \) remains optimal under the RHS perturbation \( b_2 = 16 + \Delta \) as long as:
+\sslab{Read off the range}
+To remain optimal, the dictionary must still satisfy feasibility: all basic variables must remain nonnegative when \( s_1 = s_3 = 0 \). Only \( s_2 \) depends on \( \Delta \), so:
 \[
-\boxed{\Delta \geq -3} \Rightarrow b_2 \geq 13
+s_2 = 3 + \Delta \geq 0
+\quad\Longleftrightarrow\quad
+\boxed{\Delta \geq -3}
+\quad\Longleftrightarrow\quad
+b_2 \geq 13.
 \]
-
-Beyond this range, \( s_2 < 0 \), and the current dictionary becomes infeasible --- triggering a new pivot in the simplex method.
+Since \( s_2 \) is a \emph{slack} variable, the objective value \( z = 23 \) does not move at all inside this range. Beyond it, \( s_2 < 0 \) and the current dictionary becomes infeasible---triggering a new pivot in the simplex method.
 \end{steppanel}
 
 \subsection{Perturbing \( b_1 \): A Nonbasic Slack Variable}
 
 The first constraint corresponds to slack variable \( s_1 \), which is currently \emph{nonbasic} and set to 0 in the optimal solution. Its original right-hand side is \( b_1 = 9 \). We now perturb it to \( 9 + \Delta \), where \( \Delta \in \mathbb{R} \), and examine how this affects the dictionary.
 
-\begin{tcolorbox}[colback=sensbox!6, colframe=sensbox, coltitle=white, fonttitle=\bfseries, sharp corners,
-    width=0.9\textwidth,
-    box align=center, 
-    title=\textbf{Perturbed Standard Form (RHS of Constraint 1)}]
+\begin{sensdisplay}{Perturbed Standard Form (RHS of Constraint 1)}
 \[
 \begin{aligned}
 \max \quad & 2x + 3y \\
-\st \quad 
+\st \quad
 & x + y + s_1 = 9 + \Delta \quad & \text{(hours)} \\
 & 2x + y + s_2 = 16 \quad & \text{(flour)} \\
 & x + 2y + s_3 = 14 \quad & \text{(sugar)} \\
@@ -313,29 +206,30 @@ x + y + s_1' &= 9
 \end{aligned}
 \]
 So the perturbed system is equivalent to the original, but now expressed in terms of \( s_1' \).
-\end{tcolorbox}
+\end{sensdisplay}
 
-\subsubsection*{Updated Dictionary}
-
+\begin{steppanel}{sensbox}
+\sslab{Adapt the final dictionary}
 We substitute \( s_1 = s_1' - \Delta \) into the optimal dictionary:
-
 \[
 \begin{aligned}
-\max \quad 
+\max \quad
 z &= 23 - s_1 - s_3 = 23 - (s_1' - \Delta) - s_3 = (23 + \Delta) - s_1' - s_3 \\
 x &= 4 - 2s_1 + s_3 = 4 - 2(s_1' - \Delta) + s_3 = (4 + 2\Delta) - 2s_1' + s_3 \\
 y &= 5 + s_1 - s_3 = 5 + (s_1' - \Delta) - s_3 = (5 - \Delta) + s_1' - s_3 \\
 s_2 &= 3 + 3s_1 - s_3 = 3 + 3(s_1' - \Delta) - s_3 = (3 - 3\Delta) + 3s_1' - s_3
 \end{aligned}
 \]
+\end{steppanel}
 
+\begin{steppanel}{sensbox}
+\sslab{Read off the range}
 To ensure the basis remains feasible, set \( s_1' = s_3 = 0 \) and check that the basic variables remain nonnegative:
 \[
 x = 4 + 2\Delta, \quad
 y = 5 - \Delta, \quad
-s_2 = 3 - 3\Delta
+s_2 = 3 - 3\Delta.
 \]
-
 Feasibility conditions:
 \[
 \begin{aligned}
@@ -344,37 +238,24 @@ y \geq 0 &\Rightarrow \Delta \leq 5 \\
 s_2 \geq 0 &\Rightarrow \Delta \leq 1
 \end{aligned}
 \]
-
 Thus, all conditions are satisfied when:
 \[
 \boxed{-2 \leq \Delta \leq 1}
+\quad\Longleftrightarrow\quad
+7 \leq b_1 \leq 10.
 \]
-
-\subsubsection*{Conclusions}
-\begin{itemize}
-\item The current basis \( B = \{x, y, s_2\} \) remains optimal under the perturbation \( b_1 = 9 + \Delta \) as long as:
-\[
-\boxed{-2 \leq \Delta \leq 1} \quad \Rightarrow \quad \boxed{7 \leq b_1 \leq 10}
-\]
-\item Within this range, the objective value changes linearly as:
-\[
-z = 23 + \Delta.
-\]
-\item Outside this range, one or more basic variables becomes negative, and the current solution becomes infeasible, prompting a new pivot in the simplex method.
-\end{itemize}
+Within this range, the objective value changes linearly as \( z = 23 + \Delta \). Outside this range, one or more basic variables becomes negative, and the current solution becomes infeasible, prompting a new pivot in the simplex method.
+\end{steppanel}
 
 \subsection{Perturbing \( b_3 \): Another Nonbasic Slack Variable}
 
 The third constraint corresponds to slack variable \( s_3 \), which is currently \emph{nonbasic} and equal to 0 in the optimal solution. Its original right-hand side is \( b_3 = 14 \). We now perturb it to \( 14 + \Delta \), where \( \Delta \in \mathbb{R} \), and examine how this affects the dictionary.
 
-\begin{tcolorbox}[colback=sensbox!6, colframe=sensbox, coltitle=white, fonttitle=\bfseries, sharp corners,
-    width=0.9\textwidth,
-    box align=center, 
-    title=\textbf{Perturbed Standard Form (RHS of Constraint 3)}]
+\begin{sensdisplay}{Perturbed Standard Form (RHS of Constraint 3)}
 \[
 \begin{aligned}
 \max \quad & 2x + 3y \\
-\st \quad 
+\st \quad
 & x + y + s_1 = 9 \quad & \text{(hours)} \\
 & 2x + y + s_2 = 16 \quad & \text{(flour)} \\
 & x + 2y + s_3 = 14 + \Delta \quad & \text{(sugar)} \\
@@ -392,30 +273,30 @@ Substituting into the system yields:
 x + 2y + (s_3' - \Delta) = 14 + \Delta \quad \Rightarrow \quad x + 2y + s_3' = 14.
 \]
 So the perturbed system returns to the original structure but in terms of \( s_3' \).
-\end{tcolorbox}
+\end{sensdisplay}
 
-\subsubsection*{Updated Dictionary}
-
+\begin{steppanel}{sensbox}
+\sslab{Adapt the final dictionary}
 Substitute \( s_3 = s_3' - \Delta \) into the optimal dictionary:
-
 \[
 \begin{aligned}
-\max \quad 
+\max \quad
 z &= 23 - s_1 - s_3 = 23 - s_1 - (s_3' - \Delta) = (23 + \Delta) - s_1 - s_3' \\
 x &= 4 - 2s_1 + s_3 = 4 - 2s_1 + (s_3' - \Delta) = (4 - \Delta) - 2s_1 + s_3' \\
 y &= 5 + s_1 - s_3 = 5 + s_1 - (s_3' - \Delta) = (5 + \Delta) + s_1 - s_3' \\
 s_2 &= 3 + 3s_1 - s_3 = 3 + 3s_1 - (s_3' - \Delta) = (3 + \Delta) + 3s_1 - s_3'
 \end{aligned}
 \]
+\end{steppanel}
 
+\begin{steppanel}{sensbox}
+\sslab{Read off the range}
 Now test feasibility at the basic solution \( s_1 = s_3' = 0 \):
-
 \[
 x = 4 - \Delta, \quad
 y = 5 + \Delta, \quad
-s_2 = 3 + \Delta
+s_2 = 3 + \Delta.
 \]
-
 Feasibility requires:
 \[
 \begin{aligned}
@@ -423,27 +304,32 @@ x \geq 0 &\Rightarrow \Delta \leq 4 \\
 s_2 \geq 0 &\Rightarrow \Delta \geq -3
 \end{aligned}
 \]
-
 Thus, the allowable range for \( \Delta \) is:
 \[
 \boxed{-3 \leq \Delta \leq 4}
+\quad\Longleftrightarrow\quad
+11 \leq b_3 \leq 18.
 \]
+Within this range, the objective value changes linearly as \( z = 23 + \Delta \). Outside this range, \( x < 0 \) or \( s_2 < 0 \), and the dictionary becomes infeasible.
+\end{steppanel}
 
-\subsubsection*{Conclusion}
+\begin{algocard}{Recipe: RHS Ranging in the Dictionary}
+\algostep{sensbox}{\ding{228}}{Perturb}{Replace $b_i$ by $b_i + \Delta$ and absorb $\Delta$ into the constraint's slack variable: $s_i' = s_i + \Delta$ restores the original right-hand side.}
+\algostep{sensbox}{\ding{228}}{Substitute}{Rewrite the optimal dictionary in terms of $s_i'$; only the constant column changes, each constant shifting by a multiple of $\Delta$.}
+\algostep{sensbox}{\ding{228}}{Impose feasibility}{Require every basic variable $\ge 0$ at $\mathbf{x}_N = \mathbf{0}$; each row gives one linear inequality in $\Delta$.}
+\algostep{algopt}{\ding{52}}{Read the range}{Intersect the inequalities. Inside the range, $z$ changes linearly in $\Delta$; at an endpoint a basic variable hits $0$, and any further change triggers a pivot.}
+\end{algocard}
 
-\begin{itemize}
-\item The current basis \( B = \{x, y, s_2\} \) remains optimal under the perturbation \( b_3 = 14 + \Delta \) as long as:
-\[
-\boxed{-3 \leq \Delta \leq 4} \quad \Rightarrow \quad \boxed{11 \leq b_3 \leq 18}
-\]
-\item Within this range, the objective value changes linearly as:
-\[
-z = 23 + \Delta.
-\]
-\item Outside this range, \( x < 0 \) or \( s_2 < 0 \), and the dictionary becomes infeasible.
-\end{itemize}
+\begin{remark}{Shadow Prices}{}
+The rate at which $z$ changes with $b_i$ is called the \emph{shadow price} of constraint $i$. For the binding constraints we found $z = 23 + \Delta$: an extra hour or an extra unit of sugar is worth exactly $1$ in objective value, as long as $\Delta$ stays within its allowable range. For the non-binding flour constraint ($s_2 = 3 > 0$), the objective did not move at all: its shadow price is $0$. This settles both phone calls from the start of the chapter: pay up to \$1 for the extra oven hour (and no more than \$1 total for up to one extra hour, since the price expires at $b_1 = 10$), and politely decline the flour. Shadow prices are the central objects of the next chapter, where they reappear as the variables of the \emph{dual} linear program (Chapter~\ref{ch:duality}).
+\end{remark}
 
-\subsection{Perturbing \( c_1 \) and \( c_2 \): Objective Coefficients of Basic Variables}
+\begin{learningcheckpoint}[label={lc:shadow-price-b1}]
+The optimal dictionary gives \( z = 23 + \Delta \) when \( b_1 = 9 + \Delta \). What is the shadow price of constraint 1, and over what range of \( b_1 \) is that price valid? What happens to the shadow price at \( b_1 = 10 \)?
+\end{learningcheckpoint}
+
+\section{Ranging the objective coefficients}
+\label{sec:sensitivity-cost}
 
 We now examine how changes to the objective function coefficients affect the optimality of the current basis. In the original problem, the objective is:
 \[
@@ -453,9 +339,7 @@ We now perturb these coefficients to:
 \[
 \max \quad (2 + \delta_1)x + (3 + \delta_2)y,
 \]
-where \( \delta_1, \delta_2 \in \mathbb{R} \).
-
-From the final dictionary, we have:
+where \( \delta_1, \delta_2 \in \mathbb{R} \). Recall the final dictionary:
 \[
 \begin{aligned}
 z &= 23 - s_1 - s_3 \\
@@ -464,21 +348,25 @@ y &= 5 + s_1 - s_3 \\
 s_2 &= 3 + 3s_1 - s_3,
 \end{aligned}
 \]
-with basis \( B = \{x, y, s_2\} \) and nonbasic variables \( N = \{s_1, s_3\} \).
+with basis \( B = \{x, y, s_2\} \) and nonbasic variables \( N = \{s_1, s_3\} \). Unlike an RHS change, a cost change never threatens \emph{feasibility}---the solution stays where it is---but it can destroy \emph{optimality} by making a reduced cost positive.
 
-\subsubsection*{Perturbing \( c_1 \): Objective Coefficient of \( x \)}
+\subsection{Perturbing \( c_1 \): Objective Coefficient of \( x \)}
 
-Let \( c_1 = 2 + \delta_1 \). Since \( x \) is basic, the perturbed objective becomes:
+\begin{steppanel}{sensbox}
+\sslab{Adapt the final dictionary}
+Let \( c_1 = 2 + \delta_1 \). Since \( x \) is basic, we express the extra term \( \delta_1 x \) in terms of the nonbasic variables using the dictionary row for \( x \):
 \[
 z = 23 + \delta_1 \cdot x = 23 + \delta_1(4 - 2s_1 + s_3)
 = (23 + 4\delta_1) + (-2\delta_1)s_1 + \delta_1 s_3.
 \]
-
 Adding to the original dictionary \( z = 23 - s_1 - s_3 \), we obtain:
 \[
 z = (23 + 4\delta_1) + (-1 - 2\delta_1)s_1 + (-1 + \delta_1)s_3.
 \]
+\end{steppanel}
 
+\begin{steppanel}{sensbox}
+\sslab{Read off the range}
 To maintain optimality, the reduced costs of nonbasic variables \( s_1 \) and \( s_3 \) must remain \( \leq 0 \). Thus:
 \[
 \begin{aligned}
@@ -486,30 +374,32 @@ To maintain optimality, the reduced costs of nonbasic variables \( s_1 \) and \(
 -1 + \delta_1 &\leq 0 \quad \Rightarrow \quad \delta_1 \leq 1.
 \end{aligned}
 \]
-
 So the allowable range for \( \delta_1 \) is:
 \[
-\boxed{-\tfrac{1}{2} \leq \delta_1 \leq 1} \quad \Rightarrow \quad \boxed{1.5 \leq c_1 \leq 3}.
+\boxed{-\tfrac{1}{2} \leq \delta_1 \leq 1}
+\quad\Longleftrightarrow\quad
+1.5 \leq c_1 \leq 3.
 \]
+Within this range, the objective value changes linearly as \( z = 23 + 4\delta_1 \).
+\end{steppanel}
 
-Within this range, the objective value changes linearly as:
-\[
-z = 23 + 4\delta_1.
-\]
+\subsection{Perturbing \( c_2 \): Objective Coefficient of \( y \)}
 
-\subsubsection*{Perturbing \( c_2 \): Objective Coefficient of \( y \)}
-
+\begin{steppanel}{sensbox}
+\sslab{Adapt the final dictionary}
 Let \( c_2 = 3 + \delta_2 \). Since \( y \) is also basic, the perturbed objective becomes:
 \[
 z = 23 + \delta_2 \cdot y = 23 + \delta_2(5 + s_1 - s_3)
 = (23 + 5\delta_2) + \delta_2 s_1 - \delta_2 s_3.
 \]
-
 Adding to the original dictionary \( z = 23 - s_1 - s_3 \), we obtain:
 \[
 z = (23 + 5\delta_2) + (-1 + \delta_2)s_1 + (-1 - \delta_2)s_3.
 \]
+\end{steppanel}
 
+\begin{steppanel}{sensbox}
+\sslab{Read off the range}
 To maintain optimality:
 \[
 \begin{aligned}
@@ -517,37 +407,75 @@ To maintain optimality:
 -1 - \delta_2 &\leq 0 \quad \Rightarrow \quad \delta_2 \geq -1.
 \end{aligned}
 \]
-
 So the allowable range for \( \delta_2 \) is:
 \[
-\boxed{-1 \leq \delta_2 \leq 1} \quad \Rightarrow \quad \boxed{2 \leq c_2 \leq 4}.
+\boxed{-1 \leq \delta_2 \leq 1}
+\quad\Longleftrightarrow\quad
+2 \leq c_2 \leq 4.
 \]
+Within this range, the objective value changes linearly as \( z = 23 + 5\delta_2 \).
+\end{steppanel}
 
-Within this range, the objective value changes linearly as:
-\[
-z = 23 + 5\delta_2.
-\]
-
-\subsubsection*{Summary of Sensitivity to Objective Coefficients}
+\subsection{Summary}
 
 \begin{center}
-\begin{tabular}{|c|c|c|}
-\hline
-\textbf{Perturbed Coefficient} & \textbf{Allowed Range} & \textbf{Effect on Objective} \\
-\hline
-\( c_1 = 2 + \delta_1 \) & \( \boxed{1.5 \leq c_1 \leq 3} \) & \( z = 23 + 4\delta_1 \) \\
-\( c_2 = 3 + \delta_2 \) & \( \boxed{2 \leq c_2 \leq 4} \)   & \( z = 23 + 5\delta_2 \) \\
-\hline
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Perturbed coefficient & Allowed range & Effect on objective \\
+\midrule
+\( c_1 = 2 + \delta_1 \) & \( 1.5 \leq c_1 \leq 3 \) & \( z = 23 + 4\delta_1 \) \\
+\( c_2 = 3 + \delta_2 \) & \( 2 \leq c_2 \leq 4 \)   & \( z = 23 + 5\delta_2 \) \\
+\bottomrule
 \end{tabular}
 \end{center}
 
 Outside these ranges, the reduced costs of nonbasic variables become positive, violating optimality. In such cases, the simplex method would require a new pivot.
 
+\begin{algocard}{Recipe: Objective-Coefficient Ranging in the Dictionary}
+\algostep{sensbox}{\ding{228}}{Perturb}{Replace $c_i$ by $c_i + \delta$. If variable $i$ is nonbasic, only its own reduced cost shifts by $\delta$; skip to the last step.}
+\algostep{sensbox}{\ding{228}}{Substitute}{If variable $i$ is basic, express the extra term $\delta\, x_i$ in terms of the nonbasic variables using the dictionary row for $x_i$, and add it to the objective row.}
+\algostep{sensbox}{\ding{228}}{Impose optimality}{Require every reduced cost $\le 0$ (for a maximization problem); each nonbasic variable gives one linear inequality in $\delta$.}
+\algostep{algopt}{\ding{52}}{Read the range}{Intersect the inequalities. Inside the range the solution does not move, and $z$ changes linearly if $i$ is basic (not at all if $i$ is nonbasic).}
+\end{algocard}
+
+\begin{learningcheckpoint}[label={lc:nonbasic-cost}]
+Changing the objective coefficient of a \emph{nonbasic} variable never changes the current optimal solution---but changing it enough can still change the \emph{optimal basis}. Reconcile these two statements.
+\end{learningcheckpoint}
+
 \section{Sensitivity with Matrix Notation}
+\label{sec:sensitivity-matrix}
+
+The dictionary manipulations above can be organized with matrices, which is how software carries them out. Writing the running example in standard form,
+\[
+\begin{aligned}
+\max \quad & \mathbf{c}^\top \mathbf{x} \\
+\st \quad & A_x\mathbf{x} + I\mathbf{s}  = \mathbf{b}, \\
+& \mathbf{x}, \mathbf{s} \geq \mathbf{0},
+\end{aligned}
+\qquad\text{where}\qquad
+A_x =
+\begin{bmatrix}
+1 & 1 \\
+2 & 1 \\
+1 & 2
+\end{bmatrix},
+\quad
+\mathbf{x} =
+\begin{bmatrix}
+x \\
+y \\
+\end{bmatrix},
+\quad
+\mathbf{s} =
+\begin{bmatrix}
+s_1 \\
+s_2 \\
+s_3
+\end{bmatrix}.
+\]
 
 \begin{tcolorbox}[colback=algopt!6, colframe=algopt, coltitle=white, fonttitle=\bfseries, sharp corners,
-    width=1\textwidth, % adjust width as desired
-    box align=center, 
     title=\textbf{Final Dictionary in Matrix Notation}]
 Let the basic variables be $\mathbf{x}_B = \begin{bmatrix} x \\ y \\ s_2 \end{bmatrix}$,
 and the non-basic variables be $\mathbf{x}_N = \begin{bmatrix} s_1 \\ s_3 \end{bmatrix}$.
@@ -560,13 +488,13 @@ $$
 where:
 
 $$
-\mathbf{b}' = 
+\mathbf{b}' =
 \begin{bmatrix}
 4 \\
 5 \\
 3
 \end{bmatrix}, \quad
-A_N' = 
+A_N' =
 \begin{bmatrix}
 -2 & 1 \\
 1 & -1 \\
@@ -617,7 +545,7 @@ s_1
 \begin{bmatrix}
 2  \\
 -1  \\
--3 
+-3
 \end{bmatrix}
  +s_3
 \begin{bmatrix}
@@ -627,7 +555,7 @@ s_1
 \end{bmatrix}.$$
 \end{tcolorbox}
 
-The basis matrix is 
+The basis matrix is
 $$
 A_B = \begin{bmatrix}
 1 & 1 & 0\\
@@ -688,54 +616,68 @@ A_s = A_B^{-1}
 
 \end{remark}
 
-\subsubsection{1. Changing the Right-Hand Side \( b_1 \) of the First Constraint}
+\subsection{Ranging \( b_1 \) with the Basis Inverse}
+
 We modify the right-hand side of the first constraint and analyze its impact on feasibility:
 \[
-b_1 \quad \Rightarrow \quad \begin{bmatrix} b_1 \\ 16 \\ 14 \end{bmatrix}.
+\mathbf{b} \quad \Rightarrow \quad \begin{bmatrix} b_1 \\ 16 \\ 14 \end{bmatrix}.
 \]
-Using the inverse basis matrix \( A_B^{-1} \), the basic solution is updated as:
+
+\begin{steppanel}{sensbox}
+\cstep{1}{Update the basic solution}
+Using the inverse basis matrix \( A_B^{-1} \), the basic solution is \( \mathbf{x}_B = A_B^{-1} \mathbf{b} \):
 \[
-\mathbf{x}_B = A_B^{-1} \mathbf{b}.
-\]
-Ensuring that all basic variables remain non-negative, we derive the feasibility conditions:
-\[ 
-A_B^{-1} \mathbf{b} = A_B^{-1} = \begin{bmatrix}
+A_B^{-1} \mathbf{b} = \begin{bmatrix}
 2 & 0 & -1\\
 -1 & 0 & 1\\
 -3 & 1 & 1
-\end{bmatrix} \begin{bmatrix} b_1\\ 16\\ 14 \end{bmatrix} 
-= 
+\end{bmatrix} \begin{bmatrix} b_1\\ 16\\ 14 \end{bmatrix}
+=
 \begin{bmatrix}
 2b_1 - 14\\
 -b_1 + 14\\
 -3b_1 + 30
-\end{bmatrix} \geq 
+\end{bmatrix}.
+\]
+\end{steppanel}
+
+\begin{steppanel}{sensbox}
+\cstep{2}{Impose feasibility}
+Ensuring that all basic variables remain non-negative:
+\[
+\begin{bmatrix}
+2b_1 - 14\\
+-b_1 + 14\\
+-3b_1 + 30
+\end{bmatrix} \geq
 \begin{bmatrix}
 0\\
 0\\
 0
-\end{bmatrix} 
-\]
-Simplifying, we have
-\[
+\end{bmatrix}
+\quad\Longleftrightarrow\quad
 \begin{bmatrix}
 b_1 \\
 14\\
 10
-\end{bmatrix} \geq 
+\end{bmatrix} \geq
 \begin{bmatrix}
 7\\
 b_1\\
 b_1
-\end{bmatrix} 
+\end{bmatrix}.
 \]
+\end{steppanel}
 
+\begin{steppanel}{sensbox}
+\cstep{3}{Read the range}
 \[
-7 \leq b_1 \leq 10
+\boxed{7 \leq b_1 \leq 10}
 \]
-is the feasible range for \( b_1 \) that preserves the optimal basis.
+is the feasible range for \( b_1 \) that preserves the optimal basis---matching the range \( -2 \le \Delta \le 1 \) found with the dictionary in Section~\ref{sec:sensitivity-rhs}.
+\end{steppanel}
 
-In the image here, we show changing $b_1$ to the values of $7,9,10$.
+The figure below shows the constraint \( x + y \le b_1 \) drawn for the three values \( b_1 = 7, 9, 10 \).
 \begin{center}
 % --- TikZ recreation of Figures/sensitivity-changing-b ---
 % Original LP:  max 2x + 3y  s.t.  x + y <= b_1, 2x + y <= 16, x + 2y <= 14, x, y >= 0
@@ -778,11 +720,12 @@ In the image here, we show changing $b_1$ to the values of $7,9,10$.
 \end{tikzpicture}
 \end{center}
 
-\subsubsection{Sensitivity Analysis on the Objective Coefficient \(c_x\)}
+\subsection{Ranging \( c_x \) via Reduced Costs}
 
 To determine the range of values for \( c_x \) (the coefficient of \( x \) in the objective function) such that the current basis remains optimal, we analyze the simplex optimality conditions.
 
-\textbf{Step 1: Compute the Reduced Costs}
+\begin{steppanel}{sensbox}
+\cstep{1}{Set up the reduced costs}
 The objective function is initially:
 \[
     z = 2x + 3y.
@@ -799,15 +742,17 @@ The reduced cost for any non-basic variable \( j \) is given by:
 \[
     \bar{c}_j = c_j - c_B A_B^{-1} A_j.
 \]
-The non-basic variables are \( s_1 \) and \( s_3 \). We need to ensure that their reduced costs remain non-negative.
+The non-basic variables are \( s_1 \) and \( s_3 \). We need to ensure that their reduced costs remain non-positive.
+\end{steppanel}
 
-\textbf{Step 2: Compute the Reduced Costs for \( s_1 \) and \( s_3 \)}
+\begin{steppanel}{sensbox}
+\cstep{2}{Compute the reduced costs for \( s_1 \) and \( s_3 \)}
 The constraint matrix is:
 \[
-    A = \begin{bmatrix} 
-    1 & 1 & 1 & 0 & 0 \\ 
-    2 & 1 & 0 & 1 & 0 \\ 
-    1 & 2 & 0 & 0 & 1 
+    A = \begin{bmatrix}
+    1 & 1 & 1 & 0 & 0 \\
+    2 & 1 & 0 & 1 & 0 \\
+    1 & 2 & 0 & 0 & 1
     \end{bmatrix}.
 \]
 Extracting the columns corresponding to \( s_1 \) and \( s_3 \):
@@ -817,20 +762,20 @@ Extracting the columns corresponding to \( s_1 \) and \( s_3 \):
 \]
 Using the inverse basis matrix:
 \[
-    A_B^{-1} A_{s_1} = 
-    \begin{bmatrix} 
-    2 & 0 & -1 \\ 
-    -1 & 0 & 1 \\ 
+    A_B^{-1} A_{s_1} =
+    \begin{bmatrix}
+    2 & 0 & -1 \\
+    -1 & 0 & 1 \\
     -3 & 1 & 1
     \end{bmatrix}
     \begin{bmatrix} 1 \\ 0 \\ 0 \end{bmatrix} =
     \begin{bmatrix} 2 \\ -1 \\ -3 \end{bmatrix}.
 \]
 \[
-    A_B^{-1} A_{s_3} = 
-    \begin{bmatrix} 
-    2 & 0 & -1 \\ 
-    -1 & 0 & 1 \\ 
+    A_B^{-1} A_{s_3} =
+    \begin{bmatrix}
+    2 & 0 & -1 \\
+    -1 & 0 & 1 \\
     -3 & 1 & 1
     \end{bmatrix}
     \begin{bmatrix} 0 \\ 0 \\ 1 \end{bmatrix} =
@@ -845,30 +790,32 @@ Thus, the reduced costs are:
     \bar{c}_{s_3} = 0 - \begin{bmatrix} c_x & 3 & 0 \end{bmatrix} \cdot \begin{bmatrix} -1 \\ 1 \\ 1 \end{bmatrix}
     = 0 - (-c_x + 3).
 \]
-To retain optimality, we want $\bar{c}_{s_1}$ and $\bar{c}_{s_3}$ to be $\leq 0$.
+\end{steppanel}
 
+\begin{steppanel}{sensbox}
+\cstep{3}{Read the range}
+To retain optimality, we want $\bar{c}_{s_1}$ and $\bar{c}_{s_3}$ to be $\leq 0$:
 \[
-    -2c_x + 3 \leq 0 \quad \Rightarrow \quad c_x \geq \frac{3}{2} = 1.5.
+    -2c_x + 3 \leq 0 \quad \Rightarrow \quad c_x \geq \frac{3}{2} = 1.5,
 \]
 \[
     c_x - 3 \leq 0 \quad \Rightarrow \quad c_x \leq 3.
 \]
-
-\textbf{Step 3: Feasible Range for \( c_x \)}
 For the current basis to remain optimal, \( c_x \) must satisfy:
 \[
-    1.5 \leq c_x \leq 3.
+    \boxed{1.5 \leq c_x \leq 3},
 \]
-
-Thus, we have confirmed that the coefficient \( c_x \) can range between 1.5 and 3 while maintaining the current optimal basis.
+matching the range found with the dictionary in Section~\ref{sec:sensitivity-cost}.
+\end{steppanel}
 
 \begin{center}
 \altincludegraphics[scale = 0.3]{Figures/sensitivity-objective}{Feasible region in the x-y plane with several level curves of the objective z = c_x x + 3y drawn for different slopes. The figure shows that as long as c_x lies in the interval [1.5, 3], the level curves tilt within the cone defined by the active constraints at the current optimum, so the optimal vertex (and basis) does not change.}
 \end{center}
 
-\subsection{Excel Solver Sensitivity Analysis}
+\section{Sensitivity Reports in Software}
+\label{sec:sensitivity-software}
 
-When solving a problem in excel, you can ask for a sensitivity analysis.
+When solving a problem in Excel, you can ask for a sensitivity analysis.
 
 \begin{center}
 \altincludegraphics[scale =0.3]{Figures/excel-sensitivity}{Screenshot of Excel's Solver Results dialog with the option to generate a Sensitivity report selected, illustrating how to request post-optimal sensitivity output after solving a linear program.}
@@ -881,6 +828,8 @@ This will generate a report that will show the following:
 
 \item \textbf{Constraint Status:} The report shows which constraints are binding (active) and which are non-binding. A binding constraint has a positive shadow price and restricts the optimal solution, while a non-binding constraint has a shadow price of zero.
 \end{itemize}
+
+These are exactly the quantities computed by hand in Sections~\ref{sec:sensitivity-rhs} and~\ref{sec:sensitivity-cost}: the allowable increase/decrease columns are the ranges from the two recipe cards, and the shadow prices are the rates from the Shadow Prices remark.
 
 For concreteness, the figures below show a worksheet set up for Solver and the
 sensitivity report it produces. Figure~\ref{fig:excel-setup} shows the model
@@ -980,25 +929,27 @@ A_B^{-1} = \begin{bmatrix} -2 & 1 \\ 3 & -1 \end{bmatrix}.
 The following is a sensitivity report from Excel Solver for a maximization LP with two decision variables $x_1$ and $x_2$ and three constraints:
 
 \begin{center}
-\begin{tabular}{|c|c|c|c|c|}
-\hline
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
 \textbf{Variable} & \textbf{Value} & \textbf{Obj.\ Coeff.} & \textbf{Allow.\ Increase} & \textbf{Allow.\ Decrease} \\
-\hline
+\midrule
 $x_1$ & 8 & 6 & 2 & 3 \\
 $x_2$ & 4 & 5 & 4 & 1 \\
-\hline
+\bottomrule
 \end{tabular}
 \end{center}
 
 \begin{center}
-\begin{tabular}{|c|c|c|c|c|}
-\hline
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
 \textbf{Constraint} & \textbf{Shadow Price} & \textbf{RHS} & \textbf{Allow.\ Increase} & \textbf{Allow.\ Decrease} \\
-\hline
+\midrule
 1 & 2.5 & 20 & 4 & 6 \\
 2 & 0 & 30 & $\infty$ & 5 \\
 3 & 1.0 & 12 & 3 & 2 \\
-\hline
+\bottomrule
 \end{tabular}
 \end{center}
 
@@ -1009,4 +960,3 @@ $x_2$ & 4 & 5 & 4 & 1 \\
 \item If 2 additional units of the first resource become available (RHS increases from 20 to 22), what is the new approximate optimal objective value?
 \end{enumerate}
 \end{ex}
-

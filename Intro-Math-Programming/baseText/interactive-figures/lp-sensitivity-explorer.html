@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interactive LP: Sensitivity Explorer</title>
+<!--
+  Standalone interactive LP sensitivity explorer (no external dependencies).
+  Recreates https://www.desmos.com/calculator/xz1f0tdjf9
+
+  Drag a1, a2, b to change constraint 1 (a1*x + a2*y <= b) and watch the
+  feasible region deform; drag c1, c2 to tilt the objective and watch the
+  optimal vertex jump between corners.
+
+  Open Optimization OR Book - CC BY-SA 4.0
+-->
+<style>
+  :root {
+    --blue: #2d70b3; --red: #c74440; --green: #388c46;
+    --purple: #6042a6; --orange: #fa7e19;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    margin: 0; padding: 16px; background: #fff; color: #222;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  h1 { font-size: 1.1rem; font-weight: 600; margin: 0 0 4px; }
+  .subtitle { font-size: 0.85rem; color: #666; margin: 0 0 12px; text-align: center; }
+  #wrap { width: 100%; max-width: 680px; }
+  svg { width: 100%; height: auto; display: block; border: 1px solid #ddd; border-radius: 6px; background: #fff; }
+  .panel {
+    margin-top: 12px; padding: 10px 14px;
+    border: 1px solid #ddd; border-radius: 6px; background: #fafafa;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 6px 24px;
+  }
+  .srow { display: flex; align-items: center; gap: 10px; }
+  .srow label {
+    font-family: Georgia, serif; font-style: italic; font-size: 1rem;
+    min-width: 5.5em; white-space: nowrap;
+  }
+  .srow label b { font-style: normal; }
+  .srow input { flex: 1; accent-color: var(--blue); min-width: 100px; }
+  .c-red label { color: var(--red); }
+  .c-obj label { color: var(--blue); }
+  .readout { grid-column: 1 / -1; font-size: 0.9rem; color: #333; margin-top: 4px;
+             font-family: Georgia, serif; }
+  .readout .opt { color: var(--purple); font-weight: 700; }
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 8px; font-size: 0.82rem; color: #444; }
+  .legend span::before { content: "\2014\2014"; letter-spacing: -2px; margin-right: 5px; font-weight: bold; }
+  .legend .lr::before { color: var(--red); }
+  .legend .lg::before { color: var(--green); }
+  .legend .lo::before { color: var(--orange); }
+  .legend .lp::before { color: var(--purple); }
+  @media (max-width: 560px) { .panel { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <h1>LP sensitivity explorer</h1>
+  <p class="subtitle">Change the constraint <span style="color:var(--red)">a₁x + a₂y ≤ b</span> and the objective
+    <span style="color:var(--blue)">c₁x + c₂y</span>; watch the region deform and the optimal vertex jump.</p>
+  <svg id="plot" xmlns="http://www.w3.org/2000/svg"></svg>
+  <div class="panel">
+    <div class="srow c-red"><label>a₁ = <b id="va1"></b></label><input type="range" id="a1" min="0" max="5" step="0.1" value="1"></div>
+    <div class="srow c-obj"><label>c₁ = <b id="vc1"></b></label><input type="range" id="c1" min="-10" max="10" step="0.1" value="8.2"></div>
+    <div class="srow c-red"><label>a₂ = <b id="va2"></b></label><input type="range" id="a2" min="0" max="5" step="0.1" value="2"></div>
+    <div class="srow c-obj"><label>c₂ = <b id="vc2"></b></label><input type="range" id="c2" min="-10" max="10" step="0.1" value="3.3"></div>
+    <div class="srow c-red"><label>b = <b id="vb"></b></label><input type="range" id="b" min="5" max="35" step="0.5" value="16"></div>
+    <div class="readout" id="readout"></div>
+  </div>
+  <div class="legend">
+    <span class="lr">a₁x + a₂y ≤ b</span>
+    <span class="lg">5x + 3y ≤ 45</span>
+    <span class="lo">c₁x + c₂y = 10, 20, 30</span>
+    <span class="lr">= 40, 50, 60</span>
+    <span class="lp">= 70, 80, 90, 100</span>
+  </div>
+</div>
+
+<script>
+"use strict";
+const FIXED = { a: 5, b: 3, c: 45 };            // green constraint 5x+3y<=45
+const LEVELS = [
+  { vals: [10,20,30],       color: "var(--orange)" },
+  { vals: [40,50,60],       color: "var(--red)" },
+  { vals: [70,80,90,100],   color: "var(--purple)" },
+];
+const V = { xmin: -5.5, xmax: 16.5, ymin: -2.5, ymax: 12.5 };
+const W = 680, H = 465;
+
+const svg = document.getElementById("plot");
+svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+const sx = x => (x - V.xmin) / (V.xmax - V.xmin) * W;
+const sy = y => H - (y - V.ymin) / (V.ymax - V.ymin) * H;
+
+function el(name, attrs, parent) {
+  const e = document.createElementNS("http://www.w3.org/2000/svg", name);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  (parent || svg).appendChild(e);
+  return e;
+}
+
+/* static grid + axes */
+const grid = el("g", {stroke:"#e6e6e6", "stroke-width":1});
+for (let x = Math.ceil(V.xmin); x <= V.xmax; x++)
+  el("line", {x1:sx(x), y1:0, x2:sx(x), y2:H}, grid);
+for (let y = Math.ceil(V.ymin); y <= V.ymax; y++)
+  el("line", {x1:0, y1:sy(y), x2:W, y2:sy(y)}, grid);
+const axes = el("g", {stroke:"#444", "stroke-width":1.5});
+el("line", {x1:0, y1:sy(0), x2:W, y2:sy(0)}, axes);
+el("line", {x1:sx(0), y1:0, x2:sx(0), y2:H}, axes);
+const ticks = el("g", {"font-size":11, fill:"#555", "text-anchor":"middle"});
+for (let x = -5; x <= 15; x += 5) if (x !== 0)
+  el("text", {x:sx(x), y:sy(0)+14}, ticks).textContent = x;
+for (let y = 5; y <= 10; y += 5)
+  el("text", {x:sx(0)-12, y:sy(y)+4}, ticks).textContent = y;
+
+/* dynamic layer, redrawn on every slider move */
+const dyn = el("g", {});
+
+function clipPolygon(poly, {a,b,c}) {
+  const out = [];
+  const inside = p => a*p[0] + b*p[1] <= c + 1e-9;
+  for (let i = 0; i < poly.length; i++) {
+    const cur = poly[i], nxt = poly[(i+1) % poly.length];
+    const cin = inside(cur), nin = inside(nxt);
+    if (cin) out.push(cur);
+    if (cin !== nin) {
+      const t = (c - a*cur[0] - b*cur[1]) / (a*(nxt[0]-cur[0]) + b*(nxt[1]-cur[1]));
+      out.push([cur[0] + t*(nxt[0]-cur[0]), cur[1] + t*(nxt[1]-cur[1])]);
+    }
+  }
+  return out;
+}
+
+function lineInView(a, b, c) {
+  const pts = [];
+  const push = (x,y) => {
+    if (x >= V.xmin-1e-9 && x <= V.xmax+1e-9 && y >= V.ymin-1e-9 && y <= V.ymax+1e-9)
+      pts.push([x,y]);
+  };
+  if (Math.abs(b) > 1e-12) { push(V.xmin, (c-a*V.xmin)/b); push(V.xmax, (c-a*V.xmax)/b); }
+  if (Math.abs(a) > 1e-12) { push((c-b*V.ymin)/a, V.ymin); push((c-b*V.ymax)/a, V.ymax); }
+  pts.sort((p,q) => p[0]-q[0] || p[1]-q[1]);
+  return pts.length >= 2 ? [pts[0], pts[pts.length-1]] : null;
+}
+
+const S = {};
+for (const id of ["a1","a2","b","c1","c2"]) {
+  S[id] = document.getElementById(id);
+  S[id].addEventListener("input", draw);
+}
+const fmt = v => +(+v).toFixed(4);
+
+function draw() {
+  const a1 = +S.a1.value, a2 = +S.a2.value, b = +S.b.value;
+  const c1 = +S.c1.value, c2 = +S.c2.value;
+  document.getElementById("va1").textContent = a1;
+  document.getElementById("va2").textContent = a2;
+  document.getElementById("vb").textContent  = b;
+  document.getElementById("vc1").textContent = c1;
+  document.getElementById("vc2").textContent = c2;
+
+  dyn.innerHTML = "";
+
+  /* feasible region */
+  const BIG = 1e4;
+  let poly = [[0,0],[BIG,0],[BIG,BIG],[0,BIG]];
+  poly = clipPolygon(poly, {a:a1, b:a2, c:b});
+  poly = clipPolygon(poly, FIXED);
+  const verts = [];
+  for (const p of poly)
+    if (!verts.some(q => Math.hypot(q[0]-p[0], q[1]-p[1]) < 1e-6)) verts.push(p);
+
+  if (verts.length >= 3)
+    el("polygon", {
+      points: verts.map(p => `${sx(p[0])},${sy(p[1])}`).join(" "),
+      fill: "var(--blue)", "fill-opacity": 0.35
+    }, dyn);
+
+  /* level-set families (dotted) */
+  for (const fam of LEVELS)
+    for (const z of fam.vals) {
+      const seg = lineInView(c1, c2, z);
+      if (seg) el("line", {
+        x1:sx(seg[0][0]), y1:sy(seg[0][1]), x2:sx(seg[1][0]), y2:sy(seg[1][1]),
+        stroke: fam.color, "stroke-width": 2.5,
+        "stroke-dasharray": "0.5 7", "stroke-linecap": "round"
+      }, dyn);
+    }
+
+  /* constraint boundary lines */
+  const segs = [ [{a:a1,b:a2,c:b}, "var(--red)"], [FIXED, "var(--green)"] ];
+  for (const [con, color] of segs) {
+    const seg = lineInView(con.a, con.b, con.c);
+    if (seg) el("line", {
+      x1:sx(seg[0][0]), y1:sy(seg[0][1]), x2:sx(seg[1][0]), y2:sy(seg[1][1]),
+      stroke: color, "stroke-width": 2.5
+    }, dyn);
+  }
+
+  /* vertices + optimum */
+  let best = null, zBest = -Infinity;
+  for (const p of verts) {
+    const z = c1*p[0] + c2*p[1];
+    if (z > zBest + 1e-9) { zBest = z; best = p; }
+  }
+  for (const p of verts) {
+    const isBest = best && Math.hypot(p[0]-best[0], p[1]-best[1]) < 1e-9;
+    el("circle", {cx:sx(p[0]), cy:sy(p[1]), r: isBest ? 6.5 : 4,
+      fill: isBest ? "var(--orange)" : "var(--purple)",
+      stroke: isBest ? "#7a3c00" : "none", "stroke-width": 1.5}, dyn);
+    const t = el("text", {
+      x: sx(p[0]) + (p[0] < 0.01 ? -8 : 10),
+      y: sy(p[1]) + (p[1] < 0.01 ? 18 : -8),
+      "font-size": 13.5, fill: "var(--purple)",
+      "text-anchor": p[0] < 0.01 ? "end" : "start",
+      "font-family": "Georgia, serif"
+    }, dyn);
+    t.textContent = `(${fmt(p[0])}, ${fmt(p[1])})`;
+  }
+
+  const ro = document.getElementById("readout");
+  if (best)
+    ro.innerHTML = `max ${c1}x + ${c2}y &nbsp;&rarr;&nbsp; ` +
+      `<span class="opt">Z* = ${fmt(zBest)} at (${fmt(best[0])}, ${fmt(best[1])})</span>`;
+  else
+    ro.textContent = "Feasible region is empty.";
+}
+draw();
+</script>
+</body>
+</html>

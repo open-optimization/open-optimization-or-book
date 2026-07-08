@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interactive LP: Weak Duality Explorer</title>
+<!--
+  Standalone interactive weak-duality explorer (no external dependencies).
+  Recreates https://www.desmos.com/calculator/d2d5c861c3
+
+  Primal:  max 2x + 3y  s.t.  x+y <= 9,  x+2y <= 14,  2x+y <= 16,  x,y >= 0.
+  Combine the constraints with multipliers a, b, c >= 0:
+     a(x+y) + b(x+2y) + c(2x+y) <= 9a + 14b + 16c = d
+  i.e.  t*x + w*y <= d  with  t = a+b+2c,  w = a+2b+c.
+  If t >= 2 and w >= 3, then 2x+3y <= t*x + w*y <= d for every feasible (x,y):
+  d is an upper bound on the primal optimum. Minimizing d is the DUAL.
+
+  Open Optimization OR Book - CC BY-SA 4.0
+-->
+<style>
+  :root {
+    --blue: #2d70b3; --red: #c74440; --green: #388c46;
+    --purple: #6042a6; --orange: #fa7e19;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    margin: 0; padding: 16px; background: #fff; color: #222;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  h1 { font-size: 1.1rem; font-weight: 600; margin: 0 0 4px; }
+  .subtitle { font-size: 0.85rem; color: #666; margin: 0 0 12px; text-align: center; max-width: 640px; }
+  #wrap { width: 100%; max-width: 700px; }
+  svg { width: 100%; height: auto; display: block; border: 1px solid #ddd; border-radius: 6px; background: #fff; }
+  .panel {
+    margin-top: 12px; padding: 10px 14px;
+    border: 1px solid #ddd; border-radius: 6px; background: #fafafa;
+  }
+  .srow { display: flex; align-items: center; gap: 10px; margin: 4px 0; }
+  .srow label {
+    font-family: Georgia, serif; font-style: italic; font-size: 1rem;
+    min-width: 9.5em; white-space: nowrap;
+  }
+  .srow label b { font-style: normal; color: var(--orange); }
+  .srow input { flex: 1; accent-color: var(--orange); }
+  .facts {
+    margin-top: 8px; font-family: Georgia, serif; font-size: 1rem; line-height: 1.55;
+  }
+  .facts .val { font-weight: 700; }
+  .verdict { margin-top: 6px; font-size: 0.95rem; font-weight: 600; }
+  .verdict.ok  { color: var(--green); }
+  .verdict.bad { color: var(--red); }
+  .verdict.tight { color: var(--purple); }
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 8px; font-size: 0.82rem; color: #444; }
+  .legend span::before { content: "\2014\2014"; letter-spacing: -2px; margin-right: 5px; font-weight: bold; }
+  .legend .lr::before { color: var(--red); }
+  .legend .lp::before { color: var(--purple); }
+  .legend .lg::before { color: var(--green); }
+  .legend .lo::before { color: var(--orange); }
+  .legend .lb::before { color: var(--blue); }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <h1>Weak duality explorer: max 2x + 3y</h1>
+  <p class="subtitle">Multiply the constraints by a, b, c ≥ 0 and add them:
+    the <span style="color:var(--orange)">orange line</span> t·x + w·y = d.
+    Whenever t ≥ 2 and w ≥ 3, every feasible point satisfies 2x + 3y ≤ t·x + w·y ≤ d,
+    so d bounds the optimum. Try to push d down to 23 — that is the dual problem.</p>
+  <svg id="plot" xmlns="http://www.w3.org/2000/svg"></svg>
+  <div class="panel">
+    <div class="srow"><label>a = <b id="va"></b> · (x + y ≤ 9)</label><input type="range" id="a" min="0" max="3" step="0.01" value="2"></div>
+    <div class="srow"><label>b = <b id="vb"></b> · (x + 2y ≤ 14)</label><input type="range" id="b" min="0" max="3" step="0.01" value="2"></div>
+    <div class="srow"><label>c = <b id="vc"></b> · (2x + y ≤ 16)</label><input type="range" id="c" min="0" max="3" step="0.01" value="1"></div>
+    <div class="facts" id="facts"></div>
+    <div class="verdict" id="verdict"></div>
+  </div>
+  <div class="legend">
+    <span class="lr">x + y ≤ 9</span>
+    <span class="lp">x + 2y ≤ 14</span>
+    <span class="lg">2x + y ≤ 16</span>
+    <span class="lo">t·x + w·y = d (combined)</span>
+    <span class="lb">2x + 3y = 23 (primal optimum, dashed)</span>
+  </div>
+</div>
+
+<script>
+"use strict";
+const CONS = [
+  { a: 1, b: 1, c: 9,  color: "var(--red)" },
+  { a: 1, b: 2, c: 14, color: "var(--purple)" },
+  { a: 2, b: 1, c: 16, color: "var(--green)" },
+];
+const OBJ = { a: 2, b: 3 };
+const V = { xmin: -2.2, xmax: 14.5, ymin: -1.5, ymax: 9.5 };
+const W = 700, H = 465;
+
+const svg = document.getElementById("plot");
+svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+const sx = x => (x - V.xmin) / (V.xmax - V.xmin) * W;
+const sy = y => H - (y - V.ymin) / (V.ymax - V.ymin) * H;
+
+function el(name, attrs, parent) {
+  const e = document.createElementNS("http://www.w3.org/2000/svg", name);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  (parent || svg).appendChild(e);
+  return e;
+}
+
+function clipPolygon(poly, {a,b,c}) {
+  const out = [];
+  const inside = p => a*p[0] + b*p[1] <= c + 1e-9;
+  for (let i = 0; i < poly.length; i++) {
+    const cur = poly[i], nxt = poly[(i+1) % poly.length];
+    const cin = inside(cur), nin = inside(nxt);
+    if (cin) out.push(cur);
+    if (cin !== nin) {
+      const t = (c - a*cur[0] - b*cur[1]) / (a*(nxt[0]-cur[0]) + b*(nxt[1]-cur[1]));
+      out.push([cur[0] + t*(nxt[0]-cur[0]), cur[1] + t*(nxt[1]-cur[1])]);
+    }
+  }
+  return out;
+}
+
+function lineInView(a, b, c) {
+  const pts = [];
+  const push = (x,y) => {
+    if (x >= V.xmin-1e-9 && x <= V.xmax+1e-9 && y >= V.ymin-1e-9 && y <= V.ymax+1e-9)
+      pts.push([x,y]);
+  };
+  if (Math.abs(b) > 1e-12) { push(V.xmin, (c-a*V.xmin)/b); push(V.xmax, (c-a*V.xmax)/b); }
+  if (Math.abs(a) > 1e-12) { push((c-b*V.ymin)/a, V.ymin); push((c-b*V.ymax)/a, V.ymax); }
+  pts.sort((p,q) => p[0]-q[0] || p[1]-q[1]);
+  return pts.length >= 2 ? [pts[0], pts[pts.length-1]] : null;
+}
+
+/* ---- static layers ---- */
+const grid = el("g", {stroke:"#e6e6e6", "stroke-width":1});
+for (let x = Math.ceil(V.xmin); x <= V.xmax; x++)
+  el("line", {x1:sx(x), y1:0, x2:sx(x), y2:H}, grid);
+for (let y = Math.ceil(V.ymin); y <= V.ymax; y++)
+  el("line", {x1:0, y1:sy(y), x2:W, y2:sy(y)}, grid);
+const axes = el("g", {stroke:"#444", "stroke-width":1.5});
+el("line", {x1:0, y1:sy(0), x2:W, y2:sy(0)}, axes);
+el("line", {x1:sx(0), y1:0, x2:sx(0), y2:H}, axes);
+const ticks = el("g", {"font-size":11, fill:"#555", "text-anchor":"middle"});
+for (let x = 2; x <= 14; x += 2)
+  el("text", {x:sx(x), y:sy(0)+14}, ticks).textContent = x;
+for (let y = 2; y <= 8; y += 2)
+  el("text", {x:sx(0)-12, y:sy(y)+4}, ticks).textContent = y;
+
+/* feasible region */
+const BIG = 1e4;
+let poly = [[0,0],[BIG,0],[BIG,BIG],[0,BIG]];
+for (const con of CONS) poly = clipPolygon(poly, con);
+const verts = [];
+for (const p of poly)
+  if (!verts.some(q => Math.hypot(q[0]-p[0], q[1]-p[1]) < 1e-6)) verts.push(p);
+el("polygon", {
+  points: verts.map(p => `${sx(p[0])},${sy(p[1])}`).join(" "),
+  fill: "var(--blue)", "fill-opacity": 0.35
+});
+
+/* primal optimum */
+let best = verts[0], zBest = -Infinity;
+for (const p of verts) {
+  const z = OBJ.a*p[0] + OBJ.b*p[1];
+  if (z > zBest) { zBest = z; best = p; }
+}
+
+/* constraint lines */
+for (const con of CONS) {
+  const seg = lineInView(con.a, con.b, con.c);
+  if (seg) el("line", {
+    x1:sx(seg[0][0]), y1:sy(seg[0][1]), x2:sx(seg[1][0]), y2:sy(seg[1][1]),
+    stroke: con.color, "stroke-width": 2.5
+  });
+}
+
+/* optimal objective level line 2x+3y = 23 (dashed blue) */
+{
+  const seg = lineInView(OBJ.a, OBJ.b, zBest);
+  if (seg) el("line", {
+    x1:sx(seg[0][0]), y1:sy(seg[0][1]), x2:sx(seg[1][0]), y2:sy(seg[1][1]),
+    stroke: "var(--blue)", "stroke-width": 2, "stroke-dasharray": "7 6"
+  });
+}
+
+/* dynamic combined-constraint line (on top) */
+const comboLine = el("line", {stroke:"var(--orange)", "stroke-width":3});
+
+/* vertex labels */
+for (const p of verts) {
+  const isBest = Math.hypot(p[0]-best[0], p[1]-best[1]) < 1e-9;
+  el("circle", {cx:sx(p[0]), cy:sy(p[1]), r: isBest ? 6 : 4,
+    fill: isBest ? "var(--blue)" : "var(--purple)"});
+  const t = el("text", {
+    x: sx(p[0]) + (p[0] < 0.01 ? -8 : 10),
+    y: sy(p[1]) + (p[1] < 0.01 ? 18 : -8),
+    "font-size": 13.5, fill: isBest ? "var(--blue)" : "var(--purple)",
+    "text-anchor": p[0] < 0.01 ? "end" : "start",
+    "font-family": "Georgia, serif",
+    "font-weight": isBest ? "700" : "400"
+  });
+  t.textContent = `(${+p[0].toFixed(3)}, ${+p[1].toFixed(3)})` + (isBest ? " ← optimum" : "");
+}
+
+/* ---- sliders ---- */
+const S = {};
+for (const id of ["a","b","c"]) {
+  S[id] = document.getElementById(id);
+  S[id].addEventListener("input", update);
+}
+const f2 = v => +(+v).toFixed(2);
+
+function update() {
+  const a = +S.a.value, b = +S.b.value, c = +S.c.value;
+  document.getElementById("va").textContent = a;
+  document.getElementById("vb").textContent = b;
+  document.getElementById("vc").textContent = c;
+
+  const t = a + b + 2*c;          // coefficient of x
+  const w = a + 2*b + c;          // coefficient of y
+  const d = 9*a + 14*b + 16*c;    // right-hand side
+
+  const seg = lineInView(t, w, d);
+  if (seg) {
+    comboLine.setAttribute("x1", sx(seg[0][0])); comboLine.setAttribute("y1", sy(seg[0][1]));
+    comboLine.setAttribute("x2", sx(seg[1][0])); comboLine.setAttribute("y2", sy(seg[1][1]));
+    comboLine.setAttribute("visibility", "visible");
+  } else comboLine.setAttribute("visibility", "hidden");
+
+  document.getElementById("facts").innerHTML =
+    `t = a + b + 2c = <span class="val">${f2(t)}</span> &nbsp;&nbsp; ` +
+    `w = a + 2b + c = <span class="val">${f2(w)}</span> &nbsp;&nbsp; ` +
+    `d = 9a + 14b + 16c = <span class="val" style="color:var(--orange)">${f2(d)}</span>`;
+
+  const verdict = document.getElementById("verdict");
+  if (t >= OBJ.a - 1e-9 && w >= OBJ.b - 1e-9) {
+    if (d <= zBest + 1e-6) {
+      verdict.className = "verdict tight";
+      verdict.textContent =
+        `★ t ≥ 2 and w ≥ 3, so 2x + 3y ≤ ${f2(d)}. The bound is TIGHT: strong duality, d = Z* = ${zBest}.`;
+    } else {
+      verdict.className = "verdict ok";
+      verdict.textContent =
+        `✓ t ≥ 2 and w ≥ 3, so 2x + 3y ≤ t·x + w·y ≤ d = ${f2(d)} for all feasible (x, y). ` +
+        `Valid upper bound (optimum is ${zBest}; gap ${f2(d - zBest)}).`;
+    }
+  } else {
+    verdict.className = "verdict bad";
+    verdict.textContent =
+      `✗ Need t ≥ 2 and w ≥ 3 for the bound 2x + 3y ≤ t·x + w·y to hold — d is NOT a valid bound here.`;
+  }
+}
+update();
+</script>
+</body>
+</html>

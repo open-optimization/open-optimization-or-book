@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interactive LP: Graphical Method</title>
+<!--
+  Standalone interactive linear-programming plot (no external dependencies).
+  Recreates https://www.desmos.com/calculator/j1li4l7lcv
+
+  TO REUSE FOR ANOTHER PLOT: edit only the CONFIG object below.
+  Constraints are written as  a*x + b*y <= c.
+  (x >= 0 and y >= 0 are added automatically if nonneg: true.)
+
+  Open Optimization OR Book - CC BY-SA 4.0
+-->
+<style>
+  :root {
+    --desmos-blue: #2d70b3;
+    --desmos-red: #c74440;
+    --desmos-green: #388c46;
+    --desmos-purple: #6042a6;
+    --desmos-black: #000000;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    margin: 0; padding: 16px;
+    background: #fff; color: #222;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  h1 { font-size: 1.1rem; font-weight: 600; margin: 0 0 4px; }
+  .subtitle { font-size: 0.85rem; color: #666; margin: 0 0 12px; text-align: center; }
+  .subtitle code { background: #f2f2f2; padding: 1px 4px; border-radius: 3px; }
+  #wrap { width: 100%; max-width: 640px; }
+  svg { width: 100%; height: auto; display: block; border: 1px solid #ddd; border-radius: 6px; background: #fff; }
+  .controls {
+    margin-top: 12px; padding: 10px 14px;
+    border: 1px solid #ddd; border-radius: 6px; background: #fafafa;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .zlabel { font-style: italic; font-family: Georgia, serif; font-size: 1.1rem; min-width: 6.5em; }
+  .zlabel b { color: var(--desmos-blue); font-style: normal; }
+  input[type=range] { flex: 1; min-width: 180px; accent-color: var(--desmos-blue); }
+  .objline-eq { font-family: Georgia, serif; font-style: italic; font-size: 0.95rem; color: #444; }
+  .optnote { font-size: 0.85rem; color: var(--desmos-purple); min-height: 1.2em; margin-top: 6px; font-weight: 600; }
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 8px; font-size: 0.82rem; color: #444; }
+  .legend span::before { content: "\2014\2014"; letter-spacing: -2px; margin-right: 5px; font-weight: bold; }
+  .legend .c0::before { color: var(--desmos-red); }
+  .legend .c1::before { color: var(--desmos-green); }
+  .legend .obj::before { color: var(--desmos-blue); }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <h1 id="title"></h1>
+  <p class="subtitle" id="subtitle"></p>
+  <svg id="plot" xmlns="http://www.w3.org/2000/svg"></svg>
+  <div class="controls">
+    <span class="zlabel">Z = <b id="zval"></b></span>
+    <input type="range" id="zslider" aria-label="Objective value Z">
+    <span class="objline-eq" id="objeq"></span>
+  </div>
+  <div class="optnote" id="optnote"></div>
+  <div class="legend" id="legend"></div>
+</div>
+
+<script>
+"use strict";
+
+/* ============================================================
+   CONFIG — edit this block to recreate a different Desmos plot
+   ============================================================ */
+const CONFIG = {
+  title: "Graphical method: maximize 2x + 5y",
+  subtitle: "Drag the slider to move the objective line 2x + 5y = Z across the feasible region.",
+  nonneg: true,                          // add x>=0, y>=0
+  constraints: [                         // a*x + b*y <= c
+    { a: 1, b: 2, c: 16, color: "var(--desmos-red)",   label: "x + 2y ≤ 16" },
+    { a: 5, b: 3, c: 45, color: "var(--desmos-green)", label: "5x + 3y ≤ 45" },
+  ],
+  objective: { a: 2, b: 5, label: "2x + 5y" },
+  slider: { min: 0, max: 50, step: 0.5, initial: 31 },
+  levelLines: [7, 17, 27, 37, 47],       // faint fixed level sets (optional, [] to disable)
+  labeledPoints: [ [0,0], [9,0], [6,5], [0,8] ],   // vertices to label (auto-computed if null)
+  view: { xmin: -1.2, xmax: 17, ymin: -1.2, ymax: 16 },
+  sense: "max",                          // "max" or "min" — used for the optimality note
+};
+/* ============================================================ */
+
+const W = 640, H = 560, PAD = 0;
+const svg = document.getElementById("plot");
+svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+
+const V = CONFIG.view;
+const sx = x => (x - V.xmin) / (V.xmax - V.xmin) * (W - 2*PAD) + PAD;
+const sy = y => H - PAD - (y - V.ymin) / (V.ymax - V.ymin) * (H - 2*PAD);
+
+function el(name, attrs, parent) {
+  const e = document.createElementNS("http://www.w3.org/2000/svg", name);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  (parent || svg).appendChild(e);
+  return e;
+}
+
+/* ---- half-plane list (a*x + b*y <= c) ---- */
+const halfplanes = CONFIG.constraints.map(({a,b,c}) => ({a,b,c}));
+if (CONFIG.nonneg) halfplanes.push({a:-1,b:0,c:0}, {a:0,b:-1,c:0});
+
+/* ---- feasible polygon via Sutherland–Hodgman clipping ---- */
+function clipPolygon(poly, {a,b,c}) {
+  const out = [];
+  const inside = p => a*p[0] + b*p[1] <= c + 1e-9;
+  for (let i = 0; i < poly.length; i++) {
+    const cur = poly[i], nxt = poly[(i+1) % poly.length];
+    const cin = inside(cur), nin = inside(nxt);
+    if (cin) out.push(cur);
+    if (cin !== nin) {
+      const t = (c - a*cur[0] - b*cur[1]) / (a*(nxt[0]-cur[0]) + b*(nxt[1]-cur[1]));
+      out.push([cur[0] + t*(nxt[0]-cur[0]), cur[1] + t*(nxt[1]-cur[1])]);
+    }
+  }
+  return out;
+}
+const BIG = 1e4;
+let feasible = [[-BIG,-BIG],[BIG,-BIG],[BIG,BIG],[-BIG,BIG]];
+for (const hp of halfplanes) feasible = clipPolygon(feasible, hp);
+
+/* dedupe vertices */
+const verts = [];
+for (const p of feasible)
+  if (!verts.some(q => Math.hypot(q[0]-p[0], q[1]-p[1]) < 1e-6)) verts.push(p);
+
+/* optimal vertex */
+const obj = CONFIG.objective;
+const zAt = p => obj.a*p[0] + obj.b*p[1];
+const best = verts.reduce((u,v) =>
+  (CONFIG.sense === "min" ? zAt(v) < zAt(u) : zAt(v) > zAt(u)) ? v : u, verts[0]);
+const zBest = zAt(best);
+
+/* ---- static layers ---- */
+/* grid */
+const grid = el("g", {stroke:"#e6e6e6", "stroke-width":1});
+for (let x = Math.ceil(V.xmin); x <= V.xmax; x++)
+  el("line", {x1:sx(x), y1:sy(V.ymin), x2:sx(x), y2:sy(V.ymax)}, grid);
+for (let y = Math.ceil(V.ymin); y <= V.ymax; y++)
+  el("line", {x1:sx(V.xmin), y1:sy(y), x2:sx(V.xmax), y2:sy(y)}, grid);
+
+/* axes + ticks */
+const axes = el("g", {stroke:"#444", "stroke-width":1.5});
+el("line", {x1:sx(V.xmin), y1:sy(0), x2:sx(V.xmax), y2:sy(0)}, axes);
+el("line", {x1:sx(0), y1:sy(V.ymin), x2:sx(0), y2:sy(V.ymax)}, axes);
+const ticks = el("g", {"font-size":12, fill:"#555", "text-anchor":"middle"});
+for (let x = 5; x <= V.xmax; x += 5)
+  el("text", {x:sx(x), y:sy(0)+16}, ticks).textContent = x;
+for (let y = 5; y <= V.ymax; y += 5)
+  el("text", {x:sx(0)-14, y:sy(y)+4}, ticks).textContent = y;
+
+/* shaded feasible region */
+el("polygon", {
+  points: verts.map(p => `${sx(p[0])},${sy(p[1])}`).join(" "),
+  fill: "var(--desmos-blue)", "fill-opacity": 0.35, stroke: "none"
+});
+
+/* helper: segment of line a*x+b*y=c inside the view window */
+function lineInView(a, b, c) {
+  const pts = [];
+  const push = (x,y) => {
+    if (x >= V.xmin-1e-9 && x <= V.xmax+1e-9 && y >= V.ymin-1e-9 && y <= V.ymax+1e-9)
+      pts.push([x,y]);
+  };
+  if (Math.abs(b) > 1e-12) { push(V.xmin, (c-a*V.xmin)/b); push(V.xmax, (c-a*V.xmax)/b); }
+  if (Math.abs(a) > 1e-12) { push((c-b*V.ymin)/a, V.ymin); push((c-b*V.ymax)/a, V.ymax); }
+  pts.sort((p,q) => p[0]-q[0] || p[1]-q[1]);
+  return pts.length >= 2 ? [pts[0], pts[pts.length-1]] : null;
+}
+
+/* constraint boundary lines (restricted to first quadrant, like the Desmos plot) */
+for (const con of CONFIG.constraints) {
+  const seg = lineInView(con.a, con.b, con.c);
+  if (!seg) continue;
+  let [p, q] = seg;
+  if (CONFIG.nonneg) {   // trim to x>=0, y>=0
+    const clip = (pt, o) => {
+      let t0 = 0;
+      if (pt[0] < 0) t0 = Math.max(t0, (0-pt[0])/(o[0]-pt[0]));
+      if (pt[1] < 0) t0 = Math.max(t0, (0-pt[1])/(o[1]-pt[1]));
+      return [pt[0]+t0*(o[0]-pt[0]), pt[1]+t0*(o[1]-pt[1])];
+    };
+    p = clip(p,q); q = clip(q,p);
+  }
+  el("line", {x1:sx(p[0]), y1:sy(p[1]), x2:sx(q[0]), y2:sy(q[1]),
+              stroke: con.color, "stroke-width": 2.5});
+}
+
+/* faint fixed level lines of the objective */
+for (const z of (CONFIG.levelLines || [])) {
+  const seg = lineInView(obj.a, obj.b, z);
+  if (seg) el("line", {
+    x1:sx(seg[0][0]), y1:sy(seg[0][1]), x2:sx(seg[1][0]), y2:sy(seg[1][1]),
+    stroke:"var(--desmos-blue)", "stroke-width":1, "stroke-opacity":0.25,
+    "stroke-dasharray":"2 5"
+  });
+}
+
+/* movable objective line (drawn last so it sits on top, updated by slider) */
+const objLine = el("line", {
+  stroke:"var(--desmos-blue)", "stroke-width":3,
+  "stroke-dasharray":"1 7", "stroke-linecap":"round"
+});
+const objTag = el("text", {"font-size":13, fill:"var(--desmos-blue)",
+  "font-style":"italic", "font-family":"Georgia, serif"});
+
+/* labeled points */
+const ptsToLabel = CONFIG.labeledPoints || verts;
+for (const [x,y] of ptsToLabel) {
+  el("circle", {cx:sx(x), cy:sy(y), r:4.5, fill:"var(--desmos-purple)"});
+  const t = el("text", {
+    x: sx(x) + (x === 0 ? -8 : 10),
+    y: sy(y) + (y === 0 ? -10 : -8),
+    "font-size":15, fill:"var(--desmos-purple)",
+    "text-anchor": x === 0 ? "end" : "start",
+    "font-family":"Georgia, serif"
+  });
+  t.textContent = `(${+x.toFixed(4)}, ${+y.toFixed(4)})`;
+}
+
+/* ---- slider wiring ---- */
+const slider = document.getElementById("zslider");
+const zval = document.getElementById("zval");
+const optnote = document.getElementById("optnote");
+Object.assign(slider, CONFIG.slider);
+slider.value = CONFIG.slider.initial;
+
+function update() {
+  const z = parseFloat(slider.value);
+  zval.textContent = z;
+  const seg = lineInView(obj.a, obj.b, z);
+  if (seg) {
+    objLine.setAttribute("x1", sx(seg[0][0])); objLine.setAttribute("y1", sy(seg[0][1]));
+    objLine.setAttribute("x2", sx(seg[1][0])); objLine.setAttribute("y2", sy(seg[1][1]));
+    objLine.setAttribute("visibility", "visible");
+    objTag.setAttribute("x", sx(seg[1][0]) - 4);
+    objTag.setAttribute("y", sy(seg[1][1]) - 8);
+    objTag.setAttribute("text-anchor", "end");
+    objTag.textContent = `${obj.label} = ${z}`;
+  } else {
+    objLine.setAttribute("visibility", "hidden");
+    objTag.textContent = "";
+  }
+  if (Math.abs(z - zBest) < 1e-9) {
+    optnote.textContent =
+      `★ Optimal! Z = ${+zBest.toFixed(4)} at (${+best[0].toFixed(4)}, ${+best[1].toFixed(4)}).`;
+  } else if ((CONFIG.sense === "max" && z > zBest) || (CONFIG.sense === "min" && z < zBest)) {
+    optnote.textContent = "The objective line no longer touches the feasible region — infeasible value.";
+  } else {
+    optnote.textContent = "";
+  }
+}
+slider.addEventListener("input", update);
+update();
+
+/* ---- text chrome ---- */
+document.getElementById("title").textContent = CONFIG.title;
+document.getElementById("subtitle").textContent = CONFIG.subtitle;
+document.getElementById("objeq").textContent = `${obj.label} = Z`;
+const legend = document.getElementById("legend");
+CONFIG.constraints.forEach((con, i) => {
+  const s = document.createElement("span");
+  s.className = "c" + i;
+  s.textContent = con.label;
+  legend.appendChild(s);
+});
+const so = document.createElement("span");
+so.className = "obj";
+so.textContent = `objective ${obj.label} = Z (dotted)`;
+legend.appendChild(so);
+</script>
+</body>
+</html>
