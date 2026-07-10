@@ -8,14 +8,17 @@
 \end{outcome}
 
 \begin{quote}
-\itshape You solved the bakery problem graphically: you checked a handful of corner points and picked the best one. But the feasible region contains infinitely many points---how do you \emph{know} a better plan isn't hiding somewhere in the middle, or partway along an edge you never examined? In two dimensions, a picture is convincing. A real production model has thousands of variables, and there is no picture. This chapter replaces the picture with proofs: short arguments that certify, once and for all, that checking the corners is enough.
+\itshape You solved the bakery problem graphically: you checked a handful of corner points and picked the best one. But the feasible region contains infinitely many points. How do you \emph{know} a better plan isn't hiding somewhere in the middle, or partway along an edge you never examined? In two dimensions, a picture is convincing. A real production model has thousands of variables, and there is no picture. This chapter replaces the picture with proofs: short arguments that certify, once and for all, that checking the corners is enough.
 \end{quote}
 
 In this chapter, we formalize some of the mathematics about linear programs.  We define some notation here and then state and prove several theorems.   
 
 \begin{warn}
-In this section, we provide rigorous mathematical proofs of several results.  For this course, you do not need to be able to reproduce these proofs.  However, try to understand the concepts and have a visual image in your head of why these results are true.
+In this section, we provide rigorous mathematical proofs of several results.  For this book, you do not need to be able to reproduce these proofs.  However, try to understand the concepts and have a visual image in your head of why these results are true.
 \end{warn}
+
+\section{Mathematical Preliminaries}
+
 \subsection{Vectors and Their Properties}
 
 \textbf{Vectors:}  
@@ -39,7 +42,7 @@ Vector operations form the building blocks for linear programming, enabling the 
     \[
     \mathbf{v} + \mathbf{u} = (2+3, 3+2) = (5, 5).
     \]  
-    This operation is essential in modeling systems where contributions of multiple variables are combined.
+    This operation is used to model systems where contributions of multiple variables are combined.
 
     \item[Scalar Multiplication:]  
     A vector can be scaled by multiplying it with a scalar (constant). For example, if \(k = 2\) and \(\mathbf{v} = (2, 3)\), then:
@@ -57,7 +60,7 @@ Vector operations form the building blocks for linear programming, enabling the 
     \[
     \mathbf{v} \cdot \mathbf{u} = 2 \cdot 3 + 3 \cdot 2 = 10.
     \]  
-    The dot product is crucial in defining constraints and objective functions in linear programming, as it represents weighted sums of variables.
+    The dot product is used to define constraints and objective functions in linear programming, as it represents weighted sums of variables.
 \end{description}
 
 \subsection{Linear Combinations and Related Concepts}
@@ -68,14 +71,6 @@ A vector \(\mathbf{u}\) is a linear combination of vectors \(\mathbf{v}^1, \math
 \mathbf{u} = \sum_{i=1}^k \lambda_i \mathbf{v}^i,
 \]
 where \(\lambda_1, \lambda_2, \dots, \lambda_k\) are scalars. If all scalars are non-negative (\(\lambda_i \geq 0\)), the combination is called a \emph{non-negative linear combination}. Linear combinations are used in linear programming to express feasible solutions as sums of variable contributions.
-
-\medskip  
-\textbf{Convex Combination:}  
-A vector \(\mathbf{u}\) is a convex combination of vectors \(\mathbf{v}^1, \mathbf{v}^2, \dots, \mathbf{v}^k\) if:
-\[
-\mathbf{u} = \sum_{i=1}^k \lambda_i \mathbf{v}^i, \quad \text{where } \lambda_i \geq 0 \text{ and } \sum_{i=1}^k \lambda_i = 1.
-\]
-Convex combinations are fundamental to linear programming because they describe feasible regions (e.g., convex polyhedra).
 
 \begin{definition}{Linear Independence}{}
 A set of vectors \( \{ \mathbf{v}^1, \mathbf{v}^2, \dots, \mathbf{v}^k \} \subseteq \mathbb{R}^n \) is said to be \emph{linearly independent} if the only solution to the equation
@@ -186,7 +181,7 @@ If an optimal solution exists, then there exists an optimal solution that is a v
 \end{theorem}
 
 \begin{proof}
-Let \( \mathbf{x}^* \in P \) be an optimal solution, and suppose for contradiction that \( \mathbf{x}^* \) is \emph{not} a vertex.
+Let \( \mathbf{x}^* \in P \) be an optimal solution. If \( \mathbf{x}^* \) is a vertex, we are done, so suppose \( \mathbf{x}^* \) is \emph{not} a vertex. We show how to produce another optimal solution with a strictly larger set of linearly independent tight constraints; repeating this argument leads to an optimal vertex.
 
 Define the index set of tight (active) constraints at \( \mathbf{x}^* \) as
 \[
@@ -194,7 +189,7 @@ I := \{ i \in \{1, \dots, m\} : A_i \mathbf{x}^* = b_i \},
 \]
 where \( A_i \) is the $i$th row of \( A \). Let \( A_I \) be the submatrix of \( A \) consisting of the rows indexed by \( I \).
 
-Since \( \mathbf{x}^* \) is not a vertex, the tight constraints are linearly dependent: \( \operatorname{rank}(A_I) < n \). Therefore, the homogeneous system \( A_I \mathbf{d} = 0 \) has a nonzero solution \( \mathbf{d} \in \mathbb{R}^n \setminus \{0\} \).
+Since \( \mathbf{x}^* \) is not a vertex, the tight constraints do not contain \( n \) linearly independent rows: \( \operatorname{rank}(A_I) < n \). Therefore, the homogeneous system \( A_I \mathbf{d} = 0 \) has a nonzero solution \( \mathbf{d} \in \mathbb{R}^n \setminus \{0\} \).
 
 Consider the line \( \mathbf{x}(t) := \mathbf{x}^* + t \mathbf{d} \) for small \( t \in \mathbb{R} \). For all \( i \in I \), we have:
 \[
@@ -202,7 +197,7 @@ A_i \mathbf{x}(t) = A_i \mathbf{x}^* + t A_i \mathbf{d} = b_i + 0 = b_i,
 \]
 so the tight constraints remain tight along the line.
 
-For any \( i \notin I \), we have \( A_i \mathbf{x}^* < b_i \). Since \( A_i \mathbf{d} \) is bounded, we can choose a small enough \( \varepsilon > 0 \) such that for all \( t \in [-\varepsilon, \varepsilon] \), the inequality \( A_i \mathbf{x}(t) \leq b_i \) holds. Thus, for small \( t \), \( \mathbf{x}(t) \in P \).
+For any \( i \notin I \), we have \( A_i \mathbf{x}^* < b_i \). Since \( A_i \mathbf{x}(t) = A_i \mathbf{x}^* + t \, A_i \mathbf{d} \) depends continuously on \( t \), we can choose a small enough \( \varepsilon > 0 \) such that \( A_i \mathbf{x}(t) \leq b_i \) for all \( t \in [-\varepsilon, \varepsilon] \) and all \( i \notin I \). Thus, for small \( t \), \( \mathbf{x}(t) \in P \).
 
 Now define the objective value along this line: 
 \[
@@ -211,21 +206,20 @@ z(t) := \mathbf{c}^\top \mathbf{x}(t) = \mathbf{c}^\top \mathbf{x}^* + t \cdot (
 
 \begin{itemize}
 \item If \( \mathbf{c}^\top \mathbf{d} > 0 \), then for small \( t > 0 \), \( \mathbf{x}(t) \in P \) and \( \mathbf{c}^\top \mathbf{x}(t) > \mathbf{c}^\top \mathbf{x}^* \), contradicting optimality of \( \mathbf{x}^* \).
-\item If \( \mathbf{c}^\top \mathbf{d} < 0 \), then for small \( t < 0 \), same contradiction.
-\item If \( \mathbf{c}^\top \mathbf{d} = 0 \), then \( \mathbf{x}(t) \) is also optimal for all small \( t \), and we can move in both directions while maintaining feasibility and optimality.
+\item If \( \mathbf{c}^\top \mathbf{d} < 0 \), then for small \( t < 0 \) we obtain the same contradiction.
 \end{itemize}
 
-In all cases, we can find another feasible optimal point along the line \( \mathbf{x}(t) \), with the same or better objective value. Moreover, we can choose such a point with a strictly larger set of linearly independent tight constraints. Repeating this process, we eventually reach an optimal point at which the tight constraints form a full-rank system (rank \( n \)), which uniquely determines the point. Such a point is, by definition, a vertex.
+Hence \( \mathbf{c}^\top \mathbf{d} = 0 \), so every point \( \mathbf{x}(t) \) that lies in \( P \) is also optimal. This is where boundedness of \( P \) is used: since \( P \) is bounded, the line \( \{ \mathbf{x}(t) : t \in \mathbb{R} \} \) cannot be entirely contained in \( P \), so the set \( \{ t \geq 0 : \mathbf{x}(t) \in P \} \) is a closed, bounded interval \( [0, t^+] \). At \( t = t^+ \), some constraint \( j \notin I \) becomes tight: \( A_j \mathbf{x}(t^+) = b_j \). Note that \( A_j \mathbf{d} \neq 0 \), since otherwise \( A_j \mathbf{x}(t) \) would be constant in \( t \) and constraint \( j \) would never become tight. Because \( A_i \mathbf{d} = 0 \) for all \( i \in I \) while \( A_j \mathbf{d} \neq 0 \), the row \( A_j \) is not a linear combination of the rows \( \{ A_i : i \in I \} \). Therefore \( \mathbf{x}(t^+) \) is an optimal solution whose tight constraints contain a strictly larger linearly independent set.
 
-This contradicts our assumption that no optimal vertex exists.
+Repeating this argument (at most \( n \) times), we reach an optimal point at which the tight constraints form a full-rank system (rank \( n \)), which uniquely determines the point. Such a point is, by definition, a vertex. Hence there exists an optimal solution at a vertex of \( P \).
 \end{proof}
 
 This theorem makes good on the promise from the start of the chapter: no better plan hides in the interior or along an edge, because any non-vertex optimum can be slid to a vertex without losing a cent. It is also the license behind the simplex method (Chapter~\ref{ch:simplex-dictionary}), which searches only vertices.
 
 \section{Convexity}
-A key property that will enable efficient algorithms is \emph{convexity}.  This comes in the form of \emph{convex sets} and \emph{convex functions}.  Then the constraints to an optimization problem form a  convex set and the objective function is a convex function, then we say that it is a convex optimization problem.
+A key property that will enable efficient algorithms is \emph{convexity}.  This comes in the form of \emph{convex sets} and \emph{convex functions}.  When the constraints to an optimization problem form a convex set and the objective function is a convex function, then we say that it is a convex optimization problem.
 
-We explain these definitions in the next two subsections.
+We explain these definitions below.
 \subsection{Convex Sets}
 
 \begin{definition}{Convex Combination}
@@ -285,16 +279,6 @@ A set $C$ is convex if it contains all convex combinations of points in $C$.  Th
     \label{fig:nonconvex-set-example}
   \end{subfigure}
 \end{figure}
-
-\begin{definition}{Convex Sets}
-A set $S$ is \emph{convex} if for any two points in $S$, the entire line segment between them is also contained in $S$.
-That is, for any $x,y \in S$
-$$
-\lambda x + (1-\lambda) y \in S \quad \text{ for all } \lambda \in [0,1].
-$$
-\end{definition}
-
-    
 
 Some examples of convex sets are:
 \begin{enumerate}
@@ -358,34 +342,6 @@ Some examples of convex sets are:
 
 \end{figure}
 
-\begin{example}{Proof that a Polyhedron is Convex}\label{exa:polyhedron-convex}
-Let \( P \) be a polyhedron defined by:
-\[ P = \{\mathbf{x} \in \mathbb{R}^n : A\mathbf{x} \leq \mathbf{b}\} \]
-where \( A \) is an \( m \times n \) matrix and \( \mathbf{b} \) is an \( m \times 1 \) vector.\\
-
-To prove the convexity of \( P \), we'll use the definition of convexity: For any \( \mathbf{x}, \mathbf{y} \in P \) and any \( \lambda \in [0,1] \), the point \( \mathbf{z} = \lambda \mathbf{x} + (1-\lambda) \mathbf{y} \) must also belong to \( P \).
-
-Let \( \mathbf{x}, \mathbf{y} \in P \). Then, by the definition of \( P \), we have:
-\[ A\mathbf{x} \leq \mathbf{b} \ \ \ \text{ and } \ \ \  A\mathbf{y} \leq \mathbf{b} \]
-
-We want to demonstrate the inequality \( A\mathbf{z} \leq \mathbf{b} \). 
-We do this in just a few lines:
-\begin{align*}
-A\mathbf{z} &= A(\lambda \mathbf{x} + (1-\lambda) \mathbf{y}) & \text{Substituting the expression for \( \mathbf{z} \)}\\
-&=\lambda A\mathbf{x} + (1-\lambda) A\mathbf{y} & \text{Expanding the matrix-vector product}\\
-&\leq \lambda \mathbf{b} + (1-\lambda) \mathbf{b} & \text{Explanation below}\\
-& = \mathbf{b}
-\end{align*}
-The inequality above uses the fact that \( A\mathbf{x} \leq \mathbf{b} \) and \( A\mathbf{y} \leq \mathbf{b} \), and since \( \lambda \) is in the interval \([0,1]\), it follows that:
-\[ \lambda A\mathbf{x} \leq \lambda \mathbf{b}  \ \ \ 
-\text{ and } \ \ \ 
-(1-\lambda) A\mathbf{y} \leq (1-\lambda) \mathbf{b} \]
-
-The computation shows that \( \mathbf{z} = \lambda \mathbf{x} + (1-\lambda) \mathbf{y} \) satisfies \( A\mathbf{z} \leq \mathbf{b} \) and therefore \( \mathbf{z} \in P \).
-
-This shows that the polyhedron \( P \) is convex.
-\end{example}
-
 \begin{lemma}{Intersection of Convex Sets is Convex}
 Let $C_1$ and $C_2$ be convex sets.  Then the intersection $C_1 \cap C_2$ is convex.  
 In particular, 
@@ -427,53 +383,13 @@ $$
 \filldraw [red] (z) circle (2pt) node[anchor=south east] {};%$z = \lambda x + (1-\lambda)y$};
 \end{tikzpicture}\vspace{1cm}
 \end{center}
-\caption{The green intersection of the convex sets that are the ball and the polytope is also convex. This can be seen by considering any points $x,y \in \text{Ball} \cap \text{Polytope}$.  Since Ball is convex, the line segment between $x$ and $y$ is completey contained in Ball.  And similarly, the line segment is completely contained in Polytope.  Hence, the line segment is also contained in the intersection.  This is how we can reason that the intersection is also convex.} 
+\caption{The green intersection of the convex sets that are the ball and the polytope is also convex. This can be seen by considering any points $x,y \in \text{Ball} \cap \text{Polytope}$.  Since Ball is convex, the line segment between $x$ and $y$ is completely contained in Ball.  And similarly, the line segment is completely contained in Polytope.  Hence, the line segment is also contained in the intersection.  This is how we can reason that the intersection is also convex.} 
 \end{figure}
-
-\medskip  
-\textbf{Linear Independence:}  
-Vectors \(\mathbf{v}^1, \mathbf{v}^2, \dots, \mathbf{v}^k\) are linearly independent if the only solution to:
-\[
-\sum_{i=1}^k \lambda_i \mathbf{v}^i = \mathbf{0}
-\]
-is \(\lambda_1 = \lambda_2 = \cdots = \lambda_k = 0\). In \(\mathbb{R}^2\), two vectors are linearly dependent if they lie on the same line. Linear independence is critical in linear programming to ensure constraints are non-redundant.
-
-\subsection{Spanning Sets and Basis}
-
-\textbf{Spanning Set:}  
-A set of vectors \(\mathbf{v}^1, \mathbf{v}^2, \dots, \mathbf{v}^k\) spans \(\mathbb{R}^m\) if any vector in \(\mathbb{R}^m\) can be expressed as a linear combination of these vectors:
-\[
-\sum_{i=1}^m \lambda_i \mathbf{v}^i.
-\]
-
-\textbf{Basis:}  
-A set of vectors \(\mathbf{v}^1, \mathbf{v}^2, \dots, \mathbf{v}^m\) is a basis for \(\mathbb{R}^m\) if:
-\begin{itemize}
-    \item The vectors span \(\mathbb{R}^m\).
-    \item The vectors are linearly independent.
-\end{itemize}
-In linear programming, the concept of a basis is used to identify corner points of the feasible region.
-
-\subsection{Convex and Polyhedral Sets}
-
-\textbf{Convex Set:}  
-A set \(C \subseteq \mathbb{R}^n\) is convex if, for any two points \(\mathbf{v}^1, \mathbf{v}^2 \in C\), the line segment joining them lies entirely within \(C\):
-\[
-\lambda \mathbf{v}^1 + (1 - \lambda) \mathbf{v}^2 \in C, \quad \forall \lambda \in [0, 1].
-\]
-Convex sets form the feasible regions in linear programming problems.
-
-\textbf{Polyhedral Set:}  
-A polyhedral set is the intersection of finitely many half-spaces, described as:
-\[
-P= \{\mathbf{x} : A \mathbf{x} \leq \mathbf{b}, \, \mathbf{x} \geq \mathbf{0}\}.
-\]
-Polyhedral sets are convex and represent the feasible regions of linear programming models.
 
 %
 \begin{theorem}{Convexity of Polyhedra}
 \label{thm:polyhedra_convex}
-%A polyhedron, defined as the intersection of finitely many half-spaces, is a convex set.
+A polyhedron \( P = \{\mathbf{x} \in \mathbb{R}^n : A\mathbf{x} \leq \mathbf{b}\} \), that is, the intersection of finitely many half-spaces, is a convex set.
 \end{theorem}
 %
 \begin{proof}
@@ -517,7 +433,7 @@ An extreme point of a polyhedral set \(C\) is a point that cannot be written as 
 \label{lemma:objective_bound}
 Given two points \(\mathbf{x}, \mathbf{y} \in \mathbb{R}^n\), a linear function evaluated at any point on the line segment between \(\mathbf{x}\) and \(\mathbf{y}\) is bounded above by the maximum of the evaluations at \(\mathbf{x}\) and \(\mathbf{y}\). Formally, for any \(\mathbf{c} \in \mathbb{R}^n\),
 \[
-\min\{\mathbf{c}^\top \mathbf{x}, \mathbf{c}^\top \mathbf{y}\} \leq \mathbf{c}^\top \mathbf{z} \leq \max\{\mathbf{c}^\top \mathbf{x}, \mathbf{c}^\top \mathbf{y}\}.
+\min\{\mathbf{c}^\top \mathbf{x}, \mathbf{c}^\top \mathbf{y}\} \leq \mathbf{c}^\top \mathbf{z} \leq \max\{\mathbf{c}^\top \mathbf{x}, \mathbf{c}^\top \mathbf{y}\},
 \]
 where \(\mathbf{z} = \lambda \mathbf{x} + (1-\lambda) \mathbf{y}\) for some $\lambda \in (0,1)$.
 
@@ -527,7 +443,7 @@ Either both of these inequalities are strict, or they are both held at equality.
 \begin{proof}
 Expanding $\mathbf{c}^\top \mathbf{z}$ based on the definition
 \begin{align*}
-\mathbf{c}^\top \mathbf{z}  &= \mathbf{c}^\top \mathbf{z} (\lambda \mathbf{x} + (1-\lambda) \mathbf{y}) & \text{Replace formula for $\mathbf{z}$}\\
+\mathbf{c}^\top \mathbf{z}  &= \mathbf{c}^\top (\lambda \mathbf{x} + (1-\lambda) \mathbf{y}) & \text{Replace formula for $\mathbf{z}$}\\
 & =  \mathbf{c}^\top \lambda\mathbf{x} +  \mathbf{c}^\top (1-\lambda)\mathbf{y} & \text{ use distributivity}\\
 & = \lambda \mathbf{c}^\top \mathbf{x} + (1-\lambda) \mathbf{c}^\top\mathbf{y} & \text{ use linearity}
 \end{align*}
@@ -591,7 +507,7 @@ By Lemma~\ref{lemma:objective_bound}, the value \(\mathbf{c}^\top \mathbf{x}^*\)
 
 Since \(\mathbf{x}^*\) maximizes \(\mathbf{c}^\top \mathbf{x}\) over \(C\), it must be that \(\mathbf{c}^\top \mathbf{x} = \mathbf{c}^\top \mathbf{x}^*\) and \(\mathbf{c}^\top \mathbf{y} = \mathbf{c}^\top \mathbf{x}^*\). Thus, both \(\mathbf{x}\) and \(\mathbf{y}\) also maximize \(\mathbf{c}^\top \mathbf{x}\) over \(C\).
 
-If \(\mathbf{x}^*\) is not an extreme point, we can repeat this argument for \(\mathbf{x}\) and \(\mathbf{y}\), expressing them as convex combinations of other points in \(C\). However, since \(C\) is compact, this process must terminate after a finite number of steps, at which point we reach an extreme point that maximizes \(\mathbf{c}^\top \mathbf{x}\).
+If \(\mathbf{x}^*\) is not an extreme point, we can repeat this argument for \(\mathbf{x}\) and \(\mathbf{y}\), expressing them as convex combinations of other points in \(C\). When \(C\) is a polyhedron, this process must terminate after a finite number of steps because each step moves to a face of strictly smaller dimension and a polyhedron has only finitely many faces; at that point we reach an extreme point that maximizes \(\mathbf{c}^\top \mathbf{x}\). (For a general compact convex set, termination requires a more careful argument, for instance induction on the dimension of \(C\); we omit the details.)
 
 Hence, there exists an optimal solution at an extreme point of \(C\).
 \end{proof}
@@ -614,7 +530,7 @@ A' (\mathbf{v} + \epsilon \mathbf{d}) = A' \mathbf{v} + \epsilon A' \mathbf{d} =
 \]
 Similarly, \( A' (\mathbf{v} - \epsilon \mathbf{d}) = \mathbf{b}' \).
 
-Furthermore, for sufficiently small \( \epsilon > 0 \), the perturbed points also satisfy all other constraints defining \( P \). This is because \( P \) is a polyhedron, and the constraints are continuous linear inequalities that remain satisfied under small perturbations of \( \mathbf{v} \).
+For sufficiently small \( \epsilon > 0 \), the perturbed points also satisfy all other constraints defining \( P \). This is because \( P \) is a polyhedron, and the constraints are continuous linear inequalities that remain satisfied under small perturbations of \( \mathbf{v} \).
 
 Now, we express \( \mathbf{v} \) as a strict convex combination of \( \mathbf{v} + \epsilon \mathbf{d} \) and \( \mathbf{v} - \epsilon \mathbf{d} \):
 \[
@@ -669,7 +585,7 @@ where \( \mathbf{x}_1 \neq \mathbf{v} \) and \( \mathbf{x}_2 \neq \mathbf{v} \).
 
 We claim that both \( \mathbf{x}_1 \) and \( \mathbf{x}_2 \) must satisfy \( A'\mathbf{x} = \mathbf{b}' \).  To see this, 
 let $\mathbf{a}$ be a row of $A'$ and $b$ be the corresponding right hand side value in $\mathbf{b}'$
-By Lemma~\ref{lemma:objective_bound}, the value of \( \mathbf{a}^\top \mathbf{z} \) satisfies:
+By Lemma~\ref{lemma:objective_bound}, the value of \( \mathbf{a}^\top \mathbf{v} \) satisfies:
 \[
 \min\{\mathbf{a}^\top\mathbf{x}_1, \mathbf{a}^\top\mathbf{x}_2\} \leq \mathbf{a}^\top\mathbf{v} \leq \max\{\mathbf{a}^\top\mathbf{x}_1, \mathbf{a}^\top\mathbf{x}_2\}.
 \]
@@ -692,24 +608,26 @@ Therefore, \( \mathbf{v} \) cannot be expressed as a strict convex combination o
 \textbf{Rays and Directions:}  
 A ray in \(\mathbb{R}^n\) is a set of points:
 \[
-\{\mathbf{x} : \mathbf{\bar x} + \lambda \mathbf{d}, \, \lambda \geq 0\},
+\{\mathbf{x} : \mathbf{x} = \mathbf{\bar x} + \lambda \mathbf{d}, \, \lambda \geq 0\},
 \]
 where \(\mathbf{\bar x}\) is the starting point and \(\mathbf{d}\) is the direction. Rays describe unbounded feasible regions in linear programming models.
 
 \textbf{Extreme Directions:}  
 An extreme direction is one that cannot be written as a positive combination of other directions. In linear programming, extreme directions help characterize unbounded solutions.
 
-\medskip  
-This section provides the mathematical tools essential for understanding and formulating linear programming problems, emphasizing the geometric and algebraic structures that define feasible regions and optimal solutions.
+\medskip
+With these notions in hand, we can state a structural result: every point of a polyhedron \( P \) can be built from the extreme points and extreme directions of \( P \).
 
 \begin{theorem}{Representation Theorem}
 \label{thm:representation}
- Let  $\mathbf{x}^1, \mathbf{x}^2,\cdots \mathbf{x}^k$ be the set of extreme points of $P$, and if $P$ is unbounded, $\mathbf{d}^1, \mathbf{d}^2,\cdots \mathbf{d}^l$ be the set of extreme directions. Then any $\mathbf{x} \in P$ is equal to a convex combination of the extreme points and a non-negative linear combination of the extreme directions: $\mathbf{x} = \sum_{j=1}^k \lambda_j \mathbf{x}^j + \sum_{j=1}^l \mu_j \mathbf{d}^j$, where $\sum_{j=1}^k \lambda_j = 1$, $\lambda_j \ge 0,~\forall  j=1,2,\cdots,k$, and $\mu_j \ge 0,~\forall j=1,2,\cdots,l$.
+ Let \( P \subseteq \mathbb{R}^n \) be a nonempty polyhedron, let $\mathbf{x}^1, \mathbf{x}^2,\cdots \mathbf{x}^k$ be the set of extreme points of $P$, and if $P$ is unbounded, $\mathbf{d}^1, \mathbf{d}^2,\cdots \mathbf{d}^l$ be the set of extreme directions. Then any $\mathbf{x} \in P$ is equal to a convex combination of the extreme points and a non-negative linear combination of the extreme directions: $\mathbf{x} = \sum_{j=1}^k \lambda_j \mathbf{x}^j + \sum_{j=1}^l \mu_j \mathbf{d}^j$, where $\sum_{j=1}^k \lambda_j = 1$, $\lambda_j \ge 0,~\forall  j=1,2,\cdots,k$, and $\mu_j \ge 0,~\forall j=1,2,\cdots,l$.
  \end{theorem}
+
+As an illustration, consider the LP below, whose feasible region \( P \) is drawn on the right (in the \((x_1,x_2)\)-plane, with the slack variables \(s_1, s_2, s_3\) eliminated). This feasible region is unbounded, extending without limit to the upper right, which is why the theorem must allow for extreme directions. Its extreme points are \((0,0)\), \((0,1)\), and \((2,3)\), marked in the figure.
 
  \begin{minipage}[t][][b]{.4\linewidth}
 \begin{align*}
-\max \quad & z = -5x_1 - x_2  \\\
+\max \quad & z = -5x_1 - x_2  \\
 \text{s.t.} \quad & x_1 - 4x_2 +s_1 = 0  \\
 & -x_1 + x_2 + s_2 = 1 \\
 & -x_1 + 2x_2 +s_3 = 4 \\
@@ -740,7 +658,7 @@ This section provides the mathematical tools essential for understanding and for
 \end{tikzpicture} \end{center} 
 \end{minipage}
 
-Represent point (1/2, 1) as a convex combination of the extreme points of the above LP.  Find $\lambda$s to solve the following system of equations:
+As a concrete use of the theorem, we represent the point \((1/2, 1) \in P\) as a convex combination of the extreme points.  Find $\lambda$s to solve the following system of equations, subject to $\lambda_1 + \lambda_2 + \lambda_3 = 1$ and $\lambda_1, \lambda_2, \lambda_3 \geq 0$:
 
 $$\lambda_1 \left[
   \begin{array}{c}
@@ -761,12 +679,15 @@ $$\lambda_1 \left[
   \begin{array}{c}
   1/2 \\
   1 \\
-  \end{array} \right] 
+  \end{array} \right]
 $$
+
+One solution is \(\lambda_1 = 1/2\), \(\lambda_2 = 1/4\), \(\lambda_3 = 1/4\): the weights are non-negative and sum to \(1\), so \((1/2,1)\) is a convex combination of the extreme points.  Here no extreme directions are needed (all \(\mu_j = 0\)); they would be required only for points outside the convex hull of the extreme points, farther out in the unbounded part of \(P\).
 
 \section{Exercises}
 
 \begin{ex}{Vector Operations}{}
+\label{ex:vector-operations}
 Let \( \mathbf{v} = [3, -2, 4] \) and \( \mathbf{u} = [-1, 0, 2] \). Compute:
 \begin{enumerate}
     \item \( \mathbf{v} + \mathbf{u} \)
@@ -798,6 +719,7 @@ Consider the matrix \( A = \begin{bmatrix} 1 & 2 \\ 2 & 4 \end{bmatrix} \).
 \end{ex}
 
 \begin{ex}{Convex Combinations and Geometry}{}
+\label{ex:convex-combo-triangle}
 Let \( P \) be the triangle with vertices at \( (0,0) \), \( (2,0) \), and \( (0,2) \).  
 \begin{enumerate}
     \item Plot the set \( P \).
@@ -814,4 +736,29 @@ Consider the halfspace \( H = \{ \mathbf{x} \in \mathbb{R}^2 : x_1 + 2x_2 \leq 4
     \item Verify that the set is convex by checking whether the midpoint between \( (0,0) \) and \( (2,1) \) lies in \( H \).
 \end{enumerate}
 \end{ex}
+
+\subsubsection*{Selected Solutions}
+
+\begin{solution}(Exercise~\ref{ex:vector-operations})
+Working componentwise:
+\begin{enumerate}
+    \item \( \mathbf{v} + \mathbf{u} = [3 + (-1),\ -2 + 0,\ 4 + 2] = [2, -2, 6] \).
+    \item \( 2\mathbf{v} = [6, -4, 8] \).
+    \item \( \mathbf{v} \cdot \mathbf{u} = (3)(-1) + (-2)(0) + (4)(2) = -3 + 0 + 8 = 5 \).
+\end{enumerate}
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:convex-combo-triangle})
+The triangle \( P \) is the set of convex combinations of \( (0,0) \), \( (2,0) \), and \( (0,2) \); equivalently, \( P = \{ \x \in \mathbb{R}^2 : x_1 \geq 0,\ x_2 \geq 0,\ x_1 + x_2 \leq 2 \} \).
+
+\begin{enumerate}
+    \item The plot is the triangle with the three given vertices.
+    \item Yes.  Take \( \lambda_1 = 0 \), \( \lambda_2 = \lambda_3 = \tfrac12 \):
+    \[
+    0 \begin{bmatrix} 0 \\ 0 \end{bmatrix} + \tfrac12 \begin{bmatrix} 2 \\ 0 \end{bmatrix} + \tfrac12 \begin{bmatrix} 0 \\ 2 \end{bmatrix} = \begin{bmatrix} 1 \\ 1 \end{bmatrix},
+    \]
+    and the weights are nonnegative and sum to \( 1 \).
+    \item No.  Any combination of the vertices hitting \( (1.5, 1.5) \) must satisfy \( 2\lambda_2 = 1.5 \) and \( 2\lambda_3 = 1.5 \), forcing \( \lambda_2 = \lambda_3 = 0.75 \) and \( \lambda_2 + \lambda_3 = 1.5 > 1 \).  Equivalently, \( 1.5 + 1.5 = 3 > 2 \) violates \( x_1 + x_2 \leq 2 \), so \( (1.5, 1.5) \notin P \).
+\end{enumerate}
+\end{solution}
 

@@ -1,0 +1,98 @@
+% ============================================================================
+% Minimal EPUB preamble — replaces packages-and-commands.tex for tex4ebook.
+%
+% Strategy: instead of the full tcolorbox/tikz-heavy preamble (which renders
+% boxes as pictures and breaks reflowable HTML), define plain-LaTeX versions
+% of every custom environment used in the chapters. Each maps to simple
+% markup that tex4ht converts to clean HTML.
+%
+% Environments are defined with xparse "g" (optional brace group) arguments
+% so that inconsistent call styles like \begin{definition}{Title}{} and
+% \begin{definition}{} both work.
+% ============================================================================
+\usepackage{amsmath,amssymb,amsfonts,mathtools}
+\usepackage{graphicx}
+\usepackage{xcolor,colortbl}
+\usepackage{array,multirow,booktabs,longtable}
+\usepackage{verbatim}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{calc}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{caption}
+\usepackage{xparse}
+
+% ---- math shorthands (subset of preamble-optimization.tex) ----
+\providecommand{\st}{\text{ s.t. }}
+\providecommand{\x}{\mathbf{x}}
+\renewcommand{\b}{\mathbf{b}}
+\providecommand{\A}{\mathbf{A}}
+\providecommand{\R}{\mathbb{R}}
+\providecommand{\RR}{\mathbb{R}}
+\providecommand{\Z}{\mathbb{Z}}
+\providecommand{\ZZ}{\mathbb{Z}}
+\providecommand{\N}{\mathbb{N}}
+\providecommand{\Q}{\mathbb{Q}}
+\providecommand{\floor}[1]{\lfloor #1 \rfloor}
+\providecommand{\ceil}[1]{\lceil #1 \rceil}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+% ---- model-block headers (from preamble-simplified.tex) ----
+\definecolor{chaptertitlecolour}{HTML}{840125}
+\providecommand{\modelhead}[1]{\noindent\textbf{\textcolor{chaptertitlecolour}{#1:}}}
+\providecommand{\modelsets}{\modelhead{Sets}}
+\providecommand{\modelparams}{\modelhead{Parameters}}
+\providecommand{\modelvars}{\modelhead{Variables}}
+\providecommand{\modelmodel}{\modelhead{Model}}
+
+% ---- accessibility wrapper (same signature as preamble-accessibility) ----
+\providecommand{\altincludegraphics}[3][]{\includegraphics[#1]{#2}}
+
+% ---- generic titled block used by all boxed environments ----
+\newcounter{epubex}[chapter]
+\renewcommand{\theepubex}{\thechapter.\arabic{epubex}}
+\NewDocumentCommand{\epubblockhead}{m g}{%
+  \par\medskip\noindent
+  \textbf{#1\IfValueT{#2}{\if\relax\detokenize{#2}\relax\else: #2\fi}}\par\nopagebreak\smallskip
+}
+
+\NewDocumentEnvironment{outcome}{}
+  {\epubblockhead{Learning Outcomes}}{\par\medskip}
+\NewDocumentEnvironment{resource}{}
+  {\epubblockhead{Resources}}{\par\medskip}
+\NewDocumentEnvironment{ex}{g g}
+  {\refstepcounter{epubex}\epubblockhead{Exercise \theepubex}{#1}}{\par\medskip}
+\NewDocumentEnvironment{example}{g g}
+  {\refstepcounter{epubex}\epubblockhead{Example \theepubex}{#1}}{\par\medskip}
+\NewDocumentEnvironment{examplewithcode}{g g}
+  {\refstepcounter{epubex}\epubblockhead{Example \theepubex}{#1}%
+   \IfValueT{#2}{#2\par}}{\par\medskip}
+\NewDocumentEnvironment{examplewithallcode}{g g g g}
+  {\refstepcounter{epubex}\epubblockhead{Example \theepubex}{#1}%
+   \IfValueT{#2}{\href{#2}{[Excel]}\ }%
+   \IfValueT{#3}{\href{#3}{[PuLP]}\ }%
+   \IfValueT{#4}{\href{#4}{[Gurobipy]}}\par}{\par\medskip}
+\NewDocumentEnvironment{examplewithoutcode}{g g}
+  {\refstepcounter{epubex}\epubblockhead{Example \theepubex}{#1}}{\par\medskip}
+\NewDocumentEnvironment{solution}{g}
+  {\epubblockhead{Solution}{#1}\itshape}{\par\medskip}
+\NewDocumentEnvironment{definition}{g g}
+  {\refstepcounter{epubex}\epubblockhead{Definition \theepubex}{#1}}{\par\medskip}
+\NewDocumentEnvironment{theorem}{g g}
+  {\refstepcounter{epubex}\epubblockhead{Theorem \theepubex}{#1}}{\par\medskip}
+\NewDocumentEnvironment{general}{g g}
+  {\epubblockhead{\IfValueTF{#1}{#1}{Note}}\IfValueT{#2}{#2\par}}{\par\medskip}
+\NewDocumentEnvironment{learningcheckpoint}{O{}}
+  {\epubblockhead{Learning Checkpoint}}{\par\medskip}
+\NewDocumentEnvironment{casestudybox}{g}
+  {\epubblockhead{Case Study}{#1}}{\par\medskip}
+
+% ---- algorithm as a plain block (contents are enumerate lists) ----
+\NewDocumentEnvironment{algorithm}{O{}}
+  {\par\medskip\noindent
+   \renewcommand{\caption}[2][]{\textbf{Algorithm: ##2}\par\smallskip}%
+   \renewcommand{\captionsetup}[2][]{}%
+   \ignorespaces}
+  {\par\medskip}

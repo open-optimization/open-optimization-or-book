@@ -683,12 +683,37 @@
 
 % Exercise counter
 \newcounter{exo}[chapter]
+\newcounter{bookex}[chapter]
+\renewcommand{\thebookex}{\thechapter.\arabic{bookex}}
 \renewcommand{\theexo}{\thechapter.\arabic{exo}}
 
 % Exercise environment
 \newenvironment{ex}{%
     \par\medskip\noindent\refstepcounter{exo}\textbf{Exercise \theexo}\hspace{0.25em}\itshape
 }{\par\medskip}
+
+%% Unified redefinition (kept in sync with packages-and-commands.tex): accepts
+%%   \begin{ex} | \begin{ex}{Title} | \begin{ex}{Title}{} | \begin{ex}[Title]{}
+%% Blank titles {} are skipped (\notblank, etoolbox); second brace group ignored.
+%% CAUTION: trailing brace groups are grabbed greedily, so an exercise body
+%% must not BEGIN with a bare {...} group (none do as of 2026-07).
+\makeatletter
+\providecommand{\ex@print@title}[1]{\ \textbf{(#1)}\def\@currentlabelname{#1}}
+\providecommand{\ex@peek@title}{\@ifnextchar\bgroup{\ex@grab@title}{\ex@finish}}
+\providecommand{\ex@grab@title}[1]{\notblank{#1}{\ex@print@title{#1}}{}\ex@peek@second}
+\providecommand{\ex@peek@second}{\@ifnextchar\bgroup{\ex@grab@second}{\ex@finish}}
+\providecommand{\ex@grab@second}[1]{\ex@finish}
+\providecommand{\ex@finish}{\hspace{0.25em}\itshape}
+\RenewDocumentEnvironment{ex}{o}{%
+  \par\medskip\noindent\refstepcounter{bookex}%
+  \textbf{Exercise \thebookex}%
+  \IfValueTF{#1}%
+    {\notblank{#1}{\ex@print@title{#1}}{}\ex@peek@second}%
+    {\ex@peek@title}%
+}{%
+  \par\medskip
+}
+\makeatother
 
 % Solution output environment
 \newenvironment{solout}[1]{%

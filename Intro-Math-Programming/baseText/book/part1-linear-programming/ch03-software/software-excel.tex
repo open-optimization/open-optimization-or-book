@@ -2,9 +2,9 @@
 
 \begin{outcome}
 \begin{itemize}
-\item Learn relevant excel functions
-\item Setup  linear programs in excel
-\item Solve linear programs in excel
+\item Learn relevant Excel functions
+\item Set up linear programs in Excel
+\item Solve linear programs in Excel
 \end{itemize}
 \end{outcome}
 
@@ -43,7 +43,7 @@ Naming ranges makes formulas easier to read and maintain. Instead of \texttt{=SU
 
 \paragraph{Using Logical Functions}
 
-Logical functions like \texttt{IF()}, \texttt{AND()}, and \texttt{OR()} are helpful for decision-making within formulas. For example, \texttt{=IF(A1>10, \"High\", \"Low\")} returns \"High\" if \texttt{A1} is greater than 10, and \"Low\" otherwise.
+Logical functions like \texttt{IF()}, \texttt{AND()}, and \texttt{OR()} are helpful for decision-making within formulas. For example, \texttt{=IF(A1>10, "High", "Low")} returns ``High'' if \texttt{A1} is greater than 10, and ``Low'' otherwise.
 
 With these foundational tools, setting up optimization problems becomes much more manageable. In the next section, we will explore how to use these functions in combination with Excel Solver to define and solve optimization models.
 
@@ -83,7 +83,7 @@ In the Solver Parameters dialog box:
     \item Choose \textbf{Max} or \textbf{Min} to indicate whether the objective is to be maximized or minimized.
     \item Specify the \textbf{Variable Cells} by selecting the range of cells representing decision variables.
     \item Add \textbf{Constraints} by specifying the relationship (e.g., \texttt{<=}, \texttt{>=}, \texttt{=}) and the cells involved.
-    \item When the variables are non-negative, you can select \texttt{Make Unconstrainted Variables Non-Negative}.
+    \item When the variables are non-negative, you can select \texttt{Make Unconstrained Variables Non-Negative}.
 \end{itemize}
 
 {\centering
@@ -140,7 +140,7 @@ Some videos
 
 \item \href{https://www.youtube.com/watch?v=-E3rSoClgMI}{Traveling Salesman Problem}
 
-\item \href{https://www.youtube.com/watch?v=UQYJvSjXE6I}{Also Travelin Salesman Problem}
+\item \href{https://www.youtube.com/watch?v=UQYJvSjXE6I}{Also Traveling Salesman Problem}
 
 \item \href{https://www.youtube.com/watch?v=owHq3Mbniqo}{Multiple Traveling Salesman Problem}
 
@@ -155,6 +155,11 @@ Some other links
 \end{itemize}
 \end{resource}
 
+\begin{tryit}
+\vizlink{excel-solver}{Excel Solver Walkthrough}: cells, formulas, and the Solver dialog on a small LP.
+\end{tryit}
+
+
 \section{Exercises}
 \begin{ex}
 Consider the following table indicating the nutritional value of different food types.
@@ -162,7 +167,7 @@ Consider the following table indicating the nutritional value of different food 
 \begin{tabular}%{lccccc}
 {|p{0.2\linewidth} | p{0.14\linewidth} | p{0.14\linewidth} | p{0.14\linewidth} | p{0.14\linewidth} | p{0.14\linewidth} |}
 \hline & Price $(\$)$ per serving & Calories per serving & Fat $(\mathrm{g})$ per serving & Protein $(\mathrm{g})$ per serving & Carbohydrate $(\mathrm{g})$ per serving \\
-\hline Raws carrots & $0.14$ & 23 & $0.1$ & $0.6$ & 6 \\
+\hline Raw carrots & $0.14$ & 23 & $0.1$ & $0.6$ & 6 \\
 Baked potatoes & $0.12$ & 171 & $0.2$ & $3.7$ & 30 \\
 Wheat bread & $0.2$ & 65 & 0 & $2.2$ & 13 \\
 Cheddar cheese & $0.75$ & 112 & $9.3$ & 7 & 0 \\
@@ -177,13 +182,14 @@ You need to decide how many servings of each food to buy each day so that you mi
 \item protein must be at least $100 \mathrm{~g}$,
 \item carbohydrates must be at least $250 \mathrm{~g}$.
 \end{itemize}
-Write an LP that will help you decide how many servings of each of the aforementioned foods are needed to meet all the nutritional requirement, while minimizing the total cost of the food (you may buy fractional numbers of servings).
+Write an LP that will help you decide how many servings of each of the aforementioned foods are needed to meet all the nutritional requirements, while minimizing the total cost of the food (you may buy fractional numbers of servings).
 
 Solve this problem using Excel Solver.  Provide a screenshot of your spreadsheet with the optimal solution.
 
 \end{ex}
 
 \begin{ex}{Production Planning in Excel}{}
+\label{ex:excel-production-planning}
 A small factory produces two products: widgets and gadgets.  Each widget earns \$8 in profit and each gadget earns \$6.  Production is limited by two resources:
 
 \begin{center}
@@ -205,6 +211,7 @@ Both products require nonnegative production quantities.
 \end{ex}
 
 \begin{ex}{Transportation Problem in Excel}{}
+\label{ex:excel-transportation}
 A company has two warehouses (W1 and W2) that supply three retail stores (S1, S2, S3). The shipping cost per unit, supply at each warehouse, and demand at each store are given below:
 
 \begin{center}
@@ -223,3 +230,30 @@ W2 & \$6 & \$3 & \$5 & 50 \\
 \item Solve using Excel Solver to minimize total shipping cost. Report the optimal shipping plan and minimum cost.
 \end{enumerate}
 \end{ex}
+
+\subsubsection*{Selected Solutions}
+
+\begin{solution}(Exercise~\ref{ex:excel-production-planning})
+Let $x_1$ and $x_2$ be the number of widgets and gadgets produced.  The LP behind the spreadsheet is
+\begin{align*}
+\max \quad & z = 8x_1 + 6x_2\\
+\text{s.t.} \quad & 2x_1 + x_2 \leq 40 && \text{(machine time)}\\
+& x_1 + 2x_2 \leq 30 && \text{(raw material)}\\
+& x_1, x_2 \geq 0.
+\end{align*}
+In Excel, put the two variables in yellow cells, compute the objective and the two constraint left-hand sides with \texttt{SUMPRODUCT} in green cells, and add the constraints in Solver with the Simplex LP method.  Solver returns $x_1 = 50/3 \approx 16.67$ widgets and $x_2 = 20/3 \approx 6.67$ gadgets with maximum profit $520/3 \approx \$173.33$; both resource constraints are binding.
+For part 3, the Sensitivity Report shows the allowable increase for the widget profit coefficient.  Raising it from \$8 to \$9 stays within the allowable range, so the optimal production plan does not change --- only the profit does, rising to \$190.  (Geometrically, the objective slope stays between the slopes of the two binding constraints, so the same corner point remains optimal.)
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:excel-transportation})
+Let $x_{ij} \geq 0$ be the number of units shipped from warehouse $i$ to store $j$.  A natural Excel layout is a $2 \times 3$ grid of yellow variable cells mirroring the cost table, with row sums compared to supply and column sums compared to demand:
+\begin{align*}
+\min \quad & z = 4x_{11} + 8x_{12} + x_{13} + 6x_{21} + 3x_{22} + 5x_{23}\\
+\text{s.t.} \quad & x_{11} + x_{12} + x_{13} \leq 60 && \text{(supply W1)}\\
+& x_{21} + x_{22} + x_{23} \leq 50 && \text{(supply W2)}\\
+& x_{11} + x_{21} = 30, \quad x_{12} + x_{22} = 40, \quad x_{13} + x_{23} = 40 && \text{(demands)}\\
+& x_{ij} \geq 0.
+\end{align*}
+Total supply equals total demand (110 units), so both supplies are used fully.  Solver finds the optimal plan $x_{11} = 20$, $x_{13} = 40$, $x_{21} = 10$, $x_{22} = 40$ (all other routes unused), with minimum cost \$300: each warehouse ships everything it can along its cheapest routes (W1 to S3, W2 to S2), and store S1's demand is split to make the supplies balance.
+\end{solution}
+

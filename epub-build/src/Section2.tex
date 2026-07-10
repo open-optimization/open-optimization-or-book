@@ -1,0 +1,847 @@
+\chapter{Graphically Solving Linear Programs}
+
+\begin{outcome}
+\begin{enumerate}
+\item[A.] Learn how to plot the feasible region and the objective function.
+\item[B.] Identify and compute extreme points of the feasible region.
+\item[C.] Find the optimal solution(s) to a linear program graphically.
+\item[D.] Classify the type of result of the problem as infeasible, unbounded, unique optimal solution, or infinitely many optimal solutions.
+\end{enumerate}
+\end{outcome}
+\begin{resource}
+\begin{itemize}
+\item \href{https://www.youtube.com/watch?v=K7TL5NMlKIk&ab_channel=Dr.TreforBazett}{Youtube! - Modeling with Linear Programming - Watch 4:20 - End}
+\item \href{https://www.youtube.com/watch?v=E72DWgKP_1Y&t=1014s&ab_channel=TomS}{Youtube! - Watch 1:43 - 3:43}
+\end{itemize}
+\end{resource}
+
+When a linear program has only two decision variables, we can solve it graphically by plotting the feasible region along with the level curves of the objective function. We will show that we can find a point in the feasible region that maximizes (or minimizes) the objective function using these level curves.
+
+We will begin with an easy example that is bounded and investigate the structure of the feasible region.  We will then explore other examples.
+
+%% Decorative LP images removed (files not available)
+
+\section{Nonempty and Bounded Problem}
+
+Consider the problem
+\begin{align*}
+\max \quad & 2 x_1+5 x_2 \\
+\text { s.t. } \quad
+&x_1+2 x_2 \leq 16 \\
+&5 x_1+3 x_2 \leq  45 \\
+&x_1, x_2  \geq 0
+\end{align*}
+
+We want to start by plotting the \emph{feasible region}, that is, the set points $(x_1,x_2)$ that satisfy all the constraints.
+
+We can plot this by first plotting the four lines
+\begin{itemize}
+\item $x_1+2 x_2 = 16$
+\item $5 x_1+3 x_2 = 45$
+\item $x_1 = 0$
+\item $x_2= 0$
+\end{itemize}
+and then shading in the side of the space cut out by the corresponding inequality.
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=0.85\linewidth]{figs/Section2-tikz01.png}
+\end{center}
+\caption{\href{https://www.desmos.com/calculator/j1li4l7lcv}{Desmos: Interactive plot!} (\href{https://open-optimization.github.io/open-optimization-or-book/interactive-figures/lp-graphical-method.html}{backup interactive plot})}
+\end{figure}
+
+The resulting feasible region can then can be shaded in as the region that satisfies all the inequalities.
+
+Notice that the feasible region is nonempty (it has points that satisfy all the inequalities) and also that it is bounded (the feasible points don't continue infinitely in any direction).
+
+We want to identify the \emph{extreme points} (i.e., the corners) of the feasible region.
+Understanding these points will be critical to understanding the optimal solutions of the model.
+Notice that all extreme points can be computed by finding the intersection of 2 of the lines.   But!  Not all intersections of any two lines are feasible.
+
+We will later use the terminology \emph{basic feasible solution} for an extreme point of the feasible region, and \emph{basic solution} as a point that is the intersection of 2 lines, but is actually infeasible (does not satisfy all the constraints).
+
+\begin{theorem}{Optimal Solution at a Vertex}\label{thm:optimalextremepoint}
+If the feasible region of the linear program is nonempty and bounded, then there exists an optimal solution at vertex of the feasible region.
+\end{theorem}
+
+This theorem implies the following algorithm.
+\begin{algorithm}[H]
+\caption{Enumerate Vertices Algorithm for Solving a Linear Programming Problem}
+\label{alg:EnumerateVertices}
+\begin{enumerate}
+    \item \textbf{Identify the Feasible Region:}
+    Determine the set of constraints defining the feasible region in the problem.
+    \item \textbf{Enumerate Vertices:}
+    Find all the vertices (corner points) of the feasible region. This can be done by solving pairs of constraint equations to find their intersections, keeping only those that satisfy all constraints.
+    \item \textbf{Compute Objective Values:}
+    Evaluate the objective function at each vertex of the feasible region.
+    \item \textbf{Compare Objective Values:}
+    For a maximization problem, identify the vertex with the highest objective value. For a minimization problem, identify the vertex with the lowest objective value.
+    \item \textbf{Determine the Optimal Solution:}
+    The vertex with the optimal objective value is the solution to the linear programming problem.
+\end{enumerate}
+\end{algorithm}
+
+We will explore why Theorem~\ref{thm:optimalextremepoint} is true, and also what happens when the feasible region does not satisfy the assumptions of either nonempty or bounded.
+
+\section{Graphical Approach}
+We now apply the vertex enumeration idea graphically using a concrete example.
+
+\begin{example}{Furniture Workshop}\label{ex:FurnitureWorkshop}
+A small furniture workshop produces chairs and tables. Each chair requires 2 hours of carpentry and 1 hour of finishing, earning a profit of \$8. Each table requires 1 hour of carpentry and 3 hours of finishing, earning a profit of \$6. The workshop has 80 hours of carpentry time and 90 hours of finishing time available per week. Market demand limits chair production to at most 35 per week.
+
+Letting $x_1$ denote the number of chairs and $x_2$ the number of tables, the linear program is:
+\begin{equation}
+\begin{aligned}
+\max\;\;& z(x_1,x_2) = 8x_1 + 6x_2\\
+\text{s.t.}\;\;&  2x_1 + x_2 \leq 80\\
+& x_1 + 3x_2 \leq 90\\
+& x_1 \leq 35\\
+& x_1 \geq 0\\
+& x_2 \geq 0
+\end{aligned}
+\label{eqn:FurnitureWorkshop}
+\end{equation}
+\end{example}
+
+\begin{solution} To solve graphically, we first sketch the feasible region by plotting the boundary lines of each constraint and shading the region that satisfies all inequalities simultaneously. The result is shown in Figure~\ref{fig:FurnitureWorkshopFeasibleRegion}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\linewidth]{figs/Section2-tikz02.png}
+\caption{Feasible region and level curves for the Furniture Workshop problem. The shaded polygon represents the set of all $(x_1,x_2)$ satisfying every constraint. Dashed lines show the objective function at several values of $z$. As $z$ increases, the level curves sweep upward and to the right.}
+\label{fig:FurnitureWorkshopFeasibleRegion}
+\end{figure}
+
+Next, we overlay level curves of the objective function. Setting $8x_1 + 6x_2 = z$ gives the family of lines
+\[
+x_2 = -\tfrac{4}{3}\,x_1 + \tfrac{z}{6},
+\]
+which are parallel lines with slope $-4/3$. Increasing $z$ shifts them in the direction of the gradient $\nabla z = (8,6)$.  Sweeping the level curves in this direction, the last one to touch the feasible region does so at the vertex $(x_1^*,x_2^*) = (30,20)$, yielding the optimal profit
+\[
+z^* = 8(30) + 6(20) = 360.
+\]
+
+This optimal point sits at the intersection of the two constraints $2x_1+x_2=80$ and $x_1+3x_2=90$. Both constraints are satisfied with equality at the optimum --- we say they are \textit{binding}. The remaining constraints ($x_1\leq 35$, $x_1\geq 0$, $x_2\geq 0$) are satisfied strictly and are \textit{non-binding}.
+
+This illustrates a general principle: when an optimal solution to a linear program exists, it occurs at a vertex of the feasible region --- the intersection of several binding constraints.
+\end{solution}
+
+We can now state a preliminary algorithm for solving a two-variable LP with a bounded feasible region graphically.
+\begin{algorithm}[H]
+\captionsetup{labelformat=empty}
+\caption{Preliminary Graphical Solution Method (Bounded, Unique Optimum)}
+\label{alg:GraphLPBoundedUniqueSoln}
+\begin{center}
+\begin{minipage}[t]{\textwidth-1em}
+\underline{\textbf{Preliminary Graphical Solution Method}}\\
+\textit{Assumes bounded feasible region with unique optimum}
+\begin{enumerate}[nosep]
+\item Sketch the feasible region by plotting each constraint boundary and shading the intersection of all half-planes.
+\item Draw several level curves of the objective function $z = c_1 x_1 + c_2 x_2$ for increasing values of $z$.
+\item Sweep the level curves in the gradient direction $\nabla z = (c_1, c_2)$ until the last level curve that still touches the feasible region is found.
+\item The vertex of the feasible region lying on this last level curve is the optimal solution.
+\end{enumerate}
+\end{minipage}
+\end{center}
+\end{algorithm}
+
+\begin{example}{Lemonade Vendor}\label{exa:lemonadevendor}
+Say you are a vendor of lemonade and lemon juice. Each unit of lemonade
+requires 1 lemon and 2 litres of water. Each unit of lemon juice
+requires 3 lemons and 1 litre of water. Each unit of lemonade gives a
+profit of three dollars. Each unit of lemon juice gives a profit of two
+dollars. You have 6 lemons and 4 litres of water available. How many
+units of lemonade and lemon juice should you make to maximize profit?
+
+If we let \(x\) denote the number of units of lemonade to be made and
+let \(y\) denote the number of units of lemon juice to be made, then the
+profit is given by \(3x + 2y\) dollars. We call \(3x + 2y\) the
+objective function. Note that there are a number of constraints that
+\(x\) and \(y\) must satisfied. First of all, \(x\) and \(y\) should be
+nonnegative. The number of lemons needed to make \(x\) units of lemonade
+and \(y\) units of lemon juice is \(x+3y\) and cannot exceed 6. The
+number of litres of water needed to make \(x\) units of lemonade and
+\(y\) units of lemon juice is \(2x+y\) and cannot exceed 4. Hence, to
+determine the maximum profit, we need to maximize \(3x + 2y\) subject to
+\(x\) and \(y\) satisfying the constraints \(x + 3y \leq 6\),
+\(2x + y \leq 4\), \(x \geq 0\), and \(y \geq 0.\)
+
+A more compact way to write the problem is as follows:
+\[\begin{array}{rrcrll}
+\text{maximize } & 3x & + & 2y & \\
+\text{subject to}
+& x & + & 3y & \leq & 6 \\
+& 2x & +&  y & \leq & 4 \\
+& x &  & & \geq & 0 \\
+& & & y & \geq & 0. \\
+\end{array}\]
+
+\end{example}
+\begin{solution}
+We can solve this maximization problem graphically as follows. We first
+sketch the set of $(x,y)$  satisfying the
+constraints, called the feasible region, on the \((x,y)\)-plane. We then
+take the objective function \(3x+2y\) and turn it into an equation of a
+line \(3x+2y = z\) where \(z\) is a parameter. Note that as the value of
+\(z\) increases, the line defined by the equation \(3x+2y=z\) moves in
+the direction of the normal vector
+$(3,2)$ We call this direction the
+direction of improvement. Determining the maximum value of the objective
+function, called the optimal value, subject to the constraints amounts to
+finding the maximum value of \(z\) so that the line defined by the
+equation \(3x+2y=z\) still intersects the feasible region.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\linewidth]{figs/Section2-tikz03.png}
+\caption{Feasible region and objective level curves for the Lemonade Vendor problem. The shaded polygon is the set of $(x,y)$ satisfying all constraints; dashed lines are level curves $3x+2y = z$ for $z = 0,2,4,6,8$. Sweeping the level curves in the direction of $\nabla z = (3,2)$ shows the optimum is at the vertex $(1.2,1.6)$.}
+\label{fig:LemonadeVendorFeasibleRegion}
+\end{figure}
+
+% TODO: Borrowed stack-exchange TikZ below shows an unrelated 3-constraint LP
+% (x_1+x_2>=3, 2x_1-x_2<=5, -x_1+2x_2<=3) and looks out of place in the
+% Lemonade Vendor solution. No recreated equivalent was located; left in
+% place pending author review. -- May 13, 2026
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\linewidth]{figs/Section2-tikz04.png}\footnote{%
+\url{https://tex.stackexchange.com/questions/75933/how-to-draw-the-region-of-inequality}%
+}
+\caption{Feasible region of a generic linear program with constraints $x_1+x_2\geq 3$, $2x_1-x_2\leq 5$, and $-x_1+2x_2\leq 3$. The shaded triangle illustrates how three linear inequalities can carve out a bounded polygonal region.}
+\label{fig:GenericThreeConstraintRegion}
+\end{figure}
+%
+% Removed borrowed plot (replaced by recreated TikZ above) -- May 13, 2026
+% Was: \begin{center}\altincludegraphics[width=0.8\linewidth]{images/lemon}{...} \end{center}
+% Source: external-sources/lineqlpbook/images/lemon.{pdf,svg,fig} (Cheung, CC BY-SA 4.0).
+% The lemon.pdf image showed the same Lemonade Vendor LP that is recreated in
+% the TikZ figure above (Figure~\ref{fig:LemonadeVendorFeasibleRegion}).
+
+In Figure~\ref{fig:LemonadeVendorFeasibleRegion}, level curves of \(z = 3x+2y\) are
+drawn for several values of \(z\). From the picture, we can see that if \(z\) is greater than 6.8,
+the line defined by \(3x+2y = z\) will not intersect the feasible
+region. Hence, the profit cannot exceed 6.8 dollars.
+
+As the line \(3x+2y = 6.8\) does intersect the feasible region, \(6.8\)
+is the maximum value for the objective function. Note that there is only
+one point in the feasible region that intersects the line \(3x+2y=6.8\),
+namely $(x,y) = (1.2,1.6)$.
+In other words, to maximize profit, we want to make 1.2 units of
+lemonade and 1.6 units of lemon juice.
+\end{solution}
+
+The examples above each have a single optimal solution. However, four qualitatively different outcomes are possible for any linear program:
+\begin{enumerate}[nosep]
+\item A unique optimal solution (as we have already seen).
+\item Infinitely many optimal solutions (the optimal level curve is parallel to an edge of the feasible region).
+\item The problem is unbounded: the objective value can be made arbitrarily large (maximization) or small (minimization).
+\item The problem is infeasible: no point satisfies all constraints simultaneously.
+\end{enumerate}
+
+The third outcome can only arise when the feasible region is unbounded. We will illustrate each of these outcomes below and, in a later chapter, prove that these are the only possibilities.
+
+\section{Infinitely Many Optimal Solutions}
+
+It is possible for a linear program to have more than one optimal solution. When this happens, there are in fact infinitely many.  We illustrate with a modification of the Furniture Workshop.
+
+\begin{example}{Furniture Workshop --- Alternative Objective}\label{exa:FurnitureWorkshopAltOpt}
+Suppose the workshop in Example~\ref{ex:FurnitureWorkshop} revises its pricing so that each chair earns \$2 and each table earns \$1. The new objective function is $z(x_1,x_2) = 2x_1 + x_2$, while the constraints remain unchanged:
+\begin{equation}
+\begin{aligned}
+\max\;\;& z(x_1,x_2) = 2x_1 + x_2\\
+\text{s.t.}\;\;&  2x_1 + x_2 \leq 80\\
+& x_1 + 3x_2 \leq 90\\
+& x_1 \leq 35\\
+& x_1, x_2 \geq 0
+\end{aligned}
+\label{eqn:FurnitureWorkshopAltOpt}
+\end{equation}
+\end{example}
+
+\begin{solution}
+The gradient of the new objective is $\nabla z = (2,1)$, which is parallel to the constraint $2x_1 + x_2 = 80$. As we sweep the level curves in the gradient direction, the last level curve that touches the feasible region coincides with the entire edge from $(30,20)$ to $(35,10)$.  Along this edge, $2x_1+x_2 = 80$ for every point, so $z = 80$ everywhere on it.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\linewidth]{figs/Section2-tikz05.png}
+\caption{Alternative optimal solutions: the level curve $z = 80$ (bold blue segment) lies along an entire edge of the feasible region. Every point on this edge is an optimal solution.}
+\label{fig:FurnitureWorkshopAltOptSoln}
+\end{figure}
+
+Let $P$ denote the feasible region. For any $x_1^* \in [30,35]$ with $x_2^* = 80 - 2x_1^*$, the point $(x_1^*,x_2^*)$ lies on the edge from $(30,20)$ to $(35,10)$, and $z(x_1^*,x_2^*) = 80 \geq z(x_1,x_2)$ for all $(x_1,x_2)\in P$. Since there are infinitely many such points, the problem has infinitely many optimal solutions.
+\label{ex:FurnitureWorkshopAltOptSoln}
+\end{solution}
+
+\begin{ex}{Graphical Method for Lemonade Vendor}{} Solve the Lemonade Vendor problem from Example~\ref{exa:lemonadevendor} using the graphical method.
+\end{ex}
+
+Based on this example, we extend our graphical algorithm to handle multiple optimal solutions:
+\begin{algorithm}[H]
+\captionsetup{labelformat=empty}
+\caption{Extended Graphical Solution Method (Bounded Feasible Region)}
+\label{alg:GraphLPBounded}
+\begin{center}
+\begin{minipage}[t]{\textwidth-1em}
+\underline{\textbf{Extended Graphical Solution Method}}\\
+\textit{Handles both unique and multiple optimal solutions}
+\begin{enumerate}[nosep]
+\item Sketch the feasible region by plotting each constraint boundary.
+\item Draw level curves of the objective function for several values of $z$.
+\item Sweep the level curves in the gradient direction to find the optimal value of $z$ that still intersects the feasible region. An optimal solution will occur at a vertex.
+\item If the optimal level curve is parallel to an edge of the feasible region adjacent to the optimal vertex, then every point on that edge is also optimal. The problem has infinitely many optimal solutions.
+\end{enumerate}
+\end{minipage}
+\end{center}
+\end{algorithm}
+
+\begin{learningcheckpoint}[label={lc:how-many-optima}]
+Consider the graphical representation below.  How many optimal solutions are there if we are maximizing?  How about if we are minimizing?
+\begin{center}
+\includegraphics[width=0.85\linewidth]{figs/Section2-tikz06.png}
+\end{center}
+\end{learningcheckpoint}
+
+\begin{ex}{Infinitely Many Optimal Solutions}{} Modify the objective function in Example~\ref{exa:lemonadevendor} so that the resulting LP has infinitely many optimal solutions. Describe the complete set of optimal solutions.
+\end{ex}
+
+\section{Problems with No Solution}
+
+When the constraints of a linear program contradict one another, no point can satisfy them all. The feasible region is empty and we say the problem is \emph{infeasible}.
+
+\begin{example}{Infeasible Problem}
+ Consider the following linear programming problem:
+\begin{equation}
+\begin{aligned}
+\max\;\;& z(x_1,x_2) = 4x_1 + 3x_2\\
+\text{s.t.}\;\;& x_1 + x_2 \leq 8\\
+& 2x_1 + x_2 \leq 12\\
+& x_1 \geq 7\\
+& x_2 \geq 5
+\end{aligned}
+\label{eqn:LPInfeasible}
+\end{equation}
+\end{example}
+\begin{solution}
+The constraints are plotted in Figure~\ref{fig:LPInfeasible}. The first two constraints restrict $x_1+x_2\leq 8$, but the lower bounds $x_1\geq 7$ and $x_2\geq 5$ together require $x_1+x_2\geq 12$. These are contradictory, so no point satisfies all constraints simultaneously.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\linewidth]{figs/Section2-tikz07.png}
+\caption{An infeasible linear program. The upper-bound constraints force $x_1+x_2\leq 8$, but the lower bounds require $x_1\geq 7$ and $x_2\geq 5$, so $x_1+x_2\geq 12$. No point can satisfy both conditions, and the feasible region is empty.}
+\label{fig:LPInfeasible}
+\end{figure}
+
+Since the feasible region is empty, the problem has no solution.
+\label{ex:LPNoSoln}
+\end{solution}
+Before stating the complete graphical algorithm, we also consider the case of unbounded feasible regions.
+
+\section{Problems with Unbounded Feasible Regions}
+
+Consider the problem
+
+\begin{align*}
+\min \quad && z = 5x_1 + 7x_2  \\
+\text{s.t.} \quad && x_1 + 3x_2 &\geq 6 \\
+&& 5x_1 + 2x_2 &\geq 10 \\
+&& x_2 &\leq 4 \\
+&& x_1, x_2 &\geq 0
+\end{align*}
+
+\begin{center}
+\includegraphics[width=0.85\linewidth]{figs/Section2-tikz08.png}
+\end{center}
+
+%% Original figure removed (file not available)
+
+As you can see, the feasible region is \emph{unbounded}.  In particular, from any point in the feasible region, one can always find another feasible point by increasing the $X$ coordinate (i.e., move to the right in the picture).   However, this does not necessarily mean that the optimization problem is unbounded.
+
+Indeed, the optimal solution is at $\mathbf{x}^* = (1.38, 1.54)$, the extreme point in the lower left hand corner,
+with optimal objective value
+$$
+z^* = 5 \cdot 1.38 + 7\cdot 1.54 = 17.7.
+$$
+
+Consider however, if we consider a different problem where we try to maximize the objective
+\begin{align*}
+{\color{red} \max }\quad && z = 5x_1 + 7x_2  \\
+\text{s.t.} \quad && x_1 + 3x_2 &\geq 6 \\
+&& 5x_1 + 2x_2 &\geq 10 \\
+&& x_2 &\leq 4 \\
+&& x_1, x_2 &\geq 0
+\end{align*}
+
+\begin{solution}
+This optimization problem is unbounded!  For example, notice that the point $(x_1,x_2) = (n,0)$ is feasible for all $n=1,2,3,\dots,$.   Then the objective function $z = 5n + 0$ follows the sequence $5, 10, 15, \dots,$, which diverges to infinity.
+\end{solution}
+
+We now illustrate two more scenarios with unbounded feasible regions. In the first, the problem is unbounded; in the second, a finite optimum exists despite the unbounded region.
+
+\begin{example}{Unbounded Problem}\label{ex:LPUnboundFeasibleRegion1} Consider the linear programming problem:
+\begin{equation}
+\begin{aligned}
+\max\;\;& z(x_1,x_2) = x_1 + 3x_2\\
+\text{s.t.}\;\;& x_1 - x_2 \leq 3\\
+& x_1 + 2x_2 \geq 4\\
+&x_1,x_2 \geq 0
+\end{aligned}
+\label{eqn:LPUnboundFeasibleRegion1}
+\end{equation}
+\end{example}
+\begin{solution}
+The feasible region and level curves are shown in Figure~\ref{fig:LPUnboundFeasibleRegion1}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\linewidth]{figs/Section2-tikz09.png}
+\caption{An unbounded linear program. The feasible region extends infinitely upward and to the right. Level curves of $z = x_1 + 3x_2$ continue to intersect the feasible region for arbitrarily large $z$, so the problem is unbounded.}
+\label{fig:LPUnboundFeasibleRegion1}
+\end{figure}
+
+The feasible region extends infinitely upward and to the right. For any target value $z_0$, we can find a feasible point achieving $z \geq z_0$. For instance, take $(x_1,x_2) = (0,t)$ for $t\geq 2$: then $0-t = -t \leq 3$ and $0+2t = 2t\geq 4$, so the point is feasible, and $z = 3t$, which grows without bound. Hence the optimal value is $+\infty$ and the problem is unbounded.
+\end{solution}
+
+An unbounded feasible region does not always lead to an unbounded objective. The key is whether the gradient of the objective points into the unbounded direction or away from it.
+
+\begin{example}{Finite Optimum with Unbounded Feasible Region}\label{exa:LPUnboundFiniteSoln}
+Consider the same feasible region as in Example~\ref{ex:LPUnboundFeasibleRegion1} but with a new objective:
+\begin{equation}
+\begin{aligned}
+\min\;\;& z(x_1,x_2) = 3x_1 + x_2\\
+\text{s.t.}\;\;& x_1 - x_2 \leq 3\\
+& x_1 + 2x_2 \geq 4\\
+&x_1,x_2 \geq 0
+\end{aligned}
+\label{eqn:LPUnboundFiniteSoln}
+\end{equation}
+\end{example}
+\begin{solution}
+The feasible region is the same unbounded region as before. However, we are now \emph{minimizing}, and the gradient $(3,1)$ points to the right and slightly upward --- precisely into the unbounded part of the feasible region. Moving opposite to the gradient (toward smaller $z$) takes us to the lower-left corner of the feasible region.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\linewidth]{figs/Section2-tikz10.png}
+\caption{A linear program with an unbounded feasible region but a finite optimal solution. The minimum of $z = 3x_1+x_2$ occurs at the vertex $(0,2)$ with $z^* = 2$, because the gradient points away from the bounded end of the feasible region.}
+\label{fig:LPUnboundFeasibleRegion2}
+\end{figure}
+
+Evaluating the objective at the vertices: $z(0,2) = 2$ and $z(\tfrac{10}{3},\tfrac{1}{3}) = 10 + \tfrac{1}{3} = \tfrac{31}{3} \approx 10.3$. Since we are minimizing, the optimum is $z^* = 2$ at $(x_1^*,x_2^*) = (0,2)$. Once again, the optimal solution occurs at a vertex of the feasible region, even though the region is unbounded.
+\label{ex:LPUnboundFeasibleRegion2}
+\end{solution}
+
+We can now state a complete algorithm for graphically solving any two-variable linear program.
+
+\begin{algorithm}
+\caption{Complete Graphical Method for Two-Variable Linear Programs}
+\label{alg:GraphLPGeneral}
+\begin{enumerate}
+    \item Sketch the feasible region by plotting the constraint boundaries and shading their intersection.
+    \item If the feasible region is empty, the problem is \textbf{infeasible} --- stop.
+    \item Draw level curves of the objective function and determine the gradient direction.
+    \item \textbf{Bounded feasible region:}
+    \begin{enumerate}
+        \item Sweep the level curves in the gradient direction (for maximization) or opposite (for minimization) to find the last level curve touching the feasible region. The optimal solution is at a vertex.
+        \item If this optimal level curve is parallel to an edge of the feasible region, every point on that edge is optimal (infinitely many solutions).
+    \end{enumerate}
+    \item \textbf{Unbounded feasible region:}
+    \begin{enumerate}
+        \item If the level curves can be swept indefinitely while still intersecting the feasible region, the problem is \textbf{unbounded}.
+        \item Otherwise, a finite optimum exists at a vertex --- proceed as in the bounded case.
+    \end{enumerate}
+\end{enumerate}
+\end{algorithm}
+
+\newpage
+
+\section{Exercises}\label{exercises}
+\addcontentsline{toc}{section}{Exercises}
+\begin{ex}{Feasible Region Analysis}{}
+Consider the following system of constraints:
+\[
+x + y \geq 5
+\]
+\[
+x \geq 0, \quad y \geq 0
+\]
+Which of the following statements is true about the feasible region?
+\begin{enumerate}
+    \item  The feasible region is a bounded polygon.
+    \item The feasible region is an unbounded region.
+    \item The feasible region consists of a single point.
+    \item The problem is infeasible.
+\end{enumerate}
+
+\end{ex}
+
+\begin{ex}{Sketch Feasible Region}\label{ex:feasible-region}
+Sketch all \(\begin{bmatrix} x \\ y \end{bmatrix}\) satisfying
+\[
+x - 2y \leq 2
+\]
+on the \((x,y)\)-plane.
+\end{ex}
+
+\begin{ex}{Graphically Solving}{}
+Graph the feasible region of the linear program:
+\begin{align*}
+\min  \quad & x_1 - x_2\\
+ & x_1 + x_2 \leq 6\\
+ & x_1 - x_2 \geq 1\\
+ & x_2 - x_1 \geq 3\\
+ & x_1, x_2 \geq 0
+\end{align*}
+Without considering the objective function, how many feasible solutions are there?  Justify your answer.
+\end{ex}
+
+\begin{ex}{Graphical Method}{}
+Use the graphical method to determine two optimal solutions to linear program:
+\begin{align*}
+\min  \quad& 3x_1 + 5x_2\\
+ & 3x_1 + 2x_2 \ge 36\\
+ & 6x_1 + 10x_2 \geq 90\\
+ & x_1, x_2 \geq 0
+\end{align*}
+\end{ex}
+
+\begin{ex}{Infeasible Region Graph}\label{ex:infeasible}
+Graph the feasible region of the linear program:
+\begin{align*}
+\min  \quad & x_1 - x_2\\
+ & x_1 + x_2 \leq 6\\
+ & x_1 - x_2 \geq 1\\
+ & x_2 - x_1 \geq 3\\
+ & x_1, x_2 \geq 0
+\end{align*}
+Without considering the objective function, how many feasible solutions are there?  Justify your answer.
+\end{ex}
+
+\begin{ex}{Determine Optimal Value}\label{ex:lp-optimal-value}
+Determine the optimal value of
+\[
+\begin{array}{rl}
+\text{Minimize} & x + y \\
+\text{Subject to} &  2x + y \geq 4 \\
+& x + 3y \geq 1.
+\end{array}
+\]
+\end{ex}
+
+\begin{ex}{Show Unbounded Problem}\label{ex:lp-unbounded}
+Show that the problem
+\[
+\begin{array}{rl}
+\text{Minimize} & -x + y \\
+\text{Subject to} &  2x - y \geq 0 \\
+& x + 3y \geq 3
+\end{array}
+\]
+is unbounded.
+\end{ex}
+
+\begin{ex}{Bounded Solution on Unbounded Region}{}
+Consider the feasible region from Example~\ref{ex:LPUnboundFeasibleRegion1} (with $x_1-x_2\leq 3$ and $x_1+2x_2\geq 4$). Does the problem $\max\; z = -2x_1 + x_2$ subject to these constraints have a finite solution? Justify your answer using Algorithm~\ref{alg:GraphLPGeneral}.
+\label{exer:BoundedSolutionQuestion}
+\end{ex}
+
+\begin{ex}{Infinite Optimal Solutions}{}
+Find an objective function for the feasible region in Example~\ref{ex:LPUnboundFeasibleRegion1} that produces infinitely many optimal solutions. Describe the set of optima.
+\end{ex}
+
+\begin{ex}{Bounded Optimum on Unbounded Region}{}
+Consider the constraints $-x_1+x_2\leq 5$, $x_1+x_2\geq 2$, $x_1,x_2\geq 0$. Construct a \textbf{maximization} objective that has a finite optimum despite the unbounded feasible region. Sketch the feasible region and level curves to verify.
+
+\emph{[Hint: Choose a gradient that points away from the unbounded direction.]}
+\end{ex}
+
+\begin{ex}{Unbounded Objective Direction}{}
+Consider the following problem:
+\[
+\begin{array}{rrcrll}
+\text{minimize } & -2x_1 & + & x_2 & \\
+\text{subject to} & -x_1 & + & x_2 & \leq & 3 \\
+& x_1 & - & 2x_2 & \leq & 2 \\
+& x_1 & & & \geq & 0 \\
+& & & x_2 & \geq & 0. \\
+\end{array}
+\]
+
+\begin{enumerate}
+\item Show that for any \(t \geq 0\),
+\[
+\begin{bmatrix} x_1 \\ x_2 \end{bmatrix} = \begin{bmatrix} t \\ t \end{bmatrix}
+\]
+satisfies all the constraints. Show that the objective function is unbounded for this point as $t \to \infty$.
+
+\item Show that \[
+\begin{bmatrix} x_1 \\ x_2 \end{bmatrix} = \begin{bmatrix} 2t+2 \\ t \end{bmatrix}
+\]
+ is feasible for any \(t \geq 0\).  What is the objective function value at this point?  Show that the objective function is unbounded (yet again) by letting $t \to \infty$.
+ \end{enumerate}
+ \end{ex}
+
+ \begin{ex}{Bounded and Unbounded Optimization}{}
+Consider the following problem:
+
+\[
+\begin{array}{rrcllll}
+\text{maximize/minimize } & 2x & + & 2y \\
+\text{subject to} & -x & + & 2y & \leq & 12 \\
+& 2x & + & y & \geq & 4 \\
+& x & + & 2y & \geq & 5 \\
+& x & & & \geq & 0 \\
+& & & y & \geq & 0. \\
+\end{array}
+\]
+
+\begin{enumerate}
+
+\item Determine the minimum value of \(2x + 2y\) by solving (graphically) the corresponding optimization problem. Show that the minimum is attained at a bounded feasible point.
+
+\item Show that the maximum value of \(2x + 2y\) is unbounded by finding a feasible solution of the form
+\[
+\begin{bmatrix} x \\ y \end{bmatrix} = \begin{bmatrix} 5\\ 0\end{bmatrix} + t \begin{bmatrix} 1\\ 0\end{bmatrix}
+\]
+for any \(t \geq 0\). Show that as \(t \to \infty\), the objective function becomes unbounded.
+
+\item Show that
+\[
+\begin{bmatrix} x \\ y \end{bmatrix} = \begin{bmatrix} 0 \\ 6 \end{bmatrix} + t\begin{bmatrix} 1 \\ 2 \end{bmatrix}
+\]
+is feasible for any \(t \geq 0\). Compute the objective function value at this point and demonstrate that it is unbounded as \(t \to \infty\).
+
+\end{enumerate}
+
+\end{ex}
+
+%By Kevin Cheung
+%The book is licensed under the
+%\href{http://creativecommons.org/licenses/by-sa/4.0/}{Creative Commons
+%Attribution-ShareAlike 4.0 International License}.
+%
+%This file has been modified by Robert Hildebrand 2020.
+%CC BY SA 4.0 licence still applies.
+
+\section{Graphical example}\label{graphic}
+%
+%To motivate the subject of linear programming (LP), we begin with a
+%planning problem that can be solved graphically.
+%
+%
+%
+%The above solution method can hardly be regarded as rigorous because we
+%relied on a picture to conclude that \(3x + 2y \leq 6.8\) for all
+%$(x,y)$ satisfying the constraints. But we
+%can actually show this \emph{algebraically}.
+%
+%Note that multiplying both sides of the constraint \(x + 3y \leq 6\)
+%gives \(0.2x + 0.6 y \leq 1.2\), and multiplying both sides of the
+%constraint \(2x + y \leq 4\) gives \(2.8x + 1.4 y \leq 5.6\). Hence, any
+\(\begin{bmatrix} x\\y\end{bmatrix}\) that satisfies both \(x+3y\leq 6\)
+%and \(2x+y \leq 4\) must also satisfy
+\((0.2x+0.6y) + (2.8x+1.4y) \leq 1.2 + 5.6\), which simplifies to
+\(3x + 2y \leq 6.8\) as desired! (Here, we used the fact that if
+\(a \leq b\) and \(c \leq d\), then \(a+c \leq b+d\).)
+%
+%Now, one might ask if it is always possible to find an algebraic proof
+%like the one above for similar problems. If the answer is yes, how does
+%one find such a proof? We will see answers to this question later on.
+%
+%Before we end this segment, let us consider the following problem:
+\[\begin{array}{rrcrll}
+\text{minimize } & -2x & + & y & \\
+\text{subject to} & -x & + & y & \leq & 3 \\
+%& x & - &  2y & \leq & 2 \\
+%& x &  & & \geq & 0 \\
+%& & & y & \geq & 0. \\
+\end{array}\]
+%
+%Note that for any \(t \geq 0\),
+\(\begin{bmatrix} x \\ y\end{bmatrix} = \begin{bmatrix} t \\ t\end{bmatrix}\)
+%satisfies all the constraints. The value of the objective function at
+\(\begin{bmatrix} x \\ y\end{bmatrix} = \begin{bmatrix} t \\ t\end{bmatrix}\)
+%is \(-t\). As \(t \rightarrow \infty\), the value of the objective
+%function tends to \(-\infty\). Therefore, there is no minimum value for
+%the objective function. The problem is said to be unbounded. Later on,
+%we will see how to detect unboundedness algorithmically.
+%
+%As an exercise, check that unboundedness can also be established by
+%using
+\(\begin{bmatrix} x \\ y\end{bmatrix} = \begin{bmatrix} 2t+2 \\ t\end{bmatrix}\)
+%for \(t \geq 0\).
+
+\begin{ex} \label{ex:lp-diet-problem}
+Suppose that you are shopping for dietary supplements to satisfy your
+required daily intake of 0.40mg of nutrient \(M\) and 0.30mg of
+nutrient \(N\). There are three popular products on the market. The
+costs and the amounts of the two nutrients are given in the following
+table:
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{lccc}
+\toprule
+         & Product 1 & Product 2 & Product 3 \\ \midrule
+Cost     & \$27      & \$31      & \$24      \\
+Daily amount of \(M\) & 0.16 mg   & 0.21 mg   & 0.11 mg   \\
+Daily amount of \(N\) & 0.19 mg   & 0.13 mg   & 0.15 mg   \\ \bottomrule
+\end{tabular}
+\caption{Data for problem.}
+\label{tab:your_table_label}
+\end{table}
+
+You want to determine how much of each product you should buy so that
+the daily intake requirements of the two nutrients are satisfied at
+minimum cost. Formulate your problem as a linear programming problem,
+assuming that you can buy a fractional number of each product.
+\end{ex}
+
+\subsubsection*{Selected Solutions}
+\label{solutions}
+\addcontentsline{toc}{subsection}{Solutions}
+
+\begin{solution}(Exercise~\ref{ex:infeasible})
+In fact, constraints 2 and 3 point away from each other, and hence there are no feasible solutions.
+\end{solution}
+
+\begin{solution}(Exercise \ref{ex:feasible-region})
+
+The points \((x,y)\) satisfying \(x-2y \leq 2\) are precisely those
+above the line passing through \((2,0)\) and \((0,-1)\).
+\end{solution}
+
+\begin{solution}(\ref{ex:lp-optimal-value})
+
+We want to determine the minimum value \(z\) so that \(x+y=z\) defines
+a line that has a nonempty intersection with the feasible region.
+However, we can avoid referring to a sketch by setting \(x=z-y\) and
+substituting for \(x\) in the inequalities to obtain:
+
+\begin{eqnarray*}
+2(z-y) + y \geq 4 \\
+(z-y) + 3y \geq 1,
+\end{eqnarray*}
+
+or equivalently,
+
+\begin{eqnarray*}
+z \geq 2+\frac{1}{2}y \\
+z \geq 1-2y,
+\end{eqnarray*}
+
+Thus, the minimum value for \(z\) is
+\(\min \{ 2+\frac{1}{2}y, 1-2y\}\), which occurs at
+\(y = -\frac{2}{5}\). Hence, the optimal value is \(\frac{9}{5}\).
+
+We can verify our work by doing the following. If our calculations
+above are correct, then an optimal solution is given by
+\(x = \frac{11}{5}\), \(y = -\frac{2}{5}\) since \(x = z - y\). It is
+easy to check that this satisfies both inequalities and therefore is a
+feasible solution.
+
+Now, taking \(\frac{2}{5}\) times the first inequality and
+\(\frac{1}{5}\) times the second inequality, we can infer the
+inequality \(x+y \geq \frac{9}{5}\). The left-hand side of this
+inequality is precisely the objective function. Hence, no feasible
+solution can have objective function value less than \(\frac{9}{5}\).
+But \(x = \frac{11}{5}\), \(y = -\frac{2}{5}\) is a feasible solution
+with objective function value equal to \(\frac{9}{5}\). As a result,
+it must be an optimal solution.
+
+\textbf{Remark.} We have not yet discussed how to obtain the
+multipliers \(\frac{2}{5}\) and \(\frac{1}{5}\) for inferring the
+inequality \(x+y \geq \frac{9}{5}\). This is an issue that will be
+taken up later. In the meantime, think about how one could have
+obtained these multipliers for this particular exercise.
+\end{solution}
+
+\begin{solution}(Exercise \ref{ex:lp-unbounded})
+We could glean some insight by first making a sketch on the
+\((x,y)\)-plane.
+
+The line defined by \(-x + y = z\) has \(x\)-intercept \(-z\). Note
+that for \(z \leq -3\),
+\(\begin{bmatrix} x\\y \end{bmatrix} = \begin{bmatrix} -z\\ 0\end{bmatrix}\)
+satisfies both inequalities and the value of the objective function at
+\(\begin{bmatrix} x\\y \end{bmatrix} = \begin{bmatrix} -z\\ 0\end{bmatrix}\)
+is \(z\). Hence, there is no lower bound on the value of the objective
+function.
+\end{solution}
+
+\begin{solution}(Exercise \ref{ex:lp-diet-problem})
+Let \(x_i\) denote the amount of Product \(i\) to buy for
+\(i = 1,2,3\). Then, the problem can be formulated as
+\[
+\begin{array}{rrcrcrll}
+\text{minimize } & 27 x_1 & + & 31 x_2 & + & 24 x_3 \\
+\text{subject to}
+& 0.16 x_1 & + & 0.21 x_2 & + & 0.11 x_3 & \geq & 0.30 \\
+& 0.19 x_1 & + & 0.13 x_2 & + & 0.15 x_3 & \geq & 0.40 \\
+& x_1 & , & x_2 & , & x_3 & \geq & 0. \\
+\end{array}
+\]
+
+\textbf{Remark.} If one cannot buy fractional amounts of the products,
+the problem can be formulated as
+\[
+\begin{array}{rrcrcrll}
+\text{minimize } & 27 x_1 & + & 31 x_2 & + & 24 x_3 \\
+\text{subject to}
+& 0.16 x_1 & + & 0.21 x_2 & + & 0.11 x_3 & \geq & 0.30 \\
+& 0.19 x_1 & + & 0.13 x_2 & + & 0.15 x_3 & \geq & 0.40 \\
+& x_1 & , & x_2 & , & x_3 & \geq & 0. \\
+& x_1 & , & x_2 & , & x_3 & \in & \mathbb{Z}. \\
+\end{array}
+\]
+\end{solution}
+
+\section{Extreme Directions}
+
+Let's define a procedure for finding the extreme directions, using the following LP's feasible region.  Graphically, we can see that the extreme directions should follow the $s_1=0$ (red) line and the $s_3 = 0$ (orange) line.
+
+\begin{minipage}[t][][b]{.4\linewidth}
+\begin{align*}
+\max \quad & z = -5x_1 - x_2  \\\
+\text{s.t.} \quad & x_1 - 4x_2 +s_1 = 0  \\
+& -x_1 + x_2 + s_2 = 1 \\
+& -x_1 + 2x_2 +s_3 = 4 \\
+& x_1, x_2, s_1, s_2, s_3 \ge 0.
+\end{align*}
+\end{minipage}%
+\begin{minipage}[t][][b]{.6\linewidth}
+\begin{center}  \includegraphics[width=0.85\linewidth]{figs/Section2-tikz11.png} \end{center}
+\end{minipage}
+
+\begin{center}  \includegraphics[width=0.85\linewidth]{figs/Section2-tikz12.png} \end{center}
+
+%\draw[scale=0.5,domain=-3:3,smooth,variable=\x,blue] plot ({\x},{\x*\x}); % commented out - was outside tikzpicture
+
+\medskip E.g., consider the $s_3=0$ (orange) line, to find the extreme direction start at extreme point (2,3) and find another feasible point on the orange line, say (4,4) and subtract (2,3) from (4,4), which yields (2,1).
+
+\medskip This is related to the slope in two-dimensions, as discussed in class, the rise is 1 and the run is 2. So this direction has a slope of 1/2, but this does not carry over easily to higher dimensions where directions cannot be defined by a single number.
+
+\medskip To find the extreme directions we can change the right-hand-side to $\mathbf{b} = \mathbf{0}$, which forms a polyhedral cone (in yellow), and then add the constraint $x_1 + x_2 = 1$. The intersection of the cone and  $x_1 + x_2 = 1$ form a line segment.
+
+\begin{minipage}[t][][b]{.4\linewidth} \vspace{0mm}
+\begin{align*}
+\max \quad & z = -5x_1 - x_2  \\
+\text{s.t.} \quad & x_1 - 4x_2 +s_1 = 0  \\
+& -x_1 + x_2 + s_2 = 0 \\
+& -x_1 + 2x_2 +s_3 = 0 \\
+& x_1 + x_2 = 1 \\
+& x_1, x_2, s_1, s_2, s_3 \ge 0.
+\end{align*}
+\end{minipage}%
+\begin{minipage}[t][][b]{.6\linewidth}
+\begin{center} \includegraphics[width=0.85\linewidth]{figs/Section2-tikz13.png} \end{center}
+\end{minipage}
+
+\begin{center} \includegraphics[width=0.85\linewidth]{figs/Section2-tikz14.png} \end{center}
+
+\medskip Magnifying for clarity, and removing the $s_2=0$ (teal) line, as it is redundant, and marking the extreme points of the new feasible region, (4/5, 1/5) and (2/3, 1/3), with red boxes, we have:
+
+\begin{center}  \includegraphics[width=0.85\linewidth]{figs/Section2-tikz15.png} \end{center}
+
+The extreme directions are thus (4/5, 1/5) and (2/3, 1/3). \\
+
+
