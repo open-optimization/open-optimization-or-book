@@ -23,7 +23,7 @@ A (undirected) graph $G = (V,E)$ is defined by a set of vertices $V$ and a set o
 For example, the following graph $G$ can be described by:
 \begin{itemize}
 \item the vertex set $V = \{1,2,3,4,5,6\}$ and 
-\item the edge set $E = \{(4,6),(4,5), (5,1) (1,2), (2,5), (2,3), (3,4)\}$. 
+\item the edge set $E = \{(4,6),(4,5), (5,1), (1,2), (2,5), (2,3), (3,4)\}$.
 \end{itemize}
 
 \begin{center}
@@ -52,7 +52,7 @@ A \emph{directed graph} (or di-graph for short) is denoted as $G = (V, A)$ where
 For example, the following directed graph $G$ can be described by
 \begin{itemize}
 \item  the vertex set $V = \{1,2,3,4,5,6\}$ and 
-\item the arc set $ A= \{(4,6),(6,4), (4,5), (5,1) (1,2), (2,5), (2,3), (3,4)\}$. 
+\item the arc set $ A= \{(4,6),(6,4), (4,5), (5,1), (1,2), (2,5), (2,3), (3,4)\}$.
 \end{itemize}
 \begin{center}
 \begin{tikzpicture}
@@ -102,7 +102,7 @@ The transportation network can be represented as a directed graph \( G = (V, A) 
 \begin{itemize}
     \item \( V = \{ W_1, W_2, S_1, S_2 \} \) (two warehouses and two stores).
     \item \( A = \{(W_1, S_1), (W_1, S_2), (W_2, S_1), (W_2, S_2)\} \) (directed transportation routes).
-    \item Each arc \( (i,j) \) has a given transportation cost \( C_{ij} \) and capacity \( u_{ij} \).
+    \item Each arc \( (i,j) \) has a given transportation cost \( c_{ij} \) and capacity \( u_{ij} \).
 \end{itemize}
 
 The network data is summarized in the following table:
@@ -233,7 +233,7 @@ The figure below shows a small example. There are:
 \begin{itemize}
 \item \( c_{ij} \): cost per unit shipped on arc \( (i, j) \in A \)
 \item \( u_{ij} \): maximum capacity of arc \( (i, j) \in A \)
-\item \( d_i \): net demand at node \( i \in V \) (positive = demand, negative = supply)
+\item \( d_i \): net supply at node \( i \in V \) (positive = supply at the warehouses, negative = demand at the stores)
 \end{itemize}
 
 \smallskip \modelhead{Variables} \\
@@ -242,8 +242,8 @@ The figure below shows a small example. There are:
 \smallskip \modelhead{Model}
 \begin{align*}
 \min \quad & \sum_{(i,j) \in A} c_{ij} \cdot x_{ij} \\
-\st \quad 
-& \sum_{i : (i,k) \in A} x_{ik} - \sum_{j : (k,j) \in A} x_{kj} = d_k &&\quad \text{for all } k \in V   \tag{flow balance} \\
+\st \quad
+& \sum_{j : (k,j) \in A} x_{kj} - \sum_{i : (i,k) \in A} x_{ik} = d_k &&\quad \text{for all } k \in V   \tag{flow balance} \\
 & 0 \leq x_{ij} \leq u_{ij} &&\quad \text{for all } (i,j) \in A   \tag{capacity constraints}
 \end{align*}
 
@@ -361,7 +361,7 @@ The minimum cost network flow problem can be defined as follows: Given a network
 \begin{itemize}
 \item \( u_{ij} \): Capacity of arc \( (i, j) \in A \).
 \item \( c_{ij} \): Cost per unit of flow on arc \( (i, j) \in A \).
-\item \( d_i \): Change at node \( i \in V \).
+\item \( d_i \): Net demand at node \( i \in V \) (positive = demand, negative = supply).
 \end{itemize}
 
 \modelhead{Variables}
@@ -374,7 +374,7 @@ The minimum cost network flow problem can be formulated as a linear programming 
 
 \begin{align*}
 \min \quad & \sum_{(i, j) \in A} c_{ij} x_{ij} \\
-\st        & \sum_{i:(i, k) \in A} x_{ij} - \sum_{j:(k, j) \in A} x_{ji} = d_k &&\quad \text{for all } k \in V \\
+\st        & \sum_{i:(i, k) \in A} x_{ik} - \sum_{j:(k, j) \in A} x_{kj} = d_k &&\quad \text{for all } k \in V \\
 & 0 \leq x_{ij} \leq u_{ij} &&\quad \text{for all } (i, j) \in A
 \end{align*}
 
@@ -465,8 +465,8 @@ The network includes:
 & x_{et} - x_{be} - x_{ce} - x_{de} = 0 & \text{(at \( e \))} \\
 & 0 \leq x_{sa} \leq 4,\quad 0 \leq x_{sb} \leq 2,\quad 0 \leq x_{sc} \leq 8 & \text{(available seats on initial flights)} \\
 & 0 \leq x_{ac} \leq 5,\quad 0 \leq x_{ad} \leq 2,\quad 0 \leq x_{bc} \leq 6,\quad 0 \leq x_{be} \leq 9 \\
-& 0 \leq x_{cd} \leq 1,\quad 0 \leq x_{ce} \leq 3,\quad 0 \leq x_{ct} \leq 4,\quad 0 \leq x_{de} \\
-&\leq 7,\quad 0 \leq x_{et} \leq 5
+& 0 \leq x_{cd} \leq 1,\quad 0 \leq x_{ce} \leq 3,\quad 0 \leq x_{ct} \leq 4 \\
+& 0 \leq x_{de} \leq 7,\quad 0 \leq x_{et} \leq 5
 \end{align*}
 In compact summation notation form,  we have
 
@@ -488,39 +488,6 @@ $$
 
 The same framework can be extended to include priorities, time windows, or rebooking costs.
 \end{examplewithallcode}
-
-%
-%
-\begin{example}{}
-\textbf{Sets and Parameters}
-\begin{itemize}
-\item \textbf{\underline{nodes}}: $V = \{s, a, b, c, d, e, t\}$
-\item \textbf{\underline{arcs}}: $A = \{(s,a), (s,b), (s,c), (a,c), (a,d), (b,c), (b,e), (c,d), (c,e), (c,t), (d,e), (e,t)\}$
-\item \textbf{\underline{capacities}}: $u_{ij}$ for each $(i,j) \in A$
-\end{itemize}
-%
-\modelhead{Variables}
-\begin{itemize}
-\item \textbf{\underline{flow on arcs}}: $x_{ij}$ represents the flow on arc $(i,j) \in A$
-\end{itemize}
-%
-%
-\textbf{Explicit Model}
-\begin{align*}
-\max \quad & x_{sa} + x_{sb} + x_{sc} \\
-\st \quad 
-%    & x_{ac} + x_{bc} - x_{sa} - x_{sb} - x_{sc} = 0 \\
-%    & x_{ad} + x_{cd} - x_{ac} = 0 \\
-%    & x_{bc} + x_{be} + x_{ce} - x_{ac} = 0 \\
-%    & x_{ct} + x_{et} - x_{ce} - x_{cd} = 0 \\
-%    & x_{de} - x_{ad} - x_{cd} = 0 \\
-%    & x_{et} - x_{de} - x_{be} = 0\\
-%     &0 \leq x_{sa} \leq 4, \quad 0 \leq x_{sb} \leq 2, \quad 0 \leq x_{sc} \leq 8 \\
-%    & 0 \leq x_{ac} \leq 5, \quad 0 \leq x_{ad} \leq 2, \quad 0 \leq x_{bc} \leq 6, \quad 0 \leq x_{be} \leq 9 \\
-%    & 0 \leq x_{cd} \leq 1, \quad 0 \leq x_{ce} \leq 3, \quad 0 \leq x_{ct} \leq 4, \quad 0 \leq x_{de} \leq 7, \quad 0 \leq x_{et} \leq 5 \\
-\end{align*}
-%
-\end{example}
 
 The solution is shown here in bold values on the graph.  There is a total flow of 12.
 \begin{center}
@@ -606,7 +573,7 @@ The network flow problem can be formulated as a linear programming problem as fo
 \modelhead{Constraints}
 - Flow Balance: The first set of constraints ensures that the flow into each node is equal to the flow out of the node, except for the source and sink nodes.
 
-- Capacity Constraints: The third set of constraints ensures that the flow on each arc does not exceed its capacity.
+- Capacity Constraints: The second set of constraints ensures that the flow on each arc does not exceed its capacity.
 
 We will discuss duality later.  But duality is a concept that helps create bounds on a problem.
 For this particular problem, we can think of a dual as a \emph{cut} in the graph - something that separates $s$ from $t$.  For example:
@@ -667,7 +634,7 @@ The selected arcs are a cut that separates $s$ from $t$.  The sum of their weigh
 This bound is a form of \emph{duality}.  We will explore the concept more in later chapters.  This duality is captured in the following theorem.
 
 \begin{theorem}{}
-The maximum flow amount is equal to the size if the minimum cut.
+The maximum flow amount is equal to the size of the minimum cut.
 \end{theorem}
 
 %
@@ -705,8 +672,8 @@ The multi-commodity minimum cost network flow problem can be formulated as an in
 
 \begin{align*}
 \min \quad & \sum_{k \in K} \sum_{(i, j) \in A} c_{ijk} f_{ijk} \\
-\st        & \sum_{k \in K} \left( \sum_{j:(i, j) \in A} f_{ijk} \right) \leq u_{ij} &&\quad \text{for all } (i, j) \in A \\
-& \sum_{j:(i, j) \in A} f_{ijk} - \sum_{j:(j, i) \in A} f_{jik} = d_{ik} &&\quad \text{for all } i \in N, \; \forall k \in K \\
+\st        & \sum_{k \in K} f_{ijk} \leq u_{ij} &&\quad \text{for all } (i, j) \in A \\
+& \sum_{j:(j, i) \in A} f_{jik} - \sum_{j:(i, j) \in A} f_{ijk} = d_{ik} &&\quad \text{for all } i \in N, \; \forall k \in K \\
 & f_{ijk} \in \mathbb{Z}_{\geq 0} &&\quad \text{for all } (i, j) \in A, \; \forall k \in K
 \end{align*}
 
@@ -916,10 +883,15 @@ This problem can be efficiently solved using specialized algorithms such as:
 \begin{resource}
 %Other examples:
 \begin{itemize}
-\item \href{https://gurobi.github.io/modeling-examples/food_manufacturing_1_2/food_manufacture_1.html}{Food manfacturing - GUROBI}
+\item \href{https://gurobi.github.io/modeling-examples/food_manufacturing_1_2/food_manufacture_1.html}{Food manufacturing - GUROBI}
 \item \href{https://www.andrew.cmu.edu/user/gc0v/webpub/book.pdf}{Optimization Methods in Finance - Corneujols, T\"ut\"unc\"u}
 \end{itemize}
 \end{resource}
+
+\begin{tryit}
+\vizlink{network-flow}{Network Flow Problems}: min-cost flow, transportation, and shortest path on interactive networks, with plain-language descriptions and applications.
+\end{tryit}
+
 %
 %
 \section{Multi-Period Capital Investment}
@@ -1023,8 +995,9 @@ A new apartment complex has been completed, and 12 families need to be assigned 
 \end{enumerate}
 Download the data for this problem here \href{https://github.com/open-optimization/open-optimization-or-book/blob/master/Intro-Math-Programming/baseText/optimization/optimization-examples/Family-Apartment_Preferences__12_.csv}{data}.
 \end{ex}
-\begin{ex}\textbf{Maximum Network Flow to a Single Node} 
+\begin{ex}\textbf{Maximum Network Flow to a Single Node}
 {}{}
+\label{ex:relief-max-flow}
 A disaster relief effort is underway to transport supplies to a central distribution hub in a flooded region. The network consists of multiple warehouses (nodes) that currently have varying inventory levels of emergency supplies. Each transportation route (arc) between warehouses is serviced by a single truck with a limited carrying capacity. The goal is to determine the optimal transportation plan that maximizes the amount of supplies delivered to the central hub while respecting inventory constraints and truck capacities on each route.
 
 Formulate a max-flow optimization problem for this scenario. Define your decision variables, objective function, and constraints explicitly.  Assume that you do not want to leave any inventory at the distribution centers.
@@ -1034,17 +1007,16 @@ Formulate a max-flow optimization problem for this scenario. Define your decisio
         \textbf{Node} & \textbf{Type} & \textbf{Inventory (if applicable)} & \textbf{Connected To} & \textbf{Capacity} \\
         \hline
         W1 & Warehouse & \textbf{200} & D1 & 100 \\
-        W2 & Warehouse & \textbf{300} & D1 & 150 \\
+        W2 & Warehouse & \textbf{300} & D1, D2 & 150, 70 \\
         W3 & Warehouse & \textbf{150} & D2 & 120 \\
-        W4 & Warehouse & \textbf{250} & D3 & 100 \\
+        W4 & Warehouse & \textbf{250} & D3, D1 & 100, 120 \\
         W5 & Warehouse & \textbf{180} & D3 & 90 \\
         \hline
         D1 & Distribution  & N/A & Hub, D2 & 200, 80 \\
         D2 & Distribution & N/A & Hub & 180 \\
+        D3 & Distribution & N/A & Hub & 160 \\
         \hline
-        Hub & Central Hub & N/A & D3 & 160 \\
-        \hline
-        D3 & Distribution & N/A & W4, W5 & 100, 90 \\
+        Hub & Central Hub & N/A & --- & --- \\
         \hline
     \end{tabular}
     
@@ -1083,6 +1055,7 @@ Formulate a max-flow optimization problem for this scenario. Define your decisio
 \end{ex}
 
 \begin{ex}\textbf{Max flow.}{}
+\label{ex:max-flow-explicit}
 
 Write out the explicit constraints that define the max flow problem given in the picture.  
 Solve this problem as a linear program using Excel.
@@ -1216,64 +1189,42 @@ Use the picture below to formulate the corresponding capacitated min cost networ
    \end{center}
    \end{ex}
 
-% --- TikZ recreation of networkx figure: network-flow.png ---
-% TODO(author): The edges and labels below were inferred by visual inspection
-% of the original networkx-rendered PNG. Please verify edge directions and
-% label values (each edge label is rendered as [capacity, cost]).
-\begin{figure}[h]
-\centering
-\begin{tikzpicture}[
-    every node/.style={circle, draw=black, fill=cyan!40, minimum size=8mm, inner sep=1pt, font=\small},
-    >=Stealth, thick
-  ]
-  \node (n1) at (0,2.5) {1};
-  \node (n2) at (1.5,0) {2};
-  \node (n3) at (3.5,0) {3};
-  \node (n4) at (5.5,2) {4};
-  \node (n5) at (4.5,4.5) {5};
-  \node (n6) at (1,5) {6};
+\subsubsection*{Selected Solutions}
 
-  % Edges (capacity, cost) -- inferred from the original networkx PNG
-  \draw[->] (n1) -- (n2) node[midway, sloped, below, font=\scriptsize, fill=none, draw=none, rectangle] {$[6.0,\,2]$};
-  \draw[->] (n1) -- (n3) node[midway, sloped, below, font=\scriptsize, fill=none, draw=none, rectangle] {$[8.0,\,-5]$};
-  \draw[->] (n2) -- (n5) node[pos=0.55, sloped, above, font=\scriptsize, fill=none, draw=none, rectangle] {$[7.0,\,12]$};
-  \draw[->] (n2) -- (n6) node[pos=0.6, sloped, above, font=\scriptsize, fill=none, draw=none, rectangle] {$[5.0,\,0]$};
-  \draw[->] (n3) -- (n4) node[midway, sloped, above, font=\scriptsize, fill=none, draw=none, rectangle] {$[5.0,\,3]$};
-  \draw[->] (n3) -- (n5) node[pos=0.6, sloped, above, font=\scriptsize, fill=none, draw=none, rectangle] {$[5.0,\,-9]$};
-  \draw[->] (n4) -- (n5) node[midway, sloped, above, font=\scriptsize, fill=none, draw=none, rectangle] {$[8.0,\,2]$};
-  \draw[->] (n5) -- (n6) node[midway, above, font=\scriptsize, fill=none, draw=none, rectangle] {$[5.0,\,4]$};
-\end{tikzpicture}
-\caption{Network flow example: directed graph with six nodes; each edge is labelled $[\text{capacity},\,\text{cost}]$.}
-\label{fig:network-flow.png}
-\end{figure}
+\begin{solution}(Exercise~\ref{ex:relief-max-flow})
+Introduce one variable per transportation route: let $x_{ij} \geq 0$ be the number of units of supplies sent along the arc from node $i$ to node $j$, for each arc in the picture (for example $x_{W_1,D_1}$, $x_{D_1,D_2}$, $x_{D_1,\text{Hub}}$, and so on).  The objective is to maximize the total amount reaching the hub,
+\[
+\max \quad x_{D_1,\text{Hub}} + x_{D_2,\text{Hub}} + x_{D_3,\text{Hub}}.
+\]
+There are three families of constraints.  Each arc has a truck capacity, $x_{ij} \leq u_{ij}$, where $u_{ij}$ is the capacity written on the arc.  Each distribution node passes along everything it receives, so flow is conserved there; for example at $D_1$,
+\[
+x_{W_1,D_1} + x_{W_2,D_1} + x_{W_4,D_1} = x_{D_1,D_2} + x_{D_1,\text{Hub}},
+\]
+and similarly at $D_2$ and $D_3$.  Finally, each warehouse can ship at most what it has on hand: the total flow leaving warehouse $W_i$ is at most its inventory.
+One caution about the ``leave no inventory behind'' request: writing the warehouse constraints as equalities makes the model infeasible, since for instance $W_1$ holds 200 units but its only outgoing route has capacity 100.  So treat inventory as an upper bound on warehouse outflow and let the objective push as much through the network as the capacities allow.
+\end{solution}
 
-% --- TikZ recreation of networkx figure: network-flow-solution.png ---
-% TODO(author): Node net-flow values and edge flows below were inferred by
-% visual inspection of the original networkx-rendered PNG. Please verify.
-\begin{figure}[h]
-\centering
-\begin{tikzpicture}[
-    every node/.style={circle, draw=black, fill=cyan!40, minimum size=9mm, inner sep=1pt, font=\small},
-    >=Stealth, thick
-  ]
-  \node (n1) at (0,2.5) {$1\!:\!12.0$};
-  \node (n2) at (1.5,0) {$2\!:\!6.0$};
-  \node (n3) at (3.5,0) {$3\!:\!{-}2.0$};
-  \node (n4) at (5.5,2) {$4\!:\!0.0$};
-  \node (n5) at (4.5,4.5) {$5\!:\!{-}9.0$};
-  \node (n6) at (1,5) {$6\!:\!{-}7.0$};
+\begin{solution}(Exercise~\ref{ex:max-flow-explicit})
+Let $x_{ij} \geq 0$ denote the flow on arc $(i,j)$.  Maximize the flow arriving at $t$ subject to flow conservation at the four internal nodes and the arc capacities:
+\begin{align*}
+\max \quad & x_{v_3 t} + x_{v_4 t}\\
+\st \quad & x_{s v_1} + x_{v_2 v_1} = x_{v_1 v_3} + x_{v_1 v_2} && (v_1)\\
+& x_{s v_2} + x_{v_1 v_2} + x_{v_3 v_2} = x_{v_2 v_4} + x_{v_2 v_1} && (v_2)\\
+& x_{v_1 v_3} + x_{v_4 v_3} = x_{v_3 t} + x_{v_3 v_2} && (v_3)\\
+& x_{v_2 v_4} = x_{v_4 t} + x_{v_4 v_3} && (v_4)\\
+& x_{s v_2} \leq 8, \; x_{s v_1} \leq 11, \; x_{v_1 v_2} \leq 10, \; x_{v_2 v_1} \leq 1, \; x_{v_2 v_4} \leq 11,\\
+& x_{v_1 v_3} \leq 12, \; x_{v_3 v_2} \leq 4, \; x_{v_4 v_3} \leq 7, \; x_{v_4 t} \leq 4, \; x_{v_3 t} \leq 15,\\
+& x_{ij} \geq 0 \quad \text{for all arcs } (i,j).
+\end{align*}
+Solving this LP (in Excel or otherwise) gives a maximum flow of 19.  One optimal flow is $x_{s v_1} = 11$, $x_{s v_2} = 8$, $x_{v_1 v_3} = 8$, $x_{v_1 v_2} = 3$, $x_{v_2 v_4} = 11$, $x_{v_4 t} = 4$, $x_{v_4 v_3} = 7$, $x_{v_3 t} = 15$, and all other arcs at 0.  You can certify optimality without any theory: the two arcs into $t$ have capacities $15 + 4 = 19$, so no flow can exceed 19, and this flow achieves it.
+\end{solution}
 
-  % Optimal flows on each arc
-  \draw[->] (n1) -- (n2) node[midway, sloped, below, font=\scriptsize, fill=none, draw=none, rectangle] {$5.0$};
-  \draw[->] (n1) -- (n3) node[midway, sloped, below, font=\scriptsize, fill=none, draw=none, rectangle] {$7.0$};
-  \draw[->] (n2) -- (n5) node[pos=0.55, sloped, above, font=\scriptsize, fill=none, draw=none, rectangle] {$6.0$};
-  \draw[->] (n2) -- (n6) node[pos=0.6, sloped, above, font=\scriptsize, fill=none, draw=none, rectangle] {$5.0$};
-  \draw[->] (n3) -- (n4) node[midway, sloped, above, font=\scriptsize, fill=none, draw=none, rectangle] {$5.0$};
-  \draw[->] (n3) -- (n5) node[pos=0.6, sloped, above, font=\scriptsize, fill=none, draw=none, rectangle] {$0.0$};
-  \draw[->] (n4) -- (n5) node[midway, sloped, above, font=\scriptsize, fill=none, draw=none, rectangle] {$0.0$};
-  \draw[->] (n5) -- (n6) node[midway, above, font=\scriptsize, fill=none, draw=none, rectangle] {$2.0$};
-\end{tikzpicture}
-\caption{Network flow solution: nodes are annotated with their net-flow values (positive $=$ supply, negative $=$ demand); each arc carries the optimal flow value.}
-\label{fig:network-flow-solution}
-\end{figure}
+% NOTE (2026-07-08): Two TikZ figures recreated from old networkx PNGs
+% (network-flow.png / network-flow-solution.png) were removed here.  They were
+% unreferenced leftovers (commented out in earlier versions), matched no example
+% or exercise in the chapter, and the inferred solution values violated flow
+% conservation at nodes 4 and 5.  If a worked min-cost-flow example is wanted
+% here, regenerate the figures from actual solver output.  The TikZ code is in
+% git history at commit 8c97ba9 (lines 1219-1278).
+
 

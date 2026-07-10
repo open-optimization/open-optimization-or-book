@@ -13,11 +13,19 @@
 \end{itemize}
 \end{outcome}
 
+\begin{tryit}
+\vizlink{sensitivity-walkthrough}{Sensitivity Analysis Walkthrough}: shadow prices, allowable ranges, and reduced costs derived step by step.
+
+\vizlink{duality-sensitivity}{Duality and Sensitivity Explorer}: change the data and watch the optimal solution and shadow prices respond.
+\end{tryit}
+
+
+
 \begin{quote}
-\itshape Your bakery's production plan is set, and the profit works out to \$23. Then the phone rings twice. A neighboring shop offers to rent you one more hour of oven time; a supplier offers a deal on extra flour. Should you take either offer---and what is the most you would pay? Sensitivity analysis answers before you spend a dime: the extra hour would raise your profit by exactly \$1, while the extra flour is worth nothing to you at all---you already have three units you aren't using.
+\itshape Your bakery's production plan is set, and the profit works out to \$23. Then the phone rings twice. A neighboring shop offers to rent you one more hour of oven time; a supplier offers a deal on extra flour. Should you take either offer, and what is the most you would pay? Sensitivity analysis answers before you spend a dime: the extra hour would raise your profit by exactly \$1, while the extra flour is worth nothing to you at all: you already have three units you aren't using.
 \end{quote}
 
-Every resource in a linear program has a price tag like this, telling you what one more unit of it is worth to your bottom line, and every such price tag comes with an expiration: it is only valid until the data move far enough that the optimal plan itself changes. Solving a linear program answers one question about one set of numbers. In practice the numbers---objective coefficients, resource limits---are estimates: prices move, machines break, a supplier delivers more flour than promised. \emph{Sensitivity analysis} asks how the optimal solution and the optimal value respond when the data change, and, crucially, \emph{how far} the data can move before the answer changes structurally. Remarkably, all of this---including both claims in the story above---can be read from the final simplex dictionary, which is why optimization software such as Excel Solver reports it alongside the solution.
+Every resource in a linear program has a price tag like this, telling you what one more unit of it is worth to your bottom line, and every such price tag comes with an expiration: it is only valid until the data move far enough that the optimal plan itself changes. Solving a linear program answers one question about one set of numbers. In practice the numbers (objective coefficients, resource limits) are estimates: prices move, machines break, a supplier delivers more flour than promised. \emph{Sensitivity analysis} asks how the optimal solution and the optimal value respond when the data change, and \emph{how far} the data can move before the answer changes structurally. All of this, including both claims in the story above, can be read from the final simplex dictionary, which is why optimization software such as Excel Solver reports it alongside the solution.
 
 We return to the linear program solved by dictionaries in Chapter~\ref{ch:simplex-dictionary} and by tableaus in Chapter~\ref{ch:simplex-tableau},
 \begin{tcolorbox}[colback=algslate!6, colframe=algslate, coltitle=white, fonttitle=\bfseries, sharp corners,
@@ -58,7 +66,7 @@ The optimal solution is:
 
 \begin{tcolorbox}[colback=sensbox!6, colframe=sensbox, coltitle=white, fonttitle=\bfseries, sharp corners,
     title={\ding{228}\ Interactive: drag the constraints}]
-Before any algebra, build intuition by dragging the right-hand sides and the objective slope in the \href{https://www.desmos.com/calculator/xz1f0tdjf9}{Desmos sensitivity explorer} (\href{https://open-optimization.github.io/open-optimization-or-book/Intro-Math-Programming/baseText/interactive-figures/lp-sensitivity-explorer.html}{backup interactive explorer}) and watching when the optimal vertex jumps to a different corner of the feasible region.
+Before any algebra, build intuition by dragging the right-hand sides and the objective slope in the \href{https://www.desmos.com/calculator/xz1f0tdjf9}{Desmos sensitivity explorer} (\href{https://open-optimization.github.io/open-optimization-or-book/interactive-figures/lp-sensitivity-explorer.html}{backup interactive explorer}) and watching when the optimal vertex jumps to a different corner of the feasible region.
 \end{tcolorbox}
 
 \section{What can change, and what happens}
@@ -72,7 +80,7 @@ The objective row of the revised dictionary is
 \[
 z = \mathbf{c}_B^\top A_B^{-1} \mathbf{b} + (\mathbf{c}_N^\top - \mathbf{c}_B^\top A_B^{-1} A_N) \mathbf{x}_N,
 \]
-where the coefficients of \( \mathbf{x}_N \), namely \( \mathbf{c}_N^\top - \mathbf{c}_B^\top A_B^{-1} A_N \), are the \emph{reduced costs}. A change in \(c_i\) lands in one of two places. If \(i\) is a \textbf{basic} variable, then \(c_i\) sits inside \(\mathbf{c}_B\), so it moves the constant term \(\mathbf{c}_B^\top A_B^{-1}\mathbf{b}\): the optimal value changes \emph{linearly} in \(c_i\) for as long as the basis stays optimal. If \(i\) is a \textbf{nonbasic} variable, then \(c_i\) appears only in its own reduced cost: the current solution and objective value do not move at all---until the change is large enough to flip the sign of that reduced cost, at which point variable \(i\) wants to enter the basis and the current dictionary is no longer optimal.
+where the coefficients of \( \mathbf{x}_N \), namely \( \mathbf{c}_N^\top - \mathbf{c}_B^\top A_B^{-1} A_N \), are the \emph{reduced costs}. A change in \(c_i\) lands in one of two places. If \(i\) is a \textbf{basic} variable, then \(c_i\) sits inside \(\mathbf{c}_B\), so it moves the constant term \(\mathbf{c}_B^\top A_B^{-1}\mathbf{b}\): the optimal value changes \emph{linearly} in \(c_i\) for as long as the basis stays optimal. If \(i\) is a \textbf{nonbasic} variable, then \(c_i\) appears only in its own reduced cost: the current solution and objective value do not move at all until the change is large enough to flip the sign of that reduced cost, at which point variable \(i\) wants to enter the basis and the current dictionary is no longer optimal.
 
 \subsection{Changing a right-hand side \( b_i \)}
 
@@ -80,7 +88,7 @@ The basic solution is \( \mathbf{x}_B = A_B^{-1}\mathbf{b} \), so a change in \(
 
 \subsection{Changing a constraint coefficient \( a_{ij} \)}
 
-Geometrically, changing \(a_{ij}\) \emph{tilts} the corresponding constraint, reshaping the feasible region. Algebraically, the effect depends on which column is touched. If column \(j\) is \textbf{nonbasic}, then \(A_B^{-1}\) is untouched; only the reduced cost of variable \(j\) changes, and the current solution survives unless that reduced cost changes sign. If column \(j\) is \textbf{basic}, the change alters \(A_B\) itself---and since the entire dictionary is built from \(A_B^{-1}\), even a small change can move the basic solution, every reduced cost, and the optimal value all at once.
+Geometrically, changing \(a_{ij}\) \emph{tilts} the corresponding constraint, reshaping the feasible region. Algebraically, the effect depends on which column is touched. If column \(j\) is \textbf{nonbasic}, then \(A_B^{-1}\) is untouched; only the reduced cost of variable \(j\) changes, and the current solution survives unless that reduced cost changes sign. If column \(j\) is \textbf{basic}, the change alters \(A_B\) itself, and since the entire dictionary is built from \(A_B^{-1}\), even a small change can move the basic solution, every reduced cost, and the optimal value all at once.
 
 \subsection{Summary}
 
@@ -173,7 +181,7 @@ s_2 = 3 + \Delta \geq 0
 \quad\Longleftrightarrow\quad
 b_2 \geq 13.
 \]
-Since \( s_2 \) is a \emph{slack} variable, the objective value \( z = 23 \) does not move at all inside this range. Beyond it, \( s_2 < 0 \) and the current dictionary becomes infeasible---triggering a new pivot in the simplex method.
+Since \( s_2 \) is a \emph{slack} variable, the objective value \( z = 23 \) does not move at all inside this range. Beyond it, \( s_2 < 0 \) and the current dictionary becomes infeasible, triggering a new pivot in the simplex method.
 \end{steppanel}
 
 \subsection{Perturbing \( b_1 \): A Nonbasic Slack Variable}
@@ -348,7 +356,7 @@ y &= 5 + s_1 - s_3 \\
 s_2 &= 3 + 3s_1 - s_3,
 \end{aligned}
 \]
-with basis \( B = \{x, y, s_2\} \) and nonbasic variables \( N = \{s_1, s_3\} \). Unlike an RHS change, a cost change never threatens \emph{feasibility}---the solution stays where it is---but it can destroy \emph{optimality} by making a reduced cost positive.
+with basis \( B = \{x, y, s_2\} \) and nonbasic variables \( N = \{s_1, s_3\} \). Unlike an RHS change, a cost change never threatens \emph{feasibility} (the solution stays where it is), but it can destroy \emph{optimality} by making a reduced cost positive.
 
 \subsection{Perturbing \( c_1 \): Objective Coefficient of \( x \)}
 
@@ -440,7 +448,7 @@ Outside these ranges, the reduced costs of nonbasic variables become positive, v
 \end{algocard}
 
 \begin{learningcheckpoint}[label={lc:nonbasic-cost}]
-Changing the objective coefficient of a \emph{nonbasic} variable never changes the current optimal solution---but changing it enough can still change the \emph{optimal basis}. Reconcile these two statements.
+Changing the objective coefficient of a \emph{nonbasic} variable never changes the current optimal solution, but changing it enough can still change the \emph{optimal basis}. Reconcile these two statements.
 \end{learningcheckpoint}
 
 \section{Sensitivity with Matrix Notation}
@@ -674,7 +682,7 @@ b_1
 \[
 \boxed{7 \leq b_1 \leq 10}
 \]
-is the feasible range for \( b_1 \) that preserves the optimal basis---matching the range \( -2 \le \Delta \le 1 \) found with the dictionary in Section~\ref{sec:sensitivity-rhs}.
+is the feasible range for \( b_1 \) that preserves the optimal basis, matching the range \( -2 \le \Delta \le 1 \) found with the dictionary in Section~\ref{sec:sensitivity-rhs}.
 \end{steppanel}
 
 The figure below shows the constraint \( x + y \le b_1 \) drawn for the three values \( b_1 = 7, 9, 10 \).
@@ -868,7 +876,7 @@ Consider the following linear program and its optimal dictionary:
 The optimal dictionary is:
 \[
 \begin{aligned}
-z &= 34 - s_1 - s_2 \\
+z &= 36 - 2s_1 - s_2 \\
 x_1 &= 6 + s_1 - s_2 \\
 x_2 &= 4 - 2s_1 + s_2 \\
 \end{aligned}
@@ -883,6 +891,7 @@ Using the same linear program and optimal dictionary from the previous exercise,
 \end{ex}
 
 \begin{ex}{Shadow Price Interpretation}{}
+\label{ex:shadow-price-workshop}
 A furniture workshop produces tables and chairs. The linear program is:
 \[
 \begin{aligned}
@@ -903,6 +912,7 @@ The optimal solution is $x_1 = 7.5$, $x_2 = 5$, with optimal profit $z^* = 525$.
 \end{ex}
 
 \begin{ex}{Sensitivity from the Basis Inverse}{}
+\label{ex:sensitivity-basis-inverse}
 Consider the LP:
 \[
 \begin{aligned}
@@ -960,3 +970,35 @@ $x_2$ & 4 & 5 & 4 & 1 \\
 \item If 2 additional units of the first resource become available (RHS increases from 20 to 22), what is the new approximate optimal objective value?
 \end{enumerate}
 \end{ex}
+
+\subsubsection*{Selected Solutions}
+
+\begin{solution}(Exercise~\ref{ex:shadow-price-workshop})
+At the optimal solution $(x_1, x_2) = (7.5, 5)$ both constraints are binding: $4(7.5) + 2(5) = 40$ and $2(7.5) + 3(5) = 30$.
+
+\begin{enumerate}
+\item The shadow price of wood is $y_1 = 11.25$: one additional board-foot of wood increases the optimal profit by \$11.25 (as long as the basis does not change).  The shadow price of labor is $y_2 = 2.50$: one additional hour of labor is worth \$2.50 at the margin.
+\item Two additional board-feet increase profit by approximately $2 \times 11.25 = \$22.50$, from \$525 to \$547.50.  (This is exact here: the wood RHS can range from $20$ to $60$ before the basis changes, and $42$ is well inside that range.)
+\item Wood is more valuable at the margin, since $11.25 > 2.50$: a unit of wood buys more additional profit than a unit of labor.
+\end{enumerate}
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:sensitivity-basis-inverse})
+\begin{enumerate}
+\item
+\[
+\mathbf{x}_B = A_B^{-1}\mathbf{b} = \begin{bmatrix} -2 & 1 \\ 3 & -1 \end{bmatrix}\begin{bmatrix} 6 \\ 15 \end{bmatrix} = \begin{bmatrix} 3 \\ 3 \end{bmatrix},
+\]
+so $(x_1, x_2) = (3, 3) \geq \mathbf{0}$ is a feasible basic solution with objective value $z = 5(3) + 4(3) = 27$.
+\item Replacing $b_1$ by a variable value,
+\[
+\mathbf{x}_B(b_1) = A_B^{-1}\begin{bmatrix} b_1 \\ 15 \end{bmatrix} = \begin{bmatrix} -2b_1 + 15 \\ 3b_1 - 15 \end{bmatrix} \geq \mathbf{0}
+\quad\Longleftrightarrow\quad 5 \leq b_1 \leq 7.5.
+\]
+\item The dual prices are $\mathbf{y}^\top = \mathbf{c}_B^\top A_B^{-1} = [5, 4]\, A_B^{-1} = [2, 1]$, so the reduced costs of the nonbasic slacks are $\bar{c}_{s_1} = -y_1 = -2$ and $\bar{c}_{s_2} = -y_2 = -1$; both are nonpositive, confirming optimality (equivalently, $z = 27 - 2s_1 - s_2$).  With $c_1$ variable, $\mathbf{y}(c_1)^\top = [c_1, 4]\, A_B^{-1} = [-2c_1 + 12,\ c_1 - 4]$, and the basis stays optimal while both components are nonnegative:
+\[
+-2c_1 + 12 \geq 0 \ \text{ and } \ c_1 - 4 \geq 0
+\quad\Longleftrightarrow\quad 4 \leq c_1 \leq 6.
+\]
+\end{enumerate}
+\end{solution}

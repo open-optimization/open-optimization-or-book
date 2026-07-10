@@ -10,12 +10,12 @@
 \end{outcome}
 
 \begin{quote}
-\itshape You are shopping for a used car. One is \$4{,}000 and twelve years old; another is \$9{,}000 and three years old; a third is \$11{,}000 and eight years old. The third can be dismissed at a glance---the second is cheaper \emph{and} newer. But between the first two, no calculation can declare a winner: it depends on what a year of age is worth to you, and that is a judgment, not an optimization. Multi-objective optimization is the study of exactly this situation: ruling out the options nobody should ever choose, and mapping the trade-offs among the ones that remain.
+\itshape You are shopping for a used car. One is \$4{,}000 and twelve years old; another is \$9{,}000 and three years old; a third is \$11{,}000 and eight years old. The third can be dismissed at a glance: the second is cheaper \emph{and} newer. But between the first two, no calculation can declare a winner: it depends on what a year of age is worth to you, and that is a judgment, not an optimization. Multi-objective optimization is the study of exactly this situation: ruling out the options nobody should ever choose, and mapping the trade-offs among the ones that remain.
 \end{quote}
 
 \section{Introduction to Multi-Objective Optimization}
 
-In many real-world problems, decision makers must balance competing objectives. Rather than optimizing a single quantity, we seek solutions that trade off different goals — cost vs. quality, speed vs. safety, efficiency vs. equity, and so on. This leads to the field of \emph{multi-objective optimization} (MOO), which provides a framework for identifying and analyzing such trade-offs.
+Decision makers must often balance competing objectives. Rather than optimizing a single quantity, we seek solutions that trade off different goals, such as cost against quality or efficiency against equity. This leads to the field of \emph{multi-objective optimization} (MOO), a framework for identifying and analyzing such trade-offs.
 
 To illustrate this, consider a simple inventory and production planning problem over a fixed horizon of \(T = 10\) periods. Let \(x_t\) denote the quantity produced in period \(t\), \(s_t\) the inventory carried over after period \(t\), and \(d_t\) the demand to be satisfied during that period. The system begins with \(s_0 = 5\) units of initial inventory. Production costs \(c^p_t\) vary by time, while holding inventory incurs a fixed per-unit cost \(c^h\).
 
@@ -29,7 +29,7 @@ s_t = s_{t-1} + x_t - d_t \quad \text{for all } t = 1,\ldots,T
 \min \sum_{t=1}^{T} \left( c^p_t x_t + c^h s_t \right)
 \]
 
-However, holding inventory is not just costly — it also introduces risk. Products may be damaged, stolen, or become obsolete. To capture this additional concern, we define a \textbf{risk function} that models the expected loss due to stored inventory:
+However, holding inventory is not just costly; it also introduces risk. Products may be damaged, stolen, or become obsolete. To capture this additional concern, we define a \textbf{risk function} that models the expected loss due to stored inventory:
 \[
 r(s_t) = c_r \left(1 - e^{-\beta s_t}\right)
 \]
@@ -49,7 +49,9 @@ To explore the trade-off, we solve the problem repeatedly with varying upper bou
     \item The maximum risk experienced across all periods, computed as \( \max_t r(s_t) \).
 \end{itemize}
 
-The resulting plot shows the \emph{Pareto frontier} of non-dominated solutions — those for which no other solution achieves both a lower cost and lower risk.
+This sweep is the $\varepsilon$-constraint method, which we define later in the chapter (Section~\ref{sec:pareto-frontier}). The parameter values in this example are illustrative; the computational resources at the end of the chapter (Section~\ref{sec:moo-tools}), such as \texttt{pymoo}, make it easy to experiment with instances of your own.
+
+The resulting plot shows the \emph{Pareto frontier} (defined precisely in Section~\ref{sec:pareto-frontier}) of non-dominated solutions, those for which no other solution achieves both a lower cost and lower risk.
 
 \begin{figure}[h]
     \centering
@@ -60,13 +62,14 @@ The resulting plot shows the \emph{Pareto frontier} of non-dominated solutions �
 This example illustrates the essence of multi-objective optimization: generating and analyzing a spectrum of solutions that offer different balances between competing goals. In practice, decision makers select among these using domain knowledge, regulatory limits, or stakeholder preferences.
 
 \section{Multi-Objective Optimization and the Pareto Frontier}
+\label{sec:pareto-frontier}
 
-Multi-objective optimization (MOO) involves simultaneously optimizing two or more conflicting objectives subject to certain constraints. In many real-world applications, improving one objective often leads to a trade-off in another. A central concept in MOO is the \emph{Pareto Frontier} (or \emph{Pareto Front}), which consists of all solutions for which no objective can be improved without worsening at least one other.
+We now make these ideas precise. The central concept is the \emph{Pareto Frontier} (or \emph{Pareto Front}), which consists of all solutions for which no objective can be improved without worsening at least one other.
 
 \paragraph{Motivating Example: Furniture Manufacturer}
 
 Consider a high-end furniture manufacturer that builds dining tables and chairs from expensive bocote and rosewood.
-The manufacturer receives 960 board-feet (bdft) of bocote and 200 bdft of rosewood per month. Each table requires 80~bdft of bocote and 20~bdft of rosewood; each chair requires 20~bdft of bocote and 10~bdft of rosewood. Let \(x\) denote the number of tables and \(y\) the number of chairs produced. The feasible production set \(P\) is given by:
+The manufacturer receives 960 board-feet (bdft) of bocote and 200 bdft of rosewood per month. Each table requires 80~bdft of bocote and 12~bdft of rosewood; each chair requires 20~bdft of bocote and 10~bdft of rosewood. Let \(x\) denote the number of tables and \(y\) the number of chairs produced. The feasible production set \(P\) is given by:
 
 \[
 \begin{aligned}
@@ -128,7 +131,7 @@ Suppose each table earns \$8000 and each chair earns \$2000. The goal is to maxi
 
 Scaling the objective to \(w = 4x + y\), the feasible region remains the same but is easier to visualize. Solving this LP reveals multiple optimal solutions on the boundary from \((12, 0)\) to \((10, 8)\). These all yield the same profit, but they may differ in other criteria.
 
-Now, suppose a new manager wants to minimize material waste—specifically, 10~bdft wasted per table and 2~bdft per chair:
+Now, suppose a new manager wants to minimize material waste, specifically 10~bdft wasted per table and 2~bdft per chair:
 
 \[
 \text{Minimize } 10x + 2y \quad \text{subject to maximum revenue}.
@@ -206,7 +209,7 @@ Alternatively, the manager may be willing to sacrifice some revenue. If they acc
     \caption{Feasible set with revenue constrained to at least 70\% of the maximum.}
 \end{figure}
 
-This \emph{epsilon-constraint} method provides flexibility to explore trade-offs, generating new points on the Pareto frontier.
+This \emph{$\varepsilon$-constraint} method provides flexibility to explore trade-offs, generating new points on the Pareto frontier.
 
 \paragraph{Pareto Optimality}
 
@@ -225,50 +228,51 @@ That is, no objective can be strictly improved without sacrificing performance i
 
 \begin{figure}[h]
     \centering
-    
+
             \begin{tikzpicture}
   \begin{axis}[
-    xlabel={number of tables ($x$)},
-    ylabel={number of chairs ($y$)},
+    xlabel={revenue $f_1 = 8000x + 2000y$ (in \$1000s)},
+    ylabel={rosewood waste $f_2 = 10x + 2y$ (bdft)},
     axis lines=left,
-    xmin=0, xmax=13,
-    ymin=0, ymax=21,
-    xtick={0,2,4,6,8,10,12},
-    ytick={0,5,10,15,20},
+    xmin=0, xmax=105,
+    ymin=0, ymax=130,
+    xtick={0,20,40,60,80,100},
+    ytick={0,20,40,60,80,100,120},
     width=12cm,
     height=9cm,
     grid=both,
     enlargelimits=false,
+    legend pos=north west,
+    legend cell align=left,
   ]
 
-  % Feasible region (blue fill)
-  \addplot[fill=blue!30, draw=blue, opacity = 0.3, thick] coordinates {
-    (0,0)
-    (0,20)
-    (10,8)
-    (12,0)
-    (0,0)
-  };
-  
-  % Constraint lines
-  \addplot[domain=0:12, thick, blue] {48 - 4*x}; % 80x + 20y = 960
-  \addplot[domain=0:12, thick, blue] {20 - 1.2*x}; % 12x + 10y = 200
+  % Pareto frontier in objective space:
+  % image of the edge x=0 (from (0,0) to (0,20)) and the edge 12x+10y=200 (from (0,20) to (10,8))
+  \addplot[thick, blue] coordinates {(0,0) (40,40) (96,116)};
+  \addlegendentry{Pareto frontier}
 
-  % Integer points in feasible region
-  \foreach \pt in {
-    (0,0), (0,20), (10,8), (12,0),
-    (5,14), (11,4)
-  } {
-    \addplot[only marks, mark=*, mark size=2pt, black] coordinates {\pt};
-  }
-    % Objective function lines (example)
-\foreach \z in {5,10,...,60}{
-    \addplot[dashed,gray, domain=0:13, samples=2] {(\z - 4*x)};
-}
+  % Pareto-optimal production plans: (0,0), (0,10), (0,20), (5,14), (10,8)
+  \addplot[only marks, mark=*, mark size=2.5pt, blue] coordinates {
+    (0,0) (20,20) (40,40) (68,78) (96,116)
+  };
+  \addlegendentry{Pareto optimal}
+
+  % Dominated production plans: (2,10), (4,4), (8,0), (12,0)
+  \addplot[only marks, mark=square*, mark size=2.5pt, red] coordinates {
+    (36,40) (40,48) (64,80) (96,120)
+  };
+  \addlegendentry{dominated}
+
+  % Annotate selected plans
+  \node[above left, font=\small] at (axis cs:40,40) {$(0,20)$};
+  \node[above left, font=\small] at (axis cs:68,78) {$(5,14)$};
+  \node[below right, font=\small] at (axis cs:96,116) {$(10,8)$};
+  \node[above left, font=\small] at (axis cs:96,120) {$(12,0)$};
+  \node[below right, font=\small] at (axis cs:40,48) {$(4,4)$};
 
   \end{axis}
 \end{tikzpicture}
-    \caption{Identifying the Pareto frontier among possible solutions.}
+    \caption{The furniture problem in objective space: each point is a production plan $(x,y)$ plotted by its revenue $f_1$ (maximize) and rosewood waste $f_2$ (minimize). The blue points are non-dominated: no feasible plan earns more revenue without creating more waste, and none creates less waste without giving up revenue. The red points are dominated; for example, $(12,0)$ earns the same \$96{,}000 as $(10,8)$ but wastes 120~bdft instead of 116, and $(4,4)$ matches the revenue of $(0,20)$ with more waste. The frontier consists of the plans along $x = 0$ and along the rosewood constraint from $(0,20)$ to $(10,8)$.}
 \end{figure}
 
 \paragraph{Summary of Multi-Objective Optimization Methods}
@@ -289,6 +293,8 @@ That is, no objective can be strictly improved without sacrificing performance i
 \hline
 \textbf{Goal Programming} & Minimize deviation from target values & Useful when goals are known & Sensitive to target and weight choices \\
 \hline
+\textbf{Elbow (Knee Point)} & Pick the frontier point where trade-offs deteriorate fastest & Yields a single balanced compromise & Requires computing the frontier first; not every frontier has a clear knee \\
+\hline
 \end{tabular}
 \end{table}
 
@@ -301,6 +307,9 @@ For two objectives $f_1(x)$ and $f_2(x)$ (both to be minimized), the scalarized 
 \end{align*}
 Here, $w_1$ and $w_2$ represent the relative importance of each objective. Varying the weights traces out the \emph{convex} portions of the Pareto frontier: each weight vector corresponds to a supporting hyperplane to the feasible region in objective space.
 While simple and computationally efficient, the method \emph{cannot} produce Pareto-optimal points lying in non-convex regions of the frontier. Objectives should be normalized before weighting to ensure that units and scales do not distort the trade-off.
+
+\paragraph{Lexicographic Method}
+The \emph{lexicographic} method ranks the objectives in strict order of priority and optimizes them sequentially: first optimize the most important objective, then optimize the second over the set of solutions that are optimal for the first, and so on. This is what the furniture manufacturer did above: maximize revenue first, then minimize rosewood waste among the revenue-optimal plans, which selected $(10,8)$. The method fits settings with a clear hierarchy of goals, but it returns a single solution rather than a picture of the trade-offs.
 
 \paragraph{Goal Programming}
 \emph{Goal programming} incorporates explicit target values for each objective, seeking solutions that minimize the deviations from these goals. Let $g_j$ be the desired goal for objective $f_j(x)$. Introduce positive and negative deviation variables $d_j^+$ and $d_j^-$ such that:
@@ -351,7 +360,7 @@ In finance, the classical Markowitz model seeks portfolios that trade off \emph{
 The Pareto frontier of this problem is the well-known \emph{efficient frontier}: a curve in the risk--return plane.  Every portfolio on this curve is Pareto optimal; portfolios below it are dominated (higher risk for the same return, or lower return for the same risk).
 
 \subsubsection{Engineering Design}
-Mechanical and aerospace engineers routinely face multi-objective trade-offs.  For example, in aircraft wing design the objectives might include minimizing weight (for fuel efficiency), minimizing drag (for speed), and minimizing manufacturing cost---all subject to structural safety constraints.  The Pareto frontier reveals which designs are non-dominated, allowing the engineer to select a final design that best matches operational priorities.  Similar trade-offs arise in automotive design, where ride comfort, fuel economy, and acceleration performance compete.
+Mechanical and aerospace engineers routinely face multi-objective trade-offs.  For example, in aircraft wing design the objectives might include minimizing weight (for fuel efficiency), minimizing drag (for speed), and minimizing manufacturing cost, all subject to structural safety constraints.  The Pareto frontier reveals which designs are non-dominated, allowing the engineer to select a final design that best matches operational priorities.  Similar trade-offs arise in automotive design, where ride comfort, fuel economy, and acceleration performance compete.
 
 \subsubsection{Healthcare Staff Scheduling}
 Hospitals scheduling nurses and physicians must balance staffing cost against quality-of-care and workload fairness.  Adding staff to a shift reduces patient-to-nurse ratios and overtime fatigue but increases cost; concentrating shifts among fewer workers saves money but hurts fairness and increases burnout risk.  A bi-objective model minimizing total staffing cost and, say, the maximum number of undesirable shifts assigned to any one nurse produces a Pareto frontier of schedules.  Administrators can then see exactly how much each improvement in fairness costs, rather than committing to a single weighting in advance.
@@ -364,12 +373,12 @@ Firms increasingly aim to minimize both cost and environmental impact in their s
 
 \begin{resource}
 \begin{itemize}
-\item \href{https://pymoo.org/}{pymoo --- Python Multi-Objective Optimization Framework}
-\item \href{https://platemo.com/}{PlatEMO --- Platform for Evolutionary Multi-Objective Optimization}
+\item \href{https://pymoo.org/}{pymoo: Python Multi-Objective Optimization Framework}
+\item \href{https://platemo.com/}{PlatEMO: Platform for Evolutionary Multi-Objective Optimization}
 \end{itemize}
 \end{resource}
 
-For problems with more than two or three objectives, or with large numbers of decision variables, the exact methods discussed above (weighted sum, $\epsilon$-constraint) can become computationally expensive. In practice, multi-objective evolutionary algorithms (MOEAs) are widely used to generate high-quality approximations of the Pareto frontier.
+For problems with more than two or three objectives, or with large numbers of decision variables, the exact methods discussed above (weighted sum, $\varepsilon$-constraint) can become computationally expensive. In practice, multi-objective evolutionary algorithms (MOEAs) are widely used to generate high-quality approximations of the Pareto frontier.
 
 Several well-known algorithms are available for this purpose:
 \begin{description}
@@ -380,6 +389,26 @@ Several well-known algorithms are available for this purpose:
 
 The Python library \texttt{pymoo} provides implementations of these algorithms and many others, along with built-in test problems, performance metrics, and visualization tools for Pareto fronts. It offers a convenient way to experiment with multi-objective optimization without implementing algorithms from scratch.
 
+For small problems like the furniture example, the $\varepsilon$-constraint method needs nothing more than an ordinary LP solver. The following PuLP script maximizes revenue while sweeping the bound on rosewood waste, recovering points on the Pareto frontier:
+
+\begin{lstlisting}[language=Python]
+import pulp
+
+for eps in [40, 60, 80, 100, 116]:
+    prob = pulp.LpProblem("furniture", pulp.LpMaximize)
+    x = pulp.LpVariable("tables", lowBound=0)
+    y = pulp.LpVariable("chairs", lowBound=0)
+    prob += 8000*x + 2000*y            # revenue (primary objective)
+    prob += 80*x + 20*y <= 960         # bocote
+    prob += 12*x + 10*y <= 200         # rosewood
+    prob += 10*x + 2*y <= eps          # waste <= epsilon
+    prob.solve(pulp.PULP_CBC_CMD(msg=0))
+    print(f"eps={eps}: x={x.value():.2f}, y={y.value():.2f}, "
+          f"revenue={pulp.value(prob.objective):.0f}")
+\end{lstlisting}
+
+Sweeping $\varepsilon$ from 40 to 116 traces the frontier from the plan $(0,20)$ with revenue \$40{,}000 up to $(10,8)$ with revenue \$96{,}000, passing through fractional plans such as $x \approx 5.26$, $y \approx 13.68$ with revenue \$69{,}474 at $\varepsilon = 80$.
+
 \section{Exercises}
 
 \begin{ex}{}{}
@@ -388,10 +417,10 @@ Define \emph{Pareto optimality} for a minimization multi-objective problem with 
 \end{ex}
 \begin{ex}{}{}
 \label{ex:pareto-table}
-\textbf{Pareto Frontier, Weighted Sum, and $\epsilon$-Constraint}.
+\textbf{Pareto Frontier, Weighted Sum, and $\varepsilon$-Constraint}.
 
 Consider the following feasible set of designs with two objectives to minimize: $f_1$ (cost) and $f_2$ (emissions).
-The table lists six non-dominated \emph{candidates} from a design study; some may still be dominated among this set.
+The table lists six \emph{candidates} from a design study; some may be dominated among this set.
 
 \begin{center}
 \begin{tabular}{c|cccccc}
@@ -409,7 +438,7 @@ $f_2$  & 5 & 8 & 4 & 6 & 6 & 3 \\
 
 \vspace{2cm}
 
-\item Using the $\epsilon$-constraint method minimizing $f_1$ subject to $f_2\le \epsilon$, give a value of $\epsilon$ that attains a design on the frontier \emph{that cannot be obtained} by any weighted sum (if any), or explain why all frontier points are reachable by weighted sums.
+\item Using the $\varepsilon$-constraint method minimizing $f_1$ subject to $f_2\le \varepsilon$, give a value of $\varepsilon$ that attains a design on the frontier \emph{that cannot be obtained} by any weighted sum (if any), or explain why all frontier points are reachable by weighted sums.
 
 \vspace{2cm}
 
@@ -437,7 +466,7 @@ We reformulate as a minimization problem with objectives $f_1 = \text{cost}$ and
 
 \begin{enumerate}
 \item Which projects are Pareto optimal? Justify your answer.
-\item Using the weighted-sum method with weights $w_1 = 0.4$ for cost and $w_2 = 0.6$ for negative accessibility, which project is selected?
+\item Using the weighted-sum method with weights $w_1 = 0.5$ for cost and $w_2 = 0.5$ for negative accessibility, which project is selected?
 \item Is there a set of weights that would select project P3? Explain.
 \end{enumerate}
 \end{ex}
@@ -450,9 +479,9 @@ Consider a bi-objective linear program:
 subject to $x_1 + x_2 \geq 4$, $x_1 \leq 5$, $x_2 \leq 5$, and $x_1, x_2 \geq 0$.
 
 \begin{enumerate}
-\item Apply the $\epsilon$-constraint method: minimize $f_1$ subject to $f_2 \leq \epsilon$. Write out the resulting single-objective LP.
-\item Find the optimal solution for $\epsilon = 10$ and for $\epsilon = 6$. Are both solutions Pareto optimal?
-\item Describe what happens as $\epsilon$ decreases from a large value toward $f_2^*$ (the minimum of $f_2$ alone).
+\item Apply the $\varepsilon$-constraint method: minimize $f_1$ subject to $f_2 \leq \varepsilon$. Write out the resulting single-objective LP.
+\item Find the optimal solution for $\varepsilon = 10$ and for $\varepsilon = 6$. Are both solutions Pareto optimal?
+\item Describe what happens as $\varepsilon$ decreases from a large value toward $f_2^*$ (the minimum of $f_2$ alone).
 \end{enumerate}
 \end{ex}
 
@@ -486,7 +515,7 @@ For a problem minimizing $f_1$ and $f_2$ over a feasible set $P$, a point $\math
 \begin{solution}(Exercise~\ref{ex:pareto-table})
 (1) Compare pairs for domination (both objectives minimized).  $D = (3,6)$ dominates $B = (4,8)$.  $E = (5,6)$ is dominated by $D$ ($3 \leq 5$, $6 \leq 6$).  $A = (6,5)$ is not dominated.  $C = (7,4)$ is not dominated.  $F = (10,3)$ is not dominated.  The Pareto frontier is $\{D, A, C, F\}$ with objective vectors $(3,6), (6,5), (7,4), (10,3)$.
 
-(2) A design is a weighted-sum optimum for some $\alpha$ exactly when it lies on the lower-left convex hull of the frontier points.  Plotting $(3,6), (6,5), (7,4), (10,3)$, all four points lie on or below the segments of the hull; checking slopes, $D$ (best $f_1$) and $F$ (best $f_2$) are always obtainable, and $C$ lies on the hull between them, while $A$ lies slightly above the segment from $D$ to $C$ (slope check: from $D$ to $C$, $\Delta = (4, -2)$; $A$ at $(6,5)$ vs.\ the segment value $6 - \tfrac{2}{4}(6-3) = 4.5 < 5$), so $A$ cannot be obtained by any weighted sum.
+(2) A design is a weighted-sum optimum for some $\alpha$ exactly when it lies on the lower-left convex hull of the frontier points.  Plotting $(3,6), (6,5), (7,4), (10,3)$, the lower convex hull is formed by $D$, $C$, and $F$, while $A$ lies above it: $D$ (best $f_1$) and $F$ (best $f_2$) are always obtainable, and $C$ lies on the hull between them, but $A$ sits above the segment from $D$ to $C$ (slope check: from $D$ to $C$, $\Delta = (4, -2)$; $A$ at $(6,5)$ vs.\ the segment value $6 - \tfrac{2}{4}(6-3) = 4.5 < 5$), so $A$ cannot be obtained by any weighted sum.
 
-(3) Choose $\epsilon = 5$: minimizing $f_1$ subject to $f_2 \leq 5$ selects $A = (6,5)$, the frontier point unreachable by weighted sums.
+(3) Choose $\varepsilon = 5$: minimizing $f_1$ subject to $f_2 \leq 5$ selects $A = (6,5)$, the frontier point unreachable by weighted sums.
 \end{solution}

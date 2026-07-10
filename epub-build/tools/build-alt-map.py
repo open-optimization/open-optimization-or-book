@@ -1,0 +1,74 @@
+#!/usr/bin/env python3
+"""Build figs/<name>.png -> alt-text map for the EPUB.
+
+Matches each extracted tikzpicture to the book's curated alt-text drafts
+(baseText/book/alt-text-drafts/*.json) via the md5 content hash embedded
+in the draft keys (tikz-<file>-<nn>-<md5[:8]>). Falls back to
+alt-text-manual.json for figures without a curated draft.
+
+Output: alt-map.json  { "figs/Section2-tikz01.png": "alt text", ... }
+"""
+import hashlib, json, glob, sys, os
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+BUILD = HERE.parent
+REPO = BUILD.parent
+BOOK = REPO / "Intro-Math-Programming/baseText/book"
+CH02 = BOOK / "part1-linear-programming/ch02-modeling"
+
+BEGIN, END = "\\begin{tikzpicture}", "\\end{tikzpicture}"
+
+def blocks(text):
+    i = 0
+    while True:
+        s = text.find(BEGIN, i)
+        if s < 0:
+            return
+        depth, j = 1, s + len(BEGIN)
+        while depth:
+            nb, ne = text.find(BEGIN, j), text.find(END, j)
+            if 0 <= nb < ne:
+                depth += 1; j = nb + len(BEGIN)
+            else:
+                depth -= 1; j = ne + len(END)
+        yield text[s:j]
+        i = j
+
+# curated drafts, indexed by md5[:8] suffix of the key
+drafts = {}
+for f in glob.glob(str(BOOK / "alt-text-drafts/*.json")):
+    try:
+        d = json.load(open(f))
+        if isinstance(d, dict):
+            for k, v in d.items():
+                if isinstance(v, str) and v.strip():
+                    drafts[k.rsplit("-", 1)[-1]] = v.strip()
+    except Exception:
+        pass
+
+manual = {}
+mpath = BUILD / "alt-text-manual.json"
+if mpath.exists():
+    manual = json.load(open(mpath))
+
+FILES = ["modeling-linear-programming", "modeling-sums",
+         "modeling-sums-continued", "Section2"]
+
+alt_map, missing = {}, []
+for stem in FILES:
+    text = (CH02 / f"{stem}.tex").read_text()
+    for n, b in enumerate(blocks(text), 1):
+        name = f"figs/{stem}-tikz{n:02d}.png"
+        h = hashlib.md5(b.encode()).hexdigest()[:8]
+        if h in drafts:
+            alt_map[name] = drafts[h]
+        elif name in manual:
+            alt_map[name] = manual[name]
+        else:
+            missing.append(name)
+
+json.dump(alt_map, open(BUILD / "alt-map.json", "w"), indent=1)
+print(f"mapped: {len(alt_map)}, missing: {len(missing)}")
+for m in missing:
+    print("  MISSING:", m)

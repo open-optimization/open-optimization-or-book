@@ -1,13 +1,13 @@
 \section{Complementary Slackness}
 
-So far, we have established that the primal and dual problems are closely linked, and their optimal objective values coincide under strong duality. However, 	\textbf{how can we identify optimal solutions for both problems simultaneously?} The answer lies in 	\textit{complementary slackness}, a crucial condition for verifying optimality.
+So far, we have established that the primal and dual problems are closely linked, and their optimal objective values coincide under strong duality. However, 	\textbf{how can we identify optimal solutions for both problems simultaneously?} The answer lies in 	\textit{complementary slackness}, the condition we use to verify optimality.
 
 \subsection{Definition of Complementary Slackness}
 \begin{definition}{Complementary Slackness}
 Complementary slackness conditions state that if \( \x^* \) and \( \y^* \) are optimal solutions for the primal and dual problems, then the following must hold:
 
 \begin{enumerate}
-\item For each primal constraint \( i \), either the constraint is tight and/or the corresponding dual variable is zero:
+\item For each primal constraint \( i \), the constraint is tight, or the corresponding dual variable is zero (or both):
 \[
 \text{either } \a_i^\top \x^* = b_i \quad \text{or} \quad y_i^* = 0, \quad \forall i.
 \]
@@ -16,7 +16,7 @@ Equivalently,
 y_i^* (\a_i^\top \x^* - b_i) = 0.
 \]
 
-\item For each dual constraint \( j \), either the constraint is tight and/or the corresponding primal variable is zero:
+\item For each dual constraint \( j \), the constraint is tight, or the corresponding primal variable is zero (or both):
 \[
 \text{either } (A^\top \y^*)_j = c_j \quad \text{or} \quad x_j^* = 0, \quad \forall j.
 \]
@@ -181,12 +181,10 @@ y_1 + 1.5y_2 + 0.5y_3 = 20 \tag{2}
 
 \textbf{Step 3: Substitute \(y_1 = 0\) into equations (1) and (2):}
 
-\[
-\begin{aligned}
-4y_2 + 2y_3 &= 60  \\
-1.5y_2 + 0.5y_3 &= 20 
-\end{aligned}
-\]
+\begin{align*}
+4y_2 + 2y_3 &= 60 \tag{1'} \\
+1.5y_2 + 0.5y_3 &= 20 \tag{2'}
+\end{align*}
 
 \textbf{Step 4: Solve the system}
 
@@ -220,52 +218,10 @@ Substitute back: \( 3(10) + y_3 = 40 \Rightarrow y_3 = 10 \)
 Thus, the dual solution is fully recovered using complementary slackness.
 \end{example}
 
-\subsection{Summary: Why Learn Duality?}
-
-Most students and practitioners rarely write down the dual linear program explicitly.
-However, understanding duality is essential to interpreting the output of optimization solvers
-and making informed decisions.
-
-In practice, you solve the primal LP, but the solver uses duality internally and reports the dual variables as \emph{shadow prices} on each constraint---how much the objective would improve if you relaxed that constraint by one unit.  The economic meaning of those numbers, the reasoning behind zero versus nonzero values, and the marginal value of resources all rest on the duality concepts developed in this chapter: dual feasibility, strong duality, and complementary slackness.  Shadow prices also power rapid ``what-if'' sensitivity analysis, letting you estimate the impact of changing a right-hand side without re-solving the LP.
-
-As a small illustration, consider the LP below alongside typical solver output:
-
-\medskip
-
-\begin{minipage}{0.48\textwidth}
-\textbf{Primal LP:}
-\[
-\begin{aligned}
-\max\quad & 40x_1 + 30x_2 \\
-\text{s.t.} \quad
-& 2x_1 + x_2 \le 100 && \text{(Labor)} \\
-& x_1 + x_2 \le 80 && \text{(Material)} \\
-& x_1, x_2 \ge 0
-\end{aligned}
-\]
-\end{minipage}
-\hfill
-\begin{minipage}{0.48\textwidth}
-\textbf{Solver Output:}
-\begin{itemize}
-    \item Optimal solution: \( x_1 = 30,\; x_2 = 20 \)
-    \item Shadow prices:
-    \begin{itemize}
-        \item Labor: \$10
-        \item Material: \$0
-    \end{itemize}
-\end{itemize}
-\end{minipage}
-
-\medskip
-
-Without ever writing the dual, the solver output already speaks its language: labor is the scarce resource (an extra hour is worth \$10), while material is not fully used (its shadow price is zero---exactly what complementary slackness predicts).
-
-For students continuing in optimization, operations research, or algorithms, duality will return again and again---not as a side topic, but as a core idea behind decomposition methods (e.g., Benders, Dantzig--Wolfe), primal-dual interior point methods, approximation algorithms, and large-scale optimization.
-
 \section{Exercises}
 
 \begin{ex}{Bakery Production and Duality Interpretation}{}
+\label{ex:cs-bakery-duality}
 A bakery produces cakes ($x_1$), cookies ($x_2$), and muffins ($x_3$) to maximize profit:
 
 \[
@@ -404,8 +360,8 @@ Answer the following:
 \end{enumerate}
 \end{ex}
 
-\begin{ex}{Duality with Mixed Constraint Types: Eco-Friendly Packaging Startup}{}{}
-You are managing production at an eco-friendly packaging startup. Your team produces various biodegradable container sets for local farms and grocery stores. Each set is assembled using a mix of labor, recycled material, and specialized equipment.
+\begin{ex}{Duality with Mixed Constraint Types: Eco-Friendly Packaging Startup}{}
+You are managing production at an eco-friendly packaging startup. Your team produces various biodegradable container sets for local farms and grocery stores. Each set is assembled using labor and recycled material.
 
 You produce three types of packaging sets:
 
@@ -450,13 +406,13 @@ The retail revenue constraint is:
 The resource requirements for each packaging set are:
 
 \begin{center}
-\begin{tabular}{|l|c|c|c|}
+\begin{tabular}{|l|c|c|}
 \hline
-Packaging Set & Labor & Material & Equipment Time \\
+Packaging Set & Labor & Material \\
 \hline
-$x_1$: FreshBox Standard & 2 & 4 & 1 \\
-$x_2$: FreshBox Premium & 4 & 6 & 2 \\
-$x_3$: Market Crate & 3 & 4 & 3 \\
+$x_1$: FreshBox Standard & 2 & 4 \\
+$x_2$: FreshBox Premium & 4 & 6 \\
+$x_3$: Market Crate & 3 & 4 \\
 \hline
 \end{tabular}
 \end{center}
@@ -492,6 +448,7 @@ The primal linear program is:
 \end{ex}
 
 \begin{ex}
+\label{ex:cs-box-constraints}
 Consider the optimization problem
 
 \begin{equation*}
@@ -510,12 +467,12 @@ $$
 
 (a.) What is the dual of this linear program?
 
-(b.) Explain how the dual can be used to prove that a solution is optimal?
+(b.) Explain how the dual can be used to prove that a solution is optimal.
 
 (c.) The optimal solution to this linear program is $(x_1, x_2, x_3, x_4) = (0,\tfrac{1}{2},1,1)$ with objective value $27$.  \\
 
 Using duality theory, prove that this is an optimal solution.  \\
-\textit{(Hint: Recall that complimentary slackness implies that dual variables corresponding to constraints 1 and 2 must be 0).  }
+\textit{(Hint: Recall that complementary slackness implies that dual variables corresponding to constraints 1 and 2 must be 0).  }
 \end{ex}
 
 \begin{ex}
@@ -588,11 +545,84 @@ A student claims that the optimal primal solution is $x_1^* = 2, x_2^* = 0$.
 
 \subsubsection*{Selected Solutions}
 
+\begin{solution}(Exercise~\ref{ex:cs-bakery-duality})
+\begin{enumerate}
+\item \textbf{Feasibility:} Substituting $(x_1, x_2, x_3) = (2, 0, 8)$: flour $8(2) + 6(0) + 8 = 24 \leq 48$, sugar $4(2) + 2(0) + 1.5(8) = 20 \leq 20$, baking time $2(2) + 1.5(0) + 0.5(8) = 8 \leq 8$, so the primal solution is feasible.  Substituting $(y_1, y_2, y_3) = (0, 10, 10)$: the dual constraints evaluate to $60 \geq 60$, $35 \geq 30$, and $20 \geq 20$, so the dual solution is feasible.
+
+\item \textbf{Complementary slackness:} In the primal, sugar and baking time are tight while flour has slack ($24 < 48$); accordingly $y_1 = 0$ while $y_2, y_3 > 0$.  In the dual, constraints 1 and 3 are tight while constraint 2 has slack ($35 > 30$); accordingly $x_2 = 0$ while $x_1, x_3 > 0$.  Every condition $y_i(\a_i^\top \x - b_i) = 0$ and $x_j(c_j - (A^\top \y)_j) = 0$ is satisfied.
+
+\item \textbf{Objective values:} Primal: $60(2) + 30(0) + 20(8) = 280$.  Dual: $48(0) + 20(10) + 8(10) = 280$.  They match, confirming optimality by strong duality.
+
+\item \textbf{Shadow prices:} Flour has shadow price $y_1 = 0$: with 24 kg left over, more flour is worthless.  Sugar has shadow price $y_2 = 10$: one more kg of sugar would increase profit by \$10.  Baking time has shadow price $y_3 = 10$: one more oven hour is worth \$10.
+
+\item \textbf{Sensitivity:} (a) One more kg of flour: no change (\$0).  (b) One more kg of sugar: profit increases by \$10.  (c) One more hour of baking time: profit increases by \$10.  These estimates are valid for small changes in the right-hand sides (as long as the optimal basis does not change).
+\end{enumerate}
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:cs-box-constraints})
+(a) The dual is
+\[
+\begin{aligned}
+\min \quad & y_1 + y_2 + y_3 + y_4 + 8y_5 \\
+\text{s.t.} \quad & y_1 + y_5 \geq 1, \quad y_2 + 2y_5 \geq 4, \quad y_3 + 3y_5 \geq 9, \quad y_4 + 4y_5 \geq 16, \\
+& y_1, \dots, y_5 \geq 0.
+\end{aligned}
+\]
+
+(b) By weak duality, every dual feasible $\y$ gives an upper bound $\b^\top \y$ on the primal objective.  If we exhibit a primal feasible $\x$ and a dual feasible $\y$ whose objective values are equal, both must be optimal.
+
+(c) At $\x^* = (0, \tfrac{1}{2}, 1, 1)$, constraints 1 and 2 have slack ($0 < 1$ and $\tfrac12 < 1$), so $y_1 = y_2 = 0$.  Since $x_2, x_3, x_4 > 0$, dual constraints 2, 3, 4 must be tight: $2y_5 = 4$ gives $y_5 = 2$; then $y_3 = 9 - 3(2) = 3$ and $y_4 = 16 - 4(2) = 8$.  The remaining dual constraint holds with slack: $y_1 + y_5 = 2 \geq 1$, consistent with $x_1 = 0$.  So $\y^* = (0, 0, 3, 8, 2)$ is dual feasible with objective $3 + 8 + 8(2) = 27$, matching the primal value $4(\tfrac12) + 9 + 16 = 27$.  By part (b), both solutions are optimal.
+\end{solution}
+
 \begin{solution}(Exercise~\ref{ex:cs-claimed-optimal})
 (a) The conditions are $y_1(x_1 + x_2 - 4) = 0$, $y_2(2x_1 + x_2 - 5) = 0$, $x_1(y_1 + 2y_2 - 3) = 0$, and $x_2(y_1 + y_2 - 2) = 0$.
 
 (b) At $(x_1, x_2) = (2, 0)$: the first primal constraint gives $2 < 4$ (slack), forcing $y_1 = 0$; the second gives $4 < 5$ (slack), forcing $y_2 = 0$.  But $x_1 = 2 > 0$ requires the first dual constraint to be tight: $y_1 + 2y_2 = 3$.
 
-(c) With $y_1 = y_2 = 0$ we get $0 = 3$, a contradiction---no dual solution is compatible, so $(2,0)$ is not optimal.  (It is feasible, but both constraints have slack, so we can do better.)  The actual optimum is $(x_1, x_2) = (1, 3)$ with value $9$: both primal constraints are tight, and solving $y_1 + 2y_2 = 3$, $y_1 + y_2 = 2$ gives the dual optimum $\y^* = (1,1)$ with matching value $4(1) + 5(1) = 9$.
+(c) With $y_1 = y_2 = 0$ we get $0 = 3$, a contradiction: no dual solution is compatible, so $(2,0)$ is not optimal.  (It is feasible, but both constraints have slack, so we can do better.)  The actual optimum is $(x_1, x_2) = (1, 3)$ with value $9$: both primal constraints are tight, and solving $y_1 + 2y_2 = 3$, $y_1 + y_2 = 2$ gives the dual optimum $\y^* = (1,1)$ with matching value $4(1) + 5(1) = 9$.
 \end{solution}
+
+\section*{Summary: Why Learn Duality?}
+\addcontentsline{toc}{section}{Summary: Why Learn Duality?}
+
+Most students and practitioners rarely write down the dual linear program explicitly.
+However, understanding duality is essential to interpreting the output of optimization solvers
+and making informed decisions.
+
+In practice, you solve the primal LP, but the solver uses duality internally and reports the dual variables as \emph{shadow prices} on each constraint: how much the objective would improve if you relaxed that constraint by one unit.  The economic meaning of those numbers, the reasoning behind zero versus nonzero values, and the marginal value of resources all rest on the duality concepts developed in this chapter: dual feasibility, strong duality, and complementary slackness.  Shadow prices also support rapid ``what-if'' sensitivity analysis, letting you estimate the impact of changing a right-hand side without re-solving the LP.
+
+As a small illustration, consider the LP below alongside typical solver output:
+
+\medskip
+
+\begin{minipage}{0.48\textwidth}
+\textbf{Primal LP:}
+\[
+\begin{aligned}
+\max\quad & 50x_1 + 20x_2 \\
+\text{s.t.} \quad
+& 2x_1 + x_2 \le 100 && \text{(Labor)} \\
+& x_1 + x_2 \le 80 && \text{(Material)} \\
+& x_1, x_2 \ge 0
+\end{aligned}
+\]
+\end{minipage}
+\hfill
+\begin{minipage}{0.48\textwidth}
+\textbf{Solver Output:}
+\begin{itemize}
+    \item Optimal solution: \( x_1 = 50,\; x_2 = 0 \), profit \$2500
+    \item Shadow prices:
+    \begin{itemize}
+        \item Labor: \$25
+        \item Material: \$0
+    \end{itemize}
+\end{itemize}
+\end{minipage}
+
+\medskip
+
+Without ever writing the dual, the solver output already speaks its language: labor is the scarce resource (an extra hour is worth \$25), while material is not fully used (only 50 of the 80 units are consumed, so its shadow price is zero, exactly what complementary slackness predicts).
+
+For students continuing in optimization, operations research, or algorithms, duality returns as a core idea behind decomposition methods (e.g., Benders, Dantzig--Wolfe), primal-dual interior point methods, approximation algorithms, and large-scale optimization.
 

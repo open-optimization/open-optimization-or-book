@@ -1,0 +1,865 @@
+% Copyright 2020 by Robert Hildebrand
+%This work is licensed under a
+%Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0)
+%See http://creativecommons.org/licenses/by-sa/4.0/
+
+\chapter{Modeling: Linear Programming}
+
+\begin{outcome}
+\begin{enumerate}
+\item Define what a linear program is
+\item Understand how to model a linear program
+\item View many examples and get a sense of what types of problems can be modeled as linear programs.
+\end{enumerate}
+\end{outcome}
+\begin{resource}
+\begin{itemize}
+\item \href{https://www.youtube.com/watch?v=K7TL5NMlKIk&ab_channel=Dr.TreforBazett}{Youtube! - Modeling with Linear Programming - Watch 0:00 - 4:19}
+\item \href{https://www.youtube.com/watch?v=E72DWgKP_1Y&t=1014s&ab_channel=TomS}{Youtube! - Watch 0:00 - 1:43}
+\end{itemize}
+\end{resource}
+
+Linear Programming, also known as Linear Optimization, is the starting point for most forms of optimization.  It is the problem of optimization a linear function over linear constraints.   
+
+In this chapter, we will define what this means, how to setup a linear program, and discuss many examples.   Examples will be connected with code in Excel and Python (using with PuLP or Gurobipy modeling tools) so that you can easily start solving optimization problems.   Tutorials on these tools will come in later chapters.
+
+As a warm up, consider the following word problem.\\
+\noindent \textbf{Question:} A movie theater sells adult tickets for $\$10$ each and child tickets for $\$6$ each. On Saturday, the theater sold $120$ tickets total and collected $\$1{,}000$ in ticket sales. How many adult and child tickets were sold?
+
+\smallskip
+
+\noindent \textbf{\textcolor{blue}{Solution:}} Let $x$ and $y$ denote the number of adult and child tickets sold, respectively. Then
+\[
+x + y = 120 \tag{1}
+\]
+\[
+10x + 6y = 1{,}000. \tag{2}
+\]
+Substituting $x = 120 - y$ from (1) into (2) gives $10(120-y) + 6y = 1{,}000$, which simplifies to $4y = 200$, so $y = 50$ and $x = 70$.
+
+\smallskip
+
+In optimization, we follow a similar process of assigning variables and writing mathematical expressions from a word problem. However, instead of equations that pin down a unique answer, we typically have \emph{inequalities} that bound the variables in different ways---and an \emph{objective function} we wish to maximize or minimize. Thus, there can be many feasible solutions, and the goal is to find the best one.
+
+\section{Introductory LP Example}
+We begin with a simple example.
+\begin{examplewithallcode}{Screen Printing Shop}%
+{https://github.com/open-optimization/open-optimization-or-examples/blob/master/linear-programming/screen_printing/screen_printing.xlsx}%
+{https://github.com/open-optimization/open-optimization-or-examples/blob/master/linear-programming/screen_printing/screen_printing_pulp.ipynb}%
+{https://github.com/open-optimization/open-optimization-or-examples/blob/master/linear-programming/screen_printing/screen_printing_gurobipy.ipynb}
+%
+Consider a screen printing shop that produces custom t-shirts and tote bags. Each t-shirt sells for $\$15$ and costs $\$5$ in materials, while each tote bag sells for $\$12$ and costs $\$4$ in materials. A t-shirt requires $2$ hours of printing time and $1$ hour of drying and packaging, while a tote bag requires $3$ hours of printing time and $1$ hour of drying and packaging. The shop has at most $150$ hours of printing time and $60$ hours of drying/packaging time available per week. Market research indicates that the shop will sell no more than $45$ t-shirts per week. The shop wishes to maximize its weekly profit.
+
+We can represent this as a linear programming problem. Let $x_1$ denote the number of t-shirts produced and $x_2$ the number of tote bags. The profit per t-shirt is $\$15 - \$5 = \$10$ and the profit per tote bag is $\$12 - \$4 = \$8$. The total weekly profit is:
+\begin{equation}
+z(x_1,x_2) = 10x_1 + 8x_2
+\end{equation}
+The shop can use no more than $150$ hours of printing time per week, and since a t-shirt takes $2$ hours and a tote bag takes $3$ hours of printing, we have:
+\begin{equation}
+2x_1 + 3x_2 \leq 150
+\end{equation}
+Similarly, the shop has at most $60$ hours of drying and packaging time, with each item requiring $1$ hour:
+\begin{equation}
+x_1 + x_2 \leq 60
+\end{equation}
+Finally, we know that $x_1 \leq 45$, since the shop will sell no more than $45$ t-shirts per week. The complete linear programming problem is:
+\begin{equation}
+\begin{aligned}
+\max\;\;&& z(x_1,x_2) = 10x_1 + 8x_2\\
+\st\;\;&&  2x_1 + 3x_2 &\leq 150\\
+&& x_1 + x_2 &\leq 60\\
+&& x_1 &\leq 45\\
+&& x_1 &\geq 0\\
+&& x_2 &\geq 0
+\end{aligned}
+\label{eqn:ScreenPrintEx}
+\end{equation}
+\label{ex:ScreenPrint}
+\end{examplewithallcode}
+
+\section{Modeling and Assumptions in Linear Programming}
+
+\begin{outcome}
+\begin{enumerate}
+\item Address crucial assumptions when choosing to model a problem with linear programming.
+\end{enumerate}
+\end{outcome}
+
+\paragraph{A Generic Linear Program (LP)}
+
+Linear programming (LP) is a mathematical optimization framework widely used in decision-making and resource allocation. In its most basic form, an LP seeks to optimize (maximize or minimize) a linear objective function subject to a set of linear constraints. These constraints typically represent limitations or requirements in real-world scenarios, such as budgets, capacities, or resource availability.
+
+\smallskip \modelhead{Variables}\\
+The decision variables represent the quantities we want to determine. For example:
+\begin{itemize}
+    \item $x_i$: Continuous variables ($x_i \in \mathbb{R}$, i.e., a real number), $\forall i = 1,\dots,n$.
+\end{itemize}
+These variables could represent amounts of products to produce, resources to allocate, or investments to make.  We can use any letters to represent these variables.  Typically we use $x_i$, but frequently will use $y_i$ or other letters depending on the context and what makes reading the problem most convenient.
+
+\smallskip \modelhead{Parameters}\\
+Parameters are the given data in the problem, which are assumed to be known in advance:
+\begin{itemize}
+    \item $c_i$: Cost coefficients for each decision variable, $\forall i = 1,\dots,n$. These values represent the contribution of each variable to the objective function.
+    \item $a_{ij}$: Constraint coefficients, $\forall i = 1,\dots,n$ and $j = 1,\dots,m$. These define the relationships between decision variables and the constraints.
+    \item $b_j$: Right-hand side values of the constraints, $\forall j = 1,\dots,m$. These represent limits or requirements for each constraint.
+\end{itemize}
+
+The general form of a linear program can be written as follows:
+
+\begin{equation}
+\begin{aligned}
+\max\;\;&& z = c_1x_1 + \dots + c_nx_n \\
+\st\;\;&& a_{11}x_1 + \dots + a_{1n}x_n &\leq b_1 \\
+&& \hspace*{0.5in}\vdots \\
+&& a_{m1}x_1 + \dots + a_{mn}x_n &\leq b_m \\
+&& x_i &\geq 0 \quad \forall i=1, \dots, n.
+\end{aligned}
+\label{eqn:GeneralLPMax}
+\end{equation}
+
+\paragraph{Features of a Linear Program}
+
+\begin{itemize}
+    \item \textbf{Objective Function}: The linear function $z = c_1x_1 + \dots + c_nx_n$ represents the goal to optimize. This could involve maximizing profit, minimizing cost, or achieving some other measurable outcome.
+    \item \textbf{Constraints}: The system of inequalities (or equalities) restricts the values of the decision variables. Each constraint reflects a real-world limitation, such as resource availability or capacity limits.
+    \item \textbf{Feasibility}: The set of all possible solutions that satisfy the constraints is called the feasible region. The optimal solution must lie within this region.
+    \item \textbf{Linear Relationships}: Both the objective function and constraints are linear, meaning the relationships between variables are additive and proportional.
+    \item \textbf{Sets}: For specific optimization problems, it can be useful to define sets of variables or parameters to help write down the problem in a generic formulation.
+\end{itemize}
+
+\paragraph{Example of a Linear Program}
+
+To illustrate, consider a specific example with three decision variables and four constraints. This includes a mix of constraint types ($\leq$, $\geq$, and $=$), showcasing the versatility of linear programming:
+
+\smallskip \modelhead{Variables}\\
+$x_i$: Continuous variables ($x_i \in \mathbb{R}$, i.e., a real number), $\forall i = 1,\dots,3$.
+
+\smallskip \modelhead{Parameters}\\
+\begin{itemize}
+    \item $c_i$: Cost coefficients, $\forall i = 1,\dots,3$.
+    \item $a_{ij}$: Constraint coefficients, $\forall i = 1,\dots,3$ and $j = 1,\dots,4$.
+    \item $b_j$: Right-hand side values for each constraint, $\forall j = 1,\dots,4$.
+\end{itemize}
+
+\smallskip \modelhead{Model}
+\begin{align*}
+\min \quad & z = c_1x_1 + c_2x_2 + c_3x_3 \\
+\st        & a_{11}x_1 + a_{12}x_2 + a_{13}x_3 \geq b_1 \\
+& a_{21}x_1 + a_{22}x_2 + a_{23}x_3 \leq b_2 \\
+& a_{31}x_1 + a_{32}x_2 + a_{33}x_3 = b_3 \\
+& a_{41}x_1 + a_{42}x_2 + a_{43}x_3 \geq b_4 \\
+& x_1 \geq 0, \; x_2 \leq 0, \; x_3 \text{ unrestricted.}
+\end{align*}
+
+A key feature of linear programming is the use of linear functions, defined as follows:
+
+\begin{definition}{Linear Function}\label{def:linearfunction}
+A function $z: \mathbb{R}^n \rightarrow \mathbb{R}$ is \textit{linear} if there are constants $c_1, \dots, c_n \in \mathbb{R}$ such that:
+\begin{equation}
+z(x_1, \dots, x_n) = c_1x_1 + \dots + c_nx_n.
+\end{equation}
+\label{def:LinearFunc}
+\end{definition}
+
+Linear functions are characterized by their simplicity and additivity, making them well-suited for optimization problems where proportionality is assumed. This simplicity allows linear programs to be solved efficiently, even for large-scale problems.
+
+%For the time being, we will eschew the general form and focus exclusively on linear programming problems with two variables. Using this limited case, we will develop a graphical method for identifying optimal solutions, which we will generalize later to problems with arbitrary numbers of variables. 
+
+\subsection{Assumptions}
+Inspecting Example \ref{ex:ScreenPrint} (or the more general problem in Equation~\eqref{eqn:GeneralLPMax}) we can see there are several assumptions that must be satisfied when using a linear programming model. We enumerate these below:
+\begin{description}
+\item[Proportionality Assumption] A problem can be phrased as a linear program only if the contribution to the objective function \textit{and} the left-hand-side of each constraint by each decision variable $(x_1,\dots,x_n)$ is proportional to the value of the decision variable.
+
+\item[Additivity Assumption] A problem can be phrased as a linear programming problem only if the contribution to the objective function \textit{and} the left-hand-side of each constraint by any decision variable $x_i$ ($i=1,\dots,n$) is completely independent of any other decision variable $x_j$ ($j \neq i$) and additive. 
+
+\item[Divisibility Assumption] A problem can be phrased as a linear programming problem only if the quantities represented by each decision variable are infinitely divisible (i.e., fractional answers make sense). 
+
+\item[Certainty Assumption] A problem can be phrased as a linear programming problem only if the coefficients in the objective function and constraints are known with certainty. 
+\end{description}
+
+The first two assumptions simply assert (in English) that both the objective function and functions on the left-hand-side of the (in)equalities in the constraints are linear functions of the variables $x_1,\dots,x_n$. 
+
+The third assumption asserts that a valid optimal answer could contain fractional values for decision variables. It's important to understand how this assumption comes into play--even in the screen printing example. Many quantities can be divided into non-integer values (ounces, pounds etc.) but many other quantities cannot be divided. For instance, can we really expect that it's reasonable to print $\tfrac{1}{2}$ a t-shirt in the screen printing example? When values must be constrained to true integer values, the linear programming problem is called an \textit{integer programming problem}.  There is a vast literature dealing with these problems.
+For many problems, particularly when the values of the decision variables may become large, a fractional optimal answer could be obtained and then rounded to the nearest integer to obtain a reasonable answer. For example, if our screen printing problem were re-written so that the optimal answer was to print $1045.3$ t-shirts, then we could round down to $1045$.
+
+The final assumption asserts that the coefficients (e.g., profit per plane or boat) is known with absolute certainty. In traditional linear programming, there is no lack of knowledge about the make up of the objective function, the coefficients in the left-hand-side of the constraints or the bounds on the right-hand-sides of the constraints. There is a literature on \textit{stochastic programming} that relaxes some of these assumptions, but this too is outside the scope of the course.
+
+\begin{learningcheckpoint}[label={lc:lp-assumptions}]
+In a short sentence or two, discuss whether the problem in
+Example~\ref{ex:ScreenPrint} meets all assumptions of a linear programming model.
+%Do the same for Exercise~\autoref{ex:ChemicalPlant}.
+
+\emph{Hint: Can you print $\tfrac{2}{3}$ of a t-shirt? Can you run a process
+for $\tfrac{1}{3}$ of an hour?}
+\end{learningcheckpoint}
+
+\begin{ex}{Stochastic Objective}{} Suppose the costs are not known with certainty but instead a probability distribution for each value of $c_i$ ($i=1,\dots,n$) is known. Suggest a way of constructing a linear program from the probability distributions.
+%
+\emph{[Hint: Suppose I tell you that I'll give you a uniformly random amount of money between $\$1$ and $\$2$. How much money do you expect to receive? Use the same reasoning to answer the question.]}
+\end{ex}
+
+\section{Examples}
+
+\begin{outcome}
+
+\begin{enumerate}
+\item Identify decision variables and parameters
+\item Learn how to format a linear optimization problem.
+\item Identify and understand common classes of linear optimization problems.
+\end{enumerate}
+\end{outcome}
+
+We will begin with a few examples, and then discuss specific problem types that occur often.
+
+\begin{examplewithallcode}{Production Planning}
+{https://github.com/open-optimization/open-optimization-or-book/blob/master/Intro-Math-Programming/baseText/optimization/optimization-examples/production-planning-excel.xlsx}
+{https://github.com/open-optimization/open-optimization-or-book/tree/master/Intro-Math-Programming/baseText/optimization/optimization-examples/production_planning_pulp.ipynb}
+{https://github.com/open-optimization/open-optimization-or-book/tree/master/Intro-Math-Programming/baseText/optimization/optimization-examples/production_planning_gurobi.ipynb}
+A manufacturing firm seeks to optimize its production schedule over a two-day planning horizon to meet daily demand while minimizing costs. The firm starts with an initial inventory of \( s_0 \) units. The costs associated with production and inventory are as follows:
+
+\begin{itemize}
+    \item \textbf{Production costs:} \$10 per unit on Day 1, and \$16 per unit on Day 2.
+    \item \textbf{Inventory cost:} \$5 per unit for carrying excess inventory from one day to the next.
+\end{itemize}
+
+\includegraphics[width=0.85\linewidth]{figs/modeling-linear-programming-tikz01.png}
+
+The goal is to determine the number of units to produce each day and the inventory levels to minimize total costs while satisfying the demand for each day.
+
+\end{examplewithallcode}
+
+\begin{solution}
+ \modelhead{Sets}
+\begin{itemize}
+    \item Days of production $ = \{1, 2\}$.
+\end{itemize}
+ \modelhead{Parameters} 
+\begin{itemize}
+    \item $c_{p1}$: Per unit production cost on Day 1 (\$10).
+    \item $c_{p2}$: Per unit production cost on Day 2 (\$16).
+    \item $c_{inv}$: Per unit inventory cost (\$5).
+    \item $d_1$: Demand on Day 1 (10 units).
+    \item $d_2$: Demand on Day 2 (4 units).
+        \item $s_0$: Inventory at the start of Day 1.
+\end{itemize}
+
+ \modelhead{Variables} 
+\begin{itemize}
+    \item $x_1$: Number of units produced on Day 1.
+    \item $x_2$: Number of units produced on Day 2.
+    \item $s_1$: Inventory at the end of Day 1.
+    \item $s_2$: Inventory at the end of Day 2.
+\end{itemize}
+
+\modelhead{Model}
+\begin{align*}
+\min \quad & z = 10x_1 + 16x_2 + 5s_1 + 5s_2   \tag{Total cost} \\
+\st        & s_0 + x_1 = 10 + s_1   \tag{Day 1 balance} \\
+& s_1 + x_2 = 4 + s_2   \tag{Day 2 balance} \\
+& x_1, x_2, s_0, s_1, s_2 \geq 0.   \tag{Non-negativity constraints}
+\end{align*}
+
+\end{solution}
+
+\begin{definition}{Optimization model components}
+When defining an optimization model, it is essential to identify and clearly articulate the following five components:
+
+\begin{itemize}
+    \item \textbf{Sets:} What lists of data do you need to write down? These could include indices, categories, or groups relevant to the problem.
+    \item \textbf{Parameters (Data):} What is the actual data for the problem? These are the fixed numerical values such as costs, capacities, or resource availabilities.
+    \item \textbf{Decision Variables:} What decisions need to be made to provide a solution? These variables represent the quantities that can be controlled or adjusted, such as production levels or resource allocations.
+    \item \textbf{Objective Function:} The expression that we want to maximize or minimize. This is the goal of the optimization, such as minimizing cost or maximizing profit.
+    \item \textbf{Constraints:} Certain rules that those decision variables should satisfy. These include limitations or requirements, such as resource capacities or demand fulfillment.
+\end{itemize}
+
+Each of these components plays a crucial role in formulating a well-structured optimization model that accurately represents the problem and provides actionable solutions.  The role of Sets will become more important as we get into more complicated optimization models.
+\end{definition}
+
+\newpage
+\begin{examplewithallcode}{Bakery Production}
+{https://github.com/open-optimization/open-optimization-or-book/blob/master/Intro-Math-Programming/baseText/optimization/optimization-examples/bakery-production-excel.xlsx}
+{https://github.com/open-optimization/open-optimization-or-book/tree/master/Intro-Math-Programming/baseText/optimization/optimization-examples/bakery_production_pulp.ipynb}
+{https://github.com/open-optimization/open-optimization-or-book/tree/master/Intro-Math-Programming/baseText/optimization/optimization-examples/bakery_production_gurobi.ipynb}
+A small bakery produces three products each day: cakes, cookies, and muffins. Each item requires a specific amount of ingredients and baking time, and each contributes to the bakery’s profit. The bakery operates with daily limits on flour, sugar, and baking time due to ingredient supply and staffing constraints.
+
+Each cake earns a profit of \$6.00, requires 500 grams of flour, 200 grams of sugar, and 60 minutes of baking time. Each cookie earns a profit of \$1.50, requires 100 grams of flour, 50 grams of sugar, and 10 minutes of baking time. Each muffin earns a profit of \$2.50, requires 200 grams of flour, 80 grams of sugar, and 20 minutes of baking time.
+
+The bakery has at most 4,800 grams of flour, 2,060 grams of sugar, and 480 minutes of baking time available each day.
+
+Determine how many cakes, cookies, and muffins the bakery should produce each day in order to maximize its total profit, while staying within the limits on flour, sugar, and baking time.
+
+\subsection*{Linear Programming Model}
+
+\[
+\begin{aligned}
+\text{Maximize} \quad & 6x_1 + 1.5x_2 + 2.5x_3 \\
+\text{subject to} \quad
+& 500x_1 + 100x_2 + 200x_3 \leq 4800 \quad \text{(Flour)} \\
+& 200x_1 + 50x_2 + 80x_3 \leq 2060 \quad \text{(Sugar)} \\
+& 60x_1 + 10x_2 + 20x_3 \leq 480 \quad \text{(Baking time)} \\
+& x_1, x_2, x_3 \geq 0 \\
+& x_1, x_2, x_3 \in \mathbb{Z} \quad \text{(if integer production is required)}
+\end{aligned}
+\]
+\end{examplewithallcode}
+
+\begin{examplewithallcode}{Production with welding robot}
+{https://github.com/open-optimization/open-optimization-or-examples/blob/master/linear-programming/production_welding/production-welding-robot.xlsx}
+{https://github.com/open-optimization/open-optimization-or-examples/blob/master/linear-programming/production_welding/production_welding_pulp.ipynb}
+{https://github.com/open-optimization/open-optimization-or-examples/blob/master/linear-programming/production_welding/production_welding_gurobipy.ipynb}
+%{productionproblem}{}{}{}
+You have 21 units of transparent aluminum alloy (TAA), LazWeld1, a joining robot leased for 23 hours, and CrumCut1, a cutting robot leased for 17 hours of aluminum cutting. You also have production code for a bookcase, desk, and cabinet, along with commitments to buy any of these you can produce for \$18,  \$16, and  \$10 apiece, respectively.  A bookcase requires 2 units of TAA, 3 hours of joining, and 1 hour of cutting, a desk requires 2 units of TAA, 2 hours of joining, and 2 hour of cutting, and a cabinet requires 1 unit of TAA, 2 hours of joining, and 1 hour of cutting. 
+
+Formulate an LP to maximize your revenue given your current resources.
+\end{examplewithallcode}
+
+\begin{solution}
+
+\noindent\medskip \modelhead{Sets}
+\begin{itemize}
+\item The types of objects $ = \{$ bookcase,~desk,~cabinet$\}$.
+\end{itemize}
+\medskip \modelhead{Parameters} 
+\begin{itemize}
+\item Purchase cost of each object
+\item Units of TAA needed for each object
+\item Hours of joining needed for each object
+\item Hours of cutting needed for each object
+\item Hours of TAA, Joining, and Cutting available on robots
+\end{itemize}
+
+\noindent\medskip \modelhead{Variables} \\
+$x_i$ : number of units of product $i$ to produce, \\
+for all $ i = $bookcase,~desk,~cabinet.\\
+
+\noindent \medskip \modelhead{Model}
+\begin{align*}
+\max \quad & z = 18x_1 + 16x_2 + 10x_3   \tag{profit} \\
+\st        & 2x_1 + 2x_2 + 1x_3 \le 21   \tag{TAA} \\
+& 3x_1 + 2x_2 + 2x_3 \le 23   \tag{LazWeld1} \\
+& 1x_1 + 2x_2 + 1x_3 \le 17   \tag{CrumCut1} \\
+& x_1, x_2, x_3 \ge 0.
+\end{align*}
+\end{solution}
+
+\begin{examplewithallcode}{The Diet Problem}
+{https://github.com/open-optimization/open-optimization-or-book/blob/master/Intro-Math-Programming/baseText/optimization/optimization-examples/diet-problem.xlsx}
+{https://github.com/open-optimization/open-optimization-or-book/tree/master/Intro-Math-Programming/baseText/optimization/optimization-examples/diet_problem_pulp.ipynb}
+{https://github.com/open-optimization/open-optimization-or-book/tree/master/Intro-Math-Programming/baseText/optimization/optimization-examples/diet_problem_gurobi.ipynb}
+
+In the future (as envisioned in a bad 70's science fiction film) all food is in tablet form, and there are four types, green, blue, yellow, and red. A balanced, futuristic diet requires, at least 20 units of Iron, 25 units of Vitamin B, 30 units of Vitamin C, and 15 units of Vitamin D. Formulate an LP that ensures a balanced diet at the minimum possible cost.
+\end{examplewithallcode}
+
+\begin{table}[h!]
+\begin{center}
+\label{tab:pillContent}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+Tablet & Iron & B & C & D & Cost (\$) \\ \hline
+Chem 1 & 6 & 6 & 7 & 4 & 1.25 \\
+Chem 2 & 4 & 5 & 4 & 9 & 1.05 \\
+Chem 3 & 5 & 2 & 5 & 6 & 0.85 \\
+Chem 4 & 3 & 6 & 3 & 2 & 0.65 \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{solution}
+\smallskip \modelhead{Sets}
+\begin{itemize}
+\item Set of tablets $\{1,2,3,4\}$
+\end{itemize}
+
+\smallskip \modelhead{Parameters}
+\begin{itemize}
+\item Iron in each tablet
+\item Vitamin B in each tablet
+\item Vitamin C in each tablet
+\item Vitamin D in each tablet
+\item Cost of each tablet
+\end{itemize}
+
+\smallskip  \modelhead{Variables} \\
+$x_i$ : number of tablet of type $i$ to include in the diet, $\forall i \in \{1,2,3,4\}$.\\
+
+\smallskip  \modelhead{Model}
+\begin{align*}
+\min \quad && z = 1.25x_1 + 1.05x_2 + 0.85x_3 + 0.65x_4 \\
+\st \quad &&  6x_1 + 4x_2 + 5x_3 + 3x_4 &\ge 20  \\
+&& 6x_1 + 5x_2 + 2x_3 + 6x_4 &\ge 25 \\
+&& 7x_1 + 4x_2 + 5x_3 + 3x_4 &\ge 30 \\
+&& 4x_1 + 9x_2 + 6x_3 + 2x_4 &\ge 15  \\
+&& x_1, x_2, x_3, x_4 &\ge 0. 
+\end{align*}
+\end{solution}
+
+%The optimal diet costs \$5.35, and consists of 4.0625 green tablets and 0.3125 blue tablets.
+
+\begin{examplewithallcode}{The Next Diet Problem}
+{https://github.com/open-optimization/open-optimization-or-book/blob/master/Intro-Math-Programming/baseText/optimization/optimization-examples/diet-problem-next.xlsx}
+{https://github.com/open-optimization/open-optimization-or-book/tree/master/Intro-Math-Programming/baseText/optimization/optimization-examples/diet_problem_next_pulp.ipynb}
+{https://github.com/open-optimization/open-optimization-or-book/tree/master/Intro-Math-Programming/baseText/optimization/optimization-examples/diet_problem_next_gurobi.ipynb}
+
+Progress is important, and our last problem had too many tablets, so we are going to produce a single, purple, 10 gram tablet for our futuristic diet requires, which are at least 20 units of Iron, 25 units of Vitamin B, 30 units of Vitamin C, and 15 units of Vitamin D, and 2000 calories. The tablet is made from blending 4 nutritious chemicals; the following table shows the units of our nutrients per, and cost of, grams of each chemical.
+
+Formulate an LP that ensures a balanced diet at the minimum possible cost.
+\end{examplewithallcode}
+
+\begin{table}[h!] \begin{center} \begin{tabular} {|c|c|c|c|c|c|c|}
+\hline Tablet  & Iron  &  B &  C &  D & Calories & Cost (\$) \\ \hline
+\hline  Chem 1  & 6    & 6         & 7         & 4         &  1000    & 1.25 \\
+\hline  Chem 2  & 4    & 5         & 4         & 9         &  250     & 1.05 \\
+\hline  Chem 3  & 5    & 2         & 5         & 6         &  850     & 0.85 \\
+\hline  Chem 4  & 3    & 6         & 3         & 2         &  750     & 0.65 \\
+\hline
+\end{tabular} \end{center} \end{table}
+
+\begin{solution}
+
+\smallskip \modelhead{Sets}
+\begin{itemize}
+\item Set of chemicals $\{1,2,3,4\}$
+\end{itemize}
+\smallskip \modelhead{Parameters}
+\begin{itemize}
+\item Iron in each chemical
+\item Vitamin B in each chemical
+\item Vitamin C in each chemical
+\item Vitamin D in each chemical
+\item Cost of each chemical
+\end{itemize}
+\smallskip \modelhead{Variables} \\
+$x_i$ : grams of chemical $i$ to include in the purple tablet, $\forall i = 1,2,3,4$.\\
+\smallskip \modelhead{Model}
+\begin{align*}
+\min\ && z = 1.25x_1 + 1.05x_2 + 0.85x_3 + 0.65x_4 \\
+\st &&  6x_1 + 4x_2 + 5x_3 + 3x_4 &\ge 20 \\
+&& 6x_1 + 5x_2 + 2x_3 + 6x_4 &\ge 25  \\
+&& 7x_1 + 4x_2 + 5x_3 + 3x_4 &\ge 30  \\
+&& 4x_1 + 9x_2 + 6x_3 + 2x_4 &\ge 15  \\
+&& 1000x_1 + 250x_2 + 850x_3 + 750x_4 &\ge 2000 \\
+&& x_1 + x_2 + x_3 + x_4 &= 10  \\
+&& x_1, x_2, x_3, x_4 &\ge 0. 
+\end{align*}
+
+\end{solution}
+
+\begin{examplewithallcode}{Work Scheduling Problem}
+{https://github.com/open-optimization/open-optimization-or-book/blob/master/Intro-Math-Programming/baseText/optimization/optimization-examples/work_scheduling_excel.xlsx}
+{https://github.com/open-optimization/open-optimization-or-book/tree/master/Intro-Math-Programming/baseText/optimization/optimization-examples/work_scheduling_pulp.ipynb}
+{https://github.com/open-optimization/open-optimization-or-book/tree/master/Intro-Math-Programming/baseText/optimization/optimization-examples/work_scheduling_gurobi.ipynb}
+
+You are the manager of LP Burger. The following table shows the minimum number of employees required to staff the restaurant on each day of the week. Each employees must work for five consecutive days. Formulate an LP to find the minimum number of employees required to staff the restaurant.
+
+\end{examplewithallcode}
+
+\begin{table}[h!] \begin{center} \begin{tabular} {|l|l|} 
+\hline Day of Week & Workers Required   \\ \hline
+\hline  1 = Monday & 6  \\
+\hline  2 = Tuesday & 4  \\
+\hline  3 = Wednesday & 5  \\
+\hline  4 = Thursday & 4  \\
+\hline  5 = Friday & 3  \\
+\hline  6 = Saturday & 7  \\
+\hline  7 = Sunday & 7  \\
+\hline \end{tabular} \end{center} \end{table}
+
+\begin{solution} This problem has multiple optimal solutions for which days workers begin working on, all of which result in 8 total workers hired.
+
+\modelhead{Variables} \\
+$x_i$ : the number of workers that start 5 consecutive days of work on day $i$, $ i = 1,\dots,7$ \\
+\smallskip \modelhead{Model}
+\begin{align*}
+\min \quad & z = x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7 \\
+\st        & x_1 + x_4 + x_5 + x_6 + x_7 \ge 6   \tag{Mon} \\
+& x_2 + x_5 + x_6 + x_7 + x_1 \ge 4   \tag{Tue} \\
+& x_3 + x_6 + x_7 + x_1 + x_2 \ge 5   \tag{Wed} \\
+& x_4 + x_7 + x_1 + x_2 + x_3 \ge 4   \tag{Thu} \\
+& x_5 + x_1 + x_2 + x_3 + x_4 \ge 3   \tag{Fri} \\
+& x_6 + x_2 + x_3 + x_4 + x_5 \ge 7   \tag{Sat} \\
+& x_7 + x_3 + x_4 + x_5 + x_6 \ge 7   \tag{Sun} \\
+& x_1, \dots, x_7 \ge 0.
+\end{align*}
+
+One solution is as follows. The LP relaxation gives $z_{LP} = 7.333$ with fractional values $(x_1, \dots, x_7) = (0,\; 0.333,\; 1,\; 2.333,\; 0,\; 3.333,\; 0.333)$. Rounding to an integer solution yields $z_{IP} = 8$ with $(x_1, \dots, x_7) = (0,\; 0,\; 0,\; 3,\; 0,\; 4,\; 1)$.
+\end{solution}
+
+\newpage
+\begin{examplewithallcode}{LP Burger - extended}
+{https://github.com/open-optimization/open-optimization-or-book/blob/master/Intro-Math-Programming/baseText/optimization/optimization-examples/work_scheduling_excel_extended.xlsx}
+{https://github.com/open-optimization/open-optimization-or-book/blob/master/Intro-Math-Programming/baseText/optimization/optimization-examples/work_scheduling_extended_pulp.ipynb}
+{https://github.com/open-optimization/open-optimization-or-book/blob/master/Intro-Math-Programming/baseText/optimization/optimization-examples/work_scheduling_gurobi.ipynb}
+LP Burger has changed its policy, and allows, at most, two part time workers, who work for two consecutive days in a week.  Formulate this problem.
+\end{examplewithallcode}
+\begin{solution}
+\modelhead{Variables} \\
+$x_i$ : the number of workers that start 5 consecutive days of work on day $i$, $ i = 1,\cdots,7$ \\
+$y_i$ : the number of workers that start 2 consecutive days of work on day $i$, $ i = 1,\cdots,7$.
+
+\smallskip \modelhead{Model}
+\begin{align*}
+\min \quad && z = 5(x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7) \\
+&& + 2(y_1 + y_2 + y_3 + y_4 + y_5 + y_6 + y_7) \nonumber \\
+\st \quad && x_1 + x_4 + x_5 + x_6 + x_7 + y_1 + y_7 &\ge 6 \\
+&& x_2 + x_5 + x_6 + x_7 + x_1 + y_2 + y_1 &\ge 4 \\
+&&           x_3 + x_6 + x_7 + x_1 + x_2 + y_3 + y_2 &\ge 5 \\
+&&           x_4 + x_7 + x_1 + x_2 + x_3 + y_4 + y_3 &\ge 4 \\
+&&           x_5 + x_1 + x_2 + x_3 + x_4 + y_5 + y_4 &\ge 3 \\
+&&           x_6 + x_2 + x_3 + x_4 + x_5 + y_6 + y_5 &\ge 7 \\
+&&           x_7 + x_3 + x_4 + x_5 + x_6 + y_7 + y_6 &\ge 7 \\
+&&           y_1 + y_2 + y_3 + y_4 + y_5 + y_6 + y_7 &\le 2 \\
+&&           x_i \ge 0, y_i \ge 0, \forall i = 1,\cdots,7.
+\end{align*}
+\end{solution}
+
+% SUBSECTION 3.2.1
+\newpage
+\subsection{Knapsack Problem}
+We consider now a simple example where the variables can only take the values of 0 or 1.  We call these \emph{binary variables}.
+\begin{examplewithallcode}{Camping Trip}
+{https://github.com/open-optimization/open-optimization-or-book/blob/master/Intro-Math-Programming/baseText/optimization/optimization-examples/knapsack-problem-excel.xlsx}
+{https://github.com/open-optimization/open-optimization-or-book/tree/master/Intro-Math-Programming/baseText/optimization/optimization-examples/knapsack-three-two-one-gurobi.ipynb}
+{https://github.com/open-optimization/open-optimization-or-book/tree/master/Intro-Math-Programming/baseText/optimization/optimization-examples/knapsack-three-two-one-pulp.ipynb}
+Imagine you are preparing for a week-long camping trip to the mountains. You have a backpack with a weight capacity of 20 kilograms. Your goal is to pack the most valuable items to ensure a comfortable and safe trip without exceeding the backpack's weight limit. Each item has a weight and a value associated with it, representing its importance and utility for the trip. The table below lists the potential items you can take, their weights in kilograms, and their values on a scale from 1 to 10 (with 10 being the most valuable).
+\newline
+Formulate an Integer Program to find the optimal items you should bring on your trip with you. 
+\end{examplewithallcode}
+
+\begin{table}[h!] \begin{center} \begin{tabular} {|l|l|l|l|} 
+\hline Item & Index & Weight (kg) & Value  \\ \hline
+\hline Tent & A & 4 & 10  \\
+\hline Stove & B & 2 & 9  \\
+\hline Sleeping Bag & C & 3 & 8  \\
+\hline First Aid Kit & D & 1 & 7  \\
+\hline Food Supplies & E & 5 & 9  \\
+\hline Water Filter & F & 1 & 6  \\
+\hline Clothes & G & 4 & 5  \\
+\hline Map and Compass & H & 0.5 & 7  \\
+\hline \end{tabular} \end{center} \end{table}
+
+\begin{solution}
+\modelhead{Variables} \\
+$x_i$ : whether to include item $i$ in the backpack, where $i \in \{A, B, C, D, E, F, G, H\}$, $x_i = 1$ if item $i$ is included, and $x_i = 0$ otherwise.
+
+\smallskip \modelhead{Model}
+\begin{align*}
+\max \quad & z = 10x_A + 9x_B + 8x_C + 7x_D + 9x_E + 6x_F + 5x_G + 7x_H \\
+\st        & 4x_A + 2x_B + 3x_C + 1x_D + 5x_E + 1x_F + 4x_G + 0.5x_H \le 20 \\
+& x_A, x_B, x_C, x_D, x_E, x_F, x_G, x_H \in \{0,1\}.
+\end{align*}
+\end{solution}
+
+% SUBSECTION 3.2.2
+\subsection{Capital Investment}
+We next see a similar application of binary variables.
+%FIRST EXAMPLE OF CAPITAL INVESTMENT
+\begin{examplewithallcode}{Capital Allocation Problem}
+{https://github.com/open-optimization/open-optimization-or-book/blob/master/Intro-Math-Programming/baseText/optimization/optimization-examples/capital-allocation-excel.xlsx}
+{https://github.com/open-optimization/open-optimization-or-book/tree/master/Intro-Math-Programming/baseText/optimization/optimization-examples/knapsack-capital-allocation-pulp.ipynb}
+{https://github.com/open-optimization/open-optimization-or-book/tree/master/Intro-Math-Programming/baseText/optimization/optimization-examples/knapsack-capital-allocation-gurobi.ipynb}
+You are a financial planner for an investment firm. The firm has \$100,000 to invest in a portfolio of projects. Each project has a projected return and requires an initial investment. The goal is to maximize the total return of the portfolio while not exceeding the available capital. The following table lists potential projects, their required investments, and their projected returns.
+
+Formulate an LP to maximize the total return of the portfolio while not exceeding the available investment capital.
+\end{examplewithallcode}
+
+\begin{table}[h!] \begin{center} \begin{tabular} {|l|l|l|} 
+\hline Project & Investment Required (\$) & Projected Return (\$)  \\ \hline
+\hline  A & 20,000 & 30,000  \\
+\hline  B & 30,000 & 40,000  \\
+\hline  C & 50,000 & 75,000  \\
+\hline  D & 10,000 & 15,000  \\
+\hline  E & 40,000 & 60,000  \\
+\hline \end{tabular} \end{center} \end{table}
+
+\begin{solution}
+
+\smallskip \modelhead{Sets}
+\begin{itemize}
+\item Projects: \( P = \{A, B, C, D, E\} \)
+\end{itemize}
+
+\smallskip \modelhead{Parameters}
+\begin{itemize}
+\item \( \text{inv}_i \): investment required for project \( i \)
+\item \( \text{ret}_i \): projected return from project \( i \)
+\item \( B = 100{,}000 \): total available capital
+\end{itemize}
+
+\smallskip \modelhead{Variables} \\
+\( x_i \in \{0,1\} \): 1 if project \( i \) is selected, 0 otherwise
+
+\smallskip \modelhead{Model}
+\begin{align*}
+\max \quad & z = 30{,}000x_A + 40{,}000x_B + 75{,}000x_C + 15{,}000x_D + 60{,}000x_E \\
+\st \quad 
+& 20{,}000x_A + 30{,}000x_B + 50{,}000x_C + 10{,}000x_D + 40{,}000x_E \le 100{,}000 \\
+& x_A, x_B, x_C, x_D, x_E \in \{0,1\}
+\end{align*}
+
+\smallskip \underline{Compact Form:}
+
+\begin{align*}
+\max \quad & \sum_{i \in P} \text{ret}_i \cdot x_i \\
+\st        & \sum_{i \in P} \text{inv}_i \cdot x_i \le B \\
+& x_i \in \{0,1\} &&\quad \text{for all } i \in P
+\end{align*}
+
+\end{solution}
+
+\subsection{Transportation problem}
+\begin{examplewithallcode}{Solar Panel Shipping}
+{https://github.com/open-optimization/open-optimization-or-book/blob/master/Intro-Math-Programming/baseText/optimization/optimization-examples/solar-shipping.xlsx}
+{https://github.com/open-optimization/open-optimization-or-book/tree/master/Intro-Math-Programming/baseText/optimization/optimization-examples/solar_shipping_pulp.ipynb}
+{https://github.com/open-optimization/open-optimization-or-book/tree/master/Intro-Math-Programming/baseText/optimization/optimization-examples/solar_shipping_gurobi.ipynb}
+
+SolTranz Inc. manufactures high-efficiency solar panels at three factories located in Reno (R), Boulder (B), and Tucson (T). The maximum production at each facility is 4,500, 5,500, and 7,000 panels, respectively. These panels must be shipped to five warehouses (labeled 1 through 5), each with a fixed demand.
+
+The cost of producing a solar panel depends on the factory, and the shipping costs to each warehouse are also known. However, no more than 2,000 panels can be shipped from a factory to a single warehouse. The table below summarizes the data.
+
+Formulate a linear program that minimizes the total cost of production and shipping to satisfy all warehouse demands.
+
+\end{examplewithallcode}
+
+\begin{table}[h!] \begin{center} \begin{tabular} {|c|c|c|c|c|c|c|}
+\hline Factory  & Prod. Cost (\$) & WH1 & WH2 & WH3 & WH4 & WH5 \\ \hline
+\hline Reno (R)     & 150     & 60  & 70  & 75  & 65  & 50 \\
+\hline Boulder (B)  & 140     & 80  & 55  & 65  & 70  & 60 \\
+\hline Tucson (T)   & 130     & 85  & 60  & 55  & 50  & 65 \\
+\hline
+\end{tabular} \end{center} \caption*{Shipping cost from each factory to each warehouse (in \$ per panel).}
+\end{table}
+
+\textbf{Warehouse Demands:}
+\[
+\begin{aligned}
+\text{WH1: } & 3000 \quad \text{WH2: } 3500 \quad \text{WH3: } 2500 \quad \text{WH4: } 4000 \quad \text{WH5: } 3000
+\end{aligned}
+\]
+
+\begin{solution}
+
+\smallskip \modelhead{Sets}
+\begin{itemize}
+\item Factories: \( F = \{R, B, T\} \)
+\item Warehouses: \( W = \{1, 2, 3, 4, 5\} \)
+\end{itemize}
+
+\smallskip \modelhead{Parameters}
+\begin{itemize}
+\item \( C_f \): production cost per panel at factory \( f \)
+\item \( S_f \): supply capacity of factory \( f \)
+\item \( D_w \): demand at warehouse \( w \)
+\item \( T_{f,w} \): shipping cost per panel from factory \( f \) to warehouse \( w \)
+\item \( M = 2000 \): max panels shipped from any factory to any warehouse
+\end{itemize}
+
+\smallskip \modelhead{Variables} \\
+\( x_{f,w} \): number of solar panels shipped from factory \( f \) to warehouse \( w \)
+
+\smallskip \modelhead{Model}
+\begin{align*}
+\min \quad & \sum_{f \in F} \sum_{w \in W} (C_f + T_{f,w}) \cdot x_{f,w} \\
+\st \quad 
+& \sum_{w \in W} x_{R,w} \leq 4500   \tag{Reno capacity} \\
+& \sum_{w \in W} x_{B,w} \leq 5500   \tag{Boulder capacity} \\
+& \sum_{w \in W} x_{T,w} \leq 7000   \tag{Tucson capacity} \\
+& \sum_{f \in F} x_{f,1} = 3000   \tag{WH1 demand} \\
+& \sum_{f \in F} x_{f,2} = 3500   \tag{WH2 demand} \\
+& \sum_{f \in F} x_{f,3} = 2500   \tag{WH3 demand} \\
+& \sum_{f \in F} x_{f,4} = 4000   \tag{WH4 demand} \\
+& \sum_{f \in F} x_{f,5} = 3000   \tag{WH5 demand} \\
+& 0 \leq x_{f,w} \leq 2000 &&\quad \text{for all } f \in F, \forall w \in W \\
+\end{align*}
+
+\end{solution}
+
+\subsection{Assignment Problem}
+Consider the assignment of $3$ employees to $3$ tasks, where each employee has a cost to do each ask.  How to figure out the best assignment to the tasks?
+
+\begin{examplewithallcode}
+{Hiring for tasks}
+{https://github.com/open-optimization/open-optimization-or-book/blob/master/Intro-Math-Programming/baseText/optimization/optimization-examples/assignment-problem-excel.xlsx}
+{https://github.com/open-optimization/open-optimization-or-book/tree/master/Intro-Math-Programming/baseText/optimization/optimization-examples/assignment_problem_pulp.ipynb}
+{https://github.com/open-optimization/open-optimization-or-book/tree/master/Intro-Math-Programming/baseText/optimization/optimization-examples/assignment_problem_gurobi.ipynb}
+\label{example:hiring-for-tasks}
+In this assignment problem, we need to hire three people (Person 1, Person 2, Person 3) to three tasks (Task 1, Task 2, Task 3).   In the table below, we list the cost of hiring each person for each task, in dollars.  Since each person has a different cost for each task, we must make an assignment to minimize our total cost.\footnote{The numerical cost matrix used in this example is similar to one appearing in an introductory assignment-problem tutorial at \url{https://www.excel-easy.com/examples/assignment-problem.html}; if the values were taken from that source rather than independently chosen, this footnote serves as attribution.}
+
+\medskip
+\noindent
+\begin{center}
+\begin{tabular}{llll}
+    \hline
+        Cost & Task 1 & Task 2 & Task 3  \\ \hline
+        Person 1 & 40 & 47 & 80  \\ \hline
+        Person 2 & 72 & 36 & 58  \\ \hline
+        Person 3 & 24 & 61 & 71 \\ \hline
+    \end{tabular}
+\end{center}
+
+Given the specific costs of assigning three people to three tasks, we can write out the mathematical model explicitly using the given numbers.
+\end{examplewithallcode}
+\begin{solution}
+
+\smallskip \modelhead{Sets}
+\begin{itemize}
+\item Persons: $\{1, 2, 3\}$
+\item Tasks: $\{1, 2, 3\}$
+\end{itemize}
+
+\smallskip \modelhead{Parameters}
+\begin{itemize}
+\item $c_{ij}$: cost for person $i$ to complete task $j$
+\end{itemize}
+
+\smallskip \modelhead{Variables} \\
+$x_{ij} = 1$ if person $i$ is assigned to task $j$, and $0$ otherwise.
+
+\smallskip \modelhead{Model}
+\begin{align*}
+\min \quad & z = 40x_{11} + 47x_{12} + 80x_{13} + 72x_{21} + 36x_{22} + 58x_{23} + 24x_{31} + 61x_{32} + 71x_{33} \\
+\st        & x_{11} + x_{12} + x_{13} = 1   \tag{Person 1} \\
+& x_{21} + x_{22} + x_{23} = 1   \tag{Person 2} \\
+& x_{31} + x_{32} + x_{33} = 1   \tag{Person 3} \\
+& x_{11} + x_{21} + x_{31} = 1   \tag{Task 1} \\
+& x_{12} + x_{22} + x_{32} = 1   \tag{Task 2} \\
+& x_{13} + x_{23} + x_{33} = 1   \tag{Task 3} \\
+& x_{ij} \in \{0, 1\} &&\quad \text{for all } i, j \in \{1, 2, 3\}.
+\end{align*}
+\end{solution}
+
+\section{Exercises}
+
+Work through the following problems to practice formulating linear programs.\footnote{Some exercises in this section were adapted from content by Rupinder Sekhon and Roberta Bloom, shared under CC BY 4.0 via LibreTexts.}
+
+\begin{ex}{Chemical Manufacturing}
+\label{ex:ChemicalPlant}
+ A chemical manufacturer produces three chemicals: A, B and C. These chemical are produced by two processes: 1 and 2. 
+\begin{itemize}
+\item Running process 1 for 1 hour costs \$4 and yields 3 units of chemical A, 1 unit of chemical B and 1 unit of chemical C. 
+\item Running process 2 for 1 hour costs \$1 and produces 1 units of chemical A, and 1 unit of chemical B (but none of Chemical C). 
+\end{itemize}
+To meet customer demand, 
+\begin{itemize}
+\item at least 10 units of chemical A, 
+\item at least 5 units of chemical B and 
+\item at least 3 units of chemical C
+\end{itemize}
+must be produced daily.\\
+
+ Assume that the chemical manufacturer wants to minimize the cost of production. 
+
+Develop a linear programming problem describing the constraints and objectives of the chemical manufacturer. \\
+
+\emph{[Hint: Let $x_1$ be the amount of time Process 1 is executed and let $x_2$ be amount of time Process 2 is executed. Use the coefficients above to express the cost of running Process 1 for $x_1$ time and Process 2 for $x_2$ time. Do the same to compute the amount of chemicals A, B, and C that are produced.]}
+\label{exer:ChemicalPlant}
+\end{ex}
+
+\begin{ex}{Identify Linear Functions}{}
+Which ones are linear functions?
+\begin{enumerate}
+    \item $x^2 + 3y + 2z$
+    \item $\sqrt{x_1 x_2 x_3}$
+    \item $\sum_{i=1}^n a_i 2^{x_i}, \quad \text{where } a_1, a_2, \dots, a_n \text{ are constant}$
+    \item $\sum_{i=1}^n a_i x_i, \quad \text{where } a_1, a_2, \dots, a_n \text{ are constant}$
+\end{enumerate}
+\end{ex}
+
+\begin{ex}{Identify Linear Function}{}
+Which one is a linear function?
+
+\begin{enumerate}
+    \item $2x_1 + x_2x_3 - 7x_3$
+    \item $\sqrt{2}x_1 + x_2 + 3^{1.6}x_3$
+\end{enumerate}
+\end{ex}
+
+\begin{ex}{Identify Linear Inequalities}{}
+Which ones are linear inequalities?  Can any be made into linear inequalities?
+
+\begin{enumerate}
+    \item $\frac{x_1}{x_1 + x_2 + x_3} \geq 0.5$
+    \item $\sin x_1 + x_2 + x_3 = 0.5$
+    \item $\sum_{i=1}^n a_i 2^{x_i} \geq b, \quad \text{where } a_1, a_2, \dots, a_n, b \text{ are constant}$
+    \item $\sum_{i=1}^n a_i x_i = b, \quad \text{where } a_1, a_2, \dots, a_n, b \text{ are constant}$
+    \item $\sum_{i=1}^n a_i x_i \geq b, \quad \text{where } a_1, a_2, \dots, a_n, b \text{ are constant}$
+\end{enumerate}
+\end{ex}
+
+\begin{ex}{Oven Store Profit Maximization}{}
+An appliance store sells three types of ovens: small, medium, and large. The small, medium, and large ovens require, respectively, 3, 5, and 6 cubic feet of storage space; at most 100 cubic feet of storage is available. Each oven takes 1 hour of sales time; there is a maximum of 200 hours of sales labor time available. The small, medium, and large ovens require, respectively, 1, 1, and 2 hours of installation time; at most 280 hours of installer labor are available monthly.
+
+If the profit (in dollars) from small, medium, and large ovens is 50, 100, and 150 respectively, how many of each type of oven should be sold to maximize profit, and what is the maximum profit?
+\end{ex}
+
+\begin{ex}{Manufacturing Profit Problem}{}
+A factory manufactures three products, A, B, and C. Each product requires the use of two machines (Machine I and Machine II). The total hours available per month on Machine I and Machine II are 180 and 300, respectively. The table below shows the time requirements (in hours per unit) and profit per unit for each product.
+
+\[
+\begin{array}{|c|c|c|c|}
+\hline
+ & A & B & C \\
+\hline
+\text{Machine I} & 1 & 2 & 2 \\
+\hline
+\text{Machine II} & 2 & 2 & 4 \\
+\hline
+\text{Profit (dollars)} & 20 & 30 & 40 \\
+\hline
+\end{array}
+\]
+
+How many units of each product should be manufactured to maximize profit, and what is the maximum profit?
+\end{ex}
+
+\begin{ex}{Factory Production Scheduling}{}
+A company produces three products, A, B, and C, at two factories, Factory I and Factory II. Daily production of each factory for each product is listed below:
+
+\[
+\begin{array}{|c|c|c|}
+\hline
+ & \text{Factory I} & \text{Factory II} \\
+\hline
+\text{Product A} & 10 & 20 \\
+\hline
+\text{Product B} & 20 & 20 \\
+\hline
+\text{Product C} & 20 & 10 \\
+\hline
+\end{array}
+\]
+
+The company must produce at least 1000 units of product A, 1600 units of product B, and 700 units of product C. If the cost of operating Factory I is \$4000 per day and the cost of operating Factory II is \$5000 per day, how many days should each factory operate to complete the order at a minimum cost, and what is the minimum cost?
+\end{ex}
+
+\begin{ex}{Quiz Grading Minimization}{}
+Professor Wright gives three types of quizzes (objective, recall, and recall-plus) and decides to give at least 20 quizzes next quarter. Each type of quiz requires the students to spend extra preparation time:
+\[
+\begin{aligned}
+&\text{Objective: } 10 \text{ minutes per quiz},\\
+&\text{Recall: } 30 \text{ minutes per quiz},\\
+&\text{Recall-plus: } 60 \text{ minutes per quiz}.
+\end{aligned}
+\]
+He wants students to spend at least 12 hours (720 minutes) in total preparation for these quizzes (beyond normal study time).
+
+Average quiz scores are:
+\[
+\text{Objective: } 5,\quad
+\text{Recall: } 6,\quad
+\text{Recall-plus: } 7.
+\]
+He wants the total of all quiz scores to be at least 130 points.
+
+It takes the professor:
+\[
+\begin{aligned}
+& 1 \text{ minute to grade each objective quiz},\\
+& 2 \text{ minutes to grade each recall quiz},\\
+& 3 \text{ minutes to grade each recall-plus quiz}.
+\end{aligned}
+\]
+How many of each type should he give in order to minimize his own grading time?
+\end{ex}
+
+

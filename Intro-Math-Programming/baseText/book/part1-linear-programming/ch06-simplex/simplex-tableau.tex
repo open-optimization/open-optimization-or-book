@@ -14,11 +14,19 @@
 \end{itemize}
 \end{outcome}
 
+\begin{tryit}
+\vizlink{simplex-tableau}{Simplex Pivoter in Tableau Form}: the same pivoting mechanics as this chapter, with every row operation shown.
+
+\vizlink{tableau-pivoter}{Free Tableau Pivoter}: a Gauss--Jordan sandbox; pivot on any entry and see what happens.
+\end{tryit}
+
+
+
 % Fixed-width centred column for evenly spaced tableau entries.
 % (Z is unused by array/tabularx/siunitx, so this is safe book-wide.)
 \newcolumntype{Z}{>{\centering\arraybackslash}p{0.95cm}}
 
-The dictionary method of Chapter~\ref{ch:simplex-dictionary} and the matrix calculations of Chapter~\ref{ch:simplex-matrix} both carry out the \emph{same} arithmetic; they differ only in how much of it we write down. The \emph{simplex tableau} is the most compact bookkeeping of all: a single table of numbers that stores the slack form of the linear program and updates it in place at each pivot. Everything the simplex method needs---which variable to bring in, which to send out, and whether we are finished---can be read straight off the table.
+The dictionary method of Chapter~\ref{ch:simplex-dictionary} and the matrix calculations of Chapter~\ref{ch:simplex-matrix} both carry out the \emph{same} arithmetic; they differ only in how much of it we write down. The \emph{simplex tableau} is the most compact bookkeeping of all: a single table of numbers that stores the slack form of the linear program and updates it in place at each pivot. Everything the simplex method needs (which variable to bring in, which to send out, and whether we are finished) can be read straight off the table.
 
 We use the same linear program solved by dictionaries earlier,
 \begin{equation*}
@@ -49,7 +57,7 @@ z - 2x - 3y = 0,
 \]
 so that the objective sits in the table on the same footing as the constraints. This equation is the \emph{objective row} (or $z$-row); we place it on top.
 
-Each row of the tableau lists the coefficients of one equation, and the final column holds its right-hand side. The leftmost column names the \emph{basic variable} of that row---the variable that appears with coefficient $1$ in that row and $0$ in every other row. Reading the starting tableau,
+Each row of the tableau lists the coefficients of one equation, and the final column holds its right-hand side. The leftmost column names the \emph{basic variable} of that row: the variable that appears with coefficient $1$ in that row and $0$ in every other row. Reading the starting tableau,
 \begin{center}
 \renewcommand{\arraystretch}{1.3}
 \begin{tabular}{c|ZZZZZ|Z}
@@ -141,7 +149,7 @@ $y$   & \cellcolor{algenter!18}$\tfrac12$ & $1$ & $0$ & $0$ & $\tfrac12$ & $7$ &
 {\color{algpivot}\ding{114}\ \textbf{Pivot}} on $\tfrac12$.
 
 \medskip
-Notice the objective value has already climbed from $0$ to $21$. One more pivot on the blue element---scale the $s_1$-row by $2$, then clear the $x$ column---produces the third tableau, with basis $\{x,s_2,y\}$:
+Notice the objective value has already climbed from $0$ to $21$. One more pivot on the blue element (scale the $s_1$-row by $2$, then clear the $x$ column) produces the third tableau, with basis $\{x,s_2,y\}$:
 \begin{center}
 \renewcommand{\arraystretch}{1.3}
 \begin{tabular}{c|ZZZZZ|Z}
@@ -167,9 +175,9 @@ Every entry of the $z$-row is now nonnegative, so no variable can enter and impr
 The result matches the dictionary solution exactly, as it must. The nonzero slack $s_2=3$ says the second constraint $2x+y\le 16$ is slack (indeed $2(4)+5 = 13 < 16$), while $s_1=s_3=0$ says the first and third constraints are tight at the optimum.
 
 \begin{algocard}{Algorithm: Simplex Method (Tableau Form)}
-\algostep{algenter}{\ding{43}}{Choose the entering variable}{Scan the objective row. Pick a nonbasic variable with a \emph{negative} entry; a common choice is the most negative. If no entry is negative, stop---the current tableau is optimal.}
+\algostep{algenter}{\ding{43}}{Choose the entering variable}{Scan the objective row. Pick a nonbasic variable with a \emph{negative} entry; a common choice is the most negative. If no entry is negative, stop: the current tableau is optimal.}
 \algostep{algleave}{\ding{47}}{Ratio test for the leaving variable}{For each row with a \emph{positive} entry in the entering column, form the ratio $\dfrac{\text{RHS}}{\text{entering-column entry}}$. The row with the smallest ratio leaves. (If no entry is positive, the problem is unbounded.)}
-\algostep{algpivot}{\ding{114}}{Pivot}{Scale the pivot row so the pivot element becomes $1$, then add multiples of it to every other row---including the objective row---so the rest of the entering column becomes $0$.}
+\algostep{algpivot}{\ding{114}}{Pivot}{Scale the pivot row so the pivot element becomes $1$, then add multiples of it to every other row, including the objective row, so the rest of the entering column becomes $0$.}
 \algostep{algopt}{\ding{52}}{Repeat until optimal}{Repeat until every objective-row entry is nonnegative. Then read the optimal solution and objective value from the RHS column.}
 \end{algocard}
 
@@ -178,7 +186,7 @@ The tableau, the dictionary, and the matrix form are three windows onto one algo
 \section{Artificial Variables and the Big-M Method}
 \label{sec:tableau-bigm}
 
-Every tableau so far began from the slack basis, where the slack variables supplied a ready-made identity block and a feasible starting point. A ``$\ge$'' constraint spoils that: its surplus variable enters with a coefficient of $-1$, so it cannot serve as a basic variable, and the origin is infeasible. The tableau form handles this exactly as the dictionary form does (Chapter~\ref{ch:simplex-dictionary}), by adding an \emph{artificial variable} to each such constraint and penalizing it by a large constant $M$ in the objective---the \emph{Big-M method}. The one new wrinkle is bookkeeping: because each artificial variable starts \emph{in} the basis, we must first clear its column from the objective row before the simplex rules apply.
+Every tableau so far began from the slack basis, where the slack variables supplied a ready-made identity block and a feasible starting point. A ``$\ge$'' constraint spoils that: its surplus variable enters with a coefficient of $-1$, so it cannot serve as a basic variable, and the origin is infeasible. The tableau form handles this exactly as the dictionary form does (Chapter~\ref{ch:simplex-dictionary}), by adding an \emph{artificial variable} to each such constraint and penalizing it by a large constant $M$ in the objective (the \emph{Big-M method}). The one new wrinkle is bookkeeping: because each artificial variable starts \emph{in} the basis, we must first clear its column from the objective row before the simplex rules apply.
 
 \subsection{A problem with no slack-basis start}
 
@@ -280,7 +288,7 @@ $s_3$ & $1$ & $2$ & $0$ & $0$ & $1$ & $0$ & $14$\\
 \bottomrule
 \end{tabular}
 \end{center}
-Running the simplex method to optimality of the penalized problem---two pivots suffice---leads to
+Running the simplex method to optimality of the penalized problem (two pivots suffice) leads to
 \begin{center}
 \renewcommand{\arraystretch}{1.3}\small\setlength{\tabcolsep}{4.5pt}
 \begin{tabular}{c|cccccc|c}
@@ -295,7 +303,7 @@ $y$   & $0$ & $1$ & $0$ & $-\tfrac13$ & $\tfrac23$ & $0$ & $4$\\
 \bottomrule
 \end{tabular}
 \end{center}
-Every objective-row entry is nonnegative, so this tableau is optimal for the Big-M problem---yet the artificial variable $a_1$ is still basic, at the positive value $a_1 = 6$. Because a genuine solution of the original problem would let us set every artificial variable to zero, a positive artificial variable in the optimal Big-M tableau is the signal that \textbf{the original linear program is infeasible}. The tell-tale $-6M$ in the objective value $24-6M$ says the same thing: no finite objective can escape the penalty.
+Every objective-row entry is nonnegative, so this tableau is optimal for the Big-M problem, yet the artificial variable $a_1$ is still basic, at the positive value $a_1 = 6$. Because a genuine solution of the original problem would let us set every artificial variable to zero, a positive artificial variable in the optimal Big-M tableau is the signal that \textbf{the original linear program is infeasible}. The tell-tale $-6M$ in the objective value $24-6M$ says the same thing: no finite objective can escape the penalty.
 
 \begin{center}
 \renewcommand{\arraystretch}{1.3}
@@ -311,6 +319,7 @@ A feasible basis for the original problem was found; delete the artificial colum
 \section{Exercises}
 
 \begin{ex}{Reading a tableau}{}
+\label{ex:tableau-reading}
 The following tableau arose while solving a maximization problem, with the objective row on top:
 \begin{center}
 \renewcommand{\arraystretch}{1.3}
@@ -329,6 +338,7 @@ Identify the basic and nonbasic variables, state the corresponding basic feasibl
 \end{ex}
 
 \begin{ex}{Entering variable, ratio test, and pivot element}{}
+\label{ex:tableau-ratio-test}
 Consider the tableau
 \begin{center}
 \renewcommand{\arraystretch}{1.3}
@@ -352,6 +362,7 @@ Starting from the tableau in the previous exercise, perform the pivot you identi
 \end{ex}
 
 \begin{ex}{Solve a linear program in tableau form}{}
+\label{ex:tableau-solve-lp}
 Use the simplex method in tableau form to solve
 \[
 \begin{aligned}
@@ -415,3 +426,56 @@ $y$   & $0$ & $1$ & $-1$ & $0$ & $0$ & $2$\\
 \end{center}
 Is the tableau optimal for the penalized problem? What is the value of the artificial variable $a_1$, and what does it tell you about the original linear program? Explain the role of the $-3M$ term in the objective value.
 \end{ex}
+
+\subsubsection*{Selected Solutions}
+
+\begin{solution}(Exercise~\ref{ex:tableau-reading})
+The basic variables are the row labels $x_1$ and $x_2$; the nonbasic variables are $s_1$ and $s_2$.  Setting the nonbasic variables to zero and reading the RHS column gives the basic feasible solution
+\[
+x_1 = 6, \quad x_2 = 4, \quad s_1 = s_2 = 0, \qquad z = 40.
+\]
+The objective-row entries of the nonbasic variables are $3$ and $1$, both nonnegative.  In this convention a positive entry means that increasing the corresponding nonbasic variable would \emph{decrease} $z$, so no pivot can improve the objective and the tableau is optimal.
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:tableau-ratio-test})
+The most negative objective-row entry is $-4$, so $x_1$ enters.  The ratio test divides each RHS by the positive entries of the $x_1$ column:
+\[
+\frac{6}{2} = 3, \qquad \frac{8}{4} = 2, \qquad \frac{12}{3} = 4.
+\]
+The minimum ratio $2$ occurs in the $s_2$ row, so $s_2$ leaves and the pivot element is the $4$ in the $s_2$ row of the $x_1$ column.
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:tableau-solve-lp})
+Adding slacks $s_1, s_2$, the initial tableau has objective row $(-1, -2, 0, 0 \mid 0)$.
+
+\textbf{First pivot:} $y$ enters ($-2$ is most negative).  Ratios: $4/1 = 4$ and $6/3 = 2$, so $s_2$ leaves; the pivot element is the $3$ in the $s_2$ row.  Dividing the pivot row by $3$ and clearing the $y$ column gives
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{c|ZZZZ|Z}
+\toprule
+Basis & $x$ & $y$ & $s_1$ & $s_2$ & RHS\\
+\midrule
+$z$   & $-\tfrac13$ & $0$ & $0$ & $\tfrac23$ & $4$\\
+\midrule
+$s_1$ & $\tfrac23$ & $0$ & $1$ & $-\tfrac13$ & $2$\\
+$y$   & $\tfrac13$ & $1$ & $0$ & $\tfrac13$  & $2$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Second pivot:} $x$ enters ($-\tfrac13$).  Ratios: $2/\tfrac23 = 3$ and $2/\tfrac13 = 6$, so $s_1$ leaves; the pivot element is the $\tfrac23$ in the $s_1$ row.  The resulting tableau is
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{c|ZZZZ|Z}
+\toprule
+Basis & $x$ & $y$ & $s_1$ & $s_2$ & RHS\\
+\midrule
+$z$   & $0$ & $0$ & $\tfrac12$ & $\tfrac12$ & $5$\\
+\midrule
+$x$ & $1$ & $0$ & $\tfrac32$ & $-\tfrac12$ & $3$\\
+$y$ & $0$ & $1$ & $-\tfrac12$ & $\tfrac12$ & $1$\\
+\bottomrule
+\end{tabular}
+\end{center}
+Every objective-row entry is nonnegative, so the tableau is optimal: $(x, y) = (3, 1)$ with $z^* = 5$.
+\end{solution}

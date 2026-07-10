@@ -1,7 +1,12 @@
 \chapter{Simplex - Matrix Calculations}
 \label{ch:simplex-matrix}
 
+In the previous chapter we ran the simplex method through dictionaries: rewrite, pivot, repeat.  That view is good for intuition.  In this chapter we work out the \emph{linear algebra} behind it.  Every dictionary you wrote is a statement about matrices: choosing a basis means selecting an invertible submatrix $A_B$, pivoting means changing that submatrix, and the objective row of a dictionary is a vector of \emph{reduced costs} computed from $A_B^{-1}$.  Making this precise explains \emph{why} the method works, and it is how simplex is implemented in software, where solvers manipulate basis matrices rather than rewrite equations.
+
+We proceed in two steps.  Section~\ref{sec:solutions-axb} shows how partitioning variables into basic and nonbasic sets turns $A\x = \b$ into a formula for basic solutions.  Section~\ref{sec:optimality-conditions} then rewrites the objective from the perspective of a basis, giving an algebraic certificate of optimality.
+
 \section{Solutions to $A\x = \b$}
+\label{sec:solutions-axb}
 \begin{outcome}
 \begin{itemize}
 \item Explore how a system of equations can be rewritten via partitioning the variables
@@ -468,8 +473,8 @@ x_B = A_B^{-1}\b=
 \end{bmatrix}
 =
 \begin{bmatrix}
-    2 \\
-    1
+    6/5 \\
+    7/5
 \end{bmatrix}.
 \]
 Since \( \x_B \geq 0 \), this is a \textbf{basic feasible solution}.
@@ -610,6 +615,8 @@ Computing the basic solution:
     (-3/7)(16) + (2/7)(45) \\
     (5/7)(16) + (-1/7)(45)
 \end{bmatrix}
+\]
+\[
 =
 \begin{bmatrix}
     -48/7 + 90/7 \\
@@ -625,63 +632,57 @@ Computing the basic solution:
     6 \\ 5
 \end{bmatrix}.
 \]
-Since \( \x_B = (6,5) \) contains no negative values, this is actually a \textbf{feasible solution}, contradicting our initial assumption that it would be infeasible!
+Since \( \x_B = (6,5) \) contains no negative values, this basis indeed yields a \textbf{feasible solution}.
 
-\item  Basis 2: \(B= \{x_1, s_1\} \) (Infeasible)
-The basis matrix is:
+\item  Basis 2: \(B= \{x_1, s_2\} \) (Infeasible)
+The basis matrix (the columns of \( x_1 \) and \( s_2 \)) is:
 \[
 A_B =
 \begin{bmatrix}
-    1 & 1 \\
-    5 & 0
+    1 & 0 \\
+    5 & 1
 \end{bmatrix}.
 \]
 Computing \( A_B^{-1} \):
 \[
 A_B^{-1} =
-\frac{1}{(1)(0) - (1)(5)}
+\frac{1}{(1)(1) - (0)(5)}
 \begin{bmatrix}
-    0 & 1 \\
-    5 & -1
-\end{bmatrix}
-=
-\frac{1}{-5}
-\begin{bmatrix}
-    0 & 1 \\
-    5 & -1
+    1 & 0 \\
+    -5 & 1
 \end{bmatrix}
 =
 \begin{bmatrix}
-    0 & -1/5 \\
-    -1 & 1/5
+    1 & 0 \\
+    -5 & 1
 \end{bmatrix}.
 \]
 Computing the basic solution:
 \[
-\x_B = A_B^{-1}\b=
+\x_B = \begin{bmatrix} x_1 \\ s_2 \end{bmatrix} = A_B^{-1}\b=
 \begin{bmatrix}
-    0 & -1/5 \\
-    -1 & 1/5
+    1 & 0 \\
+    -5 & 1
 \end{bmatrix}
 \begin{bmatrix}
     16 \\ 45
 \end{bmatrix}
 =
 \begin{bmatrix}
-    (0)(16) + (-1/5)(45) \\
-    (-1)(16) + (1/5)(45)
+    (1)(16) + (0)(45) \\
+    (-5)(16) + (1)(45)
 \end{bmatrix}
 =
 \begin{bmatrix}
-    -9 \\
-    -16 + 9
+    16 \\
+    -80 + 45
 \end{bmatrix}
 =
 \begin{bmatrix}
-    -9 \\ -7
+    16 \\ -35
 \end{bmatrix}.
 \]
-Since the solution contains negative values, this basis is \textbf{infeasible}.
+Since \( s_2 = -35 < 0 \), this basis is \textbf{infeasible}.  The corresponding point is \( (x_1, x_2) = (16, 0) \), which violates the constraint \( 5x_1 + 3x_2 \leq 45 \).
 
 \item  Basis 3: \(B= \{s_1, s_2\} \) (Feasible)
 The basis matrix is:
@@ -702,7 +703,48 @@ Since this is the identity matrix, its inverse is itself. Thus, the basic soluti
 Since all basic variables are nonnegative, this is a \textbf{feasible solution}.
 \end{itemize}
 
+Figure~\ref{fig:matrix-bases-geometry} shows where these three basic solutions sit relative to the feasible region.
+
+\begin{figure}[h!]
+\begin{center}
+% Feasible region for max 2x1+5x2 s.t. x1+2x2<=16, 5x1+3x2<=45, x1,x2>=0.
+% Vertices: (0,0), (9,0), (6,5), (0,8).  Basic solutions from the three bases:
+% B={x1,x2} -> (6,5), B={s1,s2} -> (0,0), B={x1,s2} -> (16,0) infeasible.
+\begin{tikzpicture}[scale=0.55]
+    % Grid and axes
+    \draw[gray!40, very thin, step=1] (0,0) grid (17,10);
+    \draw[->, thick] (0,0) -- (17.5,0) node[right] {$x_1$};
+    \draw[->, thick] (0,0) -- (0,10.5) node[above] {$x_2$};
+    \foreach \x in {2,4,...,16} \draw (\x,0.1) -- (\x,-0.1) node[below] {\scriptsize \x};
+    \foreach \y in {2,4,...,10} \draw (0.1,\y) -- (-0.1,\y) node[left] {\scriptsize \y};
+
+    % Feasible region
+    \fill[blue!50!cyan, opacity=0.3] (0,0) -- (9,0) -- (6,5) -- (0,8) -- cycle;
+    \draw[blue!60!black, thick] (0,0) -- (9,0) -- (6,5) -- (0,8) -- cycle;
+
+    % Constraint boundaries
+    \draw[orange, thick] (-0.5,8.25) node[above left] {\scriptsize $x_1+2x_2=16$} -- (17,-0.5);
+    \draw[teal, thick] (3,10) -- (9.6,-1) node[below] {\scriptsize $5x_1+3x_2=45$};
+
+    % Remaining vertices of the region
+    \node[fill=blue,circle,inner sep=1.3pt,label={below:\scriptsize $(9,0)$}] at (9,0) {};
+    \node[fill=blue,circle,inner sep=1.3pt,label={left:\scriptsize $(0,8)$}] at (0,8) {};
+
+    % Basic solutions from the three bases
+    \node[fill=blue,circle,inner sep=1.8pt,
+        label={above right:\small $(6,5)$: $B=\{x_1,x_2\}$}] at (6,5) {};
+    \node[fill=blue,circle,inner sep=1.8pt,
+        label={above right:\small $(0,0)$: $B=\{s_1,s_2\}$}] at (0,0) {};
+    \node[draw=red,thick,circle,fill=white,inner sep=1.8pt,
+        label={above left:\small $(16,0)$: $B=\{x_1,s_2\}$, infeasible basic solution}] at (16,0) {};
+\end{tikzpicture}
+\end{center}
+\caption{The three bases of this subsection, seen geometrically.  Each basis fixes the nonbasic variables at zero, which places the basic solution at the intersection of two constraint boundaries.  Bases $\{x_1,x_2\}$ and $\{s_1,s_2\}$ give basic \emph{feasible} solutions at the vertices $(6,5)$ and $(0,0)$ (filled dots).  Basis $\{x_1,s_2\}$ gives the basic solution $(16,0)$ (open dot), the intersection of the $x_1$-axis ($x_2=0$) with the boundary $x_1+2x_2=16$ ($s_1=0$); it violates $5x_1+3x_2\le 45$, so it is an infeasible basic solution and lies outside the region.}
+\label{fig:matrix-bases-geometry}
+\end{figure}
+
 \section{Optimality Conditions}
+\label{sec:optimality-conditions}
 \begin{outcome}
 \begin{itemize}
 \item Define reduced costs at a basic feasible solution
@@ -751,7 +793,7 @@ A_B^{-1} \,A_N\,\mathbf{x}_N.\\
 \end{equation}
 \end{definition}
 
-Let's see this in action.
+Here is an example: the same linear program written first at the slack basis and then at the basis $\{x, y\}$.
 
 \[
 \begin{aligned}
@@ -777,7 +819,7 @@ Let's see this in action.
     \[
     \max \; \c^\top \x \quad \st \quad A \x = b, \quad \x \geq 0,
     \]
-    let \(\b\) be a basis corresponding to a basic feasible solution \( \x_B = A_B^{-1}\b\), with nonbasic variables \( \x_N = 0 \). 
+    let \(B\) be a basis corresponding to a basic feasible solution \( \x_B = A_B^{-1}\b\), with nonbasic variables \( \x_N = 0 \).
 
     If all reduced costs satisfy:
     \[
@@ -788,7 +830,7 @@ Let's see this in action.
 \begin{proof}
 Let $\bar \x = (\bar \x_B, \bar \x_N) = (A_B^{-1}\b, \0)$.
 
-    If all reduced costs are nonnegative, i.e.,
+    If all reduced costs are nonpositive, i.e.,
     \[
    \c_N^\top -\c_B^\top A_B^{-1} A_N \leq 0,
     \]
@@ -803,6 +845,8 @@ Let $\bar \x = (\bar \x_B, \bar \x_N) = (A_B^{-1}\b, \0)$.
     
     Thus, $\bar \x$ is an optimal solution!
 \end{proof}
+
+A note on sign conventions.  The three treatments of the simplex method in this book state the same optimality test in three ways.  In the dictionary form of Chapter~\ref{ch:simplex-dictionary}, we improve the solution by increasing a nonbasic variable with a \emph{positive} coefficient in the objective row, and we stop when there is none.  The theorem above says the same thing in matrix language: those coefficients are the reduced costs $\c_N^\top -\c_B^\top A_B^{-1} A_N$, and the solution is optimal once they are all $\leq 0$.  In the tableau form of Chapter~\ref{ch:simplex-tableau}, the objective is stored as the equation $z - \c^\top\x = 0$, which flips the signs of these coefficients, so there you look for \emph{negative} $z$-row entries and stop when every entry is nonnegative.  All three are the same test.
 
 \begin{example}{Verifying Optimality Using Reduced Costs}{}
 
@@ -915,31 +959,39 @@ A_B^{-1} A_N =
 Computing:
 \[
 \begin{bmatrix}
-    (2)(-3/7) + (5)(5/7) & (2)(2/7) + (5)(-1/7)
+    0 & 0
+\end{bmatrix}
+-
+\begin{bmatrix}
+    (2)(-\tfrac37) + (5)(\tfrac57) & (2)(\tfrac27) + (5)(-\tfrac17)
 \end{bmatrix}
 =
 \begin{bmatrix}
-    -6/7 + 25/7 & 4/7 - 5/7
+    0 & 0
+\end{bmatrix}
+-
+\begin{bmatrix}
+    \tfrac{19}{7} & -\tfrac17
 \end{bmatrix}
 =
 \begin{bmatrix}
-    19/7 & -1/7
+    -\tfrac{19}{7} & \tfrac17
 \end{bmatrix}.
 \]
 
-Since one reduced cost is negative, \( (6,5) \) is \emph{not necessarily optimal} unless we reconsider the basis.
+The reduced cost on $s_2$ is positive ($\tfrac17 > 0$), so \( (6,5) \) is \emph{not} optimal: increasing $s_2$ improves the objective.
 \end{steppanel}
 
 \textbf{Verifying Optimality of \( (0,8) \)}
 
 \begin{steppanel}{algslate}\cstep{1}{Identify the Basis}
 
-We choose \(B= \{x_2, s_1\} \), so:
+At the point $(x_1, x_2) = (0,8)$ we have $s_1 = 16 - 2(8) = 0$ and $s_2 = 45 - 3(8) = 21$, so the basic variables are $x_2$ and $s_2$.  We choose \(B= \{x_2, s_2\} \), so:
 \[
 A_B =
 \begin{bmatrix}
-    2 & 1 \\
-    3 & 0
+    2 & 0 \\
+    3 & 1
 \end{bmatrix}, \quad
 \c_B^\top =
 \begin{bmatrix}
@@ -947,12 +999,12 @@ A_B =
 \end{bmatrix}.
 \]
 
-The nonbasic variables are \( x_1, s_2 \), so:
+The nonbasic variables are \( x_1, s_1 \), so:
 \[
 A_N =
 \begin{bmatrix}
-    1 & 0 \\
-    5 & 1
+    1 & 1 \\
+    5 & 0
 \end{bmatrix}, \quad
 \c_N^\top =
 \begin{bmatrix}
@@ -964,45 +1016,35 @@ A_N =
 \begin{steppanel}{algslate}\cstep{2}{Compute \( A_B^{-1} \)}
 \[
 A_B^{-1} =
-\frac{1}{(2)(0) - (1)(3)}
+\frac{1}{(2)(1) - (0)(3)}
 \begin{bmatrix}
-    0 & 1 \\
-    3 & -2
-\end{bmatrix}
-=
-\frac{1}{-3}
-\begin{bmatrix}
-    0 & 1 \\
-    3 & -2
+    1 & 0 \\
+    -3 & 2
 \end{bmatrix}
 =
 \begin{bmatrix}
-    0 & -1/3 \\
-    -1 & 2/3
+    \tfrac12 & 0 \\
+    -\tfrac32 & 1
 \end{bmatrix}.
 \]
+As a check, $A_B^{-1}\b = \left(\tfrac{16}{2},\, -\tfrac{3}{2}(16) + 45\right) = (8, 21)$, matching $(x_2, s_2) = (8, 21) \geq 0$: a basic feasible solution.
 
 \end{steppanel}
 \begin{steppanel}{algslate}\cstep{3}{Compute Reduced Costs}
 \[
 A_B^{-1} A_N =
 \begin{bmatrix}
-    0 & -1/3 \\
-    -1 & 2/3
+    \tfrac12 & 0 \\
+    -\tfrac32 & 1
 \end{bmatrix}
 \begin{bmatrix}
-    1 & 0 \\
-    5 & 1
-\end{bmatrix}
-=
-\begin{bmatrix}
-    0(1) + (-1/3)(5) & 0(0) + (-1/3)(1) \\
-    -1(1) + (2/3)(5) & -1(0) + (2/3)(1)
+    1 & 1 \\
+    5 & 0
 \end{bmatrix}
 =
 \begin{bmatrix}
-    -5/3 & -1/3 \\
-    7/3 & 2/3
+    \tfrac12 & \tfrac12 \\
+    \tfrac72 & -\tfrac32
 \end{bmatrix}.
 \]
 
@@ -1016,19 +1058,20 @@ A_B^{-1} A_N =
     5 & 0
 \end{bmatrix}
 \begin{bmatrix}
-    -5/3 & -1/3 \\
-    7/3 & 2/3
-\end{bmatrix}.
-\]
-
-Computing:
-\[
-\begin{bmatrix}
-    (5)(-5/3) + (0)(7/3) & (5)(-1/3) + (0)(2/3)
+    \tfrac12 & \tfrac12 \\
+    \tfrac72 & -\tfrac32
 \end{bmatrix}
 =
 \begin{bmatrix}
-    -25/3 & -5/3
+    2 & 0
+\end{bmatrix}
+-
+\begin{bmatrix}
+    \tfrac52 & \tfrac52
+\end{bmatrix}
+=
+\begin{bmatrix}
+    -\tfrac12 & -\tfrac52
 \end{bmatrix}.
 \]
 \end{steppanel}
@@ -1036,105 +1079,16 @@ Since both reduced costs are negative, this confirms that $(0,8)$ is an optimal 
 
 \textbf{Conclusion}
 \begin{itemize}
-\item \( (6,5) \) is \emph{not necessarily optimal} because it has a negative reduced cost.
-\item \( (0,8) \) is \emph{optimal} because all reduced costs are nonnegative.
+\item \( (6,5) \) is \emph{not necessarily optimal} because it has a positive reduced cost.
+\item \( (0,8) \) is \emph{optimal} because all reduced costs are nonpositive.
 \end{itemize}
 \end{solution}
 
-\begin{warn}
-Still working on the associated figure.
-\end{warn}
+The reduced-cost computation we just carried out is the algebraic version of a picture worth revisiting: every vertex of the feasible region has its own dictionary, and the signs of its reduced costs say whether a better neighbor exists.  See Figure~\ref{fig:bfs-perspectives} in Section~\ref{sec:pivoting} for that vertex-by-vertex view.
 
-\begin{figure}[h!]
-\begin{center}
-\begin{tikzpicture}[scale = 0.35]
-    % Grid and axes
-    \draw[gray!50, thin, step=2] (-2,-2) grid (17,16);
-    \draw[very thick,->] (-2,0) -- (17,0) node[right] {$x_1$};
-    \draw[very thick,->] (0,-2) -- (0,16) node[above] {$x_2$};
-
-    % Axis labels
-    \foreach \x in {0,5,10,15} \draw (\x,0.5) -- (\x,-0.5) node[below] {\tiny\x};
-    \foreach \y in {0,5,10,15} \draw (-0.5,\y) -- (0.5,\y) node[left] {\tiny\y};
-
-    % Shaded feasible region
-    \fill[blue!50!cyan,opacity=0.3] (0,0) -- (0,8) -- (6,5) -- (9,0) -- cycle;
-
-    % Constraint lines
-    \draw[red,thick] (0,8) -- node[below right,sloped] {\tiny$x_1 + 2x_2 \leq 16$} (16,0);
-    \draw[red,thick] (0,15) -- node[above left,sloped] {\tiny$5x_1 + 3x_2 \leq 45$} (9,0);
-    \draw[red,thick] (0,0) -- node[below left] {\tiny$x_1 \geq 0$} (0,15);
-    \draw[red,thick] (0,0) -- node[above right] {\tiny$x_2 \geq 0$} (16,0);
-
-    % Vertices
-    \node[blue] at (0,0) [circle,fill,inner sep=1.5pt]{};
-    \node[blue] at (0,8) [circle,fill,inner sep=1.5pt]{};
-    \node[blue] at (6,5) [circle,fill,inner sep=1.5pt]{};
-    \node[blue] at (9,0) [circle,fill,inner sep=1.5pt]{};
-
-    % Labels for vertices
-    \node[black,anchor=east] at (-0.5,0) {\scriptsize$(0,0)$};
-    \node[black,anchor=east] at (-0.5,8) {\scriptsize$(0,8)$};
-    \node[black,anchor=west] at (6.5,5) {\scriptsize$(6,5)$};
-    \node[black,anchor=north] at (9,-0.5) {\scriptsize$(9,0)$};
-
-    % Optimization problems at each BFS
-    \node[draw,fill=white,anchor=north west] at (-10,-3) {
-        \small \begin{tabular}{l}
-        \textbf{BFS at (0,0)} \\
-        \(\max \quad 2x_1 + 5x_2\) \\
-        \(\text{s.t. } \quad s_1 = 16 - x_1 - 2x_2\) \\
-        \(\quad \quad  s_2 = 45 - 5x_1 - 3x_2\) \\
-        \( x_1, x_2 \geq 0 \)
-        \end{tabular}
-    };
-
-    \node[draw,fill=white,anchor=north west] at (-17,12) {
-        \small \begin{tabular}{l}
-        \textbf{BFS at (0,8)} \\
-        \(\max \quad 2(0) + 5(8) + 2x_1\) \\
-        \(\text{s.t. } \quad x_1 + 2(8) \leq 16\) \\
-        \(\quad \quad 5x_1 + 3(8) \leq 45\) \\
-        \( x_1, s_2 \geq 0 \)
-        \end{tabular}
-    };
-
-    \node[draw,fill=white,anchor=north east] at (22,14) {
-        \small \begin{tabular}{l}
-        \textbf{BFS at (6,5)}:\\
-        \(\max \quad z = 37 - \frac{1}{3}s_1 + \frac{11}{6}s_2\) \\
-        \(\text{s.t. } \quad x_1 = 6 - \frac{1}{3}s_1 + \frac{1}{3}s_2\) \\
-        \quad\quad \(x_2 = 5 - \frac{1}{2}s_1 - \frac{1}{2}s_2\)\\
-        \quad\quad \( x_1, x_2, s_1, s_2 \geq 0 \)
-        \end{tabular}
-    };
-
-    \node[draw,fill=white,anchor=north east] at (20,-3) {
-        \small \begin{tabular}{l}
-        \textbf{BFS at (9,0)} \\
-        \(\max \quad 2(9) + 5(0) + 5x_2\) \\
-        \(\text{s.t. } \quad 9 + 2x_2 \leq 16\) \\
-        \(\quad \quad 5(9) + 3x_2 \leq 45\) \\
-      \quad \quad  \( x_2, s_1 \geq 0 \)
-        \end{tabular}
-    };
-
-    % Table within the TikZ picture
-    \node[draw,fill=white,anchor=north west] at (22,14) {
-        \begin{tabular}{|c|c|}
-        \hline
-        Vertex & Objective Value \\
-        \hline
-        $(0,0)$ & $0$ \\
-        $(0,8)$ & $40$ \\
-        $(6,5)$ & $37$ \\
-        $(9,0)$ & $18$ \\
-        \hline
-        \end{tabular}
-    };
-
-\end{tikzpicture}
-\end{center}
-\caption{\href{https://www.desmos.com/calculator/j1li4l7lcv}{Desmos: Interactive plot!} (\href{https://open-optimization.github.io/open-optimization-or-book/Intro-Math-Programming/baseText/interactive-figures/lp-graphical-method.html}{backup interactive plot}) Showing the optimization problem from different BFS perspectives.}
-\end{figure}
+\begin{resource}
+\begin{itemize}
+\item \href{https://www.desmos.com/calculator/j1li4l7lcv}{Desmos: Interactive plot} of an LP from different BFS perspectives (\href{https://open-optimization.github.io/open-optimization-or-book/interactive-figures/lp-graphical-method.html}{backup interactive plot}).
+\end{itemize}
+\end{resource}
 

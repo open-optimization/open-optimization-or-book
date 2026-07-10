@@ -602,6 +602,41 @@
 \newtcolorbox{sensdisplay}[1]{colback=sensbox!6, colframe=sensbox,
   coltitle=white, fonttitle=\bfseries, sharp corners, title=\textbf{#1}}
 
+% =====================================================================
+% Unified simplex worked-example formatting (Ch. 7 & 9).
+% One colour language: green=entering, orange=ratio/leaving, blue=pivot,
+% purple=optimal.  Two levels of detail:
+%   Tier 1 (teaching): \begin{stepbox}{algenter}{\ding{43}\ Entering variable} ... \end{stepbox}
+%   Tier 2 (compact) : \begin{dict} ...\end{dict}  \pivotstrip{y}{s_3}{note}  \begin{dictopt}...\end{dictopt}
+% =====================================================================
+% Tier-1 coloured step box (arg1 = step colour, arg2 = icon+title).
+\newtcolorbox{stepbox}[2]{colback=#1!6, colframe=#1, coltitle=white,
+  fonttitle=\bfseries, sharp corners, title={#2},
+  left=6pt, right=6pt, top=3pt, bottom=3pt, before skip=5pt, after skip=5pt}
+% Neutral dictionary frame for compact sequences.
+\newtcolorbox{dict}{enhanced, width=0.6\linewidth, box align=center,
+  colback=white, colframe=algslate!30, boxrule=0.5pt, sharp corners,
+  left=6pt, right=6pt, top=3pt, bottom=3pt, before skip=5pt, after skip=5pt}
+% Optimal dictionary frame (purple cap).
+\newtcolorbox{dictopt}{enhanced, width=0.6\linewidth, box align=center,
+  colback=algopt!6, colframe=algopt, boxrule=0.8pt, sharp corners,
+  title={\ding{52}\ Optimal}, coltitle=white, fonttitle=\bfseries,
+  left=6pt, right=6pt, top=3pt, bottom=3pt, before skip=5pt, after skip=5pt}
+% Compact pivot transition between two dictionaries (slim boxed band).
+%   \pivotstrip{entering}{leaving}{optional ratio note}
+\newcommand{\pivotstrip}[3]{%
+\begin{center}
+\begin{tcolorbox}[enhanced, width=0.74\linewidth, colback=algslate!4, colframe=algslate!35,
+  boxrule=0.4pt, arc=1pt, left=8pt, right=8pt, top=3pt, bottom=3pt,
+  before skip=4pt, after skip=4pt]
+\centering\small
+{\color{algenter}\ding{43}\ \textbf{enter}\ $#1$}\quad
+{\color{algleave}\ding{47}\ \textbf{leave}\ $#2$}\quad
+{\color{algpivot}\ding{114}\ \textbf{pivot}}%
+\ifx\relax#3\relax\else\\[2pt]{\footnotesize\color{black!55}#3}\fi
+\end{tcolorbox}
+\end{center}}
+
 % Thew following passes on paperheight to ps2pdf... bug fix  
 \pdfpageheight=\paperheight 
 
@@ -611,6 +646,9 @@
 
 % For fancy headers!
 \usepackage{fancyhdr}
+
+% Side figures that text wraps around (used in Chapter 1)
+\usepackage{wrapfig}
 
 % Used for creating EOC questions with corresponding solutions at the end of the textbook
 \usepackage{answers}
@@ -846,6 +884,72 @@
   breakable
 }
 
+%% ============================================================================
+%% "TRY IT OUT VISUALLY!" boxes
+%% Pointers to the book's interactive visualizations (visualizations/ in the
+%% repository, served at open-optimization.github.io). Usage:
+%%   \begin{tryit}
+%%     \vizlink{simplex-dictionary}{Simplex Pivoter in Dictionary Form}: pivot
+%%     this chapter's bakery example yourself.
+%%   \end{tryit}
+%% ============================================================================
+\newcommand{\vizlink}[2]{\href{https://open-optimization.github.io/open-optimization-or-book/visualizations/\##1}{\textbf{#2}}}
+\newtcolorbox{tryit}{
+  colback=violet!4!white,
+  colframe=violet!55!black,
+  coltitle=white,
+  fonttitle=\bfseries,
+  title={Try it out visually!},
+  boxrule=1pt,
+  arc=2mm,
+  left=6pt, right=6pt, top=4pt, bottom=4pt,
+  breakable
+}
+
 % Deferred command overrides - must come AFTER all packages are loaded
 \renewcommand{\epsilon}{\varepsilon}                    % curly epsilon
+
+%% ============================================================================
+%% UNIFIED EXERCISE ENVIRONMENT
+%% Must come AFTER LyryxMathStyle.sty (loaded above), which defines the
+%% original zero-argument ex environment. This redefinition accepts every
+%% call pattern used across the book:
+%%   \begin{ex}                 -> Exercise 1.2
+%%   \begin{ex}{Title}          -> Exercise 1.2 (Title)
+%%   \begin{ex}{Title}{}        -> Exercise 1.2 (Title)  (second group ignored;
+%%                                 some call sites put a label-like tag there)
+%%   \begin{ex}[Title]{}        -> Exercise 1.2 (Title)
+%% Blank titles ({}) are skipped via \notblank (etoolbox, loaded above).
+%% CAUTION: up to two trailing brace groups are grabbed greedily, so an
+%% exercise body must not BEGIN with a bare {...} group. All call sites
+%% were audited (2026-07): none do. If you write one, start the body with
+%% \relax or give the exercise an explicit empty title {}.
+%% (Implementation note: xparse's g-type is rejected by modern LaTeX kernels,
+%% so the brace groups are peeked for manually with \@ifnextchar.)
+%% ============================================================================
+% Exercises get their OWN counter (reset per chapter), decoupled from the
+% shared `exo' counter that examples and `general' boxes step. Before this,
+% the first exercise of a chapter could be numbered 2.14 because examples
+% earlier in the chapter had consumed 2.1--2.13.
+\newcounter{bookex}[chapter]
+\renewcommand{\thebookex}{\thechapter.\arabic{bookex}}
+
+\makeatletter
+\newcommand{\ex@print@title}[1]{\ \textbf{(#1)}\def\@currentlabelname{#1}}
+% Peek for an optional {Title} brace group, then an ignored second group.
+\newcommand{\ex@peek@title}{\@ifnextchar\bgroup{\ex@grab@title}{\ex@finish}}
+\newcommand{\ex@grab@title}[1]{\notblank{#1}{\ex@print@title{#1}}{}\ex@peek@second}
+\newcommand{\ex@peek@second}{\@ifnextchar\bgroup{\ex@grab@second}{\ex@finish}}
+\newcommand{\ex@grab@second}[1]{\ex@finish}
+\newcommand{\ex@finish}{\hspace{0.25em}\itshape}
+\RenewDocumentEnvironment{ex}{o}{%
+  \par\medskip\noindent\refstepcounter{bookex}%
+  \textbf{Exercise \thebookex}%
+  \IfValueTF{#1}%
+    {\notblank{#1}{\ex@print@title{#1}}{}\ex@peek@second}%
+    {\ex@peek@title}%
+}{%
+  \par\medskip
+}
+\makeatother
 
