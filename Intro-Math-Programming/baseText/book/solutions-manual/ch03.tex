@@ -1,0 +1,158 @@
+% ============================================================================
+% Chapter 3: Software - Excel (book/part1-linear-programming/ch03-software/software-excel.tex)
+% 9 exercises. All numeric answers verified with scipy.optimize.linprog (HiGHS)
+% on 2026-07-13.
+% ============================================================================
+\section{Chapter 3: Software -- Excel}
+
+\textbf{Coverage and flow.} The chapter has a single content section (Using Excel Solver, covering spreadsheet functions, the recommended color-coded layout, the Solver dialog, solving methods, and the Answer/Sensitivity reports), and the nine exercises drill it thoroughly. The two warm-ups rerun workbooks from Chapter 4's examples with new data, the core problems walk through diet, production, and transportation models built from scratch, two exercises specifically exercise the Sensitivity Report (shadow prices, allowable ranges), one concept exercise targets the solving-method dropdown, and the challenge exercise isolates the Make Unconstrained Variables Non-Negative checkbox. Every part of the Solver workflow described in the text is touched at least once; sensitivity interpretation is drilled hardest, which is appropriate since it previews Chapter 7. Honest verdict: coverage is complete and well graded from one to three stars; the only soft spot is that no exercise asks students to use the plain Excel functions (SUMPRODUCT, COUNTIF, absolute references) outside of a Solver model, and the diet exercise's data provenance should be checked (see the flag under Exercise 3.3).
+
+% ----------------------------------------------------------------------------
+\exsol{3.1}{Solver Rerun: Minimum-Cost Network Flow}{1}
+
+The model is the minimum-cost network flow LP from the book's warehouse example, with only the objective coefficients changed. With $x_{ij}$ the flow from warehouse $i$ to store $j$:
+\begin{align*}
+\min \quad & 3x_{11} + 7x_{12} + 4x_{21} + 2x_{22}\\
+\st & x_{11} + x_{12} \leq 20, \qquad x_{21} + x_{22} \leq 30,\\
+& x_{11} + x_{21} = 25, \qquad x_{12} + x_{22} = 25,\\
+& 0 \leq x_{11} \leq 15, \quad 0 \leq x_{12} \leq 10, \quad 0 \leq x_{21} \leq 20, \quad 0 \leq x_{22} \leq 20.
+\end{align*}
+\emph{Solver setup:} the objective cell holds \texttt{=SUMPRODUCT(costs, flows)}, the variable cells are the four flow cells, and the constraints are row sums $\leq$ supply, column sums $=$ demand, and flows $\leq$ capacities, solved with Simplex LP and non-negativity checked.
+
+(a) The optimal flows are $x_{11} = 15$, $x_{12} = 5$, $x_{21} = 10$, $x_{22} = 20$, with cost $3(15) + 7(5) + 4(10) + 2(20) = 45 + 35 + 40 + 40 = 160$, matching the stated check value.
+
+(b) Routes $W_1 \to S_1$ (flow $15$, capacity $15$) and $W_2 \to S_2$ (flow $20$, capacity $20$) are at capacity. These are the two cheapest routes, so the model saturates them first and covers the remaining demand with the more expensive routes.
+
+% ----------------------------------------------------------------------------
+\exsol{3.2}{Solver Rerun: Production Planning over 10 Periods}{1}
+
+(a) Only the demand cells change; the model is otherwise the ten-period production LP from the book (production costs $10, 12, \dots, 28$, holding cost $5$, initial inventory $s_0 = 5$, inventory-balance constraints $s_{t-1} + x_t = d_t + s_t$). \emph{Solver setup:} objective cell \texttt{=SUMPRODUCT(prodcost, x) + 5*SUM(s)}, variable cells $x_1,\dots,x_{10}$ and $s_1,\dots,s_{10}$, constraints one balance equation per period, Simplex LP, non-negative variables. The optimal plan is chase production with the initial inventory used in period 1:
+\[
+x = (1, 9, 7, 8, 5, 10, 7, 6, 8, 4), \qquad s_t = 0 \text{ for all } t,
+\]
+with total cost $10(1) + 12(9) + 14(7) + 16(8) + 18(5) + 20(10) + 22(7) + 24(6) + 26(8) + 28(4) = 1252$, matching the check value.
+
+(b) Producing one unit in period $t$ and holding it to period $t+1$ costs $c_t + 5$, while waiting and producing it in period $t+1$ costs $c_{t+1} = c_t + 2$. Since the holding cost ($5$) exceeds the cost escalation between consecutive periods ($2$), carrying inventory is never worthwhile, so the optimal plan produces each period's demand in that period ($x_t = d_t$, except period 1 where the free initial inventory of $5$ units offsets demand).
+
+% ----------------------------------------------------------------------------
+\exsol{3.3}{Diet Problem in Excel}{2}
+
+Let $x_1, \dots, x_5 \geq 0$ be daily servings of raw carrots, baked potatoes, wheat bread, cheddar cheese, and peanut butter. The LP is
+\begin{align*}
+\min \quad & 0.14x_1 + 0.12x_2 + 0.20x_3 + 0.75x_4 + 0.15x_5\\
+\st & 23x_1 + 171x_2 + 65x_3 + 112x_4 + 188x_5 \geq 2000 && \text{(calories)}\\
+& 0.1x_1 + 0.2x_2 + 9.3x_4 + 16x_5 \geq 50 && \text{(fat)}\\
+& 0.6x_1 + 3.7x_2 + 2.2x_3 + 7x_4 + 7.7x_5 \geq 100 && \text{(protein)}\\
+& 6x_1 + 30x_2 + 13x_3 + 2x_5 \geq 250 && \text{(carbohydrate)}\\
+& x_1, \dots, x_5 \geq 0.
+\end{align*}
+\emph{Solver setup:} lay out the nutrition table as data (blue), one yellow cell per food for servings, a green objective cell \texttt{=SUMPRODUCT(prices, servings)}, and four green cells \texttt{=SUMPRODUCT(nutrientrow, servings)} constrained $\geq$ the requirements; solve with Simplex LP and non-negativity checked.
+
+The optimal diet is potatoes and peanut butter only:
+\[
+x_2 \approx 7.7147 \text{ servings of baked potatoes}, \qquad x_5 \approx 9.2800 \text{ servings of peanut butter},
+\]
+with $x_1 = x_3 = x_4 = 0$ and minimum daily cost $\approx \$2.32$ (exactly $\$2.3178$). The protein and carbohydrate constraints are binding ($100$ g and $250$ g exactly); calories ($\approx 3064$) and fat ($\approx 150$ g) are comfortably oversatisfied. A screenshot should show the yellow serving cells with these values and the green cost cell at $2.32$.
+
+\begin{qaflag}
+Licensing: this exact food table (raw carrots, baked potatoes, wheat bread, cheddar cheese, peanut butter, with these prices and nutrient values and the 2000/50/100/250 requirements) circulates widely in university course materials and closely matches the diet-problem exercise found in at least one commercial optimization textbook. Recommend verifying the original source; if it cannot be traced to an openly licensed source, regenerate the table with fresh (verified) nutrition data, which would not change the pedagogical content. The numbers themselves are fine: the LP is feasible, non-degenerate, and has a clean two-food solution.
+\end{qaflag}
+
+% ----------------------------------------------------------------------------
+\exsol{3.4}{Production Planning in Excel}{2}
+
+Let $x_1$ and $x_2$ be the numbers of widgets and gadgets produced. The LP is
+\begin{align*}
+\max \quad & z = 8x_1 + 6x_2\\
+\st & 2x_1 + x_2 \leq 40 && \text{(machine time)}\\
+& x_1 + 2x_2 \leq 30 && \text{(raw material)}\\
+& x_1, x_2 \geq 0.
+\end{align*}
+
+(a) \emph{Solver setup:} data cells (blue) hold the profit vector $(8,6)$, the constraint matrix, and the right-hand sides $(40, 30)$; two yellow variable cells hold $x_1, x_2$; green cells hold the objective \texttt{=SUMPRODUCT(profits, vars)} and the two constraint left-hand sides. Add both $\leq$ constraints, choose Max, Simplex LP, and check Make Unconstrained Variables Non-Negative.
+
+(b) Solver returns $x_1 = 50/3 \approx 16.67$ widgets and $x_2 = 20/3 \approx 6.67$ gadgets with maximum profit $520/3 \approx \$173.33$. Both constraints are binding.
+
+(c) The Sensitivity Report's Variable Cells table shows the widget objective coefficient $8$ with allowable increase $4$ (up to $12$) and allowable decrease $5$ (down to $3$); geometrically the objective slope must stay between the slopes of the two binding constraints. Raising the widget profit to $\$9$ is within the allowable increase, so the optimal plan does not change; only the profit rises, to $9(50/3) + 6(20/3) = \$190$. (The report's Constraints table shows shadow prices $10/3$ for machine time and $4/3$ for raw material, useful cross-checks.)
+
+% ----------------------------------------------------------------------------
+\exsol{3.5}{Transportation Problem in Excel}{2}
+
+(a) Let $x_{ij} \geq 0$ be units shipped from warehouse $i$ to store $j$. Lay out a $2 \times 3$ grid of yellow variable cells mirroring the blue cost table, with green row sums (compared to supply) and green column sums (compared to demand):
+\begin{align*}
+\min \quad & 4x_{11} + 8x_{12} + x_{13} + 6x_{21} + 3x_{22} + 5x_{23}\\
+\st & x_{11} + x_{12} + x_{13} \leq 60, \qquad x_{21} + x_{22} + x_{23} \leq 50,\\
+& x_{11} + x_{21} = 30, \qquad x_{12} + x_{22} = 40, \qquad x_{13} + x_{23} = 40,\\
+& x_{ij} \geq 0.
+\end{align*}
+\emph{Solver setup:} objective cell \texttt{=SUMPRODUCT(costgrid, shipgrid)}, variable cells the six grid cells, constraints row sums $\leq (60, 50)$ and column sums $= (30, 40, 40)$, Simplex LP, non-negativity checked.
+
+(b) Total supply equals total demand ($110$), so both warehouses ship everything. The optimal plan is
+\[
+x_{11} = 20, \quad x_{13} = 40, \quad x_{21} = 10, \quad x_{22} = 40, \quad x_{12} = x_{23} = 0,
+\]
+with minimum cost $4(20) + 1(40) + 6(10) + 3(40) = 80 + 40 + 60 + 120 = \$300$. Each warehouse saturates its cheapest route (W1 to S3 at \$1, W2 to S2 at \$3) and store S1's demand is split $20/10$ to balance the supplies.
+
+% ----------------------------------------------------------------------------
+\exsol{3.6}{Product Mix with a Sensitivity Report}{2}
+
+Let $x_1, x_2, x_3 \geq 0$ be the numbers of tables, chairs, and desks made per week:
+\begin{align*}
+\max \quad & 70x_1 + 50x_2 + 90x_3\\
+\st & 4x_1 + 3x_2 + 6x_3 \leq 240 && \text{(carpentry)}\\
+& 2x_1 + x_2 + 3x_3 \leq 100 && \text{(finishing)}\\
+& 30x_1 + 20x_2 + 40x_3 \leq 2000 && \text{(wood)}.
+\end{align*}
+
+(a) \emph{Solver setup:} three yellow variable cells, green objective \texttt{=SUMPRODUCT(profits, vars)}, three green resource-usage cells constrained $\leq (240, 100, 2000)$, Max, Simplex LP. The optimum is $x_1 = 30$ tables, $x_2 = 40$ chairs, $x_3 = 0$ desks, with maximum profit $70(30) + 50(40) = \$4100$, matching the check value.
+
+(b) Sensitivity Report, Constraints table: shadow price $\$15$ per carpentry hour, $\$5$ per finishing hour, $\$0$ per board-foot of wood. Carpentry ($4 \cdot 30 + 3 \cdot 40 = 240$) and finishing ($2 \cdot 30 + 40 = 100$) are binding; wood is not ($1700$ of $2000$ used, slack $300$).
+
+(c) No. An extra finishing hour is worth its shadow price, $\$5$, which is less than the $\$10$ asking price, so buying finishing time at \$10 per hour would lose \$5 per hour purchased.
+
+(d) The desk's reduced cost is $90 - (6 \cdot 15 + 3 \cdot 5) = 90 - 105 = -15$, so the report lists an allowable increase of $15$ on the desk coefficient (up to $\$105$). At $\$100$ the plan is unchanged (still $30$ tables, $40$ chairs, no desks, profit $\$4100$). At $\$110$, which exceeds the allowable increase, the plan changes: re-solving gives $x_1 = 0$, $x_2 = 40$, $x_3 = 20$ with profit $\$4200$, so desks enter the mix.
+
+% ----------------------------------------------------------------------------
+\exsol{3.7}{Unbalanced Transportation with a Sensitivity Report}{2}
+
+(a) Let $x_{ij} \geq 0$ ship from plant $i$ to city $j$. Supply is $160$ against demand $150$, so supplies are $\leq$ and demands are $=$:
+\begin{align*}
+\min \quad & 4x_{11} + 5x_{12} + 7x_{13} + 6x_{21} + 3x_{22} + 2x_{23} + 5x_{31} + 8x_{32} + 4x_{33}\\
+\st & x_{11}+x_{12}+x_{13} \leq 70, \quad x_{21}+x_{22}+x_{23} \leq 50, \quad x_{31}+x_{32}+x_{33} \leq 40,\\
+& x_{11}+x_{21}+x_{31} = 50, \quad x_{12}+x_{22}+x_{32} = 60, \quad x_{13}+x_{23}+x_{33} = 40, \quad x_{ij} \geq 0.
+\end{align*}
+\emph{Solver setup:} $3 \times 3$ yellow grid, objective \texttt{=SUMPRODUCT(costs, flows)}, row sums $\leq$ supplies, column sums $=$ demands, Simplex LP. The optimal plan is
+\[
+x_{11} = 50, \quad x_{12} = 10, \quad x_{22} = 50, \quad x_{33} = 40 \quad \text{(all other routes 0)},
+\]
+with minimum cost $4(50) + 5(10) + 3(50) + 4(40) = 200 + 50 + 150 + 160 = \$560$, matching the check value.
+
+(b) Plant 1 ships only $60$ of its $70$ units, so $10$ units stay at P1. (P2 and P3 ship their full capacities.)
+
+(c) Sensitivity Report shadow prices on the supply constraints: P1 gets $0$, P2 gets $-2$, P3 gets $0$ (P3's constraint is binding but degenerate here, so its reported price is $0$). The nonzero price means one extra unit of capacity at plant 2 would reduce total cost by $\$2$: P2 has the cheapest route into city 2, and extra P2 capacity would displace a unit of P1's $\$5$ shipping with a $\$3$ shipment. The sign is negative because this is a minimization: relaxing a binding $\leq$ supply constraint can only help, lowering the objective.
+
+% ----------------------------------------------------------------------------
+\exsol{3.8}{Simplex LP versus GRG Nonlinear}{2}
+
+(a) Simplex LP is designed for problems whose objective and constraint cells are all linear functions of the variable cells (linear programs). GRG Nonlinear (generalized reduced gradient) is designed for problems where those functions are smooth (differentiable) but nonlinear.
+
+(b) For a linear program, Simplex LP guarantees a globally optimal solution and produces the standard LP Sensitivity Report with shadow prices, reduced costs, and allowable increase/decrease ranges. GRG is a local-search method: on a general nonlinear problem it only guarantees a locally optimal point (it happens that for LPs local and global coincide, but Solver does not exploit that), it can be slower and dependent on the starting point, and its sensitivity output reports Lagrange multipliers and reduced gradients without the allowable-range information that makes the LP report useful.
+
+(c) Solver runs a linearity test on the model before (and after) solving. Because \texttt{=B2*B3} multiplies two variable cells, the constraint is not a linear function of the variables, and Solver stops with the message that the linearity conditions required by this LP Solver are not satisfied. The fix is either to reformulate the model linearly or to switch to GRG Nonlinear.
+
+(d) Any smooth nonlinear objective works, for example minimizing portfolio variance $f(\x) = \x^{\mathsf T} Q \x$ (a quadratic), or maximizing $\sqrt{x_1} + \sqrt{x_2}$. These are differentiable, so GRG applies, but they are not linear, so Simplex LP rejects them.
+
+% ----------------------------------------------------------------------------
+\exsol{3.9}{When a Variable Must Go Negative}{3}
+
+The model is
+\[
+\max \; 0.05x_A + 0.12x_B \quad \st \; x_A + x_B = 100, \quad 0 \leq x_B \leq 140, \quad x_A \text{ free}.
+\]
+\emph{Solver setup:} two yellow cells for $x_A, x_B$, objective \texttt{=0.05*xA+0.12*xB}, constraints \texttt{xA+xB=100} and \texttt{xB<=140}, Simplex LP.
+
+(a) With Make Unconstrained Variables Non-Negative checked, Solver silently imposes $x_A \geq 0$ and $x_B \geq 0$, so the best it can do is $x_A = 0$, $x_B = 100$, with return $0.05(0) + 0.12(100) = 12$, that is \$12{,}000.
+
+(b) With the box unchecked and $x_B \geq 0$ added explicitly, Solver finds $x_A = -40$, $x_B = 140$: short \$40{,}000 of fund A to push fund B to its margin cap. The return is $0.05(-40) + 0.12(140) = -2 + 16.8 = 14.8$, that is \$14{,}800.
+
+(c) The checkbox adds a lower bound of zero to every decision variable that does not already have an explicit lower bound in the constraint list. Short selling is exactly a negative holding, so that hidden bound cuts off the true optimum; the box must be unchecked for $x_A$ to go negative. The risk is that unchecking removes the automatic bound from all variables at once: any variable that should be non-negative (here $x_B$) must now receive its own explicit $\geq 0$ constraint, or Solver may return meaningless negative values for it.

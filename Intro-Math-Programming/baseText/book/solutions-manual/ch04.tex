@@ -1,0 +1,256 @@
+% ============================================================================
+% Chapter 4: Modeling with Compact Notation
+% (book/part1-linear-programming/ch02-modeling/modeling-sums.tex and
+%  modeling-sums-continued.tex; the exercises are in the second file)
+% 14 exercises. All numeric answers verified with scipy (linprog/HiGHS and
+% linear_sum_assignment) on 2026-07-13.
+% BOOK FIX applied 2026-07-13: Exercise 4.7's network had arc (v2,v1) capacity 1,
+% which made the instance infeasible; changed to 4 in the book and a check value
+% (min cost 67) was added. See the qaflag under 4.7.
+% ============================================================================
+\section{Chapter 4: Modeling with Compact Notation}
+
+\textbf{Coverage and flow.} The chapter builds compact summation models (production planning, assignment, network flow, max flow, multicommodity flow, transportation, multi-period investment), and its fourteen exercises track that arc well. Production planning is drilled by 4.1 (warm-up) and 4.10 (capacity constraints and prebuilding); assignment by 4.2, 4.4 (a 12 by 12 data-driven instance), 4.9 (forbidden pairs), and the fairness pair 4.12/4.14; minimum-cost flow and transshipment by 4.3, 4.7, 4.8, and the conceptual 4.11; max flow by 4.5 and 4.6; multicommodity flow by 4.13. The two concept exercises (4.11 on aggregate flow balance, 4.12 on integrality) are genuine highlights that connect the models to later theory. Gaps: the multi-period capital investment section and the source-sink multicommodity formulation have no exercises, the max-flow min-cut theorem is exercised only implicitly (a cut certificate appears in 4.6), and nothing drills the school-bus/transportation-table material directly. Honest verdict: coverage of the core modeling sections is thorough and nicely graded; one exercise on the investment model would round it out. One data error was found and fixed in the book (Exercise 4.7, see below).
+
+% ----------------------------------------------------------------------------
+\exsol{4.1}{Production Planning over Five Periods}{1}
+
+(a) With production $x_t \geq 0$ and end-of-period inventory $s_t \geq 0$:
+\begin{align*}
+\min \quad & 8x_1 + 10x_2 + 12x_3 + 14x_4 + 16x_5 + 3(s_1 + s_2 + s_3 + s_4 + s_5)\\
+\st \quad & 2 + x_1 = 5 + s_1\\
+& s_1 + x_2 = 7 + s_2\\
+& s_2 + x_3 = 6 + s_3\\
+& s_3 + x_4 = 8 + s_4\\
+& s_4 + x_5 = 4 + s_5\\
+& x_t, s_t \geq 0 \quad \text{for } t = 1, \dots, 5.
+\end{align*}
+
+(b) The optimal plan is chase production, $x = (3, 7, 6, 8, 4)$ with all $s_t = 0$: the initial inventory of $2$ covers part of period 1's demand. The cost is $8(3) + 10(7) + 12(6) + 14(8) + 16(4) = 24 + 70 + 72 + 112 + 64 = 342$, matching the check value.
+
+(c) Producing a unit one period early costs the earlier production cost plus the holding cost of $3$; waiting costs only $2$ more, since the production cost rises by $2$ per period. Because $3 > 2$, prebuilding is never worthwhile and no inventory is carried.
+
+% ----------------------------------------------------------------------------
+\exsol{4.2}{Machine Assignment with New Costs}{1}
+
+The model is the standard assignment problem with binary $x_{ij}$ ($1$ if machine $i$ does job $j$), objective $\min \sum_{i,j} c_{ij} x_{ij}$, one constraint $\sum_j x_{ij} = 1$ per machine and one constraint $\sum_i x_{ij} = 1$ per job. With the given cost matrix the optimal assignment is
+\[
+0 \to 1 \;(3), \qquad 1 \to 0 \;(5), \qquad 2 \to 2 \;(2), \qquad 3 \to 3 \;(3),
+\]
+for total cost $3 + 5 + 2 + 3 = 13$, matching the check value. Enumerating all $4! = 24$ assignments confirms optimality; the second-best assignment costs $16$.
+
+% ----------------------------------------------------------------------------
+\exsol{4.3}{Warehouse Shipping with New Data}{1}
+
+The model from the book's warehouse example with the new data:
+\begin{align*}
+\min \quad & 4x_{11} + 6x_{12} + 3x_{21} + 2x_{22}\\
+\st \quad & x_{11} + x_{12} \leq 20, \qquad x_{21} + x_{22} \leq 30,\\
+& x_{11} + x_{21} = 20, \qquad x_{12} + x_{22} = 30,\\
+& 0 \leq x_{11} \leq 15, \quad 0 \leq x_{12} \leq 10, \quad 0 \leq x_{21} \leq 20, \quad 0 \leq x_{22} \leq 20.
+\end{align*}
+
+(a) Total demand ($50$) equals total supply, so both warehouses ship everything. The optimal flow is
+\[
+x_{11} = 10, \quad x_{12} = 10, \quad x_{21} = 10, \quad x_{22} = 20,
+\]
+with cost $4(10) + 6(10) + 3(10) + 2(20) = 40 + 60 + 30 + 40 = 170$, matching the check value.
+
+(b) Routes $W_1 \to S_2$ (flow $10$, capacity $10$) and $W_2 \to S_2$ (flow $20$, capacity $20$) are at capacity: Store 2's demand of $30$ exactly saturates both routes into it, and the remaining flows are then forced.
+
+\begin{qaflag}
+Duplication note: this exercise and Exercise 3.1 both rerun the same warehouse network from the same example, differing only in costs and demands. That is defensible (3.1 drills the Excel workbook, 4.3 drills writing the model), but if the chapters are ever assigned together, consider changing the network topology in one of them so students do not solve essentially the same instance twice.
+\end{qaflag}
+
+% ----------------------------------------------------------------------------
+\exsol{4.4}{Fair Housing Assignment for 12 Families}{2}
+
+Model: binary $x_{ij}$ with $x_{ij} = 1$ if family $i$ gets apartment $j$, objective $\min \sum_{i,j} P_{ij} x_{ij}$ where $P_{ij}$ is family $i$'s rank of apartment $j$, with $\sum_j x_{ij} = 1$ for each family and $\sum_i x_{ij} = 1$ for each apartment. In Excel: a $12 \times 12$ yellow grid of variables next to the blue preference table from the CSV, objective \texttt{=SUMPRODUCT(prefs, assign)}, row and column sums constrained to $1$, variables $\geq 0$ (binary is not needed; the assignment LP returns a 0-1 solution, see Exercise 4.12), Simplex LP.
+
+(a, b) The minimum total preference score is $\mathbf{17}$, achieved by
+\begin{center}
+\begin{tabular}{llc|llc}
+Family & Apartment & Rank & Family & Apartment & Rank\\
+\hline
+1 & 12 & 2 & 7 & 5 & 1\\
+2 & 4 & 1 & 8 & 6 & 1\\
+3 & 11 & 1 & 9 & 10 & 1\\
+4 & 8 & 2 & 10 & 9 & 2\\
+5 & 1 & 1 & 11 & 3 & 1\\
+6 & 7 & 1 & 12 & 2 & 3\\
+\end{tabular}
+\end{center}
+Eight families receive a first choice, three a second choice, and one a third choice. (Alternative optima with total $17$ may exist; any assignment Solver returns with total $17$ is correct.)
+
+(c) The worst preference score assigned is $3$ (Family 12 receives Apartment 2, its third choice).
+
+% ----------------------------------------------------------------------------
+\exsol{4.5}{Maximum Network Flow to a Single Node}{2}
+
+\emph{Variables.} For each arc $(i,j)$ in the picture let $x_{ij} \geq 0$ be the units of supplies sent from $i$ to $j$.
+
+\emph{Objective.} Maximize the total amount reaching the hub:
+\[
+\max \quad x_{D_1,\mathrm{Hub}} + x_{D_2,\mathrm{Hub}} + x_{D_3,\mathrm{Hub}}.
+\]
+
+\emph{Constraints.} Three families:
+\begin{itemize}
+\item Truck capacities: $x_{ij} \leq u_{ij}$ for every arc, with $u$ as labeled ($x_{W_1,D_1} \leq 100$, $x_{W_2,D_1} \leq 150$, $x_{W_2,D_2} \leq 70$, $x_{W_3,D_2} \leq 120$, $x_{W_4,D_1} \leq 120$, $x_{W_4,D_3} \leq 100$, $x_{W_5,D_3} \leq 90$, $x_{D_1,\mathrm{Hub}} \leq 200$, $x_{D_1,D_2} \leq 80$, $x_{D_2,\mathrm{Hub}} \leq 180$, $x_{D_3,\mathrm{Hub}} \leq 160$).
+\item Flow conservation at the distribution nodes (nothing is stored there):
+\begin{align*}
+x_{W_1,D_1} + x_{W_2,D_1} + x_{W_4,D_1} &= x_{D_1,D_2} + x_{D_1,\mathrm{Hub}},\\
+x_{W_2,D_2} + x_{W_3,D_2} + x_{D_1,D_2} &= x_{D_2,\mathrm{Hub}},\\
+x_{W_4,D_3} + x_{W_5,D_3} &= x_{D_3,\mathrm{Hub}}.
+\end{align*}
+\item Warehouse inventory: total outflow from each warehouse is at most its inventory, for example $x_{W_2,D_1} + x_{W_2,D_2} \leq 300$ and $x_{W_4,D_1} + x_{W_4,D_3} \leq 250$.
+\end{itemize}
+
+Solving the LP gives a maximum delivery of $\mathbf{540}$ units: all three hub arcs run at capacity ($200 + 180 + 160$), which is also an upper bound since every unit must enter the hub on one of them. One optimal plan: $x_{W_2,D_1} = 80$, $x_{W_4,D_1} = 120$, $x_{W_2,D_2} = 60$, $x_{W_3,D_2} = 120$, $x_{W_4,D_3} = 70$, $x_{W_5,D_3} = 90$, $x_{D_1,D_2} = 0$, hub arcs at $200, 180, 160$ (many alternative optima exist, for example ones that use $W_1$).
+
+Important modeling caution: the warehouse constraints must be inequalities. Writing them as equalities (shipping out all inventory) is infeasible, since for instance $W_1$ holds $200$ units but its only outgoing arc has capacity $100$.
+
+\begin{qaflag}
+Wording: the exercise says ``you do not want to leave any inventory at the distribution centers,'' but the nodes holding inventory are the warehouses, and Exercise 4.11(3) later refers back to this exercise as if it had said warehouses. Recommend rewording to ``supplies may not be stored at the distribution centers (whatever enters must leave), and warehouses may ship up to their inventory,'' which is what the intended model does. As written, a literal student might try equality constraints at the warehouses and hit the infeasibility discussed above (which 4.11 then exploits, so keep the discussion, just make the wording consistent).
+\end{qaflag}
+
+% ----------------------------------------------------------------------------
+\exsol{4.6}{Max Flow}{2}
+
+Let $x_{ij} \geq 0$ be the flow on arc $(i,j)$. Maximize the flow into $t$ subject to conservation at the four internal nodes and the capacities:
+\begin{align*}
+\max \quad & x_{v_3 t} + x_{v_4 t}\\
+\st \quad & x_{s v_1} + x_{v_2 v_1} = x_{v_1 v_3} + x_{v_1 v_2} && (v_1)\\
+& x_{s v_2} + x_{v_1 v_2} + x_{v_3 v_2} = x_{v_2 v_4} + x_{v_2 v_1} && (v_2)\\
+& x_{v_1 v_3} + x_{v_4 v_3} = x_{v_3 t} + x_{v_3 v_2} && (v_3)\\
+& x_{v_2 v_4} = x_{v_4 t} + x_{v_4 v_3} && (v_4)\\
+& x_{s v_2} \leq 8, \quad x_{s v_1} \leq 11, \quad x_{v_1 v_2} \leq 10, \quad x_{v_2 v_1} \leq 1, \quad x_{v_2 v_4} \leq 11,\\
+& x_{v_1 v_3} \leq 12, \quad x_{v_3 v_2} \leq 4, \quad x_{v_4 v_3} \leq 7, \quad x_{v_4 t} \leq 4, \quad x_{v_3 t} \leq 15,\\
+& x_{ij} \geq 0.
+\end{align*}
+In Excel, one variable cell per arc, the four conservation constraints as equalities, capacities as $\leq$ bounds, Simplex LP.
+
+The maximum flow is $\mathbf{19}$. One optimal flow: $x_{s v_1} = 11$, $x_{s v_2} = 8$, $x_{v_1 v_3} = 8$, $x_{v_1 v_2} = 3$, $x_{v_2 v_4} = 11$, $x_{v_4 t} = 4$, $x_{v_4 v_3} = 7$, $x_{v_3 t} = 15$, all other arcs $0$. Optimality is certified without any theory: the two arcs into $t$ have total capacity $15 + 4 = 19$, so no flow can exceed $19$, and this flow achieves it (a minimum cut).
+
+% ----------------------------------------------------------------------------
+\exsol{4.7}{Min Cost Network Flow}{2}
+
+Reading the picture (capacity in black, cost in red, blue labels are net demands with positive meaning demand and negative meaning supply), the data are: demands $d_{v_1} = 6$, $d_{v_6} = 10$; supplies $2, 5, 3, 6$ at $v_5, v_2, v_3, v_4$; and arcs (capacity, cost): $(v_5,v_2)$: $(8,7)$, $(v_5,v_1)$: $(11,4)$, $(v_2,v_4)$: $(11,7)$, $(v_4,v_6)$: $(4,2)$, $(v_1,v_3)$: $(12,9)$, $(v_3,v_6)$: $(15,2)$, $(v_3,v_2)$: $(4,1)$, $(v_4,v_3)$: $(7,8)$, $(v_2,v_1)$: $(4,2)$, $(v_1,v_2)$: $(10,1)$. The model, with $x_{ij}$ the flow on arc $(i,j)$:
+\begin{align*}
+\min \quad & \textstyle\sum_{(i,j)} c_{ij} x_{ij}\\
+\st \quad & \sum_{i:(i,k)} x_{ik} - \sum_{j:(k,j)} x_{kj} = d_k \quad \text{for all nodes } k \qquad (d_{v_1} = 6,\; d_{v_6} = 10,\; d_{v_5} = -2,\\
+& \hspace{16em} d_{v_2} = -5,\; d_{v_3} = -3,\; d_{v_4} = -6)\\
+& 0 \leq x_{ij} \leq u_{ij} \quad \text{for all arcs}.
+\end{align*}
+The optimal cost is $\mathbf{67}$, with flows
+\[
+x_{v_5 v_1} = 2, \quad x_{v_2 v_1} = 4, \quad x_{v_2 v_4} = 1, \quad x_{v_4 v_6} = 4, \quad x_{v_4 v_3} = 3, \quad x_{v_3 v_6} = 6,
+\]
+and all other arcs zero. (Check: $2 \cdot 4 + 4 \cdot 2 + 1 \cdot 7 + 4 \cdot 2 + 3 \cdot 8 + 6 \cdot 2 = 8 + 8 + 7 + 8 + 24 + 12 = 67$.) A nice feature of the instance: node $v_1$'s demand of $6$ exactly matches its maximum possible net inflow ($2$ from $v_5$, whose supply is $2$, plus the capacity $4$ of arc $(v_2,v_1)$), so every feasible flow has $x_{v_5 v_1} = 2$ and $x_{v_2 v_1} = 4$, and the LP's only real freedom is how $v_6$'s demand is routed.
+
+\begin{qaflag}
+Fixed in the book (2026-07-13): as originally drawn, arc $(v_2,v_1)$ had capacity $1$, making the instance infeasible under either sign convention (node $v_1$ demands $6$ but could receive at most $2 + 1 = 3$; flipping signs instead makes $v_6$ a supply node with no outgoing arcs). The book figure now shows capacity $4$ on that arc, the exercise states the label convention explicitly, and a check value (minimum cost $67$) was added. Verified with scipy.
+\end{qaflag}
+
+% ----------------------------------------------------------------------------
+\exsol{4.8}{Transshipment Through Regional Hubs}{2}
+
+(a) Ten arc variables: $x_{A,H_1}, x_{A,H_2}, x_{B,H_1}, x_{B,H_2}$ from factories to hubs, and $x_{H_h,S_j}$ from each hub to each store. The model:
+\begin{align*}
+\min \quad & 2x_{A,H_1} + 4x_{A,H_2} + 3x_{B,H_1} + x_{B,H_2}\\
+& \quad + 4x_{H_1,S_1} + 6x_{H_1,S_2} + 7x_{H_1,S_3} + 5x_{H_2,S_1} + 3x_{H_2,S_2} + 2x_{H_2,S_3}\\
+\st \quad & x_{A,H_1} + x_{A,H_2} \leq 40, \qquad x_{B,H_1} + x_{B,H_2} \leq 60 && \text{(supply)}\\
+& x_{A,H_1} + x_{B,H_1} = x_{H_1,S_1} + x_{H_1,S_2} + x_{H_1,S_3} && \text{(balance at } H_1)\\
+& x_{A,H_2} + x_{B,H_2} = x_{H_2,S_1} + x_{H_2,S_2} + x_{H_2,S_3} && \text{(balance at } H_2)\\
+& x_{H_1,S_j} + x_{H_2,S_j} = d_j \quad (d = 30, 45, 25) && \text{(demand)}\\
+& x \geq 0.
+\end{align*}
+The two hub-balance equalities are the explicit statement that hubs neither create nor store product.
+
+(b) Total demand ($100$) equals total supply, so both factories ship everything. An optimal plan:
+\[
+x_{A,H_1} = 30, \quad x_{A,H_2} = 10, \quad x_{B,H_2} = 60, \qquad x_{H_1,S_1} = 30, \quad x_{H_2,S_2} = 45, \quad x_{H_2,S_3} = 25,
+\]
+with minimum cost $30(2) + 10(4) + 60(1) + 30(4) + 45(3) + 25(2) = 60 + 40 + 60 + 120 + 135 + 50 = \mathbf{465}$. The structure is intuitive: B uses its cheap arc into $H_2$, $H_2$ serves the stores it reaches cheaply ($S_2$, $S_3$), and $S_1$ is served through $H_1$.
+
+% ----------------------------------------------------------------------------
+\exsol{4.9}{Assignment with Forbidden Pairs}{2}
+
+(a) Without the certification rules, the optimal assignment is
+\[
+1 \to 2 \;(8), \quad 2 \to 1 \;(7), \quad 3 \to 3 \;(6), \quad 4 \to 5 \;(6), \quad 5 \to 4 \;(6),
+\]
+with minimum cost $8 + 7 + 6 + 6 + 6 = 33$, matching the check value. Note that it uses both forbidden pairs, worker 1 on job 2 and worker 4 on job 5.
+
+(b) Adding $x_{12} = 0$ (and $x_{45} = 0$) simply removes those variables from the feasible region, so no assignment using the pair can be selected. Replacing $c_{12}$ by a huge cost $M$ leaves the pair feasible but makes any assignment using it cost at least $M$, which exceeds the cost of every assignment avoiding it, so the optimizer never picks it. Both approaches leave the assignment structure (and its integrality property) intact; the explicit constraint is cleaner numerically, while the big-cost trick needs no new constraints.
+
+(c) With the forbidden pairs enforced, the optimum becomes
+\[
+1 \to 5 \;(11), \quad 2 \to 1 \;(7), \quad 3 \to 3 \;(6), \quad 4 \to 2 \;(7), \quad 5 \to 4 \;(6),
+\]
+with cost $11 + 7 + 6 + 7 + 6 = 37$, matching the check value. The certification rules cost the company $37 - 33 = 4$.
+
+% ----------------------------------------------------------------------------
+\exsol{4.10}{Multi-Period Inventory with a Production Cap}{2}
+
+(a) The model is the production planning LP with the added bounds $x_t \leq 120$:
+\[
+\min \; \sum_{t=1}^{6} \big(c_t x_t + 2 s_t\big) \quad \st \; s_{t-1} + x_t = d_t + s_t \; (t = 1, \dots, 6), \quad 0 \leq x_t \leq 120, \quad s_t \geq 0, \quad s_0 = 0,
+\]
+with $c = (20, 20, 22, 25, 24, 23)$ and $d = (80, 120, 60, 140, 90, 110)$.
+
+(b) A period-4 unit produced in period $t$ costs $c_t$ plus $2$ per period held: period 3 costs $22 + 2 = 24$, period 2 costs $20 + 4 = 24$, period 1 costs $20 + 6 = 26$. Periods 2 and 3 tie as cheapest at $24$, and both beat producing in period 4 itself ($25$). However, period 2's capacity is fully consumed by its own demand ($d_2 = 120$ equals the cap), so all prebuilding must happen in period 3.
+
+(c) The optimal plan is
+\[
+x = (80, 120, 120, 80, 90, 110), \qquad s = (0, 0, 60, 0, 0, 0),
+\]
+with minimum cost $\mathbf{13{,}450}$, matching the check value. This confirms part (b) with a twist worth pointing out to students: since prebuilt units cost $24$ versus $25$ in period 4, the LP does not prebuild just the $20$ units forced by the cap ($140 - 120$); it fills period 3 to capacity and prebuilds $60$ units, producing only $80$ in period 4. (Because period 2 is at capacity, there are no ties to exploit and this plan is essentially unique.)
+
+% ----------------------------------------------------------------------------
+\exsol{4.11}{Why Everything Ships Somewhere}{2}
+
+(a) Fix an arc $(i,j) \in A$. The variable $x_{ij}$ appears in exactly two balance constraints: in node $i$'s constraint with coefficient $+1$ (it is an outflow of $i$) and in node $j$'s with coefficient $-1$ (an inflow of $j$). Summing the constraints over all $k \in V$ therefore cancels every variable, leaving
+\[
+0 = \sum_{k \in V} d_k.
+\]
+So if total net supply does not equal total net demand, the summed equation $0 = \sum_k d_k$ is violated by every $\x$, and the model is infeasible. Balance of supply and demand is a necessary condition for feasibility.
+
+(b) At an intermediate node the constraint says inflow minus outflow is zero: whatever arrives must depart. Flow cannot be created (outflow exceeding inflow) or destroyed (inflow exceeding outflow) at such a node. Chaining this along any route, every unit that leaves a supply node travels through intermediate nodes unchanged until it reaches a node with positive demand, where the balance constraint lets it be absorbed.
+
+(c) In Exercise 4.5 the warehouses hold $200 + 300 + 150 + 250 + 180 = 1080$ units, but the arcs into the hub can absorb at most $200 + 180 + 160 = 540$. Writing the warehouse constraints as equalities declares every warehouse's net supply to be its full inventory, so the $d_k$ sum to $1080$ minus whatever the hub absorbs; no choice of hub demand up to $540$ makes the total zero while respecting the capacities, and by part (a) the equality model cannot be feasible (part (b) says the surplus cannot simply vanish at the warehouses). Standard fixes: state warehouse supply as an inequality (outflow at most inventory), or keep equalities and add a dummy node that absorbs the surplus through zero-cost, high-capacity arcs from each warehouse. Both let the model choose how much of the inventory actually moves.
+
+% ----------------------------------------------------------------------------
+\exsol{4.12}{Integer Answers for Free}{2}
+
+(a) Model answer: the feasible region of the assignment LP is a polytope whose corner points all happen to have 0-1 coordinates, because the constraint matrix is totally unimodular. The simplex method always stops at a corner point, so even though we only asked for $x_{ij} \geq 0$, the answer it returns is automatically a legitimate 0-1 assignment. We get integrality for free from the geometry, not from imposing it.
+
+(b) The transportation constraint matrix has the same network structure, so the same result applies: when all supplies $s_i$ and demands $d_j$ are integers, every corner point of the transportation polytope is integral, and there is always an optimal shipping plan in whole units. Solving the LP with the simplex method returns integer shipments with no integrality constraints needed.
+
+(c) In the two-team example (both teams rank Project 2 first with scores $2$ and $1$), every integer assignment gives one team its score-$2$ project and the other its score-$1$ project, so the min-max value over integer assignments is $2$. The LP with the added constraints $z \leq \sum_j C_{ij} x_{ij}$ (or $z \geq$, for min-max) does strictly better: splitting each project half-and-half gives both teams $1.5$. Since the LP optimum ($1.5$) is not attained by any integer point, the optimal corner of this LP is fractional, so the formulation no longer has the integrality property. The added $z$ rows destroy the network (totally unimodular) structure of the constraint matrix.
+
+% ----------------------------------------------------------------------------
+\exsol{4.13}{Multicommodity Rerouting Under a Tighter Capacity}{3}
+
+(a) With the original capacities the commodities do not compete: commodity 1 sends all $10$ units along $1 \to 2 \to 4$ at per-unit cost $2 + 1 = 3$ (cost $30$), and commodity 2 sends its $5$ units along $1 \to 3 \to 4$ at per-unit cost $2 + 1 = 3$ (cost $15$). Total minimum cost $45$, as claimed; all arc loads ($10, 5, 10, 5$) are within capacity.
+
+(b) With $u_{24} = 8$, commodity 1 can push only $8$ units through $2 \to 4$; the LP reroutes its other $2$ units along $1 \to 3 \to 4$ at per-unit cost $3 + 2 = 5$. Commodity 2 stays on $1 \to 3 \to 4$ (its cost there is $3$ versus $5$ via node 2). Optimal flows: commodity 1 sends $8$ on $1 \to 2 \to 4$ and $2$ on $1 \to 3 \to 4$; commodity 2 sends $5$ on $1 \to 3 \to 4$. Cost $8(3) + 2(5) + 5(3) = 24 + 10 + 15 = \mathbf{49}$, matching the check value. Arc $(2,4)$ is at its capacity of $8$; arcs $(1,3)$ and $(3,4)$ carry $7$ units each, within capacity.
+
+(c) Example: two nodes $s$ and $t$ joined by two parallel routes, a cheap route with cost $1$ and capacity $10$, and an expensive route with cost $3$ and capacity $10$. Commodities 1 and 2 each must send $8$ units from $s$ to $t$. Solved separately, each commodity routes all $8$ units on the cheap route, loading it to $16 > 10$: infeasible. The joint LP sees the shared capacity constraint $f_{\text{cheap},1} + f_{\text{cheap},2} \leq 10$ and resolves the conflict by rationing the cheap route: it carries $10$ units total (split between the commodities in any proportion) and the remaining $6$ units go on the expensive route, for total cost $10(1) + 6(3) = 28$. The coupling constraint forces the commodities to negotiate over the scarce cheap capacity, which is exactly what makes multicommodity flow harder than solving each commodity alone.
+
+% ----------------------------------------------------------------------------
+\exsol{4.14}{Max-Min Fair Project Assignment}{3}
+
+(a) Enumerating the $3! = 6$ assignments, the maximum total satisfaction is achieved by team $1 \to$ project 1, team $2 \to$ project 2, team $3 \to$ project 3, with total $8 + 8 + 7 = 23$ (the unique maximizer), matching the check value.
+
+(b) The same assignment maximizes the minimum: its worst-off team scores $\min(8, 8, 7) = 7$. No assignment achieves a minimum of $8$: team 2 scores at least $8$ only on project 2, and team 3 scores at least $8$ only on project 2 (scores $6, 9, 7$), so both would need project 2, which is impossible. Hence the best achievable minimum is $7$.
+
+(c) The max-min LP
+\[
+\max \; z \quad \st \; z \leq \sum_j S_{ij} x_{ij} \; (i = 1,2,3), \quad \sum_j x_{ij} = 1, \quad \sum_i x_{ij} = 1, \quad x_{ij} \geq 0
+\]
+has optimal value $z = 7.5$. One optimal solution is the doubly stochastic matrix
+\[
+x = \begin{bmatrix} 5/6 & 0 & 1/6 \\ 1/6 & 3/4 & 1/12 \\ 0 & 1/4 & 3/4 \end{bmatrix},
+\]
+which gives every team an expected satisfaction of exactly $7.5$. Fractions help here because the max-min objective rewards evening out the teams: splitting projects lets the worst-off team absorb some of another team's surplus (team 1 trades away part of project 1's value to lift teams 2 and 3). In part (a) the objective $\sum_{ij} S_{ij} x_{ij}$ is linear over the assignment polytope, whose corners are integral, so some integer assignment is always optimal and fractions cannot improve the total. The added constraints $z \leq \sum_j S_{ij} x_{ij}$ break that structure (see Exercise 4.12(c)), so the LP optimum genuinely exceeds the best integer value.

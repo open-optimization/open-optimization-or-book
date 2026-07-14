@@ -128,6 +128,7 @@ Using pennies, nickels, dimes, and quarters, how can you minimize the number of 
 \end{examplewithallcode}
 
 \section{Capital Budgeting}
+\label{sec:capital-budgeting}
 
 \input{../optimization/open-optimization-examples/example-capital-budgeting.tex}
 
@@ -165,6 +166,7 @@ The objective function \eqref{eq:clsp-objective} minimizes the total cost over t
 For simplicity, we assume an initial inventory level of zero.
 
 \section{Facility Location}
+\label{sec:facility-location}
 The basic model of the facility location problem is to determine where to place your stores or facilities in order to be close to all of your customers and hence reduce the costs of transportation to your customers.  Each customer is known to have a certain demand for a product, and each facility has a capacity on how much of that demand it can satisfy.  We also need to consider the cost of building the facility in a given location.
 
 This basic framework can be applied in many types of problems and there are a number of variants to this problem. Here we present the \emph{capacitated facility location problem}. Additional variants and alternative formulations are covered in Book 2.
@@ -341,6 +343,57 @@ Alternative model!
 \fi  % END BOOK 2 ONLY - Uncapacitated Facility Location
 
 
+\begin{casestudybox}{Where Should the Water Bombers Sleep? Airtanker Basing in Ontario}
+\label{case:wildfire-airtankers}
+
+Ontario fights forest fires with a fleet of airtankers (water bombers).  A fire caught within the first few hours is usually a small story; a fire missed grows into a big one.  So the province's ability to hit new fires quickly depends on where the airtankers are based each morning.  In the early 1990s the Ontario Ministry of Natural Resources asked operations researchers to help decide the home bases, and the resulting mathematical programming model informed the province's actual basing strategy from the 1993 fire season onward.
+
+\subsection*{The Challenge}
+Fires do not announce where they will start.  What is known is the historical pattern: some fire management zones see far more fire starts than others, and an airtanker can only provide effective \emph{initial attack} on fires within a limited flying range of its base.  With a fixed fleet, where should the aircraft be based so that as much expected fire activity as possible is within reach?
+
+\subsection*{The Solution: A Coverage Location Model}
+\textbf{Model type: integer program (facility location / coverage).  No machine learning; the fire-frequency inputs are historical averages.}
+
+\modelhead{Sets and Parameters}
+\begin{itemize}
+\item Let $I$ be the set of fire management zones and $J$ the set of candidate bases.
+\item Let $n_i$ be the expected number of fires in zone $i$ (from historical records).
+\item Let $t_{ij} = 1$ if an airtanker based at $j$ can reach zone $i$ within the initial-attack time standard, and $0$ otherwise.
+\item Let $N$ be the number of airtankers in the fleet.
+\end{itemize}
+
+\modelhead{Variables}
+\begin{itemize}
+\item Let $y_j \in \mathbb{Z}_{\geq 0}$ be the number of airtankers based at $j$.
+\item Let $z_i = 1$ if zone $i$ is covered by at least one base within reach.
+\end{itemize}
+
+\modelhead{Model}
+\begin{align*}
+\max \quad & \sum_{i \in I} n_i \, z_i   \tag{expected fires within reach} \\
+\st        & z_i \leq \sum_{j \in J} t_{ij}\, y_j &&\quad \text{for all } i \in I   \tag{coverage requires a nearby base} \\
+             & \sum_{j \in J} y_j = N   \tag{fleet size} \\
+             & y_j \in \mathbb{Z}_{\geq 0}, \quad z_i \in \{0,1\}.
+\end{align*}
+
+\subsection*{Assumptions and Simplifications}
+\begin{itemize}
+\item The version above counts a zone as covered or not; the published model is finer-grained, accounting for how \emph{many} aircraft can respond and for daily fire-weather variation.
+\item Expected fire counts stand in for actual (random) fire occurrence: the model optimizes the average day, not the worst day.
+\item Airtankers can be re-deployed between bases day to day; the published work treats home-basing (seasonal) and daily deployment as linked decisions.
+\end{itemize}
+
+\subsection*{Implementation and Results}
+The Ontario Ministry of Natural Resources used the model to inform its airtanker home-basing strategy beginning with the 1993 fire season, and Ontario's fire management program has continued to work with operations researchers for decades since, on deployment, dispatch, and detection-patrol planning.
+
+\subsection*{References}
+\begin{itemize}
+\item J.I. MacLellan, D.L. Martell. ``Basing Airtankers for Forest Fire Control in Ontario.'' \emph{Operations Research} 44(5), 677--686, 1996. \url{https://doi.org/10.1287/opre.44.5.677}
+\item D.L. Martell. ``The Development and Implementation of Forest Fire Management Decision Support Systems in Ontario, Canada.'' \emph{Forest Ecology and Management} / retrospective account, 2015.
+\item D.L. Martell, R.J. Drysdale, G.E. Doan, D. Boychuk. ``An Evaluation of Forest Fire Initial Attack Resources.'' \emph{Interfaces} 14(5), 20--32, 1984.
+\end{itemize}
+\end{casestudybox}
+
 \section{Set Covering}
 
 The \emph{set covering} problem can be used for a wide array of problems.    We will see several examples in this section.
@@ -471,8 +524,57 @@ Given a non-negative matrix $A \in \Z_+^{m \times n}$, a non-negative vector $b 
 
 
 
-\section{Graph Coloring}
+\begin{casestudybox}{Kidney Exchange: Integer Programming that Saves Lives}
+\label{case:kidney-exchange}
 
+Thousands of kidney patients have a friend or family member willing to donate a kidney, but with the wrong blood or tissue type.  Kidney exchange programs fix this with a swap: donor A gives to patient B while donor B gives to patient A.  With three pairs, a three-way cycle works the same way.  National programs, including the United States' kidney paired donation program (UNOS) and the United Kingdom's Living Kidney Sharing Scheme, decide who swaps with whom by solving an \textbf{integer program}.  In the UK, that integer program runs on a fixed schedule several times a year: the solver's output is literally the list of surgeries to schedule.
+
+\subsection*{The Challenge}
+Given a pool of incompatible patient--donor pairs, find a set of swap cycles that gives as many patients as possible a compatible kidney.  Two hard rules shape the problem.  First, a pair can appear in at most one cycle (each donor has one kidney to give).  Second, all surgeries in a cycle must happen simultaneously, so that no donor can back out after their loved one has received a kidney; operating-room logistics therefore cap cycles at two or three pairs.
+
+\subsection*{The Solution: A Cycle-Selection Integer Program}
+\textbf{Model type: pure binary integer program.  No machine learning; compatibility is determined by medical testing.}
+
+\modelhead{Sets}
+\begin{itemize}
+\item Let $P$ be the set of incompatible patient--donor pairs.
+\item Let $C$ be the set of feasible swap cycles of length at most 3: subsets of pairs where each donor is compatible with the next patient around the cycle.
+\end{itemize}
+
+\modelhead{Variables}
+\begin{itemize}
+\item Let $x_c = 1$ if cycle $c$ is selected for surgery, and $0$ otherwise.
+\end{itemize}
+
+\modelhead{Model}
+\begin{align*}
+\max \quad & \sum_{c \in C} |c| \, x_c   \tag{total transplants} \\
+\st        & \sum_{c \in C :\, i \in c} x_c \leq 1 &&\quad \text{for all } i \in P   \tag{each pair in at most one cycle} \\
+             & x_c \in \{0,1\} &&\quad \text{for all } c \in C.
+\end{align*}
+
+Here $|c|$ is the number of pairs in cycle $c$, which equals the number of transplants the cycle produces.  Real programs also include \emph{chains} started by altruistic donors (someone who donates without a paired patient) and weight cycles by medical priority rather than just counting transplants; both are small extensions of the same model.
+
+\subsection*{Assumptions and Simplifications}
+\begin{itemize}
+\item Compatibility is treated as a yes/no input from blood typing and tissue crossmatching, computed before the optimization.
+\item The model shown maximizes the \emph{number} of transplants; deployed programs maximize a weighted sum reflecting waiting time, sensitization, and pediatric status.
+\item Enumerating all cycles is feasible for cycle length $\le 3$; national-scale pools with long chains need column generation (a Book 2 topic).
+\end{itemize}
+
+\subsection*{Implementation and Results}
+Cycle- and chain-based integer programs are the clearing engines of the US and UK national programs, and the published models have been benchmarked directly on real UNOS and UK datasets.  The UK scheme's matching runs are performed with algorithms developed by the University of Glasgow.  Economist Alvin Roth shared the 2012 Nobel Prize in part for the market design behind kidney exchange.
+
+\subsection*{References}
+\begin{itemize}
+\item D.J. Abraham, A. Blum, T. Sandholm. ``Clearing Algorithms for Barter Exchange Markets: Enabling Nationwide Kidney Exchanges.'' \emph{Proceedings of ACM EC}, 2007. \url{https://doi.org/10.1145/1250910.1250954}
+\item D.F. Manlove, G. O'Malley. ``Paired and Altruistic Kidney Donation in the UK: Algorithms and Experimentation.'' \emph{ACM Journal of Experimental Algorithmics} 19, 2015. \url{https://doi.org/10.1145/2670129}
+\item R. Anderson, I. Ashlagi, D. Gamarnik, A.E. Roth. ``Finding Long Chains in Kidney Exchange Using the Traveling Salesman Problem.'' \emph{PNAS} 112(3), 2015. \url{https://doi.org/10.1073/pnas.1421853112}
+\end{itemize}
+\end{casestudybox}
+
+\section{Graph Coloring}
+\label{sec:graph-coloring}
 
 Graph coloring \refincludefigurestatic{wiki-File-Petersen-graph-3-coloring.png} is
 the problem of finding a minimum coloring in a graph, and it can be formulated in many ways. Each vertex is assigned a color and two vertices cannot share the same color if they are connected by an edge.
@@ -515,6 +617,7 @@ As an exercise, try implementing these different models and compare the solve ti
 
 \newpage
 \section{Basic Modeling Tricks - Using Binary Variables}
+\label{sec:modeling-tricks}
 In this section, we describe ways to model a variety of constraints that commonly appear in practice.  The goal is changing constraints described in words to constraints defined by math.
 
 Binary variables can allow you to model many types of constraints.  We discuss here various logical constraints where we assume that $x_i \in \{0,1\}$ for $i=1, \dots, n$.  We will take the meaning of the variable to be selecting an item.
@@ -601,6 +704,7 @@ Here, $z_i$ represents if we buy the $i$th unit.  The inequality constraints imp
 
 
 \subsection{Big M constraints - Activating/Deactivating Inequalities}
+\label{subsec:big-M-activation}
 Big M comes again!   It's extremely useful when trying to activate constraints based on a binary variable.
 
 For instance, if we don't rent a bus, then we can have at most 3 passengers join us on our trip.   Consider passengers $A,B,C,D,E$ and let $x_i \in \{0,1\}$ be 1 if we take passenger $i$ and 0 otherwise.
@@ -776,7 +880,60 @@ In the figure, solid green arrows represent toll-free travel, while dashed red a
 
 
 
+\begin{casestudybox}{108{,}
+\label{case:walmart-loads}000 Fewer Truck Routes: Walmart's Load Planning}
+
+Walmart moves goods from distribution centers to about 4{,}700 US stores on one of the largest private trucking fleets in the world.  For the 2023 Franz Edelman Award (which it won), Walmart described an end-to-end optimization framework, from long-term network design down to daily routing and trailer load planning.  In fiscal year 2023 the system eliminated 108{,}000 truck routes and 33 million driving miles, saving \$91.5 million and preventing 98.6 million pounds of CO$_2$ emissions.
+
+\subsection*{The Challenge}
+Every day, each store needs a set of orders delivered.  Orders take up trailer space; trucks have capacity; stores have delivery windows; and every truck dispatched costs money and emissions.  The daily question at the heart of load planning: pack the orders into as few trailer-loads as possible while respecting capacities and delivery requirements.
+
+\subsection*{The Solution: A Packing/Consolidation Integer Program}
+\textbf{Model type: integer programming for load consolidation and routing, inside a framework whose strategic layers are also optimization models.  Forecasts feed the models as data.}
+
+The consolidation core, simplified:
+
+\modelhead{Sets and Parameters}
+\begin{itemize}
+\item Let $O$ be the set of orders for a delivery region, with sizes $q_o$ (trailer cube).
+\item Let $T$ be the set of available trailer-loads (trucks), each with capacity $Q$.
+\item Compatibility data: $s_{ot} = 1$ if order $o$ can ride on truck $t$ (same route corridor, feasible delivery window).
+\end{itemize}
+
+\modelhead{Variables}
+\begin{itemize}
+\item Let $x_{ot} = 1$ if order $o$ is loaded on truck $t$.
+\item Let $y_t = 1$ if truck $t$ is dispatched.
+\end{itemize}
+
+\modelhead{Model}
+\begin{align*}
+\min \quad & \sum_{t \in T} y_t   \tag{trucks dispatched} \\
+\st        & \sum_{t \in T} s_{ot}\, x_{ot} = 1 &&\quad \text{for all } o \in O   \tag{every order ships} \\
+           & \sum_{o \in O} q_o\, x_{ot} \leq Q\, y_t &&\quad \text{for all } t \in T   \tag{capacity; ride only dispatched trucks} \\
+           & x_{ot} \leq s_{ot}, \quad x_{ot}, y_t \in \{0,1\}.
+\end{align*}
+
+The capacity constraint again uses the big-$M$ linking pattern with $M = Q$.  The deployed system couples this packing decision with routing (which stores share a route) and with strategic network design; the Edelman paper describes the full architecture.
+
+\subsection*{Assumptions and Simplifications}
+\begin{itemize}
+\item Order sizes and delivery windows are data; in practice they come from demand forecasts.
+\item The simplified model minimizes truck count; Walmart's objective also prices miles, so consolidating onto fewer, fuller, shorter routes is what produced the 33-million-mile reduction.
+\item Routing (the order in which a truck visits stores) is a separate, harder layer, in Book 2 territory; this box shows the consolidation layer.
+\end{itemize}
+
+\subsection*{Implementation and Results}
+Deployed across Walmart's US supply chain: 108{,}000 routes and 33 million miles eliminated in FY2023, \$91.5 million saved, 98.6 million pounds of CO$_2$ avoided.  2023 INFORMS Franz Edelman Award winner.
+
+\subsection*{References}
+\begin{itemize}
+\item ``Optimizing Walmart's Supply Chain from Strategy to Execution.'' \emph{INFORMS Journal on Applied Analytics} 54(1), 5--19, 2024. \url{https://doi.org/10.1287/inte.2023.0093}
+\end{itemize}
+\end{casestudybox}
+
 \subsection{Either Or Constraints}
+\label{subsec:either-or}
 The Big-M technique from the previous subsection activated a single constraint.  A closely related situation is when we have two constraints and we need \emph{at least one} of them to hold: an \emph{inclusive or}.  For example, a delivery might need to arrive either before a morning deadline or after an afternoon opening, or a budget must be satisfied in at least one of two currencies.  The trick is to use one binary variable to decide \emph{which} constraint is enforced, and a pair of Big-M constraints to relax whichever one is not selected.
 \begin{general}{Either Or}{}{}
 
@@ -821,6 +978,7 @@ which simplifies to $x \geq 2(1-\delta)$ and $y \geq 10\delta$.  If $\delta = 0$
 \end{example}
 
 \paragraph{Choosing Big-M Values.}
+\label{par:choosing-big-M}
 The constants \(M_1\) and \(M_2\) should be chosen as valid upper bounds on the expressions \(a^\top x - b\) and \(c^\top x - d\), respectively, over the feasible region. Overly large values may weaken the LP relaxation and cause numerical instability, so careful bounding is recommended whenever possible.  In the example above, the bounds $M_1 = 2$ and $M_2 = 10$ are as tight as possible.
 
 \paragraph{Use Cases.}
@@ -1067,6 +1225,7 @@ The pairs of consecutive variables are $(x_1,x_2)$, $(x_2,x_3)$, and $(x_3,x_4)$
 \end{examplewithcode}
 
 \subsection{Piecewise linear functions with SOS2 constraint}
+\label{subsec:pwl-sos2}
 \begin{examplewithcode}{Piecewise Linear Function}{\href{https://github.com/open-optimization/open-optimization-or-examples/blob/master/nonlinear-programming/Gurobi-SOS-Examples.ipynb}{Gurobipy}}
 \label{example:pwl}
 Consider the piecewise linear function 
@@ -1276,6 +1435,7 @@ Together with the first constraints, this gives $t = \max_i x_i$.
 
 
 \section{Job Shop Scheduling}
+\label{sec:job-shop}
 
 \begin{tryit}
 \vizlink{gantt-jobshop}{Job-Shop Schedule (Gantt)}: this chapter's scheduling problem, solved and animated.
@@ -1788,8 +1948,88 @@ We call this the \emph{log reformulation} because this requires only logarithmic
 \fi  % END BOOK 2 ONLY CONTENT
 
 \section{Exercises}
-\begin{ex}{Locating Distribution Terminals}{}{}
 
+\exgroup{Warm-ups}
+
+\begin{ex}{Knapsack Problem}{}
+\label{ex:knapsack-hiker}
+\stars{1} A hiker is packing a backpack with a weight capacity of 15\,kg. The available items are:
+
+\begin{center}
+\begin{tabular}{c|c|c}
+\textbf{Item} & \textbf{Weight (kg)} & \textbf{Value} \\
+\hline
+Tent & 5 & 8 \\
+Sleeping Bag & 3 & 6 \\
+Stove & 4 & 5 \\
+Food & 7 & 10 \\
+Camera & 2 & 4 \\
+\end{tabular}
+\end{center}
+
+\begin{enumerate}
+\item Formulate a binary integer program to maximize the total value of items packed without exceeding the weight capacity.
+\item Suppose the hiker also requires that if the stove is packed, then the food must also be packed (you cannot cook without food). Add this logical constraint to your formulation.
+\end{enumerate}
+\exrefs{Example~\ref{example:knapsack}, \S\ref{sec:modeling-tricks}}
+\end{ex}
+
+\begin{ex}{Courier Van Knapsack}{}
+\label{ex:knapsack-warmup}
+\stars{1} A courier van can carry at most 15\,kg on its last run of the day.  Five packages are waiting, with weights and payouts:
+
+\begin{center}
+\begin{tabular}{c|c|c|c|c|c}
+\textbf{Package} & 1 & 2 & 3 & 4 & 5 \\
+\hline
+\textbf{Weight (kg)} & 11 & 3 & 2 & 5 & 4 \\
+\textbf{Payout (\$)} & 5 & 3 & 3 & 7 & 4 \\
+\end{tabular}
+\end{center}
+
+\begin{enumerate}
+\item Formulate a binary knapsack problem for choosing which packages to load.
+\item Solve it, by hand or with a solver.  Which packages ride along, and what is the total payout?
+\end{enumerate}
+\exrefs{Example~\ref{example:knapsack}}
+\end{ex}
+
+\begin{ex}{Covering a Small Town}{}
+\label{ex:fire-warmup}
+\stars{1} A town has six districts arranged in a $2 \times 3$ grid:
+\begin{center}
+\begin{tabular}{|c|c|c|}
+\hline
+1 & 2 & 3 \\
+\hline
+4 & 5 & 6 \\
+\hline
+\end{tabular}
+\end{center}
+Two districts are neighbors when their cells share a side.  A fire station placed in a district covers that district and all of its neighbors.
+\begin{enumerate}
+\item Write out the neighbor sets $V_i$ for each district $i$.
+\item Formulate the set covering integer program that minimizes the number of fire stations so that every district is covered.
+\item Solve the instance.  How many stations are needed, and where can they go?
+\end{enumerate}
+\exrefs{Example~\ref{example:fire-station}, \ref{general:set-covering}}
+\end{ex}
+
+\begin{ex}{Big-M Activation Drill}{}
+\label{ex:bigM-drill}
+\stars{1} A tour company runs three excursions with sign-up counts $x_1, x_2, x_3$, where each excursion can take at most 30 tourists ($0 \leq x_i \leq 30$).  Let $\delta \in \{0,1\}$ equal $1$ if the company hires a second guide.  Company policy: \emph{if no second guide is hired, then the three excursions can take at most 40 tourists in total.}
+\begin{enumerate}
+\item Write this if-then requirement as a single linear constraint using a big-$M$ parameter.
+\item What is the smallest valid value of $M$?  Justify it using the bounds on the $x_i$.
+\end{enumerate}
+\exrefs{\S\ref{subsec:big-M-activation}, \S\ref{sec:modeling-tricks}}
+\end{ex}
+
+\exgroup{Core problems}
+
+\begin{ex}{Locating Distribution Terminals}{}
+\label{ex:terminals}
+\stars{2}
 Suppose that a company based in St. John's is considering adding distribution terminals in (1) Halifax, (2) Moncton, (3) Montréal, (4) Ottawa, and (5) Toronto.\\
 
 The cost of building the five terminals in millions of dollars would be 10 in Halifax, 12 in Moncton, 20 in Montréal, 18 in Ottawa, and 25 in Toronto. 
@@ -1803,10 +2043,12 @@ Define the variables:
 $y_{i}= \begin{cases}1 & \text { if a terminal is built in city } i(i=1, \ldots, 5) \\ 0 & \text { otherwise }\end{cases}$
 
 Using these variables, write a (binary) integer program that models the problem of determining which terminals to build subject to the constraints above that minimizes cost.
+\exrefs{\S\ref{sec:capital-budgeting}, \S\ref{sec:modeling-tricks}}
 \end{ex}
 
 \begin{ex}{Warehouse Location}{}
-A retail company must decide which of four potential warehouse sites to open. Each warehouse has a fixed opening cost and can serve a subset of five customer regions.  The data are as follows:
+\label{ex:warehouse-cover}
+\stars{2} A retail company must decide which of four potential warehouse sites to open. Each warehouse has a fixed opening cost and can serve a subset of five customer regions.  The data are as follows:
 
 \begin{center}
 \begin{tabular}{c|c|l}
@@ -1825,32 +2067,74 @@ Every customer region must be served by at least one open warehouse.
 \item Define binary decision variables and formulate an integer program that minimizes the total fixed cost while ensuring every region is served.
 \item What type of classic IP problem does this resemble?
 \end{enumerate}
+\exrefs{\ref{general:set-covering}, Example~\ref{example:fire-station}}
 \end{ex}
 
-\begin{ex}{Knapsack Problem}{}
-A hiker is packing a backpack with a weight capacity of 15\,kg. The available items are:
+\begin{ex}{Capital Budgeting with Dependencies}{}
+\label{ex:capital-dependencies}
+\stars{2} A firm is screening five projects over a two-year horizon.  The net present values and the cash outlays (all in \$1000s) are:
 
 \begin{center}
-\begin{tabular}{c|c|c}
-\textbf{Item} & \textbf{Weight (kg)} & \textbf{Value} \\
+\begin{tabular}{l|c|c|c|c|c}
+\textbf{Project} & 1 & 2 & 3 & 4 & 5 \\
 \hline
-Tent & 5 & 8 \\
-Sleeping Bag & 3 & 6 \\
-Stove & 4 & 5 \\
-Food & 7 & 10 \\
-Camera & 2 & 4 \\
+\textbf{NPV} & 20 & 40 & 20 & 15 & 30 \\
+\textbf{Year 1 outlay} & 5 & 4 & 3 & 7 & 8 \\
+\textbf{Year 2 outlay} & 1 & 7 & 9 & 4 & 6 \\
+\end{tabular}
+\end{center}
+
+The budget is 20 in each year.  In addition: project 3 is an expansion of project 1, so it can only be undertaken if project 1 is; and projects 2 and 5 would serve the same market, so at most one of them may be chosen.
+\begin{enumerate}
+\item Formulate a binary integer program that maximizes total NPV subject to both budgets and both logical conditions.
+\item Solve the instance.  Which projects are funded, and what is the optimal NPV?
+\end{enumerate}
+\exrefs{\S\ref{sec:capital-budgeting}, \S\ref{sec:modeling-tricks}}
+\end{ex}
+
+\begin{ex}{Facility Location: Two Distribution Centers}{}
+\label{ex:facility-small}
+\stars{2} A company can open distribution centers at two sites to serve three stores.  Opening costs, capacities, per-unit serving costs, and demands are:
+
+\begin{center}
+\begin{tabular}{lcc|ccc}
+\toprule
+ & \(\mathbf{f_i}\) (\$) & \(\mathbf{u_i}\) (units) & Store 1 & Store 2 & Store 3 \\
+\midrule
+Center 1 & 80 & 40 & \$2 & \$3 & \$1 \\
+Center 2 & 60 & 25 & \$4 & \$1 & \$2 \\
+\midrule
+\textbf{Demand \(d_j\)} & & & 10 & 12 & 15 \\
+\bottomrule
 \end{tabular}
 \end{center}
 
 \begin{enumerate}
-\item Formulate a binary integer program to maximize the total value of items packed without exceeding the weight capacity.
-\item Suppose the hiker also requires that if the stove is packed, then the food must also be packed (you cannot cook without food). Add this logical constraint to your formulation.
+\item Check that this instance, unlike the retail distribution example in the text, has enough capacity to be feasible.
+\item Formulate the capacitated facility location model for this data.
+\item Solve the instance.  Which centers open, how is demand assigned, and what is the total cost?  In particular, is it worth opening the cheaper center?
 \end{enumerate}
+\exrefs{\S\ref{sec:facility-location}}
+\end{ex}
+
+\begin{ex}{Coloring a Five-Node Graph}{}
+\label{ex:graph-coloring-5}
+\stars{2} Consider the graph on vertices $\{A, B, C, D, E\}$ with edges
+\[
+\{A,B\},\ \{B,C\},\ \{C,D\},\ \{D,E\},\ \{E,A\},\ \{A,C\},
+\]
+a five-cycle together with the chord $\{A,C\}$.
+\begin{enumerate}
+\item Write the classical integer programming formulation for coloring this graph with variables $x_{ij}$ and $w_j$.
+\item Solve the instance to find the chromatic number, and exhibit an optimal coloring.
+\item Explain how the triangle $A, B, C$ gives a quick lower bound that matches your answer.
+\end{enumerate}
+\exrefs{\S\ref{sec:graph-coloring}}
 \end{ex}
 
 \begin{ex}{Either-Or Constraints}{}
 \label{ex:either-or-modes}
-A company produces two products, $x_1$ and $x_2$. Production of product~1 requires a special machine that can either run in mode~A or mode~B, but not both simultaneously.  The constraints are:
+\stars{2} A company produces two products, $x_1$ and $x_2$. Production of product~1 requires a special machine that can either run in mode~A or mode~B, but not both simultaneously.  The constraints are:
 \begin{itemize}
 \item Mode A: $2x_1 + x_2 \leq 10$
 \item Mode B: $x_1 + 3x_2 \leq 12$
@@ -1858,19 +2142,114 @@ A company produces two products, $x_1$ and $x_2$. Production of product~1 requir
 Exactly one of these two constraints must hold (the machine operates in exactly one mode). The objective is to maximize $5x_1 + 4x_2$ with $x_1, x_2 \geq 0$.
 
 Introduce a binary variable and a big-$M$ parameter to formulate this either-or constraint as a mixed-integer program.
+\exrefs{\S\ref{subsec:either-or}}
 \end{ex}
 
 \begin{ex}{Fixed-Charge Production}{}
 \label{ex:fixed-charge}
-A factory can produce a product in any quantity $x \geq 0$, but starting up production incurs a fixed cost of $\$500$.  The variable production cost is $\$8$ per unit, and each unit sells for $\$15$.  The factory has capacity to produce at most 200 units.
+\stars{2} A factory can produce a product in any quantity $x \geq 0$, but starting up production incurs a fixed cost of $\$500$.  The variable production cost is $\$8$ per unit, and each unit sells for $\$15$.  The factory has capacity to produce at most 200 units.
 
 \begin{enumerate}
 \item Define a binary variable $y$ that indicates whether the factory produces any units at all. Write a mixed-integer program that maximizes profit (revenue minus variable cost minus fixed cost).
 \item Explain the role of the constraint that links $x$ and $y$.
 \end{enumerate}
+\exrefs{\S\ref{subsec:big-M-activation}}
+\end{ex}
+
+\exgroup{Concepts and connections}
+
+\begin{ex}{Why Rounding the Relaxation Fails}{}
+\label{ex:lp-rounding}
+\stars{2} Return to the knapsack instance of Example~\ref{example:knapsack} and replace $x_i \in \{0,1\}$ by $0 \leq x_i \leq 1$ (the LP relaxation).
+\begin{enumerate}
+\item Solve the LP relaxation.  (For a single knapsack constraint the relaxation can be solved greedily: sort items by value per kilogram and fill the bag in that order, taking a fraction of the last item.)  You should find value $52/3 \approx 17.33$ with $x_1 = 7/12$ and all other variables equal to $1$.
+\item Round the fractional variable up.  Is the result feasible?  Round it down.  What value do you get, and how does it compare to the true integer optimum of $15$?
+\item Rounding down happened to give an optimal integer solution here.  Explain why rounding cannot be trusted in general.  In particular, describe what rounding does to a model with equality constraints such as Example~\ref{ex:min-coins}, and to binary choice variables such as those in Exercise~\ref{ex:terminals}, where a value like $y_i = 0.5$ has no meaning.
+\end{enumerate}
+\exrefs{Example~\ref{example:knapsack}, Example~\ref{ex:min-coins}, \S\ref{sec:IP-formulations}}
+\end{ex}
+
+\begin{ex}{When is Big-M Too Big?}{}
+\label{ex:bigM-size}
+\stars{2} In Exercise~\ref{ex:either-or-modes}, the value $M = 10^6$ is perfectly valid: the resulting mixed-integer program has the same optimal solution as with $M = 20$.
+\begin{enumerate}
+\item Explain what such a huge $M$ does to the LP relaxation: how much does a tiny fractional value of $\delta$, say $\delta = 10^{-5}$, relax each mode constraint?  Why does this weaken the bounds a solver gets from the relaxation?
+\item Derive the tightest valid constants for that exercise.  When mode B is active, the constraint $x_1 + 3x_2 \leq 12$ bounds $2x_1 + x_2$; when mode A is active, $2x_1 + x_2 \leq 10$ bounds $x_1 + 3x_2$.  Show that $M_1 = 14$ and $M_2 = 18$ suffice.
+\item Name one numerical (floating-point) hazard of very large $M$ values mentioned in the text.
+\end{enumerate}
+\exrefs{Choosing Big-M Values paragraph in \S\ref{par:choosing-big-M}, Exercise~\ref{ex:either-or-modes}}
+\end{ex}
+
+\begin{ex}{Reading the Kidney Exchange Model}{}
+\label{ex:kidney-model}
+\stars{2} Consider the cycle-selection integer program in the kidney exchange case study.
+\begin{enumerate}
+\item Explain in plain language what the constraint $\sum_{c \in C:\, i \in c} x_c \leq 1$ enforces, and what could go wrong medically if it were dropped.
+\item The objective uses coefficients $|c|$.  Why does $\sum_{c} |c| x_c$ equal the number of transplants performed?
+\item The set $C$ only contains cycles of length at most 3.  Give the operational reason for this cap, and describe what happens to the size of $C$ if the cap is raised.
+\item An altruistic donor donates a kidney without a paired patient, starting a chain rather than a cycle.  Describe how you would extend the sets and variables of the model to include chains of bounded length.
+\end{enumerate}
+\exrefs{Kidney exchange case study in \S\ref{case:kidney-exchange}}
+\end{ex}
+
+\exgroup{Challenge problems}
+
+\begin{ex}{Piecewise-Linear Production Cost}{}
+\label{ex:pwl-challenge}
+\stars{3} A plant can produce up to 30 tons of product, sold at \$6 per ton.  Production cost is piecewise linear in the quantity $x$: the first 10 tons cost \$5 per ton, the next 10 tons cost \$3 per ton (a bulk discount on inputs), and the final 10 tons cost \$8 per ton (overtime).
+\begin{enumerate}
+\item Write the total cost $C(x)$ at the breakpoints $x = 0, 10, 20, 30$ and explain why $C$ is not convex, so the standard LP tricks for convex piecewise-linear costs do not apply.
+\item Formulate profit maximization using breakpoint weights $\lambda_1, \dots, \lambda_4$ with an SOS2 condition, and also write the equivalent binary-variable formulation from the text.
+\item Solve the model.  You should find that producing 20 tons is optimal with profit \$40.  Why does the plant stop exactly at the end of the discounted segment?
+\end{enumerate}
+\exrefs{\S\ref{subsec:pwl-sos2}, Example~\ref{example:pwl}, Example~\ref{example:SOS2}}
+\end{ex}
+
+\begin{ex}{Two Jobs, Three Machines}{}
+\label{ex:flowshop}
+\stars{3} Two jobs must each pass through machines $M_1 \to M_2 \to M_3$ in that order.  Processing times are:
+
+\begin{center}
+\begin{tabular}{l|c|c|c}
+ & $M_1$ & $M_2$ & $M_3$ \\
+\hline
+Job 1 & 3 & 2 & 4 \\
+Job 2 & 2 & 4 & 3 \\
+\end{tabular}
+\end{center}
+
+Each machine can process only one job at a time, and jobs cannot be interrupted.
+\begin{enumerate}
+\item Introduce start-time variables $s_{jk}$ for job $j$ on machine $k$ and write the precedence constraints within each job.
+\item For each machine $k$, introduce a binary variable $\delta_k$ and write the disjunctive pair of big-$M$ constraints stating that either job 1 precedes job 2 on machine $k$ or vice versa.  Propose a valid value of $M$ from the data.
+\item Minimize the makespan and solve the model.  You should find an optimal makespan of 12; report which job goes first on each machine and the full schedule.
+\end{enumerate}
+\exrefs{\S\ref{sec:job-shop}, \S\ref{subsec:multi-term-disjunction}, \S\ref{subsec:big-M-activation}}
 \end{ex}
 
 \subsubsection*{Selected Solutions}
+
+\begin{solution}(Exercise~\ref{ex:knapsack-warmup})
+With $x_i = 1$ if package $i$ is loaded, the model is
+\[
+\max\ 5x_1 + 3x_2 + 3x_3 + 7x_4 + 4x_5
+\quad \text{s.t.} \quad
+11x_1 + 3x_2 + 2x_3 + 5x_4 + 4x_5 \leq 15,\ x_i \in \{0,1\}.
+\]
+The optimal load is packages $2, 3, 4, 5$ with weight $3+2+5+4 = 14 \leq 15$ and payout $3+3+7+4 = \$17$.  The heavy package 1 never pays: taking it leaves only 4\,kg of room, and the best it can then achieve is $5 + 3 = \$8$.
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:fire-warmup})
+The neighbor sets (including the district itself, as in the fire station example) are $V_1 = \{1,2,4\}$, $V_2 = \{1,2,3,5\}$, $V_3 = \{2,3,6\}$, $V_4 = \{1,4,5\}$, $V_5 = \{2,4,5,6\}$, $V_6 = \{3,5,6\}$.  One station cannot cover all six districts since no set $V_i$ has more than four elements.  Two stations suffice: districts $2$ and $5$ cover $V_2 \cup V_5 = \{1,\dots,6\}$, and so do districts $3$ and $4$, and districts $1$ and $6$.  The optimal value is $2$, and these three placements are the only optimal ones.
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:facility-small})
+Total capacity is $40 + 25 = 65 \geq 37 = 10 + 12 + 15$, so the instance is feasible; in fact center 1 alone has capacity $40 \geq 37$, while center 2 alone ($25 < 37$) does not suffice.  Solving the model, the optimum opens center 1 only and serves all three stores from it: cost $80 + 2(10) + 3(12) + 1(15) = 80 + 71 = \$151$.  Opening both centers costs $140$ in fixed charges plus $47$ in best-case serving costs, a total of $\$187$, so the cheaper center is not worth its \$60 opening cost.
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:graph-coloring-5})
+The chromatic number is $3$.  Lower bound: vertices $A$, $B$, $C$ are pairwise adjacent (a triangle), so they need three distinct colors.  Upper bound: the coloring $A \to 1$, $B \to 2$, $C \to 3$, $D \to 1$, $E \to 2$ is proper, as can be checked edge by edge.  Solving the integer program confirms $\sum_j w_j = 3$.
+\end{solution}
 
 \begin{solution}(Exercise~\ref{ex:either-or-modes})
 Introduce $\delta \in \{0,1\}$, where $\delta = 0$ selects mode~A and $\delta = 1$ selects mode~B.  Valid big-$M$ values can be read from the problem: relaxing each constraint by $M = 20$ (any upper bound on the left-hand sides over reasonable production levels works).  The formulation is

@@ -1,0 +1,119 @@
+% ============================================================================
+% Solutions Manual, Chapter 1: Mathematical Programming
+% Synced to book/part1-linear-programming/ch01-introduction/mathematicalProgramming.tex
+% 11 exercises. Numeric answers verified with scipy.optimize.linprog (2026-07-13).
+% ============================================================================
+\section{Chapter 1: Mathematical Programming}
+
+\textbf{Coverage assessment.} The eleven exercises track the chapter closely. The four warm-ups drill the classification taxonomy of Sections 1.5 through 1.8 (LP, BIP/ILP, NLP, MINLP), one exercise per class, which is exactly the skill the chapter builds. The core problems return to the Section 1.1 shirt store and to the model components of Section 1.3 (variables, objective, constraints), and the concept exercises cover the divisibility issue, the history of the word programming, and the Section 1.2 success stories. The challenge problem closes the loop by turning the warm-up scenario into a full solvable LP, so the ladder flows cleanly from one-star recognition to three-star formulation. Gaps are minor: nothing exercises the machine learning subsections (loss minimization, k-means) or the optimization-under-uncertainty section, both of which are explicitly out of scope for the book, so this is defensible. All exercises appear original to the book; no licensing concerns.
+
+\exsol{1.1}{Classify It: Production Plan}{1}
+
+This is a \textbf{linear program (LP)}. The two features that justify the classification are: (i) the type of functions, since the objective $2x_1 + 3x_2$ and the constraint left-hand sides $x_1 + 2x_2$ and $x_1 + x_2$ are all linear functions of the decision variables; and (ii) the type of variables, since $x_1$ and $x_2$ are continuous quantities (liters of juice) restricted only by linear inequalities and non-negativity, with no integrality requirement. Linearity rules out NLP and MINLP; continuity rules out ILP, BIP, and MILP. Written out, the model is
+\begin{align*}
+\max \quad & 2x_1 + 3x_2\\
+\st \quad & x_1 + 2x_2 \leq 800\\
+& x_1 + x_2 \leq 600\\
+& x_1, x_2 \geq 0.
+\end{align*}
+
+\exsol{1.2}{Classify It: Choosing Projects}{1}
+
+This is a \textbf{binary integer program (BIP)}, a special case of ILP: the objective $\sum_i c_i x_i$ and the budget constraint $\sum_i a_i x_i \leq b$ are linear, and every variable is restricted to the discrete set $\{0,1\}$. The binary restriction is what rules out LP.
+
+If the city may fund fractions of projects, replace $x_i \in \{0,1\}$ with $0 \leq x_i \leq 1$. All functions are then linear over continuous variables and the model becomes an \textbf{LP}. (This LP is the linear relaxation of the BIP; its optimal value is always at least as large as the BIP value, since every BIP-feasible point is LP-feasible.)
+
+\exsol{1.3}{Classify It: Fitting a Line}{1}
+
+This is a \textbf{nonlinear program (NLP)}. The decision variables $m$ and $q$ are continuous and unconstrained, so no integer class applies, but the objective
+\[
+\sum_{i=1}^N \big(y_i - (m t_i + q)\big)^2
+\]
+is \emph{not} linear in $m$ and $q$: expanding any one term produces $m^2 t_i^2 + q^2 + 2 m q t_i + \dots$, so the objective is a quadratic function of the decision variables. (The model $f(t) = mt + q$ is linear in $t$, but classification is always with respect to the \emph{decision variables}, here $m$ and $q$.) In fact this is a convex quadratic minimization, the classical least-squares problem, so it sits in the easy convex corner of NLP and even has a closed-form solution.
+
+\exsol{1.4}{Classify It: Warehouses with Congestion}{1}
+
+This is a \textbf{mixed-integer nonlinear program (MINLP)}. Ruling out the simpler classes one ingredient at a time:
+\begin{itemize}
+\item The quadratic handling costs $x_j^2$ in the objective rule out LP, ILP/BIP, and MILP, all of which require linear functions.
+\item The binary open/close variables $y_j \in \{0,1\}$ rule out LP and NLP, which allow only continuous variables.
+\item The model mixes continuous flows $x_j \geq 0$ with binary $y_j$, so it is not a pure integer model.
+\end{itemize}
+Nonlinear functions plus a mix of integer and continuous variables is precisely the definition of MINLP. (The linking requirement that flow is allowed only when $y_j = 1$ is typically written $x_j \leq M y_j$ for a large constant $M$; that constraint itself is linear.)
+
+\exsol{1.5}{Shirt Store: Variables and One Constraint}{2}
+
+\begin{enumerate}
+\item Let $x_T, x_F, x_S \geq 0$ be the number of shirts ordered on Thursday, Friday, and Saturday, and let $s_F, s_S \geq 0$ be the inventory on hand at the end of Friday and at the end of Saturday.
+\item Thursday's order is everything the store has available on Friday (the store starts empty and orders arrive one day after placement). Whatever is not sold to Friday's 5 customers is Friday's ending inventory:
+\[
+x_T = 5 + s_F .
+\]
+\item The non-negativity constraint $s_F \geq 0$, combined with the balance equation above, is what prevents a Friday stockout: together they force $x_T \geq 5$, so the store must order at least enough on Thursday to cover Friday's demand. Without $s_F \geq 0$, the model could "borrow" shirts by letting the inventory go negative.
+\end{enumerate}
+
+\exsol{1.6}{Spot the Pieces: Food Truck}{2}
+
+A model answer in words:
+\begin{itemize}
+\item \textbf{Decision variables:} the number of tacos to prepare (units: tacos) and the number of burritos to prepare (units: burritos) for tomorrow.
+\item \textbf{Objective function:} maximize total profit (units: dollars), which is \$2 per taco times the number of tacos plus \$3.50 per burrito times the number of burritos.
+\item \textbf{Constraints:}
+  \begin{itemize}
+  \item Meat: 0.1 kg per taco times the number of tacos plus 0.25 kg per burrito times the number of burritos must not exceed 30 kg of available meat (units: kilograms).
+  \item Labor: prep time per taco times the number of tacos plus prep time per burrito times the number of burritos must not exceed 10 hours (units: hours). The per-item prep times are data the owner must supply.
+  \item Non-negativity: both production quantities are at least zero.
+  \end{itemize}
+\end{itemize}
+
+\begin{qaflag}
+Underspecified data (issue type b): the exercise gives the 10-hour labor limit but no prep time per taco or per burrito, so the labor constraint cannot be written numerically. This is workable for an identify-the-pieces exercise (the student can name the constraint and observe that data is missing), but if that is not the intent, one added sentence fixes it, for example "each taco takes 3 minutes of prep and each burrito 5 minutes." Recommendation: either add the prep times or add a sentence asking students to identify what data is missing, making the omission clearly deliberate.
+\end{qaflag}
+
+\exsol{1.7}{Spot the Pieces: Tutoring Center}{2}
+
+\textbf{Decision variables:} for each of the 12 tutors, the number of one-hour sessions that tutor works next week (units: sessions, a whole number between 0 and 8).
+\textbf{Objective:} maximize the total number of sessions covered (units: sessions).
+\textbf{Constraints:} (i) each tutor works at most 8 sessions; (ii) the total number of sessions is at least 40; (iii) total spending, tutor $i$'s rate $p_i$ dollars per session times the sessions assigned to tutor $i$, summed over tutors, is at most the \$900 budget (units: dollars); (iv) session counts are non-negative integers.
+
+\textbf{Model class:} this is an \textbf{integer linear program (ILP)}. All functions (objective, budget, session counts) are linear, but the decision variables must be whole numbers of sessions, since a tutor cannot be hired for a fraction of a one-hour session. The integrality requirement is exactly what keeps this from being an LP, and it is what makes the problem potentially much harder to solve.
+
+\exsol{1.8}{Half a Bus}{2}
+
+\begin{enumerate}
+\item Rounding is likely acceptable for the shirts: 1045.3 rounded to 1045 changes the plan by about 0.03 percent, and shirts are cheap, so the cost impact and the feasibility risk are negligible. For the buses, rounding is risky: 12.5 to 12 or 13 is a 4 percent change in a decision where each unit is expensive, and rounding down may leave demand uncovered while rounding up may waste a large capital cost. The rounded plan may be far from optimal, or not even feasible.
+\item Divisibility is the LP assumption that fractional variable values make sense. When they do not, and the numbers involved are small enough that rounding is unsafe, we must move from the LP class to the MILP class and impose integrality explicitly. The price is computational: LPs are solvable in polynomial time, while MILP is NP-hard, so insisting on integer variables moves the problem into a class where solve times can grow explosively with size.
+\end{enumerate}
+
+\exsol{1.9}{Why ``Programming''?}{2}
+
+In this subject, "programming" means planning or scheduling: a "program" was a plan of activities, as in a military logistics program or a concert program, and the term was coined in the 1940s before computer programming was common. Linear programming therefore means constructing an optimal plan using linear relationships; it has nothing to do with writing computer code in any particular style.
+
+\exsol{1.10}{Reading a Success Story}{2}
+
+Answers vary; the goal is to translate a headline into model components. A model answer for UPS ORION:
+\begin{enumerate}
+\item[(a)] \textbf{Decision variables:} for each driver, the choice of route, in practice binary variables indicating whether the driver travels directly from one stop to another, which together encode the order in which that driver's packages are delivered.
+\item[(b)] \textbf{Objective:} minimize total cost of the routes, dominated by total miles driven (equivalently fuel and time), summed over all drivers.
+\item[(c)] \textbf{One constraint the model must respect:} every package on the truck is delivered exactly once (each stop is visited); other acceptable answers include delivery time windows for scheduled packages, vehicle capacity, and driver shift lengths.
+\end{enumerate}
+For American Airlines yield management, acceptable answers are variables for how many seats to sell in each fare class on each flight, objective of maximizing expected revenue, and the constraint that seats sold cannot exceed aircraft capacity. For Netherlands Railways, variables are departure and arrival times and platform/rolling-stock assignments, the objective mixes profit and service quality, and constraints include track capacity and minimum transfer times.
+
+\exsol{1.11}{Shirt Store: The Full Model}{3}
+
+\begin{enumerate}
+\item Let $x_T, x_F, x_S \geq 0$ be the shirts ordered Thursday, Friday, and Saturday (arriving the next day), and $s_F, s_S, s_{Sun} \geq 0$ the end-of-day inventories. Each day, arriving shirts plus carried inventory must cover that day's demand, with the excess carried forward:
+\begin{align*}
+\min \quad & 8x_T + 9x_F + 10x_S + 0.5\,s_F + 0.5\,s_S\\
+\st \quad & x_T = 5 + s_F && \text{(Friday balance)}\\
+& s_F + x_F = 10 + s_S && \text{(Saturday balance)}\\
+& s_S + x_S = 7 + s_{Sun} && \text{(Sunday balance)}\\
+& x_T,\, x_F,\, x_S,\, s_F,\, s_S,\, s_{Sun} \geq 0.
+\end{align*}
+\item Compare the ways to cover each day's demand. A Saturday shirt ordered Thursday costs $8 + 0.5 = \$8.50$ (one night of holding), cheaper than \$9 ordered Friday. A Sunday shirt ordered Thursday costs $8 + 0.5 + 0.5 = \$9$, cheaper than \$9.50 (ordered Friday, held one night) and \$10 (ordered Saturday). So the optimal plan orders everything Thursday:
+\[
+x_T = 22, \quad x_F = x_S = 0, \quad s_F = 17, \quad s_S = 7, \quad s_{Sun} = 0,
+\]
+with total cost $22 \cdot 8 + 0.5(17 + 7) = \$188$. (Verified with an LP solver: the optimum is exactly 188 at this point.)
+\item Integrality does not matter for this instance. The demands are integers and the optimal LP solution is already integer, so adding the requirement $x, s \in \mathbb{Z}$ would not change the answer. In general, inventory-balance models with integer demands like this one have integer optimal solutions, so the LP is safe here; the divisibility assumption only becomes a real issue when the LP optimum comes out fractional.
+\end{enumerate}

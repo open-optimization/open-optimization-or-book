@@ -9,6 +9,7 @@
 \end{outcome}
 
 \section{Using Excel Solver}
+\label{sec:excel-solver}
 
 Excel Solver is a powerful tool for solving optimization problems with linear and nonlinear constraints. Before diving into using Solver, it is essential to understand some basic Excel functions and techniques that are commonly used when setting up optimization problems. These functions help organize data, compute intermediate values, and define objective functions and constraints.
 
@@ -161,8 +162,34 @@ Some other links
 
 
 \section{Exercises}
-\begin{ex}
-Consider the following table indicating the nutritional value of different food types.
+
+\exgroup{Warm-ups}
+
+\begin{ex}{Solver Rerun: Minimum-Cost Network Flow}{}
+\label{ex:excel-network-flow-rerun}
+\stars{1} This exercise mirrors Example~\ref{ex:min-cost-flow-warehouses} (Minimum-Cost Network Flow).  Download the Excel workbook linked in that example and change only the cost data: shipping now costs $3$ per unit from Warehouse 1 to Store 1, $7$ from Warehouse 1 to Store 2, $4$ from Warehouse 2 to Store 1, and $2$ from Warehouse 2 to Store 2.  The supplies ($20$ and $30$), demands ($25$ and $25$), and route capacities ($15$, $10$, $20$, $20$) are unchanged.
+\begin{enumerate}
+\item Re-solve with the Simplex LP method and report the optimal flow on each of the four routes.
+\item As a check, the minimum cost is $160$.  Which routes are at capacity?
+\end{enumerate}
+\exrefs{\S\ref{sec:excel-solver}, Example~\ref{ex:min-cost-flow-warehouses}}
+\end{ex}
+
+\begin{ex}{Solver Rerun: Production Planning over 10 Periods}{}
+\label{ex:excel-production-rerun}
+\stars{1} This exercise mirrors Example~\ref{ex:production-10period} (Production Planning with 10 Periods).  Download the Excel workbook linked in that example.  Keep the production costs $(10, 12, \dots, 28)$, the holding cost of $5$, and the initial inventory $s_0 = 5$, but replace the demands with $(6, 9, 7, 8, 5, 10, 7, 6, 8, 4)$.
+\begin{enumerate}
+\item Update the demand cells and re-solve with the Simplex LP method.  Report the production plan and the total cost.  As a check, the minimum cost is $1252$.
+\item The optimal plan carries no inventory between periods.  Explain why, by comparing the holding cost with the period-to-period increase in production cost.
+\end{enumerate}
+\exrefs{\S\ref{sec:excel-solver}, Example~\ref{ex:production-10period}}
+\end{ex}
+
+\exgroup{Core problems}
+
+\begin{ex}{Diet Problem in Excel}{}
+\label{ex:excel-diet}
+\stars{2} Consider the following table indicating the nutritional value of different food types.
 \begin{center}
 \begin{tabular}%{lccccc}
 {|p{0.2\linewidth} | p{0.14\linewidth} | p{0.14\linewidth} | p{0.14\linewidth} | p{0.14\linewidth} | p{0.14\linewidth} |}
@@ -185,12 +212,12 @@ You need to decide how many servings of each food to buy each day so that you mi
 Write an LP that will help you decide how many servings of each of the aforementioned foods are needed to meet all the nutritional requirements, while minimizing the total cost of the food (you may buy fractional numbers of servings).
 
 Solve this problem using Excel Solver.  Provide a screenshot of your spreadsheet with the optimal solution.
-
+\exrefs{\S\ref{sec:excel-solver}}
 \end{ex}
 
 \begin{ex}{Production Planning in Excel}{}
 \label{ex:excel-production-planning}
-A small factory produces two products: widgets and gadgets.  Each widget earns \$8 in profit and each gadget earns \$6.  Production is limited by two resources:
+\stars{2} A small factory produces two products: widgets and gadgets.  Each widget earns \$8 in profit and each gadget earns \$6.  Production is limited by two resources:
 
 \begin{center}
 \begin{tabular}{c|c|c|c}
@@ -208,11 +235,12 @@ Both products require nonnegative production quantities.
 \item Solve using Excel Solver with the Simplex LP method. Report the optimal production quantities and maximum profit.
 \item Generate a Sensitivity Report.  Using the report, answer: if the profit per widget increases to \$9, does the optimal production plan change?
 \end{enumerate}
+\exrefs{\S\ref{sec:excel-solver}}
 \end{ex}
 
 \begin{ex}{Transportation Problem in Excel}{}
 \label{ex:excel-transportation}
-A company has two warehouses (W1 and W2) that supply three retail stores (S1, S2, S3). The shipping cost per unit, supply at each warehouse, and demand at each store are given below:
+\stars{2} A company has two warehouses (W1 and W2) that supply three retail stores (S1, S2, S3). The shipping cost per unit, supply at each warehouse, and demand at each store are given below:
 
 \begin{center}
 \begin{tabular}{c|c|c|c|c}
@@ -229,6 +257,87 @@ W2 & \$6 & \$3 & \$5 & 50 \\
 \item Set up a transportation model in Excel with decision variables representing the number of units shipped from each warehouse to each store.
 \item Solve using Excel Solver to minimize total shipping cost. Report the optimal shipping plan and minimum cost.
 \end{enumerate}
+\exrefs{\S\ref{sec:excel-solver}, \S\ref{sec:transportation-problem}}
+\end{ex}
+
+\begin{ex}{Product Mix with a Sensitivity Report}{}
+\label{ex:excel-furniture-sensitivity}
+\stars{2} A furniture shop makes tables, chairs, and desks with profits of \$70, \$50, and \$90 per item.  Weekly resources are 240 hours of carpentry, 100 hours of finishing, and 2000 board-feet of wood:
+
+\begin{center}
+\begin{tabular}{c|c|c|c|c}
+ & \textbf{Table} & \textbf{Chair} & \textbf{Desk} & \textbf{Available} \\
+\hline
+Carpentry (hrs) & 4 & 3 & 6 & 240 \\
+Finishing (hrs) & 2 & 1 & 3 & 100 \\
+Wood (bd-ft) & 30 & 20 & 40 & 2000 \\
+\end{tabular}
+\end{center}
+
+Production quantities may be fractional.
+\begin{enumerate}
+\item Set up the LP in Excel with color-coded data, variable, and formula cells, and solve with the Simplex LP method.  Report the production plan and the maximum profit.  As a check, the maximum profit is \$4100.
+\item Generate a Sensitivity Report.  Report the shadow price of each resource and state which constraints are binding.
+\item Using only the report, decide: is it worth paying \$10 per hour for additional finishing time?
+\item The report lists an allowable increase for the desk profit coefficient.  If the profit per desk rises to \$100, does the production plan change?  What if it rises to \$110?
+\end{enumerate}
+\exrefs{\S\ref{sec:excel-solver}}
+\end{ex}
+
+\begin{ex}{Unbalanced Transportation with a Sensitivity Report}{}
+\label{ex:excel-unbalanced-transportation}
+\stars{2} Three plants supply three cities.  Plant capacities are 70, 50, and 40 units; city demands are 50, 60, and 40 units, so total supply exceeds total demand.  Shipping costs per unit are:
+
+\begin{center}
+\begin{tabular}{c|c|c|c|c}
+ & C1 & C2 & C3 & \textbf{Supply} \\
+\hline
+P1 & \$4 & \$5 & \$7 & 70 \\
+P2 & \$6 & \$3 & \$2 & 50 \\
+P3 & \$5 & \$8 & \$4 & 40 \\
+\hline
+\textbf{Demand} & 50 & 60 & 40 & \\
+\end{tabular}
+\end{center}
+
+\begin{enumerate}
+\item Set up the model in Excel with supply constraints as $\leq$ and demand constraints as $=$, and solve with the Simplex LP method.  Report the shipping plan and the minimum cost.  As a check, the minimum cost is \$560.
+\item Which plant does not ship its full capacity, and how many units stay there?
+\item Generate a Sensitivity Report.  Report the shadow price of each supply constraint and interpret the sign of the nonzero one: what would one extra unit of capacity at that plant be worth?
+\end{enumerate}
+\exrefs{\S\ref{sec:excel-solver}, \S\ref{sec:transportation-problem}}
+\end{ex}
+
+\exgroup{Concepts and connections}
+
+\begin{ex}{Simplex LP versus GRG Nonlinear}{}
+\label{ex:excel-solver-methods}
+\stars{2} Solver's dialog offers three solving methods: Simplex LP, GRG Nonlinear, and Evolutionary.
+\begin{enumerate}
+\item Describe what class of problems each of Simplex LP and GRG Nonlinear is designed for.
+\item If your model is a linear program, why should you choose Simplex LP rather than GRG Nonlinear, even though both may return the same answer?  Consider the guarantee on the solution (global versus possibly local optimum) and the contents of the Sensitivity Report.
+\item Suppose you select Simplex LP but one of your constraint cells contains the formula \texttt{=B2*B3}, where both \texttt{B2} and \texttt{B3} are variable cells.  What will Solver do, and why?
+\item Give an example of an objective function for which GRG Nonlinear is appropriate and Simplex LP is not.
+\end{enumerate}
+\exrefs{\S\ref{sec:excel-solver}}
+\end{ex}
+
+\exgroup{Challenge problems}
+
+\begin{ex}{When a Variable Must Go Negative}{}
+\label{ex:excel-short-selling}
+\stars{3} An investor has \$100 (in thousands) to split between fund A, which returns 5\%, and fund B, which returns 12\%.  The broker allows \emph{short selling} fund A: the investor may hold a negative amount of A and use the proceeds to buy more of B.  Margin rules cap the holding in B at \$140.  The model is
+\begin{align*}
+\max \quad & 0.05\,x_A + 0.12\,x_B\\
+\text{s.t.} \quad & x_A + x_B = 100\\
+& x_B \leq 140, \qquad x_B \geq 0, \qquad x_A \text{ free}.
+\end{align*}
+\begin{enumerate}
+\item Set up the model in Excel and solve with the Simplex LP method, leaving \texttt{Make Unconstrained Variables Non-Negative} checked.  Report the solution.
+\item Now uncheck \texttt{Make Unconstrained Variables Non-Negative}, add the constraint $x_B \geq 0$ explicitly, and re-solve.  Report the new solution.
+\item Explain exactly what the checkbox does and why it must be unchecked for this model.  What risk do you take on for other variables when you uncheck it?
+\end{enumerate}
+\exrefs{\S\ref{sec:excel-solver}}
 \end{ex}
 
 \subsubsection*{Selected Solutions}
@@ -255,5 +364,10 @@ Let $x_{ij} \geq 0$ be the number of units shipped from warehouse $i$ to store $
 & x_{ij} \geq 0.
 \end{align*}
 Total supply equals total demand (110 units), so both supplies are used fully.  Solver finds the optimal plan $x_{11} = 20$, $x_{13} = 40$, $x_{21} = 10$, $x_{22} = 40$ (all other routes unused), with minimum cost \$300: each warehouse ships everything it can along its cheapest routes (W1 to S3, W2 to S2), and store S1's demand is split to make the supplies balance.
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:excel-short-selling})
+With the checkbox checked, Solver silently adds $x_A \geq 0$ and $x_B \geq 0$, so the best it can do is $x_A = 0$, $x_B = 100$, for a return of $0.05 \cdot 0 + 0.12 \cdot 100 = 12$ (that is, \$12{,}000).  With the checkbox unchecked and $x_B \geq 0$ added as an explicit constraint, Solver finds $x_A = -40$, $x_B = 140$: the investor shorts \$40 of fund A to push fund B to its margin cap, earning $0.05(-40) + 0.12(140) = 14.8$, or \$14{,}800.
+The checkbox applies a lower bound of zero to every decision variable that has no explicit lower bound in the constraint list.  Short selling is exactly a negative holding, so that hidden bound cuts off the optimal solution.  The risk when unchecking is that all other variables also lose the automatic bound: any variable that should be non-negative (here $x_B$) must now get its own $\geq 0$ constraint, or Solver may return meaningless negative values for it.
 \end{solution}
 

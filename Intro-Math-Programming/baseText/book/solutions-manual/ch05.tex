@@ -1,0 +1,235 @@
+% ============================================================================
+% Chapter 5: Graphically Solving Linear Programs
+% Book source: part1-linear-programming/ch02-modeling/Section2.tex
+% Exercise numbering synced to \begin{ex} order as of 2026-07-13.
+% All numeric answers verified with scipy.optimize.linprog (HiGHS).
+% ============================================================================
+\section{Chapter 5: Graphically Solving Linear Programs}
+
+\textbf{Coverage assessment.} The 17 exercises track the chapter's four learning outcomes closely: warm-ups (5.1--5.4) drill sketching and the basic level-curve sweep, the core problems (5.5--5.10) hit each qualitative outcome (multiple optima, infeasibility, finite optimum, unboundedness, plus one modeling formulation), and the concepts and challenge groups (5.11--5.17) ask students to reason about and construct each phenomenon. Difficulty ramps sensibly from one to three stars. The main redundancy is that Exercises 5.12, 5.13, and 5.17 all ask the student to construct an objective with infinitely many optima; each uses a different feasible region and 5.17 adds a tie-breaking twist, so the overlap is tolerable but the author may wish to trim one. Several exercises (5.2, 5.7, 5.8, 5.10, 5.15) derive from Kevin Cheung's CC BY-SA 4.0 text; the attribution currently lives in a commented-out block near the end of the source file rather than a visible footnote. Two data errors in the book were found and corrected directly (see flags at Exercises 5.10 and 5.16).
+
+\begin{qaflag}
+Licensing: the Cheung (CC BY-SA 4.0) attribution in \texttt{Section2.tex} is present only as a LaTeX comment (near the end of the file, ``By Kevin Cheung \dots modified by Robert Hildebrand 2020''). Since several exercises and the Lemonade Vendor example are adapted from that source, consider making the attribution a visible footnote or margin note. The borrowed tex.stackexchange TikZ figure is already credited with a visible footnote URL. No content resembling verbatim text from closed-license books was found.
+\end{qaflag}
+
+\exsol{5.1}{Feasible Region Analysis}{1}
+The correct statement is (b): the feasible region is an unbounded region.
+
+The region is the set of points on or above the line $x + y = 5$ that also lie in the first quadrant. It is nonempty (for example $(5,0)$ and $(3,2)$ are feasible), so (d) fails, and it contains more than one point, so (c) fails. It is not bounded: the ray $(t,t)$ for $t \geq 2.5$ satisfies $t + t \geq 5$ and $t \geq 0$, so feasible points continue infinitely in the direction $(1,1)$ (indeed in any nonnegative direction). Hence (a) fails and (b) holds.
+
+\exsol{5.2}{Sketch Feasible Region}{1}
+The boundary line $x - 2y = 2$ passes through $(2,0)$ and $(0,-1)$. Writing the constraint as $y \geq \tfrac{1}{2}x - 1$, the feasible set is the closed half-plane consisting of the boundary line and everything above it. To check the side, test the origin: $0 - 0 = 0 \leq 2$, so the origin's side (above the line) is the feasible side. The sketch is the line through $(2,0)$ and $(0,-1)$ with the upper half-plane shaded. (This matches the book's Selected Solution.)
+
+\exsol{5.3}{Graphical Method 1 Practice}{1}
+Following Graphical Method 1:
+
+\emph{Feasible region.} The constraints $x+y \leq 4$, $x \leq 3$, $x,y \geq 0$ cut out a quadrilateral with vertices
+\[
+(0,0), \quad (3,0), \quad (3,1), \quad (0,4).
+\]
+The vertex $(3,1)$ is the intersection of $x + y = 4$ and $x = 3$.
+
+\emph{Level curves.} The lines $3x + 2y = z$ have slope $-3/2$ and move in the direction of the gradient $(3,2)$ (up and to the right) as $z$ increases.
+
+\emph{Sweep.} Objective values at the vertices are $z(0,0)=0$, $z(3,0)=9$, $z(3,1)=11$, $z(0,4)=8$. Sweeping the level curves in the direction $(3,2)$, the last line to touch the region passes through $(3,1)$, where both $x+y \leq 4$ and $x \leq 3$ are binding.
+
+\emph{Answer.} The unique optimal solution is $(x^*,y^*) = (3,1)$ with optimal value $z^* = 11$. (Verified numerically; matches the book's Selected Solution.)
+
+\exsol{5.4}{Graphical Method for Lemonade Vendor}{1}
+The feasible region of
+\[
+\max\; 3x + 2y \quad \st x + 3y \leq 6, \;\; 2x + y \leq 4, \;\; x, y \geq 0
+\]
+is the quadrilateral with vertices $(0,0)$, $(2,0)$, $(1.2, 1.6)$, and $(0,2)$; the vertex $(1.2,1.6)$ solves $x + 3y = 6$ and $2x + y = 4$ simultaneously (from the second equation $y = 4 - 2x$; substituting, $x + 12 - 6x = 6$ gives $x = 1.2$, $y = 1.6$).
+
+The level curves $3x + 2y = z$ have slope $-3/2$; the objective values at the vertices are
+\[
+z(0,0) = 0, \quad z(2,0) = 6, \quad z(1.2,1.6) = 6.8, \quad z(0,2) = 4.
+\]
+Sweeping the level lines in the gradient direction $(3,2)$, the last one to touch the region does so only at $(1.2, 1.6)$. The optimal plan is $1.2$ units of lemonade and $1.6$ units of lemon juice, for a maximum profit of $z^* = 6.8$ dollars.
+
+\exsol{5.5}{Graphical Method}{2}
+Note first that the second constraint is $6x_1 + 10x_2 \geq 90$, which after dividing by $2$ reads $3x_1 + 5x_2 \geq 45$: its boundary is parallel to the level curves of the objective $3x_1 + 5x_2$. This is the signal for multiple optima.
+
+\emph{Region.} The constraints $3x_1 + 2x_2 \geq 36$, $6x_1 + 10x_2 \geq 90$, $x_1, x_2 \geq 0$ give an unbounded region lying above both lines. Its vertices are
+\[
+(0,18), \qquad (10,3), \qquad (15,0),
+\]
+where $(10,3)$ is the intersection of $3x_1+2x_2=36$ and $6x_1+10x_2=90$, and $(15,0)$ is where $6x_1 + 10x_2 = 90$ meets the $x_1$-axis (note $3(15)+2(0) = 45 \geq 36$, so it is feasible).
+
+\emph{Sweep.} We minimize, so we sweep the level lines $3x_1 + 5x_2 = z$ opposite to the gradient $(3,5)$, that is, down and to the left. The last position at which a level line still touches the region is $z = 45$, and there the level line lies along the entire edge of the constraint $6x_1 + 10x_2 = 90$ between $(10,3)$ and $(15,0)$.
+
+\emph{Two optimal solutions.} $(x_1, x_2) = (10, 3)$ and $(x_1, x_2) = (15, 0)$, both with $z^* = 3(10) + 5(3) = 3(15) + 5(0) = 45$. (Verified numerically.) In fact every point of the segment between them, $\{(10 + 5t,\, 3 - 3t) : t \in [0,1]\}$, is optimal.
+
+\exsol{5.6}{Infeasible Region Graph}{2}
+Graphing the constraints: $x_1 + x_2 \leq 6$ shades below the line through $(6,0)$ and $(0,6)$; $x_1 - x_2 \geq 1$ shades below and to the right of the line $x_2 = x_1 - 1$; $x_2 - x_1 \geq 3$ shades above and to the left of the parallel line $x_2 = x_1 + 3$. The second and third boundary lines are parallel (both have slope $1$) and their feasible half-planes point away from each other.
+
+Algebraically, adding $x_1 - x_2 \geq 1$ and $x_2 - x_1 \geq 3$ gives $0 \geq 4$, a contradiction, so no point can satisfy both. There are \textbf{zero} feasible solutions: the problem is infeasible, regardless of the objective function. (Verified numerically: the solver reports infeasibility. This matches, and slightly expands, the book's Selected Solution.)
+
+\exsol{5.7}{Determine Optimal Value}{2}
+Note there are no nonnegativity constraints, so the region is just the intersection of the two half-planes $2x + y \geq 4$ and $x + 3y \geq 1$, an unbounded ``wedge'' whose single vertex is the intersection of the two boundary lines: from $y = 4 - 2x$ and $x + 3y = 1$ we get $x + 12 - 6x = 1$, so $x = \tfrac{11}{5}$, $y = -\tfrac{2}{5}$.
+
+Sweeping the level lines $x + y = z$ opposite to the gradient $(1,1)$, the last line touching the wedge passes through this vertex, so
+\[
+z^* = \tfrac{11}{5} - \tfrac{2}{5} = \tfrac{9}{5}.
+\]
+
+To certify this without a picture (as in the book's Selected Solution): multiplying the first constraint by $\tfrac{2}{5}$ and the second by $\tfrac{1}{5}$ and adding yields
+\[
+\tfrac{2}{5}(2x + y) + \tfrac{1}{5}(x + 3y) = x + y \geq \tfrac{2}{5}(4) + \tfrac{1}{5}(1) = \tfrac{9}{5},
+\]
+so no feasible point does better than $\tfrac{9}{5}$, and the feasible point $(\tfrac{11}{5}, -\tfrac{2}{5})$ attains it. The optimal value is $\tfrac{9}{5}$. (Verified numerically: optimum $1.8$ at $(2.2, -0.4)$.) The multipliers $\tfrac25, \tfrac15$ foreshadow duality.
+
+\exsol{5.8}{Show Unbounded Problem}{2}
+Consider the family of points $(x, y) = (t, 0)$ for $t \geq 3$. They are feasible: $2t - 0 = 2t \geq 0$ and $t + 0 = t \geq 3$. The objective value there is $-t + 0 = -t$, and as $t \to \infty$ the objective tends to $-\infty$. Since we are minimizing, the objective has no lower bound on the feasible region, so the problem is unbounded. (Verified numerically: the solver reports unboundedness. The book's Selected Solution gives the same ray parametrized by the level value $z$.)
+
+Geometrically, $(1,0)$ is a direction of the feasible region along which the level lines $-x + y = z$ can be swept forever with $z$ decreasing.
+
+\exsol{5.9}{Bounded Solution on Unbounded Region}{2}
+\textbf{No, the problem does not have a finite solution; it is unbounded.}
+
+Following the Complete Graphical Method: the region ($x_1 - x_2 \leq 3$, $x_1 + 2x_2 \geq 4$, $x_1, x_2 \geq 0$) is the unbounded region of Example LPUnboundFeasibleRegion1, extending without limit up and to the right. The gradient of the objective is $\nabla z = (-2, 1)$, which points up and to the left, into the unbounded ``upward'' part of the region. Concretely, the vertical ray
+\[
+(x_1, x_2) = (0,\, 2 + t), \qquad t \geq 0,
+\]
+is feasible for every $t \geq 0$ (check: $0 - (2+t) = -2 - t \leq 3$ and $0 + 2(2+t) = 4 + 2t \geq 4$), and along it
+\[
+z = -2(0) + (2 + t) = 2 + t \longrightarrow \infty.
+\]
+The level curves can be swept indefinitely while still meeting the region, so by step 5(a) of the Complete Graphical Method the problem is unbounded. (Verified numerically.)
+
+\begin{qaflag}
+The exercise title ``Bounded Solution on Unbounded Region'' suggests the answer should be a finite optimum, but the correct answer for $\max\, (-2x_1 + x_2)$ over this region is that the problem is \emph{unbounded} (direction $(0,1)$ is feasible and improving). If the intended answer was a finite optimum, a suitable objective would be $\max\, (-2x_1 - x_2)$ or $\min\, (3x_1 + x_2)$ as in the book's Example on finite optima. Judgment call: either retitle the exercise (e.g., ``Finite or Unbounded?'') or change the objective; the exercise is answerable as stated.
+\end{qaflag}
+
+\exsol{5.10}{Diet Problem}{2}
+Let $x_i \geq 0$ denote the amount of Product $i$ purchased, $i = 1, 2, 3$. Each column of the table contributes its nutrient amounts, and the requirements are $0.40$ mg of $M$ and $0.30$ mg of $N$:
+\begin{align*}
+\min \quad & 27x_1 + 31x_2 + 24x_3 \\
+\st & 0.16x_1 + 0.21x_2 + 0.11x_3 \geq 0.40 && (\text{nutrient } M)\\
+& 0.19x_1 + 0.13x_2 + 0.15x_3 \geq 0.30 && (\text{nutrient } N)\\
+& x_1, x_2, x_3 \geq 0.
+\end{align*}
+If only whole units can be bought, add $x_1, x_2, x_3 \in \mathbb{Z}$, making it an integer program.
+
+Although the exercise only asks for the formulation, the LP optimum (verified numerically) is $x^* = (\tfrac{110}{191},\, \tfrac{280}{191},\, 0) \approx (0.576,\, 1.466,\, 0)$ with cost $\tfrac{11650}{191} \approx \$60.99$; both nutrient constraints are binding and Product 3 is not purchased.
+
+\begin{qaflag}
+Fixed in the book: the Selected Solution for this exercise had the right-hand sides swapped ($\geq 0.30$ on the $M$ row and $\geq 0.40$ on the $N$ row), contradicting the problem statement, which requires $0.40$ mg of $M$ and $0.30$ mg of $N$. Both displayed formulations in the book's Selected Solutions were corrected to $\geq 0.40$ ($M$ row) and $\geq 0.30$ ($N$ row) on 2026-07-13 and re-verified.
+\end{qaflag}
+
+\exsol{5.11}{Why Must an Optimum Be at a Vertex?}{2}
+\begin{enumerate}
+\item Think of the level lines of $z = c_1 x_1 + c_2 x_2$ sweeping across the region in the gradient direction.
+\begin{itemize}
+\item \emph{Interior point.} If $\x$ is strictly inside the region, a small disk around $\x$ is feasible. Moving from $\x$ a small step in the gradient direction $(c_1, c_2)$ stays feasible and strictly increases $z$ (for a maximization). So an interior point is never strictly better than all boundary points; we may keep moving until we hit the boundary.
+\item \emph{Point strictly inside an edge.} Along an edge, the objective is a linear function of the single parameter that traces the edge. A linear function of one variable on a segment attains its maximum at an endpoint of the segment. The endpoints of an edge are vertices, so some vertex of that edge has an objective value at least as large as any point inside the edge. (If the objective is constant along the edge, both endpoints tie with the interior points.)
+\end{itemize}
+Combining the two observations: from any feasible point we can move to the boundary without decreasing $z$, and from any edge point we can move to an endpoint (a vertex) without decreasing $z$. Hence some vertex is at least as good as any given feasible point, so an optimal vertex exists.
+\item Boundedness is used when we claim edges are \emph{segments with endpoints}: on a bounded region every edge has two endpoints, and moving along the boundary always terminates at a vertex. On an unbounded region an ``edge'' may be a ray with no far endpoint, and the improvement path may go on forever. Example with no optimal solution at all: maximize $z = x + y$ subject to $x, y \geq 0$. The region (the whole first quadrant) is unbounded, and along the feasible ray $(t,t)$ the objective $2t \to \infty$; no feasible point is optimal because every feasible point is beaten by another.
+\end{enumerate}
+This is deliberately a picture-level argument; the rigorous version is the algebraic proof in the next chapter, consistent with the book's lighter treatment of proofs here.
+
+\exsol{5.12}{Infinite Optimal Solutions}{2}
+Take the objective $\min\; z = x_1 + 2x_2$ over the region $x_1 - x_2 \leq 3$, $x_1 + 2x_2 \geq 4$, $x_1, x_2 \geq 0$.
+
+The level curves $x_1 + 2x_2 = z$ are parallel to the boundary of the constraint $x_1 + 2x_2 \geq 4$. Sweeping them downward (opposite the gradient $(1,2)$, since we minimize), the last position that meets the region is $z = 4$, where the level line lies along the whole edge between the vertices $(0, 2)$ and $(\tfrac{10}{3}, \tfrac{1}{3})$.
+
+The set of optima is exactly that edge:
+\[
+\{ (x_1, x_2) : x_1 + 2x_2 = 4,\; 0 \leq x_1 \leq \tfrac{10}{3} \},
+\]
+with optimal value $z^* = 4$ (verified numerically). Note the direction matters: \emph{maximizing} $x_1 + 2x_2$ over this region is unbounded. Any positive multiple of $(1,2)$, minimized, gives the same answer.
+
+\exsol{5.13}{Infinitely Many Optimal Solutions}{2}
+Choose the objective parallel to one of the resource constraints. Two natural choices:
+
+\emph{Choice 1.} $\max\; z = x + 3y$ (parallel to the lemon constraint $x + 3y \leq 6$). The last level line touches the region along the entire edge between $(0,2)$ and $(1.2, 1.6)$, so
+\[
+z^* = 6, \qquad \text{optimal set} = \{ (x, y) : x + 3y = 6,\; 0 \leq x \leq 1.2 \},
+\]
+the segment from $(0,2)$ to $(1.2, 1.6)$.
+
+\emph{Choice 2.} $\max\; z = 2x + y$ (parallel to the water constraint $2x + y \leq 4$). Then $z^* = 4$ and the optimal set is the segment from $(1.2, 1.6)$ to $(2, 0)$, that is, $\{ (x,y) : 2x + y = 4,\; 1.2 \leq x \leq 2 \}$.
+
+(Both verified numerically: the solver returns $z^* = 6$ and $z^* = 4$ respectively, at vertices of the corresponding edges.) In either case the optimal level curve coincides with an edge of the feasible region, which is precisely the tie condition in Graphical Method 2, so there are infinitely many optimal solutions.
+
+\exsol{5.14}{Bounded Optimum on Unbounded Region}{2}
+\emph{Region.} The constraints $-x_1 + x_2 \leq 5$, $x_1 + x_2 \geq 2$, $x_1, x_2 \geq 0$ give an unbounded region with vertices $(0,5)$, $(0,2)$, and $(2,0)$; it extends without bound up and to the right (any direction $\mathbf d = (d_1, d_2) \geq 0$ with $d_2 \leq d_1$ is a feasible direction, e.g. $(1,0)$ and $(1,1)$).
+
+\emph{Objective.} Take
+\[
+\max\; z = -2x_1 - x_2.
+\]
+Its gradient $(-2,-1)$ points down and to the left, away from every unbounded direction of the region: for any feasible direction $\mathbf d \geq 0$, we have $-2d_1 - d_2 \leq 0$, so moving into the unbounded part never increases $z$.
+
+\emph{Sweep.} Sweeping the level lines $-2x_1 - x_2 = z$ in the direction $(-2,-1)$, the last line touching the region passes through the vertex $(0,2)$. Objective values at the vertices: $z(0,5) = -5$, $z(0,2) = -2$, $z(2,0) = -4$. The finite optimum is
+\[
+z^* = -2 \quad \text{at} \quad (x_1^*, x_2^*) = (0, 2),
+\]
+verified numerically. The sketch shows the level lines leaving the region at $(0,2)$ even though the region itself is unbounded. (Any objective $\max\; c_1 x_1 + c_2 x_2$ with $c_1, c_2 < 0$ and $(c_1,c_2)$ not parallel to $(1,1)$ gives a unique finite optimum in the same way; $\max\, (-x_1 - x_2)$ gives a finite optimum attained on the whole edge from $(0,2)$ to $(2,0)$.)
+
+\exsol{5.15}{Unbounded Objective Direction}{3}
+\begin{enumerate}
+\item For $(x_1, x_2) = (t, t)$ with $t \geq 0$:
+\[
+-t + t = 0 \leq 3, \qquad t - 2t = -t \leq 2, \qquad t \geq 0,\; t \geq 0,
+\]
+so all four constraints hold for every $t \geq 0$. The objective value is
+\[
+z(t) = -2t + t = -t,
+\]
+and $z(t) \to -\infty$ as $t \to \infty$. Since we minimize, the objective is unbounded below along this ray.
+\item For $(x_1, x_2) = (2t + 2, t)$ with $t \geq 0$:
+\[
+-(2t+2) + t = -t - 2 \leq 3, \qquad (2t + 2) - 2t = 2 \leq 2 \;(\text{tight}), \qquad 2t + 2 \geq 0,\; t \geq 0,
+\]
+so the point is feasible for all $t \geq 0$; it travels along the boundary line $x_1 - 2x_2 = 2$. The objective value is
+\[
+z(t) = -2(2t + 2) + t = -3t - 4,
+\]
+which again tends to $-\infty$ as $t \to \infty$. This gives a second certificate of unboundedness, along a different ray. (Unboundedness verified numerically.)
+\end{enumerate}
+The two rays have directions $(1,1)$ and $(2,1)$; any feasible direction $\mathbf d$ with $\c^\top \mathbf d < 0$ certifies unboundedness of a minimization.
+
+\exsol{5.16}{Bounded and Unbounded Optimization}{3}
+\begin{enumerate}
+\item \emph{Minimum.} The region has vertices $(0,6)$, $(0,4)$, $(1,2)$, and $(5,0)$, where $(1,2)$ is the intersection of $2x + y = 4$ and $x + 2y = 5$, and it is unbounded to the upper right. Objective values: $z(0,6) = 12$, $z(0,4) = 8$, $z(1,2) = 6$, $z(5,0) = 10$. Sweeping the level lines $2x + 2y = z$ downward (we minimize, gradient $(2,2)$), the last contact is at the vertex $(1,2)$. The minimum value is
+\[
+z^* = 2(1) + 2(2) = 6 \quad \text{at } (x, y) = (1, 2),
+\]
+a bounded feasible point at which $2x + y \geq 4$ and $x + 2y \geq 5$ are binding. (Verified numerically.)
+\item For $(x, y) = (5 + t, 0)$ with $t \geq 0$: $-(5+t) + 0 \leq 12$, $2(5+t) = 10 + 2t \geq 4$, $(5+t) + 0 = 5 + t \geq 5$, and $x, y \geq 0$. So the ray is feasible, and
+\[
+z(t) = 2(5 + t) + 0 = 10 + 2t \to \infty \quad \text{as } t \to \infty,
+\]
+so the maximization is unbounded.
+\item For $(x, y) = (0, 6) + t(2, 1) = (2t,\, 6 + t)$ with $t \geq 0$:
+\[
+-2t + 2(6 + t) = 12 \leq 12 \;(\text{tight for all } t), \quad 2(2t) + (6+t) = 6 + 5t \geq 4, \quad 2t + 2(6+t) = 12 + 4t \geq 5,
+\]
+and $x = 2t \geq 0$, $y = 6 + t \geq 0$. The ray travels along the boundary $-x + 2y = 12$. The objective value is
+\[
+z(t) = 2(2t) + 2(6 + t) = 12 + 6t \to \infty \quad \text{as } t \to \infty,
+\]
+a second demonstration of unboundedness. (All parts verified numerically.)
+\end{enumerate}
+
+\begin{qaflag}
+Fixed in the book: part (c) originally used the direction $\begin{bmatrix}1\\2\end{bmatrix}$ from $(0,6)$, but $(t, 6+2t)$ violates $-x + 2y \leq 12$ for every $t > 0$ (the left side is $12 + 3t$), so the claimed feasibility was false. The boundary direction of that constraint is $(2,1)$; the book was corrected to $\begin{bmatrix}2\\1\end{bmatrix}$ on 2026-07-13 and re-verified (the ray $(2t, 6+t)$ keeps $-x+2y = 12$ tight and all other constraints satisfied). There was no book Selected Solution to sync.
+\end{qaflag}
+
+\exsol{5.17}{From an Optimal Edge to a Unique Optimum}{3}
+\begin{enumerate}
+\item Consider
+\[
+\max\; z = x + y \quad \st x + y \leq 4, \;\; x \leq 3, \;\; x, y \geq 0,
+\]
+the feasible region of Exercise 5.3, with vertices $(0,0)$, $(3,0)$, $(3,1)$, $(0,4)$. The level curves $x + y = z$ are parallel to the constraint boundary $x + y = 4$. Sweeping in the gradient direction $(1,1)$, the last level curve to touch the region is $x + y = 4$, and it contains the entire edge from $(0,4)$ to $(3,1)$. By the tie-checking step of Graphical Method 2 (optimal level curve parallel to an edge adjacent to an optimal vertex), every point of
+\[
+\{ (x, y) : x + y = 4,\; 0 \leq x \leq 3 \}
+\]
+is optimal, with $z^* = 4$: the optimal set is a whole edge, not a single vertex.
+\item Change the $y$-coefficient from $1$ to $2$, giving $\max\; z = x + 2y$ over the same region. Now the level curves have slope $-1/2$, no longer parallel to any edge of the region. Vertex values: $z(0,0)=0$, $z(3,0)=3$, $z(3,1)=5$, $z(0,4)=8$. The unique optimum is $(0,4)$ with $z^* = 8$. The tie disappears because along the former optimal edge $x + y = 4$ the new objective $x + 2y = x + 2(4 - x) = 8 - x$ is strictly decreasing in $x$, so the edge's endpoint $(0,4)$ strictly beats every other point of the edge.
+\end{enumerate}
+Any construction with these two features (objective parallel to a binding edge, then a single perturbed coefficient) earns full credit.

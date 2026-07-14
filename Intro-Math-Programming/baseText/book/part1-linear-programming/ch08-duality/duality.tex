@@ -31,6 +31,7 @@ You will learn
 \end{quote}
 
 \section{Duality Theory}
+\label{sec:duality-theory}
 
 \subsection*{Motivating Example}
 
@@ -165,6 +166,7 @@ From the above reasoning, we have shown that if $\x$ is feasible for the primal 
 Weak duality is not specific to linear programming; the same kind of bound appears in many other classes of optimization problems. In the special case of linear programs (and certain other problem classes), we can say even more: there exist optimal solutions for both problems whose objective values match. This result is known as the \emph{Strong Duality Theorem}.
 
 \section{Primal-Dual Pairs and Strong Duality}
+\label{sec:duality-strong}
 \begin{outcome}
 \begin{itemize}
 \item Learn the two most important theorems in Linear Programming!!!
@@ -314,6 +316,7 @@ This is exactly what \textbf{strong duality} predicts: because the primal proble
 \end{example}
 
 \subsection{Economic Interpretation of the Dual}
+\label{sec:duality-economic}
 
 Duality in linear programming has a natural economic interpretation: the dual variables represent the \emph{value} of resources or constraints in the primal problem. These values are commonly known as \textbf{shadow prices}.
 
@@ -520,6 +523,7 @@ This ensures equilibrium: no profitable arbitrage is possible, and every unit of
 \end{itemize}
 
 \section{Different Primal–Dual Forms}
+\label{sec:duality-forms}
 
 The form of a dual problem depends on the primal's objective (maximize or minimize), inequality directions, and sign constraints on variables.  Rather than memorizing a separate rule for every combination, it helps to see a few representative primal--dual pairs side by side and notice the pattern: constraint types in one problem control variable signs in the other, and vice versa.  We walk through four common cases below.
 
@@ -550,7 +554,7 @@ When the primal constraints are equalities, we may combine them with multipliers
 \end{tcolorbox}
 \end{multicols}
 
-\paragraph{Case 2: Minimization with $\leq$ constraints.}
+\paragraph{Case 2: Minimization with $\geq$ constraints.}
 Duality is symmetric: a minimization primal produces a maximization dual, and the roles of $\b$ and $\c$ swap.  Note how the direction of the constraints and the sign restrictions mirror the maximization case.
 
 \begin{multicols}{2}
@@ -558,7 +562,7 @@ Duality is symmetric: a minimization primal produces a maximization dual, and th
 \[
 \begin{aligned}
 \min\ & \mathbf{b}^\top \mathbf{x} \\
-\text{s.t.} \quad & A \mathbf{x} \leq \mathbf{c} \\
+\text{s.t.} \quad & A \mathbf{x} \geq \mathbf{c} \\
 & \mathbf{x} \geq 0
 \end{aligned}
 \]
@@ -914,14 +918,14 @@ Consider the following primal linear program:
 \columnbreak
 
 \begin{tcolorbox}[title=Dual (D), colback=green!5, colframe=green!60!black, sharp corners=south]
-Let \( y_1 \in \mathbb{R} \), \( y_2 \geq 0 \), \( y_3 \leq 0 \) be dual variables for constraints (1), (2), and (3), respectively.  
+Let \( y_1 \in \mathbb{R} \), \( y_2 \leq 0 \), \( y_3 \geq 0 \) be dual variables for constraints (1), (2), and (3), respectively.
 \[
 \begin{aligned}
 \min\quad & 2y_1 + 3y_2 + 1y_3 \\
 \text{s.t.} \quad
 & y_1 + 2y_2 + y_3 \geq 2 \quad \text{(from } x_1 \geq 0\text{)} \\
 & y_1 - y_2 - y_3 = 1 \quad \text{(from } x_2 \text{ free)}\\
-& y_1  \text{ free } , y_2 \geq 0 , y_3 \leq 0 
+& y_1  \text{ free } , y_2 \leq 0 , y_3 \geq 0
 \end{aligned}
 \]
 \end{tcolorbox}
@@ -937,14 +941,16 @@ To derive the dual, we introduce a dual variable for each constraint:
 \textbf{Explanation of Dual Structure:}
 \begin{itemize}
     \item The primal has one equality constraint. Therefore, the corresponding dual variable \( y_1 \) is unrestricted in sign.
-    \item The second primal constraint is a \( \geq \) inequality, so its corresponding dual variable \( y_2 \) must be \( \geq 0 \).
-    \item The third primal constraint is a \( \leq \) inequality, so its corresponding dual variable \( y_3 \) must be \( \leq 0 \).
+    \item The second primal constraint is a \( \geq \) inequality in a maximization problem, so its corresponding dual variable \( y_2 \) must be \( \leq 0 \): only a nonpositive multiplier turns a \( \geq \) constraint into a valid \( \leq \) ingredient of an upper bound.
+    \item The third primal constraint is a \( \leq \) inequality, so its corresponding dual variable \( y_3 \) must be \( \geq 0 \).
     \item The dual constraints come from the coefficients of the primal variables. Since the primal is a maximization, the dual constraints are \( \geq \).
     \item The dual objective coefficients come from the right-hand sides of the primal constraints: \( 2, 3, 1 \).
 \end{itemize}
 
-\textbf{Summary:}  
+\textbf{Summary:}
 This example demonstrates how mixed constraint types in the primal (\( =, \geq, \leq \)) lead to a dual with mixed variable sign restrictions. The primal variable bounds also affect whether dual constraints are inequalities or equalities. You need these mappings to construct dual problems correctly.
+
+(A side note: this particular primal happens to be infeasible. Constraints (1) and (2) force \( x_1 \geq 5/3 \), while constraints (1) and (3) force \( x_1 \leq 3/2 \). The construction of the dual is purely syntactic and does not depend on feasibility; consistent with Theorem~\ref{thm:strong-duality}, the dual above turns out to be unbounded.)
 
 \subsubsection*{Complicated Dual Derivation: A Second Look via Aggregation}
 {}\label{example:complicated-dual-aggregation}
@@ -956,7 +962,7 @@ Consider the following primal linear program:
 & x_1 + x_2 = 2 \quad \text{(constraint 1)} \\
 & 2x_1 - x_2 \geq 3 \quad \text{(constraint 2)} \\
 & x_1 - x_2 \leq 1 \quad \text{(constraint 3)} \\
-& x_1 \geq 0
+& x_1 \geq 0, \; x_2 \text{ free}
 \end{aligned}
 \]
 
@@ -972,11 +978,11 @@ We aggregate the constraints by forming a linear combination:
 y_1(x_1 + x_2 = 2) + y_2(2x_1 - x_2 \geq 3) + y_3(x_1 - x_2 \leq 1)
 \]
 
-Before combining, we must ensure all constraints are oriented as \( \leq \) inequalities, because we're maximizing in the primal. So:
+Before combining, we must ensure every term contributes a valid \( \leq \) inequality, because we're maximizing in the primal and want an \emph{upper} bound. So:
 
-- Equality constraint: no change needed, but equality implies \( y_1 \in \mathbb{R} \)
-- \( \geq \): multiply by \( y_2 \geq 0 \)
-- \( \leq \): multiply by \( y_3 \leq 0 \)
+- Equality constraint: any multiplier is fine, so \( y_1 \in \mathbb{R} \)
+- \( \geq \) constraint: multiply by \( y_2 \leq 0 \) (a nonpositive multiplier flips \( \geq \) to \( \leq \))
+- \( \leq \) constraint: multiply by \( y_3 \geq 0 \) (a nonnegative multiplier preserves \( \leq \))
 
 Now aggregate:
 \[
@@ -1001,14 +1007,14 @@ So the aggregated constraint is:
 
 To upper-bound the primal objective \( 2x_1 + x_2 \), we want:
 \[
-(y_1 + 2y_2 + y_3)x_1 + (y_1 - y_2 - y_3)x_2 \geq 2x_1 + x_2 \quad \text{for all feasible } x_1, x_2 \geq 0
+(y_1 + 2y_2 + y_3)x_1 + (y_1 - y_2 - y_3)x_2 \geq 2x_1 + x_2 \quad \text{for all feasible } x_1, x_2
 \]
 
-Since \( x_1, x_2 \geq 0 \), domination means:
+Since \( x_1 \geq 0 \), domination in the \( x_1 \) coordinate means the aggregated coefficient must be at least \( 2 \).  Since \( x_2 \) is free, its aggregated coefficient must match the objective coefficient \emph{exactly} (otherwise a large positive or negative \( x_2 \) breaks the bound):
 \[
 \begin{aligned}
-y_1 + 2y_2 + y_3 &\geq 2 \quad \text{(coefficient on } x_1) \\
-y_1 - y_2 - y_3 &\geq 1 \quad \text{(coefficient on } x_2)
+y_1 + 2y_2 + y_3 &\geq 2 \quad \text{(coefficient on } x_1 \geq 0) \\
+y_1 - y_2 - y_3 &= 1 \quad \text{(coefficient on } x_2 \text{ free})
 \end{aligned}
 \]
 
@@ -1024,9 +1030,9 @@ With constraints:
 \[
 \begin{aligned}
 y_1 + 2y_2 + y_3 &\geq 2 \\
-y_1 - y_2 - y_3 &\geq 1 \\
-y_2 &\geq 0 \quad \text{(from } \geq \text{ primal constraint)} \\
-y_3 &\leq 0 \quad \text{(from } \leq \text{ primal constraint)} \\
+y_1 - y_2 - y_3 &= 1 \\
+y_2 &\leq 0 \quad \text{(from } \geq \text{ primal constraint)} \\
+y_3 &\geq 0 \quad \text{(from } \leq \text{ primal constraint)} \\
 y_1 &\in \mathbb{R} \quad \text{(from } = \text{ constraint)}
 \end{aligned}
 \]
@@ -1046,9 +1052,30 @@ This example illustrates how careful sign and inequality management gives rise t
 
 \section{Exercises}
 
+\exgroup{Warm-ups}
+
+\begin{ex}{The Dual of a Small Bakery}{}
+\label{ex:dual-2x2-warmup}
+\stars{1} A bakery sells loaves ($x_1$, profit \$5 each) and rolls ($x_2$, profit \$4 each), using at most 12 units of flour and 5 units of sugar:
+\[
+\begin{aligned}
+\max \quad & 5x_1 + 4x_2 \\
+\text{s.t.} \quad & 2x_1 + 3x_2 \leq 12 \quad \text{(flour)} \\
+& x_1 + x_2 \leq 5 \quad \text{(sugar)} \\
+& x_1, x_2 \geq 0
+\end{aligned}
+\]
+\begin{enumerate}
+\item Write the dual linear program, introducing one dual variable per resource.
+\item Interpret each dual variable as a price per unit of its resource, as in the rival baker story: what do the two dual constraints say about loaves and rolls?
+\item Which primal data become the dual objective coefficients, and which become the dual right-hand sides?
+\end{enumerate}
+\exrefs{\S\ref{sec:duality-theory}}
+\end{ex}
+
 \begin{ex}{Formulate the Dual}{}
 \label{ex:formulate-dual}
-Write the dual of the following linear program:
+\stars{1} Write the dual of the following linear program:
 \[
 \begin{aligned}
 \text{Maximize} \quad & 4x_1 + 5x_2 + 3x_3 \\
@@ -1058,11 +1085,29 @@ Write the dual of the following linear program:
 & x_1, x_2, x_3 \geq 0
 \end{aligned}
 \]
+\exrefs{\S\ref{sec:duality-theory}, \S\ref{sec:duality-strong}}
 \end{ex}
+
+\begin{ex}{Verifying Weak Duality}{}
+\label{ex:weak-duality-check}
+\stars{1} For the bakery problem of \S\ref{sec:duality-theory},
+\[
+\max \; 3x_1 + 2x_2 \quad \text{s.t.} \quad x_1 + x_2 \leq 4, \quad 2x_1 + x_2 \leq 5, \quad x_1, x_2 \geq 0,
+\]
+with dual $\min \; 4y_1 + 5y_2$ s.t.\ $y_1 + 2y_2 \geq 3$, $y_1 + y_2 \geq 2$, $y_1, y_2 \geq 0$, consider the points $\x = (1, 2)$ and $\y = (2, 1)$.
+\begin{enumerate}
+\item Check that $\x$ is primal feasible and compute its objective value.
+\item Check that $\y$ is dual feasible and compute its objective value.
+\item What sandwich does Theorem~\ref{thm:weak-duality} give for the optimal value $z^*$? Confirm that the true optimum, $\x^* = (1,3)$ with $z^* = 9$, lies inside it.
+\end{enumerate}
+\exrefs{Theorem~\ref{thm:weak-duality}, \S\ref{sec:duality-theory}}
+\end{ex}
+
+\exgroup{Core problems}
 
 \begin{ex}{Weak Duality Bound}{}
 \label{ex:weak-duality-bound}
-Consider the primal LP:
+\stars{2} Consider the primal LP:
 \[
 \begin{aligned}
 \max \quad & 3x_1 + 2x_2 \\
@@ -1077,10 +1122,11 @@ Consider the primal LP:
 \item Verify that $\mathbf{x} = (2, 2)$ is feasible for the primal. Compute the primal objective value $\mathbf{c}^\top \mathbf{x}$.
 \item Use weak duality to explain why the optimal value of the primal must lie between these two values.
 \end{enumerate}
+\exrefs{Theorem~\ref{thm:weak-duality}, \S\ref{sec:duality-strong}}
 \end{ex}
 
 \begin{ex}{Dual with Mixed Constraints}{}
-Formulate the dual of the following LP:
+\stars{2} Formulate the dual of the following LP:
 \[
 \begin{aligned}
 \text{Maximize} \quad & 2x_1 + 3x_2 \\
@@ -1091,10 +1137,11 @@ Formulate the dual of the following LP:
 \end{aligned}
 \]
 Identify the sign restrictions on each dual variable and whether each dual constraint is an inequality or an equality.
+\exrefs{\S\ref{sec:duality-forms}}
 \end{ex}
 
 \begin{ex}{Shadow Prices and Dual Variables}{}
-A bakery solves the following LP:
+\stars{2} A bakery solves the following LP:
 \[
 \begin{aligned}
 \max \quad & 5x_1 + 4x_2 \quad \text{(profit in dollars)}\\
@@ -1114,10 +1161,23 @@ The optimal dual solution is $(y_1^*, y_2^*, y_3^*) = (2, 1, 0)$.
 \item Verify that the complementary slackness conditions are satisfied.
 \item Interpret the dual variables as shadow prices. If the bakery could acquire 1 additional kg of flour, by approximately how much would profit increase?
 \end{enumerate}
+\exrefs{\S\ref{sec:duality-economic}, Theorem~\ref{thm:strong-duality}}
+\end{ex}
+
+\exgroup{Concepts and connections}
+
+\begin{ex}{Certificates in Your Own Words}{}
+\stars{2} Figure~\ref{fig:duality-pipeline} describes every dual feasible solution as a \emph{certificate}.
+\begin{enumerate}
+\item In your own words, explain what a dual feasible $\y$ certifies about the primal, and what you would show a skeptical friend to convince them, without solving the primal, that no feasible plan can earn more than a given amount.
+\item Why does the certificate argument need $\y \geq 0$ when the primal constraints are inequalities?
+\item Explain why hunting for the \emph{best} certificate is itself a linear program, and what strong duality says about how good the best certificate is.
+\end{enumerate}
+\exrefs{Figure~\ref{fig:duality-pipeline}, \S\ref{sec:duality-theory}, Theorem~\ref{thm:strong-duality}}
 \end{ex}
 
 \begin{ex}{Strong Duality and Infeasibility}{}
-Consider the primal LP:
+\stars{2} Consider the primal LP:
 \[
 \begin{aligned}
 \max \quad & x_1 + x_2 \\
@@ -1131,6 +1191,21 @@ Consider the primal LP:
 \item Show that the primal is infeasible by arguing that no $(x_1, x_2) \geq 0$ can simultaneously satisfy both constraints.
 \item Is the dual feasible, infeasible, or unbounded? Explain using the strong duality theorem.
 \end{enumerate}
+\exrefs{Theorem~\ref{thm:strong-duality}, Example~\ref{example:dual-infeasibility-unbounded}}
+\end{ex}
+
+\exgroup{Challenge problems}
+
+\begin{ex}{The Dual of the Dual is the Primal}{}
+\label{ex:dual-of-dual}
+\stars{3} Consider the symmetric primal-dual pair
+\[
+\textbf{(P)} \quad \max \; \c^\top \x \ \text{ s.t. } A\x \leq \b, \ \x \geq 0,
+\qquad
+\textbf{(D)} \quad \min \; \b^\top \y \ \text{ s.t. } A^\top \y \geq \c, \ \y \geq 0.
+\]
+Prove that the dual of (D) is again (P).  (Hint: first rewrite (D) as a maximization problem in the same symmetric form, with a new objective vector, constraint matrix, and right-hand side; then apply the definition of the dual to that problem and simplify.)
+\exrefs{\S\ref{sec:duality-strong}, \S\ref{sec:duality-forms}}
 \end{ex}
 
 \subsubsection*{Selected Solutions}
@@ -1154,5 +1229,21 @@ The dual is $\min\, 4y_1 + 6y_2$ subject to $y_1 + 2y_2 \geq 3$, $y_1 + y_2 \geq
 For $\y = (1,1)$: $1 + 2 = 3 \geq 3$ and $1 + 1 = 2 \geq 2$, so $\y$ is dual feasible with objective $4(1) + 6(1) = 10$.
 For $\x = (2,2)$: $2 + 2 = 4 \leq 4$ and $4 + 2 = 6 \leq 6$, so $\x$ is primal feasible with objective $3(2) + 2(2) = 10$.
 By weak duality, every primal value is at most every dual value, so the optimal value $z^*$ satisfies $10 \leq z^* \leq 10$.  Since the two bounds coincide, both solutions are in fact optimal and $z^* = 10$.
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:dual-of-dual})
+Rewrite (D) in symmetric maximization form.  Minimizing $\b^\top \y$ is the same as maximizing $(-\b)^\top \y$, and the constraints $A^\top \y \geq \c$ are equivalent to $(-A^\top)\y \leq -\c$.  So (D) is
+\[
+\max \; (-\b)^\top \y \quad \text{s.t.} \quad (-A^\top)\y \leq -\c, \quad \y \geq 0,
+\]
+which is the symmetric form with objective vector $\tilde{\c} = -\b$, matrix $\tilde{A} = -A^\top$, and right-hand side $\tilde{\b} = -\c$.  Its dual, by definition, is
+\[
+\min \; \tilde{\b}^\top \z \quad \text{s.t.} \quad \tilde{A}^\top \z \geq \tilde{\c}, \quad \z \geq 0,
+\]
+that is, $\min\, (-\c)^\top \z$ subject to $(-A)\z \geq -\b$, $\z \geq 0$.  Multiplying the objective and the constraints by $-1$ turns this into
+\[
+\max \; \c^\top \z \quad \text{s.t.} \quad A\z \leq \b, \quad \z \geq 0,
+\]
+which is exactly (P) with $\z$ in place of $\x$.  Hence the dual of the dual is the primal.
 \end{solution}
 

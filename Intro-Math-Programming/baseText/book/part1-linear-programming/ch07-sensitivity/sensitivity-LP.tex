@@ -862,8 +862,29 @@ described above.
 
 \section{Exercises}
 
+\exgroup{Warm-ups}
+
+\begin{ex}{Shadow Prices from the Final Dictionary}{}
+\stars{1} Recall the final dictionary of the running example of this chapter:
+\[
+\begin{aligned}
+z &= 23 - s_1 - s_3 \\
+x &= 4 - 2s_1 + s_3 \\
+y &= 5 + s_1 - s_3 \\
+s_2 &= 3 + 3s_1 - s_3.
+\end{aligned}
+\]
+\begin{enumerate}
+\item Read off the shadow price of each of the three constraints (hours, flour, sugar) directly from the objective row.
+\item Which constraint is not binding at the optimum? How can you see this in the dictionary, and how is it reflected in that constraint's shadow price?
+\item The bakery is offered one extra unit of sugar for \$0.75. Should it accept? What is the most it should pay?
+\end{enumerate}
+\exrefs{\S\ref{sec:sensitivity-rhs}}
+\end{ex}
+
 \begin{ex}{RHS Sensitivity Range}{}
-Consider the following linear program and its optimal dictionary:
+\label{ex:sensitivity-rhs-range}
+\stars{1} Consider the following linear program and its optimal dictionary:
 \[
 \begin{aligned}
 \max \quad & 4x_1 + 3x_2 \\
@@ -884,36 +905,63 @@ x_2 &= 4 - 2s_1 + s_2 \\
 with basis $B = \{x_1, x_2\}$ and nonbasic variables $N = \{s_1, s_2\}$.
 
 Determine the range of values for $b_1$ (the RHS of the first constraint) for which the current basis remains optimal.
+\exrefs{\S\ref{sec:sensitivity-rhs}}
 \end{ex}
+
+\exgroup{Core problems}
 
 \begin{ex}{Objective Coefficient Sensitivity}{}
-Using the same linear program and optimal dictionary from the previous exercise, determine the range of values for the objective coefficient $c_1$ (the coefficient of $x_1$ in the objective function) such that the current basis remains optimal. How does the optimal objective value change as $c_1$ varies within this range?
+\stars{2} Using the same linear program and optimal dictionary as in Exercise~\ref{ex:sensitivity-rhs-range}, determine the range of values for the objective coefficient $c_1$ (the coefficient of $x_1$ in the objective function) such that the current basis remains optimal. How does the optimal objective value change as $c_1$ varies within this range?
+\exrefs{\S\ref{sec:sensitivity-cost}}
 \end{ex}
 
-\begin{ex}{Shadow Price Interpretation}{}
-\label{ex:shadow-price-workshop}
-A furniture workshop produces tables and chairs. The linear program is:
+\begin{ex}{Full Sensitivity Workup}{}
+\label{ex:sensitivity-workup-2x2}
+\stars{2} A shop assembles two products with profits \$3 and \$5 per unit:
 \[
 \begin{aligned}
-\max \quad & 50x_1 + 30x_2 \quad \text{(profit in dollars)}\\
+\max \quad & 3x_1 + 5x_2 \\
 \st \quad
-& 4x_1 + 2x_2 \leq 40 \quad \text{(wood in board-feet)} \\
-& 2x_1 + 3x_2 \leq 30 \quad \text{(labor in hours)} \\
+& x_1 + 2x_2 \leq 14 \quad \text{(assembly hours)} \\
+& 3x_1 + 2x_2 \leq 18 \quad \text{(machine hours)} \\
 & x_1, x_2 \geq 0
 \end{aligned}
 \]
-The optimal solution is $x_1 = 7.5$, $x_2 = 5$, with optimal profit $z^* = 525$.  The dual solution is $y_1 = 11.25$, $y_2 = 2.50$.
-
 \begin{enumerate}
-\item Interpret each shadow price in terms of the resources (wood and labor).
-\item If the workshop could acquire 2 additional board-feet of wood, by approximately how much would the optimal profit increase?
-\item Which resource is more valuable at the margin? Explain.
+\item Solve the LP (graphically or by the simplex method) and report the optimal solution and objective value.
+\item Compute the shadow price of each constraint.
+\item Find the allowable range of $b_1$ and of $b_2$ over which the current basis remains optimal, and state how $z$ changes inside each range.
+\item Find the allowable range of $c_1$ and of $c_2$ over which the current basis remains optimal.
+\item Check your answers with software (for example \texttt{scipy.optimize.linprog} or Excel Solver).
 \end{enumerate}
+\exrefs{\S\ref{sec:sensitivity-rhs}, \S\ref{sec:sensitivity-cost}, \S\ref{sec:sensitivity-matrix}}
+\end{ex}
+
+\begin{ex}{Ranging a Basic and a Nonbasic Coefficient}{}
+\label{ex:sensitivity-obj-nonbasic}
+\stars{2} Consider the LP
+\[
+\begin{aligned}
+\max \quad & 5x_1 + 2x_2 \\
+\st \quad
+& 2x_1 + x_2 \leq 10 \\
+& x_1 + 3x_2 \leq 15 \\
+& x_1, x_2 \geq 0,
+\end{aligned}
+\]
+whose optimal solution is $(x_1, x_2) = (5, 0)$ with $z^* = 25$ and basis $B = \{x_1, s_2\}$.
+\begin{enumerate}
+\item Verify that $(5,0)$ is optimal by computing the reduced costs of the nonbasic variables $x_2$ and $s_1$.
+\item Find the range of the coefficient $c_2$ of the \emph{nonbasic} variable $x_2$ for which the current basis remains optimal. How does $z^*$ change as $c_2$ moves inside this range?
+\item Find the range of the coefficient $c_1$ of the \emph{basic} variable $x_1$ for which the current basis remains optimal. How does $z^*$ change inside this range?
+\item Explain the structural difference between the two cases: why does one range have a single finite endpoint driven by one reduced cost, while the other involves every reduced cost?
+\end{enumerate}
+\exrefs{\S\ref{sec:sensitivity-cost}, \S\ref{sec:sensitivity-overview}}
 \end{ex}
 
 \begin{ex}{Sensitivity from the Basis Inverse}{}
 \label{ex:sensitivity-basis-inverse}
-Consider the LP:
+\stars{2} Consider the LP:
 \[
 \begin{aligned}
 \max \quad & 5x_1 + 4x_2 \\
@@ -933,10 +981,11 @@ A_B^{-1} = \begin{bmatrix} -2 & 1 \\ 3 & -1 \end{bmatrix}.
 \item For the RHS vector $\mathbf{b} = \begin{bmatrix} 6 \\ 15 \end{bmatrix}$, find the range of $b_1$ for which the current basis remains feasible.
 \item Compute the reduced costs of the nonbasic variables. For what range of $c_1$ does the current basis remain optimal?
 \end{enumerate}
+\exrefs{\S\ref{sec:sensitivity-matrix}}
 \end{ex}
 
 \begin{ex}{Reading a Sensitivity Report}{}
-The following is a sensitivity report from Excel Solver for a maximization LP with two decision variables $x_1$ and $x_2$ and three constraints:
+\stars{2} The following is a sensitivity report from Excel Solver for a maximization LP with two decision variables $x_1$ and $x_2$ and three constraints:
 
 \begin{center}
 \renewcommand{\arraystretch}{1.3}
@@ -969,17 +1018,88 @@ $x_2$ & 4 & 5 & 4 & 1 \\
 \item Which constraint is non-binding? How can you tell from the report?
 \item If 2 additional units of the first resource become available (RHS increases from 20 to 22), what is the new approximate optimal objective value?
 \end{enumerate}
+\exrefs{\S\ref{sec:sensitivity-software}}
+\end{ex}
+
+\exgroup{Concepts and connections}
+
+\begin{ex}{Shadow Price Interpretation}{}
+\label{ex:shadow-price-workshop}
+\stars{2} A furniture workshop produces tables and chairs. The linear program is:
+\[
+\begin{aligned}
+\max \quad & 50x_1 + 30x_2 \quad \text{(profit in dollars)}\\
+\st \quad
+& 4x_1 + 2x_2 \leq 40 \quad \text{(wood in board-feet)} \\
+& 2x_1 + 3x_2 \leq 30 \quad \text{(labor in hours)} \\
+& x_1, x_2 \geq 0
+\end{aligned}
+\]
+The optimal solution is $x_1 = 7.5$, $x_2 = 5$, with optimal profit $z^* = 525$.  The dual solution is $y_1 = 11.25$, $y_2 = 2.50$.
+
+\begin{enumerate}
+\item Interpret each shadow price in terms of the resources (wood and labor).
+\item If the workshop could acquire 2 additional board-feet of wood, by approximately how much would the optimal profit increase?
+\item Which resource is more valuable at the margin? Explain.
+\end{enumerate}
+\exrefs{\S\ref{sec:sensitivity-rhs}}
+\end{ex}
+
+\begin{ex}{Why a Slack Constraint Has Price Zero}{}
+\stars{2} Explain, in your own words, why a constraint that is not binding at the optimal solution must have shadow price $0$. Give two arguments:
+\begin{enumerate}
+\item A geometric or economic argument: what happens to the optimal solution when you add a little more of a resource you are not fully using?
+\item A dictionary argument: if the slack variable of constraint $i$ is basic and positive in the final dictionary, why does perturbing $b_i$ by a small $\Delta$ leave the objective row unchanged? (The perturbation of $b_2$ in \S\ref{sec:sensitivity-rhs} is a worked instance.)
+\end{enumerate}
+\exrefs{\S\ref{sec:sensitivity-rhs}, \S\ref{sec:sensitivity-overview}}
+\end{ex}
+
+\begin{ex}{Why Ranges Exist at All}{}
+\stars{2} Every quantity in a sensitivity report comes with an allowable range. Explain why.
+\begin{enumerate}
+\item What single object stays fixed throughout a sensitivity computation, and what two kinds of conditions (one for RHS changes, one for cost changes) must it continue to satisfy?
+\item Why is the effect of a data change on $z^*$ \emph{linear} inside the range?
+\item What happens, in terms of the simplex method, the moment a perturbation crosses an endpoint of its range?
+\end{enumerate}
+\exrefs{\S\ref{sec:sensitivity-overview}, \S\ref{sec:sensitivity-rhs}, \S\ref{sec:sensitivity-cost}}
+\end{ex}
+
+\begin{ex}{When the Shadow Price Prediction Breaks}{}
+\stars{2} Consider the LP
+\[
+\max \; x_1 + x_2 \quad \st \quad x_1 \leq 1, \quad x_2 \leq 1, \quad x_1 + x_2 \leq 2, \quad x_1, x_2 \geq 0,
+\]
+whose optimal solution is $(1,1)$ with $z^* = 2$. Note that all three constraints are tight there, but only two of them are needed to define the vertex: the optimal solution is \emph{degenerate}.
+\begin{enumerate}
+\item Show that increasing $b_3$ from $2$ to $3$ does not change $z^*$, while decreasing $b_3$ from $2$ to $1$ decreases $z^*$ by $1$.
+\item What, then, is ``the'' shadow price of the third constraint? Explain informally why a single number cannot describe both directions here.
+\item Why should you be cautious when reading the shadow price of a degenerate LP from a solver report?
+\end{enumerate}
+\exrefs{\S\ref{sec:sensitivity-rhs}, \S\ref{sec:sensitivity-software}}
+\end{ex}
+
+\exgroup{Challenge problems}
+
+\begin{ex}{Pushing Past the Range}{}
+\label{ex:sensitivity-range-boundary}
+\stars{3} Construct a linear program with a constraint whose shadow price is some $p > 0$ such that increasing the right-hand side of that constraint by $1$ increases the optimal value by exactly $p$, but increasing it by $5$ increases the optimal value by strictly less than $5p$. Explain what happens at the boundary of the allowable range that makes the prediction fail, and verify your construction by solving the perturbed LPs. (Hint: the running example of this chapter already contains such a constraint.)
+\exrefs{\S\ref{sec:sensitivity-rhs}, \S\ref{sec:sensitivity-overview}}
 \end{ex}
 
 \subsubsection*{Selected Solutions}
 
-\begin{solution}(Exercise~\ref{ex:shadow-price-workshop})
-At the optimal solution $(x_1, x_2) = (7.5, 5)$ both constraints are binding: $4(7.5) + 2(5) = 40$ and $2(7.5) + 3(5) = 30$.
-
+\begin{solution}(Exercise~\ref{ex:sensitivity-workup-2x2})
 \begin{enumerate}
-\item The shadow price of wood is $y_1 = 11.25$: one additional board-foot of wood increases the optimal profit by \$11.25 (as long as the basis does not change).  The shadow price of labor is $y_2 = 2.50$: one additional hour of labor is worth \$2.50 at the margin.
-\item Two additional board-feet increase profit by approximately $2 \times 11.25 = \$22.50$, from \$525 to \$547.50.  (This is exact here: the wood RHS can range from $20$ to $60$ before the basis changes, and $42$ is well inside that range.)
-\item Wood is more valuable at the margin, since $11.25 > 2.50$: a unit of wood buys more additional profit than a unit of labor.
+\item Both constraints are binding at the optimum: solving $x_1 + 2x_2 = 14$ and $3x_1 + 2x_2 = 18$ gives $(x_1, x_2) = (2, 6)$ with $z^* = 3(2) + 5(6) = 36$.
+\item The basis is $B = \{x_1, x_2\}$ with
+\[
+A_B = \begin{bmatrix} 1 & 2 \\ 3 & 2 \end{bmatrix}, \qquad
+A_B^{-1} = \begin{bmatrix} -\tfrac12 & \tfrac12 \\[2pt] \tfrac34 & -\tfrac14 \end{bmatrix},
+\]
+so the shadow prices are $\mathbf{y}^\top = \mathbf{c}_B^\top A_B^{-1} = [3, 5]\,A_B^{-1} = \left[\tfrac94, \tfrac14\right]$: an assembly hour is worth \$2.25 and a machine hour \$0.25.
+\item With $\mathbf{b} = (b_1, 18)$, feasibility of $\mathbf{x}_B = A_B^{-1}\mathbf{b} = \left(-\tfrac{b_1}{2} + 9,\ \tfrac{3b_1}{4} - \tfrac{9}{2}\right) \geq \mathbf{0}$ gives $6 \leq b_1 \leq 18$, with $z = 36 + \tfrac94(b_1 - 14)$ inside the range.  With $\mathbf{b} = (14, b_2)$, feasibility of $\left(\tfrac{b_2}{2} - 7,\ \tfrac{21}{2} - \tfrac{b_2}{4}\right) \geq \mathbf{0}$ gives $14 \leq b_2 \leq 42$, with $z = 36 + \tfrac14(b_2 - 18)$.
+\item With $\mathbf{c}_B = (c_1, 5)$ the dual prices are $\left(-\tfrac{c_1}{2} + \tfrac{15}{4},\ \tfrac{c_1}{2} - \tfrac{5}{4}\right)$; both nonnegative exactly when $\tfrac52 \leq c_1 \leq \tfrac{15}{2}$.  With $\mathbf{c}_B = (3, c_2)$ the dual prices are $\left(\tfrac{3c_2}{4} - \tfrac32,\ \tfrac32 - \tfrac{c_2}{4}\right)$, giving $2 \leq c_2 \leq 6$.
+\item Software confirms: at $b_1 = 6$ the solution is $(6,0)$ with $z = 18 = 36 + \tfrac94(-8)$, at $b_1 = 18$ it is $(0,9)$ with $z = 45 = 36 + \tfrac94(4)$, and just outside these values the duals change, signaling a new basis.
 \end{enumerate}
 \end{solution}
 
@@ -1001,4 +1121,18 @@ so $(x_1, x_2) = (3, 3) \geq \mathbf{0}$ is a feasible basic solution with objec
 \quad\Longleftrightarrow\quad 4 \leq c_1 \leq 6.
 \]
 \end{enumerate}
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:shadow-price-workshop})
+At the optimal solution $(x_1, x_2) = (7.5, 5)$ both constraints are binding: $4(7.5) + 2(5) = 40$ and $2(7.5) + 3(5) = 30$.
+
+\begin{enumerate}
+\item The shadow price of wood is $y_1 = 11.25$: one additional board-foot of wood increases the optimal profit by \$11.25 (as long as the basis does not change).  The shadow price of labor is $y_2 = 2.50$: one additional hour of labor is worth \$2.50 at the margin.
+\item Two additional board-feet increase profit by approximately $2 \times 11.25 = \$22.50$, from \$525 to \$547.50.  (This is exact here: the wood RHS can range from $20$ to $60$ before the basis changes, and $42$ is well inside that range.)
+\item Wood is more valuable at the margin, since $11.25 > 2.50$: a unit of wood buys more additional profit than a unit of labor.
+\end{enumerate}
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:sensitivity-range-boundary})
+The running example of this chapter works.  Its hours constraint $x + y \leq 9$ has shadow price $p = 1$, valid for $7 \leq b_1 \leq 10$ (allowable increase $1$).  Increasing $b_1$ by $1$ to $10$ raises the optimal value from $23$ to $24$, exactly $p$.  Increasing $b_1$ by $5$ to $14$ raises it only to $24$, not to $23 + 5 = 28$: solving the LP with $b_1 = 14$ gives the optimum $(x, y) = (6, 4)$ determined by the flour and sugar constraints, and $z^* = 2(6) + 3(4) = 24$.  At the range boundary $b_1 = 10$ the basic variable $s_2$ hits $0$ and the basis changes; beyond it the hours constraint is no longer binding, so its shadow price drops to $0$ and further increases in $b_1$ buy nothing.  In general, the optimal value is a piecewise-linear concave function of $b_1$, and the shadow price is only its slope on the current piece.
 \end{solution}

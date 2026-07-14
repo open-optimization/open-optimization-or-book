@@ -1,0 +1,227 @@
+% ============================================================================
+% Chapter 14: Graph Algorithms
+% Source: part2-discrete-algorithms/ch10-graph-theory/graphtheory-dor1.tex
+% Exercise layout is nonstandard: four in-chapter \begin{ex} environments
+% (numbered 14.1-14.4 in file order), one learning checkpoint, and a
+% \section{Exercises} whose items sit in three enumerate bands:
+% Skills 1-14, Concepts 15-17, Explorations 18-19.
+% The dead \ifdefined\old block (Euler/Hamiltonian material) is excluded.
+% All numeric answers verified with networkx 3.4 (Dijkstra, Kruskal, Prim).
+% ============================================================================
+
+\section{Chapter 14: Graph Algorithms}
+
+This chapter's exercises come in two layers. Four in-chapter exercises (numbered 14.1 through 14.4 in order of appearance: Kruskal's algorithm, NetworkX, Prim's algorithm, and a shortest path problem) sit next to the material they drill, and the book answers three of them in its Exercise Answers block. The end-of-chapter Exercises section is arranged in three bands: \textbf{Skills} items 1 to 14 (graph drawing, degrees, connectivity, Dijkstra, spanning trees), \textbf{Concepts} items 15 to 17 (handshake lemma, correctness of Kruskal and Dijkstra), and \textbf{Explorations} items 18 and 19 (social networks and Levenshtein distance), for which we give guidance and rubric notes rather than a single answer. Every shortest path, spanning tree, and degree count below was re-verified computationally with NetworkX, and the book's Exercise Answers block and Selected Solutions all check out. One data typo was fixed in the book (the Bern to Frankfurt travel time read ``3.55'' instead of ``3:55'' in the Skills 9 graph). Much of this chapter, including many exercises, is adapted from the Graph Theory chapter of \emph{Math in Society} by David Lippman (CC BY-SA 3.0); that attribution was missing and has now been added to the chapter source header and to the book's Sources and Attribution front matter.
+
+\subsection*{Learning checkpoint (five cities airfare graph)}
+
+The book's Exercise Answers block already answers this; we confirm: (a) 5 vertices and 10 edges (every pair of cities is joined, so the graph is $K_5$); (b) yes, it is connected, since $K_5$ contains a path between every pair; (c) LA has degree 4, one edge to each other city; (d) Seattle to Dallas to Atlanta is a path (it does not return to its start); (e) LA to Chicago to Dallas to LA is a circuit (it starts and ends at LA).
+
+\subsection*{Exercise 14.1: Min Cost Spanning Tree (Kruskal)}
+
+Sort the fifteen edges by weight and scan, rejecting any edge that closes a circuit:
+\begin{center}
+\begin{tabular}{llll}
+AB & 11 & add & \\
+BG & 13 & add & \\
+AE & 14 & add & \\
+AG & 15 & reject & closes circuit A--B--G--A \\
+EF & 16 & add & \\
+CE & 17 & add & tree complete (5 edges, 6 vertices) \\
+\end{tabular}
+\end{center}
+The minimum cost spanning tree is $\{AB, BG, AE, EF, CE\}$ with total weight $11 + 13 + 14 + 16 + 17 = 71$. This matches the book's Exercise Answers block (which lists the same edges; the total 71 is worth adding on the board). Verified with NetworkX.
+
+\subsection*{Exercise 14.2: NetworkX}
+
+After running the provided loading code, two lines solve the problem:
+\begin{quote}
+\texttt{T = nx.minimum\_spanning\_tree(G)} \\
+\texttt{print(sorted(T.edges(data='weight')), T.size(weight='weight'))}
+\end{quote}
+Output: edges $(A,B,11)$, $(A,E,14)$, $(B,G,13)$, $(C,E,17)$, $(E,F,16)$ and total weight $71.0$, agreeing with the hand computation in Exercise 14.1. Instructors may also ask for \texttt{nx.dijkstra\_path} on the same graph as a follow-up.
+
+\subsection*{Exercise 14.3: Prim's Algorithm}
+
+Starting from vertex A and always adding the cheapest edge leaving the current tree:
+\begin{center}
+\begin{tabular}{lll}
+Tree $\{A\}$ & cheapest leaving edge AB (11) & add AB \\
+Tree $\{A,B\}$ & candidates: BG 13, AE 14, AG 15, BF 23, \dots & add BG \\
+Tree $\{A,B,G\}$ & candidates: AE 14, AG rejected (both ends in tree), FG 19, \dots & add AE \\
+Tree $\{A,B,G,E\}$ & candidates: EF 16, EC 17, \dots & add EF \\
+Tree $\{A,B,G,E,F\}$ & candidates: EC 17, BC 25, \dots & add EC \\
+\end{tabular}
+\end{center}
+Selection order: AB (11), BG (13), AE (14), EF (16), EC (17). Prim's algorithm produces the same tree as Kruskal's, total 71, as expected since the edge weights are distinct (the MST is unique). Verified with NetworkX's Prim iterator.
+
+\begin{qaflag}
+The floating figure captioned ``Prim's algorithm'' that appears right after Exercise 14.3 shows a \emph{different} seven-vertex graph (vertices $a$ through $g$) with a highlighted solution, and nothing in the text refers to it. Students may mistake it for the answer to Exercise 14.3. Suggest either adding a sentence introducing it as a second worked illustration, or captioning it with its own data, or removing it.
+\end{qaflag}
+
+\subsection*{Exercise 14.4: Shortest Path Problem (A to G)}
+
+Dijkstra from A. Permanent labels in order: A $[0]$, B $[1]$, C $[4]$, D $[4]$ (via B, since $1+3=4$ beats $4+2=6$), E $[6]$ (via D), F $[8]$ (tie: via D $4+4$ or via E $6+2$), G $[13]$ (via E, since $6+7=13$ beats $8+6=14$). The shortest path is
+\[
+A \to B \to D \to E \to G, \qquad 1 + 3 + 2 + 7 = 13,
+\]
+and it is unique. This matches the book's Exercise Answers entry (``ABDEG, with length 13''). Verified with NetworkX.
+
+\subsection*{Skills 1: Postal carrier graph (drawing)}
+
+Rubric item; there is one intended construction. Place a vertex at each street intersection: the six blocks sit in a 2 by 3 arrangement, so the streets form a grid with $3 \times 4 = 12$ intersections. Draw an edge along every street segment that has at least one house (black square) on it, and omit segments with no houses, since the carrier only needs streets ``with houses.'' Grade on three points: (i) vertices at intersections only, not at houses; (ii) one edge per street segment even when houses sit on both sides of the street (the carrier walks the street once); (iii) segments bordering only the empty block and carrying no houses are omitted. A follow-up worth asking: does the resulting graph have an Euler path (count odd-degree vertices)?
+
+\subsection*{Skills 2: Seven bridges graph (drawing)}
+
+The construction mirrors the K\"onigsberg example: shrink each land mass to a single vertex and draw one edge per bridge, giving a multigraph with 7 edges (parallel edges are expected where two bridges join the same pair of banks). Reading the map, the river splits the town into four land masses, so the answer is a 4-vertex, 7-edge multigraph; the degrees must sum to $2 \times 7 = 14$. Grade on: vertices are land masses (not bridges), exactly seven edges, and parallel edges drawn where appropriate. The natural follow-up, which the item's stem points to, is that an all-bridges walk exists exactly when the number of odd-degree vertices is 0 or 2.
+
+\begin{qaflag}
+Skills 1 and 2 depend on low-resolution raster images (\texttt{GraphExercise1.png}, \texttt{GraphExercise2.png}), and in Skills 2 the exact assignment of bridges to land-mass pairs is hard to read from the picture, so student answers may legitimately differ in the multigraph details. Consider redrawing both as TikZ figures with unambiguous house and bridge placement, or labeling the land masses in the image.
+\end{qaflag}
+
+\subsection*{Skills 3: Dallas driving-time graph (drawing)}
+
+Five vertices (Fort Worth, Plano, Mesquite, Arlington, Denton). The table gives all ten pairwise times, so the answer is a complete graph $K_5$ with edge weights, in minutes:
+FW--Plano 54, FW--Mesquite 52, FW--Arlington 19, FW--Denton 42, Plano--Mesquite 38, Plano--Arlington 53, Plano--Denton 41, Mesquite--Arlington 43, Mesquite--Denton 56, Arlington--Denton 50.
+Any planar arrangement is acceptable; grade on all ten weighted edges being present and correctly labeled.
+
+\subsection*{Skills 4: Airfare graph (drawing)}
+
+Again a weighted $K_5$, on Seattle, Honolulu, London, Moscow, Cairo, with fares:
+Seattle--Honolulu \$159, Seattle--London \$370, Seattle--Moscow \$654, Seattle--Cairo \$684, Honolulu--London \$830, Honolulu--Moscow \$854, Honolulu--Cairo \$801, London--Moscow \$245, London--Cairo \$323, Moscow--Cairo \$329.
+This graph is reused in Skills 14, so it is worth having students keep their drawing.
+
+\subsection*{Skills 5: Degrees in the first graph}
+
+Label the vertices A $(0,0)$, B $(1,0)$, C $(0,1)$, D $(1,1)$, E $(2,1)$. The six edges are AB, BC, BD, BE, CD, DE. Degrees:
+\[
+\deg A = 1,\quad \deg B = 4,\quad \deg C = 2,\quad \deg D = 3,\quad \deg E = 2.
+\]
+Check: the degrees sum to $12 = 2 \times 6$ edges. Verified with NetworkX.
+
+\subsection*{Skills 6: Degrees in the second graph}
+
+Label the vertices A $(0,0)$ at the bottom, B and C the two middle vertices (left and right), D and E the two top vertices (left and right). The five edges are AB, AC, BC, BD, CE. Degrees:
+\[
+\deg A = 2,\quad \deg B = 3,\quad \deg C = 3,\quad \deg D = 1,\quad \deg E = 1,
+\]
+summing to $10 = 2 \times 5$. Verified with NetworkX.
+
+\subsection*{Skills 7: Which graphs are connected (five vertices)}
+
+Label each graph's vertices a $(0,0)$, b $(1,0)$, c $(0,1)$, d $(1,1)$, e $(2,1)$.
+\begin{itemize}
+\item First graph (edges ab, bd, cd, be): connected; from b one reaches a, d, e directly and c through d.
+\item Second graph (edges bd, be, de, ac): \emph{not} connected; the triangle $\{b,d,e\}$ and the edge $\{a,c\}$ form two separate pieces.
+\item Third graph (edges ab, bd, cd, be, de, ac): connected; it contains the first graph plus two more edges.
+\end{itemize}
+So the first and third graphs are connected. Verified with NetworkX.
+
+\subsection*{Skills 8: Which graphs are connected (eight vertices)}
+
+Label the vertices a $(0,0)$, b $(1,0)$, c $(2,0)$ across the bottom, d $(0.5,1)$, e $(1.5,1)$ in the middle, and f $(0,2)$, g $(1,2)$, h $(2,2)$ across the top.
+\begin{itemize}
+\item First graph (edges ab, bc, de, fg, gh): \emph{not} connected; three components (bottom path a--b--c, middle edge d--e, top path f--g--h).
+\item Second graph (edges ab, be, de, df, gh, eh, ce): connected; e touches b, d, h, c, and from those a, f, g are reached.
+\item Third graph (edges ab, be, ed, df, fa, gh, hc): \emph{not} connected; the 5-cycle a--b--e--d--f--a and the path g--h--c are separate components.
+\end{itemize}
+Only the middle graph is connected. Verified with NetworkX.
+
+\subsection*{Skills 9: Eurail, Bern to Berlin (Dijkstra)}
+
+Run Dijkstra from Bern (equivalently from Berlin; the book's Selected Solution runs it from Bern and is correct). Working in hours:minutes, the labels become permanent in the order
+\begin{center}
+\begin{tabular}{lll}
+Bern & 0:00 & \\
+Lyon & 3:50 & via Bern \\
+Frankfurt & 3:55 & via Bern \\
+Paris & 5:45 & via Lyon ($3{:}50 + 1{:}55$) \\
+M\"unchen & 7:05 & via Frankfurt ($3{:}55 + 3{:}10$) \\
+Amsterdam & 7:10 & via Paris ($5{:}45 + 1{:}25$; beats Frankfurt's $3{:}55 + 4{:}00 = 7{:}55$) \\
+Berlin & 12:50 & via M\"unchen ($7{:}05 + 5{:}45$; beats Amsterdam's $7{:}10 + 6{:}10 = 13{:}20$) \\
+\end{tabular}
+\end{center}
+Shortest route: Bern $\to$ Frankfurt $\to$ M\"unchen $\to$ Berlin, total $3{:}55 + 3{:}10 + 5{:}45 = 12{:}50$. Verified with NetworkX (770 minutes). Note: the Bern--Frankfurt edge label in the book read ``3.55''; this has been corrected to ``3:55'' in the chapter source, matching the value the book's own Selected Solution uses.
+
+\subsection*{Skills 10: Eurail, Paris to M\"unchen}
+
+Same graph. Dijkstra from M\"unchen gives permanent labels M\"unchen 0:00, Frankfurt 3:10, Berlin 5:45, Bern 7:05, Amsterdam 7:10 ($3{:}10 + 4{:}00$), Paris 8:35 (via Amsterdam, $7{:}10 + 1{:}25$), Lyon 10:30 (via Paris). The shortest route is
+\[
+\text{Paris} \to \text{Amsterdam} \to \text{Frankfurt} \to \text{M\"unchen},
+\qquad 1{:}25 + 4{:}00 + 3{:}10 = 8{:}35.
+\]
+The southern alternative through Lyon and Bern takes $1{:}55 + 3{:}50 + 3{:}55 + 3{:}10 = 12{:}50$, nearly four and a half hours longer. Verified with NetworkX (515 minutes).
+
+\subsection*{Skills 11: MST of the Dallas graph}
+
+Kruskal on the graph from Skills 3. Sorted scan:
+\begin{center}
+\begin{tabular}{lll}
+FW--Arlington & 19 & add \\
+Plano--Mesquite & 38 & add \\
+Plano--Denton & 41 & add \\
+FW--Denton & 42 & add; tree complete (4 edges, 5 vertices) \\
+\end{tabular}
+\end{center}
+No edge is rejected before the tree completes. The MST is $\{$FW--Arlington, Plano--Mesquite, Plano--Denton, FW--Denton$\}$ with total $19 + 38 + 41 + 42 = 140$ minutes. Verified with NetworkX.
+
+\subsection*{Skills 12: MST for the five buildings}
+
+Kruskal, in thousands of dollars: CE $4.0$ add, BD $4.3$ add, AE $4.4$ add, AD $4.7$ add, and the tree is complete with no rejections. Total $4.0 + 4.3 + 4.4 + 4.7 = 17.4$, that is \$17{,}400 per the cost units. This matches the book's Selected Solution, including its remark that a tree offers no backup path if a cable is cut. Verified with NetworkX.
+
+\subsection*{Skills 13: Virginia rail, Bristol to Washington (Dijkstra)}
+
+Dijkstra from Washington. Permanent labels in order: Washington $[0]$, Richmond $[115]$, Charlottesville $[140]$, Lynchburg $[210]$ (via Charlottesville, $140+70$, beating Richmond's $115+125 = 240$), Roanoke $[260]$ (via Charlottesville, $140+120$, beating Lynchburg's $210+55 = 265$), Bristol $[405]$ (via Roanoke). Shortest route:
+\[
+\text{Bristol} \to \text{Roanoke} \to \text{Charlottesville} \to \text{Washington},
+\qquad 145 + 120 + 140 = 405 \text{ minutes} = 6\text{h}45.
+\]
+Matches the book's Selected Solution. Verified with NetworkX.
+
+\subsection*{Skills 14: Kruskal on the airfare graph}
+
+Sorted scan of the ten fares from Skills 4:
+\begin{center}
+\begin{tabular}{lll}
+Seattle--Honolulu & \$159 & add \\
+London--Moscow & \$245 & add \\
+London--Cairo & \$323 & add \\
+Moscow--Cairo & \$329 & reject; closes circuit London--Moscow--Cairo \\
+Seattle--London & \$370 & add; tree complete \\
+\end{tabular}
+\end{center}
+MST total: $159 + 245 + 323 + 370 = \$1097$. An airline alliance could read this tree as the cheapest set of routes that still connects all five cities, for example as a minimal backbone of through-fares, with the caveat that trips between cities in different branches require connections. Matches the book's Selected Solution; verified with NetworkX.
+
+\subsection*{Concepts 15: Odd-degree vertices}
+
+No. Each edge contributes exactly 2 to the sum of all vertex degrees, so $\sum_v \deg(v) = 2|E|$ is even (the handshake lemma). If exactly one vertex had odd degree, the sum would be odd, a contradiction. The same argument rules out any \emph{odd number} of odd-degree vertices: 1, 3, 5, and so on are impossible, while every even count (0, 2, 4, \dots) can occur. This fact is what makes the Euler path test (at most two odd-degree vertices) well posed.
+
+\subsection*{Concepts 16: Why greedy works for spanning trees}
+
+Let $T$ be Kruskal's tree and suppose some spanning tree $T^*$ is cheaper. Pick an edge $e \in T^* \setminus T$. Kruskal's algorithm examined $e$ and rejected it only because $e$ closed a circuit with already-accepted edges; since edges are scanned from cheapest to most expensive, every edge of that circuit costs at most $c(e)$. The circuit cannot lie entirely inside $T^*$ (trees have no circuits), so it contains an edge $f \notin T^*$ with $c(f) \leq c(e)$. Then $T^* - e + f$ is again a spanning tree (removing $e$ splits $T^*$ into two pieces, and the circuit provides the edge $f$ reconnecting them), costs no more than $T^*$, and agrees with $T$ on one more edge. Repeating the exchange transforms $T^*$ into $T$ without ever increasing cost, so $c(T) \leq c(T^*)$: the greedy tree is optimal.
+
+Negative costs change nothing: the argument compares costs only through the \emph{order} in which Kruskal's algorithm scans edges, never through their signs. This is a genuine contrast with Dijkstra's algorithm (Concepts 17), which does need nonnegativity. The book's Selected Solution for this item is correct.
+
+\subsection*{Concepts 17: Why Dijkstra needs nonnegative weights}
+
+Justification: when the algorithm makes vertex $u$ permanent, $u$ carries the smallest tentative distance among all unvisited vertices. Any other route from the source to $u$ must first leave the visited set through some unvisited vertex $w$, whose tentative label is already $\geq$ label$(u)$; with nonnegative edge weights the rest of that route can only add length. So no shorter route to $u$ can exist, and finalizing $u$ is safe.
+
+Counterexample with a negative weight (directed, three vertices): edges $A \to B$ with weight 2, $A \to C$ with weight 3, and $C \to B$ with weight $-2$. The true shortest path from A to B is $A \to C \to B$ with length $3 + (-2) = 1$. Dijkstra from A gives B the tentative label 2, makes B permanent first (since $2 < 3$), and never revisits it, reporting 2 instead of 1. Verified against Bellman--Ford in NetworkX. Any three-vertex example with the same structure earns full credit; students who use an undirected negative edge should note that undirected negative edges make ``shortest walk'' degenerate, so the directed version is the clean answer.
+
+\subsection*{Explorations 18: Social network (guidance and rubric)}
+
+(a) The friendship graph has vertices A through I and the fifteen edges read from the upper triangle of the table: AB, AC, AF, AG, BC, BE, CE, DE, DI, EG, EI, FH, FI, GH, HI. Check: every X above the diagonal is used once; row I is omitted from the table because all of I's friendships already appear in earlier rows.
+
+(b) The shortest path from A to D has length 3, so A and D are three degrees of separation apart. There are four shortest paths: A--B--E--D, A--C--E--D, A--G--E--D, and A--F--I--D (any one suffices). No length-2 path exists because A's friends are $\{B, C, F, G\}$ and D's friends are $\{E, I\}$, which do not intersect. Verified with NetworkX.
+
+(c) Rubric for the movie extension (group activity, no single answer): completeness of the actor graph for the chosen movies (vertices are actors, one edge per shared movie, labeled); correctness of at least one multi-step path between two actors in different movies; quality of the quiz interaction. A natural assessment question is to have each group compute a ``degrees of separation'' number between two named actors and explain the path. Instructors may connect this to the Six Degrees of Kevin Bacon game and to breadth-first search as the unweighted special case of Dijkstra.
+
+\subsection*{Explorations 19: Levenshtein distance (guidance and rubric)}
+
+(a) Any correct star of dictionary words at distance 1 from ``moke'' earns credit. A convenient list of more than ten: substitutions give make, mike, mode, mole, more, mote, move (position changes inside the word) and coke, joke, poke, woke, yoke, toke (first letter); the insertion smoke also works. Students should then connect pairs of \emph{those} words at distance 1 from each other (for example make--mike, poke--joke) to get a genuine graph rather than only a star. A spell checker uses the graph by suggesting the dictionary neighbors of the misspelled word, that is, the vertices adjacent to ``moke.''
+
+(b) Rubric: (i) the weighting scheme is explicit and defensible (for example keyboard adjacency: substituting a letter by a neighboring key is cheap; common phonetic errors cheap; rare substitutions expensive); (ii) Dijkstra is run from ``moke'' and produces a distance label for each candidate word; (iii) the interpretation is stated: the spell checker ranks suggestions by increasing shortest-path distance, so likelier intended words appear first. Any consistent weights are acceptable; grade the reasoning, not the specific numbers.
+
+\begin{qaflag}
+Minor maintenance notes for the Exercises section. (1) Skills 11 and Skills 14 refer to ``problem \#3'' and ``problem \#4'' by hand-typed number; if items are ever inserted or reordered these references will silently break. Consider labeling the items and using \texttt{\textbackslash ref}. (2) The standalone Exercise 14.4 (Shortest Path Problem) sits between the band introduction and the Skills list, outside all three bands; moving it into Skills (it is a mechanics drill) would make the band structure exact.
+\end{qaflag}

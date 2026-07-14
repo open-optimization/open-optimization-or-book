@@ -41,6 +41,7 @@ We use the same linear program solved by dictionaries earlier,
 so that you can compare the two presentations line for line.
 
 \section{Building the tableau}
+\label{sec:tableau-building}
 
 First put the program in \emph{standard form} by adding a nonnegative slack variable to each constraint:
 \begin{equation*}
@@ -72,13 +73,15 @@ $s_3$ & $1$ & $2$ & $0$ & $0$ & $1$ & $14$\\
 \bottomrule
 \end{tabular}
 \end{center}
-the basis is $\{s_1,s_2,s_3\}$. Setting the nonbasic variables $x=y=0$ gives the basic feasible solution $s_1=9,\ s_2=16,\ s_3=14$ read directly from the RHS column, with objective value $z=0$ (the RHS of the $z$-row). The entries of the $z$-row, $-2$ and $-3$, are the \emph{reduced costs} of $x$ and $y$: the rate at which $z$ would change if that variable were increased from zero.
+the basis is $\{s_1,s_2,s_3\}$. Setting the nonbasic variables $x=y=0$ gives the basic feasible solution $s_1=9,\ s_2=16,\ s_3=14$ read directly from the RHS column, with objective value $z=0$ (the RHS of the $z$-row). The entries of the $z$-row, $-2$ and $-3$, record the \emph{reduced costs} of $x$ and $y$ with the sign flipped: increasing $x$ or $y$ from zero would change $z$ at the rates $+2$ and $+3$, the negatives of the stored entries.
 
 \begin{steppanel}{algpivot}
+\label{panel:tableau-sign-convention}%
 \slab{algpivot}{114}{Sign convention} In the dictionary form we wrote $z = 2x + 3y$ and increased the variable with the \emph{largest positive} coefficient. The tableau instead stores the row $z - 2x - 3y = 0$, so the very same coefficients appear \emph{negated}. The two rules therefore read as mirror images and give identical decisions: in tableau form we bring in the variable with the \emph{most negative} $z$-row entry, and we stop when \emph{every} $z$-row entry is nonnegative.
 \end{steppanel}
 
 \section{One pivot, three colors}
+\label{sec:tableau-pivot}
 
 A pivot has three moves, and we color them consistently throughout the book: {\color{algenter}\textbf{green}} chooses the entering variable, {\color{algleave}\textbf{orange}} runs the ratio test to find the leaving variable, and {\color{algpivot}\textbf{blue}} marks the pivot element where the two meet.
 
@@ -166,6 +169,7 @@ $y$   & $0$ & $1$ & $-1$ & $0$ & $1$  & $5$\\
 \end{center}
 
 \section{Optimality and reading the solution}
+\label{sec:tableau-optimality}
 
 Every entry of the $z$-row is now nonnegative, so no variable can enter and improve the objective: the tableau is \textbf{optimal}. We read the solution straight from the RHS column, taking each basic variable equal to its right-hand side and each nonbasic variable equal to zero:
 \[
@@ -318,9 +322,37 @@ A feasible basis for the original problem was found; delete the artificial colum
 
 \section{Exercises}
 
+\exgroup{Warm-ups}
+
+\begin{ex}{Reading a mid-solve tableau}{}
+\label{ex:tableau-read-mid}
+\stars{1} The tableau below is the second tableau of this chapter's running example, reached after one pivot:
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{c|ZZZZZ|Z}
+\toprule
+Basis & $x$ & $y$ & $s_1$ & $s_2$ & $s_3$ & RHS\\
+\midrule
+$z$   & $-\tfrac12$ & $0$ & $0$ & $0$ & $\tfrac32$ & $21$\\
+\midrule
+$s_1$ & $\tfrac12$ & $0$ & $1$ & $0$ & $-\tfrac12$ & $2$\\
+$s_2$ & $\tfrac32$ & $0$ & $0$ & $1$ & $-\tfrac12$ & $9$\\
+$y$   & $\tfrac12$ & $1$ & $0$ & $0$ & $\tfrac12$ & $7$\\
+\bottomrule
+\end{tabular}
+\end{center}
+\begin{enumerate}
+    \item Which variables are basic and which are nonbasic?
+    \item Read off the basic feasible solution and the objective value.
+    \item What are the reduced costs of the nonbasic variables?
+    \item Is this tableau optimal?  If not, which variable enters next?
+\end{enumerate}
+\exrefs{\S\ref{sec:tableau-building}, first worked tableau; \S\ref{sec:tableau-pivot}}
+\end{ex}
+
 \begin{ex}{Reading a tableau}{}
 \label{ex:tableau-reading}
-The following tableau arose while solving a maximization problem, with the objective row on top:
+\stars{1} The following tableau arose while solving a maximization problem, with the objective row on top:
 \begin{center}
 \renewcommand{\arraystretch}{1.3}
 \begin{tabular}{c|ZZZZ|Z}
@@ -335,11 +367,12 @@ $x_2$ & $0$ & $1$ & $-1$ & $1$  & $4$\\
 \end{tabular}
 \end{center}
 Identify the basic and nonbasic variables, state the corresponding basic feasible solution and its objective value, and explain how you can tell from the objective row that this tableau is optimal.
+\exrefs{\S\ref{sec:tableau-building}; \S\ref{sec:tableau-optimality}}
 \end{ex}
 
 \begin{ex}{Entering variable, ratio test, and pivot element}{}
 \label{ex:tableau-ratio-test}
-Consider the tableau
+\stars{1} Consider the tableau
 \begin{center}
 \renewcommand{\arraystretch}{1.3}
 \begin{tabular}{c|ZZZZZ|Z}
@@ -355,15 +388,20 @@ $s_3$ & $3$ & $4$ & $0$ & $0$ & $1$ & $12$\\
 \end{tabular}
 \end{center}
 Determine the entering variable, carry out the ratio test showing every ratio, name the leaving variable, and circle the pivot element.
+\exrefs{\S\ref{sec:tableau-pivot}}
 \end{ex}
 
+\exgroup{Core problems}
+
 \begin{ex}{Perform one pivot}{}
-Starting from the tableau in the previous exercise, perform the pivot you identified and write the resulting tableau. Verify that the entering column has become a unit column and that the objective value in the $z$-row has increased.
+\label{ex:tableau-one-pivot}
+\stars{2} Starting from the tableau in Exercise~\ref{ex:tableau-ratio-test}, perform the pivot you identified and write the resulting tableau. Verify that the entering column has become a unit column and that the objective value in the $z$-row has increased.
+\exrefs{\S\ref{sec:tableau-pivot}}
 \end{ex}
 
 \begin{ex}{Solve a linear program in tableau form}{}
 \label{ex:tableau-solve-lp}
-Use the simplex method in tableau form to solve
+\stars{2} Use the simplex method in tableau form to solve
 \[
 \begin{aligned}
 \max\quad & z = x + 2y\\
@@ -373,10 +411,59 @@ Use the simplex method in tableau form to solve
 \end{aligned}
 \]
 Show every tableau, coloring or labelling the entering column, leaving row, and pivot element at each step. State the optimal solution and objective value. (You should reach the optimum in two pivots.)
+\exrefs{\S\ref{sec:tableau-pivot}; \S\ref{sec:tableau-optimality}}
+\end{ex}
+
+\begin{ex}{A full two-pivot solve}{}
+\label{ex:tableau-two-pivot-solve}
+\stars{2} Solve the following linear program in tableau form, using the most-negative-entry rule to choose the entering variable:
+\[
+\begin{aligned}
+\max\quad & z = 3x + 2y\\
+\st\quad  & 2x + y  \le 10,\\
+          & x + 3y \le 15,\\
+          & x, y \ge 0.
+\end{aligned}
+\]
+Show the starting tableau and each tableau after a pivot, and state the optimal solution, the optimal objective value, and the values of the slack variables at the optimum.
+\exrefs{\S\ref{sec:tableau-pivot}; \S\ref{sec:tableau-optimality}}
+\end{ex}
+
+\begin{ex}{Setting up a Big-M tableau}{}
+\label{ex:tableau-bigm-setup}
+\stars{2} Consider the linear program
+\[
+\begin{aligned}
+\max\quad & 4x + 3y \\
+\st\quad  & x + y \ge 4,\quad x + 2y \le 10,\quad x,y \ge 0.
+\end{aligned}
+\]
+Introduce a surplus variable $e_1$ and an artificial variable $a_1$ for the first constraint and a slack $s_2$ for the second, and write the objective as $\max\ 4x + 3y - M a_1$. Build the initial tableau with the objective row on top, and then \emph{price out} the artificial variable $a_1$ so that its objective-row entry becomes zero. Which variable enters first, and does the artificial variable leave on the first pivot?
+\exrefs{\S\ref{sec:tableau-bigm}}
+\end{ex}
+
+\exgroup{Concepts and connections}
+
+\begin{ex}{The $z$-row sign convention}{}
+\label{ex:tableau-sign-convention}
+\stars{2} The dictionary form of Chapter~\ref{ch:simplex-dictionary} selects an entering variable with a \emph{positive} objective coefficient, while the tableau selects one with a \emph{negative} $z$-row entry.
+\begin{enumerate}
+    \item Explain where the sign flip comes from, using the fact that the tableau stores the objective as the equation $z - \c^\top\x = 0$.
+    \item A dictionary reads $z = 12 + 3x_1 - 2x_2$.  Write the corresponding $z$-row of a tableau, including its RHS entry.
+    \item Explain why the RHS entry of the $z$-row equals the current objective value even though every other coefficient is negated.
+\end{enumerate}
+\exrefs{\S\ref{sec:tableau-building}, sign-convention panel}
+\end{ex}
+
+\begin{ex}{From tableau to dictionary}{}
+\label{ex:tableau-to-dictionary}
+\stars{2} Write the dictionary that corresponds to the tableau in Exercise~\ref{ex:tableau-reading}, expressing $z$ and each basic variable in terms of the nonbasic variables $s_1$ and $s_2$. Confirm that setting the nonbasic variables to zero reproduces the same basic feasible solution.
+\exrefs{\S\ref{sec:tableau-building}; Chapter~\ref{ch:simplex-dictionary}}
 \end{ex}
 
 \begin{ex}{Recognizing an unbounded problem}{}
-While solving a maximization problem you obtain
+\label{ex:tableau-unbounded}
+\stars{2} While solving a maximization problem you obtain
 \begin{center}
 \renewcommand{\arraystretch}{1.3}
 \begin{tabular}{c|ZZZZ|Z}
@@ -391,25 +478,12 @@ $s_1$ & $-3$ & $0$ & $1$ & $2$ & $5$\\
 \end{tabular}
 \end{center}
 Which variable should enter? Attempt the ratio test and explain why it fails. What does this tell you about the linear program?
-\end{ex}
-
-\begin{ex}{From tableau to dictionary}{}
-Write the dictionary that corresponds to the tableau in Exercise~1, expressing $z$ and each basic variable in terms of the nonbasic variables $s_1$ and $s_2$. Confirm that setting the nonbasic variables to zero reproduces the same basic feasible solution.
-\end{ex}
-
-\begin{ex}{Setting up a Big-M tableau}{}
-Consider the linear program
-\[
-\begin{aligned}
-\max\quad & 4x + 3y \\
-\st\quad  & x + y \ge 4,\quad x + 2y \le 10,\quad x,y \ge 0.
-\end{aligned}
-\]
-Introduce a surplus variable $e_1$ and an artificial variable $a_1$ for the first constraint and a slack $s_2$ for the second, and write the objective as $\max\ 4x + 3y - M a_1$. Build the initial tableau with the objective row on top, and then \emph{price out} the artificial variable $a_1$ so that its objective-row entry becomes zero. Which variable enters first, and does the artificial variable leave on the first pivot?
+\exrefs{\S\ref{sec:tableau-optimality}, ratio test step of the algorithm card}
 \end{ex}
 
 \begin{ex}{Reading off infeasibility}{}
-Suppose the Big-M method applied to some maximization problem terminates (every objective-row entry nonnegative) with the tableau
+\label{ex:tableau-infeasible}
+\stars{2} Suppose the Big-M method applied to some maximization problem terminates (every objective-row entry nonnegative) with the tableau
 \begin{center}
 \renewcommand{\arraystretch}{1.3}\small\setlength{\tabcolsep}{4.5pt}
 \begin{tabular}{c|ccccc|c}
@@ -425,6 +499,42 @@ $y$   & $0$ & $1$ & $-1$ & $0$ & $0$ & $2$\\
 \end{tabular}
 \end{center}
 Is the tableau optimal for the penalized problem? What is the value of the artificial variable $a_1$, and what does it tell you about the original linear program? Explain the role of the $-3M$ term in the objective value.
+\exrefs{\S\ref{sec:tableau-bigm}}
+\end{ex}
+
+\exgroup{Challenge problems}
+
+\begin{ex}{Certifying unboundedness from a tableau}{}
+\label{ex:tableau-unbounded-certificate}
+\stars{3} Applying the simplex method to
+\[
+\begin{aligned}
+\max\quad & z = x_1 + x_2\\
+\st\quad  & x_1 - x_2  \le 1,\\
+          & -x_1 + x_2 \le 2,\\
+          & x_1, x_2 \ge 0
+\end{aligned}
+\]
+produces, after one pivot, the tableau
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{c|ZZZZ|Z}
+\toprule
+Basis & $x_1$ & $x_2$ & $s_1$ & $s_2$ & RHS\\
+\midrule
+$z$   & $0$ & $-2$ & $1$ & $0$ & $1$\\
+\midrule
+$x_1$ & $1$ & $-1$ & $1$ & $0$ & $1$\\
+$s_2$ & $0$ & $0$  & $1$ & $1$ & $3$\\
+\bottomrule
+\end{tabular}
+\end{center}
+\begin{enumerate}
+    \item Detect the unboundedness: identify the entering variable and show that the ratio test finds no limiting row.
+    \item Certify it: letting the entering variable equal $t \ge 0$, write the resulting family of solutions $\x(t)$ in all four variables, and verify by direct substitution that $\x(t)$ satisfies both original constraints and the nonnegativity conditions for every $t \ge 0$.
+    \item Show that $z(t) \to \infty$ as $t \to \infty$, and sketch the feasible region to explain geometrically which direction the certificate ray points in.
+\end{enumerate}
+\exrefs{\S\ref{sec:tableau-optimality}; Example~\ref{exa:simplex-unbounded}}
 \end{ex}
 
 \subsubsection*{Selected Solutions}
@@ -478,4 +588,52 @@ $y$ & $0$ & $1$ & $-\tfrac12$ & $\tfrac12$ & $1$\\
 \end{tabular}
 \end{center}
 Every objective-row entry is nonnegative, so the tableau is optimal: $(x, y) = (3, 1)$ with $z^* = 5$.
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:tableau-two-pivot-solve})
+Adding slacks $s_1, s_2$, the starting tableau is
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{c|ZZZZ|Z}
+\toprule
+Basis & $x$ & $y$ & $s_1$ & $s_2$ & RHS\\
+\midrule
+$z$   & $-3$ & $-2$ & $0$ & $0$ & $0$\\
+\midrule
+$s_1$ & $2$ & $1$ & $1$ & $0$ & $10$\\
+$s_2$ & $1$ & $3$ & $0$ & $1$ & $15$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{First pivot:} $x$ enters ($-3$ is most negative).  Ratios: $10/2 = 5$ and $15/1 = 15$, so $s_1$ leaves; the pivot element is the $2$ in the $s_1$ row.  Scaling the pivot row by $\tfrac12$ and clearing the $x$ column gives
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{c|ZZZZ|Z}
+\toprule
+Basis & $x$ & $y$ & $s_1$ & $s_2$ & RHS\\
+\midrule
+$z$   & $0$ & $-\tfrac12$ & $\tfrac32$ & $0$ & $15$\\
+\midrule
+$x$   & $1$ & $\tfrac12$ & $\tfrac12$ & $0$ & $5$\\
+$s_2$ & $0$ & $\tfrac52$ & $-\tfrac12$ & $1$ & $10$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Second pivot:} $y$ enters ($-\tfrac12$).  Ratios: $5/\tfrac12 = 10$ and $10/\tfrac52 = 4$, so $s_2$ leaves; the pivot element is the $\tfrac52$ in the $s_2$ row.  The resulting tableau is
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{c|ZZZZ|Z}
+\toprule
+Basis & $x$ & $y$ & $s_1$ & $s_2$ & RHS\\
+\midrule
+$z$   & $0$ & $0$ & $\tfrac75$ & $\tfrac15$ & $17$\\
+\midrule
+$x$ & $1$ & $0$ & $\tfrac35$ & $-\tfrac15$ & $3$\\
+$y$ & $0$ & $1$ & $-\tfrac15$ & $\tfrac25$ & $4$\\
+\bottomrule
+\end{tabular}
+\end{center}
+Every $z$-row entry is nonnegative, so the tableau is optimal: $(x, y) = (3, 4)$ with $z^* = 17$ and $s_1 = s_2 = 0$ (both constraints are tight at the optimum).
 \end{solution}

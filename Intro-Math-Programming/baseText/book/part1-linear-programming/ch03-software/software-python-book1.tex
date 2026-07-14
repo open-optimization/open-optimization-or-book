@@ -1055,6 +1055,7 @@ from pulp import *
 PuLP comes bundled with the CBC solver (COIN-OR Branch and Cut), a capable open-source solver. For larger problems, you can connect PuLP to commercial solvers like Gurobi or CPLEX.
 
 \subsection{The PuLP Modeling Pattern}
+\label{sec:pulp-pattern}
 
 Every PuLP model follows six steps:
 
@@ -1070,6 +1071,7 @@ Every PuLP model follows six steps:
 Let's work through a complete example.
 
 \subsection{Example: Product Mix Problem}
+\label{sec:pulp-product-mix}
 
 A company makes two products. Each unit of Product 1 yields \$3 profit; each unit of Product 2 yields \$2 profit. Production is limited by three resources:
 
@@ -1134,7 +1136,7 @@ prob += 2*x1 + 6*x2 <= 180, "Machine"
 Each constraint uses \texttt{<=}, \texttt{>=}, or \texttt{==}. The names help identify constraints in output.
 
 \begin{warn}
-\textbf{Common Mistake:} If you forget the comparison operator (\texttt{<=}, \texttt{>=}, \texttt{==}), you'll silently overwrite the objective function instead of adding a constraint!
+\textbf{Common Mistake:} If you forget the comparison operator (\texttt{<=}, \texttt{>=}, \texttt{==}), you'll overwrite the objective function instead of adding a constraint! Recent versions of PuLP print a \texttt{UserWarning} when this happens, but the model still solves, so the mistake is easy to miss.
 
 \textbf{Wrong:}
 \begin{lstlisting}[language=Python]
@@ -1215,6 +1217,7 @@ x = LpVariable.dicts("Ship", routes, lowBound=0, cat='Continuous')
 Now \texttt{x[('Chicago', 'NYC')]} is a variable representing shipments from Chicago to NYC.
 
 \subsection{The lpSum Function}
+\label{sec:pulp-lpsum}
 
 For sums over index sets, use \texttt{lpSum} (more efficient than Python's \texttt{sum}):
 
@@ -1232,6 +1235,7 @@ for m in markets:
 \end{lstlisting}
 
 \subsection{Complete Transportation Example}
+\label{sec:pulp-transportation}
 
 Here's a complete, runnable transportation problem:
 
@@ -1350,3 +1354,168 @@ The power of Python is that all these tools work seamlessly together, letting yo
 \item \href{https://geopandas.org/}{GeoPandas Documentation}
 \end{itemize}
 \end{resource}
+
+%==============================================================================
+\section{Exercises}
+%==============================================================================
+
+\exgroup{Warm-ups}
+
+\begin{ex}{A New Profit Margin}{}
+\stars{1}\label{ex:pulp-new-profit}
+In the product mix example, a price increase raises the profit of Product~1 from \$3 to \$5 per unit; Product~2 still earns \$2, and the resource data are unchanged. Modify the PuLP code from the example, re-solve, and report the new production plan and profit. Which constraints are binding at the new optimum? (The answer is not $(20, 20)$ anymore.)
+\exrefs{Section~\ref{sec:pulp-product-mix}}
+\end{ex}
+
+\begin{ex}{From Math to PuLP}{}
+\stars{1}\label{ex:pulp-translate}
+Translate the following linear program into PuLP code, following the six-step modeling pattern, and solve it. Report the optimal objective value and the values of all three variables.
+\begin{align*}
+\max \quad & 4x_1 + 6x_2 + 5x_3 \\
+\st        & 2x_1 + x_2 + x_3 \leq 9 \\
+& x_1 + 3x_2 + 2x_3 \leq 14 \\
+& x_1 + x_2 + 2x_3 \leq 10 \\
+& x_1, x_2, x_3 \geq 0
+\end{align*}
+\exrefs{Section~\ref{sec:pulp-pattern}, Section~\ref{sec:pulp-product-mix}}
+\end{ex}
+
+\begin{ex}{New Demand Data}{}
+\stars{1}\label{ex:pulp-transport-data}
+In the complete transportation example, market demand shifts: NYC now requires 100 units, LA requires 80, and Houston still requires 70. Supplies and costs are unchanged. Update the \texttt{demand} dictionary, re-solve, and report the new total cost and shipment plan. The original data gave a total cost of \$610; explain in one sentence why the new cost is higher.
+\exrefs{Section~\ref{sec:pulp-transportation}}
+\end{ex}
+
+\exgroup{Core problems}
+
+\begin{ex}{A Three-Plant Transportation Model}{}
+\stars{2}\label{ex:pulp-transport-model}
+Build a PuLP model from scratch for the following transportation problem. Plants A, B, C can supply 60, 70, and 80 units. Markets M1, M2, M3 require 50, 60, and 70 units. Unit shipping costs are:
+
+\begin{center}
+\begin{tabular}{l|ccc}
+ & M1 & M2 & M3 \\
+\hline
+A & 4 & 6 & 8 \\
+B & 5 & 4 & 3 \\
+C & 6 & 7 & 5 \\
+\end{tabular}
+\end{center}
+
+Use dictionaries with tuple keys for the cost data and \texttt{lpSum} for the objective and constraints. Report the minimum total cost, the shipment plan, and which plants have unused capacity.
+\exrefs{Section~\ref{sec:pulp-transportation}, Section~\ref{sec:pulp-lpsum}}
+\end{ex}
+
+\begin{ex}{Duals and Slacks from a Solved Model}{}
+\stars{2}\label{ex:pulp-duals}
+Solve the original product mix example, then run:
+\begin{lstlisting}[language=Python]
+for name, c in prob.constraints.items():
+    print(name, "dual =", c.pi, "slack =", c.slack)
+\end{lstlisting}
+PuLP stores the dual value (shadow price) of each constraint in \texttt{c.pi} and its slack in \texttt{c.slack}.
+\begin{enumerate}
+\item Report the dual value and slack of each of the three constraints.
+\item One constraint has zero dual value. What is its slack, and why does that combination make sense?
+\item If one more hour of labor became available, by how much would profit increase? Answer using only the printed output.
+\end{enumerate}
+\exrefs{Section~\ref{sec:pulp-product-mix}, Chapter~\ref{ch:sensitivity}, Chapter~\ref{ch:duality}}
+\end{ex}
+
+\begin{ex}{An Epsilon-Constraint Sweep}{}
+\stars{2}\label{ex:pulp-epsilon}
+The multi-objective chapter (Section~\ref{sec:moo-tools}) gives a PuLP listing that sweeps a bound on a secondary objective to trace a Pareto frontier. Use that listing as a template for the product mix example: the company wants high profit but also wants to limit machine hours $2X_1 + 6X_2$. For each cap $\varepsilon \in \{60, 90, 120, 150, 180\}$, maximize profit subject to the three resource constraints plus $2X_1 + 6X_2 \leq \varepsilon$. Print a table of $(\varepsilon, X_1, X_2, \text{profit})$ and describe the trade-off between machine usage and profit.
+\exrefs{Section~\ref{sec:moo-tools}, Section~\ref{sec:pulp-product-mix}}
+\end{ex}
+
+\exgroup{Concepts and connections}
+
+\begin{ex}{The Constraint That Wasn't There}{}
+\stars{2}\label{ex:pulp-missing-constraint}
+Suppose you build the product mix model but forget to add the labor constraint (the line \texttt{prob += 4*x1 + 4*x2 <= 160, "Labor"} is missing).
+\begin{enumerate}
+\item Does PuLP raise an error, print a warning, or solve without complaint? Predict, then try it.
+\item Compute the solution PuLP returns and explain why its profit is higher than \$100. Is that plan actually implementable by the company?
+\item Relatedly, what happens if you type \texttt{prob += 4*x1 + 4*x2} and forget the \texttt{<= 160}? Explain why this bug is even more dangerous than an omitted line.
+\end{enumerate}
+\exrefs{Section~\ref{sec:pulp-product-mix}}
+\end{ex}
+
+\begin{ex}{Minimize or Maximize?}{}
+\stars{2}\label{ex:pulp-sense}
+A student creates the product mix problem with \texttt{LpProblem("Product\_Mix", LpMinimize)} but keeps the objective \texttt{3*x1 + 2*x2}.
+\begin{enumerate}
+\item What solution and objective value does PuLP return? Why is the model not infeasible even though the answer is useless?
+\item Give two distinct one-line fixes: one that changes the sense and one that changes the objective. Verify in PuLP that both report the same optimal plan.
+\item Explain why checking \texttt{LpStatus[prob.status]} alone would not catch this bug, and suggest a sanity check that would.
+\end{enumerate}
+\exrefs{Section~\ref{sec:pulp-pattern}}
+\end{ex}
+
+\exgroup{Challenge problems}
+
+\begin{ex}{Profit as a Function of Labor}{}
+\stars{3}\label{ex:pulp-rhs-sweep}
+Write a loop that solves the product mix example for labor availability $b \in \{100, 110, 120, \ldots, 190\}$ (the other data unchanged), records the optimal profit for each $b$, and plots or tabulates profit versus $b$.
+\begin{enumerate}
+\item Report the ten optimal profits. The resulting curve is piecewise linear and concave; identify the values of $b$ where its slope changes.
+\item Print the labor constraint's dual value \texttt{c.pi} at each $b$ and explain the slopes of the curve using these shadow prices.
+\item Why does the curve become flat for large $b$? Answer in terms of which constraints are binding, and connect your findings to the sensitivity analysis chapter.
+\end{enumerate}
+\exrefs{Section~\ref{sec:pulp-product-mix}, Chapter~\ref{ch:sensitivity}}
+\end{ex}
+
+\subsubsection*{Selected Solutions}
+
+\begin{solution}(Exercise~\ref{ex:pulp-translate})
+Following the modeling pattern:
+\begin{lstlisting}[language=Python]
+from pulp import *
+
+prob = LpProblem("Three_Var", LpMaximize)
+x1 = LpVariable("X1", lowBound=0)
+x2 = LpVariable("X2", lowBound=0)
+x3 = LpVariable("X3", lowBound=0)
+
+prob += 4*x1 + 6*x2 + 5*x3, "Objective"
+prob += 2*x1 + x2 + x3 <= 9, "C1"
+prob += x1 + 3*x2 + 2*x3 <= 14, "C2"
+prob += x1 + x2 + 2*x3 <= 10, "C3"
+
+prob.solve()
+print(LpStatus[prob.status], value(prob.objective))
+for v in prob.variables():
+    print(v.name, "=", v.varValue)
+\end{lstlisting}
+Output: status \texttt{Optimal}, objective $35.0$, with $X_1 = 2.0$, $X_2 = 2.0$, $X_3 = 3.0$. All three constraints are binding ($4+2+3 = 9$, $2+6+6 = 14$, and $2+2+6 = 10$).
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:pulp-duals})
+(1) Running the loop on the solved model prints
+\begin{verbatim}
+Material dual = 0.2 slack = -0.0
+Labor dual = 0.25 slack = -0.0
+Machine dual = -0.0 slack = 20.0
+\end{verbatim}
+(2) The machine constraint has dual value $0$ and slack $20$: at the optimum $(20,20)$, machine usage is $2(20) + 6(20) = 160 < 180$. A constraint with leftover capacity cannot be worth anything at the margin, so its shadow price is zero. This is complementary slackness: for each constraint, the dual value or the slack (or both) must be zero.
+(3) The labor dual is $0.25$, so one extra hour of labor raises the optimal profit by \$0.25, from \$100 to \$100.25 (valid while the current basis stays optimal).
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:pulp-rhs-sweep})
+Wrapping the model in a function of $b$ and looping gives:
+\begin{verbatim}
+b = 100: profit = 75.0   labor dual = 0.75
+b = 110: profit = 82.5   labor dual = 0.75
+b = 120: profit = 90.0   labor dual = 0.75
+b = 130: profit = 92.5   labor dual = 0.25
+b = 140: profit = 95.0   labor dual = 0.25
+b = 150: profit = 97.5   labor dual = 0.25
+b = 160: profit = 100.0  labor dual = 0.25
+b = 170: profit = 102.0  labor dual = 0.0
+b = 180: profit = 102.0  labor dual = 0.0
+b = 190: profit = 102.0  labor dual = 0.0
+\end{verbatim}
+(1) The slope changes at $b = 120$ and $b = 168$ (between the printed points 160 and 170).
+(2) The slope of the profit curve at each $b$ equals the shadow price of the labor constraint. For $b \leq 120$ only labor limits production (the plan is $(b/4, 0)$) and each labor hour is worth $0.75$; for $120 \leq b \leq 168$ material and labor are both binding and an extra hour is worth only $0.25$; the decreasing slopes are exactly why the curve is concave.
+(3) At $b = 168$ the plan reaches $(18, 24)$, where material and machine are binding and labor is no longer scarce. Beyond that, extra labor has shadow price $0$ and profit stays at \$102: buying more of a non-binding resource is worthless. This is the RHS sensitivity behavior of Chapter~\ref{ch:sensitivity}, computed by brute force.
+\end{solution}
