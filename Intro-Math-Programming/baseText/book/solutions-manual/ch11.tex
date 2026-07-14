@@ -1,0 +1,348 @@
+% ============================================================================
+% CHAPTER 11: DUALITY
+% Solutions synced to book/part1-linear-programming/ch08-duality/duality.tex
+% (Exercises 11.1-11.9) and ch08-duality/complimentary-slackness.tex
+% (Exercises 11.10-11.17); the two files share one chapter counter.
+% All optima, duals, and CS checks verified with scipy.optimize.linprog (HiGHS).
+% ============================================================================
+\section{Chapter 11: Duality}
+
+This chapter has 17 exercises drawn from two book files that share one exercise counter: the duality sections contribute 11.1 to 11.9 (warm-ups on writing duals and weak duality, core problems on mixed constraint forms and shadow prices, concept problems on certificates and infeasibility, and the dual-of-the-dual proof), and the complementary slackness section contributes 11.10 to 11.17 (condition checking, recovering one side of a primal-dual pair from the other, disproving claimed optima, and two larger modeling problems). Duals are written out in full and every complementary slackness condition is checked term by term. Exercises 11.2, 11.4, 11.9, 11.11, 11.12, and 11.15 have Selected Solutions in the book; those are reproduced here, expanded where useful. All numeric claims were verified with \texttt{scipy}.
+
+\begin{qaflag}
+Book fixes made during this QA pass (all verified numerically, none affecting exercise data or Selected Solutions):
+\begin{itemize}
+\item \texttt{duality.tex}, ``Case 2'' box: the primal read $\min \b^\top \x$ s.t.\ $A\x \le \c$ with dual $\max \c^\top \y$ s.t.\ $A^\top\y \le \b$, $\y \ge 0$, which violates weak duality (test instance: $\min x$ s.t.\ $x \le 3$, $x \ge 0$ has value $0$ but the stated dual has value $3$). Fixed to the intended mirror of Case 1: minimization with $\geq$ constraints.
+\item \texttt{duality.tex}, ``Complicated Dual'' example (both derivations): the sign restrictions on $y_2$ and $y_3$ were swapped. For a maximization primal, the $\geq$ constraint must take $y_2 \le 0$ and the $\leq$ constraint $y_3 \ge 0$. Decisive check: that primal is infeasible, yet the dual as previously printed has finite optimal value $11/3$, which strong duality forbids; with the corrected signs the dual is unbounded, as it must be. A remark about the (harmless) infeasibility of that example primal was also added. The aggregation ``second look'' additionally treated the free variable $x_2$ as nonnegative, deriving $y_1 - y_2 - y_3 \ge 1$ where the first derivation has $= 1$; made consistent ($x_2$ free, equality).
+\item \texttt{complimentary-slackness.tex}, Exercise 11.13: ``a dual solution $\y^* = (1,1)$'' now reads ``a candidate dual solution,'' since $(1,1)$ is intentionally not dual feasible (that discovery is the point of parts (b) and (c)).
+\end{itemize}
+\end{qaflag}
+
+% ----------------------------------------------------------------------------
+\exsol{11.1}{The Dual of a Small Bakery}{1}
+
+Primal: $\max 5x_1 + 4x_2$ subject to $2x_1 + 3x_2 \le 12$ (flour), $x_1 + x_2 \le 5$ (sugar), $x_1, x_2 \ge 0$.
+
+\begin{enumerate}
+\item One dual variable per resource: $y_1$ for flour, $y_2$ for sugar. The dual is
+\[
+\begin{aligned}
+\min \quad & 12y_1 + 5y_2 \\
+\st & 2y_1 + y_2 \ge 5 \quad \text{(loaves)} \\
+& 3y_1 + y_2 \ge 4 \quad \text{(rolls)} \\
+& y_1, y_2 \ge 0 .
+\end{aligned}
+\]
+\item Read $y_1$ as a price per unit of flour and $y_2$ as a price per unit of sugar. The first dual constraint says the rival's offer for the ingredients in one loaf (2 flour, 1 sugar) must be at least the $\$5$ the bakery could earn by baking the loaf itself; the second says the ingredients in one roll (3 flour, 1 sugar) must fetch at least $\$4$. The dual objective is the rival shopping for the cheapest total payment $12y_1 + 5y_2$ that still convinces the baker to sell.
+\item The primal right-hand sides $(12, 5)$ (resource amounts) become the dual objective coefficients, and the primal objective coefficients $(5, 4)$ (unit profits) become the dual right-hand sides. The constraint matrix is transposed.
+\end{enumerate}
+
+\emph{Verification.} Primal optimum $(5, 0)$ with $z^* = 25$ (flour has slack $2$); dual optimum $\y^* = (0, 5)$ with value $25$, consistent with complementary slackness ($y_1 = 0$ on the slack flour constraint).
+
+% ----------------------------------------------------------------------------
+\exsol{11.2}{Formulate the Dual}{1}
+
+This exercise has a Selected Solution in the book; it is reproduced here. There are two constraints, so the dual has two variables $y_1, y_2 \geq 0$, one per constraint. Each of the three primal variables produces a dual constraint whose right-hand side is that variable's objective coefficient:
+\[
+\begin{aligned}
+\min \quad & 10y_1 + 12y_2 \\
+\st & y_1 + 3y_2 \ge 4 \\
+& 2y_1 + y_2 \ge 5 \\
+& y_1 + 2y_2 \ge 3 \\
+& y_1, y_2 \ge 0 .
+\end{aligned}
+\]
+
+% ----------------------------------------------------------------------------
+\exsol{11.3}{Verifying Weak Duality}{1}
+
+Primal: $\max 3x_1 + 2x_2$ subject to $x_1 + x_2 \le 4$, $2x_1 + x_2 \le 5$, $x_1, x_2 \ge 0$; dual: $\min 4y_1 + 5y_2$ subject to $y_1 + 2y_2 \ge 3$, $y_1 + y_2 \ge 2$, $y_1, y_2 \ge 0$.
+
+\begin{enumerate}
+\item $\x = (1, 2)$: $1 + 2 = 3 \le 4$ and $2(1) + 2 = 4 \le 5$, with $x_1, x_2 \ge 0$, so $\x$ is primal feasible. Its value is $\c^\top\x = 3(1) + 2(2) = 7$.
+\item $\y = (2, 1)$: $2 + 2(1) = 4 \ge 3$ and $2 + 1 = 3 \ge 2$, with $y_1, y_2 \ge 0$, so $\y$ is dual feasible. Its value is $\b^\top\y = 4(2) + 5(1) = 13$.
+\item Weak duality gives $\c^\top\x \le z^* \le \b^\top\y$ for this pair, i.e., the sandwich
+\[
+7 \le z^* \le 13 .
+\]
+The true optimum $\x^* = (1, 3)$ with $z^* = 9$ indeed satisfies $7 \le 9 \le 13$. (Verified: \texttt{linprog} returns $z^* = 9$ at $(1,3)$ with duals $(1,1)$.)
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\exsol{11.4}{Weak Duality Bound}{2}
+
+This exercise has a Selected Solution in the book; it is reproduced here.
+
+The dual is $\min\, 4y_1 + 6y_2$ subject to $y_1 + 2y_2 \geq 3$, $y_1 + y_2 \geq 2$, $y_1, y_2 \geq 0$.
+For $\y = (1,1)$: $1 + 2 = 3 \geq 3$ and $1 + 1 = 2 \geq 2$, so $\y$ is dual feasible with objective $4(1) + 6(1) = 10$.
+For $\x = (2,2)$: $2 + 2 = 4 \leq 4$ and $4 + 2 = 6 \leq 6$, so $\x$ is primal feasible with objective $3(2) + 2(2) = 10$.
+By weak duality, every primal value is at most every dual value, so the optimal value $z^*$ satisfies $10 \leq z^* \leq 10$. Since the two bounds coincide, both solutions are in fact optimal and $z^* = 10$. (Verified: \texttt{linprog} returns $z^* = 10$ at $(2,2)$ with duals $(1,1)$.)
+
+% ----------------------------------------------------------------------------
+\exsol{11.5}{Dual with Mixed Constraints}{2}
+
+Primal: $\max 2x_1 + 3x_2$ subject to $x_1 + x_2 = 5$, $x_1 - x_2 \le 2$, $x_1 \ge 0$, $x_2$ free.
+
+Assign $y_1$ to the equality and $y_2$ to the inequality. For a maximization primal: an equality constraint imposes no sign restriction ($y_1$ free), and a $\leq$ constraint takes a nonnegative multiplier ($y_2 \ge 0$). The dual constraints come from the primal variables: $x_1 \ge 0$ gives an inequality ($\ge$), $x_2$ free forces an equality. The dual is
+\[
+\begin{aligned}
+\min \quad & 5y_1 + 2y_2 \\
+\st & y_1 + y_2 \ge 2 \quad \text{(from } x_1 \ge 0\text{)} \\
+& y_1 - y_2 = 3 \quad \text{(from } x_2 \text{ free)} \\
+& y_1 \text{ free}, \quad y_2 \ge 0 .
+\end{aligned}
+\]
+Summary of the mappings: equality constraint $\to$ free dual variable; $\leq$ constraint $\to$ $y_2 \ge 0$; nonnegative primal variable $\to$ $\geq$ dual constraint; free primal variable $\to$ dual equality.
+
+\emph{Verification.} Primal optimum: from $x_2 = 5 - x_1$ the objective is $15 - x_1$, maximized at $x_1 = 0$, so $\x^* = (0, 5)$, $z^* = 15$. Dual: substituting $y_1 = 3 + y_2$ gives objective $15 + 7y_2$, minimized at $y_2 = 0$, so $\y^* = (3, 0)$ with value $15 = z^*$; \texttt{linprog} confirms both.
+
+% ----------------------------------------------------------------------------
+\exsol{11.6}{Shadow Prices and Dual Variables}{2}
+
+Primal: $\max 5x_1 + 4x_2$ subject to $2x_1 + x_2 \le 20$ (flour), $x_1 + 2x_2 \le 18$ (sugar), $x_1 + x_2 \le 13$ (oven); $\x^* = (7\tfrac13, 5\tfrac13)$, $z^* = 58$; $\y^* = (2, 1, 0)$.
+
+\begin{enumerate}
+\item $\b^\top\y^* = 20(2) + 18(1) + 13(0) = 40 + 18 + 0 = 58 = z^*$, so strong duality holds.
+\item Substituting $\x^* = (\tfrac{22}{3}, \tfrac{16}{3})$:
+\[
+\begin{aligned}
+2\!\left(\tfrac{22}{3}\right) + \tfrac{16}{3} &= \tfrac{60}{3} = 20 && (\text{flour binding}), \\
+\tfrac{22}{3} + 2\!\left(\tfrac{16}{3}\right) &= \tfrac{54}{3} = 18 && (\text{sugar binding}), \\
+\tfrac{22}{3} + \tfrac{16}{3} &= \tfrac{38}{3} \approx 12.67 < 13 && (\text{oven non-binding}).
+\end{aligned}
+\]
+\item Complementary slackness, condition by condition:
+\[
+\begin{aligned}
+y_1^*\,(2x_1^* + x_2^* - 20) &= 2 \cdot 0 = 0 \checkmark
+& y_2^*\,(x_1^* + 2x_2^* - 18) &= 1 \cdot 0 = 0 \checkmark \\
+y_3^*\,(x_1^* + x_2^* - 13) &= 0 \cdot \left(-\tfrac13\right) = 0 \checkmark
+& x_1^*\,(5 - 2y_1^* - y_2^* - y_3^*) &= \tfrac{22}{3}\,(5 - 5) = 0 \checkmark \\
+x_2^*\,(4 - y_1^* - 2y_2^* - y_3^*) &= \tfrac{16}{3}\,(4 - 4) = 0 \checkmark &&
+\end{aligned}
+\]
+Both dual constraints are tight (as they must be, since $x_1^*, x_2^* > 0$), and the only slack primal constraint (oven) carries dual price $0$. All conditions hold, so the pair is optimal by the Primal Dual Optimality theorem of the book (feasibility on both sides plus complementary slackness).
+\item The shadow price of flour is $y_1^* = 2$: one more kg of flour raises profit by about $\$2$. Sugar is worth $\$1$ per kg at the margin, and oven capacity is worth $\$0$ (it is not fully used, so more of it buys nothing). One additional kg of flour: profit increases by approximately $\$2$, from $58$ to $60$. (Verified: $z^*(b_1 = 21) = 60$ exactly.)
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\exsol{11.7}{Certificates in Your Own Words}{2}
+
+\begin{enumerate}
+\item A dual feasible $\y$ certifies an \emph{upper bound} on every feasible primal value: it is a recipe of multipliers that combines the primal constraints into the single valid inequality $\c^\top\x \le \b^\top\y$. To convince a skeptical friend that no plan earns more than a given amount $M$, you do not need to enumerate plans; you hand over the numbers $y_1, \dots, y_m \ge 0$, let the friend check the $n$ dominance inequalities $A^\top\y \ge \c$ (one per product), and let them compute $\b^\top\y \le M$. Multiplying out constraints and adding is arithmetic the friend can verify in minutes, with no optimization and no trust required.
+\item Multiplying an inequality by a negative number flips its direction. The primal constraints face $\leq$, and the certificate needs the combined constraint to still face $\leq$ so that it caps the objective from above; that is only guaranteed when every multiplier is nonnegative. (Equality constraints can be combined with multipliers of either sign, which is exactly why their dual variables come out free.)
+\item The set of valid certificates is cut out by linear conditions on $\y$: the sign conditions $\y \ge \mathbf{0}$ and the dominance conditions $A^\top\y \ge \c$. Minimizing the linear bound $\b^\top\y$ over this polyhedral set is a linear program, the dual. Weak duality says every certificate is an over-estimate or exact; strong duality says the hunt is perfectly successful: the best certificate is not merely close but \emph{exactly} equal to the optimal primal value, so an optimal plan and an optimal certificate together prove each other optimal.
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\exsol{11.8}{Strong Duality and Infeasibility}{2}
+
+Primal: $\max x_1 + x_2$ subject to $x_1 - x_2 \le 1$, $-x_1 + x_2 \le -3$, $x_1, x_2 \ge 0$.
+
+\begin{enumerate}
+\item Two constraints give two dual variables $y_1, y_2 \ge 0$; the dual is
+\[
+\begin{aligned}
+\min \quad & y_1 - 3y_2 \\
+\st & y_1 - y_2 \ge 1 \quad \text{(from } x_1\text{)} \\
+& -y_1 + y_2 \ge 1 \quad \text{(from } x_2\text{)} \\
+& y_1, y_2 \ge 0 .
+\end{aligned}
+\]
+\item Add the two primal constraints: $(x_1 - x_2) + (-x_1 + x_2) = 0$, while the right-hand sides add to $1 + (-3) = -2$. So every feasible point would need $0 \le -2$, impossible. The primal is infeasible (no $(x_1, x_2) \ge 0$, or indeed any $(x_1, x_2)$ at all, satisfies both).
+\item The dual is \emph{infeasible} as well: adding the two dual constraints gives $(y_1 - y_2) + (-y_1 + y_2) = 0 \ge 2$, impossible. How this squares with the strong duality theorem: since the primal is infeasible, the theorem rules out the dual having an optimal solution (case 3 needs both feasible) and, read contrapositively, an infeasible primal leaves the dual only two options, unbounded or infeasible. Here a direct check shows it is infeasible. This pair is the standard example that \emph{both} problems of a primal-dual pair can be infeasible simultaneously; that fourth possibility is consistent with the theorem even though it is not one of the three listed cases. (Verified: HiGHS reports both problems infeasible.)
+\end{enumerate}
+
+\begin{qaflag}
+Judgment call, no edit made: The Strong Duality theorem in \texttt{duality.tex} lists three cases and never mentions that primal and dual can both be infeasible, yet this exercise's part (c) hinges on exactly that fourth possibility, and part (c)'s instruction ``explain using the strong duality theorem'' may push students toward the wrong answer ``unbounded.'' Suggest adding a one-sentence remark after the theorem (e.g., ``It is also possible for both (P) and (D) to be infeasible; see the exercises.'').
+\end{qaflag}
+
+% ----------------------------------------------------------------------------
+\exsol{11.9}{The Dual of the Dual is the Primal}{3}
+
+This exercise has a Selected Solution in the book; it is reproduced here.
+
+Rewrite (D) in symmetric maximization form. Minimizing $\b^\top \y$ is the same as maximizing $(-\b)^\top \y$, and the constraints $A^\top \y \geq \c$ are equivalent to $(-A^\top)\y \leq -\c$. So (D) is
+\[
+\max \; (-\b)^\top \y \quad \st \quad (-A^\top)\y \leq -\c, \quad \y \geq 0,
+\]
+which is the symmetric form with objective vector $\tilde{\c} = -\b$, matrix $\tilde{A} = -A^\top$, and right-hand side $\tilde{\b} = -\c$. Its dual, by definition, is
+\[
+\min \; \tilde{\b}^\top \mathbf{z} \quad \st \quad \tilde{A}^\top \mathbf{z} \geq \tilde{\c}, \quad \mathbf{z} \geq 0,
+\]
+that is, $\min\, (-\c)^\top \mathbf{z}$ subject to $(-A)\mathbf{z} \geq -\b$, $\mathbf{z} \geq 0$. Multiplying the objective and the constraints by $-1$ turns this into
+\[
+\max \; \c^\top \mathbf{z} \quad \st \quad A\mathbf{z} \leq \b, \quad \mathbf{z} \geq 0,
+\]
+which is exactly (P) with $\mathbf{z}$ in place of $\x$. Hence the dual of the dual is the primal.
+
+% ----------------------------------------------------------------------------
+\exsol{11.10}{Checking the Conditions}{1}
+
+Pair: $\max 4x_1 + 3x_2$ s.t.\ $x_1 + x_2 \le 6$, $2x_1 + x_2 \le 10$, $\x \ge \mathbf{0}$; dual $\min 6y_1 + 10y_2$ s.t.\ $y_1 + 2y_2 \ge 4$, $y_1 + y_2 \ge 3$, $\y \ge \mathbf{0}$. Candidates $\x^* = (4, 2)$, $\y^* = (2, 1)$.
+
+\begin{enumerate}
+\item Primal feasibility: $4 + 2 = 6 \le 6$ and $2(4) + 2 = 10 \le 10$, with $\x^* \ge \mathbf{0}$. Dual feasibility: $2 + 2(1) = 4 \ge 4$ and $2 + 1 = 3 \ge 3$, with $\y^* \ge \mathbf{0}$. Both feasible (in fact all four constraints are tight).
+\item The four conditions:
+\[
+\begin{aligned}
+y_1^*\,(x_1^* + x_2^* - 6) &= 2\,(6 - 6) = 0 \checkmark
+& y_2^*\,(2x_1^* + x_2^* - 10) &= 1\,(10 - 10) = 0 \checkmark \\
+x_1^*\,(4 - y_1^* - 2y_2^*) &= 4\,(4 - 4) = 0 \checkmark
+& x_2^*\,(3 - y_1^* - y_2^*) &= 2\,(3 - 3) = 0 \checkmark
+\end{aligned}
+\]
+\item Feasibility on both sides plus complementary slackness is exactly the optimality certificate of the book's Primal Dual Optimality theorem, so both are optimal. Objective check: $4(4) + 3(2) = 22$ and $6(2) + 10(1) = 22$; equal values reconfirm optimality by strong duality. (Verified with \texttt{linprog}: $z^* = 22$, duals $(2,1)$.)
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\exsol{11.11}{Bakery Production and Duality Interpretation}{2}
+
+This exercise has a Selected Solution in the book; it is reproduced here.
+
+\begin{enumerate}
+\item \textbf{Feasibility:} Substituting $(x_1, x_2, x_3) = (2, 0, 8)$: flour $8(2) + 6(0) + 8 = 24 \leq 48$, sugar $4(2) + 2(0) + 1.5(8) = 20 \leq 20$, baking time $2(2) + 1.5(0) + 0.5(8) = 8 \leq 8$, so the primal solution is feasible. Substituting $(y_1, y_2, y_3) = (0, 10, 10)$: the dual constraints evaluate to $60 \geq 60$, $35 \geq 30$, and $20 \geq 20$, so the dual solution is feasible.
+\item \textbf{Complementary slackness:} In the primal, sugar and baking time are tight while flour has slack ($24 < 48$); accordingly $y_1 = 0$ while $y_2, y_3 > 0$. In the dual, constraints 1 and 3 are tight while constraint 2 has slack ($35 > 30$); accordingly $x_2 = 0$ while $x_1, x_3 > 0$. Every condition $y_i(\mathbf{a}_i^\top \x - b_i) = 0$ and $x_j(c_j - (A^\top \y)_j) = 0$ is satisfied.
+\item \textbf{Objective values:} Primal: $60(2) + 30(0) + 20(8) = 280$. Dual: $48(0) + 20(10) + 8(10) = 280$. They match, confirming optimality by strong duality.
+\item \textbf{Shadow prices:} Flour has shadow price $y_1 = 0$: with 24 kg left over, more flour is worthless. Sugar has shadow price $y_2 = 10$: one more kg of sugar would increase profit by \$10. Baking time has shadow price $y_3 = 10$: one more oven hour is worth \$10.
+\item \textbf{Sensitivity:} (a) One more kg of flour: no change (\$0). (b) One more kg of sugar: profit increases by \$10. (c) One more hour of baking time: profit increases by \$10. These estimates are valid for small changes in the right-hand sides (as long as the optimal basis does not change).
+\end{enumerate}
+
+\begin{qaflag}
+Judgment call, no edit made: this exercise is nearly a verbatim restatement of the worked ``Bakery 2.0'' example and of Examples ``Verifying Optimality with Complementary Slackness'' and ``Recovering Dual Variables via Complementary Slackness'' in the same chapter; every requested computation appears, with the same numbers, in the chapter body, and the book also prints a Selected Solution. As a graded exercise it is fully copyable. Consider changing the data (e.g., new profits or resource levels) or dropping the printed dual optimum so students must recover it themselves.
+\end{qaflag}
+
+% ----------------------------------------------------------------------------
+\exsol{11.12}{Box Constraints and a Dual Certificate}{2}
+
+This exercise has a Selected Solution in the book; it is reproduced here.
+
+(a) The dual is
+\[
+\begin{aligned}
+\min \quad & y_1 + y_2 + y_3 + y_4 + 8y_5 \\
+\st & y_1 + y_5 \geq 1, \quad y_2 + 2y_5 \geq 4, \quad y_3 + 3y_5 \geq 9, \quad y_4 + 4y_5 \geq 16, \\
+& y_1, \dots, y_5 \geq 0.
+\end{aligned}
+\]
+
+(b) By weak duality, every dual feasible $\y$ gives an upper bound $\b^\top \y$ on the primal objective. If we exhibit a primal feasible $\x$ and a dual feasible $\y$ whose objective values are equal, both must be optimal.
+
+(c) At $\x^* = (0, \tfrac{1}{2}, 1, 1)$, constraints 1 and 2 have slack ($0 < 1$ and $\tfrac12 < 1$), so $y_1 = y_2 = 0$. Since $x_2, x_3, x_4 > 0$, dual constraints 2, 3, 4 must be tight: $2y_5 = 4$ gives $y_5 = 2$; then $y_3 = 9 - 3(2) = 3$ and $y_4 = 16 - 4(2) = 8$. The remaining dual constraint holds with slack: $y_1 + y_5 = 2 \geq 1$, consistent with $x_1 = 0$. So $\y^* = (0, 0, 3, 8, 2)$ is dual feasible with objective $3 + 8 + 8(2) = 27$, matching the primal value $4(\tfrac12) + 9 + 16 = 27$. By part (b), both solutions are optimal.
+
+\emph{Verification.} \texttt{linprog} returns $z^* = 27$ at $(0, 0.5, 1, 1)$ with duals $(0, 0, 3, 8, 2)$, exactly the certificate above. Feasibility of $\x^*$: constraint 5 gives $0 + 2(\tfrac12) + 3(1) + 4(1) = 8 \le 8$, tight, consistent with $y_5 = 2 > 0$.
+
+% ----------------------------------------------------------------------------
+\exsol{11.13}{Deducing the Primal from a Dual Guess}{2}
+
+Pair: $\max 5x_1 + 4x_2$ s.t.\ $2x_1 + x_2 \le 8$, $x_1 + 3x_2 \le 9$, $\x \ge \mathbf{0}$; dual $\min 8y_1 + 9y_2$ s.t.\ $2y_1 + y_2 \ge 5$, $y_1 + 3y_2 \ge 4$, $\y \ge \mathbf{0}$. Candidate: $\y^* = (1, 1)$.
+
+\begin{enumerate}
+\item[(a)] Since $y_1^* = 1 > 0$ and $y_2^* = 1 > 0$, complementary slackness would force both primal constraints to be tight:
+\[
+2x_1 + x_2 = 8, \qquad x_1 + 3x_2 = 9
+\qquad\Longrightarrow\qquad
+x_1^* = 3, \quad x_2^* = 2 .
+\]
+\item[(b)] Yes: $(3, 2) \ge \mathbf{0}$ satisfies $2(3) + 2 = 8 \le 8$ and $3 + 3(2) = 9 \le 9$, so it is primal feasible, with value $5(3) + 4(2) = 23$.
+\item[(c)] No, this is not a valid optimal pair, and the cleanest witness is weak duality: the ``dual value'' of $\y^* = (1,1)$ is $8(1) + 9(1) = 17 < 23$, which no genuine dual feasible point can achieve. Indeed $\y^*$ is \emph{not dual feasible}: the first dual constraint fails, $2(1) + 1 = 3 < 5$. Complementary slackness also fails as a diagnostic: $x_1^* = 3 > 0$ requires the first dual constraint to be tight, but $3 \neq 5$. The lesson: complementary slackness is only a certificate when \emph{both} points are feasible (the book's Primal Dual Optimality theorem requires primal feasibility, dual feasibility, and the CS conditions together).
+
+Interestingly, the primal point $(3, 2)$ recovered from the bogus guess happens to be the true primal optimum: re-solving the tight-constraint system for the \emph{correct} dual, with $x_1^*, x_2^* > 0$ forcing both dual constraints tight, gives $2y_1 + y_2 = 5$, $y_1 + 3y_2 = 4$, so $\y^{\text{opt}} = \left(\tfrac{11}{5}, \tfrac{3}{5}\right)$ with dual value $8\left(\tfrac{11}{5}\right) + 9\left(\tfrac{3}{5}\right) = \tfrac{115}{5} = 23$, matching the primal value. (Verified: \texttt{linprog} gives $z^* = 23$ at $(3,2)$ with duals $(2.2, 0.6)$.)
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\exsol{11.14}{A Positive Price on a Slack Constraint}{2}
+
+\begin{enumerate}
+\item By the book's Primal Dual Optimality theorem, if $\x^*$ and $\y^*$ are both optimal, then, both being feasible, they must satisfy complementary slackness: $y_2^*\,(\mathbf{a}_2^\top\x^* - b_2) = 0$. Here $\mathbf{a}_2^\top\x^* < b_2$ (slack) and $y_2^* = 3 > 0$, so the product is strictly negative, not zero. The claim is therefore false: $\x^*$ and $\y^*$ cannot both be optimal.
+\item Be careful about what is ruled out: only the \emph{joint} optimality of this particular pair. The argument does not identify the culprit. It is possible that $\x^*$ is optimal and $\y^*$ is a merely feasible, suboptimal dual point; possible that $\y^*$ is optimal and $\x^*$ is suboptimal; and possible that neither is optimal. (If both were optimal, any optimal primal paired with any optimal dual satisfies CS, so the observed violation convicts at least one of them, without saying which.) A quick way to find out more: compare $\c^\top\x^*$ with $\b^\top\y^*$; by strong duality the gap between them bounds how far each is from optimal.
+\item Economically, $y_2^*$ is the price the rival (or the market) puts on one unit of resource 2. Paying a strictly positive price for additional units of a resource of which you already have unused stock is absurd: an extra unit would join the leftovers and generate no additional profit, so its marginal value is $0$. Equivalently, at economic equilibrium a good in excess supply has price zero; a positive price on a slack resource signals that the reported prices and the reported plan cannot describe the same equilibrium.
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\exsol{11.15}{Disproving a Claimed Optimum}{2}
+
+This exercise has a Selected Solution in the book; it is reproduced here.
+
+(a) The conditions are $y_1(x_1 + x_2 - 4) = 0$, $y_2(2x_1 + x_2 - 5) = 0$, $x_1(y_1 + 2y_2 - 3) = 0$, and $x_2(y_1 + y_2 - 2) = 0$.
+
+(b) At $(x_1, x_2) = (2, 0)$: the first primal constraint gives $2 < 4$ (slack), forcing $y_1 = 0$; the second gives $4 < 5$ (slack), forcing $y_2 = 0$. But $x_1 = 2 > 0$ requires the first dual constraint to be tight: $y_1 + 2y_2 = 3$.
+
+(c) With $y_1 = y_2 = 0$ we get $0 = 3$, a contradiction: no dual solution is compatible, so $(2,0)$ is not optimal. (It is feasible, but both constraints have slack, so we can do better.) The actual optimum is $(x_1, x_2) = (1, 3)$ with value $9$: both primal constraints are tight, and solving $y_1 + 2y_2 = 3$, $y_1 + y_2 = 2$ gives the dual optimum $\y^* = (1,1)$ with matching value $4(1) + 5(1) = 9$. (Verified with \texttt{linprog}.)
+
+% ----------------------------------------------------------------------------
+\exsol{11.16}{Meal Kit Optimization and Duality}{3}
+
+Primal: $\max 3x_1 + 2x_2 + 4x_3 + x_4 + 5x_5 + 2x_6$ subject to kitchen $x_1 + 2x_2 + x_3 + x_5 \le 10$, packaging $2x_1 + x_4 + 3x_5 + x_6 \le 12$, $\x \ge \mathbf{0}$.
+
+\begin{enumerate}
+\item Two resources give two dual variables: $y_1$ = the marginal value of one kitchen hour, $y_2$ = the marginal value of one packaging hour. Each kit gives one dual constraint (its resource bundle, priced at $y$, must cover its profit):
+\[
+\begin{aligned}
+\min \quad & 10y_1 + 12y_2 \\
+\st & y_1 + 2y_2 \ge 3 \quad (x_1 \text{ Classic Chicken}) \\
+& 2y_1 \phantom{{}+2y_2} \ge 2 \quad (x_2 \text{ Vegan Delight}) \\
+& y_1 \phantom{{}+2y_2} \ge 4 \quad (x_3 \text{ Protein Boost}) \\
+& \phantom{y_1 + {}} y_2 \ge 1 \quad (x_4 \text{ Quick \& Light}) \\
+& y_1 + 3y_2 \ge 5 \quad (x_5 \text{ Gourmet Chef Special}) \\
+& \phantom{y_1 + {}} y_2 \ge 2 \quad (x_6 \text{ Breakfast Box}) \\
+& y_1, y_2 \ge 0 .
+\end{aligned}
+\]
+\item In the $(y_1, y_2)$ plane the six constraints reduce to two: $y_1 \ge 4$ (Protein Boost; it dominates $2y_1 \ge 2$) and $y_2 \ge 2$ (Breakfast Box; it dominates $y_2 \ge 1$). The two coupling constraints are then automatic: $y_1 + 2y_2 \ge 4 + 4 = 8 \ge 3$ and $y_1 + 3y_2 \ge 4 + 6 = 10 \ge 5$. The feasible region is the ``northeast quadrant'' $\{y_1 \ge 4,\ y_2 \ge 2\}$, and the level lines of $10y_1 + 12y_2$ decrease toward the southwest, so the optimum is the corner
+\[
+\y^* = (4, 2), \qquad \text{dual value } 10(4) + 12(2) = 64 .
+\]
+\item A kitchen hour is worth $\$4$ and a packaging hour $\$2$ at the margin: with one more kitchen hour the startup could earn about $\$4$ more (by making one more Protein Boost), and one more packaging hour is worth $\$2$ (one more Breakfast Box). The whole resource endowment, priced this way, is worth $\$64$, and no kit beats its own resource bill at these prices.
+\item Since $y_1^* = 4 > 0$ and $y_2^* = 2 > 0$, complementary slackness forces \emph{both} primal constraints to be tight. On the variable side, the dual constraints with slack at $\y^*$ force those variables to zero:
+\[
+\begin{aligned}
+x_1&: & 4 + 2(2) &= 8 > 3 &&\Rightarrow x_1 = 0, &
+x_2&: & 2(4) &= 8 > 2 &&\Rightarrow x_2 = 0, \\
+x_4&: & 2 &> 1 &&\Rightarrow x_4 = 0, &
+x_5&: & 4 + 3(2) &= 10 > 5 &&\Rightarrow x_5 = 0,
+\end{aligned}
+\]
+while the constraints for $x_3$ ($y_1 \ge 4$, tight) and $x_6$ ($y_2 \ge 2$, tight) allow $x_3, x_6 > 0$. The basic variables are $x_3$ and $x_6$.
+\item With $x_3, x_6$ the only nonzeros, the two tight resource constraints become $x_3 = 10$ and $x_6 = 12$, so
+\[
+\x^* = (0, 0, 10, 0, 0, 12), \qquad z^* = 4(10) + 2(12) = 64,
+\]
+matching the dual value, so both solutions are optimal by strong duality. (Verified: \texttt{linprog} returns $z^* = 64$ at exactly this $\x^*$ with duals $(4, 2)$.)
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\exsol{11.17}{Duality with Mixed Constraint Types: Eco-Friendly Packaging Startup}{3}
+
+Primal: $\max 4x_1 + 6x_2 + 5x_3$ subject to labor $2x_1 + 4x_2 + 3x_3 \le 140$, material $4x_1 + 6x_2 + 4x_3 = 240$, retail $6x_1 + 9x_2 + 8x_3 \ge 80$, $\x \ge \mathbf{0}$.
+
+\begin{enumerate}
+\item Dual variables, with signs dictated by the constraint types of this \emph{maximization} primal: $y_1 \ge 0$ for the $\leq$ labor constraint (price per labor hour), $y_2$ \emph{free} for the material equality (price per unit of material; it can be negative, since being forced to consume exactly 240 units could in principle hurt), and $y_3 \le 0$ for the $\geq$ retail commitment (a $\geq$ constraint in a max problem takes a nonpositive multiplier; its ``price'' can only penalize, reflecting that the commitment restricts the startup). Each nonnegative primal variable gives a $\geq$ dual constraint:
+\[
+\begin{aligned}
+\min \quad & 140y_1 + 240y_2 + 80y_3 \\
+\st & 2y_1 + 4y_2 + 6y_3 \ge 4 \quad (x_1 \text{ FreshBox Standard}) \\
+& 4y_1 + 6y_2 + 9y_3 \ge 6 \quad (x_2 \text{ FreshBox Premium}) \\
+& 3y_1 + 4y_2 + 8y_3 \ge 5 \quad (x_3 \text{ Market Crate}) \\
+& y_1 \ge 0, \quad y_2 \text{ free}, \quad y_3 \le 0 .
+\end{aligned}
+\]
+\item The dual is three-dimensional, so solve either problem with software. \texttt{linprog} on the primal returns
+\[
+\x^* = (40, 0, 20), \qquad z^* = 4(40) + 5(20) = 260,
+\]
+with labor tight ($2(40) + 3(20) = 140$), material exact ($4(40) + 4(20) = 240$), and retail slack ($6(40) + 8(20) = 400 > 80$). Solving the dual directly gives $\y^* = (1, \tfrac12, 0)$ with value $140(1) + 240(\tfrac12) + 80(0) = 260$. (Alternatively: guessing $y_3 = 0$ from the retail slack reduces the dual to two variables, and the graphical optimum of $\min 140y_1 + 240y_2$ over the three constraints in the $(y_1, y_2)$ plane is the intersection of the $x_1$ and $x_3$ constraints, $2y_1 + 4y_2 = 4$ and $3y_1 + 4y_2 = 5$, i.e., $(1, \tfrac12)$.)
+\item Complementary slackness, both directions:
+\begin{itemize}
+\item Retail has slack ($400 > 80$) $\Rightarrow y_3^* = 0$. Consistent. Labor is tight, so $y_1^* = 1 > 0$ is allowed; the material equality is always ``tight,'' so the free $y_2^* = \tfrac12$ carries no condition.
+\item At $\y^* = (1, \tfrac12, 0)$: the $x_1$ constraint is tight ($2 + 2 + 0 = 4$), the $x_3$ constraint is tight ($3 + 2 + 0 = 5$), and the $x_2$ constraint has slack ($4 + 3 + 0 = 7 > 6$) $\Rightarrow x_2^* = 0$. So the candidate basic variables are $x_1$ and $x_3$.
+\end{itemize}
+\item With $x_2 = 0$, the two tight resource constraints give the square system
+\[
+2x_1 + 3x_3 = 140, \qquad 4x_1 + 4x_3 = 240
+\quad\Longrightarrow\quad x_1 = 40, \ x_3 = 20,
+\]
+(from the second equation $x_1 + x_3 = 60$; substituting $x_1 = 60 - x_3$ into the first gives $120 + x_3 = 140$). Total profit: $z^* = 4(40) + 6(0) + 5(20) = 260$, equal to the dual value, so the pair is optimal by strong duality. Interpretation: a labor hour is worth $\$1$, a unit of the material quota is worth $\$0.50$, and the retail commitment costs nothing since it is comfortably over-fulfilled.
+\end{enumerate}
+
+\emph{Note.} The dual variable signs above follow the corrected sign conventions in \texttt{duality.tex} (see the QA box at the top of this chapter); before the fix, the book's ``Complicated Dual'' example would have suggested $y_3 \ge 0$ for the retail constraint, which is wrong for a maximization primal (here it is harmless only because $y_3^* = 0$).

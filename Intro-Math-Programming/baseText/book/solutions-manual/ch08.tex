@@ -1,0 +1,397 @@
+% ============================================================================
+% Chapter 8 solutions: Simplex - Matrix Calculations
+% Book source: part1-linear-programming/ch06-simplex/simplex-matrix-version.tex
+% Exercise numbering follows \begin{ex} order in that file (9 exercises, all
+% in the Exercises section; no embedded mid-chapter exercise exists in the
+% current source).
+% All basis computations verified with exact-fraction linear algebra and
+% scipy.optimize.linprog, July 2026.
+% ============================================================================
+\section{Chapter 8: Simplex - Matrix Calculations}
+
+Chapter 8 recasts the simplex method as basis algebra: $A_B$, $A_B^{-1}\b$,
+and the reduced costs $\c_N^\top - \c_B^\top A_B^{-1} A_N$. Its nine
+exercises split into three warm-ups on computing basic solutions from a
+basis (8.1 to 8.3), three core computations with reduced costs and the
+dictionary formula (8.4 to 8.6), two conceptual exercises connecting
+reduced costs to the dictionary and tableau sign conventions (8.7, 8.8),
+and one challenge proof on uniqueness of the optimum (8.9). Every matrix
+inverse, basic solution, and reduced-cost vector below was verified with
+exact-fraction computations. Book Selected Solutions exist for 8.1, 8.4,
+and 8.9 and are reproduced here.
+
+\exsol{8.1}{Basis matrix and basic solution}{1}
+
+(Book Selected Solution, verified.) The columns of $x_2$ and $x_3$ give
+\[
+A_B =
+\begin{bmatrix}
+2 & 1 \\
+1 & 2
+\end{bmatrix},
+\qquad
+A_B^{-1} = \frac{1}{3}
+\begin{bmatrix}
+2 & -1 \\
+-1 & 2
+\end{bmatrix}.
+\]
+The basic solution is
+\[
+\x_B = A_B^{-1}\b = \frac{1}{3}
+\begin{bmatrix}
+2 & -1 \\
+-1 & 2
+\end{bmatrix}
+\begin{bmatrix}
+4 \\ 5
+\end{bmatrix}
+= \frac{1}{3}
+\begin{bmatrix}
+3 \\ 6
+\end{bmatrix}
+=
+\begin{bmatrix}
+1 \\ 2
+\end{bmatrix},
+\]
+so $(x_1, x_2, x_3) = (0, 1, 2)$. Both basic variables are nonnegative,
+so this is a basic feasible solution.
+
+\exsol{8.2}{A basic solution that is not feasible}{1}
+
+The columns of $x_1$ and $x_3$ give
+\[
+A_B =
+\begin{bmatrix}
+1 & 1 \\
+3 & 2
+\end{bmatrix},
+\qquad
+\det A_B = 2 - 3 = -1,
+\qquad
+A_B^{-1} =
+\begin{bmatrix}
+-2 & 1 \\
+3 & -1
+\end{bmatrix}.
+\]
+Setting $x_2 = 0$, the basic solution is
+\[
+\x_B = A_B^{-1}\b =
+\begin{bmatrix}
+-2 & 1 \\
+3 & -1
+\end{bmatrix}
+\begin{bmatrix}
+4 \\ 5
+\end{bmatrix}
+=
+\begin{bmatrix}
+-3 \\ 7
+\end{bmatrix},
+\]
+so $(x_1, x_2, x_3) = (-3, 0, 7)$. It solves $A\x = \b$ (check:
+$-3 + 2(0) + 7 = 4$ and $3(-3) + 0 + 2(7) = 5$), but the basic variable
+$x_1 = -3$ violates the nonnegativity constraint $\x \geq \mathbf{0}$. A basic
+solution only qualifies as a basic \emph{feasible} solution when
+$\x_B \geq \mathbf{0}$, so this basis gives an infeasible basic solution.
+
+\exsol{8.3}{A fourth basis for the three-bases example}{1}
+
+The columns of $x_2$ and $s_2$ give
+\[
+A_B =
+\begin{bmatrix}
+2 & 0 \\
+3 & 1
+\end{bmatrix},
+\qquad
+A_B^{-1} = \frac{1}{2}
+\begin{bmatrix}
+1 & 0 \\
+-3 & 2
+\end{bmatrix}
+=
+\begin{bmatrix}
+\tfrac12 & 0 \\
+-\tfrac32 & 1
+\end{bmatrix}.
+\]
+The basic solution is
+\[
+\x_B =
+\begin{bmatrix} x_2 \\ s_2 \end{bmatrix}
+= A_B^{-1}\b =
+\begin{bmatrix}
+\tfrac12 & 0 \\
+-\tfrac32 & 1
+\end{bmatrix}
+\begin{bmatrix}
+16 \\ 45
+\end{bmatrix}
+=
+\begin{bmatrix}
+8 \\ 21
+\end{bmatrix}.
+\]
+Both components are nonnegative, so the basis is \emph{feasible}. Since
+$x_1 = s_1 = 0$, the corresponding point is $(x_1, x_2) = (0, 8)$: the
+vertex where the boundary $x_1 + 2x_2 = 16$ meets the $x_2$-axis. (This
+is the basis shown to be optimal in the worked example of the optimality
+section.)
+
+\exsol{8.4}{Reduced costs at two bases}{2}
+
+(Book Selected Solution, verified, with the intermediate matrices shown.)
+
+\textbf{Basis $B_1 = \{y, s_1, s_2\}$.} Ordering the basic variables
+$(y, s_1, s_2)$,
+\[
+A_{B_1} =
+\begin{bmatrix}
+1 & 1 & 0 \\
+1 & 0 & 1 \\
+2 & 0 & 0
+\end{bmatrix},
+\qquad
+A_{B_1}^{-1} =
+\begin{bmatrix}
+0 & 0 & \tfrac12 \\
+1 & 0 & -\tfrac12 \\
+0 & 1 & -\tfrac12
+\end{bmatrix},
+\qquad
+\x_{B_1} = A_{B_1}^{-1}\b = \begin{bmatrix} 7 \\ 2 \\ 9 \end{bmatrix},
+\]
+so $y = 7$, $s_1 = 2$, $s_2 = 9$: a basic feasible solution with objective
+value $\c_{B_1}^\top \x_{B_1} = 3 \cdot 7 = 21$. With
+$\c_{B_1}^\top = (3, 0, 0)$, the simplex multipliers are
+$\c_{B_1}^\top A_{B_1}^{-1} = (0, 0, \tfrac32)$, and for the nonbasic
+variables $x$ and $s_3$ (columns $(1,2,1)^\top$ and $(0,0,1)^\top$),
+\[
+\c_N^\top - \c_{B_1}^\top A_{B_1}^{-1} A_N
+= \begin{bmatrix} 2 & 0 \end{bmatrix}
+- \begin{bmatrix} \tfrac32 & \tfrac32 \end{bmatrix}
+= \begin{bmatrix} \tfrac12 & -\tfrac32 \end{bmatrix}.
+\]
+The reduced cost of $x$ is $\tfrac12 > 0$, so $B_1$ is \emph{not}
+optimal; this matches the second dictionary of Chapter~7,
+$z = 21 + \tfrac12 x - \tfrac32 s_3$.
+
+\textbf{Basis $B_2 = \{x, y, s_2\}$.} Ordering the basic variables
+$(x, y, s_2)$,
+\[
+A_{B_2} =
+\begin{bmatrix}
+1 & 1 & 0 \\
+2 & 1 & 1 \\
+1 & 2 & 0
+\end{bmatrix},
+\qquad
+A_{B_2}^{-1} =
+\begin{bmatrix}
+2 & 0 & -1 \\
+-1 & 0 & 1 \\
+-3 & 1 & 1
+\end{bmatrix},
+\qquad
+\x_{B_2} = A_{B_2}^{-1}\b = \begin{bmatrix} 4 \\ 5 \\ 3 \end{bmatrix},
+\]
+a basic feasible solution with value $2 \cdot 4 + 3 \cdot 5 = 23$. With
+$\c_{B_2}^\top = (2, 3, 0)$ the multipliers are
+$\c_{B_2}^\top A_{B_2}^{-1} = (1, 0, 1)$, and for the nonbasic variables
+$s_1, s_3$ (columns $(1,0,0)^\top$ and $(0,0,1)^\top$),
+\[
+\c_N^\top - \c_{B_2}^\top A_{B_2}^{-1} A_N
+= \begin{bmatrix} 0 & 0 \end{bmatrix}
+- \begin{bmatrix} 1 & 1 \end{bmatrix}
+= \begin{bmatrix} -1 & -1 \end{bmatrix} \leq \mathbf{0}^\top,
+\]
+so $B_2$ is optimal, matching the final dictionary
+$z = 23 - s_1 - s_3$.
+
+\exsol{8.5}{Which bases are feasible?}{2}
+
+\textbf{(a)} The six column pairs of
+$A = \begin{bmatrix} 1 & 2 & 1 & 0 \\ 5 & 3 & 0 & 1 \end{bmatrix}$ have
+determinants
+\[
+\begin{aligned}
+&\det A_{\{x_1,x_2\}} = -7,\qquad
+\det A_{\{x_1,s_1\}} = -5,\qquad
+\det A_{\{x_1,s_2\}} = 1,\\
+&\det A_{\{x_2,s_1\}} = -3,\qquad
+\det A_{\{x_2,s_2\}} = 2,\qquad
+\det A_{\{s_1,s_2\}} = 1,
+\end{aligned}
+\]
+all nonzero, so every pair of columns is linearly independent and each
+choice is a basis.
+
+\textbf{(b)} Solving $A_B \x_B = \b$ for each basis (nonbasic variables
+zero):
+\begin{center}
+\begin{tabular}{l|l|l|c}
+Basis & Basic solution & Point $(x_1, x_2)$ & Feasible? \\
+\hline
+$\{x_1, x_2\}$ & $x_1 = 6,\ x_2 = 5$ & $(6, 5)$ & yes \\
+$\{x_1, s_1\}$ & $x_1 = 9,\ s_1 = 7$ & $(9, 0)$ & yes \\
+$\{x_1, s_2\}$ & $x_1 = 16,\ s_2 = -35$ & $(16, 0)$ & no ($s_2 < 0$) \\
+$\{x_2, s_1\}$ & $x_2 = 15,\ s_1 = -14$ & $(0, 15)$ & no ($s_1 < 0$) \\
+$\{x_2, s_2\}$ & $x_2 = 8,\ s_2 = 21$ & $(0, 8)$ & yes \\
+$\{s_1, s_2\}$ & $s_1 = 16,\ s_2 = 45$ & $(0, 0)$ & yes \\
+\end{tabular}
+\end{center}
+The four feasible bases correspond to the four vertices of the feasible
+region, $(0,0)$, $(9,0)$, $(6,5)$, $(0,8)$; the two infeasible bases are
+intersections of constraint boundaries lying outside the region.
+
+\textbf{(c)} Take
+\[
+A = \begin{bmatrix} 1 & 2 & 1 & 0 \\ 2 & 4 & 0 & 1 \end{bmatrix}.
+\]
+The first two columns satisfy $(2, 4)^\top = 2 \cdot (1, 2)^\top$, so
+the pair $\{1, 2\}$ is linearly dependent ($\det = 0$) and does not form
+a basis.
+
+\exsol{8.6}{Rebuilding a dictionary from the formula}{2}
+
+With variables ordered $(x, y, s_1, s_2)$,
+\[
+A = \begin{bmatrix} 3 & 1 & 1 & 0 \\ 5 & 3 & 0 & 1 \end{bmatrix},
+\quad
+\b = \begin{bmatrix} 23 \\ 45 \end{bmatrix},
+\quad
+\c^\top = \begin{bmatrix} 2 & 1 & 0 & 0 \end{bmatrix},
+\quad
+B = \{x, y\},\ N = \{s_1, s_2\}.
+\]
+Then
+\[
+A_B = \begin{bmatrix} 3 & 1 \\ 5 & 3 \end{bmatrix},
+\qquad
+A_B^{-1} = \frac{1}{4} \begin{bmatrix} 3 & -1 \\ -5 & 3 \end{bmatrix}
+= \begin{bmatrix} 0.75 & -0.25 \\ -1.25 & 0.75 \end{bmatrix}.
+\]
+Since $A_N = I_2$ (the slack columns),
+\[
+A_B^{-1}\b = \frac14 \begin{bmatrix} 3(23) - 45 \\ -5(23) + 3(45) \end{bmatrix}
+= \begin{bmatrix} 6 \\ 5 \end{bmatrix},
+\qquad
+A_B^{-1}A_N = A_B^{-1}
+= \begin{bmatrix} 0.75 & -0.25 \\ -1.25 & 0.75 \end{bmatrix}.
+\]
+The constraint part of the dictionary,
+$\x_B = A_B^{-1}\b - A_B^{-1}A_N \x_N$, reads
+\[
+\begin{aligned}
+x &= 6 - 0.75\,s_1 + 0.25\,s_2, \\
+y &= 5 + 1.25\,s_1 - 0.75\,s_2,
+\end{aligned}
+\]
+exactly the displayed rows. For the objective,
+$\c_B^\top A_B^{-1}\b = 2(6) + 1(5) = 17$, and
+\[
+\c_B^\top A_B^{-1} = \begin{bmatrix} 2 & 1 \end{bmatrix}
+\begin{bmatrix} 0.75 & -0.25 \\ -1.25 & 0.75 \end{bmatrix}
+= \begin{bmatrix} 0.25 & 0.25 \end{bmatrix},
+\qquad
+\c_N^\top - \c_B^\top A_B^{-1}A_N
+= \begin{bmatrix} -0.25 & -0.25 \end{bmatrix}.
+\]
+So the formula gives
+$\max\ 17 - 0.25 s_1 - 0.25 s_2$, reproducing the displayed dictionary
+in full. (Both reduced costs are negative, so this basis is optimal.)
+
+\exsol{8.7}{Reduced costs of basic variables}{2}
+
+Applying the reduced-cost formula to the basic columns replaces $A_N$ by
+$A_B$:
+\[
+\c_B^\top - \c_B^\top A_B^{-1} A_B
+= \c_B^\top - \c_B^\top I_m
+= \c_B^\top - \c_B^\top = \mathbf{0}^\top,
+\]
+since $A_B^{-1}A_B = I_m$ by the definition of the inverse. So every
+basic variable has reduced cost exactly zero.
+
+Interpretation: the dictionary at basis $B$ expresses $z$ and each basic
+variable purely in terms of the \emph{nonbasic} variables. Constructing
+the dictionary means substituting
+$\x_B = A_B^{-1}\b - A_B^{-1}A_N\x_N$ into the objective, which
+eliminates every basic variable from the objective row; the computation
+above is the algebraic statement that this elimination is exact. A basic
+variable can never appear in the objective row because, if it did, the
+row would not be solved for the basic variables, and the ``dictionary''
+property (basic variables and $z$ as functions of nonbasic variables
+alone) would fail. Equivalently: the value of a basic variable is
+determined by the nonbasic variables, so it carries no independent rate
+of change for $z$.
+
+\exsol{8.8}{Reduced-cost signs and the entering rule}{2}
+
+\textbf{(a)} Rewriting the objective from the viewpoint of basis $B$,
+\[
+z = \c_B^\top A_B^{-1}\b
++ \left(\c_N^\top - \c_B^\top A_B^{-1} A_N\right)\x_N,
+\]
+which is precisely the objective row of the dictionary: a constant plus a
+linear function of the nonbasic variables. The coefficient of a single
+nonbasic variable $x_j$ in this row is the $j$th component of the
+reduced-cost vector, namely $c_j - \c_B^\top A_B^{-1} A_{\{j\}}$. So
+``pick a nonbasic variable with a positive objective-row coefficient''
+and ``pick a nonbasic variable with a positive reduced cost'' are
+literally the same rule, and the stopping conditions (no positive
+coefficient; all reduced costs $\leq 0$) coincide as well.
+
+\textbf{(b)} Increasing a nonbasic variable $x_j$ from zero, while
+keeping the other nonbasic variables at zero, moves the solution along
+the ray
+\[
+\x(t) = \bar\x + t\,\mathbf{d},
+\qquad
+\mathbf{d}_B = -A_B^{-1}A_{\{j\}},\quad d_j = 1,\quad d_k = 0
+\text{ otherwise}.
+\]
+Geometrically this is a move away from the current vertex along an edge
+of the feasible region: one tight constraint ($x_j = 0$) is released
+while the equality constraints stay satisfied. The objective changes at
+rate equal to the reduced cost, so a positive reduced cost means the edge
+points uphill. The ratio test stops the move at the neighboring vertex,
+where some basic variable reaches zero.
+
+\textbf{(c)} The tableau stores the objective as the equation
+$z - \c^\top\x = 0$, so the entry recorded under a nonbasic variable is
+the \emph{negative} of its dictionary coefficient, i.e., the negative of
+its reduced cost. Hunting for a negative $z$-row entry in the tableau is
+therefore hunting for a positive reduced cost, and ``stop when all
+$z$-row entries are nonnegative'' is ``stop when all reduced costs are
+$\leq 0$.'' The three formulations state one test with two sign
+conventions; no contradiction arises.
+
+\exsol{8.9}{Strictly negative reduced costs imply a unique optimum}{3}
+
+(Book Selected Solution, verified.) Write
+$\bar{\c}_N^\top = \c_N^\top - \c_B^\top A_B^{-1} A_N$ and
+$z^* = \c^\top \bar\x = \c_B^\top A_B^{-1} \b$. Every feasible $\x$
+satisfies $A_B \x_B + A_N \x_N = \b$, so
+$\x_B = A_B^{-1}\b - A_B^{-1}A_N \x_N$ and, exactly as in the optimality
+theorem,
+\[
+\c^\top \x = z^* + \bar{\c}_N^\top \x_N .
+\]
+Take any feasible $\x \neq \bar\x$.
+
+\emph{Case 1: $\x_N \neq \mathbf{0}$.} Then some component $x_j > 0$ with
+$j \in N$, and since every entry of $\bar{\c}_N$ is strictly negative,
+$\bar{\c}_N^\top \x_N < 0$. Hence $\c^\top \x < z^*$, so $\x$ is not
+optimal.
+
+\emph{Case 2: $\x_N = \mathbf{0}$.} Then $A_B \x_B = \b$, and since $A_B$ is
+invertible this forces $\x_B = A_B^{-1}\b$, i.e., $\x = \bar\x$,
+contradicting $\x \neq \bar\x$.
+
+Therefore every feasible point other than $\bar\x$ has objective value
+strictly less than $z^*$: the solution $\bar\x$ is optimal and no other
+optimal solution exists.

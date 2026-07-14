@@ -17,7 +17,7 @@ In this chapter, we formalize some of the mathematics about linear programs.  We
 In this section, we provide rigorous mathematical proofs of several results.  For this book, you do not need to be able to reproduce these proofs.  However, try to understand the concepts and have a visual image in your head of why these results are true.
 \end{warn}
 
-\section{Mathematical Preliminaries}
+\section{Mathematical Preliminaries}\label{sec:math-preliminaries}
 
 \subsection{Vectors and Their Properties}
 
@@ -162,7 +162,7 @@ where \( I := \{ i : A_i \mathbf{x} = b_i \} \).
     the point \( \mathbf{x} = (0,0) \) has both constraints tight, and their rows \( [1,0] \), \( [0,1] \) are linearly independent. Hence the tight constraints are linearly independent at that point.
 \end{itemize}
 
-\section{Algebraic Proof - Exists Optimal Solution at a Vertex}
+\section{Algebraic Proof - Exists Optimal Solution at a Vertex}\label{sec:algebraic-vertex-proof}
 
 \begin{definition}{Vertex}{}
 Let \( P = \{ \mathbf{x} \in \mathbb{R}^n : A \mathbf{x} \leq \mathbf{b} \} \) be a polyhedron.  
@@ -216,7 +216,7 @@ Repeating this argument (at most \( n \) times), we reach an optimal point at wh
 
 This theorem makes good on the promise from the start of the chapter: no better plan hides in the interior or along an edge, because any non-vertex optimum can be slid to a vertex without losing a cent. It is also the license behind the simplex method (Chapter~\ref{ch:simplex-dictionary}), which searches only vertices.
 
-\section{Convexity}
+\section{Convexity}\label{sec:convexity}
 A key property that will enable efficient algorithms is \emph{convexity}.  This comes in the form of \emph{convex sets} and \emph{convex functions}.  When the constraints to an optimization problem form a convex set and the objective function is a convex function, then we say that it is a convex optimization problem.
 
 We explain these definitions below.
@@ -686,18 +686,21 @@ One solution is \(\lambda_1 = 1/2\), \(\lambda_2 = 1/4\), \(\lambda_3 = 1/4\): t
 
 \section{Exercises}
 
+\exgroup{Warm-ups}
+
 \begin{ex}{Vector Operations}{}
 \label{ex:vector-operations}
-Let \( \mathbf{v} = [3, -2, 4] \) and \( \mathbf{u} = [-1, 0, 2] \). Compute:
+\stars{1}Let \( \mathbf{v} = [3, -2, 4] \) and \( \mathbf{u} = [-1, 0, 2] \). Compute:
 \begin{enumerate}
     \item \( \mathbf{v} + \mathbf{u} \)
     \item \( 2\mathbf{v} \)
     \item \( \mathbf{v} \cdot \mathbf{u} \)
 \end{enumerate}
+\exrefs{\S\ref{sec:math-preliminaries}}
 \end{ex}
 
 \begin{ex}{Linear and Convex Combinations}{}
-Let \( \mathbf{v}^1 = [1, 0] \), \( \mathbf{v}^2 = [0, 1] \), and \( \mathbf{v}^3 = [1, 1] \).
+\stars{1}Let \( \mathbf{v}^1 = [1, 0] \), \( \mathbf{v}^2 = [0, 1] \), and \( \mathbf{v}^3 = [1, 1] \).
 
 \begin{enumerate}
     \item Which of the following are linear combinations of \( \mathbf{v}^1 \) and \( \mathbf{v}^2 \)?  
@@ -708,33 +711,123 @@ Let \( \mathbf{v}^1 = [1, 0] \), \( \mathbf{v}^2 = [0, 1] \), and \( \mathbf{v}^
     \end{itemize}
     \item Is the vector \( [1/2, 1/2] \) a convex combination of any two of these vectors?
 \end{enumerate}
+\exrefs{\S\ref{sec:math-preliminaries}, \S\ref{sec:convexity}}
 \end{ex}
+
 \begin{ex}{Linear Independence and Matrix Rank}{}
-Consider the matrix \( A = \begin{bmatrix} 1 & 2 \\ 2 & 4 \end{bmatrix} \).
+\stars{1}Consider the matrix \( A = \begin{bmatrix} 1 & 2 \\ 2 & 4 \end{bmatrix} \).
 \begin{enumerate}
     \item Are the rows of \( A \) linearly independent?
     \item Are the columns linearly independent?
     \item What is \( \operatorname{rank}(A) \)?
 \end{enumerate}
+\exrefs{\S\ref{sec:math-preliminaries}}
 \end{ex}
+
+\begin{ex}{Convex or Not?}{}
+\label{ex:convex-or-not}
+\stars{1}For each of the following subsets of \( \mathbb{R}^2 \), decide whether the set is convex, as in Figures~\ref{fig:convex-set-example} and \ref{fig:nonconvex-set-example}. If the set is not convex, exhibit two points in the set whose connecting segment leaves the set.
+\begin{enumerate}
+    \item The disk \( D = \{ \mathbf{x} : x_1^2 + x_2^2 \leq 4 \} \).
+    \item The ring \( R = \{ \mathbf{x} : 1 \leq x_1^2 + x_2^2 \leq 4 \} \).
+    \item The halfspace \( H = \{ \mathbf{x} : x_1 + 2x_2 \leq 3 \} \).
+    \item The set \( S = \{ \mathbf{x} : |x_1| \geq 1 \} \).
+\end{enumerate}
+\exrefs{\S\ref{sec:convexity}}
+\end{ex}
+
+\begin{ex}{Writing an LP in Matrix Notation}{}
+\label{ex:lp-matrix-notation}
+\stars{1}Consider the linear program
+\begin{align*}
+\max \quad & 3x_1 + 2x_2\\
+\text{s.t.} \quad & x_1 + 3x_2 \leq 6\\
+& 2x_1 + x_2 \leq 4\\
+& x_1, x_2 \geq 0.
+\end{align*}
+Write this LP in the standard form \( \max\{ \mathbf{c}^\top \mathbf{x} : A\mathbf{x} \leq \mathbf{b} \} \) used in this chapter: give the vector \( \mathbf{c} \), the \( 4 \times 2 \) matrix \( A \), and the vector \( \mathbf{b} \). (Write each nonnegativity constraint \( x_i \geq 0 \) as \( -x_i \leq 0 \).) Then verify that the point \( \mathbf{x} = (1.2, 1.6) \) satisfies \( A\mathbf{x} \leq \mathbf{b} \).
+\exrefs{\S\ref{sec:math-preliminaries}, \S\ref{sec:algebraic-vertex-proof}}
+\end{ex}
+
+\exgroup{Core problems}
 
 \begin{ex}{Convex Combinations and Geometry}{}
 \label{ex:convex-combo-triangle}
-Let \( P \) be the triangle with vertices at \( (0,0) \), \( (2,0) \), and \( (0,2) \).  
+\stars{2}Let \( P \) be the triangle with vertices at \( (0,0) \), \( (2,0) \), and \( (0,2) \).
 \begin{enumerate}
     \item Plot the set \( P \).
     \item Determine whether the point \( (1,1) \) is a convex combination of the vertices.
     \item Determine whether the point \( (1.5,1.5) \) is in \( P \).
 \end{enumerate}
+\exrefs{\S\ref{sec:convexity}}
 \end{ex}
 
 \begin{ex}{Halfspace Geometry and Convexity}{}
-Consider the halfspace \( H = \{ \mathbf{x} \in \mathbb{R}^2 : x_1 + 2x_2 \leq 4 \} \).
+\stars{2}Consider the halfspace \( H = \{ \mathbf{x} \in \mathbb{R}^2 : x_1 + 2x_2 \leq 4 \} \).
 \begin{enumerate}
     \item Plot the halfspace and the boundary.
     \item Is the point \( (2,1) \) in \( H \)? What about \( (1,2) \)?
     \item Verify that the set is convex by checking whether the midpoint between \( (0,0) \) and \( (2,1) \) lies in \( H \).
 \end{enumerate}
+\exrefs{\S\ref{sec:convexity}, Theorem~\ref{thm:polyhedra_convex}}
+\end{ex}
+
+\begin{ex}{Checking an Extreme Point}{}
+\label{ex:extreme-point-check}
+\stars{2}Let
+\[
+P = \{ \mathbf{x} \in \mathbb{R}^2 : x_1 - 4x_2 \leq 0,\ -x_1 + x_2 \leq 1,\ -x_1 + 2x_2 \leq 4,\ x_1 \geq 0,\ x_2 \geq 0 \}
+\]
+be the feasible region used to illustrate the Representation Theorem.
+\begin{enumerate}
+    \item Verify that \( (2,3) \in P \), identify the constraints that are tight there, and show that the tight rows are linearly independent. Conclude that \( (2,3) \) is a vertex of \( P \), and hence an extreme point.
+    \item Verify that \( (1,2) \in P \) and show that only one constraint is tight there. Then express \( (1,2) \) as a convex combination of two other points of \( P \) to conclude that \( (1,2) \) is not an extreme point.
+\end{enumerate}
+\exrefs{\S\ref{sec:algebraic-vertex-proof}, \S\ref{sec:convexity}}
+\end{ex}
+
+\begin{ex}{A Convex Combination of Extreme Points}{}
+\label{ex:rep-theorem-combo}
+\stars{2}The polyhedron \( P \) from Exercise~\ref{ex:extreme-point-check} has extreme points \( (0,0) \), \( (0,1) \), and \( (2,3) \). Following the illustration of the Representation Theorem, find multipliers \( \lambda_1, \lambda_2, \lambda_3 \geq 0 \) with \( \lambda_1 + \lambda_2 + \lambda_3 = 1 \) such that
+\[
+\lambda_1 \begin{bmatrix} 0 \\ 0 \end{bmatrix} + \lambda_2 \begin{bmatrix} 0 \\ 1 \end{bmatrix} + \lambda_3 \begin{bmatrix} 2 \\ 3 \end{bmatrix} = \begin{bmatrix} 1 \\ 7/4 \end{bmatrix}.
+\]
+Why are no extreme directions needed to represent this point?
+\exrefs{\S\ref{sec:convexity}, Theorem~\ref{thm:representation}}
+\end{ex}
+
+\exgroup{Concepts and connections}
+
+\begin{ex}{Is the Union of Convex Sets Convex?}{}
+\label{ex:union-convex}
+\stars{2}The chapter shows that the intersection of two convex sets is always convex.
+\begin{enumerate}
+    \item Give an example of two convex sets \( C_1, C_2 \subseteq \mathbb{R}^2 \) whose union \( C_1 \cup C_2 \) is not convex, and verify your claim by exhibiting two points of the union whose midpoint is not in the union.
+    \item Find a condition on \( C_1 \) and \( C_2 \) under which the union is convex, and justify it.
+\end{enumerate}
+\exrefs{\S\ref{sec:convexity}}
+\end{ex}
+
+\begin{ex}{Where Boundedness Enters the Vertex Theorem}{}
+\label{ex:boundedness-vertex}
+\stars{2}The proof in \S\ref{sec:algebraic-vertex-proof} that some optimal solution lies at a vertex assumes the feasible region \( P \) is bounded.
+\begin{enumerate}
+    \item Point to the exact step of the proof where boundedness is used, and explain what could go wrong without it.
+    \item Let \( P = \{ \mathbf{x} \in \mathbb{R}^2 : 0 \leq x_2 \leq 1 \} \) and consider maximizing \( -x_2 \) over \( P \). Show that \( P \) has no vertex at all, that the LP nevertheless has optimal solutions, and describe the set of optima. Which hypothesis of the theorem fails, and why does this example not contradict the theorem?
+\end{enumerate}
+\exrefs{\S\ref{sec:algebraic-vertex-proof}}
+\end{ex}
+
+\exgroup{Challenge problems}
+
+\begin{ex}{Intersections of Arbitrary Families of Convex Sets}{}
+\label{ex:intersection-family}
+\stars{3}Let \( \{ C_i \}_{i \in I} \) be any family of convex sets in \( \mathbb{R}^n \), where the index set \( I \) may be infinite. Prove that the intersection
+\[
+C = \bigcap_{i \in I} C_i
+\]
+is convex. Explain why this result, applied to halfspaces, gives another proof of Theorem~\ref{thm:polyhedra_convex}. (Note that \( C \) may be empty; the empty set is convex vacuously.)
+\exrefs{\S\ref{sec:convexity}, Theorem~\ref{thm:polyhedra_convex}}
 \end{ex}
 
 \subsubsection*{Selected Solutions}
@@ -759,6 +852,21 @@ The triangle \( P \) is the set of convex combinations of \( (0,0) \), \( (2,0) 
     \]
     and the weights are nonnegative and sum to \( 1 \).
     \item No.  Any combination of the vertices hitting \( (1.5, 1.5) \) must satisfy \( 2\lambda_2 = 1.5 \) and \( 2\lambda_3 = 1.5 \), forcing \( \lambda_2 = \lambda_3 = 0.75 \) and \( \lambda_2 + \lambda_3 = 1.5 > 1 \).  Equivalently, \( 1.5 + 1.5 = 3 > 2 \) violates \( x_1 + x_2 \leq 2 \), so \( (1.5, 1.5) \notin P \).
+\end{enumerate}
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:rep-theorem-combo})
+The first coordinate forces \( 2\lambda_3 = 1 \), so \( \lambda_3 = 1/2 \). The second coordinate then gives \( \lambda_2 + 3/2 = 7/4 \), so \( \lambda_2 = 1/4 \), and the normalization \( \lambda_1 + \lambda_2 + \lambda_3 = 1 \) gives \( \lambda_1 = 1/4 \). All three multipliers are nonnegative, so
+\[
+\tfrac{1}{4} \begin{bmatrix} 0 \\ 0 \end{bmatrix} + \tfrac{1}{4} \begin{bmatrix} 0 \\ 1 \end{bmatrix} + \tfrac{1}{2} \begin{bmatrix} 2 \\ 3 \end{bmatrix} = \begin{bmatrix} 1 \\ 7/4 \end{bmatrix},
+\]
+and \( (1, 7/4) \) is a convex combination of the extreme points. No extreme directions are needed because \( (1, 7/4) \) already lies in the convex hull of the three extreme points; all coefficients \( \mu_j \) in the Representation Theorem can be taken to be zero.
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:union-convex})
+\begin{enumerate}
+    \item Take \( C_1 \) to be the unit disk centered at \( (-2,0) \) and \( C_2 \) the unit disk centered at \( (2,0) \). Each disk is convex. The points \( (-2,0) \in C_1 \) and \( (2,0) \in C_2 \) both lie in the union, but their midpoint \( (0,0) \) is at distance \( 2 > 1 \) from both centers, so it lies in neither disk. Hence \( C_1 \cup C_2 \) is not convex.
+    \item If one set contains the other, say \( C_1 \subseteq C_2 \), then \( C_1 \cup C_2 = C_2 \), which is convex. Nesting is sufficient but not necessary: with \( C_1 = \{ \mathbf{x} : x_2 \geq 0 \} \) and \( C_2 = \{ \mathbf{x} : x_2 \leq 0 \} \), neither halfplane contains the other, yet \( C_1 \cup C_2 = \mathbb{R}^2 \) is convex.
 \end{enumerate}
 \end{solution}
 

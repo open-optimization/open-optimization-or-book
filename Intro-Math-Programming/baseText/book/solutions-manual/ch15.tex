@@ -1,0 +1,263 @@
+% ============================================================================
+% Chapter 15: Introduction to Integer Programming Formulations
+% Source: part3-integer-programming/ch11-ip-formulations/
+%         integerProgrammingFormulations-book1.tex, \section{Exercises}
+% 16 exercises in four bands: Warm-ups 15.1-15.4, Core 15.5-15.11,
+% Concepts and connections 15.12-15.14, Challenge 15.15-15.16.
+% All numeric optima verified with PuLP 3.3 / CBC.
+% ============================================================================
+
+\section{Chapter 15: Introduction to Integer Programming Formulations}
+
+The sixteen exercises of this chapter are grouped in four bands: Warm-ups (15.1 to 15.4: knapsacks, set covering, and a big-$M$ drill), Core problems (15.5 to 15.11: capital budgeting, covering, facility location, coloring, and logical constraints), Concepts and connections (15.12 to 15.14: LP rounding, big-$M$ tightness, and reading the kidney exchange model), and Challenge problems (15.15 and 15.16: piecewise-linear cost and a small flow shop). Every model below was implemented and solved with PuLP (CBC), and every claimed optimal value in the exercise statements checked out, including the hinted values $52/3$ in 15.12, profit \$40 in 15.15, and makespan 12 in 15.16. The book's six Selected Solutions (15.2, 15.3, 15.8, 15.9, 15.10, 15.11) were all verified; the solution to 15.3 was extended in the book to record the third optimal placement $\{1,6\}$ alongside $\{2,5\}$ and $\{3,4\}$. The exercises appear to be original to this book (no external-source attribution issues arose in this chapter).
+
+\exsol{15.1}{Knapsack Problem}{1}
+
+(a) Let $x_i \in \{0,1\}$ equal 1 if item $i$ is packed, for $i \in \{$T(ent), S(leeping bag), V(sto\emph{v}e), F(ood), C(amera)$\}$:
+\[
+\begin{aligned}
+\max\quad & 8x_T + 6x_S + 5x_V + 10x_F + 4x_C\\
+\st\quad & 5x_T + 3x_S + 4x_V + 7x_F + 2x_C \leq 15\\
+& x \in \{0,1\}^5.
+\end{aligned}
+\]
+The optimum packs the tent, sleeping bag, and food: weight $5+3+7 = 15$ (the capacity exactly), value $8+6+10 = 24$. Runner-up loads such as $\{$tent, bag, stove, camera$\}$ (weight 14, value 23) fall short.
+
+(b) ``If the stove is packed then the food is packed'' is the implication trick from the modeling tricks section:
+\[
+x_V \leq x_F.
+\]
+The optimal solution from (a) does not pack the stove, so it remains optimal with value 24. Both versions verified with PuLP.
+
+\exsol{15.2}{Courier Van Knapsack}{1}
+
+(a) With $x_i = 1$ if package $i$ is loaded,
+\[
+\max\ 5x_1 + 3x_2 + 3x_3 + 7x_4 + 4x_5
+\quad \st \quad
+11x_1 + 3x_2 + 2x_3 + 5x_4 + 4x_5 \leq 15,\quad x \in \{0,1\}^5.
+\]
+(b) Optimal load: packages 2, 3, 4, 5, with weight $3+2+5+4 = 14 \leq 15$ and payout $3+3+7+4 = \$17$. Taking the heavy package 1 leaves only 4\,kg for the rest, capping the payout at $5+3 = \$8$. Matches the book's Selected Solution; verified with PuLP.
+
+\exsol{15.3}{Covering a Small Town}{1}
+
+(a) With the district itself included (as in the fire station example):
+\[
+V_1 = \{1,2,4\},\ V_2 = \{1,2,3,5\},\ V_3 = \{2,3,6\},\ V_4 = \{1,4,5\},\ V_5 = \{2,4,5,6\},\ V_6 = \{3,5,6\}.
+\]
+(b) With $x_i = 1$ if a station is placed in district $i$:
+\[
+\min\ \sum_{i=1}^{6} x_i
+\quad \st \quad
+\sum_{j \in V_i} x_j \geq 1 \ \text{ for } i = 1,\dots,6, \qquad x \in \{0,1\}^6.
+\]
+(c) The optimum is 2 stations. One station cannot suffice since no $V_i$ contains all six districts (the largest have four elements). Enumerating all pairs shows exactly three optimal placements: $\{2,5\}$, $\{3,4\}$, and $\{1,6\}$; for example $\{1,6\}$ works because $1 \in V_1 \cap V_2 \cap V_4$ and $6 \in V_3 \cap V_5 \cap V_6$. Verified with PuLP plus complete enumeration. (The book's Selected Solution originally listed only $\{2,5\}$ and $\{3,4\}$; the third placement has been added there.)
+
+\exsol{15.4}{Big-M Activation Drill}{1}
+
+(a) The policy ``if $\delta = 0$ then $x_1 + x_2 + x_3 \leq 40$'' becomes the single constraint
+\[
+x_1 + x_2 + x_3 \leq 40 + M\delta.
+\]
+When $\delta = 0$ the cap of 40 is enforced; when $\delta = 1$ the constraint must be inert.
+
+(b) With $0 \leq x_i \leq 30$, the left side is at most $90$. Inert means $40 + M \geq 90$, so the smallest valid constant is
+\[
+M = 90 - 40 = 50.
+\]
+Any smaller $M$ would wrongly cut off legal solutions such as $x_1 = x_2 = x_3 = 30$ with a second guide hired.
+
+\exsol{15.5}{Locating Distribution Terminals}{2}
+
+The three conditions translate directly: (1) is a cardinality constraint, (2) says $y_1 = 0 \Rightarrow y_2 = 1$, i.e. $y_1 + y_2 \geq 1$, and (3) is a covering constraint:
+\[
+\begin{aligned}
+\min\quad & 10y_1 + 12y_2 + 20y_3 + 18y_4 + 25y_5\\
+\st\quad & y_1 + y_2 + y_3 + y_4 + y_5 \leq 2\\
+& y_1 + y_2 \geq 1\\
+& y_3 + y_4 + y_5 \geq 1\\
+& y \in \{0,1\}^5.
+\end{aligned}
+\]
+The exercise only asks for the model, but the instance is worth solving in class: constraints (2) and (3) force one Maritimes terminal and one central terminal, the budget of two makes it exactly one of each, and the cheapest pair is Halifax plus Ottawa, $y_1 = y_4 = 1$, cost $\$28$ million. Verified with PuLP.
+
+\exsol{15.6}{Warehouse Location}{2}
+
+(a) Let $y_i = 1$ if warehouse $i \in \{A, B, C, D\}$ opens. Each region needs an open warehouse that serves it:
+\[
+\begin{aligned}
+\min\quad & 150y_A + 200y_B + 120y_C + 180y_D\\
+\st\quad & y_A + y_C \geq 1 && \text{(region 1)}\\
+& y_A + y_B \geq 1 && \text{(region 2)}\\
+& y_A + y_B + y_D \geq 1 && \text{(region 3)}\\
+& y_B + y_C + y_D \geq 1 && \text{(region 4)}\\
+& y_B + y_D \geq 1 && \text{(region 5)}\\
+& y \in \{0,1\}^4.
+\end{aligned}
+\]
+The optimum opens B and C for $200 + 120 = \$320$K: C covers regions 1 and 4, B covers 2, 3, 4, 5. For comparison, A with D costs 330 and A with B costs 350; C with D misses region 2. Verified with PuLP.
+
+(b) This is a (weighted) \emph{set covering} problem: warehouses are the sets, regions are the elements to cover, and fixed costs replace the unit objective.
+
+\exsol{15.7}{Capital Budgeting with Dependencies}{2}
+
+(a) With $x_j = 1$ if project $j$ is funded:
+\[
+\begin{aligned}
+\max\quad & 20x_1 + 40x_2 + 20x_3 + 15x_4 + 30x_5\\
+\st\quad & 5x_1 + 4x_2 + 3x_3 + 7x_4 + 8x_5 \leq 20 && \text{(year 1)}\\
+& x_1 + 7x_2 + 9x_3 + 4x_4 + 6x_5 \leq 20 && \text{(year 2)}\\
+& x_3 \leq x_1 && \text{(3 only with 1)}\\
+& x_2 + x_5 \leq 1 && \text{(2 and 5 conflict)}\\
+& x \in \{0,1\}^5.
+\end{aligned}
+\]
+(b) Optimum: fund projects 1, 2, and 3 for NPV $20 + 40 + 20 = 80$ (\$80{,}000). Outlays: year 1 uses $5+4+3 = 12 \leq 20$; year 2 uses $1+7+9 = 17 \leq 20$. Adding project 4 would push year 2 to 21 and is infeasible; swapping 2 for 5 drops the NPV to 70. Verified with PuLP.
+
+\exsol{15.8}{Facility Location: Two Distribution Centers}{2}
+
+(a) Total demand is $10+12+15 = 37$ against total capacity $40+25 = 65$, so the instance is feasible. Center 1 alone ($u_1 = 40 \geq 37$) can serve everything; center 2 alone cannot ($25 < 37$).
+
+(b) Following the capacitated facility location model, with $y_i \in \{0,1\}$ and $x_{ij} \geq 0$ units of store $j$'s demand served by center $i$:
+\[
+\begin{aligned}
+\min\quad & 80y_1 + 60y_2 + \textstyle\sum_{i,j} c_{ij}x_{ij}\\
+\st\quad & x_{1j} + x_{2j} = d_j && j = 1,2,3\\
+& x_{11} + x_{12} + x_{13} \leq 40\,y_1\\
+& x_{21} + x_{22} + x_{23} \leq 25\,y_2\\
+& x_{ij} \geq 0,\ y_i \in \{0,1\},
+\end{aligned}
+\]
+with $c$ and $d$ as tabulated.
+
+(c) Optimum: open center 1 only and serve all demand from it, $x_{11} = 10$, $x_{12} = 12$, $x_{13} = 15$:
+\[
+\text{cost} = 80 + 2(10) + 3(12) + 1(15) = 80 + 71 = \$151.
+\]
+Opening center 2 as well would add its \$60 fixed cost and save at most $2 \cdot 12 = 24$ on serving store 2 (its only cheaper assignment), so the cheaper center is not worth opening. Matches the book's Selected Solution; verified with PuLP.
+
+\exsol{15.9}{Coloring a Five-Node Graph}{2}
+
+(a) With at most $n = 5$ colors, $x_{ij} = 1$ if vertex $i$ gets color $j$ and $w_j = 1$ if color $j$ is used:
+\[
+\begin{aligned}
+\min\quad & \sum_{j=1}^{5} w_j\\
+\st\quad & \sum_{j=1}^{5} x_{ij} = 1 && i \in \{A,\dots,E\}\\
+& x_{ij} + x_{kj} \leq w_j && \{i,k\} \in E,\ j = 1,\dots,5\\
+& x_{ij}, w_j \in \{0,1\}.
+\end{aligned}
+\]
+(b) The solver returns $\sum_j w_j = 3$, so the chromatic number is 3. One optimal coloring (relabeling the solver's colors): $A \to 1$, $B \to 2$, $C \to 3$, $D \to 2$, $E \to 3$; each of the six edges $AB, BC, CD, DE, EA, AC$ joins different colors.
+
+(c) The chord $\{A,C\}$ makes $A, B, C$ pairwise adjacent, a triangle, so any proper coloring needs at least 3 colors. The coloring in (b) attains 3, so the bound is tight. (A 5-cycle alone already needs 3 colors, being an odd cycle; the triangle is simply the quickest certificate.) Matches the book's Selected Solution; verified with PuLP.
+
+\exsol{15.10}{Either-Or Constraints}{2}
+
+Introduce $\delta \in \{0,1\}$ with $\delta = 0$ selecting mode A and $\delta = 1$ selecting mode B:
+\[
+\begin{aligned}
+\max\quad & 5x_1 + 4x_2\\
+\st\quad & 2x_1 + x_2 \leq 10 + M_1\delta\\
+& x_1 + 3x_2 \leq 12 + M_2(1-\delta)\\
+& x_1, x_2 \geq 0,\quad \delta \in \{0,1\}.
+\end{aligned}
+\]
+Any sufficiently large constants work (the book's Selected Solution uses $M_1 = M_2 = 20$); Exercise 15.13 shows the tightest choices are $M_1 = 14$ and $M_2 = 18$. As a check, the optimum is $\delta = 1$ (mode B) with $x = (12, 0)$ and objective 60; note $2x_1 + x_2 = 24 = 10 + 14$, so the relaxed mode A constraint is exactly what $M_1 = 14$ allows. Verified with PuLP for both $M = 20$ and $M = 10^6$.
+
+\begin{qaflag}
+The statement says ``Exactly one of these two constraints must hold,'' but the standard big-$M$ construction (and the section it references) enforces \emph{at least} one; solutions satisfying both constraints, such as the origin, remain feasible, and excluding them is neither possible in a useful sense nor intended. Suggest rewording to ``at least one of these two constraints must hold (the machine operates in one mode)'' to match the inclusive-or semantics of the Either Or Constraints subsection.
+\end{qaflag}
+
+\exsol{15.11}{Fixed-Charge Production}{2}
+
+(a) Let $x \geq 0$ be units produced and $y \in \{0,1\}$ indicate startup:
+\[
+\max\ 15x - 8x - 500y = 7x - 500y
+\quad \st \quad
+x \leq 200y,\quad x \geq 0,\ y \in \{0,1\}.
+\]
+Optimum: $y = 1$, $x = 200$, profit $7(200) - 500 = \$900$.
+
+(b) The linking constraint $x \leq 200y$ does double duty. If $y = 0$ it forces $x = 0$: no production without paying the fixed charge, which is exactly the fixed-cost logic (without it, the model would produce while claiming $y = 0$ and skip the \$500). If $y = 1$ it becomes the capacity constraint $x \leq 200$. The constant 200 is the tightest valid big-$M$ here because it is the true capacity. Matches the book's Selected Solution; verified with PuLP.
+
+\exsol{15.12}{Why Rounding the Relaxation Fails}{2}
+
+(a) The knapsack example has weights $(12, 2, 1, 1, 4)$ and values $(4, 2, 2, 1, 10)$ with capacity 15. Value per kg: $1/3, 1, 2, 1, 5/2$. Greedy fills items 5, 3, 2, 4 completely (total weight 8, value 15), then puts the remaining 7 kg into item 1: $x_1 = 7/12$, all other $x_i = 1$, LP value
+\[
+15 + \tfrac{7}{12}\cdot 4 = \tfrac{52}{3} \approx 17.33,
+\]
+as the exercise states. Verified with PuLP ($x_1 = 0.5833$, value $17.333$).
+
+(b) Rounding $x_1$ up gives total weight $12 + 8 = 20 > 15$: infeasible. Rounding down gives $x = (0,1,1,1,1)$, weight 8, value 15, which happens to equal the true integer optimum (PuLP confirms the IP optimum is 15).
+
+(c) The luck in (b) is not generic. Three failure modes: (i) rounding can be \emph{infeasible}, as rounding up just showed, and with equality constraints it almost always is: in the min-coins model $p + 5n + 10d + 25q = 83$, rounding a fractional LP solution changes the left side and the equation no longer holds, so the rounded point is simply not a way to make 83 cents; (ii) rounding can be feasible but far from optimal, since the nearest integer point to the LP optimum can be a poor solution, and in fact the integer optimum can sit far from the LP optimum in both position and value; (iii) for binary decision variables like the terminal choices $y_i$ of Exercise 15.5, a relaxation value $y_i = 0.5$ carries no meaning at all: one cannot half-build a terminal in Halifax, and rounding logical variables can violate linked constraints such as $y_1 + y_2 \geq 1$ or $x_3 \leq x_1$. These are exactly the reasons branch and bound, rather than rounding, is the workhorse for integer programs.
+
+\exsol{15.13}{When is Big-M Too Big?}{2}
+
+(a) With $M = 10^6$, a fractional $\delta = 10^{-5}$ adds $M\delta = 10$ units of slack to the mode A constraint: the relaxation can behave as if the right-hand side were 20 instead of 10 while paying an integrality violation of only $10^{-5}$. The LP relaxation therefore sails far outside the true feasible region and its bound on the optimum is very weak, so branch and bound must do more work to close the gap. (Tolerance interaction is worse still: solvers accept $\delta$ within about $10^{-6}$ of integer, and $10^{-6} \times 10^6 = 1$, a full unit of phantom slack in an ``integer feasible'' solution.)
+
+(b) The constant $M_1$ must bound $2x_1 + x_2 - 10$ whenever the mode B constraint holds. Maximizing $2x_1 + x_2$ subject to $x_1 + 3x_2 \leq 12$, $x \geq 0$ puts everything on $x_1$: the maximum is $24$ at $(12, 0)$, so $M_1 = 24 - 10 = 14$ suffices. Symmetrically, maximizing $x_1 + 3x_2$ subject to $2x_1 + x_2 \leq 10$, $x \geq 0$ gives $30$ at $(0, 10)$, so $M_2 = 30 - 12 = 18$. Both maxima were confirmed by LP, and both are attained, so no smaller constants are valid.
+
+(c) The text's Choosing Big-M Values paragraph names numerical instability: very large coefficients mixed with small ones produce ill-conditioned bases and floating-point roundoff, and (as computed in (a)) they let integrality tolerances translate into materially violated logic.
+
+\exsol{15.14}{Reading the Kidney Exchange Model}{2}
+
+(a) $\sum_{c \ni i} x_c \leq 1$ says each patient-donor pair joins at most one selected cycle. Medically, a donor has one kidney to give: if the constraint were dropped, the optimizer could schedule the same donor in two different swap cycles, and one of the two recipients would be prepped for a transplant whose kidney does not exist.
+
+(b) A selected cycle $c$ performs exactly $|c|$ transplants, one per pair around the cycle (each patient in $c$ receives a kidney from the previous pair's donor). Because part (a)'s constraint prevents any pair from being counted in two cycles, $\sum_c |c| x_c$ adds up transplants without double counting.
+
+(c) All surgeries in a cycle must run simultaneously so no donor can back out after their partner has received a kidney; a length-$k$ cycle ties up $2k$ operating rooms and surgical teams at once, which hospitals can staff only for $k \leq 3$. Raising the cap makes $|C|$ explode combinatorially: the number of candidate cycles of length $k$ grows roughly like the number of ordered $k$-subsets of pairs (order $|P|^k$), which is why long-cycle and long-chain variants need column generation rather than full enumeration.
+
+(d) Add a set $A$ of altruistic donors and a set $H$ of feasible \emph{chains}: sequences that start at some altruist $a \in A$ and pass through distinct pairs, each donor compatible with the next patient, up to a length cap $L$. Introduce $x_h \in \{0,1\}$ for each chain, extend the packing constraints so that each pair is in at most one selected cycle \emph{or} chain, add $\sum_{h \ni a} x_h \leq 1$ for each altruist, and credit each chain with its number of patient transplants (the number of pairs it contains) in the objective:
+\[
+\max\ \sum_{c \in C} |c|x_c + \sum_{h \in H} n_h x_h
+\quad \st\quad
+\sum_{c \ni i} x_c + \sum_{h \ni i} x_h \leq 1 \ \forall i \in P,\qquad
+\sum_{h \ni a} x_h \leq 1 \ \forall a \in A.
+\]
+
+\exsol{15.15}{Piecewise-Linear Production Cost}{3}
+
+(a) Accumulating the segment costs: $C(0) = 0$, $C(10) = 50$, $C(20) = 50 + 30 = 80$, $C(30) = 80 + 80 = 160$. The marginal costs run $5, 3, 8$: they decrease and then increase, so $C$ is not convex (concretely, $C(10) = 50 > 40 = \tfrac{1}{2}(C(0) + C(20))$). The standard LP epigraph trick $y \geq$ each segment line only works when the cost is convex, so this problem genuinely needs the SOS2 or binary machinery.
+
+(b) SOS2 formulation with weights on the four breakpoints:
+\[
+\begin{aligned}
+\max\quad & 6x - y\\
+\st\quad & x = 0\lambda_1 + 10\lambda_2 + 20\lambda_3 + 30\lambda_4\\
+& y = 0\lambda_1 + 50\lambda_2 + 80\lambda_3 + 160\lambda_4\\
+& \lambda_1 + \lambda_2 + \lambda_3 + \lambda_4 = 1,\quad \lambda \geq 0\\
+& \{\lambda_1, \lambda_2, \lambda_3, \lambda_4\} \text{ SOS2}.
+\end{aligned}
+\]
+Equivalent binary formulation from the text, with $z_i = 1$ selecting segment $i$:
+\[
+\sum_{i=1}^{3} z_i = 1,\qquad
+\lambda_1 \leq z_1,\quad \lambda_2 \leq z_1 + z_2,\quad \lambda_3 \leq z_2 + z_3,\quad \lambda_4 \leq z_3,\qquad z_i \in \{0,1\}.
+\]
+(c) Solving (PuLP with the binary formulation) gives $x = 20$, $C = 80$, profit $6(20) - 80 = \$40$, with $\lambda_3 = 1$, $z_2 = 1$. The marginal picture explains the stopping point: on the discounted middle segment each extra ton earns $6 - 3 = 3$, so the plant produces through it, but on the overtime segment each ton loses $6 - 8 = 2$, so production stops exactly at the segment boundary $x = 20$. (Endpoints check: profit is 0, 10, 40, 20 at $x = 0, 10, 20, 30$.)
+
+\exsol{15.16}{Two Jobs, Three Machines}{3}
+
+(a) Let $s_{jk} \geq 0$ be the start of job $j$ on machine $k$, with processing times $p_{jk}$ from the table. Precedence within each job (both jobs route $M_1 \to M_2 \to M_3$):
+\[
+s_{j,k+1} \geq s_{j,k} + p_{j,k}, \qquad j = 1,2,\ k = 1,2.
+\]
+(b) For each machine $k$ let $\delta_k = 1$ if job 1 precedes job 2 on $k$:
+\[
+s_{2k} \geq s_{1k} + p_{1k} - M(1 - \delta_k),
+\qquad
+s_{1k} \geq s_{2k} + p_{2k} - M\delta_k.
+\]
+A valid $M$ from the data is the sum of all processing times, $M = 3+2+4+2+4+3 = 18$: no start time exceeds 18 in any schedule without idle padding, so the inactive constraint is always released.
+
+(c) Minimizing $C_{\max}$ with $C_{\max} \geq s_{j3} + p_{j3}$ for both jobs, CBC returns an optimal makespan of \textbf{12}, with job 1 first on all three machines:
+\begin{center}
+\begin{tabular}{l|ccc}
+ & $M_1$ & $M_2$ & $M_3$\\
+\hline
+Job 1 & 0--3 & 3--5 & 5--9\\
+Job 2 & 3--5 & 5--9 & 9--12\\
+\end{tabular}
+\end{center}
+The schedule is tight everywhere: job 2 follows job 1 immediately on each machine and finishes at 12. Putting job 2 first instead yields makespan 13 (job 1 would finish $M_3$ at 13), and mixed orders are worse, so 12 is optimal, as the exercise promises. A quick lower bound for discussion: each job alone needs 9 hours, and $M_2$ cannot start before time 2, so 12 leaves little slack. Verified with PuLP.

@@ -1,0 +1,183 @@
+% ============================================================================
+% Solutions Manual, Chapter 2: Modeling: Linear Programming
+% Synced to book/part1-linear-programming/ch02-modeling/modeling-linear-programming.tex
+% 14 exercises. All numeric answers verified with scipy.optimize.linprog and
+% PuLP/CBC (2026-07-13). Book fix applied to Exercise 2.6 (storage 100 -> 90).
+% ============================================================================
+\section{Chapter 2: Modeling: Linear Programming}
+
+\textbf{Coverage assessment.} The fourteen exercises drill the two skills the chapter teaches: recognizing linearity (2.1, 2.2, 2.11, tied to Definition 2.1 and the Section 2.2 assumptions) and formulating word problems as LPs (2.3 through 2.10 and 2.14, tied to the worked examples of Section 2.3: production mix, diet, work scheduling). The assumptions of Section 2.2.1 get direct treatment in 2.12 (certainty) and 2.13 (all four), and 2.10(c) plants the LP-bound-implies-integer-bound idea that pays off in the integer programming chapters. The ladder flows well: one-star pattern-matching against worked examples, two-star fresh formulations, a three-star twist (a resource you can buy). Gaps: the knapsack, capital allocation, transportation, and assignment subsections (2.3.1 through 2.3.4) have no matching exercises in this chapter, so those model types go unpracticed here; presumably they recur in the integer programming chapters, but one binary knapsack and one small transportation exercise would round this set out. Licensing: the chapter's exercise section carries a footnote attributing adapted exercises to Sekhon and Bloom (LibreTexts, CC BY 4.0), which covers the oven store, two-machine, factory scheduling, and quiz grading problems; the rest appear original. No verbatim matches to closed-license textbooks found.
+
+\exsol{2.1}{Identify Linear Functions}{1}
+
+Only item (4) is linear.
+\begin{enumerate}
+\item $x^2 + 3y + 2z$: not linear; the term $x^2$ is a variable raised to a power other than one.
+\item $\sqrt{x_1 x_2 x_3}$: not linear; the variables are multiplied together and put under a root.
+\item $\sum_{i=1}^n a_i 2^{x_i}$: not linear; each variable appears in an exponent, and $2^{x_i}$ is an exponential function of $x_i$.
+\item $\sum_{i=1}^n a_i x_i$: linear; it is exactly the form $c_1 x_1 + \dots + c_n x_n$ of Definition 2.1, with constant coefficients $a_i$.
+\end{enumerate}
+The test throughout: every term must be a constant times a single variable to the first power.
+
+\exsol{2.2}{Identify Linear Function}{1}
+
+Function (2) is linear.
+\begin{enumerate}
+\item $2x_1 + x_2 x_3 - 7x_3$: not linear because of the product $x_2 x_3$ of two decision variables.
+\item $\sqrt{2}\,x_1 + x_2 + 3^{1.6} x_3$: linear. The coefficients $\sqrt{2}$ and $3^{1.6}$ look exotic, but they are \emph{constants}; each term is still a constant times a single variable. Linearity is about how the \emph{variables} enter, not about how pretty the coefficients are.
+\end{enumerate}
+
+\begin{qaflag}
+Mildly duplicative (issue type d): Exercise 2.2 repeats the skill of Exercise 2.1 with two more items. It does add one new lesson (irrational constant coefficients are fine) that 2.1 does not test. Recommendation: merge these two items into Exercise 2.1 as parts (5) and (6) and retire 2.2, or keep as is if the redundancy is intentional for drill.
+\end{qaflag}
+
+\exsol{2.3}{Hoodies and Posters}{1}
+
+Let $x_1$ be the number of hoodies and $x_2$ the number of posters produced per week. The profit coefficients are revenue minus material cost: $\$30 - \$18 = \$12$ per hoodie and $\$8 - \$3 = \$5$ per poster. The LP, mirroring the screen printing example, is
+\begin{align*}
+\max \quad & z = 12x_1 + 5x_2\\
+\st \quad & 3x_1 + x_2 \leq 120 && \text{(printing hours)}\\
+& x_1 + x_2 \leq 70 && \text{(finishing hours)}\\
+& x_1 \leq 35 && \text{(market limit)}\\
+& x_1, x_2 \geq 0.
+\end{align*}
+The optimal solution is $x_1 = 25$ hoodies and $x_2 = 45$ posters, where the printing and finishing constraints intersect, with weekly profit $12(25) + 5(45) = \$525$ (verified by solver). Note that producing the maximum 35 hoodies is not optimal: it leaves only $120 - 105 = 15$ printing hours for posters, and profit drops to $12(35) + 5(15) = \$495$.
+
+\exsol{2.4}{Smoothie Powders}{1}
+
+Let $x_A, x_B, x_C \geq 0$ be the scoops of powders A, B, C in the daily mix. Following the diet problem template:
+\begin{align*}
+\min \quad & z = 1.20x_A + 0.80x_B + 0.60x_C\\
+\st \quad & 6x_A + 4x_B + 2x_C \geq 24 && \text{(protein, g)}\\
+& 3x_A + 2x_B + 4x_C \geq 18 && \text{(fiber, g)}\\
+& 2x_A + 3x_B + x_C \geq 12 && \text{(iron, mg)}\\
+& x_A, x_B, x_C \geq 0.
+\end{align*}
+Solving with software gives $x_A = x_B = x_C = 2$, cost $2(1.20 + 0.80 + 0.60) = \$5.20$, as claimed. All three nutritional constraints are tight there: protein $12 + 8 + 4 = 24$, fiber $6 + 4 + 8 = 18$, iron $4 + 6 + 2 = 12$, so the optimal mix wastes nothing.
+
+\exsol{2.5}{Chemical Manufacturing}{2}
+
+Let $x_1$ and $x_2$ be the number of hours per day that Process 1 and Process 2 run. Each hour of Process 1 costs \$4 and yields $(3, 1, 1)$ units of chemicals (A, B, C); each hour of Process 2 costs \$1 and yields $(1, 1, 0)$:
+\begin{align*}
+\min \quad & z = 4x_1 + x_2\\
+\st \quad & 3x_1 + x_2 \geq 10 && \text{(chemical A)}\\
+& x_1 + x_2 \geq 5 && \text{(chemical B)}\\
+& x_1 \geq 3 && \text{(chemical C)}\\
+& x_1, x_2 \geq 0.
+\end{align*}
+Since only Process 1 makes chemical C, its demand forces $x_1 \geq 3$. The solver gives $x_1 = 3$, $x_2 = 2$ with minimum daily cost \$14: three hours of Process 1 cover chemical C and most of A, and two hours of the cheap Process 2 finish off the demands for A and B (A: $9 + 2 = 11 \geq 10$ with slack, B: $3 + 2 = 5$ tight).
+
+\exsol{2.6}{Oven Store Profit Maximization}{2}
+
+Let $x_1, x_2, x_3 \geq 0$ be the numbers of small, medium, and large ovens sold per month:
+\begin{align*}
+\max \quad & z = 50x_1 + 100x_2 + 150x_3\\
+\st \quad & 3x_1 + 5x_2 + 6x_3 \leq 90 && \text{(storage, cu ft)}\\
+& x_1 + x_2 + x_3 \leq 200 && \text{(sales hours)}\\
+& x_1 + x_2 + 2x_3 \leq 280 && \text{(installer hours)}\\
+& x_1, x_2, x_3 \geq 0.
+\end{align*}
+Storage is the scarce resource: profit per cubic foot is $50/3 \approx 16.7$ for small, $100/5 = 20$ for medium, and $150/6 = 25$ for large ovens, so the store should fill its storage with large ovens. The solver confirms the optimum $x_1 = x_2 = 0$, $x_3 = 15$ with maximum profit $\$2250$. The sales constraint (15 of 200 hours) and installation constraint (30 of 280 hours) are far from binding; only storage binds.
+
+\begin{qaflag}
+Book fix applied (issue type c, ugly data): the exercise previously gave 100 cubic feet of storage, which makes the LP optimum $x_3 = 50/3 \approx 16.67$ ovens with profit \$2500, a fractional number of ovens in a problem that asks "how many of each type should be sold." The book now says 90 cubic feet, giving the clean integer optimum above (re-verified by solver). Instructors using older printings should adjust. Separately, the sales and installer constraints can never bind with any of these storage levels; they are harmless as which-constraints-matter distractors, but could be tightened if a two-binding-constraint instance is wanted.
+\end{qaflag}
+
+\exsol{2.7}{Manufacturing Profit Problem}{2}
+
+Let $x_A, x_B, x_C \geq 0$ be the monthly production of products A, B, and C. Each machine's monthly hours give one constraint:
+\begin{align*}
+\max \quad & z = 20x_A + 30x_B + 40x_C\\
+\st \quad & x_A + 2x_B + 2x_C \leq 180 && \text{(Machine I)}\\
+& 2x_A + 2x_B + 4x_C \leq 300 && \text{(Machine II)}\\
+& x_A, x_B, x_C \geq 0.
+\end{align*}
+An optimal solution is $x_A = 120$, $x_B = 30$, $x_C = 0$ with maximum profit \$3300 (verified by solver). Both machine constraints bind: $120 + 60 = 180$ and $240 + 60 = 300$. Product C is not worth making: it earns \$40 but uses as much Machine I time as B and twice the Machine II time of A, so its profit does not justify the machine hours it consumes.
+
+\exsol{2.8}{Factory Production Scheduling}{2}
+
+Let $x_1$ and $x_2$ be the number of days that Factory I and Factory II operate. Minimize operating cost subject to filling the order:
+\begin{align*}
+\min \quad & z = 4000x_1 + 5000x_2\\
+\st \quad & 10x_1 + 20x_2 \geq 1000 && \text{(product A)}\\
+& 20x_1 + 20x_2 \geq 1600 && \text{(product B)}\\
+& 20x_1 + 10x_2 \geq 700 && \text{(product C)}\\
+& x_1, x_2 \geq 0.
+\end{align*}
+The optimal solution is $x_1 = 60$ days and $x_2 = 20$ days with minimum cost $4000(60) + 5000(20) = \$340{,}000$ (verified by solver). The constraints for products A ($600 + 400 = 1000$) and B ($1200 + 400 = 1600$) are binding, while product C is overproduced ($1400 \geq 700$).
+
+\exsol{2.9}{Quiz Grading Minimization}{2}
+
+Let $x_1, x_2, x_3 \geq 0$ be the numbers of objective, recall, and recall-plus quizzes. Grading times per quiz are 1, 2, and 3 minutes:
+\begin{align*}
+\min \quad & z = x_1 + 2x_2 + 3x_3 && \text{(grading minutes)}\\
+\st \quad & x_1 + x_2 + x_3 \geq 20 && \text{(at least 20 quizzes)}\\
+& 10x_1 + 30x_2 + 60x_3 \geq 720 && \text{(preparation minutes)}\\
+& 5x_1 + 6x_2 + 7x_3 \geq 130 && \text{(total score points)}\\
+& x_1, x_2, x_3 \geq 0.
+\end{align*}
+The solver gives the optimum $x_1 = 12$ objective, $x_2 = 0$ recall, and $x_3 = 10$ recall-plus quizzes, with minimum grading time $12 + 0 + 30 = 42$ minutes. Check: quizzes $12 + 10 = 22 \geq 20$ (slack), preparation $120 + 600 = 720$ (tight), score $60 + 70 = 130$ (tight). Intuition: objective quizzes are the cheapest way to add score and count, while recall-plus quizzes are the most grading-efficient way to generate preparation time; the middle option is dominated by mixing the two extremes.
+
+\exsol{2.10}{Campus Caf\'e Scheduling}{2}
+
+\begin{enumerate}
+\item Let $x_i \geq 0$ be the number of baristas who start their four consecutive working days on day $i$, for $i = 1$ (Mon) through $7$ (Sun), with the week wrapping around. A barista starting on day $i$ works days $i, i+1, i+2, i+3$ (mod 7), so day $d$ is covered by those who started on days $d-3, d-2, d-1, d$:
+\begin{align*}
+\min \quad & z = x_1 + x_2 + x_3 + x_4 + x_5 + x_6 + x_7\\
+\st \quad & x_5 + x_6 + x_7 + x_1 \geq 5 && \text{(Mon)}\\
+& x_6 + x_7 + x_1 + x_2 \geq 4 && \text{(Tue)}\\
+& x_7 + x_1 + x_2 + x_3 \geq 3 && \text{(Wed)}\\
+& x_1 + x_2 + x_3 + x_4 \geq 4 && \text{(Thu)}\\
+& x_2 + x_3 + x_4 + x_5 \geq 6 && \text{(Fri)}\\
+& x_3 + x_4 + x_5 + x_6 \geq 8 && \text{(Sat)}\\
+& x_4 + x_5 + x_6 + x_7 \geq 7 && \text{(Sun)}\\
+& x_1, \dots, x_7 \geq 0.
+\end{align*}
+\item The solver reports the LP optimal value $z_{LP} = 28/3 \approx 9.33$, attained for instance at the fractional point $(x_1,\dots,x_7) = (0,\, 2/3,\, 5/3,\, 5/3,\, 2,\, 8/3,\, 2/3)$.
+\item Any whole-number staffing plan is feasible for the LP, so its total cannot beat the LP optimum: every integer plan uses at least $28/3$ baristas, and being an integer, at least $\lceil 28/3 \rceil = 10$. A plan achieving 10 (verified feasible, and verified optimal by an integer solver): $x_3 = 3$ (start Wed), $x_4 = 1$ (Thu), $x_5 = 2$ (Fri), $x_6 = 2$ (Sat), $x_7 = 2$ (Sun), all others 0. Coverage by day: Mon $6 \geq 5$, Tue $4 \geq 4$, Wed $5 \geq 3$, Thu $4 \geq 4$, Fri $6 \geq 6$, Sat $8 \geq 8$, Sun $7 \geq 7$.
+\end{enumerate}
+
+\exsol{2.11}{Identify Linear Inequalities}{2}
+
+Only (4) and (5) are linear as written: both compare $\sum_i a_i x_i$, a linear function with constant coefficients, to a constant. An equation like (4) is welcome in a linear program; it is equivalent to the pair of inequalities $\sum_i a_i x_i \geq b$ and $\sum_i a_i x_i \leq b$.
+
+Constraint (1), $\frac{x_1}{x_1 + x_2 + x_3} \geq 0.5$, is not linear because the variables appear in a ratio, but it \emph{can} be made linear: if we know $x_1 + x_2 + x_3 > 0$ (for instance when all variables are non-negative and at least one is positive), multiplying both sides by the denominator gives $x_1 \geq 0.5(x_1 + x_2 + x_3)$, that is, $0.5x_1 - 0.5x_2 - 0.5x_3 \geq 0$.
+
+Constraints (2) and (3) cannot be repaired: $\sin x_1$ and $2^{x_i}$ are genuinely nonlinear functions of the variables, and no algebraic rearrangement removes them.
+
+\exsol{2.12}{Stochastic Objective}{2}
+
+Replace each random cost coefficient by its expected value and optimize the expected objective. If $c_i$ has a known distribution with mean $\bar{c}_i = \mathbb{E}[c_i]$, then by linearity of expectation the expected cost of any solution $\x$ is
+\[
+\mathbb{E}\Big[\sum_i c_i x_i\Big] = \sum_i \mathbb{E}[c_i]\, x_i = \sum_i \bar{c}_i x_i ,
+\]
+which is again a linear function of $\x$ with constant coefficients. So the LP
+\[
+\max\ \Big\{ \sum_i \bar{c}_i x_i \; : \; A\x \leq \b, \; \x \geq 0 \Big\}
+\]
+finds the solution with the best expected objective value. As in the hint, a uniformly random payment between \$1 and \$2 is worth \$1.50 in expectation, and that single number is all the LP needs. (This works because the randomness is only in the objective; random coefficients inside the \emph{constraints} are much more delicate, which is the subject of stochastic programming.)
+
+\exsol{2.13}{Which Assumption Breaks?}{2}
+
+\begin{enumerate}
+\item \textbf{Proportionality.} The per-unit cost changes from \$5 to \$4 at 100 units, so the cost contribution of the purchase variable is not proportional to its value; it is piecewise linear.
+\item \textbf{Additivity.} The combined effect of the two campaigns is less than the sum of their separate effects, so contributions are not independent and additive; there is an interaction term.
+\item \textbf{Divisibility.} 3.6 trucks is not an implementable decision; trucks come in whole numbers, so the fractional answer signals that divisibility fails and an integer model may be needed.
+\item \textbf{Certainty.} The yield coefficients depend on future rainfall, so the model data are not known with certainty.
+\end{enumerate}
+Follow-up for (a): essentially no harm. If purchases always exceed 100 units, the cost is $5(100) + 4(q - 100) = 4q + 100$ in that range: a linear function of $q$ plus a constant. The constant does not affect which solution is optimal, so an LP using a marginal cost of \$4 (plus the fixed \$100 in the reported objective) is exact on the region where the model is used. Assumption violations only matter where the model is actually evaluated.
+
+\exsol{2.14}{Production with Rented Labor}{3}
+
+\begin{enumerate}
+\item Let $x_1, x_2, x_3 \geq 0$ be the weekly production of A, B, C, and $r$ the labor hours rented. Rented hours appear in the objective as a cost ($-9r$) and in the labor constraint as extra capacity:
+\begin{align*}
+\max \quad & z = 30x_1 + 45x_2 + 24x_3 - 9r\\
+\st \quad & 2x_1 + 4x_2 + x_3 \leq 160 && \text{(machine hours)}\\
+& 3x_1 + 3x_2 + 2x_3 \leq 180 + r && \text{(labor hours)}\\
+& 0 \leq r \leq 30\\
+& x_1, x_2, x_3 \geq 0.
+\end{align*}
+\item The solver gives $x_1 = 0$, $x_2 = 22$, $x_3 = 72$, $r = 30$, with net profit $45(22) + 24(72) - 9(30) = 990 + 1728 - 270 = \$2448$. Both resource constraints bind: machine $4(22) + 72 = 160$ and labor $3(22) + 2(72) = 210 = 180 + 30$.
+\item Product C turns 2 labor hours into \$24, that is, \$12 of profit per labor hour (and it is machine-light, using only 1 machine hour per unit). As long as some product earns more than \$9 per additional labor hour, each rented hour costing \$9 can be converted into strictly more than \$9 of profit, so an optimal plan keeps renting until the agency limit of 30 hours is reached. In dual language: the shadow price of labor exceeds the \$9 rental rate, so the rental upper bound is binding.
+\end{enumerate}

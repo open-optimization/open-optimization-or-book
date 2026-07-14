@@ -1,4 +1,11 @@
 % \sout is already defined by the ulem package in the preamble
+%
+% ATTRIBUTION: Much of this chapter (the lawn inspector and Konigsberg
+% motivation, definitions, the Dijkstra and spanning tree examples, and many
+% exercises) is adapted from the "Graph Theory" chapter of "Math in Society"
+% by David Lippman, licensed CC BY-SA 3.0 (http://www.opentextbookstore.com/mathinsociety/).
+% Modifications by Robert Hildebrand and contributors; relicensed CC BY-SA 4.0
+% as part of this book. See frontmatter/sources-attribution.tex.
 \chapter{Graph Algorithms}
 
 \section{Graph Theory}
@@ -352,6 +359,7 @@ The graph below shows 5 cities.  The weights on the edges represent the airfare 
  \end{learningcheckpoint}
 
 \section{Shortest Path}
+\label{sec:gt-shortest-path}
 \begin{outcome}
 \begin{itemize}
 \item What is the problem statement?
@@ -1176,6 +1184,7 @@ The minimum cost spanning tree is the spanning tree with the smallest total edge
 \end{enumerate}
 
 \subsection{Kruskal's Algorithm for Minimum Cost Spanning Tree}
+\label{subsec:gt-kruskal}
 Kruskal's algorithm is a surprisingly simple algorithm.  It builds a spanning tree one edge at a time by choosing the cheapest next edge to add.  But!  It skips the edge if this edge would create a cycle.
 
 Here is an algorithm description:
@@ -1672,6 +1681,8 @@ Use Prim's algorithm to find a minimum cost spanning tree on the same graph as i
 
 \section{Exercises}
 
+The exercises in this chapter are arranged in three bands that build on one another.  \textbf{Skills} items drill the mechanics: translating maps and tables into graphs, computing degrees, and running Dijkstra's and Kruskal's algorithms by hand.  \textbf{Concepts} items ask you to explain why the algorithms work and what their limits are.  \textbf{Explorations} are longer, open-ended activities suited to group work.  Within each band, items follow the order in which the material appears in the chapter.
+
 \begin{ex}{Shortest Path Problem}{} %2
 \label{ex:shortest-path}
 Find the shortest path between vertices A and G in the graph below.\\
@@ -1903,7 +1914,7 @@ Moscow&&&&\$329\\
 \draw(0,0) to node[above]{1:25} (4.5,2);
 \draw(0,0) to node[left]{1:55} (2,-3);
 \draw(2,-3) to node[below]{3:50} (4,-2.5);
-\draw(4,-2.5) to node[left]{3.55} (6,-1.5);
+\draw(4,-2.5) to node[left]{3:55} (6,-1.5);
 \draw(6,-1.5) to node[above]{3:10} (8,-2);
 \draw(6,-1.5) to node[left]{4:00} (4.5,2);
 \draw(8,-2) to node[right]{5:45} (7,2);
@@ -1933,19 +1944,46 @@ Moscow&&&&\$329\\
 \draw[fill] (2,3) circle[radius=.1] node[above]{A};
 \draw[fill] (5,1.5) circle[radius=.1] node[right]{E};
 \end{tikzpicture}\\
+
+\item \label{ex:dijkstra-warmup-rail}Passenger rail travel times, in minutes, between five Virginia cities and Washington, D.C. are shown below.  Apply Dijkstra's algorithm, exactly as in the worked examples of \S\ref{sec:gt-shortest-path} and in Exercise~\ref{ex:dijkstra-eurail}, to find the route with shortest travel time from Bristol to Washington.  Record the distance labels as they become permanent.\\
+
+\begin{tikzpicture}
+\draw[fill] (0,0) circle[radius=.1] node[left]{Bristol};
+\draw[fill] (2.5,1) circle[radius=.1] node[above]{Roanoke};
+\draw[fill] (4.5,-0.5) circle[radius=.1] node[below]{Lynchburg};
+\draw[fill] (6,1.5) circle[radius=.1] node[above]{Charlottesville};
+\draw[fill] (7.5,-0.5) circle[radius=.1] node[below]{Richmond};
+\draw[fill] (9,1.5) circle[radius=.1] node[right]{Washington};
+\draw(0,0) to node[above, fill=white]{145} (2.5,1);
+\draw(2.5,1) to node[below, fill=white]{55} (4.5,-0.5);
+\draw(2.5,1) to node[above, fill=white]{120} (6,1.5);
+\draw(4.5,-0.5) to node[right, fill=white]{70} (6,1.5);
+\draw(4.5,-0.5) to node[below, fill=white]{125} (7.5,-0.5);
+\draw(6,1.5) to node[above, fill=white]{140} (9,1.5);
+\draw(7.5,-0.5) to node[right, fill=white]{115} (9,1.5);
+\end{tikzpicture}
+\exrefs{\S\ref{sec:gt-shortest-path}, Exercise~\ref{ex:dijkstra-eurail}}
+
+\item \label{ex:kruskal-airfare}Using Kruskal's algorithm, find a minimum cost spanning tree for the airfare graph you created in problem \#4.  List the edges in the order the algorithm considers them, noting any edge that is rejected because it would close a circuit.  What would an airline alliance use such a tree for?
+\exrefs{\S\ref{subsec:gt-kruskal}}
 \end{enumerate}
 
 \noindent \textbf{Concepts}
 
-\begin{enumerate}[start=13]
+\begin{enumerate}[start=15]
 \item Can a graph have one vertex with odd degree?  If not, are there other values that are not possible?  Why?\\
 
+\item \label{ex:mst-greedy}Kruskal's algorithm is \emph{greedy}: at every step it grabs the cheapest edge available, with no regard for what comes later.  Explain informally why this shortsightedness never costs anything for spanning trees.  Suppose the algorithm's tree $T$ skipped some edge $e$ that belongs to a cheaper spanning tree; use the fact that adding $e$ to $T$ closes exactly one circuit to argue that the cheaper tree can be repaired, one edge at a time, into Kruskal's tree without ever increasing the cost.  Would the same reasoning work if some edge costs were negative?
+\exrefs{\S\ref{subsec:gt-kruskal}}
+
+\item \label{ex:dijkstra-nonneg}Dijkstra's algorithm permanently marks the unvisited vertex with the smallest recorded distance and never revisits it.  Explain why this is justified when all edge weights are nonnegative.  Then construct a graph with three vertices, one of which has a negative edge weight, on which the algorithm returns a wrong answer.
+\exrefs{\S\ref{sec:gt-shortest-path}}
 
 \end{enumerate}
 
 \noindent \textbf{Explorations}
 
-\begin{enumerate}[start=14]
+\begin{enumerate}[start=18]
 \item Social networks such as Facebook and LinkedIn can be represented using graphs in which vertices represent people and edges are drawn between two vertices when those people are ``friends.''   The table below shows a friendship table, where an X shows that two people are friends.
 \begin{center}
 \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|}
@@ -1997,6 +2035,23 @@ For comparison, Bern--Frankfurt--Amsterdam--Berlin takes 14:05 and Bern--Lyon--P
 
 \begin{solution}(Exercise~\ref{ex:mst-sonet-ring})
 Using Kruskal's algorithm, the four cheapest edges are accepted one after another with no rejections: CE (4.0), BD (4.3), AE (4.4), AD (4.7).  These four edges connect all five buildings, so the algorithm stops.  The minimum cost spanning tree is $\{CE, BD, AE, AD\}$ with total cost $4.0 + 4.3 + 4.4 + 4.7 = 17.4$, i.e., \$17{,}400.  (A spanning tree is the cheapest way to connect the buildings, but it offers no backup path if a cable is cut.)
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:dijkstra-warmup-rail})
+Running Dijkstra's algorithm from Washington, the labels become permanent in the order: Washington (0), Richmond (115), Charlottesville (140), Lynchburg (210, via Charlottesville), Roanoke (260, via Charlottesville), Bristol (405).  The shortest route is
+\[
+\text{Bristol} \to \text{Roanoke} \to \text{Charlottesville} \to \text{Washington},
+\qquad 145 + 120 + 140 = 405 \text{ minutes},
+\]
+that is, 6 hours 45 minutes.  For comparison, routing through Lynchburg takes $145 + 55 + 70 + 140 = 410$ minutes and routing through Richmond takes $145 + 55 + 125 + 115 = 440$ minutes.
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:kruskal-airfare})
+Sorting the airfares from cheapest to most expensive, Kruskal's algorithm accepts Seattle--Honolulu (\$159), London--Moscow (\$245), and London--Cairo (\$323); it then rejects Moscow--Cairo (\$329) because that edge would close the circuit London--Moscow--Cairo, and finally accepts Seattle--London (\$370), which connects all five cities.  The minimum cost spanning tree has total cost $159 + 245 + 323 + 370 = \$1097$.  Such a tree gives the cheapest set of routes that still links every city, though any trip between cities in different branches must connect through intermediate stops.
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:mst-greedy})
+Suppose a spanning tree $T^*$ uses an edge $e$ that Kruskal's tree $T$ skipped.  Kruskal's algorithm rejected $e$ only because, at the moment $e$ was examined, $e$ closed a circuit with edges already accepted; since edges are examined from cheapest to most expensive, every edge on that circuit costs no more than $e$.  That circuit must contain some edge $f \notin T^*$ (a tree cannot contain a whole circuit).  Replacing $e$ by $f$ in $T^*$ yields another spanning tree that is no more expensive, and which agrees with $T$ on one more edge.  Repeating this exchange turns $T^*$ into $T$ without ever increasing the cost, so $T$ is at least as cheap as any spanning tree.  The argument never used the sign of the costs, only their order, so it works with negative edge costs too; note the contrast with Dijkstra's algorithm, which does rely on nonnegative weights (Exercise~\ref{ex:dijkstra-nonneg}).
 \end{solution}
 
 \ifdefined \old

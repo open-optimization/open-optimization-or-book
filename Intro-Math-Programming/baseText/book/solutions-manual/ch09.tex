@@ -1,0 +1,344 @@
+% ============================================================================
+% Chapter 9 solutions: Simplex Method in Tableau Form
+% Book source: part1-linear-programming/ch06-simplex/simplex-tableau.tex
+% Exercise numbering follows \begin{ex} order in that file (12 exercises).
+% All pivots and optima verified with exact-fraction basis algebra and
+% scipy.optimize.linprog, July 2026.
+% ============================================================================
+\section{Chapter 9: Simplex Method in Tableau Form}
+
+Chapter 9 repackages the simplex method as row operations on a single
+table. Its twelve exercises cover reading tableaus (9.1 to 9.3), executing
+pivots and full solves including a Big-M setup (9.4 to 9.7), the sign
+convention and the tableau-dictionary correspondence (9.8, 9.9),
+recognizing unboundedness and infeasibility from a tableau (9.10, 9.11),
+and one challenge problem that turns an unbounded tableau into an explicit
+certificate ray (9.12). Throughout, recall the chapter's sign convention:
+the $z$-row stores $z - \c^\top\x = 0$, so entering variables have
+\emph{negative} $z$-row entries and the tableau is optimal when every
+$z$-row entry is nonnegative. All arithmetic below was verified with
+exact-fraction basis computations, and each optimum with an LP solver.
+Book Selected Solutions exist for 9.2, 9.3, 9.5, and 9.6 and are
+reproduced here.
+
+\exsol{9.1}{Reading a mid-solve tableau}{1}
+
+\textbf{(a)} The basic variables are the row labels: $s_1, s_2, y$. The
+nonbasic variables are $x$ and $s_3$.
+
+\textbf{(b)} Setting $x = s_3 = 0$ and reading the RHS column:
+\[
+x = 0,\quad y = 7,\quad s_1 = 2,\quad s_2 = 9,\quad s_3 = 0,
+\qquad z = 21.
+\]
+
+\textbf{(c)} The $z$-row entries of the nonbasic variables are
+$-\tfrac12$ (for $x$) and $\tfrac32$ (for $s_3$). In the chapter's
+convention these are the recorded reduced costs; because of the stored
+sign flip, increasing $x$ by one unit \emph{raises} $z$ by $\tfrac12$,
+while increasing $s_3$ would lower it by $\tfrac32$.
+
+\textbf{(d)} Not optimal: the $z$-row has the negative entry $-\tfrac12$
+under $x$, so $x$ enters next. (The subsequent ratio test gives
+$2/\tfrac12 = 4$, $9/\tfrac32 = 6$, $7/\tfrac12 = 14$, so $s_1$ would
+leave, leading to the optimal tableau with $z = 23$.)
+
+\exsol{9.2}{Reading a tableau}{1}
+
+(Book Selected Solution, verified.) The basic variables are the row
+labels $x_1$ and $x_2$; the nonbasic variables are $s_1$ and $s_2$.
+Setting the nonbasic variables to zero and reading the RHS column gives
+the basic feasible solution
+\[
+x_1 = 6, \quad x_2 = 4, \quad s_1 = s_2 = 0, \qquad z = 40.
+\]
+The objective-row entries of the nonbasic variables are $3$ and $1$, both
+nonnegative. In this convention a positive entry means that increasing
+the corresponding nonbasic variable would \emph{decrease} $z$, so no
+pivot can improve the objective and the tableau is optimal.
+
+\exsol{9.3}{Entering variable, ratio test, and pivot element}{1}
+
+(Book Selected Solution, verified.) The most negative objective-row
+entry is $-4$, so $x_1$ enters. The ratio test divides each RHS by the
+positive entries of the $x_1$ column:
+\[
+\frac{6}{2} = 3, \qquad \frac{8}{4} = 2, \qquad \frac{12}{3} = 4.
+\]
+The minimum ratio $2$ occurs in the $s_2$ row, so $s_2$ leaves and the
+pivot element is the $4$ in the $s_2$ row of the $x_1$ column.
+
+\exsol{9.4}{Perform one pivot}{2}
+
+Pivot on the $4$ in the $s_2$ row, $x_1$ column. Scale the pivot row by
+$\tfrac14$ to get the new $x_1$-row
+$[\,1,\ \tfrac14,\ 0,\ \tfrac14,\ 0 \mid 2\,]$, then clear the $x_1$
+column: $s_1\text{-row} \leftarrow s_1\text{-row} - 2(x_1\text{-row})$,
+$s_3\text{-row} \leftarrow s_3\text{-row} - 3(x_1\text{-row})$,
+$z\text{-row} \leftarrow z\text{-row} + 4(x_1\text{-row})$. The result:
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{c|ccccc|c}
+Basis & $x_1$ & $x_2$ & $s_1$ & $s_2$ & $s_3$ & RHS\\
+\hline
+$z$   & $0$ & $-2$ & $0$ & $1$ & $0$ & $8$\\
+\hline
+$s_1$ & $0$ & $\tfrac52$  & $1$ & $-\tfrac12$ & $0$ & $2$\\
+$x_1$ & $1$ & $\tfrac14$  & $0$ & $\tfrac14$  & $0$ & $2$\\
+$s_3$ & $0$ & $\tfrac{13}{4}$ & $0$ & $-\tfrac34$ & $1$ & $6$\\
+\end{tabular}
+\end{center}
+The $x_1$ column is now the unit column $(0; 0, 1, 0)$, and the objective
+value in the $z$-row RHS has increased from $0$ to $8$ (the new BFS is
+$x_1 = 2$, $x_2 = 0$ with $z = 4 \cdot 2 = 8$). The tableau is not yet
+optimal ($-2$ under $x_2$), but the exercise asks only for this one pivot.
+
+\exsol{9.5}{Solve a linear program in tableau form}{2}
+
+(Book Selected Solution, verified, with the starting tableau displayed.)
+Adding slacks $s_1, s_2$, the initial tableau is
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{c|cccc|c|c}
+Basis & $x$ & $y$ & $s_1$ & $s_2$ & RHS & ratio\\
+\hline
+$z$   & $-1$ & $\mathbf{-2}$ & $0$ & $0$ & $0$ & \\
+\hline
+$s_1$ & $1$ & $1$ & $1$ & $0$ & $4$ & $4/1 = 4$\\
+$s_2$ & $1$ & $\fbox{3}$ & $0$ & $1$ & $6$ & $6/3 = 2$ (min)\\
+\end{tabular}
+\end{center}
+
+\textbf{Pivot 1:} $y$ enters ($-2$ most negative); ratios $4$ and $2$,
+so $s_2$ leaves; pivot on the boxed $3$. Dividing the pivot row by $3$
+and clearing the $y$ column gives
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{c|cccc|c|c}
+Basis & $x$ & $y$ & $s_1$ & $s_2$ & RHS & ratio\\
+\hline
+$z$   & $\mathbf{-\tfrac13}$ & $0$ & $0$ & $\tfrac23$ & $4$ & \\
+\hline
+$s_1$ & $\fbox{$\tfrac23$}$ & $0$ & $1$ & $-\tfrac13$ & $2$ & $2/\tfrac23 = 3$ (min)\\
+$y$   & $\tfrac13$ & $1$ & $0$ & $\tfrac13$  & $2$ & $2/\tfrac13 = 6$\\
+\end{tabular}
+\end{center}
+
+\textbf{Pivot 2:} $x$ enters ($-\tfrac13$); ratios $3$ and $6$, so $s_1$
+leaves; pivot on the boxed $\tfrac23$:
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{c|cccc|c}
+Basis & $x$ & $y$ & $s_1$ & $s_2$ & RHS\\
+\hline
+$z$   & $0$ & $0$ & $\tfrac12$ & $\tfrac12$ & $5$\\
+\hline
+$x$ & $1$ & $0$ & $\tfrac32$  & $-\tfrac12$ & $3$\\
+$y$ & $0$ & $1$ & $-\tfrac12$ & $\tfrac12$  & $1$\\
+\end{tabular}
+\end{center}
+Every $z$-row entry is nonnegative, so the tableau is optimal:
+$(x, y) = (3, 1)$ with $z^* = 5$ (both constraints tight).
+
+\exsol{9.6}{A full two-pivot solve}{2}
+
+(Book Selected Solution, verified.) Adding slacks $s_1, s_2$, the
+starting tableau is
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{c|cccc|c|c}
+Basis & $x$ & $y$ & $s_1$ & $s_2$ & RHS & ratio\\
+\hline
+$z$   & $\mathbf{-3}$ & $-2$ & $0$ & $0$ & $0$ & \\
+\hline
+$s_1$ & $\fbox{2}$ & $1$ & $1$ & $0$ & $10$ & $10/2 = 5$ (min)\\
+$s_2$ & $1$ & $3$ & $0$ & $1$ & $15$ & $15/1 = 15$\\
+\end{tabular}
+\end{center}
+
+\textbf{Pivot 1:} $x$ enters ($-3$ most negative); $s_1$ leaves; pivot on
+the boxed $2$. Scaling the pivot row by $\tfrac12$ and clearing the $x$
+column:
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{c|cccc|c|c}
+Basis & $x$ & $y$ & $s_1$ & $s_2$ & RHS & ratio\\
+\hline
+$z$   & $0$ & $\mathbf{-\tfrac12}$ & $\tfrac32$ & $0$ & $15$ & \\
+\hline
+$x$   & $1$ & $\tfrac12$ & $\tfrac12$ & $0$ & $5$ & $5/\tfrac12 = 10$\\
+$s_2$ & $0$ & $\fbox{$\tfrac52$}$ & $-\tfrac12$ & $1$ & $10$ & $10/\tfrac52 = 4$ (min)\\
+\end{tabular}
+\end{center}
+
+\textbf{Pivot 2:} $y$ enters ($-\tfrac12$); ratios $10$ and $4$, so
+$s_2$ leaves; pivot on the boxed $\tfrac52$:
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{c|cccc|c}
+Basis & $x$ & $y$ & $s_1$ & $s_2$ & RHS\\
+\hline
+$z$   & $0$ & $0$ & $\tfrac75$ & $\tfrac15$ & $17$\\
+\hline
+$x$ & $1$ & $0$ & $\tfrac35$ & $-\tfrac15$ & $3$\\
+$y$ & $0$ & $1$ & $-\tfrac15$ & $\tfrac25$ & $4$\\
+\end{tabular}
+\end{center}
+Every $z$-row entry is nonnegative, so the tableau is optimal:
+$(x, y) = (3, 4)$ with $z^* = 17$ and $s_1 = s_2 = 0$ (both constraints
+are tight at the optimum).
+
+\exsol{9.7}{Setting up a Big-M tableau}{2}
+
+The augmented constraints are
+\[
+x + y - e_1 + a_1 = 4,
+\qquad
+x + 2y + s_2 = 10,
+\qquad
+x, y, e_1, s_2, a_1 \geq 0,
+\]
+with objective $z - 4x - 3y + M a_1 = 0$. Written naively, the tableau is
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{c|ccccc|c}
+Basis & $x$ & $y$ & $e_1$ & $s_2$ & $a_1$ & RHS\\
+\hline
+$z$   & $-4$ & $-3$ & $0$ & $0$ & $M$ & $0$\\
+\hline
+$a_1$ & $1$ & $1$ & $-1$ & $0$ & $1$ & $4$\\
+$s_2$ & $1$ & $2$ & $0$  & $1$ & $0$ & $10$\\
+\end{tabular}
+\end{center}
+This is not yet a proper tableau: the \emph{basic} variable $a_1$ has a
+nonzero entry ($M$) in the $z$-row. Pricing out
+($z\text{-row} \leftarrow z\text{-row} - M \cdot a_1\text{-row}$) gives
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{c|ccccc|c|c}
+Basis & $x$ & $y$ & $e_1$ & $s_2$ & $a_1$ & RHS & ratio\\
+\hline
+$z$   & $\mathbf{-4-M}$ & $-3-M$ & $M$ & $0$ & $0$ & $-4M$ & \\
+\hline
+$a_1$ & $\fbox{1}$ & $1$ & $-1$ & $0$ & $1$ & $4$ & $4/1 = 4$ (min)\\
+$s_2$ & $1$ & $2$ & $0$  & $1$ & $0$ & $10$ & $10/1 = 10$\\
+\end{tabular}
+\end{center}
+Now $a_1$'s objective entry is zero, as required. The most negative
+$z$-row entry is $-4 - M$ (for large $M$ it beats $-3 - M$), so
+\emph{$x$ enters first}. The ratio test gives $4/1 = 4$ in the $a_1$ row
+versus $10/1 = 10$ in the $s_2$ row, so \emph{yes: the artificial
+variable $a_1$ leaves on the very first pivot}, and the method continues
+with an ordinary feasible tableau (the pivot lands at $(x, y) = (4, 0)$
+with $z = 16$).
+
+\exsol{9.8}{The $z$-row sign convention}{2}
+
+\textbf{(a)} A dictionary displays $z = \bar z + \sum_j \bar c_j x_j$ over
+the nonbasic variables. The tableau instead stores this equation with
+everything on the left: $z - \sum_j \bar c_j x_j = \bar z$. Each
+coefficient $\bar c_j$ crosses the equals sign and gets negated, so a
+variable that is attractive in the dictionary (positive $\bar c_j$) shows
+up in the tableau with a negative entry $-\bar c_j$. The entering rules
+``most positive dictionary coefficient'' and ``most negative $z$-row
+entry'' therefore select the same variable.
+
+\textbf{(b)} From $z = 12 + 3x_1 - 2x_2$, move the variable terms left:
+$z - 3x_1 + 2x_2 = 12$. The $z$-row is
+\[
+\begin{array}{c|cc|c}
+ & x_1 & x_2 & \text{RHS} \\
+\hline
+z & -3 & 2 & 12
+\end{array}
+\]
+(entries $0$ under any slack or basic columns not shown).
+
+\textbf{(c)} The stored equation is $z - \sum_j \bar c_j x_j = \bar z$,
+and it only involves \emph{nonbasic} variables besides $z$. At the
+current basic solution every nonbasic variable equals zero, so the
+equation collapses to $z = \bar z$: the RHS entry is the current
+objective value. The constant term never crosses the equals sign (it was
+already on the right), so it is the one number in the row that is not
+negated.
+
+\exsol{9.9}{From tableau to dictionary}{2}
+
+Each tableau row is an equation. The $x_1$ row says
+$x_1 + 2s_1 - s_2 = 6$ and the $x_2$ row says $x_2 - s_1 + s_2 = 4$;
+the $z$-row says $z + 3s_1 + s_2 = 40$. Solving each for its basic
+variable (and $z$):
+\[
+\begin{aligned}
+\max\quad & z = 40 - 3s_1 - s_2 \\
+\st\quad & x_1 = 6 - 2s_1 + s_2, \\
+& x_2 = 4 + s_1 - s_2, \\
+& x_1, x_2, s_1, s_2 \geq 0.
+\end{aligned}
+\]
+Setting the nonbasic variables $s_1 = s_2 = 0$ gives $x_1 = 6$,
+$x_2 = 4$, $z = 40$: the same basic feasible solution as the tableau.
+(Both dictionary coefficients in the objective are negative, matching the
+optimality of the tableau.)
+
+\exsol{9.10}{Recognizing an unbounded problem}{2}
+
+The only negative $z$-row entry is $-2$ under $x_1$, so $x_1$ should
+enter. The ratio test looks for \emph{positive} entries in the $x_1$
+column, but they are $-1$ (in the $x_2$ row) and $-3$ (in the $s_1$
+row): there are none, so the ratio test fails; no row limits the
+increase of $x_1$. Increasing $x_1 = t$ while keeping $s_2 = 0$ gives
+$x_2 = 3 + t$ and $s_1 = 5 + 3t$, which stay nonnegative for all
+$t \geq 0$, while $z = 10 + 2t \to \infty$. The linear program is
+\textbf{unbounded}: it has feasible solutions of arbitrarily large
+objective value and no optimal solution.
+
+\exsol{9.11}{Reading off infeasibility}{2}
+
+Yes, the tableau is optimal for the penalized (Big-M) problem: for large
+$M$ every $z$-row entry ($0, 0, M, 2, 0$) is nonnegative, so no pivot can
+improve the penalized objective. But the artificial variable is still
+basic at the positive value $a_1 = 3$ (read from its RHS). A feasible
+solution of the original problem would allow all artificial variables to
+be set to zero, so if the best the penalized problem can do still keeps
+$a_1 = 3 > 0$, no feasible solution of the original program exists: the
+original linear program is \textbf{infeasible}.
+
+The objective value $8 - 3M$ tells the same story: it contains the
+unavoidable penalty $-M a_1 = -3M$. Since $M$ stands for an arbitrarily
+large constant, $8 - 3M$ is arbitrarily bad; the penalized problem cannot
+escape the penalty, which is exactly the algebraic signature of
+infeasibility.
+
+\exsol{9.12}{Certifying unboundedness from a tableau}{3}
+
+\textbf{(a)} The only negative $z$-row entry is $-2$ under $x_2$, so
+$x_2$ enters. Its column entries are $-1$ (in the $x_1$ row) and $0$
+(in the $s_2$ row); the ratio test requires a \emph{positive} entry and
+finds none, so no row limits the increase of $x_2$: the problem is
+unbounded.
+
+\textbf{(b)} Set $x_2 = t \geq 0$ and keep the other nonbasic variable
+$s_1 = 0$. The $x_1$ row ($x_1 - x_2 + s_1 = 1$) gives $x_1 = 1 + t$,
+and the $s_2$ row ($s_1 + s_2 = 3$) gives $s_2 = 3$. So
+\[
+\x(t) = (x_1, x_2, s_1, s_2) = (1 + t,\ t,\ 0,\ 3), \qquad t \geq 0.
+\]
+Direct substitution into the original constraints:
+\[
+x_1 - x_2 = (1 + t) - t = 1 \leq 1 \quad\checkmark
+\qquad
+-x_1 + x_2 = -(1 + t) + t = -1 \leq 2 \quad\checkmark
+\]
+and $x_1 = 1 + t \geq 0$, $x_2 = t \geq 0$, $s_1 = 0 \geq 0$,
+$s_2 = 2 - (-1) = 3 \geq 0$. So $\x(t)$ is feasible for every
+$t \geq 0$.
+
+\textbf{(c)} Along the ray, $z(t) = x_1 + x_2 = 1 + 2t \to \infty$ as
+$t \to \infty$. Geometrically, the feasible region is the strip between
+the parallel-ish lines $x_1 - x_2 = 1$ and $-x_1 + x_2 = 2$ in the first
+quadrant; it is unbounded in the direction $\mathbf{d} = (1, 1)$. The
+certificate ray starts at the vertex $(1, 0)$ and points along
+$(1, 1)$, hugging the boundary $x_1 - x_2 = 1$; since
+$\c^\top \mathbf{d} = 1 + 1 = 2 > 0$, the objective grows without bound
+along it.

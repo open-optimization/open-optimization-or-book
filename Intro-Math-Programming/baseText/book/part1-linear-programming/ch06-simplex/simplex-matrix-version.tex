@@ -562,6 +562,7 @@ Now the system is in standard form:
 \]
 
 \subsection{Selecting and Evaluating Different Bases}
+\label{sec:three-bases}
 
 A basis consists of any two linearly independent columns from \( A \). We select three different bases:
 \begin{itemize}
@@ -846,6 +847,7 @@ Let $\bar \x = (\bar \x_B, \bar \x_N) = (A_B^{-1}\b, \0)$.
     Thus, $\bar \x$ is an optimal solution!
 \end{proof}
 
+\label{par:matrix-sign-conventions}%
 A note on sign conventions.  The three treatments of the simplex method in this book state the same optimality test in three ways.  In the dictionary form of Chapter~\ref{ch:simplex-dictionary}, we improve the solution by increasing a nonbasic variable with a \emph{positive} coefficient in the objective row, and we stop when there is none.  The theorem above says the same thing in matrix language: those coefficients are the reduced costs $\c_N^\top -\c_B^\top A_B^{-1} A_N$, and the solution is optimal once they are all $\leq 0$.  In the tableau form of Chapter~\ref{ch:simplex-tableau}, the objective is stored as the equation $z - \c^\top\x = 0$, which flips the signs of these coefficients, so there you look for \emph{negative} $z$-row entries and stop when every entry is nonnegative.  All three are the same test.
 
 \begin{example}{Verifying Optimality Using Reduced Costs}{}
@@ -1091,4 +1093,251 @@ The reduced-cost computation we just carried out is the algebraic version of a p
 \item \href{https://www.desmos.com/calculator/j1li4l7lcv}{Desmos: Interactive plot} of an LP from different BFS perspectives (\href{https://open-optimization.github.io/open-optimization-or-book/interactive-figures/lp-graphical-method.html}{backup interactive plot}).
 \end{itemize}
 \end{resource}
+
+\section{Exercises}
+
+\exgroup{Warm-ups}
+
+\begin{ex}{Basis matrix and basic solution}{}
+\label{ex:matrix-basis-warmup}
+\stars{1} Consider the system from Example 1,
+\[
+\begin{aligned}
+    x_1 + 2x_2 + x_3 &= 4, \\
+    3x_1 + x_2 + 2x_3 &= 5,
+\end{aligned}
+\]
+and take the basis \( B = \{x_2, x_3\} \).
+\begin{enumerate}
+    \item Write down the basis matrix \( A_B \) and compute \( A_B^{-1} \).
+    \item Compute the basic solution \( \x_B = A_B^{-1}\b \) with \( x_1 = 0 \).
+    \item Is this basic solution a basic feasible solution?
+\end{enumerate}
+\exrefs{\S\ref{sec:solutions-axb}, Example 1}
+\end{ex}
+
+\begin{ex}{A basic solution that is not feasible}{}
+\label{ex:matrix-infeasible-basis}
+\stars{1} For the same system as Exercise~\ref{ex:matrix-basis-warmup}, take the basis \( B = \{x_1, x_3\} \).  Compute \( A_B \), \( A_B^{-1} \), and the basic solution, and explain why this basis gives a basic solution that is \emph{not} feasible.
+\exrefs{\S\ref{sec:solutions-axb}, Example 1}
+\end{ex}
+
+\begin{ex}{A fourth basis for the three-bases example}{}
+\label{ex:matrix-fourth-basis}
+\stars{1} In Section~\ref{sec:three-bases} we evaluated the bases \( \{x_1, x_2\} \), \( \{x_1, s_2\} \), and \( \{s_1, s_2\} \) of the system
+\[
+\begin{bmatrix}
+    1 & 2 & 1 & 0 \\
+    5 & 3 & 0 & 1
+\end{bmatrix}
+\begin{bmatrix}
+    x_1 \\ x_2 \\ s_1 \\ s_2
+\end{bmatrix}
+=
+\begin{bmatrix}
+    16 \\ 45
+\end{bmatrix}.
+\]
+Now evaluate the basis \( B = \{x_2, s_2\} \): compute \( A_B \), \( A_B^{-1} \), and the basic solution, and decide whether it is feasible.  Which point \( (x_1, x_2) \) does this basis correspond to?
+\exrefs{\S\ref{sec:three-bases}}
+\end{ex}
+
+\exgroup{Core problems}
+
+\begin{ex}{Reduced costs at two bases}{}
+\label{ex:matrix-reduced-costs}
+\stars{2} Consider the bakery linear program of Section~\ref{sec:bakery-problem} in standard form,
+\[
+A =
+\begin{bmatrix}
+1 & 1 & 1 & 0 & 0 \\
+2 & 1 & 0 & 1 & 0 \\
+1 & 2 & 0 & 0 & 1
+\end{bmatrix},
+\quad
+\b = \begin{bmatrix} 9 \\ 16 \\ 14 \end{bmatrix},
+\quad
+\c^\top = \begin{bmatrix} 2 & 3 & 0 & 0 & 0 \end{bmatrix},
+\]
+with variables ordered \( (x, y, s_1, s_2, s_3) \).  For each of the bases
+\[
+B_1 = \{y, s_1, s_2\}
+\qquad \text{and} \qquad
+B_2 = \{x, y, s_2\},
+\]
+compute \( A_B^{-1} \), the basic solution \( \x_B = A_B^{-1}\b \), the objective value \( \c_B^\top A_B^{-1} \b \), and the reduced costs \( \c_N^\top - \c_B^\top A_B^{-1} A_N \).  Use the optimality condition to decide whether each basis is optimal.
+\exrefs{\S\ref{sec:optimality-conditions}, \S\ref{sec:bakery-problem}}
+\end{ex}
+
+\begin{ex}{Which bases are feasible?}{}
+\label{ex:matrix-feasible-bases}
+\stars{2} For the \( 2 \times 4 \) system
+\[
+\begin{bmatrix}
+    1 & 2 & 1 & 0 \\
+    5 & 3 & 0 & 1
+\end{bmatrix}
+\begin{bmatrix}
+    x_1 \\ x_2 \\ s_1 \\ s_2
+\end{bmatrix}
+=
+\begin{bmatrix}
+    16 \\ 45
+\end{bmatrix},
+\qquad x_1, x_2, s_1, s_2 \geq 0,
+\]
+there are \( \binom{4}{2} = 6 \) ways to choose two columns.
+\begin{enumerate}
+    \item Verify that every one of the six column pairs is linearly independent, so each choice is a basis.
+    \item For each basis, compute the basic solution and classify it as feasible or infeasible.
+    \item Give an example of a \( 2 \times 4 \) matrix in which some pair of columns does \emph{not} form a basis.
+\end{enumerate}
+\exrefs{\S\ref{sec:three-bases}, Figure~\ref{fig:matrix-bases-geometry}}
+\end{ex}
+
+\begin{ex}{Rebuilding a dictionary from the formula}{}
+\label{ex:matrix-dictionary-formula}
+\stars{2} Section~\ref{sec:optimality-conditions} displays the linear program
+\[
+\begin{aligned}
+\max\quad & 2x + y \\
+\st\quad & 3x + y + s_1 = 23,\\
+& 5x + 3y + s_2 = 45,\\
+& x, y, s_1, s_2 \ge 0,
+\end{aligned}
+\]
+together with its dictionary at the basis \( B = \{x, y\} \).  Using the revised simplex dictionary formula~\eqref{eq:dictionary-general}, compute \( A_B^{-1} \), \( A_B^{-1}\b \), \( A_B^{-1}A_N \), and the reduced costs, and confirm that the formula reproduces the displayed dictionary
+\[
+\begin{aligned}
+\max\quad & 17 - 0.25s_1 - 0.25s_2 \\
+\st\quad & x = 6 - 0.75s_1 + 0.25s_2,\\
+& y = 5 + 1.25s_1 - 0.75s_2.
+\end{aligned}
+\]
+\exrefs{\S\ref{sec:optimality-conditions}}
+\end{ex}
+
+\exgroup{Concepts and connections}
+
+\begin{ex}{Reduced costs of basic variables}{}
+\label{ex:matrix-basic-reduced-zero}
+\stars{2} The reduced-cost vector of the nonbasic variables is \( \c_N^\top - \c_B^\top A_B^{-1} A_N \).  Apply the same formula to the \emph{basic} columns: show that
+\[
+\c_B^\top - \c_B^\top A_B^{-1} A_B = \0^\top,
+\]
+so every basic variable has reduced cost exactly zero.  Explain what this says about the dictionary at basis \( B \): why can a basic variable never appear in the objective row?
+\exrefs{\S\ref{sec:optimality-conditions}}
+\end{ex}
+
+\begin{ex}{Reduced-cost signs and the entering rule}{}
+\label{ex:matrix-sign-conventions}
+\stars{2} In the dictionary form of Chapter~\ref{ch:simplex-dictionary}, the entering variable is a nonbasic variable with a \emph{positive} coefficient in the objective row, while the optimality theorem of this chapter stops when all reduced costs are \( \leq 0 \).
+\begin{enumerate}
+    \item Explain why these are the same rule: show that the objective-row coefficient of a nonbasic variable in a dictionary \emph{is} its reduced cost \( c_j - \c_B^\top A_B^{-1} A_{\{j\}} \).
+    \item A positive reduced cost signals an improving direction.  Describe geometrically what happens to the solution when that variable increases from zero.
+    \item The tableau form of Chapter~\ref{ch:simplex-tableau} instead looks for \emph{negative} \( z \)-row entries.  Using the sign-convention paragraph of \S\ref{par:matrix-sign-conventions}, explain why no contradiction arises.
+\end{enumerate}
+\exrefs{\S\ref{par:matrix-sign-conventions}, sign-convention paragraph; \S\ref{sec:optimality-conditions}}
+\end{ex}
+
+\exgroup{Challenge problems}
+
+\begin{ex}{Strictly negative reduced costs imply a unique optimum}{}
+\label{ex:matrix-unique-optimum}
+\stars{3} Let \( B \) be a basis of an LP in standard form whose basic solution \( \bar\x = (A_B^{-1}\b, \0) \) is feasible, and suppose every reduced cost is \emph{strictly} negative:
+\[
+\c_N^\top - \c_B^\top A_B^{-1} A_N < \0^\top \quad \text{(componentwise)}.
+\]
+Prove that \( \bar\x \) is the \emph{unique} optimal solution of the LP.  (This is an argument, not a computation.  Suggested route: take any feasible \( \x \neq \bar\x \), write \( \c^\top \x = \c^\top \bar\x + (\c_N^\top - \c_B^\top A_B^{-1} A_N)\x_N \), and consider the two cases \( \x_N = \0 \) and \( \x_N \neq \0 \).)
+\exrefs{\S\ref{sec:optimality-conditions}, Optimality Condition theorem}
+\end{ex}
+
+\subsubsection*{Selected Solutions}
+
+\begin{solution}(Exercise~\ref{ex:matrix-basis-warmup})
+The columns of \( x_2 \) and \( x_3 \) give
+\[
+A_B =
+\begin{bmatrix}
+    2 & 1 \\
+    1 & 2
+\end{bmatrix},
+\qquad
+A_B^{-1} = \frac{1}{3}
+\begin{bmatrix}
+    2 & -1 \\
+    -1 & 2
+\end{bmatrix}.
+\]
+The basic solution is
+\[
+\x_B = A_B^{-1}\b = \frac{1}{3}
+\begin{bmatrix}
+    2 & -1 \\
+    -1 & 2
+\end{bmatrix}
+\begin{bmatrix}
+    4 \\ 5
+\end{bmatrix}
+= \frac{1}{3}
+\begin{bmatrix}
+    3 \\ 6
+\end{bmatrix}
+=
+\begin{bmatrix}
+    1 \\ 2
+\end{bmatrix},
+\]
+so \( (x_1, x_2, x_3) = (0, 1, 2) \).  Both basic variables are nonnegative, so this is a basic feasible solution.
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:matrix-reduced-costs})
+\textbf{Basis \( B_1 = \{y, s_1, s_2\} \).}  Ordering the basic variables \( (y, s_1, s_2) \),
+\[
+A_{B_1} =
+\begin{bmatrix}
+1 & 1 & 0 \\
+1 & 0 & 1 \\
+2 & 0 & 0
+\end{bmatrix},
+\qquad
+\x_{B_1} = A_{B_1}^{-1}\b = \begin{bmatrix} 7 \\ 2 \\ 9 \end{bmatrix},
+\]
+so \( y = 7 \), \( s_1 = 2 \), \( s_2 = 9 \): a basic feasible solution with objective value \( \c_{B_1}^\top \x_{B_1} = 3 \cdot 7 = 21 \).  The nonbasic variables are \( x \) and \( s_3 \), and the reduced costs work out to
+\[
+\c_N^\top - \c_{B_1}^\top A_{B_1}^{-1} A_N = \begin{bmatrix} \tfrac12 & -\tfrac32 \end{bmatrix}.
+\]
+The reduced cost of \( x \) is \( \tfrac12 > 0 \), so \( B_1 \) is \emph{not} optimal; this matches the second dictionary of Chapter~\ref{ch:simplex-dictionary}, \( z = 21 + \tfrac12 x - \tfrac32 s_3 \).
+
+\textbf{Basis \( B_2 = \{x, y, s_2\} \).}  Here
+\[
+A_{B_2} =
+\begin{bmatrix}
+1 & 1 & 0 \\
+2 & 1 & 1 \\
+1 & 2 & 0
+\end{bmatrix},
+\qquad
+\x_{B_2} = A_{B_2}^{-1}\b = \begin{bmatrix} 4 \\ 5 \\ 3 \end{bmatrix},
+\]
+a basic feasible solution with value \( 2 \cdot 4 + 3 \cdot 5 = 23 \).  The nonbasic variables are \( s_1 \) and \( s_3 \), with reduced costs
+\[
+\c_N^\top - \c_{B_2}^\top A_{B_2}^{-1} A_N = \begin{bmatrix} -1 & -1 \end{bmatrix} \leq \0^\top,
+\]
+so \( B_2 \) is optimal, matching the final dictionary \( z = 23 - s_1 - s_3 \).
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:matrix-unique-optimum})
+Write \( \bar{\c}_N^\top = \c_N^\top - \c_B^\top A_B^{-1} A_N \) and \( z^* = \c^\top \bar\x = \c_B^\top A_B^{-1} \b \).  Every feasible \( \x \) satisfies \( A_B \x_B + A_N \x_N = \b \), so \( \x_B = A_B^{-1}\b - A_B^{-1}A_N \x_N \) and, exactly as in the optimality theorem,
+\[
+\c^\top \x = z^* + \bar{\c}_N^\top \x_N .
+\]
+Take any feasible \( \x \neq \bar\x \).
+
+\emph{Case 1: \( \x_N \neq \0 \).}  Then some component \( x_j > 0 \) with \( j \in N \), and since every entry of \( \bar{\c}_N \) is strictly negative, \( \bar{\c}_N^\top \x_N < 0 \).  Hence \( \c^\top \x < z^* \), so \( \x \) is not optimal.
+
+\emph{Case 2: \( \x_N = \0 \).}  Then \( A_B \x_B = \b \), and since \( A_B \) is invertible this forces \( \x_B = A_B^{-1}\b \), i.e., \( \x = \bar\x \), contradicting \( \x \neq \bar\x \).
+
+Therefore every feasible point other than \( \bar\x \) has objective value strictly less than \( z^* \): the solution \( \bar\x \) is optimal and no other optimal solution exists.
+\end{solution}
 

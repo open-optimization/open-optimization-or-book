@@ -1,0 +1,290 @@
+% LICENSING NOTE (2026-07-10): all prose in these boxes is original writing
+% summarizing the cited publications; no text, figures, or tables are
+% reproduced from the sources. The mathematical models are simplified
+% re-derivations in this book's notation (methods and facts are not
+% copyrightable subject matter). Accordingly these boxes are the book's own
+% content and are released under the book's CC BY-SA 4.0 license, with the
+% sources credited in each box's References list.
+% NOTE (2026-07-10): these five case studies are now INTEGRATED into the book
+% (ch2 diet, ch4 network flow, ch15 x3) with labels case:*. This file is kept
+% as the standalone-review source; edit the chapter copies going forward.
+
+% ============================================================================
+% CASE STUDY DRAFTS — for review, 2026-07-10
+% Five casestudybox drafts in the format of the §4.2 housing case study.
+% Each is self-contained: copy the whole box into the target chapter.
+% Suggested placements are noted above each box.
+% Every number is from the cited source; models are simplified versions of the
+% published formulations, with simplifications stated honestly in the box.
+% NOT yet \input anywhere.
+% ============================================================================
+
+% ----------------------------------------------------------------------------
+% 1. KIDNEY EXCHANGE — suggested placement: Ch. 15 (IP formulations), after
+%    set covering, or Ch. 4 assignment section.
+% ----------------------------------------------------------------------------
+\begin{casestudybox}{Kidney Exchange: Integer Programming that Saves Lives}
+
+Thousands of kidney patients have a friend or family member willing to donate a kidney, but with the wrong blood or tissue type.  Kidney exchange programs fix this with a swap: donor A gives to patient B while donor B gives to patient A.  With three pairs, a three-way cycle works the same way.  National programs, including the United States' kidney paired donation program (UNOS) and the United Kingdom's Living Kidney Sharing Scheme, decide who swaps with whom by solving an \textbf{integer program}.  In the UK, that integer program runs on a fixed schedule several times a year: the solver's output is literally the list of surgeries to schedule.
+
+\subsection*{The Challenge}
+Given a pool of incompatible patient--donor pairs, find a set of swap cycles that gives as many patients as possible a compatible kidney.  Two hard rules shape the problem.  First, a pair can appear in at most one cycle (each donor has one kidney to give).  Second, all surgeries in a cycle must happen simultaneously, so that no donor can back out after their loved one has received a kidney; operating-room logistics therefore cap cycles at two or three pairs.
+
+\subsection*{The Solution: A Cycle-Selection Integer Program}
+\textbf{Model type: pure binary integer program.  No machine learning; compatibility is determined by medical testing.}
+
+\modelhead{Sets}
+\begin{itemize}
+\item Let $P$ be the set of incompatible patient--donor pairs.
+\item Let $C$ be the set of feasible swap cycles of length at most 3: subsets of pairs where each donor is compatible with the next patient around the cycle.
+\end{itemize}
+
+\modelhead{Variables}
+\begin{itemize}
+\item Let $x_c = 1$ if cycle $c$ is selected for surgery, and $0$ otherwise.
+\end{itemize}
+
+\modelhead{Model}
+\begin{align*}
+\max \quad & \sum_{c \in C} |c| \, x_c   \tag{total transplants} \\
+\st        & \sum_{c \in C :\, i \in c} x_c \leq 1 &&\quad \text{for all } i \in P   \tag{each pair in at most one cycle} \\
+             & x_c \in \{0,1\} &&\quad \text{for all } c \in C.
+\end{align*}
+
+Here $|c|$ is the number of pairs in cycle $c$, which equals the number of transplants the cycle produces.  Real programs also include \emph{chains} started by altruistic donors (someone who donates without a paired patient) and weight cycles by medical priority rather than just counting transplants; both are small extensions of the same model.
+
+\subsection*{Assumptions and Simplifications}
+\begin{itemize}
+\item Compatibility is treated as a yes/no input from blood typing and tissue crossmatching, computed before the optimization.
+\item The model shown maximizes the \emph{number} of transplants; deployed programs maximize a weighted sum reflecting waiting time, sensitization, and pediatric status.
+\item Enumerating all cycles is feasible for cycle length $\le 3$; national-scale pools with long chains need column generation (a Book 2 topic).
+\end{itemize}
+
+\subsection*{Implementation and Results}
+Cycle- and chain-based integer programs are the clearing engines of the US and UK national programs, and the published models have been benchmarked directly on real UNOS and UK datasets.  The UK scheme's matching runs are performed with algorithms developed by the University of Glasgow.  Economist Alvin Roth shared the 2012 Nobel Prize in part for the market design behind kidney exchange.
+
+\subsection*{References}
+\begin{itemize}
+\item D.J. Abraham, A. Blum, T. Sandholm. ``Clearing Algorithms for Barter Exchange Markets: Enabling Nationwide Kidney Exchanges.'' \emph{Proceedings of ACM EC}, 2007. \url{https://doi.org/10.1145/1250910.1250954}
+\item D.F. Manlove, G. O'Malley. ``Paired and Altruistic Kidney Donation in the UK: Algorithms and Experimentation.'' \emph{ACM Journal of Experimental Algorithmics} 19, 2015. \url{https://doi.org/10.1145/2670129}
+\item R. Anderson, I. Ashlagi, D. Gamarnik, A.E. Roth. ``Finding Long Chains in Kidney Exchange Using the Traveling Salesman Problem.'' \emph{PNAS} 112(3), 2015. \url{https://doi.org/10.1073/pnas.1421853112}
+\end{itemize}
+\end{casestudybox}
+
+% ----------------------------------------------------------------------------
+% 2. WILDFIRE AIRTANKERS — suggested placement: Ch. 15 facility location, or
+%    Ch. 4 assignment/covering.
+% ----------------------------------------------------------------------------
+\begin{casestudybox}{Where Should the Water Bombers Sleep? Airtanker Basing in Ontario}
+
+Ontario fights forest fires with a fleet of airtankers (water bombers).  A fire caught within the first few hours is usually a small story; a fire missed grows into a big one.  So the province's ability to hit new fires quickly depends on where the airtankers are based each morning.  In the early 1990s the Ontario Ministry of Natural Resources asked operations researchers to help decide the home bases, and the resulting mathematical programming model informed the province's actual basing strategy from the 1993 fire season onward.
+
+\subsection*{The Challenge}
+Fires do not announce where they will start.  What is known is the historical pattern: some fire management zones see far more fire starts than others, and an airtanker can only provide effective \emph{initial attack} on fires within a limited flying range of its base.  With a fixed fleet, where should the aircraft be based so that as much expected fire activity as possible is within reach?
+
+\subsection*{The Solution: A Coverage Location Model}
+\textbf{Model type: integer program (facility location / coverage).  No machine learning; the fire-frequency inputs are historical averages.}
+
+\modelhead{Sets and Parameters}
+\begin{itemize}
+\item Let $I$ be the set of fire management zones and $J$ the set of candidate bases.
+\item Let $n_i$ be the expected number of fires in zone $i$ (from historical records).
+\item Let $t_{ij} = 1$ if an airtanker based at $j$ can reach zone $i$ within the initial-attack time standard, and $0$ otherwise.
+\item Let $N$ be the number of airtankers in the fleet.
+\end{itemize}
+
+\modelhead{Variables}
+\begin{itemize}
+\item Let $y_j \in \mathbb{Z}_{\geq 0}$ be the number of airtankers based at $j$.
+\item Let $z_i = 1$ if zone $i$ is covered by at least one base within reach.
+\end{itemize}
+
+\modelhead{Model}
+\begin{align*}
+\max \quad & \sum_{i \in I} n_i \, z_i   \tag{expected fires within reach} \\
+\st        & z_i \leq \sum_{j \in J} t_{ij}\, y_j &&\quad \text{for all } i \in I   \tag{coverage requires a nearby base} \\
+             & \sum_{j \in J} y_j = N   \tag{fleet size} \\
+             & y_j \in \mathbb{Z}_{\geq 0}, \quad z_i \in \{0,1\}.
+\end{align*}
+
+\subsection*{Assumptions and Simplifications}
+\begin{itemize}
+\item The version above counts a zone as covered or not; the published model is finer-grained, accounting for how \emph{many} aircraft can respond and for daily fire-weather variation.
+\item Expected fire counts stand in for actual (random) fire occurrence: the model optimizes the average day, not the worst day.
+\item Airtankers can be re-deployed between bases day to day; the published work treats home-basing (seasonal) and daily deployment as linked decisions.
+\end{itemize}
+
+\subsection*{Implementation and Results}
+The Ontario Ministry of Natural Resources used the model to inform its airtanker home-basing strategy beginning with the 1993 fire season, and Ontario's fire management program has continued to work with operations researchers for decades since, on deployment, dispatch, and detection-patrol planning.
+
+\subsection*{References}
+\begin{itemize}
+\item J.I. MacLellan, D.L. Martell. ``Basing Airtankers for Forest Fire Control in Ontario.'' \emph{Operations Research} 44(5), 677--686, 1996. \url{https://doi.org/10.1287/opre.44.5.677}
+\item D.L. Martell. ``The Development and Implementation of Forest Fire Management Decision Support Systems in Ontario, Canada.'' \emph{Forest Ecology and Management} / retrospective account, 2015.
+\item D.L. Martell, R.J. Drysdale, G.E. Doan, D. Boychuk. ``An Evaluation of Forest Fire Initial Attack Resources.'' \emph{Interfaces} 14(5), 20--32, 1984.
+\end{itemize}
+\end{casestudybox}
+
+% ----------------------------------------------------------------------------
+% 3. UN WORLD FOOD PROGRAMME — suggested placement: Ch. 2 after the diet
+%    problem, with a cross-reference from Ch. 13 (cost vs. nutrition).
+% ----------------------------------------------------------------------------
+\begin{casestudybox}{Feeding Millions: The World Food Programme's Optimization Engine}
+
+The United Nations World Food Programme (WFP) is the world's largest humanitarian organization, assisting roughly 100 million people a year in places like Iraq, Yemen, and South Sudan.  Every operation must answer the same questions: \emph{what} food basket to provide, \emph{where} to buy it, and \emph{how} to move it.  WFP built an optimization tool, Optimus, that answers all three at once, and the team won the 2021 INFORMS Franz Edelman Award for it.
+
+\subsection*{The Challenge}
+A food basket must meet nutritional requirements (energy, protein, fat, micronutrients) for a beneficiary, using commodities that can actually be procured and delivered through a network of suppliers, ports, warehouses, and distribution points, each with costs and capacities.  Cheaper baskets can be less nutritious; more nutritious baskets can be undeliverable.  Before Optimus, these decisions were made separately by different teams.
+
+\subsection*{The Solution: The Diet Problem Meets Network Flow}
+\textbf{Model type: mixed-integer linear program.  The core is the classical diet LP joined to a min-cost flow model; integer variables handle choices such as transfer modality (food vs.\ cash).  No machine learning inside the optimization; demand and price inputs come from WFP assessments.}
+
+A simplified version with the two key ingredients:
+
+\modelhead{Variables}
+\begin{itemize}
+\item Let $x_k \geq 0$ be the amount of commodity $k$ (grams per person per day) in the food basket.
+\item Let $f_{ka} \geq 0$ be the flow of commodity $k$ on arc $a$ of the supply network.
+\end{itemize}
+
+\modelhead{Model}
+\begin{align*}
+\min \quad & \sum_{k} c^{\text{proc}}_k\, x_k + \sum_{k,\,a} c^{\text{transp}}_a\, f_{ka}   \tag{procurement + transport cost} \\
+\st        & \sum_{k} n_{jk} \, x_k \geq R_j &&\quad \text{for each nutrient } j   \tag{nutritional requirements} \\
+           & \text{flow conservation linking } f_{ka} \text{ to deliveries of } x_k   \tag{the basket must actually arrive} \\
+           & \sum_{k} f_{ka} \leq u_a &&\quad \text{for each arc } a   \tag{port/route capacities} \\
+           & x_k \geq 0, \quad f_{ka} \geq 0,
+\end{align*}
+where $n_{jk}$ is the amount of nutrient $j$ per gram of commodity $k$ and $R_j$ is the daily requirement.  The published model adds palatability rules (e.g., the basket cannot be all lentils), sourcing decisions, multi-period planning, and the food-vs.-cash modality choice, which is where the integer variables enter.
+
+\subsection*{Assumptions and Simplifications}
+\begin{itemize}
+\item Nutritional needs are modeled per ``average beneficiary''; the paper discusses requirements by demographic profile.
+\item Prices and lead times are taken as data; the paper describes how WFP updates them per operation.
+\end{itemize}
+
+\subsection*{Implementation and Results}
+In Iraq, the tool cut operating costs by 17 percent, and the resulting food baskets met 98 percent of the nutrition requirements; WFP has since applied it across its major operations.  The full MILP is printed in the paper, which is open access, so students can read exactly what was modeled and what was assumed.
+
+\subsection*{References}
+\begin{itemize}
+\item K. Peters, S. Silva, R. Gonçalves, M. Kavelj, H. Fleuren, D. den Hertog, O. Ergun, M. Freeman. ``The Nutritious Supply Chain: Optimizing Humanitarian Food Assistance.'' \emph{INFORMS Journal on Optimization} 3(2), 200--226, 2021. \url{https://doi.org/10.1287/ijoo.2019.0047}
+\end{itemize}
+\end{casestudybox}
+
+% ----------------------------------------------------------------------------
+% 4. AMAZON REGIONALIZATION — suggested placement: Ch. 4 network flow section.
+% ----------------------------------------------------------------------------
+\begin{casestudybox}{Amazon Redraws Its Map: Regionalizing the Fulfillment Network}
+
+When you order from Amazon, the item might ship from a building 20 miles away or 2{,}000 miles away.  Around 2023, Amazon restructured its US fulfillment network into largely self-sufficient regions so that most packages stay close to home: the ``Regionalization'' initiative.  The redesign was driven by network optimization models, published in the INFORMS Journal on Applied Analytics, and made Amazon a 2025 Edelman Award finalist.  In 2023 it reduced the cost to serve by \$0.45 per item in the US while achieving Amazon's fastest delivery speeds to date.
+
+\subsection*{The Challenge}
+Serving a customer from a distant fulfillment center is expensive and slow, but keeping every product in every region requires more inventory.  The network design must decide which connections (fulfillment center $\to$ sortation $\to$ delivery station) to operate and how demand should flow over them, balancing cost, speed, and capacity across thousands of facilities and arcs.
+
+\subsection*{The Solution: A Path-Based Network Design MIP}
+\textbf{Model type: mixed-integer linear program on a network (with machine learning used only to forecast the inputs: demand, travel times).  The published paper is explicit about this division of labor.}
+
+A simplified core of the ``topology'' model:
+
+\modelhead{Sets and Parameters}
+\begin{itemize}
+\item Let $R$ be the set of demand regions, with demand $d_r$.
+\item Let $P_r$ be the set of feasible fulfillment paths for region $r$ (a path uses specific facilities and transportation arcs); $c_p$ is the cost of serving one unit along path $p$.
+\item Let $A$ be the set of arcs with capacities $u_a$.
+\end{itemize}
+
+\modelhead{Variables}
+\begin{itemize}
+\item Let $f_p \geq 0$ be the volume served on path $p$.
+\item Let $w_a = 1$ if arc $a$ is operated (a connection Amazon chooses to run).
+\end{itemize}
+
+\modelhead{Model}
+\begin{align*}
+\min \quad & \sum_{p} c_p\, f_p + \sum_{a \in A} g_a\, w_a   \tag{flow cost + cost of operating connections} \\
+\st        & \sum_{p \in P_r} f_p = d_r &&\quad \text{for all } r \in R   \tag{serve all demand} \\
+           & \sum_{p \,\ni\, a} f_p \leq u_a\, w_a &&\quad \text{for all } a \in A   \tag{use only open connections, within capacity} \\
+           & f_p \geq 0, \quad w_a \in \{0,1\}.
+\end{align*}
+
+Note the second constraint: it is exactly the big-$M$/linking trick from the integer programming chapter, with the capacity $u_a$ playing the role of $M$.  Regionalization shows up as the optimizer choosing to open mostly \emph{within-region} connections.
+
+\subsection*{Assumptions and Simplifications}
+\begin{itemize}
+\item Demands $d_r$ and travel times are forecasts, produced by machine learning models; the optimization treats them as data.
+\item The deployed system also has a time-expanded ``network timing'' model producing hourly schedules; the topology model above is the strategic layer.
+\end{itemize}
+
+\subsection*{Implementation and Results}
+Deployed across Amazon's US network in 2023: cost to serve fell by \$0.45 per item, delivery speeds hit record levels, and the share of shipments fulfilled within their own region rose sharply.
+
+\subsection*{References}
+\begin{itemize}
+\item ``Regionalize and Scale: Amazon's Fulfillment Network Design for Faster and Cheaper Delivery.'' \emph{INFORMS Journal on Applied Analytics}, 2025. \url{https://doi.org/10.1287/inte.2025.0295}
+\end{itemize}
+\end{casestudybox}
+
+% ----------------------------------------------------------------------------
+% 5. WALMART TRUCK ROUTING & LOAD PLANNING — suggested placement: Ch. 2
+%    modeling or Ch. 15; the load-planning core is a packing IP.
+% ----------------------------------------------------------------------------
+\begin{casestudybox}{108{,}000 Fewer Truck Routes: Walmart's Load Planning}
+
+Walmart moves goods from distribution centers to about 4{,}700 US stores on one of the largest private trucking fleets in the world.  For the 2023 Franz Edelman Award (which it won), Walmart described an end-to-end optimization framework, from long-term network design down to daily routing and trailer load planning.  In fiscal year 2023 the system eliminated 108{,}000 truck routes and 33 million driving miles, saving \$91.5 million and preventing 98.6 million pounds of CO$_2$ emissions.
+
+\subsection*{The Challenge}
+Every day, each store needs a set of orders delivered.  Orders take up trailer space; trucks have capacity; stores have delivery windows; and every truck dispatched costs money and emissions.  The daily question at the heart of load planning: pack the orders into as few trailer-loads as possible while respecting capacities and delivery requirements.
+
+\subsection*{The Solution: A Packing/Consolidation Integer Program}
+\textbf{Model type: integer programming for load consolidation and routing, inside a framework whose strategic layers are also optimization models.  Forecasts feed the models as data.}
+
+The consolidation core, simplified:
+
+\modelhead{Sets and Parameters}
+\begin{itemize}
+\item Let $O$ be the set of orders for a delivery region, with sizes $q_o$ (trailer cube).
+\item Let $T$ be the set of available trailer-loads (trucks), each with capacity $Q$.
+\item Compatibility data: $s_{ot} = 1$ if order $o$ can ride on truck $t$ (same route corridor, feasible delivery window).
+\end{itemize}
+
+\modelhead{Variables}
+\begin{itemize}
+\item Let $x_{ot} = 1$ if order $o$ is loaded on truck $t$.
+\item Let $y_t = 1$ if truck $t$ is dispatched.
+\end{itemize}
+
+\modelhead{Model}
+\begin{align*}
+\min \quad & \sum_{t \in T} y_t   \tag{trucks dispatched} \\
+\st        & \sum_{t \in T} s_{ot}\, x_{ot} = 1 &&\quad \text{for all } o \in O   \tag{every order ships} \\
+           & \sum_{o \in O} q_o\, x_{ot} \leq Q\, y_t &&\quad \text{for all } t \in T   \tag{capacity; ride only dispatched trucks} \\
+           & x_{ot} \leq s_{ot}, \quad x_{ot}, y_t \in \{0,1\}.
+\end{align*}
+
+The capacity constraint again uses the big-$M$ linking pattern with $M = Q$.  The deployed system couples this packing decision with routing (which stores share a route) and with strategic network design; the Edelman paper describes the full architecture.
+
+\subsection*{Assumptions and Simplifications}
+\begin{itemize}
+\item Order sizes and delivery windows are data; in practice they come from demand forecasts.
+\item The simplified model minimizes truck count; Walmart's objective also prices miles, so consolidating onto fewer, fuller, shorter routes is what produced the 33-million-mile reduction.
+\item Routing (the order in which a truck visits stores) is a separate, harder layer, in Book 2 territory; this box shows the consolidation layer.
+\end{itemize}
+
+\subsection*{Implementation and Results}
+Deployed across Walmart's US supply chain: 108{,}000 routes and 33 million miles eliminated in FY2023, \$91.5 million saved, 98.6 million pounds of CO$_2$ avoided.  2023 INFORMS Franz Edelman Award winner.
+
+\subsection*{References}
+\begin{itemize}
+\item ``Optimizing Walmart's Supply Chain from Strategy to Execution.'' \emph{INFORMS Journal on Applied Analytics} 54(1), 5--19, 2024. \url{https://doi.org/10.1287/inte.2023.0093}
+\end{itemize}
+\end{casestudybox}
+
+% ============================================================================
+% NOTE ON NVIDIA (searched on request): no application case study exists.
+% Nvidia's role in optimization is as a TOOLMAKER: cuOpt, its GPU-accelerated
+% optimization library (routing/scheduling world-record benchmarks), was
+% open-sourced with the COIN-OR Foundation in 2025. That is a good one-line
+% sidebar for the software chapter ("solvers are now being built by GPU
+% companies"), not a case study of using LP/IP on their own business.
+% ============================================================================

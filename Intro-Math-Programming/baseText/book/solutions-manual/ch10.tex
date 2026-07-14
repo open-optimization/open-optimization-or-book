@@ -1,0 +1,273 @@
+% ============================================================================
+% CHAPTER 10: SENSITIVITY ANALYSIS
+% Solutions synced to book/part1-linear-programming/ch07-sensitivity/sensitivity-LP.tex
+% All numeric answers verified with scipy.optimize.linprog (HiGHS), including
+% both endpoints of every allowable range and the duals just outside them.
+% ============================================================================
+\section{Chapter 10: Sensitivity Analysis}
+
+This chapter has 12 exercises. The two warm-ups (10.1, 10.2) read shadow prices and a right-hand-side range straight off a given final dictionary. The core problems (10.3 to 10.7) carry out cost ranging, a full sensitivity workup, basic versus nonbasic coefficient ranging, ranging from the basis inverse, and the reading of a solver sensitivity report. The concept problems (10.8 to 10.11) interpret shadow prices, explain why slack constraints have price zero, why allowable ranges exist, and what degeneracy does to shadow prices. The challenge problem (10.12) constructs an instance where the shadow price prediction fails outside its range. Exercises 10.4, 10.6, 10.8, and 10.12 have Selected Solutions in the book; those are reproduced here and expanded. Every range below was verified numerically at both endpoints and just outside them.
+
+% ----------------------------------------------------------------------------
+\exsol{10.1}{Shadow Prices from the Final Dictionary}{1}
+
+The final dictionary of the running example ($\max 2x + 3y$, constraints hours $x+y \le 9$, flour $2x+y \le 16$, sugar $x + 2y \le 14$) is
+\[
+z = 23 - s_1 - s_3, \qquad
+x = 4 - 2s_1 + s_3, \qquad
+y = 5 + s_1 - s_3, \qquad
+s_2 = 3 + 3s_1 - s_3 .
+\]
+
+\begin{enumerate}
+\item The shadow price of constraint $i$ is the negative of the coefficient of $s_i$ in the objective row (raising $b_i$ by $\Delta$ is equivalent to setting $s_i = -\Delta$). From $z = 23 - s_1 - 0\cdot s_2 - s_3$:
+\[
+y_1^* = 1 \ (\text{hours}), \qquad y_2^* = 0 \ (\text{flour}), \qquad y_3^* = 1 \ (\text{sugar}).
+\]
+\item Flour is not binding. In the dictionary this shows up in two equivalent ways: the slack $s_2$ is \emph{basic and positive} ($s_2 = 3$ at the optimum, so three units of flour are unused), and $s_2$ is absent from the objective row, so its shadow price is $0$. A resource with leftovers is worth nothing at the margin.
+\item The shadow price of sugar is $\$1$ per unit, so one extra unit of sugar raises profit by $\$1 > \$0.75$: accept the offer and net $\$0.25$. The most the bakery should pay is $\$1$ per unit, and (from the ranging in the chapter, $11 \le b_3 \le 18$) that price is valid for up to $4$ additional units of sugar.
+\end{enumerate}
+
+\emph{Verification.} \texttt{linprog} returns $z^* = 23$ with duals $(1, 0, 1)$; with $b_3 = 15$ the optimal value is $24$.
+
+% ----------------------------------------------------------------------------
+\exsol{10.2}{RHS Sensitivity Range}{1}
+
+The LP is $\max 4x_1 + 3x_2$ subject to $x_1 + x_2 \le 10$, $2x_1 + x_2 \le 16$, $x_1, x_2 \ge 0$, with final dictionary
+\[
+z = 36 - 2s_1 - s_2, \qquad x_1 = 6 + s_1 - s_2, \qquad x_2 = 4 - 2s_1 + s_2 .
+\]
+
+Perturb $b_1 = 10 + \Delta$. The slack of constraint 1 absorbs the change: setting $s_1' = s_1 + \Delta$ restores the original right-hand side, so we substitute $s_1 = s_1' - \Delta$ into the dictionary:
+\[
+\begin{aligned}
+z   &= 36 - 2(s_1' - \Delta) - s_2 = (36 + 2\Delta) - 2s_1' - s_2, \\
+x_1 &= 6 + (s_1' - \Delta) - s_2 = (6 - \Delta) + s_1' - s_2, \\
+x_2 &= 4 - 2(s_1' - \Delta) + s_2 = (4 + 2\Delta) - 2s_1' + s_2 .
+\end{aligned}
+\]
+Feasibility of the basic solution ($s_1' = s_2 = 0$) requires
+\[
+x_1 = 6 - \Delta \ge 0 \ \Rightarrow\ \Delta \le 6,
+\qquad
+x_2 = 4 + 2\Delta \ge 0 \ \Rightarrow\ \Delta \ge -2 .
+\]
+Hence
+\[
+-2 \le \Delta \le 6
+\qquad\Longleftrightarrow\qquad
+\boxed{8 \le b_1 \le 16},
+\]
+and inside the range $z = 36 + 2\Delta$ (the shadow price of constraint 1 is $2$, matching the coefficient of $s_1$ in the objective row).
+
+The same range follows from the basis inverse: with basis $B = \{x_1, x_2\}$, $A_B = \begin{bmatrix} 1 & 1 \\ 2 & 1 \end{bmatrix}$, $A_B^{-1} = \begin{bmatrix} -1 & 1 \\ 2 & -1 \end{bmatrix}$, and
+\[
+\x_B(b_1) = A_B^{-1}\begin{bmatrix} b_1 \\ 16 \end{bmatrix} = \begin{bmatrix} 16 - b_1 \\ 2b_1 - 16 \end{bmatrix} \ge \mathbf{0}
+\quad\Longleftrightarrow\quad 8 \le b_1 \le 16 .
+\]
+
+\emph{Verification.} At $b_1 = 8$: optimum $(8, 0)$, $z = 32 = 36 + 2(-2)$. At $b_1 = 16$: optimum $(0, 16)$, $z = 48 = 36 + 2(6)$. At $b_1 = 7.9$ the duals jump to $(4, 0)$ and at $b_1 = 16.1$ to $(0, 3)$, confirming the basis change at both endpoints.
+
+% ----------------------------------------------------------------------------
+\exsol{10.3}{Objective Coefficient Sensitivity}{2}
+
+Same LP and dictionary as Exercise 10.2. Let $c_1 = 4 + \delta$. Since $x_1$ is basic, express $\delta\, x_1$ through the dictionary row of $x_1$ and add it to the objective row:
+\[
+z = 36 - 2s_1 - s_2 + \delta\,(6 + s_1 - s_2)
+  = (36 + 6\delta) + (-2 + \delta)\,s_1 + (-1 - \delta)\,s_2 .
+\]
+Optimality (all reduced costs $\le 0$ in a maximization) requires
+\[
+-2 + \delta \le 0 \ \Rightarrow\ \delta \le 2,
+\qquad
+-1 - \delta \le 0 \ \Rightarrow\ \delta \ge -1 .
+\]
+Hence
+\[
+-1 \le \delta \le 2
+\qquad\Longleftrightarrow\qquad
+\boxed{3 \le c_1 \le 6}.
+\]
+Inside the range the optimal solution stays at $(x_1, x_2) = (6, 4)$ and the objective value moves linearly:
+\[
+z^* = 36 + 6\delta = 12 + 6 c_1
+\]
+(the slope is $x_1^* = 6$, the value of the variable whose coefficient is changing).
+
+\emph{Verification.} At $c_1 = 3$: $z^* = 30$ (attained by both $(6,4)$ and $(0,10)$, alternative optima at the endpoint). At $c_1 = 6$: $z^* = 48$ at $(6,4)$. At $c_1 = 2.99$ the optimum jumps to $(0, 10)$ and at $c_1 = 6.01$ to $(8, 0)$.
+
+% ----------------------------------------------------------------------------
+\exsol{10.4}{Full Sensitivity Workup}{2}
+
+LP: $\max 3x_1 + 5x_2$ subject to $x_1 + 2x_2 \le 14$ (assembly), $3x_1 + 2x_2 \le 18$ (machine), $x_1, x_2 \ge 0$. This exercise has a Selected Solution in the book; it is reproduced and annotated here.
+
+\begin{enumerate}
+\item Both constraints are binding at the optimum: solving $x_1 + 2x_2 = 14$ and $3x_1 + 2x_2 = 18$ gives $(x_1, x_2) = (2, 6)$ with $z^* = 3(2) + 5(6) = 36$.
+\item The basis is $B = \{x_1, x_2\}$ with
+\[
+A_B = \begin{bmatrix} 1 & 2 \\ 3 & 2 \end{bmatrix}, \qquad
+A_B^{-1} = \begin{bmatrix} -\tfrac12 & \tfrac12 \\[2pt] \tfrac34 & -\tfrac14 \end{bmatrix},
+\]
+so the shadow prices are $\y^\top = \c_B^\top A_B^{-1} = [3, 5]\,A_B^{-1} = \left[\tfrac94, \tfrac14\right]$: an assembly hour is worth $\$2.25$ and a machine hour $\$0.25$.
+\item With $\b = (b_1, 18)$, feasibility of $\x_B = A_B^{-1}\b = \left(-\tfrac{b_1}{2} + 9,\ \tfrac{3b_1}{4} - \tfrac{9}{2}\right) \geq \mathbf{0}$ gives
+\[
+\boxed{6 \le b_1 \le 18}, \qquad z = 36 + \tfrac94\,(b_1 - 14) \ \text{inside the range}.
+\]
+With $\b = (14, b_2)$, feasibility of $\left(\tfrac{b_2}{2} - 7,\ \tfrac{21}{2} - \tfrac{b_2}{4}\right) \geq \mathbf{0}$ gives
+\[
+\boxed{14 \le b_2 \le 42}, \qquad z = 36 + \tfrac14\,(b_2 - 18).
+\]
+\item With $\c_B = (c_1, 5)$ the dual prices are $\left(-\tfrac{c_1}{2} + \tfrac{15}{4},\ \tfrac{c_1}{2} - \tfrac{5}{4}\right)$; both are nonnegative (equivalently, both slack reduced costs stay $\le 0$) exactly when
+\[
+\boxed{\tfrac52 \le c_1 \le \tfrac{15}{2}}.
+\]
+With $\c_B = (3, c_2)$ the dual prices are $\left(\tfrac{3c_2}{4} - \tfrac32,\ \tfrac32 - \tfrac{c_2}{4}\right)$, giving
+\[
+\boxed{2 \le c_2 \le 6}.
+\]
+\item Software confirms every claim: at $b_1 = 6$ the solution is $(6,0)$ with $z = 18 = 36 + \tfrac94(-8)$; at $b_1 = 18$ it is $(0,9)$ with $z = 45 = 36 + \tfrac94(4)$; at $b_2 = 14$: $(0,7)$, $z = 35$; at $b_2 = 42$: $(14,0)$, $z = 42$; at $c_1 = 2.5$ and $c_1 = 7.5$ the value is $35$ and $45$ with the basis still optimal, while at $c_1 = 2.49$ and $7.51$ the optimal vertex moves to $(0,7)$ and $(6,0)$ respectively; similarly for $c_2 = 2$ and $6$.
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\exsol{10.5}{Ranging a Basic and a Nonbasic Coefficient}{2}
+
+LP: $\max 5x_1 + 2x_2$ subject to $2x_1 + x_2 \le 10$, $x_1 + 3x_2 \le 15$, $x_1, x_2 \ge 0$, with optimum $(5, 0)$, $z^* = 25$, basis $B = \{x_1, s_2\}$.
+
+\begin{enumerate}
+\item The basis matrix (columns of $x_1$ and $s_2$) and its inverse are
+\[
+A_B = \begin{bmatrix} 2 & 0 \\ 1 & 1 \end{bmatrix}, \qquad
+A_B^{-1} = \begin{bmatrix} \tfrac12 & 0 \\ -\tfrac12 & 1 \end{bmatrix},
+\qquad
+\y^\top = \c_B^\top A_B^{-1} = [5, 0]\,A_B^{-1} = \left[\tfrac52,\, 0\right].
+\]
+Reduced costs of the nonbasic variables:
+\[
+\bar{c}_{x_2} = 2 - \y^\top \begin{bmatrix} 1 \\ 3 \end{bmatrix} = 2 - \tfrac52 = -\tfrac12 \le 0,
+\qquad
+\bar{c}_{s_1} = 0 - y_1 = -\tfrac52 \le 0 .
+\]
+Both are nonpositive, so $(5,0)$ is optimal (the objective row is $z = 25 - \tfrac12 x_2 - \tfrac52 s_1$). As a check, $\x_B = A_B^{-1}\b = (5, 10)$, so $x_1 = 5$, $s_2 = 10 \ge 0$.
+\item $x_2$ is nonbasic, so $c_2$ appears only in its own reduced cost: $\bar{c}_{x_2}(c_2) = c_2 - \tfrac52 \le 0$ if and only if
+\[
+\boxed{c_2 \le \tfrac52} \qquad (\text{allowable range } -\infty < c_2 \le \tfrac52).
+\]
+Inside this range the solution and the value do not move at all: $z^* = 25$. At $c_2 = \tfrac52$ the vertex $(3,4)$ becomes an alternative optimum, and for $c_2 > \tfrac52$ the optimum jumps there.
+\item $x_1$ is basic, so $c_1$ enters $\c_B$ and moves \emph{every} reduced cost. With $\c_B = (c_1, 0)$, $\y(c_1)^\top = [c_1, 0]\,A_B^{-1} = \left[\tfrac{c_1}{2}, 0\right]$, so
+\[
+\bar{c}_{x_2} = 2 - \tfrac{c_1}{2} \le 0 \ \Rightarrow\ c_1 \ge 4,
+\qquad
+\bar{c}_{s_1} = -\tfrac{c_1}{2} \le 0 \ \Rightarrow\ c_1 \ge 0 .
+\]
+Intersecting,
+\[
+\boxed{c_1 \ge 4} \qquad (\text{allowable range } 4 \le c_1 < \infty),
+\]
+and inside it $z^* = 5\,c_1$ (slope $x_1^* = 5$), so $z^* = 25 + 5\delta$ for $c_1 = 5 + \delta$, $\delta \ge -1$.
+\item A nonbasic coefficient touches only its own reduced cost, so the range comes from a single inequality and is one-sided: lowering the profit of a product you are not making can never make you start making it, so there is no finite lower endpoint. A basic coefficient sits inside $\c_B$, hence inside $\y^\top = \c_B^\top A_B^{-1}$, and therefore shifts the reduced cost of \emph{every} nonbasic variable at once; each nonbasic variable contributes one inequality, and the range is the intersection of all of them.
+\end{enumerate}
+
+\emph{Verification.} At $c_2 = 2.49$ the optimum is $(5,0)$; at $c_2 = 2.51$ it is $(3,4)$ with $z = 25.04$. At $c_1 = 4.01$ the optimum is $(5,0)$ with $z = 20.05$; at $c_1 = 3.99$ it is $(3,4)$; at $c_1 = 4$ both vertices give $z = 20$.
+
+% ----------------------------------------------------------------------------
+\exsol{10.6}{Sensitivity from the Basis Inverse}{2}
+
+LP: $\max 5x_1 + 4x_2$ subject to $x_1 + x_2 + s_1 = 6$, $3x_1 + 2x_2 + s_2 = 15$, all variables $\ge 0$, with basis $B = \{x_1, x_2\}$,
+\[
+A_B = \begin{bmatrix} 1 & 1 \\ 3 & 2 \end{bmatrix}, \qquad
+A_B^{-1} = \begin{bmatrix} -2 & 1 \\ 3 & -1 \end{bmatrix}.
+\]
+This exercise has a Selected Solution in the book; it is reproduced here.
+
+\begin{enumerate}
+\item
+\[
+\x_B = A_B^{-1}\b = \begin{bmatrix} -2 & 1 \\ 3 & -1 \end{bmatrix}\begin{bmatrix} 6 \\ 15 \end{bmatrix} = \begin{bmatrix} 3 \\ 3 \end{bmatrix},
+\]
+so $(x_1, x_2) = (3, 3) \geq \mathbf{0}$ is a feasible basic solution with objective value $z = 5(3) + 4(3) = 27$.
+\item Replacing $b_1$ by a variable value,
+\[
+\x_B(b_1) = A_B^{-1}\begin{bmatrix} b_1 \\ 15 \end{bmatrix} = \begin{bmatrix} -2b_1 + 15 \\ 3b_1 - 15 \end{bmatrix} \geq \mathbf{0}
+\quad\Longleftrightarrow\quad \boxed{5 \le b_1 \le 7.5}.
+\]
+Inside the range $z = \c_B^\top \x_B(b_1) = 5(15 - 2b_1) + 4(3b_1 - 15) = 15 + 2b_1$, so the shadow price of constraint 1 is $2$.
+\item The dual prices are $\y^\top = \c_B^\top A_B^{-1} = [5, 4]\, A_B^{-1} = [2, 1]$, so the reduced costs of the nonbasic slacks are $\bar{c}_{s_1} = -y_1 = -2$ and $\bar{c}_{s_2} = -y_2 = -1$; both are nonpositive, confirming optimality (equivalently, $z = 27 - 2s_1 - s_2$). With $c_1$ variable, $\y(c_1)^\top = [c_1, 4]\, A_B^{-1} = [-2c_1 + 12,\ c_1 - 4]$, and the basis stays optimal while both components are nonnegative:
+\[
+-2c_1 + 12 \ge 0 \ \text{ and } \ c_1 - 4 \ge 0
+\quad\Longleftrightarrow\quad \boxed{4 \le c_1 \le 6}.
+\]
+\end{enumerate}
+
+\emph{Verification.} Duals $(2,1)$ confirmed by \texttt{linprog}; at $b_1 = 5$: $(5,0)$, $z = 25$; at $b_1 = 7.5$: $(0, 7.5)$, $z = 30$; at $b_1 = 4.99$ the duals jump to $(5,0)$ and at $7.51$ to $(0,2)$. At $c_1 = 3.99$ the optimum moves to $(0,6)$ and at $6.01$ to $(5,0)$.
+
+% ----------------------------------------------------------------------------
+\exsol{10.7}{Reading a Sensitivity Report}{2}
+
+\begin{enumerate}
+\item The optimal value is read from the variable table:
+\[
+z^* = 6(8) + 5(4) = 48 + 20 = 68 .
+\]
+\item The change is $\Delta c_1 = 7.5 - 6 = 1.5$, which is within the allowable increase of $2$. The optimal \emph{basis} (and the solution $(8,4)$) does not change; only the objective value moves, to $z = 7.5(8) + 5(4) = 80$.
+\item Constraint 2 is non-binding. Two independent tells in the report: its shadow price is $0$, and its allowable increase is $\infty$ (adding more of a resource you are not fully using changes nothing, no matter how much you add). The allowable decrease of $5$ is exactly the current slack.
+\item The increase of $2$ is within the allowable increase of $4$ for constraint 1, so the shadow price $2.5$ applies to the full change:
+\[
+z_{\text{new}} \approx 68 + 2 \times 2.5 = 73 .
+\]
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\exsol{10.8}{Shadow Price Interpretation}{2}
+
+LP: $\max 50x_1 + 30x_2$ subject to $4x_1 + 2x_2 \le 40$ (wood), $2x_1 + 3x_2 \le 30$ (labor), $x_1, x_2 \ge 0$; optimum $(7.5, 5)$, $z^* = 525$, duals $(11.25, 2.50)$. This exercise has a Selected Solution in the book; it is reproduced here.
+
+At the optimal solution $(x_1, x_2) = (7.5, 5)$ both constraints are binding: $4(7.5) + 2(5) = 40$ and $2(7.5) + 3(5) = 30$.
+
+\begin{enumerate}
+\item The shadow price of wood is $y_1 = 11.25$: one additional board-foot of wood increases the optimal profit by $\$11.25$ (as long as the basis does not change). The shadow price of labor is $y_2 = 2.50$: one additional hour of labor is worth $\$2.50$ at the margin.
+\item Two additional board-feet increase profit by approximately $2 \times 11.25 = \$22.50$, from $\$525$ to $\$547.50$. (This is exact here: the wood RHS can range from $20$ to $60$ before the basis changes, and $42$ is well inside that range.)
+\item Wood is more valuable at the margin, since $11.25 > 2.50$: a unit of wood buys more additional profit than a unit of labor.
+\end{enumerate}
+
+\emph{Verification.} \texttt{linprog} gives duals $(11.25, 2.5)$ and $z^*(b_1 = 42) = 547.5$ exactly. The wood range $[20, 60]$ checks out: at $b_1 = 19.9$ the duals become $(15, 0)$ and at $b_1 = 60.1$ they become $(0, 25)$.
+
+% ----------------------------------------------------------------------------
+\exsol{10.9}{Why a Slack Constraint Has Price Zero}{2}
+
+\begin{enumerate}
+\item \emph{Geometric and economic argument.} If constraint $i$ is not binding, the optimal point sits strictly inside the half-space of that constraint; the constraint's boundary does not touch the optimal vertex. Nudging $b_i$ up moves that boundary even further away from the optimum, so the feasible region near the optimum, and hence the optimal solution and value, do not change at all. Economically: you already have leftovers of resource $i$. More of something you are throwing away is worth exactly nothing, so the most you would pay for an extra unit, which is what the shadow price measures, is $0$.
+\item \emph{Dictionary argument.} If constraint $i$ has slack, its slack variable $s_i$ is basic with $s_i > 0$ in the final dictionary, and therefore $s_i$ does not appear in the objective row (the objective row contains only nonbasic variables). Perturbing $b_i$ to $b_i + \Delta$ and substituting $s_i' = s_i + \Delta$ changes only the constant in the row of $s_i$: it becomes $s_i = (\text{old value} + \Delta) + \dots$, and for small $|\Delta|$ this stays nonnegative, so feasibility persists. The objective row is untouched, so $z^*$ is unchanged: shadow price $0$. This is exactly the perturbation of $b_2$ worked in the book, where $s_2 = 3 + \Delta \ge 0$ holds for all $\Delta \ge -3$ and $z = 23$ throughout.
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\exsol{10.10}{Why Ranges Exist at All}{2}
+
+\begin{enumerate}
+\item The fixed object is the optimal \emph{basis} $B$ (equivalently, the matrix $A_B^{-1}$, i.e., the final dictionary's structure). For the basis to remain the answer, it must keep satisfying two families of conditions: \emph{feasibility}, $\x_B = A_B^{-1}\b \ge \mathbf{0}$, which is what an RHS change can break, and \emph{optimality}, all reduced costs $\c_N^\top - \c_B^\top A_B^{-1} A_N \le \mathbf{0}$ (for a max problem), which is what a cost change can break. Each condition is a linear inequality in the perturbation, and the allowable range is the intersection of these inequalities: a closed interval (possibly unbounded on one side).
+\item As long as the basis is fixed, the optimal value has the closed form $z^* = \c_B^\top A_B^{-1} \b$. This formula is linear in each $b_i$ (with slope $y_i = (\c_B^\top A_B^{-1})_i$, the shadow price) and linear in each $c_i$ for $i \in B$ (with slope $x_i^*$, the current value of that variable). Linearity of the formula in the data, with the basis frozen, is the whole story.
+\item At an endpoint of the range, one of the inequalities becomes tight: either a basic variable reaches $0$ (RHS ranging) or a reduced cost reaches $0$ (cost ranging). One step beyond, the dictionary is either infeasible or no longer optimal, and the simplex method must pivot to a different basis (dual simplex pivot in the first case, primal pivot in the second). After the pivot, $z^*$ is still piecewise linear in the parameter, but with a new slope; the sensitivity report's numbers all describe only the current piece.
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\exsol{10.11}{When the Shadow Price Prediction Breaks}{2}
+
+LP: $\max x_1 + x_2$ subject to $x_1 \le 1$, $x_2 \le 1$, $x_1 + x_2 \le b_3$ with $b_3 = 2$, $x_1, x_2 \ge 0$. The optimum $(1,1)$ is degenerate: all three constraints are tight but only two are needed to define the vertex.
+
+\begin{enumerate}
+\item \emph{Increase} $b_3$ to $3$: the constraints $x_1 \le 1$ and $x_2 \le 1$ alone already force $z = x_1 + x_2 \le 2$, and $(1,1)$ is still feasible ($1 + 1 = 2 \le 3$), so $z^* = 2$: no change. \emph{Decrease} $b_3$ to $1$: now $z = x_1 + x_2 \le b_3 = 1$, and $z = 1$ is attained (e.g., at $(1,0)$), so $z^* = 1$: a decrease of exactly $1$. Verified with \texttt{linprog}: $z^*(3) = 2$, $z^*(1) = 1$.
+\item The value function $z^*(b_3)$ has a \emph{kink} at $b_3 = 2$: its right derivative is $0$ and its left derivative is $1$. A shadow price is supposed to be the derivative $dz^*/db_3$, and at a kink that derivative does not exist. Behind the kink is dual degeneracy: the dual problem, $\min\, y_1 + y_2 + 2y_3$ subject to $y_1 + y_3 \ge 1$, $y_2 + y_3 \ge 1$, $\y \ge \mathbf{0}$, has a whole segment of optimal solutions
+\[
+\y(t) = (1 - t,\ 1 - t,\ t), \qquad t \in [0, 1],
+\]
+all with value $2$. Any $y_3 \in [0,1]$ is a legitimate ``shadow price'' of constraint 3; the right derivative of $z^*$ is the minimum of $y_3$ over the optimal dual set ($0$) and the left derivative is the maximum ($1$). No single number describes both directions.
+\item A solver reports the dual solution at whichever optimal dual vertex its algorithm happens to terminate (HiGHS reports $\y = (1,1,0)$ here, i.e., price $0$ for constraint 3; another solver or another pivot rule could report $(0,0,1)$). With a degenerate optimum, the reported shadow price may be valid only for increases, only for decreases, or may have allowable range $0$ in one direction, so it should be checked by re-solving with the perturbed RHS before money changes hands.
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\exsol{10.12}{Pushing Past the Range}{3}
+
+This exercise has a Selected Solution in the book; it is reproduced here with the verification spelled out.
+
+The running example of this chapter works. Its hours constraint $x + y \le 9$ has shadow price $p = 1$, valid for $7 \le b_1 \le 10$ (allowable increase $1$). Increasing $b_1$ by $1$ to $10$ raises the optimal value from $23$ to $24$, exactly $p$. Increasing $b_1$ by $5$ to $14$ raises it only to $24$, not to $23 + 5 = 28$: solving the LP with $b_1 = 14$ gives the optimum $(x, y) = (6, 4)$ determined by the flour and sugar constraints, and $z^* = 2(6) + 3(4) = 24$. At the range boundary $b_1 = 10$ the basic variable $s_2$ hits $0$ and the basis changes; beyond it the hours constraint is no longer binding, so its shadow price drops to $0$ and further increases in $b_1$ buy nothing. In general, the optimal value is a piecewise-linear concave function of $b_1$, and the shadow price is only its slope on the current piece.
+
+\emph{Verification.} \texttt{linprog} gives $z^*(b_1 = 9) = 23$ at $(4,5)$, $z^*(b_1 = 10) = 24$ at $(6,4)$, and $z^*(b_1 = 14) = 24$ at $(6,4)$, so the one-unit prediction is exact and the five-unit prediction over-promises by $4$.

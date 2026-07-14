@@ -1,4 +1,5 @@
 \chapter{Multi-Objective Optimization}
+\label{ch:multi-objective}
 
 \begin{outcome}
 \begin{itemize}
@@ -280,6 +281,7 @@ That is, no objective can be strictly improved without sacrificing performance i
 \begin{table}[h]
 \centering
 \caption{Summary of Multi-Objective Optimization Methods}
+\label{tab:moo-methods}
 \renewcommand{\arraystretch}{1.3}
 \begin{tabular}{|l|p{4.2cm}|p{3.5cm}|p{3.5cm}|}
 \hline
@@ -411,14 +413,49 @@ Sweeping $\varepsilon$ from 40 to 116 traces the frontier from the plan $(0,20)$
 
 \section{Exercises}
 
-\begin{ex}{}{}
-\label{ex:pareto-def}
-Define \emph{Pareto optimality} for a minimization multi-objective problem with two objectives.
-\end{ex}
-\begin{ex}{}{}
-\label{ex:pareto-table}
-\textbf{Pareto Frontier, Weighted Sum, and $\varepsilon$-Constraint}.
+\exgroup{Warm-ups}
 
+\begin{ex}{Defining Pareto Optimality}{}
+\stars{1}\label{ex:pareto-def}
+Define \emph{Pareto optimality} for a minimization multi-objective problem with two objectives.
+\exrefs{Section~\ref{sec:pareto-frontier}}
+\end{ex}
+
+\begin{ex}{Spotting Dominated Designs}{}
+\stars{1}\label{ex:moo-dominance}
+Five supplier contracts are scored on two objectives, both to be minimized: $f_1$ (cost, in \$1000s) and $f_2$ (delivery time, in days).
+
+\begin{center}
+\begin{tabular}{c|ccccc}
+Contract & G & H & I & J & K \\\hline
+$f_1$    & 2 & 4 & 5 & 7 & 6 \\
+$f_2$    & 9 & 7 & 8 & 3 & 5 \\
+\end{tabular}
+\end{center}
+
+\begin{enumerate}
+\item Which contracts are dominated, and by which contract?
+\item List the Pareto frontier in order of increasing $f_1$.
+\item True or false: a contract that is the unique minimizer of $f_1$ can never be dominated. Explain.
+\end{enumerate}
+\exrefs{Section~\ref{sec:pareto-frontier}, Exercise~\ref{ex:pareto-table}}
+\end{ex}
+
+\begin{ex}{Computing Weighted-Sum Scores}{}
+\stars{1}\label{ex:moo-weighted-scores}
+Using the contract table from Exercise~\ref{ex:moo-dominance}, form the weighted score $S = w_1 f_1 + w_2 f_2$ (both objectives minimized, so the lowest score wins).
+\begin{enumerate}
+\item For $(w_1, w_2) = (0.6, 0.4)$, compute all five scores and identify the winning contract.
+\item Repeat for $(w_1, w_2) = (0.2, 0.8)$. Why does the winner change?
+\item Contract I is dominated by contract H. Show that for every choice of weights $w_1, w_2 > 0$, contract I scores strictly worse than H, so a dominated point can never win a weighted sum with positive weights.
+\end{enumerate}
+\exrefs{Section~\ref{sec:pareto-frontier}}
+\end{ex}
+
+\exgroup{Core problems}
+
+\begin{ex}{Pareto Frontier, Weighted Sum, and $\varepsilon$-Constraint}{}
+\stars{2}\label{ex:pareto-table}
 Consider the following feasible set of designs with two objectives to minimize: $f_1$ (cost) and $f_2$ (emissions).
 The table lists six \emph{candidates} from a design study; some may be dominated among this set.
 
@@ -446,10 +483,11 @@ $f_2$  & 5 & 8 & 4 & 6 & 6 & 3 \\
 
 \vspace{6cm}
 \end{enumerate}
-
+\exrefs{Section~\ref{sec:pareto-frontier}, Table~\ref{tab:moo-methods}}
 \end{ex}
 
 \begin{ex}{Weighted Sum Method}{}
+\stars{2}\label{ex:weighted-sum-projects}
 A city planner is evaluating three road improvement projects. Each project has a cost (to minimize) and an accessibility score (to maximize):
 
 \begin{center}
@@ -469,9 +507,11 @@ We reformulate as a minimization problem with objectives $f_1 = \text{cost}$ and
 \item Using the weighted-sum method with weights $w_1 = 0.5$ for cost and $w_2 = 0.5$ for negative accessibility, which project is selected?
 \item Is there a set of weights that would select project P3? Explain.
 \end{enumerate}
+\exrefs{Section~\ref{sec:pareto-frontier}}
 \end{ex}
 
 \begin{ex}{Epsilon-Constraint Method}{}
+\stars{2}\label{ex:eps-constraint-lp}
 Consider a bi-objective linear program:
 \[
 \min \; (f_1(\mathbf{x}), \; f_2(\mathbf{x})) = (x_1 + 2x_2, \; 3x_1 + x_2)
@@ -483,9 +523,26 @@ subject to $x_1 + x_2 \geq 4$, $x_1 \leq 5$, $x_2 \leq 5$, and $x_1, x_2 \geq 0$
 \item Find the optimal solution for $\varepsilon = 10$ and for $\varepsilon = 6$. Are both solutions Pareto optimal?
 \item Describe what happens as $\varepsilon$ decreases from a large value toward $f_2^*$ (the minimum of $f_2$ alone).
 \end{enumerate}
+\exrefs{Section~\ref{sec:pareto-frontier}, Section~\ref{sec:moo-tools}}
+\end{ex}
+
+\begin{ex}{Epsilon-Constraint by Hand}{}
+\stars{2}\label{ex:eps-triangle}
+Consider two objectives to \emph{maximize}, $f_1 = 3x_1 + x_2$ and $f_2 = x_1 + 3x_2$, over the triangle
+\[
+X = \{(x_1, x_2) \geq 0 : x_1 + x_2 \leq 6\}.
+\]
+\begin{enumerate}
+\item Evaluate both objectives at the three vertices of $X$. Which vertex maximizes $f_1$ alone? Which maximizes $f_2$ alone?
+\item Apply the $\varepsilon$-constraint method: maximize $f_1$ subject to $f_2 \geq \varepsilon$ and $x \in X$, for each $\varepsilon \in \{6, 10, 14, 18\}$. Solve each LP by hand (graphically, or by checking the vertices of the sliced region) and tabulate $(x_1, x_2, f_1, f_2)$.
+\item Which part of the boundary of $X$ is the Pareto frontier in decision space? What is the trade-off rate between $f_1$ and $f_2$ along it?
+\item What happens if $\varepsilon > 18$?
+\end{enumerate}
+\exrefs{Section~\ref{sec:pareto-frontier}, Section~\ref{sec:moo-tools}}
 \end{ex}
 
 \begin{ex}{Trade-Off Analysis}{}
+\stars{2}\label{ex:tradeoff-analysis}
 A manufacturing firm faces two conflicting objectives: minimizing production cost ($f_1$) and minimizing environmental emissions ($f_2$). After solving a series of weighted-sum problems, the following Pareto optimal solutions are found:
 
 \begin{center}
@@ -504,6 +561,52 @@ S4 & 70 & 8 \\
 \item Compute the marginal rate of substitution (trade-off ratio) between each consecutive pair of solutions. Which jump in cost gives the largest reduction in emissions per dollar?
 \item If the firm is willing to spend at most \$50{,}000, which Pareto optimal solution should it choose?
 \end{enumerate}
+\exrefs{Section~\ref{sec:pareto-frontier}}
+\end{ex}
+
+\exgroup{Concepts and connections}
+
+\begin{ex}{What Weighted Sums Cannot See}{}
+\stars{2}\label{ex:nonconvex-weights}
+A design study produces exactly three Pareto optimal outcomes in objective space, both objectives minimized:
+\[
+P = (0, 4), \qquad Q = (3, 3), \qquad R = (4, 0).
+\]
+\begin{enumerate}
+\item Verify that no one of these points dominates another.
+\item For weights $(\alpha, 1-\alpha)$ with $\alpha \in [0,1]$, write the weighted score of each point as a function of $\alpha$ and show that $\min\{4\alpha,\, 4 - 4\alpha\} \leq 2 < 3$ for every $\alpha$. Conclude that $Q$ is never a weighted-sum optimum, not even tied.
+\item Explain the result geometrically: which points lie on the lower convex hull of $\{P, Q, R\}$, and why does every weighted sum correspond to a supporting line of that hull? Relate your answer to the ``Cons'' entry for the weighted-sum method in Table~\ref{tab:moo-methods}.
+\item Name a method from Table~\ref{tab:moo-methods} that does recover $Q$, and give a specific parameter value for it that works.
+\end{enumerate}
+\exrefs{Section~\ref{sec:pareto-frontier}, Table~\ref{tab:moo-methods}}
+\end{ex}
+
+\begin{ex}{Lexicographic versus Weighted Sum}{}
+\stars{2}\label{ex:lex-vs-weighted}
+In the furniture example of Section~\ref{sec:pareto-frontier}, the lexicographic method (maximize revenue first, then minimize waste among revenue-optimal plans) selects $(10, 8)$.
+\begin{enumerate}
+\item A weighted sum with all weight on revenue ($\alpha = 1$) maximizes $8000x + 2000y$ alone. Which plans are optimal then, and why does this not reproduce the lexicographic answer?
+\item Argue that any weight $\alpha < 1$ close enough to $1$ selects exactly $(10, 8)$: the small weight on waste acts as a tie-breaker among revenue-optimal plans while being too small to justify giving up revenue. (Exercise~\ref{ex:furniture-weights} computes the exact threshold.)
+\item When do the two methods agree in general? Explain why for a linear program with finitely many vertices there is always a sufficiently extreme weight that reproduces the lexicographic solution, and describe informally what can go wrong if the weight on the secondary objective is not small enough.
+\end{enumerate}
+\exrefs{Section~\ref{sec:pareto-frontier}, Table~\ref{tab:moo-methods}}
+\end{ex}
+
+\exgroup{Challenge problems}
+
+\begin{ex}{Weights That Select Each Vertex}{}
+\stars{3}\label{ex:furniture-weights}
+Return to the furniture example of Section~\ref{sec:pareto-frontier}. Measure revenue in thousands of dollars, so the objectives are $f_1 = 8x + 2y$ (maximize) and $f_2 = 10x + 2y$ (minimize, waste in bdft). The weighted-sum method solves
+\[
+\max_{(x,y) \in P} \; \alpha f_1(x,y) - (1-\alpha) f_2(x,y), \qquad \alpha \in [0,1].
+\]
+\begin{enumerate}
+\item The optimum is always attained at a vertex of $P$: $(0,0)$, $(0,20)$, $(10,8)$, or $(12,0)$. Write the weighted objective value of each vertex as a linear function of $\alpha$.
+\item For each Pareto optimal vertex, find the exact interval of $\alpha$ for which it is optimal, and give the breakpoint values of $\alpha$.
+\item What is optimal exactly at each breakpoint, and at $\alpha = 1$? Explain why the dominated vertex $(12,0)$ shows up at $\alpha = 1$ and what this says about using zero weights.
+\item Repeat part (2) with revenue in raw dollars ($f_1 = 8000x + 2000y$). Where are the breakpoints now? What does this tell you about normalizing objectives before choosing weights?
+\end{enumerate}
+\exrefs{Section~\ref{sec:pareto-frontier}, Table~\ref{tab:moo-methods}}
 \end{ex}
 
 \subsubsection*{Selected Solutions}
@@ -518,4 +621,45 @@ For a problem minimizing $f_1$ and $f_2$ over a feasible set $P$, a point $\math
 (2) A design is a weighted-sum optimum for some $\alpha$ exactly when it lies on the lower-left convex hull of the frontier points.  Plotting $(3,6), (6,5), (7,4), (10,3)$, the lower convex hull is formed by $D$, $C$, and $F$, while $A$ lies above it: $D$ (best $f_1$) and $F$ (best $f_2$) are always obtainable, and $C$ lies on the hull between them, but $A$ sits above the segment from $D$ to $C$ (slope check: from $D$ to $C$, $\Delta = (4, -2)$; $A$ at $(6,5)$ vs.\ the segment value $6 - \tfrac{2}{4}(6-3) = 4.5 < 5$), so $A$ cannot be obtained by any weighted sum.
 
 (3) Choose $\varepsilon = 5$: minimizing $f_1$ subject to $f_2 \leq 5$ selects $A = (6,5)$, the frontier point unreachable by weighted sums.
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:eps-triangle})
+(1) At $(0,0)$: $(f_1, f_2) = (0,0)$. At $(6,0)$: $(18, 6)$. At $(0,6)$: $(6, 18)$. So $(6,0)$ maximizes $f_1$ alone and $(0,6)$ maximizes $f_2$ alone.
+
+(2) For $\varepsilon > 6$ the constraint $x_1 + 3x_2 \geq \varepsilon$ is binding at the optimum, and the solution lies where it meets the edge $x_1 + x_2 = 6$: solving the two equations gives $x_2 = (\varepsilon - 6)/2$, $x_1 = (18 - \varepsilon)/2$.
+\begin{center}
+\begin{tabular}{c|cccc}
+$\varepsilon$ & $x_1$ & $x_2$ & $f_1$ & $f_2$ \\\hline
+6  & 6 & 0 & 18 & 6 \\
+10 & 4 & 2 & 14 & 10 \\
+14 & 2 & 4 & 10 & 14 \\
+18 & 0 & 6 & 6  & 18 \\
+\end{tabular}
+\end{center}
+
+(3) Each solution has $f_2 = \varepsilon$ exactly and the largest possible $f_1$ given that, so each is Pareto optimal. The frontier is the edge $x_1 + x_2 = 6$ from $(6,0)$ to $(0,6)$: parametrizing by $x_2 = t$ gives $f_1 = 18 - 2t$ and $f_2 = 6 + 2t$, a one-for-one trade-off between the objectives.
+
+(4) The maximum of $f_2$ over $X$ is $18$, so for $\varepsilon > 18$ the constrained LP is infeasible; the sweep should stop there.
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:furniture-weights})
+(1) The weighted objective $\alpha(8x + 2y) - (1-\alpha)(10x + 2y)$ at each vertex:
+\[
+(0,0): 0, \qquad
+(0,20): 80\alpha - 40, \qquad
+(10,8): 212\alpha - 116, \qquad
+(12,0): 216\alpha - 120.
+\]
+
+(2) The optimal value is the upper envelope of these four linear functions of $\alpha$. Comparing pairs: $(0,20)$ beats $(0,0)$ iff $80\alpha - 40 \geq 0$, i.e., $\alpha \geq \tfrac12$; $(10,8)$ beats $(0,20)$ iff $212\alpha - 116 \geq 80\alpha - 40$, i.e., $132\alpha \geq 76$, i.e., $\alpha \geq \tfrac{19}{33} \approx 0.576$; and $(10,8)$ beats $(12,0)$ iff $4 \geq 4\alpha$, which holds for all $\alpha \leq 1$. Hence
+\[
+(0,0) \text{ optimal for } \alpha \in [0, \tfrac12], \qquad
+(0,20) \text{ for } \alpha \in [\tfrac12, \tfrac{19}{33}], \qquad
+(10,8) \text{ for } \alpha \in [\tfrac{19}{33}, 1].
+\]
+A numerical sweep confirms the switch: $\alpha = 0.5757$ returns $(0,20)$ and $\alpha = 0.5758$ returns $(10,8)$.
+
+(3) At $\alpha = \tfrac12$ the entire edge $x = 0$ is optimal (every plan $(0,y)$ scores $0$ there); at $\alpha = \tfrac{19}{33}$ the whole rosewood edge from $(0,20)$ to $(10,8)$ is optimal. At $\alpha = 1$ waste is ignored, so all revenue-optimal plans, the edge from $(10,8)$ to $(12,0)$, are optimal, including the dominated plan $(12,0)$. A weighted sum with a zero weight can return points that are not Pareto optimal; any positive weight on waste breaks the tie in favor of $(10,8)$.
+
+(4) With $f_1 = 8000x + 2000y$, the same comparisons give breakpoints $\alpha = \tfrac{1}{1001} \approx 0.001$ and $\alpha = \tfrac{19}{14019} \approx 0.00136$: virtually every weight selects $(10,8)$. When objectives live on wildly different scales, the weights lose their intended meaning, which is why objectives should be normalized before weighting (Section~\ref{sec:pareto-frontier}).
 \end{solution}

@@ -1,0 +1,557 @@
+% ============================================================================
+% Chapter 7 solutions: Simplex Method (dictionary form)
+% Book source: part1-linear-programming/ch06-simplex/simplex-basis-driven.tex
+% Exercise numbering follows \begin{ex} order in that file (17 exercises).
+% All pivots and optima verified with exact-fraction basis algebra and
+% scipy.optimize.linprog, July 2026.
+% ============================================================================
+\section{Chapter 7: Simplex Method}
+
+This chapter's seventeen exercises track the chapter's arc: six warm-ups on
+standard form and the initial dictionary (7.1 to 7.6), seven core simplex
+solves in dictionary form including two Big-M problems (7.7 to 7.13), three
+conceptual problems on optimality conditions, geometry of basic feasible
+solutions, and the ratio test (7.14 to 7.16), and one challenge problem on
+degeneracy from ratio-test ties (7.17). Every pivot below was verified by
+exact-fraction basis computations and each optimum was confirmed with an LP
+solver. Solutions printed in the book's Selected Solutions (7.5, 7.6, 7.7,
+7.8, 7.9, 7.14, 7.17) are reproduced here, lightly edited, so that this
+manual is self-contained.
+
+\exsol{7.1}{Standard form and the first dictionary}{1}
+
+\textbf{(a)} Add slack variables $s_1, s_2 \geq 0$:
+\[
+\begin{aligned}
+\max \quad & 4x + 5y \\
+\st \quad & x + 2y + s_1 = 12, \\
+& 3x + 2y + s_2 = 24, \\
+& x, y, s_1, s_2 \geq 0.
+\end{aligned}
+\]
+
+\textbf{(b)} Solving each equation for its slack gives the initial dictionary
+at the slack basis $\{s_1, s_2\}$:
+\[
+\begin{aligned}
+\max \quad & z = 0 + 4x + 5y \\
+\st \quad & s_1 = 12 - x - 2y, \\
+& s_2 = 24 - 3x - 2y, \\
+& x, y, s_1, s_2 \geq 0.
+\end{aligned}
+\]
+
+\textbf{(c)} Setting the nonbasic variables $x = y = 0$ gives the basic
+feasible solution $(x, y, s_1, s_2) = (0, 0, 12, 24)$ with objective value
+$z = 0$.
+
+\textbf{(d)} Under steepest ascent we pick the largest objective
+coefficient: $5 > 4$, so $y$ enters first.
+
+\exsol{7.2}{Convert to Standard Form}{1}
+
+The objective is already a maximization and both variables are already
+nonnegative. Add a slack variable $s_1 \geq 0$ to the $\leq$ constraint and
+subtract a surplus variable $s_2 \geq 0$ from the $\geq$ constraint:
+\[
+\begin{aligned}
+\max \quad & 3x_1 - 5x_2 \\
+\st \quad & 2x_1 + x_2 + s_1 = 6, \\
+& -x_1 + 3x_2 - s_2 = 2, \\
+& x_1, x_2, s_1, s_2 \geq 0.
+\end{aligned}
+\]
+
+\exsol{7.3}{Convert to Standard Form}{1}
+
+Negate the objective to convert min to max: $\max\; x_1 - 2x_2 - x_3$.
+Since $x_3$ is unrestricted, write $x_3 = x_3^+ - x_3^-$ with
+$x_3^+, x_3^- \geq 0$. The first constraint is already an equality; add a
+slack $s_1 \geq 0$ to the second:
+\[
+\begin{aligned}
+\max \quad & x_1 - 2x_2 - x_3^+ + x_3^- \\
+\st \quad & x_1 - x_2 + 2x_3^+ - 2x_3^- = 4, \\
+& -2x_1 + x_2 + s_1 = 1, \\
+& x_1, x_2, x_3^+, x_3^-, s_1 \geq 0.
+\end{aligned}
+\]
+
+\exsol{7.4}{Convert to Standard Form}{1}
+
+The objective is already a maximization. Handle the variables: $x_1$ is
+unrestricted, so set $x_1 = x_1^+ - x_1^-$ with $x_1^+, x_1^- \geq 0$;
+$x_2, x_3 \leq 0$, so set $x_2 = -x_2'$ and $x_3 = -x_3'$ with
+$x_2', x_3' \geq 0$. Substituting, the objective becomes
+$5x_1^+ - 5x_1^- - x_2' + 3x_3'$. Subtract a surplus $s_1 \geq 0$ from the
+$\geq$ constraint; the equality stays as is:
+\[
+\begin{aligned}
+\max \quad & 5x_1^+ - 5x_1^- - x_2' + 3x_3' \\
+\st \quad & x_1^+ - x_1^- - 2x_2' + x_3' - s_1 = 7, \\
+& -x_2' + 4x_3' = 3, \\
+& x_1^+, x_1^-, x_2', x_3', s_1 \geq 0.
+\end{aligned}
+\]
+
+\exsol{7.5}{Convert to Standard Form}{1}
+
+(Book Selected Solution.) Negate the objective:
+$\max\; -2x_1 - 4x_2$. Subtract a surplus $s_1 \geq 0$ from the $\geq$
+constraint and add a slack $s_2 \geq 0$ to the $\leq$ constraint. Since
+$x_1$ is unrestricted, replace $x_1 = x_1' - x_1''$ with
+$x_1', x_1'' \geq 0$:
+\[
+\begin{aligned}
+\max \quad & -2(x_1' - x_1'') - 4x_2 \\
+\st \quad & (x_1' - x_1'') + x_2 - s_1 = 3, \\
+& 2(x_1' - x_1'') - x_2 + s_2 = 5, \\
+& x_1', x_1'', x_2, s_1, s_2 \geq 0.
+\end{aligned}
+\]
+
+\exsol{7.6}{Convert to Standard Form}{1}
+
+(Book Selected Solution.) Negate the objective:
+$\max\; -5y_1 + 3y_2 - y_3$. Add a slack $s_1 \geq 0$ to the $\leq$
+constraint; the equality needs no new variable. Since $y_3$ is
+unrestricted, replace $y_3 = y_3' - y_3''$ with $y_3', y_3'' \geq 0$:
+\[
+\begin{aligned}
+\max \quad & -5y_1 + 3y_2 - (y_3' - y_3'') \\
+\st \quad & 2y_1 - y_2 + 3(y_3' - y_3'') = 7, \\
+& -y_1 + 4y_2 + s_1 = 5, \\
+& y_1, y_2, y_3', y_3'', s_1 \geq 0.
+\end{aligned}
+\]
+
+\exsol{7.7}{Pivoting in a different direction}{2}
+
+(Book Selected Solution, verified.) Entering $x$ first costs an extra
+pivot compared with the steepest-ascent path: three pivots in all.
+
+\textbf{Pivot 1: $x$ enters.} Ratio test: $9/1 = 9$ ($s_1$),
+$16/2 = 8$ ($s_2$), $14/1 = 14$ ($s_3$); the minimum is $8$, so $s_2$
+leaves. Solving $s_2$'s row for $x$ and substituting:
+\[
+\begin{aligned}
+\max\quad & z = 16 + 2y - s_2 \\
+\st\quad & s_1 = 1 - \tfrac12 y + \tfrac12 s_2, \\
+& x = 8 - \tfrac12 y - \tfrac12 s_2, \\
+& s_3 = 6 - \tfrac32 y + \tfrac12 s_2.
+\end{aligned}
+\]
+
+\textbf{Pivot 2: $y$ enters} (only positive coefficient). Ratios:
+$1/\tfrac12 = 2$ ($s_1$), $8/\tfrac12 = 16$ ($x$), $6/\tfrac32 = 4$
+($s_3$); so $s_1$ leaves:
+\[
+\begin{aligned}
+\max\quad & z = 20 - 4s_1 + s_2 \\
+\st\quad & y = 2 - 2s_1 + s_2, \\
+& x = 7 + s_1 - s_2, \\
+& s_3 = 3 + 3s_1 - s_2.
+\end{aligned}
+\]
+
+\textbf{Pivot 3: $s_2$ enters} (coefficient $+1$). The $y$ row has $s_2$
+with a positive coefficient, so it imposes no limit; ratios $7/1 = 7$
+($x$) and $3/1 = 3$ ($s_3$), so $s_3$ leaves:
+\[
+\begin{aligned}
+\max\quad & z = 23 - s_1 - s_3 \\
+\st\quad & x = 4 - 2s_1 + s_3, \\
+& s_2 = 3 + 3s_1 - s_3, \\
+& y = 5 + s_1 - s_3.
+\end{aligned}
+\]
+All objective coefficients are negative, so this dictionary is optimal:
+$(x, y) = (4, 5)$ with $z^* = 23$, the same optimum the steepest-ascent
+path reaches in two pivots.
+
+\exsol{7.8}{Simplex Method Practice}{2}
+
+(Book Selected Solution, verified.) Initial dictionary:
+\[
+\begin{aligned}
+\max\quad & z = 5x_1 + 3x_2 \\
+\st\quad & s_1 = 12 - x_1 - x_2, \\
+& s_2 = 16 - 2x_1 - x_2.
+\end{aligned}
+\]
+
+\textbf{Pivot 1: $x_1$ enters} (coefficient $5$). Ratios: $12/1 = 12$ and
+$16/2 = 8$, so $s_2$ leaves:
+\[
+\begin{aligned}
+\max\quad & z = 40 + \tfrac12 x_2 - \tfrac52 s_2 \\
+\st\quad & x_1 = 8 - \tfrac12 x_2 - \tfrac12 s_2, \\
+& s_1 = 4 - \tfrac12 x_2 + \tfrac12 s_2.
+\end{aligned}
+\]
+
+\textbf{Pivot 2: $x_2$ enters.} Ratios: $8/\tfrac12 = 16$ and
+$4/\tfrac12 = 8$, so $s_1$ leaves:
+\[
+\begin{aligned}
+\max\quad & z = 44 - s_1 - 2s_2 \\
+\st\quad & x_2 = 8 - 2s_1 + s_2, \\
+& x_1 = 4 + s_1 - s_2.
+\end{aligned}
+\]
+Optimal: $(x_1, x_2) = (4, 8)$ with $z^* = 44$ (both constraints tight).
+
+\exsol{7.9}{Simplex Method Practice}{2}
+
+(Book Selected Solution, verified.) Initial dictionary:
+\[
+\begin{aligned}
+\max\quad & z = 5x_1 + 8x_2 \\
+\st\quad & s_1 = 30 - x_1 - 2x_2, \\
+& s_2 = 30 - 3x_1 - x_2.
+\end{aligned}
+\]
+
+\textbf{Pivot 1: $x_2$ enters} ($8 > 5$). Ratios: $30/2 = 15$ and
+$30/1 = 30$, so $s_1$ leaves:
+\[
+\begin{aligned}
+\max\quad & z = 120 + x_1 - 4s_1 \\
+\st\quad & x_2 = 15 - \tfrac12 x_1 - \tfrac12 s_1, \\
+& s_2 = 15 - \tfrac52 x_1 + \tfrac12 s_1.
+\end{aligned}
+\]
+
+\textbf{Pivot 2: $x_1$ enters.} Ratios: $15/\tfrac12 = 30$ and
+$15/\tfrac52 = 6$, so $s_2$ leaves:
+\[
+\begin{aligned}
+\max\quad & z = 126 - \tfrac{19}{5} s_1 - \tfrac25 s_2 \\
+\st\quad & x_1 = 6 + \tfrac15 s_1 - \tfrac25 s_2, \\
+& x_2 = 12 - \tfrac35 s_1 + \tfrac15 s_2.
+\end{aligned}
+\]
+Optimal: $(x_1, x_2) = (6, 12)$ with $z^* = 126$.
+
+\exsol{7.10}{Simplex Method Practice}{2}
+
+Add slacks $s_1, s_2$:
+\[
+\begin{aligned}
+\max\quad & z = 2x_1 + 3x_2 + x_3 \\
+\st\quad & s_1 = 32 - 4x_1 - 2x_2 - 5x_3, \\
+& s_2 = 28 - 2x_1 - 4x_2 - 3x_3.
+\end{aligned}
+\]
+
+\textbf{Pivot 1: $x_2$ enters} (largest coefficient $3$). Ratios:
+$32/2 = 16$ and $28/4 = 7$, so $s_2$ leaves. With
+$x_2 = 7 - \tfrac12 x_1 - \tfrac34 x_3 - \tfrac14 s_2$:
+\[
+\begin{aligned}
+\max\quad & z = 21 + \tfrac12 x_1 - \tfrac54 x_3 - \tfrac34 s_2 \\
+\st\quad & s_1 = 18 - 3x_1 - \tfrac72 x_3 + \tfrac12 s_2, \\
+& x_2 = 7 - \tfrac12 x_1 - \tfrac34 x_3 - \tfrac14 s_2.
+\end{aligned}
+\]
+
+\textbf{Pivot 2: $x_1$ enters} (coefficient $\tfrac12$). Ratios:
+$18/3 = 6$ and $7/\tfrac12 = 14$, so $s_1$ leaves:
+\[
+\begin{aligned}
+\max\quad & z = 24 - \tfrac{11}{6} x_3 - \tfrac16 s_1 - \tfrac23 s_2 \\
+\st\quad & x_1 = 6 - \tfrac76 x_3 - \tfrac13 s_1 + \tfrac16 s_2, \\
+& x_2 = 4 - \tfrac16 x_3 + \tfrac16 s_1 - \tfrac13 s_2.
+\end{aligned}
+\]
+All objective coefficients are negative, so this is optimal:
+$(x_1, x_2, x_3) = (6, 4, 0)$ with $z^* = 24$; both constraints are tight
+and $x_3$ never enters.
+
+\exsol{7.11}{Simplex Method Practice}{2}
+
+Add slacks $s_1, s_2, s_3$:
+\[
+\begin{aligned}
+\max\quad & z = 6x_1 + 8x_2 + 5x_3 \\
+\st\quad & s_1 = 1800 - 4x_1 - x_2 - x_3, \\
+& s_2 = 2000 - 2x_1 - 2x_2 - x_3, \\
+& s_3 = 3200 - 4x_1 - 2x_2 - x_3.
+\end{aligned}
+\]
+
+\textbf{Pivot 1: $x_2$ enters} (coefficient $8$). Ratios:
+$1800/1 = 1800$, $2000/2 = 1000$, $3200/2 = 1600$, so $s_2$ leaves. With
+$x_2 = 1000 - x_1 - \tfrac12 x_3 - \tfrac12 s_2$:
+\[
+\begin{aligned}
+\max\quad & z = 8000 - 2x_1 + x_3 - 4s_2 \\
+\st\quad & s_1 = 800 - 3x_1 - \tfrac12 x_3 + \tfrac12 s_2, \\
+& x_2 = 1000 - x_1 - \tfrac12 x_3 - \tfrac12 s_2, \\
+& s_3 = 1200 - 2x_1 + s_2.
+\end{aligned}
+\]
+
+\textbf{Pivot 2: $x_3$ enters} (coefficient $+1$). The $s_3$ row does not
+contain $x_3$; ratios $800/\tfrac12 = 1600$ ($s_1$) and
+$1000/\tfrac12 = 2000$ ($x_2$), so $s_1$ leaves:
+\[
+\begin{aligned}
+\max\quad & z = 9600 - 8x_1 - 2s_1 - 3s_2 \\
+\st\quad & x_3 = 1600 - 6x_1 - 2s_1 + s_2, \\
+& x_2 = 200 + 2x_1 + s_1 - s_2, \\
+& s_3 = 1200 - 2x_1 + s_2.
+\end{aligned}
+\]
+Optimal: $(x_1, x_2, x_3) = (0, 200, 1600)$ with $z^* = 9600$; the first
+two constraints are tight, the third has slack $s_3 = 1200$, and $x_1$
+stays out of the optimal solution.
+
+\exsol{7.12}{Simplex Method Practice (Big-M)}{2}
+
+Convert the minimization to a maximization, $\max\ z = -4x_1 - 6x_2 - 7x_3$,
+subtract surplus variables $e_1, e_2 \geq 0$, and, since the origin is
+infeasible, add artificial variables $a_1, a_2 \geq 0$ penalized by $-M$
+in the objective. Solving for $a_1, a_2$ gives the starting dictionary
+\[
+\begin{aligned}
+\max\quad & z = -50M + (2M - 4)x_1 + (3M - 6)x_2 + (3M - 7)x_3 - M e_1 - M e_2 \\
+\st\quad & a_1 = 20 - x_1 - x_2 - 2x_3 + e_1, \\
+& a_2 = 30 - x_1 - 2x_2 - x_3 + e_2.
+\end{aligned}
+\]
+
+\textbf{Pivot 1: $x_2$ enters} (largest coefficient $3M - 6$). Ratios:
+$20/1 = 20$ ($a_1$) and $30/2 = 15$ ($a_2$), so $a_2$ leaves:
+\[
+\begin{aligned}
+\max\quad & z = (-90 - 5M) + \left(\tfrac{M}{2} - 1\right)x_1
+  + \left(\tfrac{3M}{2} - 4\right)x_3 - M e_1
+  + \left(\tfrac{M}{2} - 3\right)e_2 + \left(3 - \tfrac{3M}{2}\right)a_2 \\
+\st\quad & a_1 = 5 - \tfrac12 x_1 - \tfrac32 x_3 + e_1 - \tfrac12 e_2 + \tfrac12 a_2, \\
+& x_2 = 15 - \tfrac12 x_1 - \tfrac12 x_3 + \tfrac12 e_2 - \tfrac12 a_2.
+\end{aligned}
+\]
+
+\textbf{Pivot 2: $x_3$ enters} (coefficient $\tfrac{3M}{2} - 4$, the
+largest). Ratios: $5/\tfrac32 = \tfrac{10}{3}$ ($a_1$) and
+$15/\tfrac12 = 30$ ($x_2$), so $a_1$ leaves. Both artificials are now
+nonbasic and may be dropped:
+\[
+\begin{aligned}
+\max\quad & z = -\tfrac{310}{3} + \tfrac13 x_1 - \tfrac83 e_1 - \tfrac53 e_2 \\
+\st\quad & x_3 = \tfrac{10}{3} - \tfrac13 x_1 + \tfrac23 e_1 - \tfrac13 e_2, \\
+& x_2 = \tfrac{40}{3} - \tfrac13 x_1 - \tfrac13 e_1 + \tfrac23 e_2.
+\end{aligned}
+\]
+
+\textbf{Pivot 3: $x_1$ enters} (coefficient $\tfrac13$). Ratios:
+$\tfrac{10}{3}/\tfrac13 = 10$ ($x_3$) and $\tfrac{40}{3}/\tfrac13 = 40$
+($x_2$), so $x_3$ leaves:
+\[
+\begin{aligned}
+\max\quad & z = -100 - x_3 - 2e_1 - 2e_2 \\
+\st\quad & x_1 = 10 - 3x_3 + 2e_1 - e_2, \\
+& x_2 = 10 + x_3 - e_1 + e_2.
+\end{aligned}
+\]
+Optimal: $(x_1, x_2, x_3) = (10, 10, 0)$ with $\max z = -100$, that is,
+minimum cost $z^* = 100$; both $\geq$ constraints are tight.
+
+\begin{qaflag}
+Tedium note: with the book's default largest-coefficient entering rule this
+Big-M solve takes three pivots and passes through fractions in thirds,
+which is right at the hand-computation limit. A shorter route exists:
+entering $x_1$ first (its coefficient $2M - 4$ is also positive) drives
+$a_1$ out immediately and reaches the same optimum in only two pivots.
+An instructor may want to point students to that path, or the book could
+add a hint such as ``entering $x_1$ first shortens the computation.''
+The exercise itself is correct as stated.
+\end{qaflag}
+
+\exsol{7.13}{Simplex Method Practice (Big-M)}{2}
+
+Convert to $\max\ z = -40x_1 - 48x_2 - 30x_3$, subtract surpluses
+$e_1, e_2 \geq 0$, and add penalized artificials $a_1, a_2 \geq 0$:
+\[
+\begin{aligned}
+\max\quad & z = -55M + (3M - 40)x_1 + (5M - 48)x_2 + (3M - 30)x_3 - M e_1 - M e_2 \\
+\st\quad & a_1 = 25 - 2x_1 - 2x_2 - x_3 + e_1, \\
+& a_2 = 30 - x_1 - 3x_2 - 2x_3 + e_2.
+\end{aligned}
+\]
+
+\textbf{Pivot 1: $x_2$ enters} (largest coefficient $5M - 48$). Ratios:
+$25/2 = 12.5$ ($a_1$) and $30/3 = 10$ ($a_2$), so $a_2$ leaves:
+\[
+\begin{aligned}
+\max\quad & z = (-480 - 5M) + \left(\tfrac{4M}{3} - 24\right)x_1
+  + \left(2 - \tfrac{M}{3}\right)x_3 - M e_1
+  + \left(\tfrac{2M}{3} - 16\right)e_2 + \left(16 - \tfrac{5M}{3}\right)a_2 \\
+\st\quad & a_1 = 5 - \tfrac43 x_1 + \tfrac13 x_3 + e_1 - \tfrac23 e_2 + \tfrac23 a_2, \\
+& x_2 = 10 - \tfrac13 x_1 - \tfrac23 x_3 + \tfrac13 e_2 - \tfrac13 a_2.
+\end{aligned}
+\]
+
+\textbf{Pivot 2: $x_1$ enters} ($\tfrac{4M}{3} - 24$ beats
+$\tfrac{2M}{3} - 16$). Ratios: $5/\tfrac43 = \tfrac{15}{4}$ ($a_1$) and
+$10/\tfrac13 = 30$ ($x_2$), so $a_1$ leaves. Both artificials are now
+nonbasic; dropping them,
+\[
+\begin{aligned}
+\max\quad & z = -570 - 4x_3 - 18e_1 - 4e_2 \\
+\st\quad & x_1 = \tfrac{15}{4} + \tfrac14 x_3 + \tfrac34 e_1 - \tfrac12 e_2, \\
+& x_2 = \tfrac{35}{4} - \tfrac34 x_3 - \tfrac14 e_1 + \tfrac12 e_2.
+\end{aligned}
+\]
+All coefficients are negative, so this is optimal after just two pivots:
+$(x_1, x_2, x_3) = \left(\tfrac{15}{4}, \tfrac{35}{4}, 0\right)$ with
+minimum cost $z^* = 40 \cdot \tfrac{15}{4} + 48 \cdot \tfrac{35}{4}
+= 150 + 420 = 570$. Both $\geq$ constraints are tight.
+
+\begin{qaflag}
+Judgment call: the optimal solution is fractional
+$\left(\tfrac{15}{4}, \tfrac{35}{4}\right)$ even though all the data are
+integers. The solve is short (two pivots) and the optimal value $570$ is
+clean, so this is acceptable, but if an integer answer is preferred,
+changing the first right-hand side from $25$ to $24$ yields the integral
+optimum $(3, 9, 0)$ with cost $552$ (verified).
+\end{qaflag}
+
+\exsol{7.14}{Dictionary Optimality}{2}
+
+(Book Selected Solution, verified.) The basic solution reads off the
+constant terms: $x_2 = 1$, $x_4 = 2$, $x_3 = b$, with
+$x_1 = x_5 = x_6 = 0$.
+\begin{enumerate}
+\item \textbf{Feasible and optimal:} feasibility requires every constant
+term nonnegative, so $b \geq 0$; optimality requires no improving
+direction, so $c_1 \leq 0$, $c_5 \leq 0$, $c_6 \leq 0$. The values
+$a_1, a_2$ may be arbitrary.
+\item \textbf{Not feasible:} $b < 0$ (the constants $1$ and $2$ are
+already nonnegative, so only the $x_3$ row can fail).
+\item \textbf{Degenerate:} $b = 0$, so that the basic variable $x_3$ sits
+at value zero (feasibility of the rest is automatic).
+\item \textbf{Feasible and unbounded:} we need $b \geq 0$ together with an
+entering variable whose objective coefficient is positive and whose
+increase never decreases any basic variable. The variable $x_5$ appears
+with fixed coefficient $-1$ in the $x_3$ row and $x_6$ with $-1$ in both
+the $x_4$ and $x_3$ rows, so the ratio test always stops them. Only $x_1$
+can certify unboundedness: its column coefficients are $+1$, $+1$, and
+$-a_2$, so the conditions are $c_1 > 0$ and $a_2 \leq 0$ (with $b \geq 0$
+for feasibility).
+\end{enumerate}
+
+\exsol{7.15}{Basic Feasible Solutions}{2}
+
+\begin{qaflag}
+Book fix applied: in the source, all but one constraint of this exercise
+had been commented out, and the one visible constraint
+($-x_1 + x_2 \leq 2$) did not match the figure. The constraint system was
+reconstructed exactly from the figure (all five labeled vertices check
+out: $A = (2,1)$, $B = (5,1)$, $C = (7,3)$, $D = (0, \tfrac{16}{3})$,
+$E = (0, \tfrac{7}{3})$) and the book statement was repaired to
+\[
+\max\ 2x_1 + x_2 \quad \st\quad 2x_1 + 3x_2 \geq 7,\ \
+x_2 \geq 1,\ \ x_1 - x_2 \leq 4,\ \ x_1 + 3x_2 \leq 16,\ \ x_1, x_2 \geq 0,
+\]
+with surplus variables $s_1, s_2$ on the two $\geq$ constraints and slacks
+$s_3, s_4$ on the two $\leq$ constraints. The solution below matches the
+repaired statement.
+\end{qaflag}
+
+\textbf{(a)} The vertex $D = (0, \tfrac{16}{3})$ is the intersection of
+the boundaries $x_1 = 0$ and $x_1 + 3x_2 = 16$ (that is, $s_4 = 0$). So
+the nonbasic variables are $N = \{x_1, s_4\}$ and the basic variables are
+$B = \{x_2, s_1, s_2, s_3\}$, with values
+\[
+x_2 = \tfrac{16}{3}, \qquad s_1 = 9, \qquad s_2 = \tfrac{13}{3},
+\qquad s_3 = \tfrac{28}{3}.
+\]
+
+\textbf{(b)} Moving from $D$ to $C = (7, 3)$ travels along the edge
+$s_4 = 0$ while $x_1$ increases from $0$: so \emph{$x_1$ enters}. At $C$
+the boundary $x_1 - x_2 = 4$ becomes tight, i.e., $s_3 = 0$: so
+\emph{$s_3$ leaves}. This agrees with the ratio test in the dictionary at
+$D$, where increasing $x_1$ (with $s_4 = 0$) drives
+$s_3 = \tfrac{28}{3} - \tfrac43 x_1$ to zero first, at $x_1 = 7$,
+before $s_2$ (at $x_1 = 13$) or $x_2$ (at $x_1 = 16$).
+
+\exsol{7.16}{What the ratio test protects}{2}
+
+\textbf{(a)} Pivoting on the $s_2$ row means solving
+$s_2 = 9 - \tfrac32 x + \tfrac12 s_3$ for $x$, giving
+$x = 6 - \tfrac23 s_2 + \tfrac13 s_3$, and substituting everywhere:
+\[
+\begin{aligned}
+\max\quad & z = 24 - \tfrac13 s_2 - \tfrac43 s_3 \\
+\st\quad & s_1 = -1 + \tfrac13 s_2 + \tfrac13 s_3, \\
+& x = 6 - \tfrac23 s_2 + \tfrac13 s_3, \\
+& y = 4 + \tfrac13 s_2 - \tfrac23 s_3.
+\end{aligned}
+\]
+The basic solution is $(x, y, s_1, s_2, s_3) = (6, 4, -1, 0, 0)$: the
+basic variable $s_1$ is negative, so the dictionary is infeasible. (Indeed
+the point $(x, y) = (6, 4)$ violates $x + y \leq 9$.) Note that the
+``objective value'' $24$ exceeds the true optimum $23$ precisely because
+the point is outside the feasible region.
+
+\textbf{(b)} As the entering variable $x$ increases, every basic variable
+with a negative $x$-coefficient decreases toward zero; the ratio of each
+row measures how far $x$ can go before that row's basic variable hits
+zero. The minimum ratio is the first blocking value. Pivoting on any
+other row pushes $x$ past that first block, so the basic variable that
+owned the minimum ratio (here $s_1$, blocked at $x = 4$) is driven
+negative. The minimum-ratio rule protects exactly the nonnegativity of
+all the basic variables that remain in the basis.
+
+\exsol{7.17}{A tie in the ratio test forces degeneracy}{3}
+
+(Book Selected Solution, verified, with part (c) restated.)
+
+\textbf{(a)} The initial dictionary is
+\[
+\begin{aligned}
+\max\quad & z = 2x + y \\
+\st\quad & s_1 = 4 - x - y, \\
+& s_2 = 8 - 2x - y.
+\end{aligned}
+\]
+With $x$ entering (and $y = 0$), the ratio test gives $4/1 = 4$ for $s_1$
+and $8/2 = 4$ for $s_2$: a tie at $x = 4$.
+
+\textbf{(b)} Let $s_1$ leave. Then $x = 4 - y - s_1$ and
+\[
+\begin{aligned}
+\max\quad & z = 8 - y - 2s_1 \\
+\st\quad & x = 4 - y - s_1, \\
+& s_2 = 0 + y + 2s_1.
+\end{aligned}
+\]
+The basic variable $s_2$ has value $0$: the dictionary is degenerate. It
+is also optimal (both reduced costs negative), with $(x, y) = (4, 0)$ and
+$z^* = 8$.
+
+\textbf{(c)} Let $s_2$ leave instead. Then
+$x = 4 - \tfrac12 y - \tfrac12 s_2$ and
+\[
+\begin{aligned}
+\max\quad & z = 8 + 0 \cdot y - s_2 \\
+\st\quad & x = 4 - \tfrac12 y - \tfrac12 s_2, \\
+& s_1 = 0 - \tfrac12 y + \tfrac12 s_2.
+\end{aligned}
+\]
+Again a basic variable ($s_1$) equals zero: degenerate. The reduced cost
+of $y$ is exactly $0$. A zero reduced cost normally signals alternative
+optima along the corresponding edge; here the degenerate row
+$s_1 = 0 - \tfrac12 y + \cdots$ blocks $y$ at once, so the optimal
+\emph{solution} $(4, 0)$ is unique, but there are multiple optimal
+\emph{bases} describing it. This is the typical fingerprint of degeneracy.
+
+\textbf{(d)} If two rows tie at the minimum ratio, the entering variable
+stops at a value where both corresponding basic variables hit zero
+simultaneously. Only one of them leaves the basis; the other remains
+basic at value zero, so the new dictionary necessarily has a basic
+variable equal to zero, which is the definition of degeneracy. A
+construction: $\max\ x + y$ subject to $x \leq 3$, $x + 2y \leq 3$,
+$x, y \geq 0$; entering $x$ gives ratios $3/1 = 3$ and $3/1 = 3$, a tie.

@@ -1,0 +1,504 @@
+% ============================================================================
+% Chapter 12: Software - Python
+% Book source: part1-linear-programming/ch03-software/software-python-book1.tex
+% Exercise numbering synced to \begin{ex} order as of 2026-07-13.
+% All code executed with Python 3.10, PuLP 3.3.2, bundled CBC solver.
+% ============================================================================
+
+\section{Chapter 12: Software -- Python}
+
+This chapter has nine exercises, all built around the two running PuLP
+examples of the chapter's PuLP section (Section 12.12): the product mix LP
+and the complete transportation LP. The warm-ups (12.1--12.3) modify data in the worked
+examples; the core problems (12.4--12.6) build a model from scratch, extract
+duals and slacks, and run an $\varepsilon$-constraint sweep; the concept
+problems (12.7--12.8) diagnose the two classic PuLP modeling bugs (a missing
+constraint and a wrong optimization sense); and the challenge problem (12.9)
+traces optimal profit as a function of a right-hand side. Every solution below
+was produced by actually running the code shown (PuLP 3.3.2 with the bundled
+CBC solver); printed output is reproduced verbatim. The book's Selected
+Solutions for 12.2, 12.5, and 12.9 were re-executed and confirmed; they are
+reused and expanded here.
+
+% ----------------------------------------------------------------------------
+\exsol{12.1}{A New Profit Margin}{1}
+
+Only the objective line changes: the profit coefficient of $X_1$ becomes 5.
+
+\begin{verbatim}
+from pulp import *
+
+prob = LpProblem("Product_Mix", LpMaximize)
+x1 = LpVariable("X1", lowBound=0)
+x2 = LpVariable("X2", lowBound=0)
+
+prob += 5*x1 + 2*x2, "Total_Profit"     # was 3*x1 + 2*x2
+prob += 10*x1 + 5*x2 <= 300, "Material"
+prob += 4*x1 + 4*x2 <= 160, "Labor"
+prob += 2*x1 + 6*x2 <= 180, "Machine"
+
+prob.solve(PULP_CBC_CMD(msg=0))
+print(f"Status: {LpStatus[prob.status]}")
+print(f"Maximum Profit: ${value(prob.objective)}")
+print(f"X1 = {x1.varValue}")
+print(f"X2 = {x2.varValue}")
+for name, c in prob.constraints.items():
+    print(name, "slack =", c.slack)
+\end{verbatim}
+
+Actual output:
+
+\begin{verbatim}
+Status: Optimal
+Maximum Profit: $150.0
+X1 = 30.0
+X2 = 0.0
+Material slack = -0.0
+Labor slack = 40.0
+Machine slack = 120.0
+\end{verbatim}
+
+The new plan is $(X_1, X_2) = (30, 0)$ with profit $\$150$. Product 1 is now
+so profitable per unit of the scarce material (profit $5$ per $10$ units of
+material, versus $2$ per $5$ for Product 2, and material is the first resource
+to run out) that the company specializes completely. Only the
+\textbf{Material} constraint is binding ($10 \cdot 30 + 5 \cdot 0 = 300$);
+Labor has slack $40$ and Machine has slack $120$ (the nonnegativity bound
+$X_2 \geq 0$ is also active). As promised, the answer is no longer $(20,20)$.
+
+% ----------------------------------------------------------------------------
+\exsol{12.2}{From Math to PuLP}{1}
+
+The book's Selected Solution is correct as printed; the code below was
+re-executed to confirm. Following the six-step pattern:
+
+\begin{verbatim}
+from pulp import *
+
+prob = LpProblem("Three_Var", LpMaximize)          # Step 1: problem
+x1 = LpVariable("X1", lowBound=0)                  # Step 2: variables
+x2 = LpVariable("X2", lowBound=0)
+x3 = LpVariable("X3", lowBound=0)
+
+prob += 4*x1 + 6*x2 + 5*x3, "Objective"            # Step 3: objective
+prob += 2*x1 + x2 + x3 <= 9, "C1"                # Step 4: constraints
+prob += x1 + 3*x2 + 2*x3 <= 14, "C2"
+prob += x1 + x2 + 2*x3 <= 10, "C3"
+
+prob.solve(PULP_CBC_CMD(msg=0))                    # Step 5: solve
+print(LpStatus[prob.status], value(prob.objective))
+for v in prob.variables():                         # Step 6: results
+    print(v.name, "=", v.varValue)
+\end{verbatim}
+
+Actual output:
+
+\begin{verbatim}
+Optimal 35.0
+X1 = 2.0
+X2 = 2.0
+X3 = 3.0
+\end{verbatim}
+
+The optimal objective value is $35$ at $(x_1, x_2, x_3) = (2, 2, 3)$.
+All three constraints are binding ($4+2+3 = 9$, $2+6+6 = 14$, $2+2+6 = 10$);
+
+\begin{qaflag}
+Resolved 2026-07-10: the original data for this exercise matched a well-known copyrighted textbook example coefficient for coefficient. The data was replaced with an original instance (verified optimum $(2,2,3)$, value $35$) in both the book and this manual.
+\end{qaflag}
+
+% ----------------------------------------------------------------------------
+\exsol{12.3}{New Demand Data}{1}
+
+Only the \texttt{demand} dictionary changes.
+
+\begin{verbatim}
+from pulp import *
+
+plants = ['Chicago', 'Denver']
+markets = ['NYC', 'LA', 'Houston']
+
+supply = {'Chicago': 100, 'Denver': 150}
+demand = {'NYC': 100, 'LA': 80, 'Houston': 70}   # updated demand
+
+cost = {
+    ('Chicago', 'NYC'): 3, ('Chicago', 'LA'): 5, ('Chicago', 'Houston'): 2,
+    ('Denver', 'NYC'): 4, ('Denver', 'LA'): 2, ('Denver', 'Houston'): 3
+}
+
+prob = LpProblem("Transportation", LpMinimize)
+routes = [(p, m) for p in plants for m in markets]
+x = LpVariable.dicts("Ship", routes, lowBound=0)
+prob += lpSum([cost[r] * x[r] for r in routes]), "Total_Cost"
+for p in plants:
+    prob += lpSum([x[p,m] for m in markets]) <= supply[p], f"Supply_{p}"
+for m in markets:
+    prob += lpSum([x[p,m] for p in plants]) >= demand[m], f"Demand_{m}"
+
+prob.solve(PULP_CBC_CMD(msg=0))
+print(f"Status: {LpStatus[prob.status]}")
+print(f"Total Cost: ${value(prob.objective)}")
+for p in plants:
+    for m in markets:
+        if x[p,m].varValue > 0:
+            print(f"  {p} -> {m}: {x[p,m].varValue}")
+\end{verbatim}
+
+Actual output:
+
+\begin{verbatim}
+Status: Optimal
+Total Cost: $670.0
+  Chicago -> NYC: 100.0
+  Denver -> LA: 80.0
+  Denver -> Houston: 70.0
+\end{verbatim}
+
+The new total cost is $\$670$ (up from $\$610$). CBC's plan sends all of
+Chicago's supply to NYC and covers LA and Houston from Denver. (There are
+alternative optima with the same cost, e.g., Denver serving LA and NYC while
+Chicago covers Houston and part of NYC; students may report a different plan
+at cost $670$.)
+
+One-sentence explanation: total demand rose from $240$ to $250$ units and
+shifted from LA (which Denver serves at the system's cheapest rate, $\$2$)
+toward NYC (cheapest inbound rate $\$3$), so the network must ship more units
+and ship them on more expensive routes. Note also that demand now exactly
+equals total supply ($250 = 250$), so neither plant has spare capacity left to
+exploit cheaper routings.
+
+% ----------------------------------------------------------------------------
+\exsol{12.4}{A Three-Plant Transportation Model}{2}
+
+\begin{verbatim}
+from pulp import *
+
+# === DATA ===
+plants = ['A', 'B', 'C']
+markets = ['M1', 'M2', 'M3']
+supply = {'A': 60, 'B': 70, 'C': 80}
+demand = {'M1': 50, 'M2': 60, 'M3': 70}
+cost = {
+    ('A','M1'): 4, ('A','M2'): 6, ('A','M3'): 8,
+    ('B','M1'): 5, ('B','M2'): 4, ('B','M3'): 3,
+    ('C','M1'): 6, ('C','M2'): 7, ('C','M3'): 5
+}
+
+# === MODEL ===
+prob = LpProblem("Three_Plant_Transport", LpMinimize)
+routes = [(p, m) for p in plants for m in markets]
+x = LpVariable.dicts("Ship", routes, lowBound=0)
+
+prob += lpSum([cost[r] * x[r] for r in routes]), "Total_Cost"
+for p in plants:
+    prob += lpSum([x[p,m] for m in markets]) <= supply[p], f"Supply_{p}"
+for m in markets:
+    prob += lpSum([x[p,m] for p in plants]) >= demand[m], f"Demand_{m}"
+
+# === SOLVE / RESULTS ===
+prob.solve(PULP_CBC_CMD(msg=0))
+print(f"Status: {LpStatus[prob.status]}")
+print(f"Total Cost: {value(prob.objective)}")
+for p in plants:
+    shipped = sum(x[p,m].varValue for m in markets)
+    print(f"Plant {p}: shipped {shipped} of {supply[p]}"
+          f" (unused {supply[p]-shipped})")
+for p in plants:
+    for m in markets:
+        if x[p,m].varValue > 0:
+            print(f"  {p} -> {m}: {x[p,m].varValue}")
+\end{verbatim}
+
+Actual output:
+
+\begin{verbatim}
+Status: Optimal
+Total Cost: 770.0
+Plant A: shipped 50.0 of 60 (unused 10.0)
+Plant B: shipped 70.0 of 70 (unused 0.0)
+Plant C: shipped 60.0 of 80 (unused 20.0)
+  A -> M1: 50.0
+  B -> M2: 60.0
+  B -> M3: 10.0
+  C -> M3: 60.0
+\end{verbatim}
+
+Minimum total cost: $\$770$. Plan: A supplies all of M1 (50 units at cost 4),
+B supplies all of M2 (60 at 4) plus 10 units of M3 (at 3), and C supplies the
+remaining 60 units of M3 (at 5). Plants A and C have unused capacity (10 and
+20 units respectively); B, whose routes to M2 and M3 are the cheapest in
+their columns, is used to capacity. Sanity check by hand: the greedy
+assignment M1$\leftarrow$A, M2$\leftarrow$B, M3$\leftarrow$B then C gives
+$200 + 240 + 30 + 300 = 770$, and the LP confirms no cheaper plan exists.
+
+% ----------------------------------------------------------------------------
+\exsol{12.5}{Duals and Slacks from a Solved Model}{2}
+
+Complete script (original product mix data, profit $3X_1 + 2X_2$):
+
+\begin{verbatim}
+from pulp import *
+
+prob = LpProblem("Product_Mix", LpMaximize)
+x1 = LpVariable("X1", lowBound=0)
+x2 = LpVariable("X2", lowBound=0)
+prob += 3*x1 + 2*x2, "Total_Profit"
+prob += 10*x1 + 5*x2 <= 300, "Material"
+prob += 4*x1 + 4*x2 <= 160, "Labor"
+prob += 2*x1 + 6*x2 <= 180, "Machine"
+prob.solve(PULP_CBC_CMD(msg=0))
+
+print(LpStatus[prob.status], value(prob.objective), x1.varValue, x2.varValue)
+for name, c in prob.constraints.items():
+    print(name, "dual =", c.pi, "slack =", c.slack)
+\end{verbatim}
+
+Actual output:
+
+\begin{verbatim}
+Optimal 100.0 20.0 20.0
+Material dual = 0.2 slack = -0.0
+Labor dual = 0.25 slack = -0.0
+Machine dual = -0.0 slack = 20.0
+\end{verbatim}
+
+\begin{enumerate}
+\item Material: dual $0.2$, slack $0$. Labor: dual $0.25$, slack $0$.
+Machine: dual $0$, slack $20$. (CBC prints $-0.0$; that is a signed floating
+point zero, i.e., $0$.) Hand check of the duals: the binding rows give
+$10y_1 + 4y_2 = 3$ and $5y_1 + 4y_2 = 2$, so $y_1 = 0.2$, $y_2 = 0.25$.
+\item The Machine constraint has dual value $0$ and slack $20$: at the
+optimum $(20,20)$, machine usage is $2(20) + 6(20) = 160 < 180$. A resource
+with leftover capacity cannot be worth anything at the margin, so its shadow
+price is zero. This is complementary slackness: for each constraint, the dual
+value or the slack (or both) must be zero.
+\item The Labor dual is $0.25$, so one extra hour of labor raises the optimal
+profit by $\$0.25$, from $\$100$ to $\$100.25$ (valid as long as the current
+basis stays optimal; Exercise 12.9 shows this rate holds up to $b = 168$).
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\exsol{12.6}{An Epsilon-Constraint Sweep}{2}
+
+Following the template from the multi-objective chapter (Section 13.3), we
+re-solve the product mix LP with the extra cap $2X_1 + 6X_2 \leq \varepsilon$.
+
+\begin{verbatim}
+from pulp import *
+
+print(f"{'eps':>4} {'X1':>6} {'X2':>6} {'profit':>7}")
+for eps in [60, 90, 120, 150, 180]:
+    prob = LpProblem("Product_Mix_Eps", LpMaximize)
+    x1 = LpVariable("X1", lowBound=0)
+    x2 = LpVariable("X2", lowBound=0)
+    prob += 3*x1 + 2*x2
+    prob += 10*x1 + 5*x2 <= 300, "Material"
+    prob += 4*x1 + 4*x2 <= 160, "Labor"
+    prob += 2*x1 + 6*x2 <= 180, "Machine"
+    prob += 2*x1 + 6*x2 <= eps, "Machine_cap"
+    prob.solve(PULP_CBC_CMD(msg=0))
+    print(f"{eps:>4} {x1.varValue:>6.1f} {x2.varValue:>6.1f}"
+          f" {value(prob.objective):>7.1f}")
+\end{verbatim}
+
+Actual output:
+
+\begin{verbatim}
+ eps     X1     X2  profit
+  60   30.0    0.0    90.0
+  90   27.0    6.0    93.0
+ 120   24.0   12.0    96.0
+ 150   21.0   18.0    99.0
+ 180   20.0   20.0   100.0
+\end{verbatim}
+
+Trade-off: tightening the machine cap costs profit, but cheaply. From
+$\varepsilon = 160$ (where the unconstrained optimum $(20,20)$ uses exactly
+$160$ machine hours) down to $\varepsilon = 60$, the cap is binding and each
+machine hour given up costs exactly $\$0.10$ of profit (the cap's shadow
+price): profit falls linearly $100 \to 99 \to 96 \to 93 \to 90$ as
+$\varepsilon$ falls $160 \to 150 \to 120 \to 90 \to 60$. For
+$\varepsilon \geq 160$ (including the printed $\varepsilon = 180$) the cap is
+slack and the solution is the original optimum. Along the sweep the plan
+shifts steadily from the machine-heavy mix toward Product 1 only: the company
+can cut machine usage by nearly two thirds (from $160$ to $60$ hours) while
+losing only $10\%$ of profit. Each row is a point on the (profit, machine
+usage) Pareto frontier.
+
+% ----------------------------------------------------------------------------
+\exsol{12.7}{The Constraint That Wasn't There}{2}
+
+\begin{enumerate}
+\item Prediction and experiment agree: PuLP neither raises an error nor
+prints a warning; it happily solves the model you gave it. PuLP cannot know
+that a constraint is missing; the two-constraint LP is a perfectly valid
+problem. The run returns status \texttt{Optimal}.
+
+\begin{verbatim}
+from pulp import *
+
+prob = LpProblem("Product_Mix_NoLabor", LpMaximize)
+x1 = LpVariable("X1", lowBound=0)
+x2 = LpVariable("X2", lowBound=0)
+prob += 3*x1 + 2*x2, "Total_Profit"
+prob += 10*x1 + 5*x2 <= 300, "Material"
+prob += 2*x1 + 6*x2 <= 180, "Machine"     # Labor line is missing
+prob.solve(PULP_CBC_CMD(msg=0))
+print(LpStatus[prob.status], value(prob.objective), x1.varValue, x2.varValue)
+print("Labor used:", 4*x1.varValue + 4*x2.varValue)
+\end{verbatim}
+
+Actual output:
+\begin{verbatim}
+Optimal 102.0 18.0 24.0
+Labor used: 168.0
+\end{verbatim}
+
+\item The returned solution is $(18, 24)$ with profit $\$102$: the
+intersection of the Material and Machine lines
+($10x_1 + 5x_2 = 300$, $2x_1 + 6x_2 = 180$). The profit exceeds $\$100$
+because dropping a constraint enlarges the feasible region, and the true
+optimum $(20,20)$ had Labor binding, so relaxing Labor strictly helps. The
+plan is \emph{not} implementable: it needs $4(18) + 4(24) = 168$ labor hours
+but only $160$ are available.
+
+\item With \texttt{prob += 4*x1 + 4*x2} (no \texttt{<= 160}), PuLP treats the
+expression as a new \emph{objective} and replaces $3x_1 + 2x_2$ with
+$4x_1 + 4x_2$. Recent PuLP versions print
+\begin{verbatim}
+UserWarning: Overwriting previously set objective.
+\end{verbatim}
+but the model still solves and reports \texttt{Optimal} (our run returns
+$(18, 24)$ with objective value $168$, which is the value of $4x_1 + 4x_2$,
+not profit). This bug is more dangerous than an omitted line because it does
+two bad things at once, both invisibly: the labor constraint is still missing
+\emph{and} the objective is now the wrong function, yet every status check
+passes. An omitted line at least leaves the objective intact. Defensive
+habits: print \texttt{prob} (or \texttt{prob.objective}) before solving, and
+treat any \texttt{UserWarning} from PuLP as an error.
+\end{enumerate}
+
+\begin{qaflag}
+Book fix applied (sync note): the warn box in the product mix example
+(Subsection 12.12.3, Step 4) said PuLP
+\emph{silently} overwrites the objective. Verified with PuLP 3.3.2 that a
+\texttt{UserWarning} is printed. The book text was updated to say a warning
+is printed but the model still solves. Exercise wording itself needed no
+change; part (1) of this exercise refers to the omitted-line case, which is
+truly silent.
+\end{qaflag}
+
+% ----------------------------------------------------------------------------
+\exsol{12.8}{Minimize or Maximize?}{2}
+
+\begin{enumerate}
+\item Minimizing $3x_1 + 2x_2$ over the feasible region returns
+$(x_1, x_2) = (0, 0)$ with objective $0$, status \texttt{Optimal}. Verified:
+
+\begin{verbatim}
+from pulp import *
+prob = LpProblem("Product_Mix", LpMinimize)   # wrong sense
+x1 = LpVariable("X1", lowBound=0)
+x2 = LpVariable("X2", lowBound=0)
+prob += 3*x1 + 2*x2, "Total_Profit"
+prob += 10*x1 + 5*x2 <= 300, "Material"
+prob += 4*x1 + 4*x2 <= 160, "Labor"
+prob += 2*x1 + 6*x2 <= 180, "Machine"
+prob.solve(PULP_CBC_CMD(msg=0))
+print(LpStatus[prob.status], value(prob.objective), x1.varValue, x2.varValue)
+\end{verbatim}
+
+Output: \texttt{Optimal 0.0 0.0 0.0}. The model is not infeasible because
+the constraints are all $\leq$ constraints with nonnegative data: the origin
+satisfies every one of them. Minimizing a nonnegative objective over a region
+containing the origin gives the useless but perfectly legal answer ``produce
+nothing.''
+
+\item Two one-line fixes, both verified to return the plan $(20, 20)$:
+\begin{itemize}
+\item Change the sense:
+\texttt{prob = LpProblem("Product\_Mix", LpMaximize)}. \\
+Output: \texttt{Optimal 100.0 20.0 20.0}.
+\item Change the objective (keep \texttt{LpMinimize}): minimize the negated
+profit, \texttt{prob += -3*x1 - 2*x2}. \\
+Output: \texttt{Optimal -100.0 20.0 20.0}; the optimal plan is the same
+$(20,20)$ and the profit is the negative of the reported objective,
+$\$100$.
+\end{itemize}
+
+\item \texttt{LpStatus[prob.status]} only reports whether the solver finished
+successfully on \emph{the model you built}; the wrong-sense model is a valid
+LP with a legitimate optimum, so the status is \texttt{Optimal} in both the
+buggy and the correct runs. Useful sanity checks: assert that the objective
+value is strictly positive (a profit of \$0 from a company trying to make
+money should raise eyebrows); assert the solution is not identically zero;
+compare the objective against any known feasible plan (e.g., $(10,10)$ earns
+\$50, so the optimum must be at least \$50); or check that at least one
+resource constraint is binding, since a profit maximum with every resource
+slack is suspicious.
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\exsol{12.9}{Profit as a Function of Labor}{3}
+
+The book's Selected Solution is correct as printed; here is the full script
+and its actual output (plans added for part 2's discussion).
+
+\begin{verbatim}
+from pulp import *
+
+def solve_mix(b):
+    prob = LpProblem("Product_Mix", LpMaximize)
+    x1 = LpVariable("X1", lowBound=0)
+    x2 = LpVariable("X2", lowBound=0)
+    prob += 3*x1 + 2*x2
+    prob += 10*x1 + 5*x2 <= 300, "Material"
+    prob += 4*x1 + 4*x2 <= b, "Labor"
+    prob += 2*x1 + 6*x2 <= 180, "Machine"
+    prob.solve(PULP_CBC_CMD(msg=0))
+    return value(prob.objective), prob.constraints["Labor"].pi, \
+           x1.varValue, x2.varValue
+
+for b in range(100, 200, 10):
+    profit, dual, v1, v2 = solve_mix(b)
+    print(f"b = {b}: profit = {profit:<6} labor dual = {dual:<5}"
+          f" plan = ({v1}, {v2})")
+\end{verbatim}
+
+Actual output:
+
+\begin{verbatim}
+b = 100: profit = 75.0   labor dual = 0.75  plan = (25.0, 0.0)
+b = 110: profit = 82.5   labor dual = 0.75  plan = (27.5, 0.0)
+b = 120: profit = 90.0   labor dual = 0.75  plan = (30.0, 0.0)
+b = 130: profit = 92.5   labor dual = 0.25  plan = (27.5, 5.0)
+b = 140: profit = 95.0   labor dual = 0.25  plan = (25.0, 10.0)
+b = 150: profit = 97.5   labor dual = 0.25  plan = (22.5, 15.0)
+b = 160: profit = 100.0  labor dual = 0.25  plan = (20.0, 20.0)
+b = 170: profit = 102.0  labor dual = -0.0  plan = (18.0, 24.0)
+b = 180: profit = 102.0  labor dual = -0.0  plan = (18.0, 24.0)
+b = 190: profit = 102.0  labor dual = -0.0  plan = (18.0, 24.0)
+\end{verbatim}
+
+\begin{enumerate}
+\item The ten profits are $75, 82.5, 90, 92.5, 95, 97.5, 100, 102, 102, 102$.
+The curve is piecewise linear and concave with slope changes at $b = 120$ and
+at $b = 168$ (the latter lies between the printed points $160$ and $170$; it
+is where the plan $(18,24)$, the intersection of Material and Machine, uses
+exactly $4(18) + 4(24) = 168$ labor hours).
+\item The slope of the profit curve at each $b$ equals the printed shadow
+price \texttt{c.pi} of the Labor constraint. For $b \leq 120$ only Labor
+limits production, the plan is $(b/4, 0)$, and each hour is worth $0.75$
+(profit rises $7.5$ per $10$ hours: $75 \to 82.5 \to 90$). For
+$120 \leq b \leq 168$, Material and Labor are both binding, the plan slides
+along the Material line, and an extra hour is worth only $0.25$ (profit rises
+$2.5$ per $10$ hours). The strictly decreasing sequence of shadow prices
+$0.75 \to 0.25 \to 0$ is exactly the concavity of the curve.
+\item For $b \geq 168$ the optimum is pinned at $(18, 24)$, where Material
+and Machine are binding and Labor is slack; extra labor has shadow price $0$
+and profit stays flat at $\$102$. Buying more of a non-binding resource is
+worthless. This is the right-hand-side sensitivity analysis of Chapter 10
+computed by brute force: the loop reproduces the shadow price and its
+allowable range (the dual stays $0.25$ precisely for
+$120 \leq b \leq 168$) without any tableau work.
+\end{enumerate}

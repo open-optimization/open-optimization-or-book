@@ -25,6 +25,7 @@ To implement the simplex algorithm, we must first discuss a \emph{Standard Form}
 The whole algorithm runs very fast in practice.  Here, we will teach you a basic version of the algorithm, but note that state-of-the-art solvers will employ a number of tricks to make this process very fast.  Linear programs can be solved with millions of variables!
 
 \section{Standard Form}
+\label{sec:standard-form}
 
 To solve a linear program using methods such as the simplex algorithm, the problem must first be converted to a standard form. This ensures the problem adheres to a uniform structure, making it easier to analyze and solve algorithmically.
 
@@ -1568,6 +1569,7 @@ A useful way to internalize what just happened: \emph{every vertex of the feasib
 \end{figure}
 
 \section{The Simplex Algorithm!}
+\label{sec:simplex-algorithm}
 Here we formally describe the simplex algorithm.
 \begin{algocard}{Algorithm: Simplex Method}
 \textbf{Input.} A linear program in standard form with a feasible starting basis (typically the slack variables).\\
@@ -1825,6 +1827,7 @@ Here:
 \end{definition}
 
 \section{No Feasible Initial Basis and the Big-M Method}
+\label{sec:big-m-dictionary}
 
 \begin{tryit}
 \vizlink{two-phase-simplex}{Two-Phase Simplex}: watch artificial variables enter, Phase 1 drive them out, and the handoff to Phase 2.
@@ -2225,6 +2228,7 @@ The large penalties make $x$ and $y$ attractive to increase, and successive pivo
 Reading the optimal dictionary gives $x = 8$, $y = 0$, and $z = 3x + y = 24$, with the first and third constraints slack ($s_1=11$, $s_3=5$) and the second constraint tight ($s_2=0$).
 
 \section{Degeneracy, Cycling, and Bland's Rule}
+\label{sec:degeneracy}
 
 \begin{definition}{Degeneracy}{}
 A basic feasible solution (BFS) in the Simplex Method is said to be \textbf{degenerate} if one or more of its basic variables take a value of zero. Mathematically, a BFS corresponding to a basis \( B \) is degenerate if there exists at least one basic variable \( \x_B \) such that \( \x_B = 0 \).
@@ -2577,10 +2581,33 @@ Dantzig also studied network flow problems, which led to the duality theorem in 
 \noindent{\centering\small \textbf{This spotlight was contributed by Irma Adams}\par}
 \end{pioneerspotlight}
 \section{Exercises}
-\subsection{Exercises: Converting to Standard Form}
+
+\exgroup{Warm-ups}
+
+\begin{ex}{Standard form and the first dictionary}{}
+\label{ex:standard-form-warmup-dictionary}
+\stars{1} Consider the linear program
+\[
+\begin{aligned}
+\max \quad & 4x + 5y \\
+\st \quad
+& x + 2y \leq 12, \\
+& 3x + 2y \leq 24, \\
+& x, y \geq 0.
+\end{aligned}
+\]
+\begin{enumerate}
+    \item Convert the program to standard form by introducing slack variables $s_1, s_2$.
+    \item Write the initial dictionary for the slack basis $\{s_1, s_2\}$, exactly as in the Initial Dictionary of Section~\ref{sec:pivoting}.
+    \item Read off the basic feasible solution and its objective value.
+    \item Under the steepest ascent rule, which variable would enter the basis first?
+\end{enumerate}
+\exrefs{\S\ref{sec:pivoting}, Initial Dictionary; \S\ref{sec:standard-form}}
+\end{ex}
 
 \begin{ex}{Convert to Standard Form}{}
-Convert the following linear program to standard form:
+\label{ex:standard-form-1}
+\stars{1} Convert the following linear program to standard form:
 
 \[
 \begin{aligned}
@@ -2591,24 +2618,28 @@ Convert the following linear program to standard form:
     & x_1, x_2 \geq 0.
 \end{aligned}
 \]
+\exrefs{\S\ref{sec:standard-form}, Example: Complete Conversion to Standard Form}
 \end{ex}
 
 \begin{ex}{Convert to Standard Form}{}
-Convert the following linear program to standard form:
+\label{ex:standard-form-2}
+\stars{1} Convert the following linear program to standard form:
 
 \[
 \begin{aligned}
     \min \quad & -x_1 + 2x_2 + x_3 \\
-    \st \quad 
+    \st \quad
     & x_1 - x_2 + 2x_3 = 4, \\
     & -2x_1 + x_2 \leq 1, \\
     & x_3 \text{ is unrestricted}, \quad x_1, x_2 \geq 0.
 \end{aligned}
 \]
+\exrefs{\S\ref{sec:standard-form}, Example: Complete Conversion to Standard Form}
 \end{ex}
 
 \begin{ex}{Convert to Standard Form}{}
-Convert the following linear program to standard form:
+\label{ex:standard-form-3}
+\stars{1} Convert the following linear program to standard form:
 
 \[
 \begin{aligned}
@@ -2619,36 +2650,252 @@ Convert the following linear program to standard form:
     & x_1 \text{ is unrestricted}, \quad x_2, x_3 \leq 0.
 \end{aligned}
 \]
+\exrefs{\S\ref{sec:standard-form}, Example: Complete Conversion to Standard Form}
 \end{ex}
 
 \begin{ex}{Convert to Standard Form}{}
 \label{ex:84}
- Convert the following linear program to standard form:
+\stars{1} Convert the following linear program to standard form:
 
 \[
 \begin{aligned}
     \min \quad & 2x_1 + 4x_2 \\
-    \st \quad 
+    \st \quad
     & x_1 + x_2 \geq 3, \\
     & 2x_1 - x_2 \leq 5, \\
     & x_1 \text{ is unrestricted}, \quad x_2 \geq 0.
 \end{aligned}
 \]
+\exrefs{\S\ref{sec:standard-form}, Example: Complete Conversion to Standard Form}
 \end{ex}
 
 \begin{ex}{Convert to Standard Form}{}
 \label{ex:85}
-Convert the following linear program to standard form:
+\stars{1} Convert the following linear program to standard form:
 
 \[
 \begin{aligned}
     \min \quad & 5y_1 - 3y_2 + y_3 \\
-    \st \quad 
+    \st \quad
     & 2y_1 - y_2 + 3y_3 = 7, \\
     & -y_1 + 4y_2 \leq 5, \\
     & y_3 \text{ is unrestricted}.
 \end{aligned}
 \]
+\exrefs{\S\ref{sec:standard-form}, Example: Complete Conversion to Standard Form}
+\end{ex}
+
+\exgroup{Core problems}
+
+\begin{ex}{Pivoting in a different direction}{}
+\label{ex:alternative-pivot}
+\stars{2} We consider the example from Section~\ref{sec:pivoting}.  In that example, we pivoted first on the $y$ variable.  This choice of pivot called the \emph{steepest ascent} rule since we chose the variable in the objective with the largest coefficient.  
+However, we can consider pivoting on any variable with a positive coefficient in the objective.  We will now pivot first on the $x$ variable.  
+
+\textbf{Starting Point}
+\[
+\begin{aligned}
+\max\quad &  2x + 3y \\
+\st\quad & s_1 = 9 - x - y, \\
+                        & s_2 = 16 - 2x - y, \\
+                        & s_3 = 14 - x - 2y, \\
+                        & x, y, s_1, s_2, s_3 \ge 0.
+\end{aligned}
+\]
+
+\begin{enumerate}
+    \item Let \(x\) increase first.
+    \item Determine which variable leaves the basis using the ratio test.
+    \item Pivot by rewriting the equation of the leaving variable in terms of \(x\) and substitute it into the other equations and the objective.
+    \item Write down the new dictionary.
+    \item Decide whether the resulting dictionary is optimal. If not, repeat the process.
+\end{enumerate}
+\exrefs{\S\ref{sec:pivoting}; \S\ref{sec:simplex-algorithm}}
+\end{ex}
+
+\begin{ex}{Simplex Method Practice}{}
+\label{ex:simplex-practice-5-3}
+\stars{2} Solve the following linear programming problem using the simplex method:
+\[
+\begin{aligned}
+\text{Maximize:}\quad & z = 5x_{1} + 3x_{2}\\
+\text{subject to:}\quad & x_{1} + x_{2} \le 12,\\
+& 2x_{1} + x_{2} \le 16,\\
+& x_{1},\, x_{2} \ge 0.
+\end{aligned}
+\]
+\exrefs{\S\ref{sec:pivoting}; \S\ref{sec:simplex-algorithm}}
+\end{ex}
+
+\begin{ex}{Simplex Method Practice}{}
+\label{ex:simplex-practice-5-8}
+\stars{2} Solve the following linear programming problem using the simplex method:
+\[
+\begin{aligned}
+\text{Maximize:}\quad & z = 5x_{1} + 8x_{2}\\
+\text{subject to:}\quad & x_{1} + 2x_{2} \le 30,\\
+& 3x_{1} + x_{2} \le 30,\\
+& x_{1},\, x_{2} \ge 0.
+\end{aligned}
+\]
+\exrefs{\S\ref{sec:pivoting}; \S\ref{sec:simplex-algorithm}}
+\end{ex}
+
+\begin{ex}{Simplex Method Practice}{}
+\label{ex:simplex-practice-3var-1}
+\stars{2} Solve the following linear programming problem using the simplex method:
+\[
+\begin{aligned}
+\text{Maximize:}\quad & z = 2x_{1} + 3x_{2} + x_{3} \\
+\text{subject to:}\quad & 4x_{1} + 2x_{2} + 5x_{3} \le 32,\\
+& 2x_{1} + 4x_{2} + 3x_{3} \le 28,\\
+& x_{1},\, x_{2},\, x_{3} \ge 0.
+\end{aligned}
+\]
+\exrefs{\S\ref{sec:pivoting}; \S\ref{sec:simplex-algorithm}}
+\end{ex}
+
+\begin{ex}{Simplex Method Practice}{}
+\label{ex:simplex-practice-3var-2}
+\stars{2} Solve the following linear programming problem using the simplex method:
+\[
+\begin{aligned}
+\text{Maximize:}\quad & z = 6x_{1} + 8x_{2} + 5x_{3},\\
+\text{subject to:}\quad & 4x_{1} + x_{2} + x_{3} \le 1800,\\
+& 2x_{1} + 2x_{2} + x_{3} \le 2000,\\
+& 4x_{1} + 2x_{2} + x_{3} \le 3200,\\
+& x_{1},\, x_{2},\, x_{3} \ge 0.
+\end{aligned}
+\]
+\exrefs{\S\ref{sec:pivoting}; \S\ref{sec:simplex-algorithm}}
+\end{ex}
+
+\begin{ex}{Simplex Method Practice}{}
+\label{ex:simplex-bigm-practice-1}
+\stars{2} Solve the following linear programming problem using the simplex method:
+\[
+\begin{aligned}
+\text{Minimize:}\quad & z = 4x_{1} + 6x_{2} + 7x_{3}, \\
+\text{subject to:}\quad & x_{1} + x_{2} + 2x_{3} \ge 20,\\
+& x_{1} + 2x_{2} + x_{3} \ge 30,\\
+& x_{1},\, x_{2},\, x_{3} \ge 0.
+\end{aligned}
+\]
+\exrefs{\S\ref{sec:big-m-dictionary}}
+\end{ex}
+
+\begin{ex}{Simplex Method Practice}{}
+\label{ex:simplex-bigm-practice-2}
+\stars{2} Solve the following linear programming problem using the simplex method:
+\[
+\begin{aligned}
+\text{Minimize:}\quad & z = 40x_{1} + 48x_{2} + 30x_{3}, \\
+\text{subject to:}\quad & 2x_{1} + 2x_{2} + x_{3} \ge 25,\\
+& x_{1} + 3x_{2} + 2x_{3} \ge 30,\\
+& x_{1},\, x_{2},\, x_{3} \ge 0.
+\end{aligned}
+\]
+\exrefs{\S\ref{sec:big-m-dictionary}}
+\end{ex}
+
+\exgroup{Concepts and connections}
+
+\begin{ex}{Dictionary Optimality}{}
+\label{ex:dictionary-optimality-conditions}
+\stars{2} {Conditions in the dictionary.} The following is a dictionary of a maximization problem. State conditions (i.e., the range of values) on $a_{1}, a_{2}, b, c_{1}, c_{5}, c_{6}$ that are required to make the following true.  Note: This does not require any simplex pivots.
+\begin{center}
+\begin{align*}
+\max \quad &0 + c_1 x_1 + c_5 x_5 + c_6 x_6 \\
+x_2 &= 1 + x_1 - a_1 x_5 \\
+x_4 &= 2 + x_1 + 2x_5 - x_6 \\
+x_3 &= b - a_2 x_1 - x_5 - x_6
+\end{align*}
+\end{center}
+
+\begin{enumerate}
+\item  The current solution is feasible and optimal.
+\item The current basic solution is not feasible.
+\item  The current basic solution is degenerate.
+\item  The current basic solution is feasible, and the LP is unbounded.
+\end{enumerate}
+\exrefs{\S\ref{sec:simplex-algorithm}; \S\ref{sec:degeneracy}}
+\end{ex}
+
+\begin{ex}{Basic Feasible Solutions}{}
+\label{ex:bfs-graphical-pivot}
+\stars{2} Consider the following linear programming feasible region in 2 variables that is depicted in the plot below.   
+$$
+\begin{array}{rrrrrl}
+\text{maximize} & 2x_{1} & + & x_{2} \\
+\text{subject to} & 2x_{1} & + & 3x_{2} & \geq & 7 \\
+& & & x_{2} & \geq & 1 \\
+& x_{1} & - & x_{2} & \leq & 4 \\
+& x_{1} & + & 3x_{2} & \leq & 16 \\
+& & x_{1},\; & x_{2} & \geq & 0.
+\end{array}
+$$
+
+Here is a graph of the feasible region:
+\begin{center}
+\altincludegraphics[width=0.6\textwidth]{Figures/desmos-graph-slacks}{Desmos graph of a 2-variable LP feasible region with vertices labeled A, B, C, D used to identify basic and nonbasic variables and to trace pivot moves between adjacent basic feasible solutions.}
+\end{center}
+
+The variables in the augmented linear program are $\{x_1, x_2, s_1, s_2, s_3, s_4\}$, where $s_1$ and $s_2$ are the surplus variables of the two $\geq$ constraints and $s_3$ and $s_4$ are the slack variables of the two $\leq$ constraints, in the order listed (matching the labels in the figure).
+In the context of  the simplex method, answer the following questions:
+
+(a)   At the basic feasible solution $D$, which variables are non-basic and which variables are basic?
+$$
+B = \big\{ \hspace{5cm} \big\}, \hspace{3cm}  N = \big\{ \hspace{3cm} \big\}. 
+$$
+
+(b) If we pivot from the basic feasible solution at $D$ to the basic feasible solution at $C$,
+\begin{itemize}
+\item Which variable enters the basis?\\
+\item Which variable leaves the basis?
+\end{itemize}
+\exrefs{\S\ref{sec:pivoting}, Figure~\ref{fig:bfs-perspectives}}
+\end{ex}
+
+\begin{ex}{What the ratio test protects}{}
+\label{ex:ratio-test-wrong-row}
+\stars{2} In the second dictionary of the running example of Section~\ref{sec:pivoting},
+\[
+\begin{aligned}
+\max\quad & z = 21 + \tfrac12 x - \tfrac32 s_3 \\
+\st\quad & s_1 = 2 - \tfrac12 x + \tfrac12 s_3, \\
+& s_2 = 9 - \tfrac32 x + \tfrac12 s_3, \\
+& y = 7 - \tfrac12 x - \tfrac12 s_3, \\
+& x, y, s_1, s_2, s_3 \geq 0,
+\end{aligned}
+\]
+the entering variable is $x$, and the ratio test selects $s_1$ (ratio $4$) to leave.
+\begin{enumerate}
+    \item Suppose you ignore the ratio test and instead pivot on the $s_2$ row (ratio $6$), so that $s_2$ leaves.  Compute the resulting basic solution and show that it is infeasible by finding the basic variable that becomes negative.
+    \item Explain in general terms what goes wrong when a row other than the minimum-ratio row is chosen: which variables does the minimum ratio protect, and why does overshooting it break feasibility?
+\end{enumerate}
+\exrefs{\S\ref{sec:simplex-algorithm}, Learning Checkpoint~\ref{lc:ratio-test}}
+\end{ex}
+
+\exgroup{Challenge problems}
+
+\begin{ex}{A tie in the ratio test forces degeneracy}{}
+\label{ex:degenerate-tie}
+\stars{3} Consider the linear program
+\[
+\begin{aligned}
+\max\quad & 2x + y \\
+\st\quad & x + y \leq 4, \\
+& 2x + y \leq 8, \\
+& x, y \geq 0.
+\end{aligned}
+\]
+\begin{enumerate}
+    \item Write the initial dictionary for the slack basis and let $x$ enter.  Show that the ratio test produces a \emph{tie}: both $s_1$ and $s_2$ reach zero at $x = 4$.
+    \item Pivot with $s_1$ leaving and write the next dictionary.  Show that it is \emph{degenerate}: a basic variable sits at value zero.
+    \item Repeat the pivot with $s_2$ leaving instead, and show that the resulting dictionary is also degenerate.  What do you notice about the reduced cost of $y$ in this dictionary, and what does it suggest about the set of optimal solutions?
+    \item Explain why this is a general phenomenon: whenever the minimum ratio is attained by two rows, the dictionary after the pivot must be degenerate.  Then construct your own linear program, different from the one above, whose first pivot has a tied ratio test.
+\end{enumerate}
+\exrefs{\S\ref{sec:degeneracy}; \S\ref{sec:simplex-algorithm}}
 \end{ex}
 
 \subsubsection*{Selected Solutions}
@@ -2659,24 +2906,24 @@ Convert the following linear program to standard form:
    \[
    \max \quad -2x_1 - 4x_2.
    \]
-   
+
 2. Convert the \( \geq \) constraint into an equality by introducing a surplus variable \( s_1 \geq 0 \):
    \[
    x_1 + x_2 - s_1 = 3.
    \]
-   
+
 3. Convert the \( \leq \) constraint into an equality by introducing a slack variable \( s_2 \geq 0 \):
    \[
    2x_1 - x_2 + s_2 = 5.
    \]
-   
+
 4. Since \( x_1 \) is unrestricted, replace it with \( x_1 = x_1' - x_1'' \), where \( x_1', x_1'' \geq 0 \).
 
 \textbf{Final Standard Form:}
 \[
 \begin{aligned}
     \max \quad & -2(x_1' - x_1'') - 4x_2 \\
-    \st \quad 
+    \st \quad
     & (x_1' - x_1'') + x_2 - s_1 = 3, \\
     & 2(x_1' - x_1'') - x_2 + s_2 = 5, \\
     & x_1', x_1'', x_2, s_1, s_2 \geq 0.
@@ -2703,175 +2950,14 @@ Convert the following linear program to standard form:
 \[
 \begin{aligned}
     \max \quad & -5y_1 + 3y_2 - (y_3' - y_3'') \\
-    \st \quad 
+    \st \quad
     & 2y_1 - y_2 + 3(y_3' - y_3'') = 7, \\
     & -y_1 + 4y_2 + s_1 = 5, \\
     & y_1, y_2, y_3', y_3'', s_1 \geq 0.
 \end{aligned}
 \]
 \end{solution}
-
-\subsection{Simplex Method}
-\begin{ex}[Pivoting in a different direction]{}
-\label{ex:alternative-pivot}
-We consider the example from Section~\ref{sec:pivoting}.  In that example, we pivoted first on the $y$ variable.  This choice of pivot called the \emph{steepest ascent} rule since we chose the variable in the objective with the largest coefficient.  
-However, we can consider pivoting on any variable with a positive coefficient in the objective.  We will now pivot first on the $x$ variable.  
-
-\textbf{Starting Point}
-\[
-\begin{aligned}
-\max\quad &  2x + 3y \\
-\st\quad & s_1 = 9 - x - y, \\
-                        & s_2 = 16 - 2x - y, \\
-                        & s_3 = 14 - x - 2y, \\
-                        & x, y, s_1, s_2, s_3 \ge 0.
-\end{aligned}
-\]
-
-\begin{enumerate}
-    \item Let \(x\) increase first.
-    \item Determine which variable leaves the basis using the ratio test.
-    \item Pivot by rewriting the equation of the leaving variable in terms of \(x\) and substitute it into the other equations and the objective.
-    \item Write down the new dictionary.
-    \item Decide whether the resulting dictionary is optimal. If not, repeat the process.
-\end{enumerate}
-\end{ex}
-
-\begin{ex}{Simplex Method Practice}{}
-\label{ex:simplex-practice-5-3}
-Solve the following linear programming problem using the simplex method:
-\[
-\begin{aligned}
-\text{Maximize:}\quad & z = 5x_{1} + 3x_{2}\\
-\text{subject to:}\quad & x_{1} + x_{2} \le 12,\\
-& 2x_{1} + x_{2} \le 16,\\
-& x_{1},\, x_{2} \ge 0.
-\end{aligned}
-\]
-\end{ex}
-
-\begin{ex}{Simplex Method Practice}{}
-\label{ex:simplex-practice-5-8}
-Solve the following linear programming problem using the simplex method:
-\[
-\begin{aligned}
-\text{Maximize:}\quad & z = 5x_{1} + 8x_{2}\\
-\text{subject to:}\quad & x_{1} + 2x_{2} \le 30,\\
-& 3x_{1} + x_{2} \le 30,\\
-& x_{1},\, x_{2} \ge 0.
-\end{aligned}
-\]
-\end{ex}
-
-\begin{ex}{Simplex Method Practice}{}
-Solve the following linear programming problem using the simplex method:
-\[
-\begin{aligned}
-\text{Maximize:}\quad & z = 2x_{1} + 3x_{2} + x_{3} \\
-\text{subject to:}\quad & 4x_{1} + 2x_{2} + 5x_{3} \le 32,\\
-& 2x_{1} + 4x_{2} + 3x_{3} \le 28,\\
-& x_{1},\, x_{2},\, x_{3} \ge 0.
-\end{aligned}
-\]
-\end{ex}
-
-\begin{ex}{Simplex Method Practice}{}
-Solve the following linear programming problem using the simplex method:
-\[
-\begin{aligned}
-\text{Maximize:}\quad & z = 6x_{1} + 8x_{2} + 5x_{3},\\
-\text{subject to:}\quad & 4x_{1} + x_{2} + x_{3} \le 1800,\\
-& 2x_{1} + 2x_{2} + x_{3} \le 2000,\\
-& 4x_{1} + 2x_{2} + x_{3} \le 3200,\\
-& x_{1},\, x_{2},\, x_{3} \ge 0.
-\end{aligned}
-\]
-\end{ex}
-
-\begin{ex}{Simplex Method Practice}{}
-Solve the following linear programming problem using the simplex method:
-\[
-\begin{aligned}
-\text{Minimize:}\quad & z = 4x_{1} + 6x_{2} + 7x_{3}, \\
-\text{subject to:}\quad & x_{1} + x_{2} + 2x_{3} \ge 20,\\
-& x_{1} + 2x_{2} + x_{3} \ge 30,\\
-& x_{1},\, x_{2},\, x_{3} \ge 0.
-\end{aligned}
-\]
-\end{ex}
-
-\begin{ex}{Simplex Method Practice}{}
-Solve the following linear programming problem using the simplex method:
-\[
-\begin{aligned}
-\text{Minimize:}\quad & z = 40x_{1} + 48x_{2} + 30x_{3}, \\
-\text{subject to:}\quad & 2x_{1} + 2x_{2} + x_{3} \ge 25,\\
-& x_{1} + 3x_{2} + 2x_{3} \ge 30,\\
-& x_{1},\, x_{2},\, x_{3} \ge 0.
-\end{aligned}
-\]
-\end{ex}
-
-\begin{ex}{Dictionary Optimality}{}
-\label{ex:dictionary-optimality-conditions}
-{Conditions in the dictionary.} The following is a dictionary of a maximization problem. State conditions (i.e., the range of values) on $a_{1}, a_{2}, b, c_{1}, c_{5}, c_{6}$ that are required to make the following true.  Note: This does not require any simplex pivots.
-\begin{center}
-\begin{align*}
-\max \quad &0 + c_1 x_1 + c_5 x_5 + c_6 x_6 \\
-x_2 &= 1 + x_1 - a_1 x_5 \\
-x_4 &= 2 + x_1 + 2x_5 - x_6 \\
-x_3 &= b - a_2 x_1 - x_5 - x_6
-\end{align*}
-\end{center}
-
-\begin{enumerate}
-\item  The current solution is feasible and optimal.
-\item The current basic solution is not feasible.
-\item  The current basic solution is degenerate.
-\item  The current basic solution is feasible, and the LP is unbounded.
-\end{enumerate}
-
-\end{ex}
-
-\begin{ex}{Basic Feasible Solutions}{}
-
-Consider the following linear programming feasible region in 2 variables that is depicted in the plot below.   
-$$
-\begin{array}{rrrrrrrrr}
-\text { maximize } &2 x_{1}&+&x_{2} \\
-\text { subject to } & -x_{1}&+&x_{2} &\leq &2 \\
-%%&-x_{1}&+&x_{2}&  \leq &2 \\
-%&&&x_{2}  &\leq &4 \\
-%%&x_{1}&+&x_{2}  &\leq& 8 \\
-%& x_{1}&+&x_{2} &\leq &8 \\
-%%&2 x_{1}&-&x_{2} & \leq &10 \\
-%& 2 x_{1}&-&x_{2} &\leq &10 \\
-%& &x_{1},& x_{2} &\geq &0 .
-\end{array}
-$$
-
-Here is a graph of the feasible region:
-\begin{center}
-\altincludegraphics[width=0.6\textwidth]{Figures/desmos-graph-slacks}{Desmos graph of a 2-variable LP feasible region with vertices labeled A, B, C, D used to identify basic and nonbasic variables and to trace pivot moves between adjacent basic feasible solutions.}
-\end{center}
-
-The variables in the augmented linear program are $\{x_1, x_2, s_1, s_2, s_3, s_4\}$.
-In the context of  the simplex method, answer the following questions:
-
-(a)   At the basic feasible solution $D$, which variables are non-basic and which variables are basic?
-$$
-B = \big\{ \hspace{5cm} \big\}, \hspace{3cm}  N = \big\{ \hspace{3cm} \big\}. 
-$$
-
-(b) If we pivot from the basic feasible solution at $D$ to the basic feasible solution at $C$, 
-\begin{itemize}
-\item Which variable enters the basis?\\
-\item Which variable leaves the basis?
-\end{itemize}
-
-\end{ex}
-
-\subsection*{Solutions to selected exercises}
+\vspace{1cm}
 
 \begin{solution}[Solution for Exercise~\ref{ex:alternative-pivot}]
 We will have to do 3 pivots!
@@ -3000,5 +3086,43 @@ The basic solution reads off the constant terms: $x_2 = 1$, $x_4 = 2$, $x_3 = b$
 \item \textbf{Degenerate:} $b = 0$, so that the basic variable $x_3$ sits at value zero.
 \item \textbf{Feasible and unbounded:} we need $b \geq 0$ together with an entering variable whose objective coefficient is positive and whose column never decreases a basic variable.  The variable $x_5$ appears as $-x_5$ in the $x_3$ row and $x_6$ appears as $-x_6$ in the $x_4$ and $x_3$ rows, so the ratio test always stops them.  Only $x_1$ can certify unboundedness: its coefficients are $+1$, $+1$, and $-a_2$, so we need $c_1 > 0$ and $a_2 \leq 0$ (with $b \geq 0$ for feasibility).
 \end{enumerate}
+\end{solution}
+\vspace{1cm}
+
+\begin{solution}(Exercise~\ref{ex:degenerate-tie})
+\textbf{(a)} The initial dictionary is
+\[
+\begin{aligned}
+\max\quad & z = 2x + y \\
+\st\quad & s_1 = 4 - x - y, \\
+& s_2 = 8 - 2x - y, \\
+& x, y, s_1, s_2 \geq 0.
+\end{aligned}
+\]
+With $x$ entering (and $y = 0$), the ratio test gives $4/1 = 4$ for $s_1$ and $8/2 = 4$ for $s_2$: a tie at $x = 4$.
+
+\textbf{(b)} Let $s_1$ leave.  Solving the $s_1$ row for $x$ gives $x = 4 - y - s_1$, and substituting,
+\[
+\begin{aligned}
+\max\quad & z = 8 - y - 2s_1 \\
+\st\quad & x = 4 - y - s_1, \\
+& s_2 = 0 + y + 2s_1, \\
+& x, y, s_1, s_2 \geq 0.
+\end{aligned}
+\]
+The basic variable $s_2$ has value $0$, so the dictionary is degenerate.  (It is also optimal: both reduced costs are negative, and the solution is $(x, y) = (4, 0)$ with $z = 8$.)
+
+\textbf{(c)} Let $s_2$ leave instead.  Solving the $s_2$ row for $x$ gives $x = 4 - \tfrac12 y - \tfrac12 s_2$, and substituting,
+\[
+\begin{aligned}
+\max\quad & z = 8 + 0 \cdot y - s_2 \\
+\st\quad & x = 4 - \tfrac12 y - \tfrac12 s_2, \\
+& s_1 = 0 - \tfrac12 y + \tfrac12 s_2, \\
+& x, y, s_1, s_2 \geq 0.
+\end{aligned}
+\]
+Again a basic variable ($s_1$) equals zero, so this dictionary is degenerate as well.  The reduced cost of $y$ is exactly $0$: increasing $y$ does not change $z$, which signals that the optimum is not unique along that direction of the boundary (any point of the edge from $(4,0)$ toward the constraint $x + y = 4$ with $2x + y = 8$ held tight gives $z = 8$ only at $(4,0)$ itself here, since increasing $y$ is blocked at once by $s_1$; the zero reduced cost still flags the possibility of alternative optimal bases).
+
+\textbf{(d)} If two rows tie at the minimum ratio, the entering variable stops at a value where \emph{both} corresponding basic variables hit zero simultaneously.  Only one of them leaves the basis; the other remains basic at value zero, so the new dictionary necessarily has a basic variable equal to zero, which is the definition of degeneracy.  Any linear program in which two constraint boundaries pass through the same point of the entering edge works as a construction, for example $\max\ x + y$ subject to $x \leq 3$, $x + 2y \leq 3$, $x, y \geq 0$: entering $x$ gives ratios $3/1 = 3$ and $3/1 = 3$, a tie.
 \end{solution}
 

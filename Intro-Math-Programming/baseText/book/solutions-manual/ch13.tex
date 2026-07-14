@@ -1,0 +1,373 @@
+% ============================================================================
+% Chapter 13: Multi-Objective Optimization
+% Book source: part1-linear-programming/ch09-multi-objective/
+%              multi-objective-optimization_updated.tex
+% Exercise numbering synced to \begin{ex} order as of 2026-07-13.
+% All computations verified numerically (PuLP 3.3.2 / CBC where LPs appear).
+% ============================================================================
+
+\section{Chapter 13: Multi-Objective Optimization}
+
+This chapter has ten exercises. The warm-ups (13.1--13.3) cover the
+definition of Pareto optimality, dominance checking in a small table, and
+weighted-sum scoring. The core problems (13.4--13.8) work the chapter's main
+methods on concrete data: frontier identification, weighted sums, the
+$\varepsilon$-constraint method (on a table, on two small LPs, and by hand),
+and trade-off analysis. The concept problems (13.9--13.10, with 13.10 as the
+challenge) probe the known blind spot of weighted sums on non-convex
+frontiers and compute the exact weight intervals that select each vertex in
+the chapter's furniture example. Every numerical claim below was verified by
+direct computation; the LP-based exercises (13.6 and the furniture sweeps)
+were additionally re-solved with PuLP/CBC, and outputs shown are actual. The
+book's Selected Solutions for 13.1, 13.4, 13.7, and 13.10 were checked and
+found correct; they are reused and expanded here.
+
+% ----------------------------------------------------------------------------
+\exsol{13.1}{Defining Pareto Optimality}{1}
+
+For a problem minimizing $f_1$ and $f_2$ over a feasible set $P$, a point
+$\x \in P$ is \emph{Pareto optimal} if there is no $\overline{\x} \in P$ with
+$f_i(\overline{\x}) \leq f_i(\x)$ for both $i = 1, 2$ and
+$f_i(\overline{\x}) < f_i(\x)$ for at least one $i$. In words: no other
+feasible point is at least as good in both objectives and strictly better in
+one. (Equivalently, adapt the book's maximization definition by flipping the
+inequalities.) The Pareto frontier is the set of all such points.
+
+% ----------------------------------------------------------------------------
+\exsol{13.2}{Spotting Dominated Designs}{1}
+
+The data (both objectives minimized):
+$G = (2,9)$, $H = (4,7)$, $I = (5,8)$, $J = (7,3)$, $K = (6,5)$.
+
+\begin{enumerate}
+\item Only contract $I$ is dominated: $H = (4,7)$ beats $I = (5,8)$ in both
+cost and delivery time. Checking every other pair, one contract is always
+cheaper while the other is faster, so no other domination occurs (e.g.,
+$K = (6,5)$ vs.\ $J = (7,3)$: $K$ is cheaper, $J$ is faster).
+\item In order of increasing $f_1$, the Pareto frontier is
+\[
+G = (2,9), \quad H = (4,7), \quad K = (6,5), \quad J = (7,3).
+\]
+Note the $f_2$ values strictly decrease along this list, as they must along a
+frontier of a two-objective minimization problem.
+\item True. If $G$ is the \emph{unique} minimizer of $f_1$, every other
+contract has strictly larger $f_1$, so no contract can be at least as good as
+$G$ in both objectives; hence nothing dominates $G$. (Uniqueness matters: if
+two contracts tie for the minimum of $f_1$, the one with larger $f_2$ is
+dominated by the other.)
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\exsol{13.3}{Computing Weighted-Sum Scores}{1}
+
+\begin{enumerate}
+\item With $(w_1, w_2) = (0.6, 0.4)$, $S = 0.6 f_1 + 0.4 f_2$:
+\begin{center}
+\begin{tabular}{c|ccccc}
+Contract & G & H & I & J & K \\\hline
+$S$ & $\mathbf{4.8}$ & $5.2$ & $6.2$ & $5.4$ & $5.6$ \\
+\end{tabular}
+\end{center}
+For example, $S_G = 0.6(2) + 0.4(9) = 1.2 + 3.6 = 4.8$. The winner is
+contract $G$.
+\item With $(w_1, w_2) = (0.2, 0.8)$:
+\begin{center}
+\begin{tabular}{c|ccccc}
+Contract & G & H & I & J & K \\\hline
+$S$ & $7.6$ & $6.4$ & $7.4$ & $\mathbf{3.8}$ & $5.2$ \\
+\end{tabular}
+\end{center}
+The winner is now contract $J$. The winner changes because the weights encode
+the decision maker's exchange rate between the objectives: with most of the
+weight on delivery time ($w_2 = 0.8$), the contract with by far the best
+delivery time ($J$, at 3 days) overcomes its high cost, whereas with the
+weight mostly on cost, the cheapest contract ($G$) wins. Geometrically, the
+two weight vectors correspond to supporting lines of different slopes, which
+touch the frontier at different points.
+\item $S_I - S_H = w_1(5 - 4) + w_2(8 - 7) = w_1 + w_2 > 0$ whenever
+$w_1, w_2 > 0$. So $I$ scores strictly worse than $H$ for every positive
+weight pair, and in general a dominated point loses to any point dominating
+it: the score difference is a nonnegative combination of the coordinatewise
+gaps, at least one of which is strictly positive.
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\exsol{13.4}{Pareto Frontier, Weighted Sum, and $\varepsilon$-Constraint}{2}
+
+The candidates (both objectives minimized):
+$A = (6,5)$, $B = (4,8)$, $C = (7,4)$, $D = (3,6)$, $E = (5,6)$,
+$F = (10,3)$.
+
+\begin{enumerate}
+\item Compare pairs for domination. $D = (3,6)$ dominates $B = (4,8)$, and
+$E = (5,6)$ is dominated by $D$ ($3 \leq 5$, $6 \leq 6$, with the first
+strict). $A$, $C$, $F$ are not dominated by anything. The Pareto frontier is
+$\{D, A, C, F\}$ with objective vectors $(3,6)$, $(6,5)$, $(7,4)$, $(10,3)$.
+\item A design is a weighted-sum optimum for some $\alpha$ exactly when it
+lies on the lower-left convex hull of the frontier points. Plotting $(3,6)$,
+$(6,5)$, $(7,4)$, $(10,3)$: the hull is formed by $D$, $C$, and $F$, while
+$A$ lies above it. Indeed, $D$ (best $f_1$) and $F$ (best $f_2$) are always
+obtainable at extreme weights; $C$ lies on the hull between them (the segment
+$D \to F$ has slope $-3/7$, and at $f_1 = 7$ it sits at
+$6 - 4 \cdot \tfrac{3}{7} \approx 4.29 > 4$, so $C$ is below that segment,
+hence on the hull); but $A = (6,5)$ sits above the segment from $D$ to $C$
+(that segment at $f_1 = 6$ has value $6 - \tfrac{2}{4}(6-3) = 4.5 < 5$). So
+$D$, $C$, $F$ are obtainable by weighted sums and $A$ is not.
+\item Choose $\varepsilon = 5$: minimizing $f_1$ subject to $f_2 \leq 5$
+leaves candidates $A = (6,5)$, $C = (7,4)$, $F = (10,3)$, and selects
+$A = (6,5)$, exactly the frontier point unreachable by any weighted sum.
+(Any $\varepsilon \in [5, 6)$ works.)
+\item Sketch description: plot the six points in the $(f_1, f_2)$ plane.
+Mark $B$ and $E$ as dominated ($B$ is up and to the right of $D$; $E$ is
+directly right of $D$). The frontier is the ``staircase'' of points $D, A,
+C, F$ running from upper-left to lower-right; improvement arrows point left
+(lower cost) and down (lower emissions), toward the empty lower-left region.
+A correct sketch shows that no frontier point has another point in its
+lower-left quadrant.
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\exsol{13.5}{Weighted Sum Method}{2}
+
+In minimization form: $P1 = (f_1, f_2) = (2, -7)$, $P2 = (5, -9)$,
+$P3 = (3, -6)$.
+
+\begin{enumerate}
+\item $P1$ and $P2$ are Pareto optimal; $P3$ is not. $P1$ dominates $P3$: it
+is cheaper ($2 < 3$) \emph{and} has the higher accessibility score
+($7 > 6$). Between $P1$ and $P2$ there is a genuine trade-off ($P1$ cheaper,
+$P2$ more accessible), so neither dominates the other.
+\item Scores $S = 0.5 f_1 + 0.5 f_2$:
+\begin{align*}
+S_{P1} &= 0.5(2) + 0.5(-7) = -2.5, \\
+S_{P2} &= 0.5(5) + 0.5(-9) = -2.0, \\
+S_{P3} &= 0.5(3) + 0.5(-6) = -1.5.
+\end{align*}
+The lowest score wins: project $P1$ is selected.
+\item No. Since $P1$ dominates $P3$,
+$S_{P3} - S_{P1} = w_1(3-2) + w_2(-6+7) = w_1 + w_2 > 0$ for all
+$w_1, w_2 > 0$, so $P3$ always scores strictly worse than $P1$. Even the
+degenerate boundary weights fail to select $P3$: with $w = (1,0)$ (cost
+only) $P1$ wins, and with $w = (0,1)$ (accessibility only) $P2$ wins. A
+dominated alternative can never be chosen by the weighted-sum method with
+positive weights.
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\exsol{13.6}{Epsilon-Constraint Method}{2}
+
+\begin{enumerate}
+\item Keeping $f_1$ as the objective and bounding $f_2$:
+\begin{align*}
+\min \quad & x_1 + 2x_2 \\
+\st & 3x_1 + x_2 \leq \varepsilon, \\
+& x_1 + x_2 \geq 4, \\
+& 0 \leq x_1 \leq 5, \quad 0 \leq x_2 \leq 5.
+\end{align*}
+\item For $\varepsilon = 10$: the optimum is $(x_1, x_2) = (3, 1)$ with
+$f_1 = 5$ and $f_2 = 10$. For $\varepsilon = 6$: the optimum is $(1, 3)$
+with $f_1 = 7$ and $f_2 = 6$. In both cases the optimum is the intersection
+of $3x_1 + x_2 = \varepsilon$ with $x_1 + x_2 = 4$ (along $x_1 + x_2 = 4$ we
+have $f_1 = 8 - x_1$, so the LP pushes $x_1$ as high as the $\varepsilon$
+bound allows: $2x_1 = \varepsilon - 4$). Both solutions are Pareto optimal:
+each is the unique minimizer of $f_1$ given $f_2 \leq \varepsilon$, and the
+$\varepsilon$ bound is active, so no feasible point improves either objective
+without worsening the other. Verified with PuLP:
+
+\begin{verbatim}
+import pulp
+
+for eps in [10, 6]:
+    prob = pulp.LpProblem("biobj", pulp.LpMinimize)
+    x1 = pulp.LpVariable("x1", lowBound=0, upBound=5)
+    x2 = pulp.LpVariable("x2", lowBound=0, upBound=5)
+    prob += x1 + 2*x2                 # f1 (primary objective)
+    prob += x1 + x2 >= 4
+    prob += 3*x1 + x2 <= eps          # f2 <= epsilon
+    prob.solve(pulp.PULP_CBC_CMD(msg=0))
+    print(f"eps={eps}: x=({x1.value()}, {x2.value()}), "
+          f"f1={x1.value() + 2*x2.value()}, "
+          f"f2={3*x1.value() + x2.value()}")
+\end{verbatim}
+
+Actual output:
+\begin{verbatim}
+eps=10: x=(3.0, 1.0), f1=5.0, f2=10.0
+eps=6: x=(1.0, 3.0), f1=7.0, f2=6.0
+\end{verbatim}
+
+\item Minimizing $f_2$ alone gives $f_2^* = 4$ at $(0, 4)$; minimizing $f_1$
+alone gives $f_1 = 4$ at $(4, 0)$, where $f_2 = 12$. So: for
+$\varepsilon \geq 12$ the bound is inactive and the solution stays at
+$(4,0)$ with $(f_1, f_2) = (4, 12)$. As $\varepsilon$ decreases from $12$
+toward $f_2^* = 4$, the optimum slides along the edge $x_1 + x_2 = 4$ from
+$(4,0)$ to $(0,4)$, with $x_1 = (\varepsilon - 4)/2$ and
+$f_1 = 8 - (\varepsilon - 4)/2$ increasing linearly from $4$ to $8$: each
+unit of tightening in $f_2$ costs exactly $\tfrac12$ unit of $f_1$. The
+sweep traces the entire Pareto frontier, the segment from $(4,12)$ to
+$(8,4)$ in objective space. For $\varepsilon < 4$ the LP is infeasible, so
+the sweep stops at $f_2^*$.
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\exsol{13.7}{Epsilon-Constraint by Hand}{2}
+
+\begin{enumerate}
+\item At $(0,0)$: $(f_1, f_2) = (0,0)$. At $(6,0)$: $(18, 6)$. At $(0,6)$:
+$(6, 18)$. So $(6,0)$ maximizes $f_1$ alone and $(0,6)$ maximizes $f_2$
+alone.
+\item For $\varepsilon > 6$ the constraint $x_1 + 3x_2 \geq \varepsilon$ is
+binding at the optimum, and the solution lies where it meets the edge
+$x_1 + x_2 = 6$: solving the two equations gives $x_2 = (\varepsilon - 6)/2$
+and $x_1 = (18 - \varepsilon)/2$. (For $\varepsilon = 6$ the vertex $(6,0)$
+itself is optimal.) Tabulating:
+\begin{center}
+\begin{tabular}{c|cccc}
+$\varepsilon$ & $x_1$ & $x_2$ & $f_1$ & $f_2$ \\\hline
+6  & 6 & 0 & 18 & 6 \\
+10 & 4 & 2 & 14 & 10 \\
+14 & 2 & 4 & 10 & 14 \\
+18 & 0 & 6 & 6  & 18 \\
+\end{tabular}
+\end{center}
+Each row is easily confirmed graphically: the sliced region is the triangle
+cut by the line $x_1 + 3x_2 = \varepsilon$, and the objective $3x_1 + x_2$
+increases toward the lower-right, so the optimum sits at the corner of the
+slice on the hypotenuse.
+\item Each tabulated solution has $f_2 = \varepsilon$ exactly and the largest
+possible $f_1$ given that bound, so each is Pareto optimal. The Pareto
+frontier in decision space is the edge $x_1 + x_2 = 6$ from $(6,0)$ to
+$(0,6)$: parametrizing by $x_2 = t$ gives $f_1 = 18 - 2t$ and
+$f_2 = 6 + 2t$, so the trade-off rate is one for one ($\Delta f_1 / \Delta
+f_2 = -1$): each unit gained in $f_2$ costs exactly one unit of $f_1$.
+\item The maximum of $f_2$ over $X$ is $18$ (at $(0,6)$), so for
+$\varepsilon > 18$ the constrained LP is \emph{infeasible}; the sweep should
+stop at $\varepsilon = 18$. (A practical lesson for implementations: first
+compute each objective's individual optimum to set the sweep range.)
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\exsol{13.8}{Trade-Off Analysis}{2}
+
+\begin{enumerate}
+\item Plot description: the four points $(40,20)$, $(45,14)$, $(55,10)$,
+$(70,8)$ in the (cost, emissions) plane form a decreasing chain; connecting
+them from upper-left to lower-right gives the (discrete, convex) Pareto
+frontier. No point lies below-left of another, so all four are on the
+frontier; improvement is toward the lower-left.
+\item Marginal rates of substitution (emissions reduced per \$1000 of extra
+cost):
+\begin{center}
+\begin{tabular}{l|ccc}
+Step & $\Delta f_1$ & $\Delta f_2$ & tons per \$1000 \\\hline
+S1 $\to$ S2 & $+5$  & $-6$ & $6/5 = 1.20$ \\
+S2 $\to$ S3 & $+10$ & $-4$ & $4/10 = 0.40$ \\
+S3 $\to$ S4 & $+15$ & $-2$ & $2/15 \approx 0.13$ \\
+\end{tabular}
+\end{center}
+The step S1 $\to$ S2 gives by far the largest emissions reduction per dollar
+(1.2 tons per \$1000). The steadily deteriorating ratios ($1.20 \to 0.40 \to
+0.13$) mean S2 is the natural elbow (knee point) of this frontier.
+\item With a budget of at most $\$50{,}000$, the feasible Pareto solutions
+are S1 ($\$40$k) and S2 ($\$45$k); the firm should choose \textbf{S2}: it
+fits the budget and has lower emissions (14 vs.\ 20 tons) than S1, and S3
+($\$55$k) is unaffordable. (Consistent with part (2), S2 also happens to be
+the best value step on the frontier.)
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\exsol{13.9}{What Weighted Sums Cannot See}{2}
+
+The points, both objectives minimized: $P = (0,4)$, $Q = (3,3)$, $R = (4,0)$.
+
+\begin{enumerate}
+\item Pairwise: $P$ vs.\ $Q$: $P$ is better in $f_1$ ($0 < 3$), $Q$ better
+in $f_2$ ($3 < 4$). $Q$ vs.\ $R$: $Q$ better in $f_1$, $R$ better in $f_2$.
+$P$ vs.\ $R$: $P$ better in $f_1$, $R$ better in $f_2$. No domination in any
+pair, so all three are Pareto optimal.
+\item The weighted scores with weights $(\alpha, 1-\alpha)$:
+\[
+S_P(\alpha) = 4(1-\alpha) = 4 - 4\alpha, \qquad
+S_Q(\alpha) = 3\alpha + 3(1-\alpha) = 3, \qquad
+S_R(\alpha) = 4\alpha.
+\]
+For any $\alpha \in [0,1]$,
+$\min\{S_P, S_R\} = \min\{4 - 4\alpha, \, 4\alpha\} \leq 2$, since the two
+values sum to $4$ (their minimum is maximized at $\alpha = \tfrac12$, where
+both equal $2$). Hence $\min\{S_P, S_R\} \leq 2 < 3 = S_Q$ for every
+$\alpha$: either $P$ or $R$ always scores strictly better than $Q$, so $Q$
+is never a weighted-sum optimum, not even tied.
+\item Geometrically, the weighted-sum method minimizes a linear function
+over the points in objective space, so its optima are exactly the points on
+the lower-left convex hull, where some supporting line with normal
+$(\alpha, 1-\alpha) \geq 0$ touches. Here the hull's lower boundary is the
+segment from $P = (0,4)$ to $R = (4,0)$; its midpoint is $(2,2)$, and $Q =
+(3,3)$ lies strictly above the segment (the line through $P$ and $R$ is
+$f_1 + f_2 = 4$, while $Q$ has $f_1 + f_2 = 6$). Every supporting line
+touches only $P$, $R$, or the whole segment, never $Q$. This is precisely
+the ``Cons'' entry for the weighted-sum method in Table~13.1: it may miss
+Pareto optimal solutions in non-convex regions of the frontier, and this
+three-point frontier is non-convex at $Q$.
+\item The $\varepsilon$-constraint method recovers $Q$: minimize $f_1$
+subject to $f_2 \leq \varepsilon$ with $\varepsilon = 3$. The feasible
+points are then $Q$ (with $f_2 = 3$) and $R$ (with $f_2 = 0$), and $Q$ wins
+with $f_1 = 3 < 4$. (Goal programming with goals $(3,3)$ and any positive
+weights also selects $Q$, whose total deviation is $0$.)
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\exsol{13.10}{Weights That Select Each Vertex}{3}
+
+The book's Selected Solution is correct as printed and is expanded here;
+all breakpoints below were re-verified both algebraically and by a PuLP
+sweep over $\alpha$.
+
+\begin{enumerate}
+\item The weighted objective
+$\alpha(8x + 2y) - (1-\alpha)(10x + 2y)$ at each vertex of $P$:
+\[
+(0,0): \; 0, \qquad
+(0,20): \; 80\alpha - 40, \qquad
+(10,8): \; 212\alpha - 116, \qquad
+(12,0): \; 216\alpha - 120.
+\]
+(For example, $(10,8)$ has $f_1 = 96$ and $f_2 = 116$, giving
+$96\alpha - 116(1 - \alpha) = 212\alpha - 116$.)
+\item The optimal value is the upper envelope of these four linear functions
+of $\alpha$. Comparing pairs: $(0,20)$ beats $(0,0)$ iff
+$80\alpha - 40 \geq 0$, i.e., $\alpha \geq \tfrac12$; $(10,8)$ beats
+$(0,20)$ iff $212\alpha - 116 \geq 80\alpha - 40$, i.e., $132\alpha \geq
+76$, i.e., $\alpha \geq \tfrac{19}{33} \approx 0.576$; and $(10,8)$ beats
+$(12,0)$ iff $4 \geq 4\alpha$, which holds for all $\alpha \leq 1$. Hence
+\[
+(0,0) \text{ optimal for } \alpha \in [0, \tfrac12], \qquad
+(0,20) \text{ for } \alpha \in [\tfrac12, \tfrac{19}{33}], \qquad
+(10,8) \text{ for } \alpha \in [\tfrac{19}{33}, 1],
+\]
+with breakpoints $\alpha = \tfrac12$ and $\alpha = \tfrac{19}{33}$.
+A numerical sweep confirms the switches (actual PuLP/CBC output of the
+weighted LP): $\alpha = 0.4999$ returns $(0,0)$; $\alpha = 0.5001$ and
+$\alpha = 0.5757$ return $(0,20)$; $\alpha = 0.5758$ returns $(10,8)$.
+\item At $\alpha = \tfrac12$ the entire edge $x = 0$ is optimal (every plan
+$(0, y)$, $0 \leq y \leq 20$, scores $0$); at $\alpha = \tfrac{19}{33}$ the
+whole rosewood edge from $(0,20)$ to $(10,8)$ is optimal. At $\alpha = 1$
+waste is ignored, so all revenue-optimal plans are optimal: the entire edge
+from $(10,8)$ to $(12,0)$, \emph{including the dominated vertex} $(12,0)$,
+which earns the same $\$96{,}000$ as $(10,8)$ but wastes $120 > 116$ bdft.
+Lesson: a weighted sum with a zero weight can return points that are not
+Pareto optimal; any strictly positive weight on waste breaks the tie in
+favor of $(10,8)$.
+\item With revenue in raw dollars, $f_1 = 8000x + 2000y$, the vertex values
+become $0$, $40040\alpha - 40$, $96116\alpha - 116$, and $96120\alpha -
+120$, and the same comparisons give breakpoints
+\[
+\alpha = \tfrac{40}{40040} = \tfrac{1}{1001} \approx 0.001
+\qquad\text{and}\qquad
+\alpha = \tfrac{76}{56076} = \tfrac{19}{14019} \approx 0.00136 :
+\]
+virtually every weight in $[0,1]$ now selects $(10,8)$, and the entire
+trade-off structure is squeezed into the first $0.14\%$ of the weight range.
+When objectives live on wildly different scales, the weights lose their
+intended meaning as relative importances, which is why objectives should be
+normalized before weighting (Section 13.2).
+\end{enumerate}

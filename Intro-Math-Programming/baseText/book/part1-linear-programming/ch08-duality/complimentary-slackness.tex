@@ -1,4 +1,5 @@
 \section{Complementary Slackness}
+\label{sec:complementary-slackness}
 
 So far, we have established that the primal and dual problems are closely linked, and their optimal objective values coincide under strong duality. However, 	\textbf{how can we identify optimal solutions for both problems simultaneously?} The answer lies in 	\textit{complementary slackness}, the condition we use to verify optimality.
 
@@ -28,7 +29,7 @@ x_j^* (c_j - (A^\top y^*)_j) = 0.
 \end{definition}
 
 Together, these conditions ensure that at optimality, only the active constraints have positive dual variables, and only the active dual constraints have positive primal variables.
-\begin{theorem}{Primal Dual Optimality}
+\begin{theorem}{Primal Dual Optimality}\label{thm:cs-optimality}
 A primal solution $\x^*$ and a dual solution $\y^*$ are 	\textbf{optimal} if and only if:
 \begin{enumerate}
 \item $\x^*$ is 	\textbf{feasible} in the primal problem.
@@ -41,7 +42,7 @@ This set of conditions allows us to efficiently check whether a given solution i
 \subsection{Interpreting Complementary Slackness}
 Complementary slackness provides a way to determine 	\textbf{which constraints are binding} at the optimal solution. If we solve either the primal or the dual problem, we can use these conditions to deduce the optimal solution of the other problem.
 
-\begin{example}{The Bakery Problem Revisited}
+\begin{example}{The Bakery Problem Revisited}\label{example:cs-bakery-revisited}
 Consider the bakery problem from the previous section. Recall the primal and dual formulations:
 
 \textbf{Primal Problem:}
@@ -79,9 +80,10 @@ Since complementary slackness holds, the given values are indeed optimal solutio
 \end{example}
 
 \subsection{Using Complementary Slackness to Solve Problems}
+\label{sec:cs-solving}
 Often, we do not have full information about an optimal solution. Instead, we might have partial information or only one of the optimal solutions (primal or dual). Complementary slackness allows us to deduce missing information.
 
-\begin{example}{Finding Missing Dual Variables}
+\begin{example}{Finding Missing Dual Variables}\label{example:cs-missing-duals}
 Suppose we solve the primal problem and find the optimal solution:
 \[
 x_1^* = 1, \quad x_2^* = 3.
@@ -117,7 +119,7 @@ At an optimal solution of the bakery problem, suppose two units of flour are lef
 
 \subsection*{Bakery 2.0 Example Revisited}
 
-\begin{example}{Verifying Optimality with Complementary Slackness}
+\begin{example}{Verifying Optimality with Complementary Slackness}\label{example:cs-bakery2-verify}
 We are given the primal and dual optimal solutions:
 
 \begin{itemize}
@@ -220,9 +222,40 @@ Thus, the dual solution is fully recovered using complementary slackness.
 
 \section{Exercises}
 
+\exgroup{Warm-ups}
+
+\begin{ex}{Checking the Conditions}{}
+\label{ex:cs-warmup-check}
+\stars{1} Consider the primal-dual pair
+\[
+\begin{aligned}
+\max \quad & 4x_1 + 3x_2 \\
+\text{s.t.} \quad & x_1 + x_2 \leq 6 \\
+& 2x_1 + x_2 \leq 10 \\
+& x_1, x_2 \geq 0
+\end{aligned}
+\qquad\qquad
+\begin{aligned}
+\min \quad & 6y_1 + 10y_2 \\
+\text{s.t.} \quad & y_1 + 2y_2 \geq 4 \\
+& y_1 + y_2 \geq 3 \\
+& y_1, y_2 \geq 0
+\end{aligned}
+\]
+and the candidate solutions $\x^* = (4, 2)$ and $\y^* = (2, 1)$.
+\begin{enumerate}
+\item Verify that $\x^*$ is primal feasible and $\y^*$ is dual feasible.
+\item Write out all four complementary slackness conditions for this pair and check each one.
+\item Conclude that both solutions are optimal, and confirm by computing both objective values.
+\end{enumerate}
+\exrefs{Example~\ref{example:cs-bakery-revisited}, \S\ref{sec:complementary-slackness}}
+\end{ex}
+
+\exgroup{Core problems}
+
 \begin{ex}{Bakery Production and Duality Interpretation}{}
 \label{ex:cs-bakery-duality}
-A bakery produces cakes ($x_1$), cookies ($x_2$), and muffins ($x_3$) to maximize profit:
+\stars{2} A bakery produces cakes ($x_1$), cookies ($x_2$), and muffins ($x_3$) to maximize profit:
 
 \[
 \text{maximize} \quad 60x_1 + 30x_2 + 20x_3
@@ -284,10 +317,124 @@ Answer the following questions:
   \end{enumerate}
   Use the shadow prices to justify your answers.
 \end{enumerate}
+\exrefs{Example~\ref{example:cs-bakery2-verify}, \S\ref{sec:complementary-slackness}}
 \end{ex}
 
+\begin{ex}{Box Constraints and a Dual Certificate}{}
+\label{ex:cs-box-constraints}
+\stars{2} Consider the optimization problem
+
+\begin{equation*}
+\begin{array}{rrrrrrrrrrrrrrrrr}
+\max \ \ \ &   x_1 &+ &4 x_2 &+& 9x_3 &+& 16 x_4&\\
+s.t. \ \
+& x_1& &&&&&&\leq &1& \text{ (Constraint 1)}\\
+&&& x_2 &&&&&\leq &1& \text{ (Constraint 2)}\\
+&&&&& x_3&&& \leq &1& \text{ (Constraint 3)}\\
+&&&&&&& x_4 &\leq &1& \text{ (Constraint 4)}\\
+& x_1 &+& 2x_2& + &3x_3 &+& 4x_4 &\leq &8 & \text{ (Constraint 5)}
+\end{array}
+\end{equation*}
+$$ x_1 \geq 0, x_2 \geq 0, x_3 \geq 0, x_4 \geq 0
+$$
+
+(a.) What is the dual of this linear program?
+
+(b.) Explain how the dual can be used to prove that a solution is optimal.
+
+(c.) The optimal solution to this linear program is $(x_1, x_2, x_3, x_4) = (0,\tfrac{1}{2},1,1)$ with objective value $27$.  \\
+
+Using duality theory, prove that this is an optimal solution.  \\
+\textit{(Hint: Recall that complementary slackness implies that dual variables corresponding to constraints 1 and 2 must be 0).  }
+\exrefs{Theorem~\ref{thm:weak-duality}, Theorem~\ref{thm:cs-optimality}}
+\end{ex}
+
+\begin{ex}{Deducing the Primal from a Dual Guess}{}
+\label{ex:cs-dual-guess}
+\stars{2} Consider the following primal-dual pair:
+
+\textbf{Primal Problem:}
+
+$$
+\begin{aligned}
+\text{Maximize} \quad & 5x_1 + 4x_2 \\
+\text{subject to} \quad & 2x_1 + x_2 \leq 8 \\
+& x_1 + 3x_2 \leq 9 \\
+& x_1, x_2 \geq 0
+\end{aligned}
+$$
+
+\textbf{Dual Problem:}
+
+$$
+\begin{aligned}
+\text{Minimize} \quad & 8y_1 + 9y_2 \\
+\text{subject to} \quad & 2y_1 + y_2 \geq 5 \\
+& y_1 + 3y_2 \geq 4 \\
+& y_1, y_2 \geq 0
+\end{aligned}
+$$
+
+(a) Suppose you are given a candidate dual solution $\y^* = (1, 1)$. Use complementary slackness to determine the values of $x_1^*$ and $x_2^*$.
+
+(b) Is the resulting primal solution feasible?
+
+(c) Does complementary slackness hold? Is this a valid optimal solution pair?
+\exrefs{Example~\ref{example:cs-missing-duals}, \S\ref{sec:cs-solving}}
+\end{ex}
+
+\exgroup{Concepts and connections}
+
+\begin{ex}{A Positive Price on a Slack Constraint}{}
+\stars{2} A classmate solves a primal-dual pair of linear programs and reports a primal feasible $\x^*$ and a dual feasible $\y^*$.  In their report, the second primal constraint has slack at $\x^*$ (its left-hand side is strictly below $b_2$), and yet the dual price is $y_2^* = 3 > 0$.  They claim both solutions are optimal.
+\begin{enumerate}
+\item What can you conclude, and from which theorem?
+\item Does your conclusion mean $\x^*$ is not optimal? Does it mean $\y^*$ is not optimal? Be precise about exactly what is ruled out.
+\item Explain the economic absurdity of a positive price on a resource that is not fully used.
+\end{enumerate}
+\exrefs{Theorem~\ref{thm:cs-optimality}, \S\ref{sec:complementary-slackness}}
+\end{ex}
+
+\begin{ex}{Disproving a Claimed Optimum}{}
+\label{ex:cs-claimed-optimal}
+\stars{2} Suppose a linear program has the following primal and dual formulations:
+
+\textbf{Primal:}
+
+$$
+\begin{aligned}
+\text{Maximize} \quad & 3x_1 + 2x_2 \\
+\text{subject to} \quad & x_1 + x_2 \leq 4 \\
+& 2x_1 + x_2 \leq 5 \\
+& x_1, x_2 \geq 0
+\end{aligned}
+$$
+
+\textbf{Dual:}
+
+$$
+\begin{aligned}
+\text{Minimize} \quad & 4y_1 + 5y_2 \\
+\text{subject to} \quad & y_1 + 2y_2 \geq 3 \\
+& y_1 + y_2 \geq 2 \\
+& y_1, y_2 \geq 0
+\end{aligned}
+$$
+
+A student claims that the optimal primal solution is $x_1^* = 2, x_2^* = 0$.
+
+(a) Write down the complementary slackness conditions for this problem.
+
+(b) Assuming the student's claim, use the conditions to derive requirements on $y_1$ and $y_2$.
+
+(c) Show that no feasible dual solution satisfies these requirements, and conclude that the student's claimed solution cannot be optimal.  What is the actual optimal solution?
+\exrefs{Theorem~\ref{thm:cs-optimality}, \S\ref{sec:cs-solving}}
+\end{ex}
+
+\exgroup{Challenge problems}
+
 \begin{ex}{Meal Kit Optimization and Duality}{}
-You are the operations manager at a startup that assembles and ships healthy meal kits. Each kit appeals to different customer preferences: vegetarian, high-protein, quick-prep, etc. You want to decide how many of each kit to produce today to maximize profit.
+\stars{3} You are the operations manager at a startup that assembles and ships healthy meal kits. Each kit appeals to different customer preferences: vegetarian, high-protein, quick-prep, etc. You want to decide how many of each kit to produce today to maximize profit.
 
 There are six meal kit options:
 
@@ -355,13 +502,14 @@ Answer the following:
   \item \textbf{Use complementary slackness to determine the basic variables in the primal.}  
   Based on the optimal dual solution and complementary slackness, identify which constraints in the primal are tight and hence which variables are basic.
 
-  \item \textbf{Recover an optimal primal solution.}  
+  \item \textbf{Recover an optimal primal solution.}
   Use the tight constraints and system of equations to solve for the primal basic variables and compute the optimal objective value.
 \end{enumerate}
+\exrefs{\S\ref{sec:cs-solving}, \S\ref{sec:duality-economic}}
 \end{ex}
 
 \begin{ex}{Duality with Mixed Constraint Types: Eco-Friendly Packaging Startup}{}
-You are managing production at an eco-friendly packaging startup. Your team produces various biodegradable container sets for local farms and grocery stores. Each set is assembled using labor and recycled material.
+\stars{3} You are managing production at an eco-friendly packaging startup. Your team produces various biodegradable container sets for local farms and grocery stores. Each set is assembled using labor and recycled material.
 
 You produce three types of packaging sets:
 
@@ -379,7 +527,7 @@ $x_3$ & Market Crate & \$8 \\
 
 You must manage the use of three critical resources:
 \begin{itemize}
-  \item \textbf{Labor Hours:} at most 100 available
+  \item \textbf{Labor Hours:} at most 140 available
   \item \textbf{Recycled Material:} must exactly use 240 units
   \item \textbf{Retail Contract Requirement:} the total retail value must be at least \$80
 \end{itemize}
@@ -423,7 +571,7 @@ The primal linear program is:
 \begin{aligned}
 \text{maximize} \quad & 4x_1 + 6x_2 + 5x_3 \\
 \text{subject to} \quad 
-& 2x_1 + 4x_2 + 3x_3 \leq 100 \quad \text{(Labor)} \\
+& 2x_1 + 4x_2 + 3x_3 \leq 140 \quad \text{(Labor)} \\
 & 4x_1 + 6x_2 + 4x_3 = 240 \quad \text{(Material)} \\
 & 6x_1 + 9x_2 + 8x_3 \geq 80 \quad \text{(Retail Revenue Commitment)} \\
 & x_1, x_2, x_3 \geq 0
@@ -442,105 +590,10 @@ The primal linear program is:
   \item \textbf{Use complementary slackness.}  
   Based on the optimal dual solution, determine which primal constraints are tight. Use this to identify likely basic variables in the optimal primal solution.
 
-  \item \textbf{Recover the optimal primal solution.}  
+  \item \textbf{Recover the optimal primal solution.}
   Solve the resulting system using the tight constraints to find the primal solution, and compute the optimal total profit.
 \end{enumerate}
-\end{ex}
-
-\begin{ex}
-\label{ex:cs-box-constraints}
-Consider the optimization problem
-
-\begin{equation*}
-\begin{array}{rrrrrrrrrrrrrrrrr}
-\max \ \ \ &   x_1 &+ &4 x_2 &+& 9x_3 &+& 16 x_4&\\
-s.t. \ \ 
-& x_1& &&&&&&\leq &1& \text{ (Constraint 1)}\\
-&&& x_2 &&&&&\leq &1& \text{ (Constraint 2)}\\
-&&&&& x_3&&& \leq &1& \text{ (Constraint 3)}\\
-&&&&&&& x_4 &\leq &1& \text{ (Constraint 4)}\\
-& x_1 &+& 2x_2& + &3x_3 &+& 4x_4 &\leq &8 & \text{ (Constraint 5)}
-\end{array}
-\end{equation*}
-$$ x_1 \geq 0, x_2 \geq 0, x_3 \geq 0, x_4 \geq 0
-$$
-
-(a.) What is the dual of this linear program?
-
-(b.) Explain how the dual can be used to prove that a solution is optimal.
-
-(c.) The optimal solution to this linear program is $(x_1, x_2, x_3, x_4) = (0,\tfrac{1}{2},1,1)$ with objective value $27$.  \\
-
-Using duality theory, prove that this is an optimal solution.  \\
-\textit{(Hint: Recall that complementary slackness implies that dual variables corresponding to constraints 1 and 2 must be 0).  }
-\end{ex}
-
-\begin{ex}
-
-Consider the following primal-dual pair:
-
-\textbf{Primal Problem:}
-
-$$
-\begin{aligned}
-\text{Maximize} \quad & 5x_1 + 4x_2 \\
-\text{subject to} \quad & 2x_1 + x_2 \leq 8 \\
-& x_1 + 3x_2 \leq 9 \\
-& x_1, x_2 \geq 0
-\end{aligned}
-$$
-
-\textbf{Dual Problem:}
-
-$$
-\begin{aligned}
-\text{Minimize} \quad & 8y_1 + 9y_2 \\
-\text{subject to} \quad & 2y_1 + y_2 \geq 5 \\
-& y_1 + 3y_2 \geq 4 \\
-& y_1, y_2 \geq 0
-\end{aligned}
-$$
-
-(a) Suppose you are given a dual solution $\y^* = (1, 1)$. Use complementary slackness to determine the values of $x_1^*$ and $x_2^*$.
-
-(b) Is the resulting primal solution feasible?
-
-(c) Does complementary slackness hold? Is this a valid optimal solution pair?
-\end{ex}
-
-\begin{ex}
-\label{ex:cs-claimed-optimal}
-Suppose a linear program has the following primal and dual formulations:
-
-\textbf{Primal:}
-
-$$
-\begin{aligned}
-\text{Maximize} \quad & 3x_1 + 2x_2 \\
-\text{subject to} \quad & x_1 + x_2 \leq 4 \\
-& 2x_1 + x_2 \leq 5 \\
-& x_1, x_2 \geq 0
-\end{aligned}
-$$
-
-\textbf{Dual:}
-
-$$
-\begin{aligned}
-\text{Minimize} \quad & 4y_1 + 5y_2 \\
-\text{subject to} \quad & y_1 + 2y_2 \geq 3 \\
-& y_1 + y_2 \geq 2 \\
-& y_1, y_2 \geq 0
-\end{aligned}
-$$
-
-A student claims that the optimal primal solution is $x_1^* = 2, x_2^* = 0$.
-
-(a) Write down the complementary slackness conditions for this problem.
-
-(b) Assuming the student's claim, use the conditions to derive requirements on $y_1$ and $y_2$.
-
-(c) Show that no feasible dual solution satisfies these requirements, and conclude that the student's claimed solution cannot be optimal.  What is the actual optimal solution?
+\exrefs{\S\ref{sec:duality-forms}, \S\ref{sec:cs-solving}}
 \end{ex}
 
 \subsubsection*{Selected Solutions}

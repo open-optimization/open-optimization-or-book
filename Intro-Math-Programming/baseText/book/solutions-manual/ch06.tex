@@ -1,0 +1,129 @@
+% ============================================================================
+% Chapter 6: Formal Mathematical Statements
+% Book source: part1-linear-programming/ch05-lp-theory/formalize-LP.tex
+% Exercise numbering synced to \begin{ex} order as of 2026-07-13.
+% Numeric checks verified with numpy/scipy.
+% ============================================================================
+\section{Chapter 6: Formal Mathematical Statements}
+
+\textbf{Coverage assessment.} The 12 exercises give a well-balanced pass over the chapter: warm-ups (6.1--6.5) drill vectors, combinations, rank, convexity recognition, and matrix form of an LP; core problems (6.6--6.9) work concretely with convex combinations, halfspaces, and the vertex/extreme point machinery on the same polyhedron used to illustrate the Representation Theorem, which is a nice touch; the concepts group (6.10--6.11) probes the proofs (union versus intersection, and exactly where boundedness enters the vertex theorem); and the single challenge problem (6.12) is the one genuine proof exercise. Proof coverage is intentionally light, matching the chapter's own warning box that students need not reproduce the proofs; this is appropriate and the author has indicated this is acceptable for theory chapters. No data errors were found; the four book Selected Solutions (6.1, 6.6, 6.9, 6.10) check out and are reused below. No exercise here appears to derive from outside sources; content and exercises look original to this book. One minor pedagogical note: in Exercise 6.2 part 1, every vector in $\mathbb{R}^2$ is a linear combination of $\mathbf{v}^1, \mathbf{v}^2$, so all three answers are ``yes''; this is arguably the point of the exercise, so it is not flagged.
+
+\exsol{6.1}{Vector Operations}{1}
+Working componentwise (matches the book's Selected Solution):
+\begin{enumerate}
+\item $\mathbf{v} + \mathbf{u} = [3 + (-1),\; -2 + 0,\; 4 + 2] = [2, -2, 6]$.
+\item $2\mathbf{v} = [6, -4, 8]$.
+\item $\mathbf{v} \cdot \mathbf{u} = (3)(-1) + (-2)(0) + (4)(2) = -3 + 0 + 8 = 5$.
+\end{enumerate}
+
+\exsol{6.2}{Linear and Convex Combinations}{1}
+\begin{enumerate}
+\item All three are linear combinations of $\mathbf{v}^1 = [1,0]$ and $\mathbf{v}^2 = [0,1]$, since these two vectors span $\mathbb{R}^2$: any $[a, b] = a\,\mathbf{v}^1 + b\,\mathbf{v}^2$. Explicitly,
+\begin{itemize}
+\item[(a)] $[2,3] = 2\,\mathbf{v}^1 + 3\,\mathbf{v}^2$,
+\item[(b)] $[1,1] = 1\,\mathbf{v}^1 + 1\,\mathbf{v}^2$,
+\item[(c)] $[1,-1] = 1\,\mathbf{v}^1 - 1\,\mathbf{v}^2$.
+\end{itemize}
+Note (c) is a linear combination but not a non-negative one.
+\item Yes. Using the pair $\mathbf{v}^1, \mathbf{v}^2$ with $\lambda = \tfrac12$:
+\[
+\tfrac12 [1, 0] + \tfrac12 [0, 1] = [\tfrac12, \tfrac12],
+\]
+and the weights are nonnegative and sum to $1$. (This is the only pair that works: combinations of $\mathbf{v}^1$ and $\mathbf{v}^3$ have first coordinate $1$, and combinations of $\mathbf{v}^2$ and $\mathbf{v}^3$ have second coordinate $1$.)
+\end{enumerate}
+
+\exsol{6.3}{Linear Independence and Matrix Rank}{1}
+\begin{enumerate}
+\item No. The second row $[2,4]$ equals $2$ times the first row $[1,2]$, so the rows are linearly dependent: $2[1,2] - [2,4] = [0,0]$ is a nontrivial vanishing combination.
+\item No. The second column $[2,4]^\top$ equals $2$ times the first column $[1,2]^\top$, so the columns are dependent as well.
+\item $\operatorname{rank}(A) = 1$: the maximum number of linearly independent rows (equivalently columns) is $1$. Consistent checks: $\det A = 1\cdot 4 - 2 \cdot 2 = 0$, so the rank is less than $2$, and $A \neq 0$, so the rank is at least $1$.
+\end{enumerate}
+
+\exsol{6.4}{Convex or Not?}{1}
+\begin{enumerate}
+\item \emph{The disk $D$: convex.} If $\x, \y \in D$ then by the triangle inequality for the Euclidean norm, $\|\lambda \x + (1-\lambda)\y\| \leq \lambda\|\x\| + (1-\lambda)\|\y\| \leq \lambda\cdot 2 + (1-\lambda)\cdot 2 = 2$, so the segment stays in $D$. (Balls are convex, as listed in the chapter.)
+\item \emph{The ring $R$: not convex.} Take $\x = (1, 0)$ and $\y = (-1, 0)$; both have norm $1$, so both are in $R$. Their midpoint is $(0,0)$, with $x_1^2 + x_2^2 = 0 < 1$, which is not in $R$: the segment passes through the hole.
+\item \emph{The halfspace $H$: convex.} For $\x, \y$ with $x_1 + 2x_2 \leq 3$ and $y_1 + 2y_2 \leq 3$, linearity gives $(\lambda \x + (1-\lambda)\y)_1 + 2(\lambda \x + (1-\lambda)\y)_2 = \lambda(x_1 + 2x_2) + (1-\lambda)(y_1 + 2y_2) \leq \lambda\cdot 3 + (1-\lambda)\cdot 3 = 3$. (Halfspaces are convex, as listed in the chapter.)
+\item \emph{The set $S = \{\x : |x_1| \geq 1\}$: not convex.} Take $\x = (1, 0) \in S$ and $\y = (-1, 0) \in S$. Their midpoint $(0,0)$ has $|x_1| = 0 < 1$, so it is not in $S$: the set is two disjoint halfplanes and the segment crosses the gap between them.
+\end{enumerate}
+
+\exsol{6.5}{Writing an LP in Matrix Notation}{1}
+Order the constraints as: lemon row, water row, then the two rewritten sign constraints $-x_1 \leq 0$ and $-x_2 \leq 0$. Then
+\[
+\c = \begin{bmatrix} 3 \\ 2 \end{bmatrix}, \qquad
+A = \begin{bmatrix} 1 & 3 \\ 2 & 1 \\ -1 & 0 \\ 0 & -1 \end{bmatrix}, \qquad
+\b = \begin{bmatrix} 6 \\ 4 \\ 0 \\ 0 \end{bmatrix},
+\]
+and the LP is $\max\{ \c^\top \x : A\x \leq \b \}$.
+
+Verification at $\x = (1.2,\, 1.6)$:
+\[
+A\x = \begin{bmatrix} 1.2 + 3(1.6) \\ 2(1.2) + 1.6 \\ -1.2 \\ -1.6 \end{bmatrix}
+= \begin{bmatrix} 6 \\ 4 \\ -1.2 \\ -1.6 \end{bmatrix} \leq \begin{bmatrix} 6 \\ 4 \\ 0 \\ 0 \end{bmatrix},
+\]
+so $\x$ is feasible (verified numerically). The first two constraints hold with equality: they are the two tight constraints at this vertex, which is the optimal solution of the Lemonade Vendor LP from the previous chapter.
+
+\exsol{6.6}{Convex Combinations and Geometry}{2}
+The triangle $P$ is the set of convex combinations of $(0,0)$, $(2,0)$, $(0,2)$; equivalently $P = \{ \x \in \mathbb{R}^2 : x_1 \geq 0,\ x_2 \geq 0,\ x_1 + x_2 \leq 2 \}$. (Matches the book's Selected Solution.)
+\begin{enumerate}
+\item The plot is the closed triangle with the three given vertices: the legs lie on the axes and the hypotenuse is the segment of $x_1 + x_2 = 2$ from $(2,0)$ to $(0,2)$.
+\item Yes. Take $\lambda_1 = 0$, $\lambda_2 = \lambda_3 = \tfrac12$:
+\[
+0 \begin{bmatrix} 0 \\ 0 \end{bmatrix} + \tfrac12 \begin{bmatrix} 2 \\ 0 \end{bmatrix} + \tfrac12 \begin{bmatrix} 0 \\ 2 \end{bmatrix} = \begin{bmatrix} 1 \\ 1 \end{bmatrix},
+\]
+with nonnegative weights summing to $1$; so $(1,1)$ is the midpoint of the hypotenuse.
+\item No. Any combination of the vertices hitting $(1.5, 1.5)$ needs $2\lambda_2 = 1.5$ and $2\lambda_3 = 1.5$, forcing $\lambda_2 = \lambda_3 = 0.75$ and $\lambda_2 + \lambda_3 = 1.5 > 1$. Equivalently, $1.5 + 1.5 = 3 > 2$ violates $x_1 + x_2 \leq 2$, so $(1.5, 1.5) \notin P$.
+\end{enumerate}
+
+\exsol{6.7}{Halfspace Geometry and Convexity}{2}
+\begin{enumerate}
+\item The boundary is the line $x_1 + 2x_2 = 4$, through $(4, 0)$ and $(0, 2)$. The halfspace $H$ is that line together with everything below it (the side containing the origin, since $0 + 0 \leq 4$).
+\item $(2,1)$: $2 + 2(1) = 4 \leq 4$, so yes, $(2,1) \in H$; it lies exactly on the boundary. $(1,2)$: $1 + 2(2) = 5 > 4$, so $(1,2) \notin H$.
+\item The midpoint of $(0,0)$ and $(2,1)$ is $(1, \tfrac12)$, and $1 + 2\cdot\tfrac12 = 2 \leq 4$, so the midpoint lies in $H$, consistent with convexity. (Strictly, checking one midpoint illustrates convexity but does not prove it; the general argument is the linearity computation of Theorem ``Convexity of Polyhedra'' applied to the single row $[1\;\; 2]$: for any $\x, \y \in H$ and $\lambda \in [0,1]$, $(\lambda\x + (1-\lambda)\y)$ satisfies $x_1 + 2x_2 \leq \lambda 4 + (1-\lambda)4 = 4$.)
+\end{enumerate}
+
+\exsol{6.8}{Checking an Extreme Point}{2}
+Write the five constraints with rows $A_1 = [1, -4]$, $A_2 = [-1, 1]$, $A_3 = [-1, 2]$, $A_4 = [-1, 0]$, $A_5 = [0, -1]$ and right-hand sides $(0, 1, 4, 0, 0)$.
+\begin{enumerate}
+\item At $(2,3)$: $A_1\x = 2 - 12 = -10 \leq 0$; $A_2\x = -2 + 3 = 1$ (tight); $A_3\x = -2 + 6 = 4$ (tight); $-x_1 = -2 \leq 0$; $-x_2 = -3 \leq 0$. So $(2,3) \in P$ and the tight constraints are exactly rows $2$ and $3$. The matrix of tight rows,
+\[
+A_I = \begin{bmatrix} -1 & 1 \\ -1 & 2 \end{bmatrix}, \qquad \det A_I = (-1)(2) - (1)(-1) = -1 \neq 0,
+\]
+has rank $2$ (verified numerically), so the two tight rows are linearly independent and $|I| = n = 2$. The system $-x_1 + x_2 = 1$, $-x_1 + 2x_2 = 4$ has the unique solution $(2,3)$, so $(2,3)$ is a vertex of $P$, hence an extreme point by the chapter's equivalence theorem.
+\item At $(1,2)$: $A_1\x = 1 - 8 = -7 \leq 0$; $A_2\x = -1 + 2 = 1$ (tight); $A_3\x = -1 + 4 = 3 < 4$; $-1 < 0$; $-2 < 0$. So $(1,2) \in P$ and only constraint $2$ is tight; one row cannot contain $2$ linearly independent rows, so $(1,2)$ is not a vertex. To exhibit it as a convex combination, slide along the tight line $-x_1 + x_2 = 1$: the points $(0,1)$ and $(2,3)$ both lie in $P$ (check $(0,1)$: $0 - 4 = -4 \leq 0$, $-0+1 = 1 \leq 1$, $-0+2 = 2 \leq 4$, $0 \geq 0$, $1 \geq 0$), and
+\[
+(1, 2) = \tfrac12 (0, 1) + \tfrac12 (2, 3),
+\]
+a strict convex combination of two other points of $P$. Hence $(1,2)$ is not an extreme point.
+\end{enumerate}
+
+\exsol{6.9}{A Convex Combination of Extreme Points}{2}
+(Matches the book's Selected Solution.) The first coordinate forces $2\lambda_3 = 1$, so $\lambda_3 = \tfrac12$. The second coordinate then gives $\lambda_2 + \tfrac32 = \tfrac74$, so $\lambda_2 = \tfrac14$, and normalization gives $\lambda_1 = 1 - \tfrac14 - \tfrac12 = \tfrac14$. All multipliers are nonnegative, and indeed
+\[
+\tfrac14 \begin{bmatrix} 0 \\ 0 \end{bmatrix} + \tfrac14 \begin{bmatrix} 0 \\ 1 \end{bmatrix} + \tfrac12 \begin{bmatrix} 2 \\ 3 \end{bmatrix} = \begin{bmatrix} 1 \\ 7/4 \end{bmatrix}
+\]
+(verified numerically). No extreme directions are needed because $(1, \tfrac74)$ already lies in the convex hull of the three extreme points; in the Representation Theorem we may take all $\mu_j = 0$. Extreme directions become necessary only for points of $P$ outside that convex hull, farther out in the unbounded part of the region.
+
+\exsol{6.10}{Is the Union of Convex Sets Convex?}{2}
+(Matches the book's Selected Solution.)
+\begin{enumerate}
+\item Take $C_1$ the unit disk centered at $(-2, 0)$ and $C_2$ the unit disk centered at $(2, 0)$; each disk is convex. The points $(-2, 0) \in C_1$ and $(2, 0) \in C_2$ lie in the union, but their midpoint $(0,0)$ is at distance $2 > 1$ from both centers, so it lies in neither disk. Hence $C_1 \cup C_2$ is not convex.
+\item If one set contains the other, say $C_1 \subseteq C_2$, then $C_1 \cup C_2 = C_2$, which is convex. Nesting is sufficient but not necessary: with $C_1 = \{\x : x_2 \geq 0\}$ and $C_2 = \{\x : x_2 \leq 0\}$, neither halfplane contains the other, yet $C_1 \cup C_2 = \mathbb{R}^2$ is convex.
+\end{enumerate}
+
+\exsol{6.11}{Where Boundedness Enters the Vertex Theorem}{2}
+\begin{enumerate}
+\item Boundedness is used exactly once, after the proof establishes $\c^\top \mathbf{d} = 0$: the proof asserts that ``since $P$ is bounded, the line $\{\x(t) : t \in \mathbb{R}\}$ cannot be entirely contained in $P$, so the set $\{t \geq 0 : \x(t) \in P\}$ is a closed, bounded interval $[0, t^+]$,'' and at $t = t^+$ a new constraint becomes tight. Without boundedness, the whole line $\x^* + t\mathbf{d}$ could remain feasible for all $t$; then no new constraint ever becomes tight, the count of independent tight constraints never grows, and the induction stalls. (Worse, the polyhedron may contain no vertex at all, as in part 2.)
+\item Let $P = \{\x \in \mathbb{R}^2 : 0 \leq x_2 \leq 1\}$, a horizontal slab, and maximize $-x_2$.
+
+\emph{No vertex.} The constraint rows are $[0, 1]$ (for $x_2 \leq 1$) and $[0, -1]$ (for $-x_2 \leq 0$). At any point of $P$ at most one of them can be tight ($x_2$ cannot equal $0$ and $1$ simultaneously), and even both together span only the $x_2$-axis direction. So the tight constraints at any point have rank at most $1 < 2 = n$, and no point of $P$ is the unique solution of $n$ linearly independent tight constraints: $P$ has no vertices. (Geometrically, $P$ contains the horizontal line through any of its points, and a set containing a line has no extreme points.)
+
+\emph{Optima exist.} The objective $-x_2$ is at most $0$ on $P$, and equals $0$ exactly when $x_2 = 0$. So the LP has optimal value $0$ and the set of optima is the entire boundary line $\{(x_1, 0) : x_1 \in \mathbb{R}\}$, infinitely many optima but none at a vertex.
+
+\emph{Which hypothesis fails.} $P$ is unbounded ($x_1$ is free), so the theorem's boundedness hypothesis fails, and the theorem simply does not apply; there is no contradiction. The example shows the hypothesis is not removable: an unbounded feasible region may fail to have any vertex for an optimum to sit at, even when optima exist.
+\end{enumerate}
+
+\exsol{6.12}{Intersections of Arbitrary Families of Convex Sets}{3}
+\emph{Proof.} Let $\x, \y \in C = \bigcap_{i \in I} C_i$ and let $\lambda \in [0, 1]$; set $\mathbf{z} = \lambda\x + (1 - \lambda)\y$. Fix any index $i \in I$. Since $\x \in C$ we have $\x \in C_i$, and likewise $\y \in C_i$. Because $C_i$ is convex, $\mathbf{z} \in C_i$. As $i \in I$ was arbitrary, $\mathbf{z}$ belongs to every $C_i$, that is, $\mathbf{z} \in C$. Hence $C$ contains all convex combinations of its points and is convex. Nothing in the argument used any bound on $|I|$; it works verbatim for infinite families. If $C$ is empty the statement holds vacuously, since there are no pairs $\x, \y$ to test. $\blacksquare$
+
+\emph{Application to polyhedra.} A polyhedron $P = \{\x \in \mathbb{R}^n : A\x \leq \b\}$ with $m$ rows is exactly the intersection of the $m$ halfspaces $H_i = \{\x : A_i \x \leq b_i\}$. Each halfspace is convex (the one-row case of the linearity argument, or the chapter's list of convex sets). By the result just proved, applied to the finite family $\{H_1, \dots, H_m\}$, the intersection $P$ is convex. This reproves Theorem ``Convexity of Polyhedra'' without redoing the componentwise computation.
