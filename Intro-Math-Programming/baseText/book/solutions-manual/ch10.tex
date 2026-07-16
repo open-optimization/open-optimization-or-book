@@ -99,36 +99,23 @@ z^* = 36 + 6\delta = 12 + 6 c_1
 % ----------------------------------------------------------------------------
 \exsol{10.4}{Full Sensitivity Workup}{2}
 
-LP: $\max 3x_1 + 5x_2$ subject to $x_1 + 2x_2 \le 14$ (assembly), $3x_1 + 2x_2 \le 18$ (machine), $x_1, x_2 \ge 0$. This exercise has a Selected Solution in the book; it is reproduced and annotated here.
+LP: $\max 5x_1 + 6x_2$ subject to $x_1 + 2x_2 \le 16$ (assembly), $3x_1 + 2x_2 \le 24$ (machine), $x_1, x_2 \ge 0$. This exercise has a Selected Solution in the book; it is reproduced and annotated here.
 
 \begin{enumerate}
-\item Both constraints are binding at the optimum: solving $x_1 + 2x_2 = 14$ and $3x_1 + 2x_2 = 18$ gives $(x_1, x_2) = (2, 6)$ with $z^* = 3(2) + 5(6) = 36$.
-\item The basis is $B = \{x_1, x_2\}$ with
+\item Both constraints bind at the optimum: solving $x_1 + 2x_2 = 16$ and $3x_1 + 2x_2 = 24$ gives $(x_1, x_2) = (4, 6)$, $z^* = 5(4) + 6(6) = 56$. Verified with \texttt{linprog}.
+\item Basis $B = \{x_1, x_2\}$,
 \[
 A_B = \begin{bmatrix} 1 & 2 \\ 3 & 2 \end{bmatrix}, \qquad
-A_B^{-1} = \begin{bmatrix} -\tfrac12 & \tfrac12 \\[2pt] \tfrac34 & -\tfrac14 \end{bmatrix},
+A_B^{-1} = \begin{bmatrix} -\tfrac12 & \tfrac12 \\ \tfrac34 & -\tfrac14 \end{bmatrix},
+\qquad
+\y^\top = [5,6]\,A_B^{-1} = [2, 1].
 \]
-so the shadow prices are $\y^\top = \c_B^\top A_B^{-1} = [3, 5]\,A_B^{-1} = \left[\tfrac94, \tfrac14\right]$: an assembly hour is worth $\$2.25$ and a machine hour $\$0.25$.
-\item With $\b = (b_1, 18)$, feasibility of $\x_B = A_B^{-1}\b = \left(-\tfrac{b_1}{2} + 9,\ \tfrac{3b_1}{4} - \tfrac{9}{2}\right) \geq \mathbf{0}$ gives
-\[
-\boxed{6 \le b_1 \le 18}, \qquad z = 36 + \tfrac94\,(b_1 - 14) \ \text{inside the range}.
-\]
-With $\b = (14, b_2)$, feasibility of $\left(\tfrac{b_2}{2} - 7,\ \tfrac{21}{2} - \tfrac{b_2}{4}\right) \geq \mathbf{0}$ gives
-\[
-\boxed{14 \le b_2 \le 42}, \qquad z = 36 + \tfrac14\,(b_2 - 18).
-\]
-\item With $\c_B = (c_1, 5)$ the dual prices are $\left(-\tfrac{c_1}{2} + \tfrac{15}{4},\ \tfrac{c_1}{2} - \tfrac{5}{4}\right)$; both are nonnegative (equivalently, both slack reduced costs stay $\le 0$) exactly when
-\[
-\boxed{\tfrac52 \le c_1 \le \tfrac{15}{2}}.
-\]
-With $\c_B = (3, c_2)$ the dual prices are $\left(\tfrac{3c_2}{4} - \tfrac32,\ \tfrac32 - \tfrac{c_2}{4}\right)$, giving
-\[
-\boxed{2 \le c_2 \le 6}.
-\]
-\item Software confirms every claim: at $b_1 = 6$ the solution is $(6,0)$ with $z = 18 = 36 + \tfrac94(-8)$; at $b_1 = 18$ it is $(0,9)$ with $z = 45 = 36 + \tfrac94(4)$; at $b_2 = 14$: $(0,7)$, $z = 35$; at $b_2 = 42$: $(14,0)$, $z = 42$; at $c_1 = 2.5$ and $c_1 = 7.5$ the value is $35$ and $45$ with the basis still optimal, while at $c_1 = 2.49$ and $7.51$ the optimal vertex moves to $(0,7)$ and $(6,0)$ respectively; similarly for $c_2 = 2$ and $6$.
+An assembly hour is worth \$2 at the margin, a machine hour \$1.
+\item RHS ranges: with $\b = (b_1, 24)$, $\x_B = (-\tfrac{b_1}{2} + 12,\ \tfrac{3b_1}{4} - 6) \ge \mathbf{0}$ gives $8 \le b_1 \le 24$ and $z = 56 + 2(b_1 - 16)$; with $\b = (16, b_2)$, $\x_B = (\tfrac{b_2}{2} - 8,\ 12 - \tfrac{b_2}{4}) \ge \mathbf{0}$ gives $16 \le b_2 \le 48$ and $z = 56 + (b_2 - 24)$.
+\item Cost ranges: $\c_B = (c_1, 6)$ gives duals $(-\tfrac{c_1}{2} + \tfrac92,\ \tfrac{c_1}{2} - \tfrac32) \ge \mathbf{0}$, so $3 \le c_1 \le 9$; $\c_B = (5, c_2)$ gives $(\tfrac{3c_2}{4} - \tfrac52,\ \tfrac52 - \tfrac{c_2}{4}) \ge \mathbf{0}$, so $\tfrac{10}{3} \le c_2 \le 10$.
+\item Endpoint checks with \texttt{linprog}: $b_1 = 8$ gives $(8,0)$, $z = 40$; $b_1 = 24$ gives $(0,12)$, $z = 72$; both match the linear formula, and the duals change just outside the range.
 \end{enumerate}
 
-% ----------------------------------------------------------------------------
 \exsol{10.5}{Ranging a Basic and a Nonbasic Coefficient}{2}
 
 LP: $\max 5x_1 + 2x_2$ subject to $2x_1 + x_2 \le 10$, $x_1 + 3x_2 \le 15$, $x_1, x_2 \ge 0$, with optimum $(5, 0)$, $z^* = 25$, basis $B = \{x_1, s_2\}$.

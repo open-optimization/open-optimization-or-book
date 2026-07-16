@@ -1,11 +1,11 @@
-\chapter{Graphically Solving Linear Programs}
+\chapter{Graphically Solving Linear Programs}\footnote{Portions of this chapter are adapted from Kevin Cheung's \emph{A First Course in Linear Programming} materials (Carleton University), licensed CC BY-SA 4.0, with modifications by Robert Hildebrand. See the Sources and Attribution chapter for details.}
 
 \begin{outcome}
 \begin{enumerate}
-\item[A.] Learn how to plot the feasible region and the objective function.
-\item[B.] Identify and compute extreme points of the feasible region.
-\item[C.] Find the optimal solution(s) to a linear program graphically.
-\item[D.] Classify the type of result of the problem as infeasible, unbounded, unique optimal solution, or infinitely many optimal solutions.
+\item[A.] Draw the region of points allowed by the constraints, together with level lines of the objective.
+\item[B.] Locate the corner points of that region and compute their coordinates.
+\item[C.] Read an optimal solution directly off the picture.
+\item[D.] Recognize the four ways a linear program can turn out: a single best point, a whole edge of best points, no allowed points at all, or an objective that grows without limit.
 \end{enumerate}
 \end{outcome}
 \begin{resource}
@@ -20,9 +20,9 @@
 \end{tryit}
 
 
-When a linear program has only two decision variables, we can solve it graphically by plotting the feasible region along with the level curves of the objective function. We will show that we can find a point in the feasible region that maximizes (or minimizes) the objective function using these level curves.
+A linear program with two decision variables fits entirely on a sheet of paper: each constraint cuts the plane with a line, the points surviving every cut form the feasible region, and the objective becomes a family of parallel lines, one for each possible objective value. Sliding a line from this family across the region and watching where it exits gives a purely visual way to locate a best possible point, and this picture is the subject of the present chapter.
 
-We will begin with an easy example that is bounded and investigate the structure of the feasible region.  We will then explore other examples.
+Our starting point is a small, well-behaved example whose picture is easy to draw.  Once its geometry is understood, we move on to examples where things go wrong in instructive ways.
 
 %% Decorative LP images removed (files not available)
 
@@ -37,9 +37,9 @@ Consider the problem
 &x_1, x_2  \geq 0
 \end{align*}
 
-We want to start by plotting the \emph{feasible region}, that is, the set of points $(x_1,x_2)$ that satisfy all the constraints.
+The first step is a picture of the \emph{feasible region}: every point $(x_1, x_2)$ that survives all of the constraints at once.
 
-We can plot this by first plotting the four lines
+A reliable way to draw it is boundary-first: sketch the line where each constraint holds with equality, namely
 \begin{itemize}
 \item $x_1+2 x_2 = 16$
 \item $5 x_1+3 x_2 = 45$
@@ -98,13 +98,11 @@ and then shading in the side of the space cut out by the corresponding inequalit
 \caption{\href{https://www.desmos.com/calculator/j1li4l7lcv}{Desmos: Interactive plot!} (\href{https://open-optimization.github.io/open-optimization-or-book/interactive-figures/lp-graphical-method.html}{backup interactive plot})}
 \end{figure}
 
-The resulting feasible region can then can be shaded in as the region that satisfies all the inequalities.
+Each line splits the plane in two; keeping the correct side of every line and shading whatever survives produces the feasible region.
 
-Notice that the feasible region is nonempty (it has points that satisfy all the inequalities) and also that it is bounded (the feasible points don't continue infinitely in any direction).
+Two features of this particular region are worth naming.  It is \emph{nonempty}: at least one point satisfies every constraint.  And it is \emph{bounded}: the whole region fits inside some large circle, with no direction in which it stretches forever.
 
-We want to identify the \emph{extreme points} (i.e., the corners) of the feasible region.
-Understanding these points will be critical to understanding the optimal solutions of the model.
-Notice that all extreme points can be computed by finding the intersection of 2 of the lines.   But!  Not all intersections of any two lines are feasible.
+The corners of the region, called \emph{extreme points}, will turn out to carry all the information we need about optimal solutions.  Each corner sits where two of the boundary lines cross, so corner coordinates come from solving $2 \times 2$ linear systems.  Watch out, though: crossing two boundary lines is necessary but not sufficient, since two lines can also intersect at a point that violates some third constraint.
 
 We will later use the terminology \emph{basic feasible solution} for an extreme point of the feasible region, and \emph{basic solution} as a point that is the intersection of 2 lines, but is actually infeasible (does not satisfy all the constraints).
 
@@ -136,7 +134,7 @@ We will explore why Theorem~\ref{thm:optimalextremepoint} is true, and also what
 We now apply the vertex enumeration idea graphically using a concrete example.
 
 \begin{example}{Furniture Workshop}\label{ex:FurnitureWorkshop}
-A small furniture workshop produces chairs and tables. Each chair requires 2 hours of carpentry and 1 hour of finishing, earning a profit of \$8. Each table requires 1 hour of carpentry and 3 hours of finishing, earning a profit of \$6. The workshop has 80 hours of carpentry time and 90 hours of finishing time available per week. Market demand limits chair production to at most 35 per week.
+A small furniture workshop produces chairs and tables. Each chair requires 2 hours of carpentry and 1 hour of finishing, earning a profit of \$8. Each table requires 1 hour of carpentry and 3 hours of finishing, earning a profit of \$6. The workshop has 80 hours of carpentry time and 90 hours of finishing time available per week. Market demand limits chair production to at most 32 per week.
 
 Letting $x_1$ denote the number of chairs and $x_2$ the number of tables, the linear program is:
 \begin{equation}
@@ -144,7 +142,7 @@ Letting $x_1$ denote the number of chairs and $x_2$ the number of tables, the li
 \max\;\;& z(x_1,x_2) = 8x_1 + 6x_2\\
 \text{s.t.}\;\;&  2x_1 + x_2 \leq 80\\
 & x_1 + 3x_2 \leq 90\\
-& x_1 \leq 35\\
+& x_1 \leq 32\\
 & x_1 \geq 0\\
 & x_2 \geq 0
 \end{aligned}
@@ -166,14 +164,14 @@ Letting $x_1$ denote the number of chairs and $x_2$ the number of tables, the li
     \foreach \x in {0,10,...,90} \draw (\x,3) -- (\x,-3) node[below] {\tiny\x};
     \foreach \y in {0,10,...,90} \draw (-3,\y) -- (3,\y) node[left] {\tiny\y};
 
-    % Feasible region vertices: (0,0), (0,30), (30,20), (35,10), (35,0)
+    % Feasible region vertices: (0,0), (0,30), (30,20), (32,16), (32,0)
     \fill[blue!50!cyan,opacity=0.3]
-        (0,0) -- (0,30) -- (30,20) -- (35,10) -- (35,0) -- cycle;
+        (0,0) -- (0,30) -- (30,20) -- (32,16) -- (32,0) -- cycle;
 
     % Constraint lines
     \draw[red,thick] (0,80) --  node[above right, sloped] {\tiny $2x_1 + x_2 \leq 80$}(40,0);
     \draw[red,thick] (0,30) --  node[above right, sloped] {\tiny $x_1 + 3x_2 \leq 90$}(90,0);
-    \draw[red,thick] (35,90) --  node[above right, sloped] {\tiny $x_1 \leq 35$}(35,0);
+    \draw[red,thick] (32,90) --  node[above right, sloped] {\tiny $x_1 \leq 32$}(32,0);
     \draw[red,thick] (0,0) -- (95,0) node[below right] {\tiny $x_2 \geq 0$};
     \draw[red,thick] (0,0) -- (0,90) node[above right] {\tiny $x_1 \geq 0$};
 
@@ -185,14 +183,14 @@ Letting $x_1$ denote the number of chairs and $x_2$ the number of tables, the li
     % Labels for vertices
     \node[blue] at (0,30) [circle,fill,inner sep=1.5pt]{};
     \node[blue] at (30,20) [circle,fill,inner sep=1.5pt]{};
-    \node[blue] at (35,10) [circle,fill,inner sep=1.5pt]{};
-    \node[blue] at (35,0) [circle,fill,inner sep=1.5pt]{};
+    \node[blue] at (32,16) [circle,fill,inner sep=1.5pt]{};
+    \node[blue] at (32,0) [circle,fill,inner sep=1.5pt]{};
 
     % Vertex coordinates
     \node[black,anchor=south east] at (-1,30) {\scriptsize $(0,30)$};
-    \node[black,anchor=south west] at (31,21) {\scriptsize $(30,20)$};
-    \node[black,anchor=south west] at (36,10) {\scriptsize $(35,10)$};
-    \node[black,anchor=north east] at (35,-1) {\scriptsize $(35,0)$};
+    \node[black,anchor=south west] at (28,21) {\scriptsize $(30,20)$};
+    \node[black,anchor=south west] at (33,16) {\scriptsize $(32,16)$};
+    \node[black,anchor=north east] at (32,-1) {\scriptsize $(32,0)$};
 
     % Objective function label
     \node[gray] at (15,90) {\tiny $8x_1 + 6x_2 = z$};

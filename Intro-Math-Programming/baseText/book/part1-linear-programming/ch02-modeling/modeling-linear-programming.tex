@@ -54,21 +54,21 @@ We begin with a simple example.
 {https://github.com/open-optimization/open-optimization-or-examples/blob/master/linear-programming/screen_printing/screen_printing_pulp.ipynb}%
 {https://github.com/open-optimization/open-optimization-or-examples/blob/master/linear-programming/screen_printing/screen_printing_gurobipy.ipynb}
 %
-Consider a screen printing shop that produces custom t-shirts and tote bags. Each t-shirt sells for $\$15$ and costs $\$5$ in materials, while each tote bag sells for $\$12$ and costs $\$4$ in materials. A t-shirt requires $2$ hours of printing time and $1$ hour of drying and packaging, while a tote bag requires $3$ hours of printing time and $1$ hour of drying and packaging. The shop has at most $150$ hours of printing time and $60$ hours of drying/packaging time available per week. Market research indicates that the shop will sell no more than $45$ t-shirts per week. The shop wishes to maximize its weekly profit.
+A screen printing shop prints custom t-shirts and tote bags and must decide how many of each to make this week. Here is what the owner knows. On the revenue side, t-shirts sell for $\$15$ against $\$5$ of materials, and tote bags sell for $\$12$ against $\$4$ of materials. On the production side, two resources are scarce: the printing press (at most $150$ hours this week) and the drying/packaging station (at most $60$ hours). A t-shirt occupies the press for $2$ hours and a tote bag for $3$; each item then spends $1$ hour in drying and packaging. One more piece of information limits the plan: local demand for t-shirts tops out around $45$ per week, so making more than that would be wasted effort. What production plan earns the most profit?
 
-We can represent this as a linear programming problem. Let $x_1$ denote the number of t-shirts produced and $x_2$ the number of tote bags. The profit per t-shirt is $\$15 - \$5 = \$10$ and the profit per tote bag is $\$12 - \$4 = \$8$. The total weekly profit is:
+To turn this story into mathematics, we need decision variables, an objective, and constraints. The decisions are the production quantities: let $x_1$ be the number of t-shirts and $x_2$ the number of tote bags made this week. Since each t-shirt nets $\$15 - \$5 = \$10$ and each tote bag nets $\$12 - \$4 = \$8$, the quantity the owner wants to maximize is the weekly profit:
 \begin{equation}
 z(x_1,x_2) = 10x_1 + 8x_2
 \end{equation}
-The shop can use no more than $150$ hours of printing time per week, and since a t-shirt takes $2$ hours and a tote bag takes $3$ hours of printing, we have:
+Next, each scarce resource becomes an inequality. Printing $x_1$ shirts and $x_2$ totes ties up $2x_1 + 3x_2$ press hours, which cannot exceed the $150$ available:
 \begin{equation}
 2x_1 + 3x_2 \leq 150
 \end{equation}
-Similarly, the shop has at most $60$ hours of drying and packaging time, with each item requiring $1$ hour:
+The drying and packaging station tells the same kind of story, one hour per item against a $60$-hour budget:
 \begin{equation}
 x_1 + x_2 \leq 60
 \end{equation}
-Finally, we know that $x_1 \leq 45$, since the shop will sell no more than $45$ t-shirts per week. The complete linear programming problem is:
+The demand ceiling is the simplest constraint of all: $x_1 \leq 45$. Assembling the objective and the constraints, and remembering that production cannot be negative, gives the complete linear program:
 \begin{equation}
 \begin{aligned}
 \max\;\;&& z(x_1,x_2) = 10x_1 + 8x_2\\
@@ -170,27 +170,25 @@ z(x_1, \dots, x_n) = c_1x_1 + \dots + c_nx_n.
 
 Linear functions are characterized by their simplicity and additivity, making them well-suited for optimization problems where proportionality is assumed. This simplicity allows linear programs to be solved efficiently, even for large-scale problems.
 
-%For the time being, we will eschew the general form and focus exclusively on linear programming problems with two variables. Using this limited case, we will develop a graphical method for identifying optimal solutions, which we will generalize later to problems with arbitrary numbers of variables. 
-
 \subsection{Assumptions}
 \label{sec:lp-assumptions}
-Inspecting Example \ref{ex:ScreenPrint} (or the more general problem in Equation~\eqref{eqn:GeneralLPMax}) we can see there are several assumptions that must be satisfied when using a linear programming model. We enumerate these below:
+When we wrote down the model in Example \ref{ex:ScreenPrint}, we quietly made four modeling assumptions.  They are worth stating out loud, because they tell you when a linear program is the right tool and when it is not.
+
 \begin{description}
-\item[Proportionality Assumption] A problem can be phrased as a linear program only if the contribution to the objective function \textit{and} the left-hand-side of each constraint by each decision variable $(x_1,\dots,x_n)$ is proportional to the value of the decision variable.
+\item[Proportionality] Doubling a variable doubles its effect.  If one t-shirt earns \$8 and consumes 15 minutes of press time, then 50 shirts earn \$400 and consume 750 minutes.  No quantity discounts, no economies of scale, no setup costs: every unit behaves like the first one.
 
-\item[Additivity Assumption] A problem can be phrased as a linear programming problem only if the contribution to the objective function \textit{and} the left-hand-side of each constraint by any decision variable $x_i$ ($i=1,\dots,n$) is completely independent of any other decision variable $x_j$ ($j \neq i$) and additive. 
+\item[Additivity] Effects add up across variables, with no interactions.  The press time used by t-shirts and the press time used by posters simply sum; producing one product does not make another product cheaper, more profitable, or harder to make.
 
-\item[Divisibility Assumption] A problem can be phrased as a linear programming problem only if the quantities represented by each decision variable are infinitely divisible (i.e., fractional answers make sense). 
+\item[Divisibility] Variables may take fractional values.  The model is allowed to recommend printing half a shirt, whether or not that makes physical sense.
 
-\item[Certainty Assumption] A problem can be phrased as a linear programming problem only if the coefficients in the objective function and constraints are known with certainty. 
+\item[Certainty] Every number in the model (the profit per shirt, the minutes per press run, the hours available) is treated as known exactly, not as an estimate or a random quantity.
 \end{description}
 
-The first two assumptions simply assert (in English) that both the objective function and functions on the left-hand-side of the (in)equalities in the constraints are linear functions of the variables $x_1,\dots,x_n$. 
+Proportionality and additivity together say exactly that the objective and constraint functions are \emph{linear} in the sense of Definition~\ref{def:linearfunction}.  If your problem has quantity discounts, interaction effects, or fixed setup charges, a plain linear program does not capture it, though we will see in the integer programming chapters that some of these features can be recovered with clever modeling.
 
-The third assumption asserts that a valid optimal answer could contain fractional values for decision variables. It's important to understand how this assumption comes into play, even in the screen printing example. Many quantities can be divided into non-integer values (ounces, pounds etc.) but many other quantities cannot be divided. For instance, can we really expect that it's reasonable to print $\tfrac{1}{2}$ a t-shirt in the screen printing example? When values must be constrained to true integer values, the linear programming problem is called an \textit{integer programming problem}.  There is a vast literature dealing with these problems.
-For many problems, particularly when the values of the decision variables may become large, a fractional optimal answer could be obtained and then rounded to the nearest integer to obtain a reasonable answer. For example, if our screen printing problem were re-written so that the optimal answer was to print $1045.3$ t-shirts, then we could round down to $1045$.
+Divisibility deserves a closer look.  Some quantities divide naturally: ounces of ink, hours of labor, dollars of budget.  Items like t-shirts do not; nobody sells six tenths of a shirt.  In practice this matters less than it first appears.  When production quantities are large, an optimal plan calling for, say, several hundred shirts plus a fraction can be rounded to whole units with only a tiny effect on profit.  When whole-number answers truly matter, we add the integrality requirement explicitly, and the model becomes an \emph{integer program}, the subject of Part~\ref{part:IntroIntegerProgramming} of this book.
 
-The final assumption asserts that the coefficients (e.g., profit per plane or boat) are known with absolute certainty. In traditional linear programming, there is no lack of knowledge about the makeup of the objective function, the coefficients in the left-hand-side of the constraints or the bounds on the right-hand-sides of the constraints. There is a literature on \textit{stochastic programming} that relaxes some of these assumptions, but this too is outside the scope of this book.
+Certainty is the assumption most often violated in the real world: demand forecasts miss, prices move, machines run slow.  Fields such as \emph{stochastic programming} and \emph{robust optimization} extend linear programming to handle uncertain data, and sensitivity analysis (Chapter~\ref{ch:sensitivity}) lets us ask how much the data could change before our optimal plan changes.  For now, we take the data as given.
 
 \begin{learningcheckpoint}[label={lc:lp-assumptions}]
 In a short sentence or two, discuss whether the problem in
@@ -855,24 +853,11 @@ Work through the following problems to practice formulating linear programs.\foo
 
 \begin{ex}{Chemical Manufacturing}{}
 \label{ex:ChemicalPlant}
-\stars{2} A chemical manufacturer produces three chemicals: A, B and C. These chemicals are produced by two processes: 1 and 2.
-\begin{itemize}
-\item Running process 1 for 1 hour costs \$4 and yields 3 units of chemical A, 1 unit of chemical B and 1 unit of chemical C.
-\item Running process 2 for 1 hour costs \$1 and produces 1 unit of chemical A, and 1 unit of chemical B (but none of Chemical C).
-\end{itemize}
-To meet customer demand,
-\begin{itemize}
-\item at least 10 units of chemical A,
-\item at least 5 units of chemical B and
-\item at least 3 units of chemical C
-\end{itemize}
-must be produced daily.\\
+\stars{2} A specialty coatings plant makes three additives, labeled A, B, and C, as joint outputs of two continuous production lines.  Each hour that Line 1 runs costs \$5 in energy and labor and outputs 2 drums of A, 3 drums of B, and 1 drum of C.  Each hour that Line 2 runs costs \$2 and outputs 1 drum of A and 2 drums of C (Line 2 cannot make B).  Contracts require the plant to deliver at least 8 drums of A, 6 drums of B, and 5 drums of C each day.  The plant manager wants a daily operating schedule for the two lines that meets the contracts at the lowest cost.
 
- Assume that the chemical manufacturer wants to minimize the cost of production.
+Formulate a linear program for the manager's problem.  State your decision variables clearly, including their units.
 
-Develop a linear programming problem describing the constraints and objectives of the chemical manufacturer. \\
-
-\emph{[Hint: Let $x_1$ be the amount of time Process 1 is executed and let $x_2$ be amount of time Process 2 is executed. Use the coefficients above to express the cost of running Process 1 for $x_1$ time and Process 2 for $x_2$ time. Do the same to compute the amount of chemicals A, B, and C that are produced.]}
+\emph{[Hint: the decisions are how long to run each line, not how much of each chemical to make.  Once you choose those variables, both the cost and the output of each chemical are linear expressions in them.]}
 \label{exer:ChemicalPlant}
 \exrefs{\S\ref{sec:lp-examples}, Example~\ref{example:diet-problem}}
 \end{ex}
@@ -995,11 +980,11 @@ How many of each type should he give in order to minimize his own grading time?
 \exrefs{\S\ref{sec:lp-modeling-assumptions}, Definition~\ref{def:linearfunction}}
 \end{ex}
 
-\begin{ex}{Stochastic Objective}{}
-\stars{2} Suppose the costs are not known with certainty but instead a probability distribution for each value of $c_i$ ($i=1,\dots,n$) is known. Suggest a way of constructing a linear program from the probability distributions.
-%
-\emph{[Hint: Suppose I tell you that I'll give you a uniformly random amount of money between $\$1$ and $\$2$. How much money do you expect to receive? Use the same reasoning to answer the question.]}
-\exrefs{\S\ref{sec:lp-assumptions}}
+\begin{ex}{Random Costs in the Objective}{}
+\stars{3} In every model so far, the objective coefficients were fixed numbers.  Now suppose each cost coefficient $c_i$ is not known exactly; instead, you know its probability distribution.  Propose a single deterministic linear program whose solution is a sensible plan under this uncertainty, and explain what your objective function represents.
+
+\emph{[Hint: if a lottery ticket pays some amount between \$1 and \$2 with all values equally likely, what single number summarizes its worth to you? Apply the same summary to each $c_i$.]}
+\exrefs{\S\ref{sec:lp-modeling-assumptions}}
 \end{ex}
 
 \begin{ex}{Which Assumption Breaks?}{}
@@ -1031,15 +1016,15 @@ Then answer: in scenario (a), does the violation cause any harm if the company i
 \subsubsection*{Selected Solutions}
 
 \begin{solution}(Exercise~\ref{ex:ChemicalPlant})
-Let $x_1$ and $x_2$ be the number of hours that Process 1 and Process 2 are run each day.  Each hour of Process 1 costs \$4 and each hour of Process 2 costs \$1, so we minimize total cost subject to meeting each chemical demand:
+Let $x_1$ and $x_2$ be the daily running time (in hours) of Line 1 and Line 2.  Each hour of Line 1 costs \$5 and each hour of Line 2 costs \$2, and each contract becomes a lower-bound constraint on total output:
 \begin{align*}
-\min \quad & z = 4x_1 + x_2\\
-\st \quad & 3x_1 + x_2 \geq 10 && \text{(chemical A)}\\
-& x_1 + x_2 \geq 5 && \text{(chemical B)}\\
-& x_1 \geq 3 && \text{(chemical C)}\\
+\min \quad & z = 5x_1 + 2x_2\\
+\st \quad & 2x_1 + x_2 \geq 8 && \text{(drums of A)}\\
+& 3x_1 \geq 6 && \text{(drums of B)}\\
+& x_1 + 2x_2 \geq 5 && \text{(drums of C)}\\
 & x_1, x_2 \geq 0.
 \end{align*}
-Since only Process 1 produces chemical C, the demand for C forces $x_1 \geq 3$.  Solving the LP gives $x_1 = 3$, $x_2 = 2$ with minimum daily cost \$14: running Process 1 for exactly 3 hours covers chemical C and most of A, and 2 hours of the cheaper Process 2 fills the remaining demand for B.
+Solving (graphically or with software) gives $x_1 = 2$ hours and $x_2 = 4$ hours, with daily cost $z^* = 5(2) + 2(4) = \$18$.  The A and B contracts are met exactly ($2(2)+4 = 8$ and $3(2) = 6$), while C is over-delivered: the schedule produces $2 + 2(4) = 10$ drums against the $5$ required.
 \end{solution}
 
 \begin{solution}(Exercise~\ref{ex:linear-inequalities-check})

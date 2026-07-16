@@ -5,7 +5,7 @@
 % ============================================================================
 \section{Chapter 3: Software -- Excel}
 
-\textbf{Coverage and flow.} The chapter has a single content section (Using Excel Solver, covering spreadsheet functions, the recommended color-coded layout, the Solver dialog, solving methods, and the Answer/Sensitivity reports), and the nine exercises drill it thoroughly. The two warm-ups rerun workbooks from Chapter 4's examples with new data, the core problems walk through diet, production, and transportation models built from scratch, two exercises specifically exercise the Sensitivity Report (shadow prices, allowable ranges), one concept exercise targets the solving-method dropdown, and the challenge exercise isolates the Make Unconstrained Variables Non-Negative checkbox. Every part of the Solver workflow described in the text is touched at least once; sensitivity interpretation is drilled hardest, which is appropriate since it previews Chapter 7. Honest verdict: coverage is complete and well graded from one to three stars; the only soft spot is that no exercise asks students to use the plain Excel functions (SUMPRODUCT, COUNTIF, absolute references) outside of a Solver model, and the diet exercise's data provenance should be checked (see the flag under Exercise 3.3).
+\textbf{Coverage and flow.} The chapter has a single content section (Using Excel Solver, covering spreadsheet functions, the recommended color-coded layout, the Solver dialog, solving methods, and the Answer/Sensitivity reports), and the nine exercises drill it thoroughly. The two warm-ups rerun workbooks from Chapter 4's examples with new data, the core problems walk through diet, production, and transportation models built from scratch, two exercises specifically exercise the Sensitivity Report (shadow prices, allowable ranges), one concept exercise targets the solving-method dropdown, and the challenge exercise isolates the Make Unconstrained Variables Non-Negative checkbox. Every part of the Solver workflow described in the text is touched at least once; sensitivity interpretation is drilled hardest, which is appropriate since it previews Chapter 7. Honest verdict: coverage is complete and well graded from one to three stars; the only soft spot is that no exercise asks students to use the plain Excel functions (SUMPRODUCT, COUNTIF, absolute references) outside of a Solver model. (The diet exercise's food table was regenerated on 2026-07-15 after its original data was traced to a copyrighted textbook; see the note under Exercise 3.3.)
 
 % ----------------------------------------------------------------------------
 \exsol{3.1}{Solver Rerun: Minimum-Cost Network Flow}{1}
@@ -37,26 +37,30 @@ with total cost $10(1) + 12(9) + 14(7) + 16(8) + 18(5) + 20(10) + 22(7) + 24(6) 
 % ----------------------------------------------------------------------------
 \exsol{3.3}{Diet Problem in Excel}{2}
 
-Let $x_1, \dots, x_5 \geq 0$ be daily servings of raw carrots, baked potatoes, wheat bread, cheddar cheese, and peanut butter. The LP is
+Let $x_1, \dots, x_5 \geq 0$ be daily servings of oatmeal, whole milk, brown rice, black beans, and almond butter. The LP is
 \begin{align*}
-\min \quad & 0.14x_1 + 0.12x_2 + 0.20x_3 + 0.75x_4 + 0.15x_5\\
-\st & 23x_1 + 171x_2 + 65x_3 + 112x_4 + 188x_5 \geq 2000 && \text{(calories)}\\
-& 0.1x_1 + 0.2x_2 + 9.3x_4 + 16x_5 \geq 50 && \text{(fat)}\\
-& 0.6x_1 + 3.7x_2 + 2.2x_3 + 7x_4 + 7.7x_5 \geq 100 && \text{(protein)}\\
-& 6x_1 + 30x_2 + 13x_3 + 2x_5 \geq 250 && \text{(carbohydrate)}\\
+\min \quad & 0.25x_1 + 0.30x_2 + 0.18x_3 + 0.40x_4 + 0.45x_5\\
+\st & 150x_1 + 149x_2 + 216x_3 + 227x_4 + 196x_5 \geq 2200 && \text{(calories)}\\
+& 3x_1 + 8x_2 + 1.8x_3 + 0.9x_4 + 18x_5 \geq 60 && \text{(fat)}\\
+& 5x_1 + 8x_2 + 5x_3 + 15x_4 + 7x_5 \geq 90 && \text{(protein)}\\
+& 27x_1 + 12x_2 + 45x_3 + 41x_4 + 6x_5 \geq 300 && \text{(carbohydrate)}\\
 & x_1, \dots, x_5 \geq 0.
 \end{align*}
 \emph{Solver setup:} lay out the nutrition table as data (blue), one yellow cell per food for servings, a green objective cell \texttt{=SUMPRODUCT(prices, servings)}, and four green cells \texttt{=SUMPRODUCT(nutrientrow, servings)} constrained $\geq$ the requirements; solve with Simplex LP and non-negativity checked.
 
-The optimal diet is potatoes and peanut butter only:
+The optimal diet uses milk, rice, and beans only:
 \[
-x_2 \approx 7.7147 \text{ servings of baked potatoes}, \qquad x_5 \approx 9.2800 \text{ servings of peanut butter},
+x_2 \approx 6.3205 \text{ servings of whole milk}, \quad x_3 \approx 4.7134 \text{ servings of brown rice}, \quad x_4 \approx 1.0579 \text{ servings of black beans},
 \]
-with $x_1 = x_3 = x_4 = 0$ and minimum daily cost $\approx \$2.32$ (exactly $\$2.3178$). The protein and carbohydrate constraints are binding ($100$ g and $250$ g exactly); calories ($\approx 3064$) and fat ($\approx 150$ g) are comfortably oversatisfied. A screenshot should show the yellow serving cells with these values and the green cost cell at $2.32$.
+with $x_1 = x_5 = 0$ and minimum daily cost $\approx \$3.17$ (exactly $\$3.1677$). The calorie, fat, and protein constraints are binding ($2200$, $60$ g, and $90$ g exactly); carbohydrates ($\approx 331.3$ g) are oversatisfied. A screenshot should show the yellow serving cells with these values and the green cost cell at $3.17$.
 
-\begin{qaflag}
-Licensing: this exact food table (raw carrots, baked potatoes, wheat bread, cheddar cheese, peanut butter, with these prices and nutrient values and the 2000/50/100/250 requirements) circulates widely in university course materials and closely matches the diet-problem exercise found in at least one commercial optimization textbook. Recommend verifying the original source; if it cannot be traced to an openly licensed source, regenerate the table with fresh (verified) nutrition data, which would not change the pedagogical content. The numbers themselves are fine: the LP is feasible, non-degenerate, and has a clean two-food solution.
-\end{qaflag}
+% Data provenance note (2026-07-15): the previous version of this exercise reused
+% the diet table (raw carrots / baked potatoes / wheat bread / cheddar cheese /
+% peanut butter with the 2000/50/100/250 requirements) verbatim from Guenin,
+% Konemann, and Tuncel, "A Gentle Introduction to Optimization" (Cambridge
+% University Press, 2014), Ch. 1, Exercise 1 -- a copyrighted source. The table
+% and requirements were regenerated with fresh data and the exercise reworded;
+% all numbers above verified with scipy.optimize.linprog (HiGHS) on 2026-07-15.
 
 % ----------------------------------------------------------------------------
 \exsol{3.4}{Production Planning in Excel}{2}
