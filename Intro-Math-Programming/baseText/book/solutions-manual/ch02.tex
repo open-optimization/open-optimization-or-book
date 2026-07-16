@@ -67,44 +67,52 @@ The decisions are running times, not chemical quantities: let $x_1, x_2 \ge 0$ b
 \end{align*}
 Only Line 1 makes B, so the B contract forces $x_1 \ge 2$.  The optimum is $x_1 = 2$, $x_2 = 4$, cost $\$18$ (verified with \texttt{linprog}): A and B are met exactly, and C is over-delivered at $10$ drums.
 
-\exsol{2.6}{Oven Store Profit Maximization}{2}
+\exsol{2.6}{E-Bike Showroom}{2}
 
-Let $x_1, x_2, x_3 \geq 0$ be the numbers of small, medium, and large ovens sold per month:
+Let $x_1, x_2, x_3 \geq 0$ be the numbers of commuter, cargo, and mountain bikes sold per month:
 \begin{align*}
-\max \quad & z = 50x_1 + 100x_2 + 150x_3\\
-\st \quad & 3x_1 + 5x_2 + 6x_3 \leq 90 && \text{(storage, cu ft)}\\
-& x_1 + x_2 + x_3 \leq 200 && \text{(sales hours)}\\
-& x_1 + x_2 + 2x_3 \leq 280 && \text{(installer hours)}\\
+\max \quad & z = 150x_1 + 300x_2 + 240x_3\\
+\st \quad & 2x_1 + 4x_2 + 3x_3 \leq 60 && \text{(floor space, m$^2$)}\\
+& 2x_1 + 3x_2 + 2x_3 \leq 120 && \text{(staff hours)}\\
+& x_1 + 3x_2 + 2x_3 \leq 75 && \text{(assembly hours)}\\
 & x_1, x_2, x_3 \geq 0.
 \end{align*}
-Storage is the scarce resource: profit per cubic foot is $50/3 \approx 16.7$ for small, $100/5 = 20$ for medium, and $150/6 = 25$ for large ovens, so the store should fill its storage with large ovens. The solver confirms the optimum $x_1 = x_2 = 0$, $x_3 = 15$ with maximum profit $\$2250$. The sales constraint (15 of 200 hours) and installation constraint (30 of 280 hours) are far from binding; only storage binds.
+Floor space is the scarce resource: profit per square meter is $150/2 = 75$ for commuter, $300/4 = 75$ for cargo, and $240/3 = 80$ for mountain bikes, so the showroom should fill its floor with mountain bikes. The solver confirms the optimum $x_1 = x_2 = 0$, $x_3 = 20$ with maximum profit $\$4800$ (verified by solver). The staff constraint (40 of 120 hours) and assembly constraint (40 of 75 hours) are far from binding; only floor space binds.
 
 \begin{qaflag}
-Book fix applied (issue type c, ugly data): the exercise previously gave 100 cubic feet of storage, which makes the LP optimum $x_3 = 50/3 \approx 16.67$ ovens with profit \$2500, a fractional number of ovens in a problem that asks "how many of each type should be sold." The book now says 90 cubic feet, giving the clean integer optimum above (re-verified by solver). Instructors using older printings should adjust. Separately, the sales and installer constraints can never bind with any of these storage levels; they are harmless as which-constraints-matter distractors, but could be tightened if a two-binding-constraint instance is wanted.
+Book fix applied (issue type e, licensing): the previous "Oven Store" exercise (small/medium/large ovens, 90 cu ft storage) circulates verbatim on solution sites and appears to originate in a commercial finite-mathematics textbook; it could not be confirmed in the CC-licensed Sekhon--Bloom text this section credits. Replaced 2026-07-16 with an original instance preserving the same teaching point (three products, one scarce resource, profit-per-unit-of-resource argument, integer optimum). Instructors using older printings should adjust.
 \end{qaflag}
 
 \exsol{2.7}{Manufacturing Profit Problem}{2}
 
-Let $x_A, x_B, x_C \geq 0$ be the monthly production of products A, B, and C. Each machine's monthly hours give one constraint:
+Let $x_1, x_2, x_3 \geq 0$ be the monthly production of bookcases, desks, and cabinets. Each workstation's monthly hours give one constraint:
 \begin{align*}
-\max \quad & z = 20x_A + 30x_B + 40x_C\\
-\st \quad & x_A + 2x_B + 2x_C \leq 180 && \text{(Machine I)}\\
-& 2x_A + 2x_B + 4x_C \leq 300 && \text{(Machine II)}\\
-& x_A, x_B, x_C \geq 0.
+\max \quad & z = 25x_1 + 40x_2 + 55x_3\\
+\st \quad & x_1 + 2x_2 + 3x_3 \leq 200 && \text{(router)}\\
+& 2x_1 + 2x_2 + 4x_3 \leq 240 && \text{(finishing)}\\
+& x_1, x_2, x_3 \geq 0.
 \end{align*}
-An optimal solution is $x_A = 120$, $x_B = 30$, $x_C = 0$ with maximum profit \$3300 (verified by solver). Both machine constraints bind: $120 + 60 = 180$ and $240 + 60 = 300$. Product C is not worth making: it earns \$40 but uses as much Machine I time as B and twice the Machine II time of A, so its profit does not justify the machine hours it consumes.
+The optimal solution is $x_1 = 40$, $x_2 = 80$, $x_3 = 0$ with maximum profit \$4200 (verified by solver). Both constraints bind: $40 + 160 = 200$ and $80 + 160 = 240$. Cabinets are not worth building: one cabinet uses the router and finishing time of roughly one bookcase plus one desk combined ($3 = 1+2$ router hours, $4 = 2+2$ finishing hours) but earns \$55 versus their \$65.
 
-\exsol{2.8}{Factory Production Scheduling}{2}
+\begin{qaflag}
+Book fix applied (issue type e, licensing): the previous data (products A/B/C on Machines I/II with 180 and 300 hours, profits 20/30/40) circulates verbatim on multiple solution sites and matches a commercial finite-mathematics textbook family; not confirmed in Sekhon--Bloom. Replaced 2026-07-16 with an original instance preserving the same teaching point (two binding resource constraints, one dominated product). Instructors using older printings should adjust.
+\end{qaflag}
 
-Let $x_1$ and $x_2$ be the number of days that Factory I and Factory II operate. Minimize operating cost subject to filling the order:
+\exsol{2.8}{Juice Bottling Plants}{2}
+
+Let $x_1$ and $x_2$ be the number of days that Plant 1 and Plant 2 operate. Minimize operating cost subject to filling the order:
 \begin{align*}
-\min \quad & z = 4000x_1 + 5000x_2\\
-\st \quad & 10x_1 + 20x_2 \geq 1000 && \text{(product A)}\\
-& 20x_1 + 20x_2 \geq 1600 && \text{(product B)}\\
-& 20x_1 + 10x_2 \geq 700 && \text{(product C)}\\
+\min \quad & z = 3000x_1 + 4500x_2\\
+\st \quad & 30x_1 + 10x_2 \geq 300 && \text{(apple)}\\
+& 20x_1 + 20x_2 \geq 320 && \text{(orange)}\\
+& 10x_1 + 30x_2 \geq 180 && \text{(grape)}\\
 & x_1, x_2 \geq 0.
 \end{align*}
-The optimal solution is $x_1 = 60$ days and $x_2 = 20$ days with minimum cost $4000(60) + 5000(20) = \$340{,}000$ (verified by solver). The constraints for products A ($600 + 400 = 1000$) and B ($1200 + 400 = 1600$) are binding, while product C is overproduced ($1400 \geq 700$).
+The optimal solution is $x_1 = 15$ days and $x_2 = 1$ day with minimum cost $3000(15) + 4500(1) = \$49{,}500$ (verified by solver). The orange ($300 + 20 = 320$) and grape ($150 + 30 = 180$) constraints are binding, while apple juice is overproduced ($450 + 10 = 460 \geq 300$).
+
+\begin{qaflag}
+Book fix applied (issue type e, licensing): the previous "Factory Production Scheduling" data (Factories I/II, products A/B/C, demands 1000/1600/700, day costs \$4000/\$5000) circulates verbatim on solution sites and appears commercial in origin; not confirmed in Sekhon--Bloom. Replaced 2026-07-16 with an original instance preserving the same teaching point (minimize operating days over a covering system; two binding demands, one oversatisfied). Instructors using older printings should adjust.
+\end{qaflag}
 
 \exsol{2.9}{Quiz Grading Minimization}{2}
 

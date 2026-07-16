@@ -115,3 +115,84 @@ against the actual PSU PDF, which was only possible via search snippets.
   all chapters, Excel chapter vs. excel-easy.com, Python chapter vs. PuLP
   docs and tutorials, multi-objective vs. pymoo/Wikipedia, frontmatter, and
   Griffin-shingle checks of ch7-ch13 (zero prose overlap).
+
+---
+
+# SWEEPS #3 and #4 (2026-07-16): search-corpus + local forensics
+
+Two new methods were used, run as parallel sweeps.
+
+## Sweep #3 - systematic search-engine corpus (~73 quoted searches)
+
+Method: ~45 paragraph-sampled quoted-phrase searches spread across all 18
+chapter files (3 per major section, mid-paragraph samples), plus ~20
+solution-site queries (Chegg/Quizlet/Numerade/Bartleby/Studocu) against
+older exercises, plus 13 targeted searches to settle the ch5 Griffin
+questions.
+
+Findings and fixes:
+
+| # | Finding | Verdict | Fix |
+|---|---------|---------|-----|
+| 1 | ch2 "Oven Store" exercise: scenario circulates verbatim on Chegg; not found in the Sekhon-Bloom text the section credits; likely commercial finite-math textbook origin | Moderate | Replaced with original "E-Bike Showroom" instance (floor 60 m2 / staff 120 h / assembly 75 h; profits 150/300/240; opt (0,0,20), $4800; scipy-verified unique). Same teaching point: profit per unit of the scarce resource. |
+| 2 | ch2 "Manufacturing Profit" (Machines I/II, 180/300 h, profits 20/30/40): verbatim on Chegg/Bartleby/Studocu; Tan-style commercial family; not in Sekhon-Bloom | Moderate | Replaced with original furniture-workshop instance (router 200 h, finishing 240 h; profits 25/40/55; opt (40,80,0), $4200, both bind, cabinet dominated; scipy-verified unique). |
+| 3 | ch2 "Factory Production Scheduling" (demands 1000/1600/700, day costs $4000/$5000): verbatim on solution sites; commercial flavor | Moderate | Replaced with original juice-bottling instance (rates 30/20/10 and 10/30 per day, demands 300/320/180, costs $3000/$4500; opt (15,1), $49,500; orange+grape bind, apple over at 460; scipy-verified). |
+| | | | Chapter Selected Solutions and solutions-manual ch02 (2.6-2.8) updated in sync, each with a qaflag documenting the licensing replacement. |
+| 4 | ch5 Griffin open items (BFS terminology sentence, Enumerate Vertices steps, rise/run passage): 13 targeted searches incl. PSU-domain-restricted | NOT FOUND in Griffin or anywhere else (high confidence; direct PDF grep still impossible) | No action needed; the three passages read as in-house scaffolding. |
+| 5 | BYU ACME simplex sentence (ch6) and Lippman ch10 prose: verbatim but CC-licensed and already attributed | Clean | None. |
+
+## Sweep #4 - local forensics (git history, comments, images, stylometry)
+
+| # | Finding | Verdict | Fix |
+|---|---------|---------|-----|
+| 1 | archive/orphaned-content/borrowed-duality.tex carried a VERBATIM excerpt of Jeff Erickson's LP notes (self-labeled "%this was borrowed from..."). License check: Erickson's book is CC BY 4.0, but his OTHER lecture notes (incl. the LP notes) are CC BY-NC-SA 4.0 - incompatible, same class as Griffin | Moderate (orphaned, not compiled, but distributed in the public repo) | File DELETED 2026-07-16 (mirrors the earlier Griffin removal). The Book 1 duality chapter itself was checked by shingle comparison: no substantive Erickson overlap (46/3411 generic 8-grams) - it is a rewrite. |
+| 2 | Legacy optimization/duality.tex still carried the stale 2023 note "This is a borrowed section..." although the content had been rewritten | Info | Note replaced with an accurate provenance comment. |
+| 3 | 00_METADATA.bib claimed "Robert Hildebrand [CC BY-SA 4.0]" authorship for two YouTube-page screenshots (youtube-OR-course.jpg, youtube-tsp-simulated-annealing.jpg) | Moderate (false authorship + third-party copyrighted page content) | Both entries corrected to state third-party screenshot status. Book 2 ch16 usage of the TSP screenshot commented out (plain hyperlink retained). |
+| 4 | Book 2 ch16: five 2-opt figures included with footnote "Figures borrowed from unknown source" - and the image files no longer exist in the repo | Moderate (Book 2) | Includes + footnote removed; TODO comment to recreate as original TikZ. |
+| 5 | Book 2 ch11 (LP-notes): exact-abs/1-norm/max subsections were once "%Borrowed from Mosek Cookbook" (legacy comment); Book 2 copy is a paraphrased rewrite with the comment stripped. Mosek Cookbook is plain (c) MOSEK ApS, NOT confirmed open | Moderate (Book 2) | Provenance comment restored above the section; TODO to cite the cookbook as further reading. Prose verified as rewritten; formulations are standard math. |
+| 6 | Git history: no incriminating commit messages; deleted ucdavis-advanced-linear-programming.pdf (once \includepdf'd wholesale) survives in git history | Info | Candidate for git-filter-repo purge if desired; not in any current build. |
+| 7 | StripPacking0/1/2.png embed "Wolfram Language for Students - Personal Use Only" metadata | Info | Authorship (Fravel) fine; consider regenerating to drop the watermark tag. Unused figure sources with non-open provenance (linear-regression.tex from latexdraw.com, svm2.tex from a blog) should be deleted or license-checked before ever using. |
+| 8 | Stylometry outlier scan (103 sections): every strong outlier is known-provenance (Cheung, Lyryx, Lippman) or the book's own tutorial/exercise voice | Clean | No unexplained foreign-voice clusters in Book 1. |
+
+## Remaining open items after four sweeps
+
+- Book 2 (pre-Book-2 punch list): Mosek citation, 2-opt TikZ recreation,
+  JSSP re-derivation in the LP-notes copy, youtube-OR-course screenshot
+  usage in legacy resources file (currently commented out).
+- Optional: purge ucdavis PDF and Griffin files from git history
+  (git-filter-repo); regenerate StripPacking PNGs.
+- Instructors with library access can spot-check the three ch5 passages
+  against Griffin's PDF, though four sweeps now agree they are in-house.
+
+---
+
+# DATA-ORIGINALITY PASS + HISTORY PURGE PREP (2026-07-16)
+
+Author policy adopted: rewording prose is not enough - the NUMBERS must be
+original too, because designing data that makes a problem work through nicely
+is real intellectual effort. Exception: classical instances where the exact
+numbers ARE the point (e.g., cycling examples), used with explicit citation.
+
+Audit of every "prose rewritten" fix from earlier sweeps:
+
+| Item | Data status | Action |
+|---|---|---|
+| Screen Printing (ch2) | Checked against Griffin's ToyMaker (planes/boats: net profits 7/6, hours 3,1/1,2, caps 120/160, demand 35). Book data (net 10/8; 2,3/1,1; 150/60; 45) shares only the story skeleton; all numbers differ | Keep |
+| Assignment example "Hiring for tasks" (ch2) | Cost matrix was flagged as similar to the excel-easy.com tutorial | REPLACED with original matrix [[45,38,60],[52,41,33],[27,49,56]]; unique optimum P1-T2, P2-T3, P3-T1, cost 98 (enumeration-verified). Book model line, both notebooks (pulp, gurobipy; outputs cleared), and assignment-problem-excel.xlsx all updated in sync; hedging footnote removed |
+| JSSP (ch11 book1) | 4 jobs x 3 machines, book-designed times; Python-MIP's docs example is a different 3x3 instance | Keep (Book 2 LP-notes copy still borrows Python-MIP's data - on the Book 2 punch list) |
+| Beale cycling example (ch6) | Classical-instance exception applies; already presented as "a rescaled version of the classic cycling example constructed by E. M. L. Beale (1955)" with the rescaling disclosed | Keep as is - model usage of the exception |
+| Dakota, Wyndor-echo, Leary, Chvatal ex., Guenin diet, Excel diet, three Chegg-flagged ch2 exercises | All already replaced with new data in earlier sweeps (scipy-verified) | Done previously |
+| Cheung ch5, Sekhon-Bloom, Lippman ch10 borrowings | Open licenses (CC BY-SA / CC BY) with attribution - reuse of data is the licensed, credited kind, not copying | Keep |
+
+## Git history purge (prepared, NOT executed)
+
+scripts/purge-history.sh (git-filter-repo) removes from ALL history:
+- Christopher_Griffin_Penn_State_University/ (CC BY-NC-SA)
+- optimization/ucdavis-*.pdf (6 course-notes PDFs, unresolved copyright)
+- archive/orphaned-content/borrowed-duality.tex (Erickson, CC BY-NC-SA)
+
+Verified clean/keep: external-sources/aFirstCourseLinearAlgebra (Lyryx, open),
+CourseNotes-*.pdf (author's own builds), NON-DISTRIBUTABLE/ (gitignored, never
+tracked - confirmed 0 tracked files). Run on a fresh clone; force-push; all
+collaborators re-clone; contact GitHub Support to invalidate cached old
+commits. Full instructions in the script header.
