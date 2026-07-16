@@ -212,6 +212,9 @@ Given connection costs \( c_{ij} \), fixed building costs \( f_i \), demands \( 
 % ============================================================================
 % Additional facility location formulations are covered in Book 2
 % ============================================================================
+% NOTE: the Generalized Assignment Problem text inside the \iffalse block below
+% is adapted from Wikipedia (CC BY-SA). Before re-enabling it, add proper
+% attribution (article name, license, changes made) or rewrite it fresh.
 \iffalse  % BEGIN BOOK 2 ONLY - Alternative Formulations
 Next we present a method that models it tracking the fraction of demand served.
 \begin{general}{Capacitated Facility Location 2}{\npcomplete}
@@ -251,7 +254,7 @@ y_{i} = \begin{cases}
 \begin{align}
 \min \quad & \displaystyle\sum_{i=1}^n\sum_{j=1}^mc_{ij}x_{ij}+\sum_{i=1}^nf_iy_i   \tag{total cost} \\
 \st        & \displaystyle\sum_{i=1}^nx_{ij}=1 &&\quad \text{for all } j=1,\dots,m   \tag{assign demand to facility} \\
-& \displaystyle \sum_{j=1}^md_jx_{ij}\leqslant u_iy_i &&\quad \text{for all } i=1\dots,n   \tag{capacity of facility $i$} \\
+& \displaystyle \sum_{j=1}^md_jx_{ij}\leq u_iy_i &&\quad \text{for all } i=1\dots,n   \tag{capacity of facility $i$} \\
 & x_{ij}\geqslant0 &&\quad \text{for all } i=1,\dots,n \text{ and }j=1,\dots,m   \tag{nonnegative fraction of demand satisfied} \\
 & y_i\in\{0,1\} &&\quad \text{for all } i=1,\dots,n   \tag{open/not open facility}
 \end{align}
@@ -263,7 +266,7 @@ Finally, we present a version that has the same variables, but the constraints m
 \begin{align*}
 \min \quad & \sum_{i = 1}^m\sum_{j=1}^n c_{ij}x_{ij}+\sum_{i = 1}^mf_iy_i \\
 \st        & \sum_{i = 1}^mx_{ij} = 1,~~~~~j =1,\ldots n \\
-& \displaystyle \sum_{j=1}^md_jx_{ij}\leqslant u_i &&\quad \text{for all } i=1\dots,n   \tag{capacity of facility $i$} \\
+& \displaystyle \sum_{j=1}^md_jx_{ij}\leq u_i &&\quad \text{for all } i=1\dots,n   \tag{capacity of facility $i$} \\
 & x_{ij}\leq y_i,~~~~~ i = 1,\ldots m,~~~ j = 1,\ldots,n \\
 & x_{ij} \geq 0~~~~~ i = 1,\ldots,m, ~~~j = 1,\ldots,n \\
 & y_i\in \{0,1\}, \  \  i = 1,\ldots,m
@@ -320,7 +323,7 @@ Given costs connections $c_{ij}$ and fixed building costs $f_i$, the uncapacitat
 \begin{array}{rl}
 \min & \displaystyle\sum_{i=1}^n\sum_{j=1}^mc_{ij}z_{ij}+\sum_{i=1}^nf_ix_i \\
 \st & \displaystyle\sum_{i=1}^nz_{ij}=1 \text{ for all }j=1,\dots,m \\
-& \displaystyle \sum_{j=1}^mz_{ij}\leqslant Mx_i\text{ for all }i=1\dots,n \\
+& \displaystyle \sum_{j=1}^mz_{ij}\leq Mx_i\text{ for all }i=1\dots,n \\
 &z_{ij}\in\{0,1\}\text{ for all }i=1,\dots,n \text{ and }j=1,\dots,m\\
 &x_i\in\{0,1\}\text{ for all } i=1,\dots,n
 \end{array}
@@ -334,7 +337,7 @@ Alternative model!
 \begin{array}{rl}
 \min & \displaystyle\sum_{i=1}^n\sum_{j=1}^mc_{ij}z_{ij}+\sum_{i=1}^nf_ix_i \\
 \st & \displaystyle\sum_{i=1}^nz_{ij}=1 \text{ for all }j=1,\dots,m \\
-& z_{ij}\leqslant x_i\text{ for all }i=1\dots,n \text{ for all } j = 1, \dots, m \\
+& z_{ij}\leq x_i\text{ for all }i=1\dots,n \text{ for all } j = 1, \dots, m \\
 &z_{ij}\in\{0,1\}\text{ for all }i=1,\dots,n \text{ and }j=1,\dots,m\\
 &x_i\in\{0,1\}\text{ for all } i=1,\dots,n
 \end{array}
@@ -579,39 +582,42 @@ Cycle- and chain-based integer programs are the clearing engines of the US and U
 Graph coloring \refincludefigurestatic{wiki-File-Petersen-graph-3-coloring.png} is
 the problem of finding a minimum coloring in a graph, and it can be formulated in many ways. Each vertex is assigned a color and two vertices cannot share the same color if they are connected by an edge.
 
-In order to present integer programming formulations, we use $x_{i j}$ to denote binary variables, with $i \in V$ and $1 \leqslant j \leqslant n$, where $x_{i j}=1$ if color $j$ is assigned to vertex $i$ and $x_{i j}=0$ otherwise. We also define $n$ binary variables $w_j$ for $j=1, \ldots, n$, that indicate whether color $j$ is used in some node, i.e., $w_j=1$ if $x_{i j}=1$ for some vertex $i$.
-The following is a classical integer programming formulation:
+Since a graph on $n$ vertices never needs more than $n$ colors, we may fix the palette to be $\{1, \ldots, n\}$.
+For every vertex $i \in V$ and every color $j$ in the palette, introduce a binary variable $x_{ij}$ that equals $1$ exactly when vertex $i$ receives color $j$.
+A second family of binaries records which colors actually get used: $w_j = 1$ signals that color $j$ appears on at least one vertex.
+Minimizing the number of colors used then gives a classical integer programming formulation:
 $$
 \begin{aligned}
 \min & \sum_{j=1}^n w_j \\
 & \sum_{j=1}^n x_{i j}=1 \quad \forall i \in V, \\
-& x_{i j}+x_{k j} \leqslant w_j \quad \forall\{i, k\} \in E, \quad 1 \leqslant j \leqslant n, \\
-& x_{i j} \in\{0,1\} \quad \forall i \in V, 1 \leqslant j \leqslant n\\
-& w_j \in\{0,1\} \quad 1 \leqslant j \leqslant n .
+& x_{i j}+x_{k j} \leq w_j \quad \forall\{i, k\} \in E, \quad 1 \leq j \leq n, \\
+& x_{i j} \in\{0,1\} \quad \forall i \in V, 1 \leq j \leq n\\
+& w_j \in\{0,1\} \quad 1 \leq j \leq n .
 \end{aligned}
 $$
 
 
-We can improve upon this model.  We suggest two possible models from~\cite{MENDEZDIAZ2008159}.  Please read their paper for more advanced models with additional families of cuts added.
+This basic model is highly symmetric: relabeling the colors in any feasible coloring produces a different solution with the same objective value, and a branch-and-bound solver may waste effort exploring all of these copies.  We present two strengthened formulations from~\cite{MENDEZDIAZ2008159} that attack this symmetry; their paper goes further, adding several families of cutting planes.
 
 \textbf{ Color order model:}
-Given a $(k)$-coloring, selecting any $k$ colors from the set $\{1, \ldots, n\}$ results in a valid solution, and these solutions are deemed equivalent. To reduce redundancy among these solutions, we stipulate that color $j$ can only be allocated to a vertex if color $j-1$ has previously been assigned. By doing so, we exclude symmetrical $(k)$-colorings that use colors with labels exceeding $k$. To define these valid solutions, we simply need to incorporate the subsequent set of constraints:
+A coloring that uses $k$ colors can be encoded in many interchangeable ways---any $k$ labels chosen from $\{1, \ldots, n\}$ will do.  To keep a single representative from each such family, we force the labels to be consumed in numerical order: color $j$ is available only once color $j-1$ appears somewhere in the graph.  Every coloring that skips a label, or that uses a label larger than the number of colors it needs, is thereby cut off.  Two extra constraint families accomplish this:
 $$
 \begin{aligned}
-& w_j \leqslant \sum_{i \in V} x_{i j} \quad \forall 1 \leqslant j \leqslant n, \\
-& w_j \geqslant w_{j+1} \quad \forall 1 \leqslant j \leqslant n-1 .
+& w_j \leq \sum_{i \in V} x_{i j} \quad \forall 1 \leq j \leq n, \\
+& w_j \geq w_{j+1} \quad \forall 1 \leq j \leq n-1 .
 \end{aligned}
 $$
-The reduction of feasible solutions is very significant.
+The first ties $w_j$ to actual use of color $j$; the second forbids gaps in the label sequence.  The number of feasible solutions drops dramatically.
 
-\textbf{ Independent set order model:} 
-In a $(k)$-coloring, permutations of the initial $k$ colors lead to equivalent outcomes. To reduce the occurrence of these similar solutions, the subsequent model introduces stricter constraints than the previous one. It mandates that the count of vertices colored with $j$ should be at least equal to or surpass the count of vertices colored with $j+1$. We incorporate the ensuing inequalities:
+\textbf{ Independent set order model:}
+Even when labels are used in order, the color classes of a $k$-coloring can still be shuffled among the labels $1, \ldots, k$, so symmetric copies remain.  A more aggressive fix sorts the color classes by size: the vertices receiving color $j$ must be at least as numerous as those receiving color $j+1$.  This yields the constraints
 $$
 \begin{aligned}
-& w_j \leqslant \sum_{i \in V} x_{i j} \quad \forall 1 \leqslant j \leqslant n \\
-& \sum_{i=1}^n x_{i j} \geqslant \sum_{i=1}^n x_{i j+1} \quad \forall 1 \leqslant j \leqslant n-1 .
+& w_j \leq \sum_{i \in V} x_{i j} \quad \forall 1 \leq j \leq n \\
+& \sum_{i=1}^n x_{i j} \geq \sum_{i=1}^n x_{i j+1} \quad \forall 1 \leq j \leq n-1 ,
 \end{aligned}
 $$
+which are more restrictive than those of the color order model.
 
 As an exercise, try implementing these different models and compare the solve times.
 
@@ -1461,31 +1467,13 @@ Processing jobs one after another (sequentially) yields a makespan of $9+7+7+7 =
 By allowing jobs to run concurrently on different machines, the makespan can be significantly reduced.
 
 \subsection{JSSP Components}
-The JSSP can be formally described by the following parameters:
+Two pieces of data specify an instance.
+First, we collect the $n$ jobs in a set $J = \{1, \ldots, n\}$ and the $m$ machines in a set $I = \{1, \ldots, m\}$.
+Second, each job carries its own route through the shop together with the time it needs at each stop: we write $o_r^j$ for the machine on which job $j$ runs its $r$-th operation, so that the route of job $j$ is the sequence $O^j = (o_1^j, \ldots, o_m^j)$, and we write $p_{ij} \geq 0$ for the time job $j$ occupies machine $i$.
 
-\begin{itemize}
-  \item \( J\): Represents the set of jobs, indexed as \( \{1, \ldots, n\} \).
-  \item \( I\): Represents the set of machines, indexed as \( \{1, \ldots, m\} \).
-  \item \( o_r^j \): Specifies the machine that handles the \( r \)-th operation of job \( j \). The sequence \( O^j=\left(o_1^j, o_2^j, \ldots, o_m^j\right) \) illustrates the processing order for job \( j \).
-  \item \( p_{i j} \): Represents the non-negative processing time of job \( j \) on machine \( i \).
-\end{itemize}
-
-The solution to the JSSP must satisfy:
-
-\begin{enumerate}
-  \item Every job \( j \) should be processed according to the machine sequence \( O^j \).
-  \item At any given time, a machine can only process one job.
-  \item A job, once started on a machine, must run to completion without any breaks.
-\end{enumerate}
-
-The objective is to minimize the makespan, or the finishing time of the last job. The problem remains NP-hard even if \( n \geq 3 \) or \( m \geq 3 \).
-
-Decision variables include:
-\begin{itemize}
-  \item \( x_{i j} \): Starting time of job \( j \) on machine \( i \).
-  \item \( y_{i j k} \): A binary variable. It's 1 if job \( j \) precedes job \( k \) on machine \( i \) and 0 otherwise.
-  \item \( C \): The makespan or the maximum completion time.
-\end{itemize}
+A \emph{schedule} assigns a start time to every operation.
+Three rules separate the feasible schedules from the infeasible ones: the operations of a job may not start out of order---each waits for its predecessor on the route $O^j$ to finish; a machine hosts at most one job at any moment; and processing cannot be paused, so an operation that starts at time $t$ on machine $i$ blocks that machine until time $t + p_{ij}$.
+Among all feasible schedules we want one whose makespan---the time when the final operation ends---is as small as possible.
 
 
 
@@ -1553,49 +1541,75 @@ The JSSP has numerous practical applications, including:
 
 \subsection{Mathematical Model}
 
+We now build a mixed-integer program from the ingredients above.
+This \emph{disjunctive} formulation is classical and is due to Manne\footnote{A.~S.~Manne, ``On the Job-Shop Scheduling Problem,'' \emph{Operations Research} 8(2):219--223, 1960.}.
 
 \modelhead{Sets}
 \begin{itemize}
-  \item \( J\): Represents the set of jobs, indexed as \( \{1, \ldots, n\} \).
-  \item \( I \): Represents the set of machines, indexed as \( \{1, \ldots, m\} \).
-  \end{itemize}
+  \item $J = \{1, \ldots, n\}$, the jobs.
+  \item $I = \{1, \ldots, m\}$, the machines.
+\end{itemize}
 \modelhead{Parameters}
 \begin{itemize}
- \item \( o_r^j \): Specifies the machine that handles the \( r \)-th operation of job \( j \). The sequence \( O^j=\left(o_1^j, o_2^j, \ldots, o_m^j\right) \) illustrates the processing order for job \( j \).
-  \item \( p_{i j} \): Represents the non-negative processing time of job \( j \) on machine \( i \).
+  \item $o_r^j$, the machine hosting the $r$-th operation of job $j$; row $j$ of the matrix $O$ from the example lists these machines in order.
+  \item $p_{ij}$, the processing time of job $j$ on machine $i$.
+  \item $M$, a big-$M$ constant; the total processing time $\sum_{i \in I} \sum_{j \in J} p_{ij}$ is always a valid choice, as computed for the example above.
 \end{itemize}
 \modelhead{Variables}
+The main decisions are continuous start times
 $$
-x_{ij} = \text{ start time of job $j$ on machine $i$}.
+s_{ij} = \text{ start time of job $j$ on machine $i$},
+$$
+together with a variable $C_{\max}$ for the makespan.
+Start times alone cannot express ``one of these two jobs must wait for the other,'' so for each machine $i$ and each pair of jobs $j < k$ we add a binary variable that records which job goes first:
+$$
+z_{ijk} = \begin{cases} 1, & \text{when machine } i \text{ processes job } j \text{ before job } k,\\ 0, & \text{when job } k \text{ takes its turn on machine } i \text{ first,} \end{cases}
+\qquad i \in I, \ j,k \in J, \ j < k.
 $$
 
+\modelhead{Constraints}
+\emph{Precedence within a job.}
+Each job must follow its route: operation $r$ of job $j$ cannot begin until operation $r-1$ has finished, that is,
 $$
-y_{ijk} = \begin{cases} 1, & \text{if job } j \text{ precedes job } k \text{ on machine } i \text{,}\\ & i \in I \text{, } j, k  \in J \text{, } j \neq k \\ 0, & \text{otherwise} \end{cases}
+s_{o^{j}_{r} j} \geq s_{o^{j}_{r-1} j} + p_{o^{j}_{r-1} j} \qquad \forall j \in J, \ r \in \{2, \dots, m\}.
 $$
 
+\emph{One job at a time per machine.}
+Fix a machine $i$ and two jobs $j < k$.
+Feasibility demands that either job $j$ clears the machine before job $k$ arrives, $s_{ij} + p_{ij} \leq s_{ik}$, or the reverse, $s_{ik} + p_{ik} \leq s_{ij}$.
+This is precisely the either-or situation of Section~\ref{subsec:either-or}, and applying that recipe with $z_{ijk}$ in the role of the selector variable $\delta$ yields the big-$M$ pair
+$$
+\begin{aligned}
+s_{ij} + p_{ij} &\leq s_{ik} + M(1 - z_{ijk}) \qquad \forall i \in I, \ j,k \in J, \ j < k,\\
+s_{ik} + p_{ik} &\leq s_{ij} + M z_{ijk} \qquad \forall i \in I, \ j,k \in J, \ j < k.
+\end{aligned}
+$$
+When $z_{ijk} = 1$ the first inequality forces job $j$ ahead of job $k$ while the second is switched off; when $z_{ijk} = 0$ the roles swap.
+
+\emph{Makespan.}
+The makespan must sit above the completion time of every job's last operation:
+$$
+C_{\max} \geq s_{o^{j}_{m} j} + p_{o^{j}_{m} j} \qquad \forall j \in J.
+$$
 
 \modelhead{Model}
 \begin{subequations}
 \begin{equation}
 \begin{array}{rrlrr}
-\min 
+\min
                & C_{\max} \\
-\st \\
-&& \text{Overlapping constraints}\\
-&            x_{o^{j}_{r}j} &  \geq x_{o^{j}_{r-1}j} +p_{o^{j}_{r-1}j} & \forall r \in \{2,\dots,m\}, j \in {J} & \text{Order tasks for job $j$} \\
-             &      x_{ij}     & \geq x_{ik} + p_{ik} - M \cdot y_{ijk} & \forall j,k \in {J}, j \neq k, i \in {I} & \text{Ordering on machine $i$} \\
-              &     x_{ik}     & \geq x_{ij} + p_{ij} - M \cdot (1-y_{ijk}) & \forall j,k \in {J}, j \neq k,i \in {I} & \text{Reverse ordering on machine $i$}\\
-              \\
-           &   & \text{ Bounding objective}\\
-            &       C_{\max}          & \geq x_{o^{j}_{m}j} + p_{o^{j}_{m}j} & \forall j \in {J} & \text{last task of job $j$ completed before end}\\
-            \\
-            && \text{ Domain of variables}\\
-            &      x_{ij}      & \geq 0 & \forall j \in {J}, i \in {I} \\
-           &       y_{ijk}     & \in \{0,1\} & \forall j,k \in {J}, i \in {I} \\
+\st
+&            s_{o^{j}_{r}j} &  \geq s_{o^{j}_{r-1}j} +p_{o^{j}_{r-1}j} & \forall j \in {J}, r \in \{2,\dots,m\} & \text{follow the route of job $j$} \\
+             &      s_{ij} + p_{ij}     & \leq s_{ik} + M (1-z_{ijk}) & \forall i \in {I}, j,k \in {J}, j < k & \text{$j$ first when $z_{ijk} = 1$} \\
+              &     s_{ik} + p_{ik}     & \leq s_{ij} + M z_{ijk} & \forall i \in {I}, j,k \in {J}, j < k & \text{$k$ first when $z_{ijk} = 0$}\\
+            &       C_{\max}          & \geq s_{o^{j}_{m}j} + p_{o^{j}_{m}j} & \forall j \in {J} & \text{makespan covers every job}\\
+            &      s_{ij}      & \geq 0 & \forall i \in {I}, j \in {J} \\
+           &       z_{ijk}     & \in \{0,1\} & \forall i \in {I}, j,k \in {J}, j < k \\
           &        C_{\max} & \geq 0
               \end{array}
               \end{equation}
 \end{subequations}
+Solving this model on the four-job, three-machine instance above gives an optimal makespan of $12$ hours---a substantial improvement over the $30$ hours needed to run the jobs one at a time.
 \begin{examplewithallcode}{Duplo Scheduling}{}{}{https://github.com/open-optimization/open-optimization-or-examples/blob/master/integer-programming/job-shop-scheduling.ipynb}
 
 The Duplo in-class exercise is solved with Gurobi in the link.
