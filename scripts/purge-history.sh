@@ -74,7 +74,11 @@ $FILTER_REPO \
   --path 'Intro-Math-Programming/baseText/optimization/ucdavis-turing-machines.pdf' \
   --path 'Intro-Math-Programming/baseText/optimization/duality-borrowed.tex' \
   --path 'Intro-Math-Programming/baseText/borrowed-duality.tex' \
-  --path 'Intro-Math-Programming/baseText/archive/orphaned-content/borrowed-duality.tex'
+  --path 'Intro-Math-Programming/baseText/archive/orphaned-content/borrowed-duality.tex' \
+  --path 'Intro-Math-Programming/baseText/book/PLAGIARISM-SWEEP-REPORT.md' \
+  --path 'Intro-Math-Programming/baseText/book/fair-use-fix-log.md' \
+  --path 'Intro-Math-Programming/baseText/book/section-6.3-fair-use-review.md' \
+  --path 'book1-license-audit.docx'
 
 echo
 echo "Done. Verify with:"
