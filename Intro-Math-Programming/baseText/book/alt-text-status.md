@@ -1,6 +1,12 @@
 # Alt-text status for Book 1
 
-**Refresh: 2026-05-05.** The merger agent updated 199 entries in
+**Refresh: 2026-07-20.** Inventory regenerated from BOTH metadata bibs
+(figures-static: 270 entries, figures-source: 233 entries; 503 total).
+All entries have alt text (`abstract` field). One wrong copy-paste
+description (simulated_annealing_temperatures.png described a Voronoi
+diagram) was found and rewritten. Current spreadsheet:
+`book/alt-text-inventory.csv` (bib_key, bib_file, author, status,
+used_in_book1, alt_text). Previous refresh notes below.
 `00_METADATA.bib` with hand-quality alt-text written by per-chapter
 worker agents. Drafts are preserved in `book/alt-text-drafts/*.json`
 and the per-bibkey audit trail is in `book/alt-text-merger-log.md`.
