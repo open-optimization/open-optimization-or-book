@@ -17,6 +17,18 @@ def main(path):
                 p = os.path.join(root, f)
                 data = open(p, 'rb').read()
                 new = AMP.sub(b'&amp;', data)
+                new = new.replace(b'&nbsp;', b'&#xA0;')
+                # repair malformed XML (tex4ht MathML mrow/mo mismatches)
+                import xml.parsers.expat
+                parser = xml.parsers.expat.ParserCreate()
+                try:
+                    parser.Parse(new, True)
+                except Exception:
+                    from lxml import etree
+                    tree = etree.fromstring(
+                        new, etree.XMLParser(recover=True, resolve_entities=False))
+                    new = etree.tostring(tree, xml_declaration=True,
+                                         encoding='utf-8')
                 if new != data:
                     open(p, 'wb').write(new)
                     fixed += 1

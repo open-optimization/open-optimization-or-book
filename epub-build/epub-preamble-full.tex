@@ -263,3 +263,36 @@
   \def\e{\mathbf{e}}\def\f{\mathbf{f}}\def\g{\mathbf{g}}\def\p{\mathbf{p}}%
   \def\q{\mathbf{q}}\def\u{\mathbf{u}}\def\v{\mathbf{v}}\def\w{\mathbf{w}}%
   \def\x{\mathbf{x}}\def\y{\mathbf{y}}\def\z{\mathbf{z}}}
+
+% ---- learning checkpoints: numbered, with working labels ----
+% (every use in the book is exactly \begin{learningcheckpoint}[label={lc:...}])
+\newcounter{epublc}[section]
+\renewcommand{\theepublc}{\thesection.\arabic{epublc}}
+\makeatletter
+\def\epublc@label label=#1\@nil{\label{#1}}
+\RenewDocumentEnvironment{learningcheckpoint}{O{}}
+  {\refstepcounter{epublc}\epubblockhead{Learning Checkpoint \theepublc}%
+   \if\relax\detokenize{#1}\relax\else\epublc@label #1\@nil\fi}
+  {\par\medskip}
+\makeatother
+
+% ---- per-figure credit lines for third-party images (license compliance) ----
+\input{epub-credits}
+\makeatletter
+\renewcommand{\epubgraphic}[2][width=.6\linewidth]{%
+  \filename@parse{#2}\edef\epub@base{\filename@base}%
+  \begin{center}\includegraphics[#1]{\epub@base}%
+  \ifcsname figcredit@\epub@base\endcsname
+    \\[2pt]{\footnotesize\csname figcredit@\epub@base\endcsname}%
+  \fi\end{center}}
+\renewcommand{\epubfigure}[4][\relax]{%
+  \filename@parse{#4}\edef\epub@base{\filename@base}%
+  \begin{figure}[htbp]\centering
+    \includegraphics[#2]{\epub@base}%
+    \ifcsname figcredit@\epub@base\endcsname
+      \\[2pt]{\footnotesize\csname figcredit@\epub@base\endcsname}%
+    \fi
+    \ifx#1\relax\else\caption{#1}\fi
+    \label{fig:#4}%
+  \end{figure}}
+\makeatother

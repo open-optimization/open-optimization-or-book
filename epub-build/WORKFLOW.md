@@ -125,6 +125,30 @@ minute for the 581-page book.
    writes the descriptions onto the `<img>` tags. Currently 189 images carry
    real descriptions.
 
+## Post-launch fixes (2026-07-21, second pass)
+
+Reader-reported issues and their fixes, now part of the pipeline:
+
+- **Undefined `&nbsp;` entity / malformed MathML** (mrow/mo mismatches from
+  tex4ht around `\text` in split environments and `\left...\right` around
+  matrices): `tools/fix-epub.py` now replaces `&nbsp;` with `&#xA0;` and runs
+  any XHTML file that fails an XML parse through lxml's recovering parser.
+  All 33 content files now parse clean.
+- **Tiny TikZ pictures blown up to 85% width** (e.g. a single graph node):
+  `tools/fix-src-epub.py` rewrites each extracted figure's width to its
+  natural size (pixels / 150 dpi, capped at `\linewidth`).
+- **Missing image credits** (the Wikipedia knapsack figure etc.): the print
+  edition prints per-figure credits via biblatex; the EPUB now does too via
+  `tools/gen-credits.py`, which builds `epub-credits.tex` from the metadata
+  bibs for every third-party image (Wikimedia, Lippman, ...). Book-native
+  figures get no credit line, matching print policy.
+- **`??` references in the checkpoint answers**: the `learningcheckpoint`
+  shim now numbers checkpoints (per section) and honors `label={lc:...}`;
+  `fix-src-epub.py` rewrites `\Cref{lc:x}` to `Checkpoint~\ref{lc:x}` and
+  drops `(page~\pageref{...})`, since reflowable EPUBs have no page numbers.
+- **`\colorbox` with mixed colors inside math** produced garbled spans:
+  stripped (decorative highlighting only) by `fix-src-epub.py`.
+
 ## Known limitations (whole-book edition)
 
 - Boxed environments render as titled plain blocks, not colored boxes
