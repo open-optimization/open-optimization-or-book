@@ -38,6 +38,10 @@ sed -i 's|\\input{../optimization/open-optimization-examples/example-capital-bud
 sed -i 's|{optimization/figures/figures-static/|{|g; s|{optimization/figures/figures-source/|{|g; s|{figures/cc-by.eps}|{cc-by}|g; s|{figures/LyryxLogo.eps}|{LyryxLogo}|g; s|{figures/component-assess.eps}|{component-assess}|g; s|{figures/component-book.eps}|{component-book}|g; s|{figures/component-supplement.eps}|{component-supplement}|g; s|{figures/component-support.eps}|{component-support}|g' src/*.tex
 # drop the tikzmark-overlay annotation (cannot work in EPUB)
 sed -i 's|\\includegraphics\[width=0.85\\linewidth\]{figs/simplex-basis-driven-tikz09.png}|% [overlay annotation omitted in EPUB]|' src/simplex-basis-driven.tex
+# strip \colorbox in math, natural-size small figures, checkpoint-answer refs
+python3 tools/fix-src-epub.py
+# per-figure credit lines for third-party images (from the metadata bibs)
+python3 tools/gen-credits.py
 
 echo "== 3/8 convert referenced PDF/EPS figures to PNG in figs-conv/ =="
 python3 tools/convert-static-figs.py
