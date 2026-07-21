@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mathematical Programming and Operations Research — Read Online</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/epub.js/0.3.93/epub.min.js"></script>
+<style>
+  :root { --bar: #840125; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Georgia, serif; height: 100vh;
+         display: flex; flex-direction: column; overflow: hidden; }
+  header { background: var(--bar); color: #fff; padding: 8px 14px;
+           display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  header h1 { font-size: 1rem; margin: 0; font-weight: normal; flex: 1;
+              white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  header a { color: #fff; }
+  header button, header select {
+    background: #fff; border: none; border-radius: 4px; padding: 5px 10px;
+    font-size: 0.9rem; cursor: pointer; max-width: 40vw; }
+  #main { flex: 1; display: flex; min-height: 0; }
+  #viewer { flex: 1; min-width: 0; }
+  .navbtn { position: absolute; top: 50%; transform: translateY(-50%);
+    font-size: 1.6rem; background: rgba(132,1,37,.08); color: var(--bar);
+    border: none; cursor: pointer; padding: 18px 8px; border-radius: 6px; z-index: 5; }
+  #prev { left: 4px; } #next { right: 4px; }
+  #status { font-size: .8rem; opacity: .85; }
+  @media (max-width: 600px) { header h1 { font-size: .85rem; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Mathematical Programming and Operations Research — Book 1</h1>
+  <select id="toc" title="Table of contents"><option>Loading…</option></select>
+  <span id="status"></span>
+  <a href="../epub-build/book1-epub.epub" download title="Download the EPUB">&#8681; EPUB</a>
+</header>
+<div id="main" style="position:relative">
+  <button id="prev" class="navbtn" title="Previous">&#8249;</button>
+  <div id="viewer"></div>
+  <button id="next" class="navbtn" title="Next">&#8250;</button>
+</div>
+<script>
+  var book = ePub("../epub-build/book1-epub.epub");
+  var rendition = book.renderTo("viewer", {
+    width: "100%", height: "100%", flow: "scrolled-doc"
+  });
+  var saved = localStorage.getItem("book1-epub-loc");
+  rendition.display(saved || undefined);
+
+  var tocSel = document.getElementById("toc");
+  book.loaded.navigation.then(function (nav) {
+    tocSel.innerHTML = "";
+    function add(items, depth) {
+      items.forEach(function (it) {
+        var o = document.createElement("option");
+        o.value = it.href;
+        o.textContent = " ".repeat(depth * 2) + it.label.trim();
+        tocSel.appendChild(o);
+        if (it.subitems && depth < 1) add(it.subitems, depth + 1);
+      });
+    }
+    add(nav.toc, 0);
+  });
+  tocSel.addEventListener("change", function () { rendition.display(this.value); });
+
+  document.getElementById("prev").addEventListener("click", function () { rendition.prev(); });
+  document.getElementById("next").addEventListener("click", function () { rendition.next(); });
+  document.addEventListener("keyup", function (e) {
+    if (e.key === "ArrowLeft") rendition.prev();
+    if (e.key === "ArrowRight") rendition.next();
+  });
+
+  rendition.on("relocated", function (loc) {
+    localStorage.setItem("book1-epub-loc", loc.start.cfi);
+    var m = loc.start.href && loc.start.href.match(/ch(\d+)|ap(\d+)/);
+    document.getElementById("status").textContent = loc.start.href || "";
+    // keep the TOC select in sync when possible
+    for (var i = 0; i < tocSel.options.length; i++) {
+      if (loc.start.href && tocSel.options[i].value.indexOf(loc.start.href) === 0) {
+        tocSel.selectedIndex = i; break;
+      }
+    }
+  });
+</script>
+</body>
+</html>
