@@ -1,4 +1,12 @@
-# EPUB build (proof of concept)
+# EPUB build
+
+**Whole-book EPUB:** `book1-epub.epub` — built by `./build-book1.sh`;
+the full pipeline is documented in `WORKFLOW.md`. The chapter-2 proof of
+concept below still works but is superseded (note: `src/` now holds the
+whole book's preprocessed sources, and the ch02 driver needs
+`epub-preamble-full.tex` for newer environments like `tryit`).
+
+# Chapter 2 proof of concept (original notes)
 
 Standalone EPUB pipeline for the book, currently covering **Chapter 2:
 Modeling Linear Programs**. Nothing here touches the main PDF build —

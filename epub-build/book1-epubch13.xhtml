@@ -1,0 +1,4701 @@
+<!DOCTYPE html> 
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" lang="en-US"> 
+<head><title>13 Multi-Objective Optimization</title> 
+<meta charset="UTF-8" /> 
+<meta name="generator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)" /> 
+<link rel="stylesheet" type="text/css" href="book1-epub.css" /> 
+</head><body 
+>
+   <!--l. 1--><div class="crosslinks"><p class="noindent"></p></div>
+   <h2 class="chapterHead"><span class="titlemark">Chapter 13</span><br /><a 
+ id="x21-36100013"></a>Multi-Objective Optimization   </h2>
+<p class="noindent"><span 
+class="ecbx-1000">Learning Outcomes</span>
+   </p> 
+
+     <ul class="itemize1">
+     <li class="itemize">
+     <p class="indent">Define multi-objective optimization problems
+     </p> 
+</li>
+     <li class="itemize">
+     <p class="indent">Discuss solutions in terms of the <span 
+class="ecti-1000">Pareto Frontier</span>
+     </p> 
+</li>
+     <li class="itemize">
+     <p class="indent">Explore approaches for finding the Pareto Frontier
+     </p> 
+</li>
+     <li class="itemize">
+     <p class="indent">Use software to solve for or approximate the Pareto Frontier</p> 
+</li></ul>
+     <blockquote class="quote">
+     <p class="noindent"><span 
+class="ecti-1000">You are shopping for a used car. One is $4,000 and twelve years</span>
+     <span 
+class="ecti-1000">old; another is $9,000 and three years old; a third is $11,000 and</span>
+     <span 
+class="ecti-1000">eight years old. The third can be dismissed at a glance: the second</span>
+     <span 
+class="ecti-1000">is cheaper </span>and <span 
+class="ecti-1000">newer. But between the first two, no calculation can</span>
+     <span 
+class="ecti-1000">declare  a  winner:  it  depends  on  what  a  year  of  age  is  worth  to</span>
+     <span 
+class="ecti-1000">you, and that is a judgment, not an optimization. Multi-objective</span>
+     <span 
+class="ecti-1000">optimization is the study of exactly this situation: ruling out the</span>
+     <span 
+class="ecti-1000">options  nobody  should  ever  choose,  and  mapping  the  trade-offs</span>
+     <span 
+class="ecti-1000">among the ones that remain.</span></p> 
+</blockquote>
+   <h3 class="sectionHead"><span class="titlemark">13.1   </span> <a 
+ id="x21-36200013.1"></a>Introduction to Multi-Objective Optimization </h3>
+<p class="noindent">Decision makers must often balance competing objectives. Rather than optimizing
+a single quantity, we seek solutions that trade off different goals, such as
+cost against quality or efficiency against equity. This leads to the field of
+<span 
+class="ecti-1000">multi-objective optimization </span>(MOO), a framework for identifying and analyzing such
+trade-offs.
+</p> 
+<p class="indent">   To illustrate this, consider a simple inventory and production planning problem over a fixed horizon
+of <!--l. 21--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >  <mrow 
+><mi 
+>T</mi> <mo 
+class="MathClass-rel">=</mo> <mn>1</mn><mn>0</mn></mrow></math> periods. Let <!--l. 21--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mrow 
+><msub><mrow 
+><mi 
+>x</mi></mrow><mrow 
+><mi 
+>t</mi></mrow></msub 
+></mrow></math> denote the quantity
+produced in period <!--l. 21--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mrow 
+><mi 
+>t</mi></mrow></math>, <!--l. 21--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+                                                                  
+
+                                                                  
+<mrow 
+><msub><mrow 
+><mi 
+>s</mi></mrow><mrow 
+><mi 
+>t</mi></mrow></msub 
+></mrow></math> the inventory carried
+over after period <!--l. 21--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mrow 
+><mi 
+>t</mi></mrow></math>,
+and <!--l. 21--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mrow 
+><msub><mrow 
+><mi 
+>d</mi></mrow><mrow 
+><mi 
+>t</mi></mrow></msub 
+></mrow></math>
+the demand to be satisfied during that period. The system begins with <!--l. 21--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mrow 
+><msub><mrow 
+><mi 
+>s</mi></mrow><mrow 
+><mn>0</mn></mrow></msub 
+> <mo 
+class="MathClass-rel">=</mo> <mn>5</mn></mrow></math> units of initial inventory.
+Production costs <!--l. 21--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mrow 
+><msubsup><mrow 
+><mi 
+>c</mi></mrow><mrow 
+><mi 
+>t</mi></mrow><mrow 
+><mi 
+>p</mi></mrow></msubsup 
+></mrow></math>
+vary by time, while holding inventory incurs a fixed per-unit cost <!--l. 21--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mrow 
+><msup><mrow 
+><mi 
+>c</mi></mrow><mrow 
+><mi 
+>h</mi></mrow></msup 
+></mrow></math>.
+</p> 
+<p class="indent">   <span 
+class="ecbx-1000">The inventory balance constraint </span>for each period is: </p> 
+<table class="equation-star"><tr><td>
+<!--l. 24--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="block" class="equation"> 
+                            <msub><mrow 
+><mi 
+>s</mi></mrow><mrow 
+><mi 
+>t</mi></mrow></msub 
+> <mo 
+class="MathClass-rel">=</mo> <msub><mrow 
+><mi 
+>s</mi></mrow><mrow 
+><mi 
+>t</mi><mo 
+class="MathClass-bin">−</mo><mn>1</mn></mrow></msub 
+> <mo 
+class="MathClass-bin">+</mo> <msub><mrow 
+><mi 
+>x</mi></mrow><mrow 
+><mi 
+>t</mi></mrow></msub 
+> <mo 
+class="MathClass-bin">−</mo> <msub><mrow 
+><mi 
+>d</mi></mrow><mrow 
+><mi 
+>t</mi></mrow></msub 
+><mspace width="1em" class="quad"/><mstyle 
+class="text"><mtext  >for all </mtext></mstyle><mi 
+>t</mi> <mo 
+class="MathClass-rel">=</mo> <mn>1</mn><mo 
+class="MathClass-punc">,</mo><mi 
+class="MathClass-op">…</mi><mo> ⁡<!--FUNCTION APPLICATION--></mo><mo 
+class="MathClass-punc">,</mo><mi 
+>T</mi>
+</math></td></tr></table>
+<p class="indent">   <span 
+class="ecbx-1000">The objective function </span>(single-objective version) is to minimize total cost:
+</p> 
+<table class="equation-star"><tr><td>
+<!--l. 29--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="block" class="equation"> 
+                                   <mi class="qopname">min</mi><mo> ⁡<!--FUNCTION APPLICATION--> </mo><munderover accentunder="false" accent="false"><mrow  
+><mo  
+>∑</mo>
+  </mrow><mrow 
+><mi 
+>t</mi><mo 
+class="MathClass-rel">=</mo><mn>1</mn></mrow><mrow 
+><mi 
+>T</mi></mrow></munderover 
+> <mrow><mo fence="true" form="prefix"> (</mo><mrow><munderover accentunder="false" accent="false"><mrow  
+><mi 
+>c</mi></mrow><mrow 
+>
+<mi 
+>t</mi></mrow><mrow 
+><mi 
+>p</mi></mrow></munderover 
+><msub><mrow 
+><mi 
+>x</mi></mrow><mrow 
+>
+<mi 
+>t</mi></mrow></msub 
+> <mo 
+class="MathClass-bin">+</mo> <msup><mrow 
+><mi 
+>c</mi></mrow><mrow 
+><mi 
+>h</mi></mrow></msup 
+><msub><mrow 
+><mi 
+>s</mi></mrow><mrow 
+>
+<mi 
+>t</mi></mrow></msub 
+></mrow><mo fence="true" form="postfix">)</mo></mrow>
+</math></td></tr></table>
+<p class="indent">   However, holding inventory is not just costly; it also introduces risk. Products
+may be damaged, stolen, or become obsolete. To capture this additional concern, we
+define a <span 
+class="ecbx-1000">risk function </span>that models the expected loss due to stored inventory:
+</p> 
+<table class="equation-star"><tr><td>
+                                                                  
+
+                                                                  
+<!--l. 34--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="block" class="equation"> 
+                                       <mi 
+>r</mi><mo 
+class="MathClass-open" stretchy="false">(</mo><msub><mrow 
+><mi 
+>s</mi></mrow><mrow 
+><mi 
+>t</mi></mrow></msub 
+><mo 
+class="MathClass-close" stretchy="false">)</mo> <mo 
+class="MathClass-rel">=</mo> <msub><mrow 
+><mi 
+>c</mi></mrow><mrow 
+><mi 
+>r</mi></mrow></msub 
+> <mrow><mo fence="true" form="prefix"> (</mo><mrow><mn>1</mn> <mo 
+class="MathClass-bin">−</mo> <msup><mrow 
+><mi 
+>e</mi></mrow><mrow 
+><mo 
+class="MathClass-bin">−</mo><mi 
+>β</mi><msub><mrow 
+><mi 
+>s</mi></mrow><mrow 
+><mi 
+>t</mi></mrow></msub 
+>
+      </mrow></msup 
+></mrow><mo fence="true" form="postfix">)</mo></mrow>
+</math></td></tr></table>
+<p class="indent">   where <!--l. 37--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mrow 
+><msub><mrow 
+><mi 
+>c</mi></mrow><mrow 
+><mi 
+>r</mi></mrow></msub 
+></mrow></math> is the
+maximum risk cost and <!--l. 37--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mrow 
+><mi 
+>β</mi></mrow></math>
+is a sensitivity parameter. This function grows quickly at first, but saturates as
+inventory increases, reflecting that the marginal risk of storing more units diminishes
+with protective measures (e.g., insurance, security systems).
+   </p> 
+<figure class="figure"> 
+
+                                                                  
+
+                                                                  
+                                                                  
+
+                                                                  
+<p class="indent"><img 
+src="figs-conv//risk-plot.png" alt="PIC"  
+width="224" height="224"  /> <a 
+ id="x21-362001r1"></a>
+<a 
+ id="x21-362002"></a>
+</p> 
+<figcaption class="caption" ><span class="id">Figure 13.1: </span><span  
+class="content">Inventory risk cost as a function of inventory level.            </span></figcaption><!--tex4ht:label?: x21-362001r13.1 -->
+                                                                  
+
+                                                                  
+   </figure>
+<p class="indent">   Now we face a <span 
+class="ecbx-1000">multi-objective problem</span>: we want to minimize both total cost
+and maximum risk incurred across the planning horizon. These objectives are in
+tension: reducing risk requires keeping inventory low, which often means producing
+more frequently at higher cost.
+</p> 
+<p class="indent">   To explore the trade-off, we solve the problem repeatedly with varying upper bounds on inventory
+(i.e., limiting <!--l. 47--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mrow 
+><msub><mrow 
+><mi 
+>s</mi></mrow><mrow 
+><mi 
+>t</mi></mrow></msub 
+> <mo 
+class="MathClass-rel">≤</mo> <mi 
+>R</mi></mrow></math>),
+and for each value compute: </p> 
+
+     <ul class="itemize1">
+     <li class="itemize">
+     <p class="indent">The optimal total cost (production + holding),
+     </p> 
+</li>
+     <li class="itemize">
+     <p class="indent">The maximum risk experienced across all periods, computed as <!--l. 50--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mrow 
+><munder class="msub"><mrow 
+><mi class="qopname">max</mi><mo> ⁡<!--FUNCTION APPLICATION--> </mo></mrow><mrow 
+><mi 
+>t</mi></mrow></munder 
+><mi 
+>r</mi><mo 
+class="MathClass-open" stretchy="false">(</mo><msub><mrow 
+><mi 
+>s</mi></mrow><mrow 
+><mi 
+>t</mi></mrow></msub 
+><mo 
+class="MathClass-close" stretchy="false">)</mo></mrow></math>.</p> 
+</li></ul>
+<p class="indent">   This sweep is the <!--l. 53--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>𝜀</mi></math>-constraint
+method, which we define later in the chapter (Section <a 
+href="#x21-36300013.2">13.2<!--tex4ht:ref: sec:pareto-frontier --></a>). The parameter values in
+this example are illustrative; the computational resources at the end of the chapter
+(Section <a 
+href="#x21-37700013.3">13.3<!--tex4ht:ref: sec:moo-tools --></a>), such as <span 
+class="ectt-1000">pymoo</span>, make it easy to experiment with instances of your
+own.
+</p> 
+<p class="indent">   The resulting plot shows the <span 
+class="ecti-1000">Pareto frontier </span>(defined precisely in Section <a 
+href="#x21-36300013.2">13.2<!--tex4ht:ref: sec:pareto-frontier --></a>) of
+non-dominated solutions, those for which no other solution achieves both a lower cost
+and lower risk.
+   </p> 
+<figure class="figure"> 
+
+                                                                  
+
+                                                                  
+                                                                  
+
+                                                                  
+<p class="indent"><img 
+src="figs-conv//pareto-curve.png" alt="PIC"  
+width="241" height="241"  /> <a 
+ id="x21-362003r2"></a>
+<a 
+ id="x21-362004"></a>
+</p> 
+<figcaption class="caption" ><span class="id">Figure 13.2: </span><span  
+class="content">Trade-off between total cost and maximum inventory risk.      </span></figcaption><!--tex4ht:label?: x21-362003r13.1 -->
+                                                                  
+
+                                                                  
+   </figure>
+<p class="indent">   This example illustrates the essence of multi-objective optimization: generating
+and analyzing a spectrum of solutions that offer different balances between
+competing goals. In practice, decision makers select among these using domain
+knowledge, regulatory limits, or stakeholder preferences.
+   </p> 
+
+   <h3 class="sectionHead"><span class="titlemark">13.2   </span> <a 
+ id="x21-36300013.2"></a>Multi-Objective Optimization and the Pareto Frontier </h3>
+<p class="noindent">We now make these ideas precise. The central concept is the <span 
+class="ecti-1000">Pareto Frontier </span>(or
+<span 
+class="ecti-1000">Pareto Front</span>), which consists of all solutions for which no objective can be improved
+without worsening at least one other.
+   </p> 
+
+<p class="noindent"><span class="paragraphHead"><a 
+ id="x21-36400013.2"></a><span 
+class="ecbx-1000">Motivating Example: Furniture Manufacturer </span></span>
+   Consider a high-end furniture manufacturer that builds dining tables
+and chairs from expensive bocote and rosewood. The manufacturer
+receives 960 board-feet (bdft) of bocote and 200 bdft of rosewood per
+month. Each table requires 80 bdft of bocote and 12 bdft of rosewood;
+each chair requires 20 bdft of bocote and 10 bdft of rosewood. Let <!--l. 73--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mrow 
+><mi 
+>x</mi></mrow></math> denote the number
+of tables and <!--l. 73--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mrow 
+><mi 
+>y</mi></mrow></math>
+the number of chairs produced. The feasible production set <!--l. 73--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mrow 
+><mi 
+>P</mi></mrow></math> is
+given by:
+   </p> 
+<table class="equation-star"><tr><td>
+<!--l. 75--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="block" class="equation"> 
+<mtable 
+class="aligned"><mtr 
+><mtd columnalign="right" ><mi 
+>P</mi> <mo 
+class="MathClass-rel">=</mo> <mo 
+class="MathClass-open" stretchy="false">{</mo><mo 
+class="MathClass-open" stretchy="false">(</mo><mi 
+>x</mi><mo 
+class="MathClass-punc">,</mo><mi 
+>y</mi><mo 
+class="MathClass-close" stretchy="false">)</mo> <mo 
+class="MathClass-rel">∈</mo> <msup><mrow 
+><mi 
+>ℝ</mi></mrow><mrow 
+><mn>2</mn></mrow></msup 
+> <mo 
+class="MathClass-punc">:</mo> <mspace width="0.17em" class="thinspace"/></mtd><mtd columnalign="left" ><mn>8</mn><mn>0</mn><mi 
+>x</mi> <mo 
+class="MathClass-bin">+</mo> <mn>2</mn><mn>0</mn><mi 
+>y</mi> <mo 
+class="MathClass-rel">≤</mo> <mn>9</mn><mn>6</mn><mn>0</mn><mo 
+class="MathClass-punc">,</mo></mtd><mtd columnalign="right" ></mtd>
+</mtr><mtr 
+><mtd columnalign="right" ></mtd>                     <mtd columnalign="left" ><mn>1</mn><mn>2</mn><mi 
+>x</mi> <mo 
+class="MathClass-bin">+</mo> <mn>1</mn><mn>0</mn><mi 
+>y</mi> <mo 
+class="MathClass-rel">≤</mo> <mn>2</mn><mn>0</mn><mn>0</mn><mo 
+class="MathClass-punc">,</mo></mtd>
+</mtr><mtr 
+><mtd columnalign="right" ></mtd>                     <mtd columnalign="left" ><mi 
+>x</mi><mo 
+class="MathClass-punc">,</mo><mi 
+>y</mi> <mo 
+class="MathClass-rel">≥</mo> <mn>0</mn><mo 
+class="MathClass-close" stretchy="false">}</mo><mo 
+class="MathClass-punc">.</mo></mtd>
+    </mtr>                                                                                    </mtable>
+</math></td></tr></table>
+   <figure class="figure"> 
+
+                                                                  
+
+                                                                  
+                                                                  
+
+                                                                  
+<p class="indent"><img 
+src="figs/multi-objective-optimization_updated-tikz01.png" alt="PIC"  
+width="293" height="293"  /> <a 
+ id="x21-364001r3"></a>
+<a 
+ id="x21-364002"></a>
+</p> 
+<figcaption class="caption" ><span class="id">Figure 13.3: </span><span  
+class="content">Feasible region for the furniture production problem.           </span></figcaption><!--tex4ht:label?: x21-364001r13.2 -->
+                                                                  
+
+                                                                  
+   </figure>
+<p class="indent">   Suppose each table earns $8000 and each chair earns $2000. The goal is to
+maximize revenue:
+   </p> 
+<table class="equation-star"><tr><td>
+<!--l. 92--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="block" class="equation"> 
+                      <mstyle 
+class="text"><mtext  >Maximize </mtext></mstyle><mn>8</mn><mn>0</mn><mn>0</mn><mn>0</mn><mi 
+>x</mi> <mo 
+class="MathClass-bin">+</mo> <mn>2</mn><mn>0</mn><mn>0</mn><mn>0</mn><mi 
+>y</mi><mspace width="1em" class="quad"/><mstyle 
+class="text"><mtext  >subject to </mtext></mstyle><mo 
+class="MathClass-open" stretchy="false">(</mo><mi 
+>x</mi><mo 
+class="MathClass-punc">,</mo><mi 
+>y</mi><mo 
+class="MathClass-close" stretchy="false">)</mo> <mo 
+class="MathClass-rel">∈</mo> <mi 
+>P</mi><mo 
+class="MathClass-punc">.</mo>
+</math></td></tr></table>
+<p class="indent">   Scaling the objective to <!--l. 96--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mrow 
+><mi 
+>w</mi> <mo 
+class="MathClass-rel">=</mo> <mn>4</mn><mi 
+>x</mi> <mo 
+class="MathClass-bin">+</mo> <mi 
+>y</mi></mrow></math>,
+the feasible region remains the same but is easier to visualize. Solving
+this LP reveals multiple optimal solutions on the boundary from <!--l. 96--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mrow 
+><mo 
+class="MathClass-open" stretchy="false">(</mo><mn>1</mn><mn>2</mn><mo 
+class="MathClass-punc">,</mo><mn>0</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></mrow></math> to <!--l. 96--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mrow 
+><mo 
+class="MathClass-open" stretchy="false">(</mo><mn>1</mn><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>8</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></mrow></math>.
+These all yield the same profit, but they may differ in other criteria.
+</p> 
+<p class="indent">   Now, suppose a new manager wants to minimize material waste, specifically
+10 bdft wasted per table and 2 bdft per chair:
+   </p> 
+<table class="equation-star"><tr><td>
+<!--l. 100--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="block" class="equation"> 
+                    <mstyle 
+class="text"><mtext  >Minimize </mtext></mstyle><mn>1</mn><mn>0</mn><mi 
+>x</mi> <mo 
+class="MathClass-bin">+</mo> <mn>2</mn><mi 
+>y</mi><mspace width="1em" class="quad"/><mstyle 
+class="text"><mtext  >subject to maximum revenue</mtext></mstyle><mo 
+class="MathClass-punc">.</mo>
+</math></td></tr></table>
+<p class="indent">   Restricting attention to the profit-optimal frontier and minimizing waste identifies
+<!--l. 104--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mrow 
+><mo 
+class="MathClass-open" stretchy="false">(</mo><mn>1</mn><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>8</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></mrow></math> as
+preferable. This is an example of the <span 
+class="ecti-1000">lexicographic method</span>: optimize a primary
+objective, then refine solutions with a secondary one.
+</p> 
+<p class="indent">   Alternatively, the manager may be willing to sacrifice some revenue. If they
+accept at least 70% of maximum profit, they solve:
+                                                                  
+
+                                                                  
+   </p> 
+<table class="equation-star"><tr><td>
+<!--l. 108--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="block" class="equation"> 
+<mtable 
+class="aligned"><mtr 
+><mtd columnalign="right" ><mstyle 
+class="text"><mtext  >Minimize </mtext></mstyle></mtd> <mtd columnalign="left" ><mspace width="0.17em" class="thinspace"/><mn>1</mn><mn>0</mn><mi 
+>x</mi> <mo 
+class="MathClass-bin">+</mo> <mn>2</mn><mi 
+>y</mi></mtd>                       <mtd columnalign="right" ></mtd>
+</mtr><mtr 
+><mtd columnalign="right" ><mstyle 
+class="text"><mtext  >subject to </mtext></mstyle></mtd><mtd columnalign="left" ><mspace width="0.17em" class="thinspace"/><mn>8</mn><mn>0</mn><mn>0</mn><mn>0</mn><mi 
+>x</mi> <mo 
+class="MathClass-bin">+</mo> <mn>2</mn><mn>0</mn><mn>0</mn><mn>0</mn><mi 
+>y</mi> <mo 
+class="MathClass-rel">≥</mo> <mn>0</mn><mo 
+class="MathClass-punc">.</mo><mn>7</mn> <mo 
+class="MathClass-bin">×</mo> <mn>9</mn><mn>6</mn><mn>0</mn><mn>0</mn><mn>0</mn><mo 
+class="MathClass-punc">,</mo></mtd>
+</mtr><mtr 
+><mtd columnalign="right" ></mtd>            <mtd columnalign="left" ><mspace width="0.17em" class="thinspace"/><mo 
+class="MathClass-open" stretchy="false">(</mo><mi 
+>x</mi><mo 
+class="MathClass-punc">,</mo><mi 
+>y</mi><mo 
+class="MathClass-close" stretchy="false">)</mo> <mo 
+class="MathClass-rel">∈</mo> <mi 
+>P</mi><mo 
+class="MathClass-punc">.</mo></mtd>
+    </mtr>                                                                                    </mtable>
+</math></td></tr></table>
+   <figure class="figure"> 
+
+                                                                  
+
+                                                                  
+                                                                  
+
+                                                                  
+<p class="indent"><img 
+src="figs/multi-objective-optimization_updated-tikz02.png" alt="PIC"  
+width="293" height="293"  /> <a 
+ id="x21-364003r4"></a>
+<a 
+ id="x21-364004"></a>
+</p> 
+<figcaption class="caption" ><span class="id">Figure 13.4:  </span><span  
+class="content">Feasible  set  with  revenue  constrained  to  at  least  70%  of  the
+maximum.                                                         </span></figcaption><!--tex4ht:label?: x21-364003r13.2 -->
+                                                                  
+
+                                                                  
+   </figure>
+<p class="indent">   This <!--l. 122--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>𝜀</mi></math><span 
+class="ecti-1000">-constraint</span>
+method provides flexibility to explore trade-offs, generating new points on the Pareto
+frontier.
+   </p> 
+
+<p class="noindent"><span class="paragraphHead"><a 
+ id="x21-36500013.2"></a><span 
+class="ecbx-1000">Pareto Optimality </span></span>
+   Many feasible solutions exist, but only some are <span 
+class="ecti-1000">Pareto optimal</span>. A solution is
+Pareto optimal if no other feasible solution improves one objective without worsening
+another.
+<a 
+ id="x21-365001r1"></a>
+</p> 
+<p class="noindent"><span 
+class="ecbx-1000">Definition 13.1: Pareto Optimal</span>
+</p> 
+<p class="indent">   Given a feasible set <!--l. 129--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mrow 
+><mi 
+>P</mi></mrow></math>
+and objective functions <!--l. 129--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mrow 
+><msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mi 
+>i</mi></mrow></msub 
+> <mo 
+class="MathClass-punc">:</mo> <mi 
+>P</mi> <mo 
+class="MathClass-rel">→</mo> <mi 
+>ℝ</mi></mrow></math> to
+<span 
+class="ecti-1000">maximize</span>, a point <!--l. 129--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mrow 
+><mstyle mathvariant="bold"><mi 
+>x</mi></mstyle> <mo 
+class="MathClass-rel">∈</mo> <mi 
+>P</mi></mrow></math> is <span 
+class="ecti-1000">Pareto</span>
+<span 
+class="ecti-1000">Optimal </span>if there is no <!--l. 129--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mrow 
+><mover accent="false" 
+class="mml-overline"><mrow><mstyle mathvariant="bold"><mi 
+>x</mi></mstyle></mrow><mo 
+accent="true">¯</mo></mover> <mo 
+class="MathClass-rel">∈</mo> <mi 
+>P</mi></mrow></math>
+such that: </p> 
+<table class="equation-star"><tr><td>
+<!--l. 130--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="block" class="equation"> 
+<mtable 
+class="aligned"><mtr 
+><mtd columnalign="right" ></mtd><mtd columnalign="left" ><msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mi 
+>i</mi></mrow></msub 
+><mo 
+class="MathClass-open" stretchy="false">(</mo><mover accent="false" 
+class="mml-overline"><mrow><mstyle mathvariant="bold"><mi 
+>x</mi></mstyle></mrow><mo 
+accent="true">¯</mo></mover><mo 
+class="MathClass-close" stretchy="false">)</mo> <mo 
+class="MathClass-rel">&#x003E;</mo> <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mi 
+>i</mi></mrow></msub 
+><mo 
+class="MathClass-open" stretchy="false">(</mo><mstyle mathvariant="bold"><mi 
+>x</mi></mstyle><mo 
+class="MathClass-close" stretchy="false">)</mo><mstyle 
+class="text"><mtext  > for some </mtext></mstyle><mi 
+>i</mi><mo 
+class="MathClass-punc">,</mo></mtd><mtd columnalign="right" ></mtd>
+</mtr><mtr 
+><mtd columnalign="right" ></mtd><mtd columnalign="left" ><msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mi 
+>j</mi></mrow></msub 
+><mo 
+class="MathClass-open" stretchy="false">(</mo><mover accent="false" 
+class="mml-overline"><mrow><mstyle mathvariant="bold"><mi 
+>x</mi></mstyle></mrow><mo 
+accent="true">¯</mo></mover><mo 
+class="MathClass-close" stretchy="false">)</mo> <mo 
+class="MathClass-rel">≥</mo> <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mi 
+>j</mi></mrow></msub 
+><mo 
+class="MathClass-open" stretchy="false">(</mo><mstyle mathvariant="bold"><mi 
+>x</mi></mstyle><mo 
+class="MathClass-close" stretchy="false">)</mo><mstyle 
+class="text"><mtext  > for all </mtext></mstyle><mi 
+>j</mi><mo 
+class="MathClass-rel">≠</mo><mi 
+>i</mi><mo 
+class="MathClass-punc">.</mo></mtd>
+    </mtr>                                                                                    </mtable>
+</math></td></tr></table>
+<p class="indent">   That is, no objective can be strictly improved without sacrificing performance in
+at least one other. The <span 
+class="ecti-1000">Pareto Frontier </span>is the set of all such efficient points.
+   </p> 
+<figure class="figure"> 
+
+                                                                  
+
+                                                                  
+                                                                  
+
+                                                                  
+<p class="indent"><img 
+src="figs/multi-objective-optimization_updated-tikz03.png" alt="PIC"  
+width="293" height="293"  /> <a 
+ id="x21-365002r5"></a>
+<a 
+ id="x21-365003"></a>
+</p> 
+<figcaption class="caption" ><span class="id">Figure 13.5:         </span><span  
+class="content">The         furniture         problem         in         objective
+space:         each         point         is         a         production         plan         <!--l. 143--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mo 
+class="MathClass-open" stretchy="false">(</mo><mi 
+>x</mi><mo 
+class="MathClass-punc">,</mo><mi 
+>y</mi><mo 
+class="MathClass-close" stretchy="false">)</mo></math>
+plotted by its revenue <!--l. 143--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+></math>
+(maximize) and rosewood waste <!--l. 143--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+></math>
+(minimize).  The  blue  points  are  non-dominated:  no  feasible  plan  earns
+more  revenue  without  creating  more  waste,  and  none  creates  less  waste
+without  giving  up  revenue.  The  red  points  are  dominated;  for  example,  <!--l. 143--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mo 
+class="MathClass-open" stretchy="false">(</mo><mn>1</mn><mn>2</mn><mo 
+class="MathClass-punc">,</mo><mn>0</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math>
+earns the same $96,000 as <!--l. 143--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>1</mn><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>8</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math>
+but        wastes        120 bdft        instead        of        116,        and        <!--l. 143--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mo 
+class="MathClass-open" stretchy="false">(</mo><mn>4</mn><mo 
+class="MathClass-punc">,</mo><mn>4</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math>
+matches the revenue of <!--l. 143--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>2</mn><mn>0</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math>
+with    more    waste.    The    frontier    consists    of    the    plans    along    <!--l. 143--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mi 
+>x</mi> <mo 
+class="MathClass-rel">=</mo> <mn>0</mn></math>
+and         along         the         rosewood         constraint         from         <!--l. 143--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mo 
+class="MathClass-open" stretchy="false">(</mo><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>2</mn><mn>0</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math>
+to <!--l. 143--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>1</mn><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>8</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math>.</span></figcaption><!--tex4ht:label?: x21-365002r13.2 -->
+                                                                  
+
+                                                                  
+   </figure>
+<p class="noindent"><span class="paragraphHead"><a 
+ id="x21-36600013.2"></a><span 
+class="ecbx-1000">Summary of Multi-Objective Optimization Methods </span></span>
+   </p> 
+<div class="table">
+                                                                  
+
+                                                                  
+<p class="indent">   </p> 
+<figure class="float" 
+>
+                                                                  
+
+                                                                  
+<a 
+ id="x21-366001r1"></a>
+<a 
+ id="x21-366002"></a>
+<figcaption class="caption" ><span class="id">Table 13.1: </span><span  
+class="content">Summary of Multi-Objective Optimization Methods            </span></figcaption><!--tex4ht:label?: x21-366001r13.2 -->
+<div class="tabular"> <table id="TBL-359" class="tabular" 
+rules="groups" 
+><colgroup id="TBL-359-1g"><col 
+id="TBL-359-1" /></colgroup><colgroup id="TBL-359-2g"><col 
+id="TBL-359-2" /></colgroup><colgroup id="TBL-359-3g"><col 
+id="TBL-359-3" /></colgroup><colgroup id="TBL-359-4g"><col 
+id="TBL-359-4" /></colgroup><tr class="hline" style="border-top:1px solid #000"><td><hr /></td><td><hr /></td><td><hr /></td><td><hr /></td></tr><tr  
+ style="vertical-align:baseline;" id="TBL-359-1-"><td  style="text-align:left; white-space:nowrap;" id="TBL-359-1-1"  
+class="td11"> <span 
+class="ecbx-1000">Method                 </span></td><td  style="text-align:left;" id="TBL-359-1-2"  
+class="td11"> <p class="indent"><span 
+class="ecbx-1000">Key Idea</span>                     </p> 
+</td><td  style="text-align:left;" id="TBL-359-1-3"  
+class="td11"> <p class="indent"><span 
+class="ecbx-1000">Pros</span>                      </p> 
+</td><td  style="text-align:left;" id="TBL-359-1-4"  
+class="td11"> <p class="indent"><span 
+class="ecbx-1000">Cons</span>                     </p> 
+</td>
+</tr><tr class="hline" style="border-top:1px solid #000"><td><hr /></td><td><hr /></td><td><hr /></td><td><hr /></td></tr><tr  
+ style="vertical-align:baseline;" id="TBL-359-2-"><td  style="text-align:left; white-space:nowrap;" id="TBL-359-2-1"  
+class="td11"> <span 
+class="ecbx-1000">Weighted Sum         </span></td><td  style="text-align:left;" id="TBL-359-2-2"  
+class="td11"> <p class="indent">Combine   objectives   into
+  a   single   scalar   using   a
+  weighted sum                    </p> 
+</td><td  style="text-align:left;" id="TBL-359-2-3"  
+class="td11"> <p class="indent">Simple                and
+  computationally
+  efficient                      </p> 
+</td><td  style="text-align:left;" id="TBL-359-2-4"  
+class="td11"> <p class="indent">May                  miss
+  Pareto-optimal
+  solutions                in
+  non-convex regions       </p> 
+</td>
+</tr><tr class="hline" style="border-top:1px solid #000"><td><hr /></td><td><hr /></td><td><hr /></td><td><hr /></td></tr><tr  
+ style="vertical-align:baseline;" id="TBL-359-3-"><td  style="text-align:left; white-space:nowrap;" id="TBL-359-3-1"  
+class="td11"> <span 
+class="ecbx-1000">Lexicographic          </span></td><td  style="text-align:left;" id="TBL-359-3-2"  
+class="td11"> <p class="indent">Prioritize    objectives    in
+  strict order                       </p> 
+</td><td  style="text-align:left;" id="TBL-359-3-3"  
+class="td11"> <p class="indent">Matches      real-world
+  decision hierarchies      </p> 
+</td><td  style="text-align:left;" id="TBL-359-3-4"  
+class="td11"> <p class="indent">Does
+  not  explore  trade-offs
+  or the full frontier        </p> 
+</td>
+</tr><tr class="hline" style="border-top:1px solid #000"><td><hr /></td><td><hr /></td><td><hr /></td><td><hr /></td></tr><tr  
+ style="vertical-align:baseline;" id="TBL-359-4-"><td  style="text-align:left; white-space:nowrap;" id="TBL-359-4-1"  
+class="td11"> <span 
+class="ecbx-1000">Epsilon-Constraint   </span></td><td  style="text-align:left;" id="TBL-359-4-2"  
+class="td11"> <p class="indent">Optimize   one   objective,
+  treat others as constraints   </p> 
+</td><td  style="text-align:left;" id="TBL-359-4-3"  
+class="td11"> <p class="indent">Finds        non-convex
+  parts of the frontier      </p> 
+</td><td  style="text-align:left;" id="TBL-359-4-4"  
+class="td11"> <p class="indent">Requires       repeated
+  solves,  hard  to  set  <!--l. 161--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+  <mi 
+>𝜀</mi></math>  </p> 
+</td>
+</tr><tr class="hline" style="border-top:1px solid #000"><td><hr /></td><td><hr /></td><td><hr /></td><td><hr /></td></tr><tr  
+ style="vertical-align:baseline;" id="TBL-359-5-"><td  style="text-align:left; white-space:nowrap;" id="TBL-359-5-1"  
+class="td11"> <span 
+class="ecbx-1000">Goal Programming   </span></td><td  style="text-align:left;" id="TBL-359-5-2"  
+class="td11"> <p class="indent">Minimize   deviation   from
+  target values                     </p> 
+</td><td  style="text-align:left;" id="TBL-359-5-3"  
+class="td11"> <p class="indent">Useful when goals are
+  known                       </p> 
+</td><td  style="text-align:left;" id="TBL-359-5-4"  
+class="td11"> <p class="indent">Sensitive to target and
+  weight choices             </p> 
+</td>
+</tr><tr class="hline" style="border-top:1px solid #000"><td><hr /></td><td><hr /></td><td><hr /></td><td><hr /></td></tr><tr  
+ style="vertical-align:baseline;" id="TBL-359-6-"><td  style="text-align:left; white-space:nowrap;" id="TBL-359-6-1"  
+class="td11"> <span 
+class="ecbx-1000">Elbow (Knee Point)  </span></td><td  style="text-align:left;" id="TBL-359-6-2"  
+class="td11"> <p class="indent">Pick   the   frontier   point
+  where trade-offs deteriorate
+  fastest                             </p> 
+</td><td  style="text-align:left;" id="TBL-359-6-3"  
+class="td11"> <p class="indent">Yields      a      single
+  balanced compromise    </p> 
+</td><td  style="text-align:left;" id="TBL-359-6-4"  
+class="td11"> <p class="indent">Requires
+  computing the frontier
+  first; not every frontier
+  has a clear knee           </p> 
+</td>
+</tr><tr class="hline" style="border-top:1px solid #000"><td><hr /></td><td><hr /></td><td><hr /></td><td><hr /></td></tr><tr  
+ style="vertical-align:baseline;" id="TBL-359-7-"><td  style="text-align:left; white-space:nowrap;" id="TBL-359-7-1"  
+class="td11">                     </td></tr></table></div>
+                                                                  
+
+                                                                  
+   </figure>
+   </div>
+<p class="noindent"><span class="paragraphHead"><a 
+ id="x21-36700013.2"></a><span 
+class="ecbx-1000">Scalarization (Weighted Sum) Method </span></span>
+   The <span 
+class="ecti-1000">weighted sum </span>method transforms a multi-objective optimization problem into
+a single-objective one by combining the objectives linearly. For two objectives <!--l. 172--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+><mo 
+class="MathClass-open" stretchy="false">(</mo><mi 
+>x</mi><mo 
+class="MathClass-close" stretchy="false">)</mo></math> and <!--l. 172--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+><mo 
+class="MathClass-open" stretchy="false">(</mo><mi 
+>x</mi><mo 
+class="MathClass-close" stretchy="false">)</mo></math> (both
+to be minimized), the scalarized problem takes the form:
+</p> 
+<!--tex4ht:inline--><!--l. 176--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="block" ><mtable 
+columnalign="left" class="align-star">
+               <mtr><mtd 
+columnalign="right" class="align-odd"><munder class="msub"><mrow 
+><mi class="qopname"> min</mi><mo> ⁡<!--FUNCTION APPLICATION--> </mo></mrow><mrow 
+><mi 
+>x</mi><mo 
+class="MathClass-rel">∈</mo><mi 
+>X</mi></mrow></munder 
+><mspace width="1em" class="quad"/></mtd>               <mtd 
+class="align-even"><msub><mrow 
+><mi 
+>w</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+><msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+><mo 
+class="MathClass-open" stretchy="false">(</mo><mi 
+>x</mi><mo 
+class="MathClass-close" stretchy="false">)</mo> <mo 
+class="MathClass-bin">+</mo> <msub><mrow 
+><mi 
+>w</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+><msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+><mo 
+class="MathClass-open" stretchy="false">(</mo><mi 
+>x</mi><mo 
+class="MathClass-close" stretchy="false">)</mo><mspace width="2em"/></mtd>                          <mtd 
+columnalign="right" class="align-label"></mtd>               <mtd 
+class="align-label">
+               <mspace width="2em"/></mtd></mtr><mtr><mtd 
+columnalign="right" class="align-odd"><mstyle 
+class="text"><mtext  >s.t.</mtext></mstyle><mspace width="1em" class="quad"/></mtd>                    <mtd 
+class="align-even"><mi 
+>x</mi> <mo 
+class="MathClass-rel">∈</mo> <mi 
+>X</mi><mo 
+class="MathClass-punc">,</mo><mspace width="1em" class="quad"/><msub><mrow 
+><mi 
+>w</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+><mo 
+class="MathClass-punc">,</mo><msub><mrow 
+><mi 
+>w</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+> <mo 
+class="MathClass-rel">≥</mo> <mn>0</mn><mo 
+class="MathClass-punc">,</mo><mspace width="1em" class="quad"/><msub><mrow 
+><mi 
+>w</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+> <mo 
+class="MathClass-bin">+</mo> <msub><mrow 
+><mi 
+>w</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+> <mo 
+class="MathClass-rel">=</mo> <mn>1</mn><mo 
+class="MathClass-punc">.</mo><mspace width="2em"/></mtd>               <mtd 
+columnalign="right" class="align-label"></mtd>               <mtd 
+class="align-label">
+   <mspace width="2em"/></mtd></mtr></mtable></math>
+<p class="noindent">Here, <!--l. 177--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>w</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+></math>
+and <!--l. 177--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>w</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+></math>
+represent the relative importance of each objective. Varying the weights
+traces out the <span 
+class="ecti-1000">convex </span>portions of the Pareto frontier: each weight vector
+corresponds to a supporting hyperplane to the feasible region in objective space.
+While simple and computationally efficient, the method <span 
+class="ecti-1000">cannot </span>produce
+Pareto-optimal points lying in non-convex regions of the frontier. Objectives should
+be normalized before weighting to ensure that units and scales do not distort the
+trade-off.
+   </p> 
+
+<p class="noindent"><span class="paragraphHead"><a 
+ id="x21-36800013.2"></a><span 
+class="ecbx-1000">Lexicographic Method </span></span>
+   The <span 
+class="ecti-1000">lexicographic </span>method ranks the objectives in strict order of priority and
+optimizes them sequentially: first optimize the most important objective, then
+optimize the second over the set of solutions that are optimal for the first, and so on.
+This is what the furniture manufacturer did above: maximize revenue first, then
+minimize rosewood waste among the revenue-optimal plans, which selected <!--l. 181--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mo 
+class="MathClass-open" stretchy="false">(</mo><mn>1</mn><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>8</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math>. The
+method fits settings with a clear hierarchy of goals, but it returns a single solution
+                                                                  
+
+                                                                  
+rather than a picture of the trade-offs.
+   </p> 
+
+<p class="noindent"><span class="paragraphHead"><a 
+ id="x21-36900013.2"></a><span 
+class="ecbx-1000">Goal Programming </span></span>
+   <span 
+class="ecti-1000">Goal programming </span>incorporates explicit target values for each objective,
+seeking solutions that minimize the deviations from these goals. Let <!--l. 184--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<msub><mrow 
+><mi 
+>g</mi></mrow><mrow 
+><mi 
+>j</mi></mrow></msub 
+></math> be the desired goal
+for objective <!--l. 184--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mi 
+>j</mi></mrow></msub 
+><mo 
+class="MathClass-open" stretchy="false">(</mo><mi 
+>x</mi><mo 
+class="MathClass-close" stretchy="false">)</mo></math>.
+Introduce positive and negative deviation variables <!--l. 184--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<msubsup><mrow 
+><mi 
+>d</mi></mrow><mrow 
+><mi 
+>j</mi></mrow><mrow 
+><mo 
+class="MathClass-bin">+</mo></mrow></msubsup 
+></math> and <!--l. 184--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<msubsup><mrow 
+><mi 
+>d</mi></mrow><mrow 
+><mi 
+>j</mi></mrow><mrow 
+><mo 
+class="MathClass-bin">−</mo></mrow></msubsup 
+></math> such
+that:
+</p> 
+<!--tex4ht:inline--><!--l. 187--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="block" ><mtable 
+columnalign="left" class="align-star">
+                  <mtr><mtd 
+columnalign="right" class="align-odd"><msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mi 
+>j</mi></mrow></msub 
+><mo 
+class="MathClass-open" stretchy="false">(</mo><mi 
+>x</mi><mo 
+class="MathClass-close" stretchy="false">)</mo> <mo 
+class="MathClass-bin">+</mo> <msubsup><mrow 
+><mi 
+>d</mi></mrow><mrow 
+><mi 
+>j</mi></mrow><mrow 
+><mo 
+class="MathClass-bin">−</mo></mrow></msubsup 
+><mo 
+class="MathClass-bin">−</mo> <msubsup><mrow 
+><mi 
+>d</mi></mrow><mrow 
+>
+<mi 
+>j</mi></mrow><mrow 
+><mo 
+class="MathClass-bin">+</mo></mrow></msubsup 
+> <mo 
+class="MathClass-rel">=</mo> <msub><mrow 
+><mi 
+>g</mi></mrow><mrow 
+>
+<mi 
+>j</mi></mrow></msub 
+><mo 
+class="MathClass-punc">,</mo><mspace width="1em" class="quad"/><msubsup><mrow 
+><mi 
+>d</mi></mrow><mrow 
+><mi 
+>j</mi></mrow><mrow 
+><mo 
+class="MathClass-bin">+</mo></mrow></msubsup 
+><mo 
+class="MathClass-punc">,</mo><msubsup><mrow 
+><mi 
+>d</mi></mrow><mrow 
+>
+<mi 
+>j</mi></mrow><mrow 
+><mo 
+class="MathClass-bin">−</mo></mrow></msubsup 
+><mo 
+class="MathClass-rel">≥</mo> <mn>0</mn><mo 
+class="MathClass-punc">.</mo></mtd>                  <mtd 
+class="align-even"><mspace width="2em"/></mtd>                  <mtd 
+columnalign="right" class="align-label">
+   </mtd></mtr></mtable></math>
+<p class="noindent">A <span 
+class="ecti-1000">weighted </span>goal programming model minimizes a weighted sum of deviations:
+</p> 
+<!--tex4ht:inline--><!--l. 192--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="block" ><mtable 
+columnalign="left" class="align-star">
+          <mtr><mtd 
+columnalign="right" class="align-odd"><munder class="msub"><mrow 
+><mi class="qopname"> min</mi><mo> ⁡<!--FUNCTION APPLICATION--> </mo></mrow><mrow 
+><mi 
+>x</mi><mo 
+class="MathClass-punc">,</mo><msup><mrow 
+><mi 
+>d</mi></mrow><mrow 
+><mo 
+class="MathClass-bin">+</mo></mrow></msup 
+><mo 
+class="MathClass-punc">,</mo><msup><mrow 
+><mi 
+>d</mi></mrow><mrow 
+><mo 
+class="MathClass-bin">−</mo></mrow></msup 
+></mrow></munder 
+><mspace width="1em" class="quad"/></mtd>          <mtd 
+class="align-even"><munderover accentunder="false" accent="false"><mrow  
+><mo  
+>∑</mo>
+  </mrow><mrow 
+><mi 
+>j</mi><mo 
+class="MathClass-rel">=</mo><mn>1</mn></mrow><mrow 
+><mi 
+>m</mi></mrow></munderover 
+><msub><mrow 
+><mi 
+>w</mi></mrow><mrow 
+>
+<mi 
+>j</mi></mrow></msub 
+><mo 
+class="MathClass-open" stretchy="false">(</mo><msubsup><mrow 
+><mi 
+>d</mi></mrow><mrow 
+><mi 
+>j</mi></mrow><mrow 
+><mo 
+class="MathClass-bin">+</mo></mrow></msubsup 
+> <mo 
+class="MathClass-bin">+</mo> <msubsup><mrow 
+><mi 
+>d</mi></mrow><mrow 
+>
+<mi 
+>j</mi></mrow><mrow 
+><mo 
+class="MathClass-bin">−</mo></mrow></msubsup 
+><mo 
+class="MathClass-close" stretchy="false">)</mo><mo 
+class="MathClass-punc">,</mo><mspace width="2em"/></mtd>                            <mtd 
+columnalign="right" class="align-label"></mtd>          <mtd 
+class="align-label">
+          <mspace width="2em"/></mtd></mtr><mtr><mtd 
+columnalign="right" class="align-odd"><mstyle 
+class="text"><mtext  >s.t.</mtext></mstyle><mspace width="1em" class="quad"/></mtd>                <mtd 
+class="align-even"><mi 
+>x</mi> <mo 
+class="MathClass-rel">∈</mo> <mi 
+>X</mi><mo 
+class="MathClass-punc">,</mo><mspace width="0.28em" class="thickpace"/><mstyle 
+class="text"><mtext  >and the above deviation equations hold.</mtext></mstyle><mspace width="2em"/></mtd>          <mtd 
+columnalign="right" class="align-label"></mtd>          <mtd 
+class="align-label">
+   <mspace width="2em"/></mtd></mtr></mtable></math>
+                                                                  
+
+                                                                  
+<p class="noindent">The weights <!--l. 193--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>w</mi></mrow><mrow 
+><mi 
+>j</mi></mrow></msub 
+></math>
+reflect the relative penalty for missing each goal. In <span 
+class="ecti-1000">preemptive </span>(lexicographic) goal
+programming, objectives are ranked in priority and optimized sequentially, ensuring
+higher-priority goals are satisfied as well as possible before addressing lower-priority
+ones.
+   </p> 
+
+<p class="noindent"><span class="paragraphHead"><a 
+ id="x21-37000013.2"></a><span 
+class="ecbx-1000">Elbow (Knee Point) Method </span></span>
+   When the Pareto frontier is plotted, some decision makers prefer to choose a
+single compromise point where further improvement in one objective would cause a
+disproportionately large loss in another. This <span 
+class="ecti-1000">elbow </span>or <span 
+class="ecti-1000">knee point </span>is often found
+where the curvature of the frontier is largest. For discrete Pareto points, a common
+heuristic is:
+     </p> 
+<dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+  1. </dt><dd 
+class="enumerate-enumitem">Identify the extreme solutions (best in each objective).
+     </dd><dt class="enumerate-enumitem">
+  2. </dt><dd 
+class="enumerate-enumitem">Draw the straight line connecting these extremes in objective space.
+     </dd><dt class="enumerate-enumitem">
+  3. </dt><dd 
+class="enumerate-enumitem">Compute the perpendicular distance of each Pareto point to this line.
+     </dd><dt class="enumerate-enumitem">
+  4. </dt><dd 
+class="enumerate-enumitem">Select the point with the largest distance as the elbow.</dd></dl>
+<p class="noindent">In more formal terms, for a smooth frontier <!--l. 205--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mo 
+class="MathClass-open" stretchy="false">(</mo><msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+><mo 
+class="MathClass-open" stretchy="false">(</mo><mi 
+>t</mi><mo 
+class="MathClass-close" stretchy="false">)</mo><mo 
+class="MathClass-punc">,</mo><msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+><mo 
+class="MathClass-open" stretchy="false">(</mo><mi 
+>t</mi><mo 
+class="MathClass-close" stretchy="false">)</mo><mo 
+class="MathClass-close" stretchy="false">)</mo></math>, the knee corresponds
+to the value of <!--l. 205--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>t</mi></math>
+maximizing the curvature:
+</p> 
+<!--tex4ht:inline--><!--l. 208--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="block" ><mtable 
+columnalign="left" class="align-star">
+                    <mtr><mtd 
+columnalign="right" class="align-odd"><mi 
+>κ</mi><mo 
+class="MathClass-open" stretchy="false">(</mo><mi 
+>t</mi><mo 
+class="MathClass-close" stretchy="false">)</mo> <mo 
+class="MathClass-rel">=</mo> <mfrac><mrow 
+><mo 
+class="MathClass-rel">|</mo><msubsup><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow><mrow 
+><mi 
+>′</mi></mrow></msubsup 
+><mo 
+class="MathClass-open" stretchy="false">(</mo><mi 
+>t</mi><mo 
+class="MathClass-close" stretchy="false">)</mo><msubsup><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow><mrow 
+><mi 
+class="MathClass-op">″</mi><mo> ⁡<!--FUNCTION APPLICATION--></mo></mrow></msubsup 
+><mo 
+class="MathClass-open" stretchy="false">(</mo><mi 
+>t</mi><mo 
+class="MathClass-close" stretchy="false">)</mo> <mo 
+class="MathClass-bin">−</mo> <msubsup><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow><mrow 
+><mi 
+>′</mi></mrow></msubsup 
+><mo 
+class="MathClass-open" stretchy="false">(</mo><mi 
+>t</mi><mo 
+class="MathClass-close" stretchy="false">)</mo><msubsup><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow><mrow 
+><mi 
+class="MathClass-op">″</mi><mo> ⁡<!--FUNCTION APPLICATION--></mo></mrow></msubsup 
+><mo 
+class="MathClass-open" stretchy="false">(</mo><mi 
+>t</mi><mo 
+class="MathClass-close" stretchy="false">)</mo><mo 
+class="MathClass-rel">|</mo></mrow> 
+<mrow 
+><msup><mrow 
+><mrow><mo fence="true" form="prefix"> [</mo><mrow><msup><mrow 
+><mo 
+class="MathClass-open" stretchy="false">(</mo><msubsup><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow><mrow 
+><mi 
+>′</mi></mrow></msubsup 
+><mo 
+class="MathClass-open" stretchy="false">(</mo><mi 
+>t</mi><mo 
+class="MathClass-close" stretchy="false">)</mo><mo 
+class="MathClass-close" stretchy="false">)</mo></mrow><mrow 
+><mn>2</mn></mrow></msup 
+> <mo 
+class="MathClass-bin">+</mo> <msup><mrow 
+><mo 
+class="MathClass-open" stretchy="false">(</mo><msubsup><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow><mrow 
+><mi 
+>′</mi></mrow></msubsup 
+><mo 
+class="MathClass-open" stretchy="false">(</mo><mi 
+>t</mi><mo 
+class="MathClass-close" stretchy="false">)</mo><mo 
+class="MathClass-close" stretchy="false">)</mo></mrow><mrow 
+><mn>2</mn></mrow></msup 
+></mrow><mo fence="true" form="postfix">]</mo></mrow> </mrow><mrow 
+><mn>3</mn><mo 
+class="MathClass-bin">∕</mo><mn>2</mn></mrow></msup 
+></mrow></mfrac>  <mo 
+class="MathClass-punc">.</mo></mtd>                    <mtd 
+class="align-even"><mspace width="2em"/></mtd>                    <mtd 
+columnalign="right" class="align-label">
+   </mtd></mtr></mtable></math>
+                                                                  
+
+                                                                  
+<p class="noindent">Not all Pareto fronts have a clear elbow, and objectives should be normalized to
+avoid scale bias.
+   </p> 
+
+<p class="noindent"><span class="paragraphHead"><a 
+ id="x21-37100013.2"></a><span 
+class="ecbx-1000">Epsilon-Constraint Method </span></span>
+   The <!--l. 211--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>𝜀</mi></math><span 
+class="ecti-1000">-constraint</span>
+method selects one objective as the primary optimization target and converts all
+other objectives into constraints with adjustable bounds. For two objectives <!--l. 212--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+><mo 
+class="MathClass-open" stretchy="false">(</mo><mi 
+>x</mi><mo 
+class="MathClass-close" stretchy="false">)</mo></math> and <!--l. 212--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+><mo 
+class="MathClass-open" stretchy="false">(</mo><mi 
+>x</mi><mo 
+class="MathClass-close" stretchy="false">)</mo></math> (both
+to be minimized), one might solve:
+</p> 
+<!--tex4ht:inline--><!--l. 217--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="block" ><mtable 
+columnalign="left" class="align-star">
+                          <mtr><mtd 
+columnalign="right" class="align-odd"><munder class="msub"><mrow 
+><mi class="qopname"> min</mi><mo> ⁡<!--FUNCTION APPLICATION--> </mo></mrow><mrow 
+><mi 
+>x</mi><mo 
+class="MathClass-rel">∈</mo><mi 
+>X</mi></mrow></munder 
+><mspace width="1em" class="quad"/></mtd>                          <mtd 
+class="align-even"><msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+><mo 
+class="MathClass-open" stretchy="false">(</mo><mi 
+>x</mi><mo 
+class="MathClass-close" stretchy="false">)</mo><mspace width="2em"/></mtd>                              <mtd 
+columnalign="right" class="align-label"></mtd>                          <mtd 
+class="align-label">
+                          <mspace width="2em"/></mtd></mtr><mtr><mtd 
+columnalign="right" class="align-odd"><mstyle 
+class="text"><mtext  >s.t.</mtext></mstyle><mspace width="1em" class="quad"/></mtd>                               <mtd 
+class="align-even"><msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+><mo 
+class="MathClass-open" stretchy="false">(</mo><mi 
+>x</mi><mo 
+class="MathClass-close" stretchy="false">)</mo> <mo 
+class="MathClass-rel">≤</mo> <mi 
+>𝜀</mi><mo 
+class="MathClass-punc">,</mo><mspace width="2em"/></mtd>                          <mtd 
+columnalign="right" class="align-label"></mtd>                          <mtd 
+class="align-label">
+                          <mspace width="2em"/></mtd></mtr><mtr><mtd 
+columnalign="right" class="align-odd"></mtd>                                 <mtd 
+class="align-even"><mi 
+>x</mi> <mo 
+class="MathClass-rel">∈</mo> <mi 
+>X</mi><mo 
+class="MathClass-punc">,</mo><mspace width="2em"/></mtd>                             <mtd 
+columnalign="right" class="align-label"></mtd>                          <mtd 
+class="align-label">
+   <mspace width="2em"/></mtd></mtr></mtable></math>
+<p class="noindent">where <!--l. 218--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>𝜀</mi></math> is
+varied across a range of values to generate the Pareto frontier. This method
+can find both convex and non-convex portions of the frontier, unlike the
+weighted sum approach. The main practical challenge is choosing meaningful <!--l. 218--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mi 
+>𝜀</mi></math> values
+and step sizes. Graphically, this corresponds to sweeping a horizontal (or vertical)
+constraint across the feasible objective region and optimizing within each
+slice.
+   </p> 
+
+   <h4 class="subsectionHead"><span class="titlemark">13.2.1   </span> <a 
+ id="x21-37200013.2.1"></a>Applications of Pareto Frontiers </h4>
+<p class="noindent">Although our furniture example was small, multi-objective optimization
+arises naturally in many fields. In each case below, the decision-maker faces
+competing objectives and must choose a preferred trade-off along the Pareto
+frontier.
+                                                                  
+
+                                                                  
+</p> 
+<p class="noindent">
+   </p> 
+
+   <h5 class="subsubsectionHead"><a 
+ id="x21-37300013.2.1"></a>Portfolio Optimization </h5>
+<p class="noindent">In finance, the classical Markowitz model seeks portfolios that
+trade off <span 
+class="ecti-1000">expected return </span>against <span 
+class="ecti-1000">risk </span>(variance of return). Given <!--l. 225--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mi 
+>n</mi></math> assets with expected
+return vector <!--l. 225--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>μ</mi> <mo 
+class="MathClass-rel">∈</mo> <msup><mrow 
+><mi 
+>ℝ</mi></mrow><mrow 
+><mi 
+>n</mi></mrow></msup 
+></math> and
+covariance matrix <!--l. 225--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi mathvariant="normal">Σ</mi> <mo 
+class="MathClass-rel">∈</mo> <msup><mrow 
+><mi 
+>ℝ</mi></mrow><mrow 
+><mi 
+>n</mi><mo 
+class="MathClass-bin">×</mo><mi 
+>n</mi></mrow></msup 
+></math>,
+the bi-objective problem is </p> 
+<table class="equation-star"><tr><td>
+<!--l. 226--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="block" class="equation"> 
+                    <mi class="qopname">max</mi><mo> ⁡<!--FUNCTION APPLICATION--> </mo><mspace width="0.28em" class="thickpace"/><msup><mrow 
+><mi 
+>μ</mi></mrow><mrow 
+><mi 
+class="MathClass-op">⊤</mi><mo> ⁡<!--FUNCTION APPLICATION--></mo></mrow></msup 
+><mi 
+>w</mi><mo 
+class="MathClass-punc">,</mo><mspace width="2em" class="qquad"/><mi class="qopname">min</mi><mo> ⁡<!--FUNCTION APPLICATION--> </mo><mspace width="0.28em" class="thickpace"/><msup><mrow 
+><mi 
+>w</mi></mrow><mrow 
+><mi 
+class="MathClass-op">⊤</mi><mo> ⁡<!--FUNCTION APPLICATION--></mo></mrow></msup 
+><mi mathvariant="normal">Σ</mi><mspace width="0.17em" class="thinspace"/><mi 
+>w</mi><mo 
+class="MathClass-punc">,</mo><mspace width="2em" class="qquad"/><mstyle 
+class="text"><mtext  >subject to</mtext></mstyle><mspace width="1em" class="quad"/><msup><mrow 
+><mstyle mathvariant="bold"><mn>1</mn></mstyle></mrow><mrow 
+><mi 
+class="MathClass-op">⊤</mi><mo> ⁡<!--FUNCTION APPLICATION--></mo></mrow></msup 
+><mi 
+>w</mi> <mo 
+class="MathClass-rel">=</mo> <mn>1</mn><mo 
+class="MathClass-punc">,</mo><mspace width="0.28em" class="thickpace"/><mi 
+>w</mi> <mo 
+class="MathClass-rel">≥</mo> <mn>0</mn><mo 
+class="MathClass-punc">.</mo>
+</math></td></tr></table>
+<p class="indent">   The Pareto frontier of this problem is the well-known <span 
+class="ecti-1000">efficient frontier</span>: a curve in
+the risk–return plane. Every portfolio on this curve is Pareto optimal; portfolios
+below it are dominated (higher risk for the same return, or lower return for the same
+risk).
+</p> 
+<p class="noindent">
+   </p> 
+
+   <h5 class="subsubsectionHead"><a 
+ id="x21-37400013.2.1"></a>Engineering Design </h5>
+<p class="noindent">Mechanical and aerospace engineers routinely face multi-objective trade-offs. For
+example, in aircraft wing design the objectives might include minimizing weight (for
+fuel efficiency), minimizing drag (for speed), and minimizing manufacturing
+cost, all subject to structural safety constraints. The Pareto frontier reveals
+which designs are non-dominated, allowing the engineer to select a final
+design that best matches operational priorities. Similar trade-offs arise in
+automotive design, where ride comfort, fuel economy, and acceleration performance
+compete.
+                                                                  
+
+                                                                  
+</p> 
+<p class="noindent">
+   </p> 
+
+   <h5 class="subsubsectionHead"><a 
+ id="x21-37500013.2.1"></a>Healthcare Staff Scheduling </h5>
+<p class="noindent">Hospitals scheduling nurses and physicians must balance staffing cost against
+quality-of-care and workload fairness. Adding staff to a shift reduces patient-to-nurse
+ratios and overtime fatigue but increases cost; concentrating shifts among
+fewer workers saves money but hurts fairness and increases burnout risk. A
+bi-objective model minimizing total staffing cost and, say, the maximum
+number of undesirable shifts assigned to any one nurse produces a Pareto
+frontier of schedules. Administrators can then see exactly how much each
+improvement in fairness costs, rather than committing to a single weighting in
+advance.
+</p> 
+<p class="noindent">
+   </p> 
+
+   <h5 class="subsubsectionHead"><a 
+ id="x21-37600013.2.1"></a>Supply Chain and Sustainability </h5>
+<p class="noindent">Firms increasingly aim to minimize both cost and environmental impact in their
+supply chains. A manufacturer might seek to minimize total logistics cost while
+also minimizing carbon emissions from transportation. Cheaper shipping
+routes (e.g., by truck over longer distances) may produce more emissions than
+costlier alternatives (e.g., rail). The Pareto frontier shows the achievable
+trade-offs, helping firms meet sustainability targets at the lowest additional
+cost.
+</p> 
+<p class="noindent">
+   </p> 
+
+   <h3 class="sectionHead"><span class="titlemark">13.3   </span> <a 
+ id="x21-37700013.3"></a>Computational Tools for Multi-Objective Optimization </h3>
+<p class="noindent"><span 
+class="ecbx-1000">Resources</span>
+   </p> 
+
+     <ul class="itemize1">
+     <li class="itemize">
+     <p class="indent"><a 
+href="https://pymoo.org/" >pymoo: Python Multi-Objective Optimization Framework</a>
+     </p> 
+</li>
+     <li class="itemize">
+     <p class="indent"><a 
+href="https://platemo.com/" >PlatEMO: Platform for Evolutionary Multi-Objective Optimization</a></p> 
+</li></ul>
+<p class="noindent">For problems with more than two or three objectives, or with large numbers
+of decision variables, the exact methods discussed above (weighted sum, <!--l. 250--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mi 
+>𝜀</mi></math>-constraint)
+can become computationally expensive. In practice, multi-objective evolutionary
+                                                                  
+
+                                                                  
+algorithms (MOEAs) are widely used to generate high-quality approximations of the
+Pareto frontier.
+</p> 
+<p class="indent">   Several well-known algorithms are available for this purpose:
+     </p> 
+<dl class="description"><dt class="description">
+     <p class="indent">
+<span 
+class="ecbx-1000">NSGA-II</span> </p> 
+</dt><dd 
+class="description">
+     <p class="indent">(Non-dominated Sorting Genetic Algorithm II) is one of the most widely
+     used  MOEAs.  It  maintains  a  population  of  candidate  solutions  and
+     uses non-dominated sorting together with a crowding distance metric to
+     preserve diversity along the Pareto front. NSGA-II is effective for problems
+     with two or three objectives.
+     </p> 
+</dd><dt class="description">
+     <p class="indent">
+<span 
+class="ecbx-1000">NSGA-III</span> </p> 
+</dt><dd 
+class="description">
+     <p class="indent">extends  NSGA-II  to  handle  many-objective  problems  (four  or  more
+     objectives) by using reference directions instead of crowding distance to
+     maintain a well-distributed set of solutions across the Pareto frontier.
+     </p> 
+</dd><dt class="description">
+     <p class="indent">
+<span 
+class="ecbx-1000">MOEA/D</span> </p> 
+</dt><dd 
+class="description">
+     <p class="indent">(Multi-Objective                      Evolutionary                      Algorithm
+     based on Decomposition) decomposes the multi-objective problem into
+     a collection of single-objective subproblems using weight vectors, solving
+     them  simultaneously.  This  approach  is  particularly  effective  when  the
+     Pareto frontier has a regular structure.</p> 
+</dd></dl>
+<p class="indent">   The Python library <span 
+class="ectt-1000">pymoo </span>provides implementations of these algorithms and
+many others, along with built-in test problems, performance metrics, and
+visualization tools for Pareto fronts. It offers a convenient way to experiment
+with multi-objective optimization without implementing algorithms from
+scratch.
+</p> 
+<p class="indent">   For small problems like the furniture example, the <!--l. 261--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mi 
+>𝜀</mi></math>-constraint
+method needs nothing more than an ordinary LP solver. The following PuLP script
+maximizes revenue while sweeping the bound on rosewood waste, recovering points
+on the Pareto frontier:
+   </p> 
+<!--l. 263-->
+<div class="lstlisting" id="listing-68"><span class="label"><a 
+ id="x21-377001r1"></a></span><span style="color:#2AA198"><span 
+class="ectt-0900">import</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#000000"><span 
+class="ectt-0900">pulp</span></span><span 
+class="ectt-0900"> </span><br /> 
+<span class="label"><a 
+ id="x21-377002r2"></a></span><span 
+class="ectt-0900"> </span><br /> 
+<span class="label"><a 
+ id="x21-377003r3"></a></span><span style="color:#2AA198"><span 
+class="ectt-0900">for</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#000000"><span 
+class="ectt-0900">eps</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#2AA198"><span 
+class="ectt-0900">in</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#000000"><span 
+class="ectt-0900">[40,</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#000000"><span 
+class="ectt-0900">60,</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#000000"><span 
+class="ectt-0900">80,</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#000000"><span 
+class="ectt-0900">100,</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#000000"><span 
+class="ectt-0900">116]:</span></span><span 
+class="ectt-0900"> </span><br /> 
+<span class="label"><a 
+ id="x21-377004r4"></a></span><span 
+class="ectt-0900"> </span><span 
+class="ectt-0900"> </span><span 
+class="ectt-0900"> </span><span style="color:#000000"><span 
+class="ectt-0900">prob</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#000000"><span 
+class="ectt-0900">=</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#000000"><span 
+class="ectt-0900">pulp</span></span><span style="color:#000000"><span 
+class="ectt-0900">.</span></span><span style="color:#000000"><span 
+class="ectt-0900">LpProblem</span></span><span style="color:#000000"><span 
+class="ectt-0900">(</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">&#x0022;</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">furniture</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">&#x0022;</span></span><span style="color:#000000"><span 
+class="ectt-0900">,</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#000000"><span 
+class="ectt-0900">pulp</span></span><span style="color:#000000"><span 
+class="ectt-0900">.</span></span><span style="color:#000000"><span 
+class="ectt-0900">LpMaximize</span></span><span style="color:#000000"><span 
+class="ectt-0900">)</span></span><span 
+class="ectt-0900"> </span><br /> 
+<span class="label"><a 
+ id="x21-377005r5"></a></span><span 
+class="ectt-0900"> </span><span 
+class="ectt-0900"> </span><span 
+class="ectt-0900"> </span><span style="color:#000000"><span 
+class="ectt-0900">x</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#000000"><span 
+class="ectt-0900">=</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#000000"><span 
+class="ectt-0900">pulp</span></span><span style="color:#000000"><span 
+class="ectt-0900">.</span></span><span style="color:#000000"><span 
+class="ectt-0900">LpVariable</span></span><span style="color:#000000"><span 
+class="ectt-0900">(</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">&#x0022;</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">tables</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">&#x0022;</span></span><span style="color:#000000"><span 
+class="ectt-0900">,</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#000000"><span 
+class="ectt-0900">lowBound</span></span><span style="color:#000000"><span 
+class="ectt-0900">=0)</span></span><span 
+class="ectt-0900"> </span><br /> 
+<span class="label"><a 
+ id="x21-377006r6"></a></span><span 
+class="ectt-0900"> </span><span 
+class="ectt-0900"> </span><span 
+class="ectt-0900"> </span><span style="color:#000000"><span 
+class="ectt-0900">y</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#000000"><span 
+class="ectt-0900">=</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#000000"><span 
+class="ectt-0900">pulp</span></span><span style="color:#000000"><span 
+class="ectt-0900">.</span></span><span style="color:#000000"><span 
+class="ectt-0900">LpVariable</span></span><span style="color:#000000"><span 
+class="ectt-0900">(</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">&#x0022;</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">chairs</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">&#x0022;</span></span><span style="color:#000000"><span 
+class="ectt-0900">,</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#000000"><span 
+class="ectt-0900">lowBound</span></span><span style="color:#000000"><span 
+class="ectt-0900">=0)</span></span><span 
+class="ectt-0900"> </span><br /> 
+<span class="label"><a 
+ id="x21-377007r7"></a></span><span 
+class="ectt-0900"> </span><span 
+class="ectt-0900"> </span><span 
+class="ectt-0900"> </span><span style="color:#000000"><span 
+class="ectt-0900">prob</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#000000"><span 
+class="ectt-0900">+=</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#000000"><span 
+class="ectt-0900">8000*</span></span><span style="color:#000000"><span 
+class="ectt-0900">x</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#000000"><span 
+class="ectt-0900">+</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#000000"><span 
+class="ectt-0900">2000*</span></span><span style="color:#000000"><span 
+class="ectt-0900">y</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#6C9908"><span 
+class="ectt-0900">#</span></span><span style="color:#6C9908"><span 
+class="ectt-0900"> </span></span><span style="color:#6C9908"><span 
+class="ectt-0900">revenue</span></span><span style="color:#6C9908"><span 
+class="ectt-0900"> </span></span><span style="color:#6C9908"><span 
+class="ectt-0900">(</span></span><span style="color:#6C9908"><span 
+class="ectt-0900">primary</span></span><span style="color:#6C9908"><span 
+class="ectt-0900"> </span></span><span style="color:#6C9908"><span 
+class="ectt-0900">objective</span></span><span style="color:#6C9908"><span 
+class="ectt-0900">)</span></span><span 
+class="ectt-0900"> </span><br /> 
+<span class="label"><a 
+ id="x21-377008r8"></a></span><span 
+class="ectt-0900"> </span><span 
+class="ectt-0900"> </span><span 
+class="ectt-0900"> </span><span style="color:#000000"><span 
+class="ectt-0900">prob</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#000000"><span 
+class="ectt-0900">+=</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#000000"><span 
+class="ectt-0900">80*</span></span><span style="color:#000000"><span 
+class="ectt-0900">x</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#000000"><span 
+class="ectt-0900">+</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#000000"><span 
+class="ectt-0900">20*</span></span><span style="color:#000000"><span 
+class="ectt-0900">y</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#000000"><span 
+class="ectt-0900">&#x003C;=</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#000000"><span 
+class="ectt-0900">960</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#6C9908"><span 
+class="ectt-0900">#</span></span><span style="color:#6C9908"><span 
+class="ectt-0900"> </span></span><span style="color:#6C9908"><span 
+class="ectt-0900">bocote</span></span><span 
+class="ectt-0900"> </span><br /> 
+<span class="label"><a 
+ id="x21-377009r9"></a></span><span 
+class="ectt-0900"> </span><span 
+class="ectt-0900"> </span><span 
+class="ectt-0900"> </span><span style="color:#000000"><span 
+class="ectt-0900">prob</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#000000"><span 
+class="ectt-0900">+=</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#000000"><span 
+class="ectt-0900">12*</span></span><span style="color:#000000"><span 
+class="ectt-0900">x</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#000000"><span 
+class="ectt-0900">+</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#000000"><span 
+class="ectt-0900">10*</span></span><span style="color:#000000"><span 
+class="ectt-0900">y</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#000000"><span 
+class="ectt-0900">&#x003C;=</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#000000"><span 
+class="ectt-0900">200</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#6C9908"><span 
+class="ectt-0900">#</span></span><span style="color:#6C9908"><span 
+class="ectt-0900"> </span></span><span style="color:#6C9908"><span 
+class="ectt-0900">rosewood</span></span><span 
+class="ectt-0900"> </span><br /> 
+<span class="label"><a 
+ id="x21-377010r10"></a></span><span 
+class="ectt-0900"> </span><span 
+class="ectt-0900"> </span><span 
+class="ectt-0900"> </span><span style="color:#000000"><span 
+class="ectt-0900">prob</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#000000"><span 
+class="ectt-0900">+=</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#000000"><span 
+class="ectt-0900">10*</span></span><span style="color:#000000"><span 
+class="ectt-0900">x</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#000000"><span 
+class="ectt-0900">+</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#000000"><span 
+class="ectt-0900">2*</span></span><span style="color:#000000"><span 
+class="ectt-0900">y</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#000000"><span 
+class="ectt-0900">&#x003C;=</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#000000"><span 
+class="ectt-0900">eps</span></span><span style="color:#000000"><span 
+class="ectt-0900"> </span></span><span style="color:#6C9908"><span 
+class="ectt-0900">#</span></span><span style="color:#6C9908"><span 
+class="ectt-0900"> </span></span><span style="color:#6C9908"><span 
+class="ectt-0900">waste</span></span><span style="color:#6C9908"><span 
+class="ectt-0900"> </span></span><span style="color:#6C9908"><span 
+class="ectt-0900">&#x003C;=</span></span><span style="color:#6C9908"><span 
+class="ectt-0900"> </span></span><span style="color:#6C9908"><span 
+class="ectt-0900">epsilon</span></span><span 
+class="ectt-0900"> </span><br /> 
+<span class="label"><a 
+ id="x21-377011r11"></a></span><span 
+class="ectt-0900"> </span><span 
+class="ectt-0900"> </span><span 
+class="ectt-0900"> </span><span style="color:#000000"><span 
+class="ectt-0900">prob</span></span><span style="color:#000000"><span 
+class="ectt-0900">.</span></span><span style="color:#000000"><span 
+class="ectt-0900">solve</span></span><span style="color:#000000"><span 
+class="ectt-0900">(</span></span><span style="color:#000000"><span 
+class="ectt-0900">pulp</span></span><span style="color:#000000"><span 
+class="ectt-0900">.</span></span><span style="color:#000000"><span 
+class="ectt-0900">PULP_CBC_CMD</span></span><span style="color:#000000"><span 
+class="ectt-0900">(</span></span><span style="color:#000000"><span 
+class="ectt-0900">msg</span></span><span style="color:#000000"><span 
+class="ectt-0900">=0)</span></span><span style="color:#000000"><span 
+class="ectt-0900">)</span></span><span 
+class="ectt-0900"> </span><br /> 
+<span class="label"><a 
+ id="x21-377012r12"></a></span><span 
+class="ectt-0900"> </span><span 
+class="ectt-0900"> </span><span 
+class="ectt-0900"> </span><span style="color:#2AA198"><span 
+class="ectt-0900">print</span></span><span style="color:#000000"><span 
+class="ectt-0900">(</span></span><span style="color:#000000"><span 
+class="ectt-0900">f</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">&#x0022;</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">eps</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">={</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">eps</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">}:</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900"> </span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">x</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">={</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">x</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">.</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">value</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">()</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">:.2</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">f</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">},</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900"> </span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">y</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">={</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">y</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">.</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">value</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">()</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">:.2</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">f</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">},</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900"> </span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">&#x0022;</span></span><span 
+class="ectt-0900"> </span><br /> 
+<span class="label"><a 
+ id="x21-377013r13"></a></span><span 
+class="ectt-0900"> </span><span 
+class="ectt-0900"> </span><span 
+class="ectt-0900"> </span><span 
+class="ectt-0900"> </span><span 
+class="ectt-0900"> </span><span 
+class="ectt-0900"> </span><span 
+class="ectt-0900"> </span><span style="color:#000000"><span 
+class="ectt-0900">f</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">&#x0022;</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">revenue</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">={</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">pulp</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">.</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">value</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">(</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">prob</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">.</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">objective</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">)</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">:.0</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">f</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">}</span></span><span style="color:#BD4E62"><span 
+class="ectt-0900">&#x0022;</span></span><span style="color:#000000"><span 
+class="ectt-0900">)</span></span></div>
+<p class="indent">   Sweeping <!--l. 279--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>𝜀</mi></math>
+from 40 to 116 traces the frontier from the plan <!--l. 279--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+                                                                  
+
+                                                                  
+<mo 
+class="MathClass-open" stretchy="false">(</mo><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>2</mn><mn>0</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math> with revenue
+$40,000 up to <!--l. 279--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>1</mn><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>8</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math>
+with revenue $96,000, passing through fractional plans such as <!--l. 279--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mi 
+>x</mi> <mo 
+class="MathClass-rel">≈</mo> <mn>5</mn><mo 
+class="MathClass-punc">.</mo><mn>2</mn><mn>6</mn></math>, <!--l. 279--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mi 
+>y</mi> <mo 
+class="MathClass-rel">≈</mo> <mn>1</mn><mn>3</mn><mo 
+class="MathClass-punc">.</mo><mn>6</mn><mn>8</mn></math> with revenue
+$69,474 at <!--l. 279--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>𝜀</mi> <mo 
+class="MathClass-rel">=</mo> <mn>8</mn><mn>0</mn></math>.
+</p> 
+<p class="noindent">
+   </p> 
+
+   <h3 class="sectionHead"><span class="titlemark">13.4   </span> <a 
+ id="x21-37800013.4"></a>Exercises </h3>
+<p class="noindent"><span 
+class="ecbx-1200">Warm-ups</span>
+<a 
+ id="x21-378001r2"></a>
+</p> 
+<p class="noindent"><span 
+class="ecbx-1000">Exercise 13.2: Defining Pareto Optimality</span>
+</p> 
+<p class="indent">   <!--l. 286--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mo 
+class="MathClass-bin">⋆</mo></math> 
+Define <span 
+class="ecti-1000">Pareto optimality </span>for a minimization multi-objective problem with two
+objectives.
+</p> 
+<p class="indent">   <span 
+class="ecrm-0800">[Section</span><span 
+class="ecrm-0800"> </span><a 
+href="#x21-36300013.2"><span 
+class="ecrm-0800">13.2</span><!--tex4ht:ref: sec:pareto-frontier --></a><span 
+class="ecrm-0800">]</span>
+<a 
+ id="x21-378002r3"></a>
+</p> 
+<p class="noindent"><span 
+class="ecbx-1000">Exercise 13.3: Spotting Dominated Designs</span>
+</p> 
+<p class="indent">   <!--l. 292--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mo 
+class="MathClass-bin">⋆</mo></math> 
+Five supplier contracts are scored on two objectives, both to be minimized: <!--l. 293--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+></math> (cost, in
+$1000s) and <!--l. 293--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+></math>
+(delivery time, in days).
+   </p> 
+
+<div class="center" 
+>
+<p class="indent">
+</p> 
+<div class="tabular"> <table id="TBL-360" class="tabular" 
+rules="groups" 
+><colgroup id="TBL-360-1g"><col 
+id="TBL-360-1" /></colgroup><colgroup id="TBL-360-2g"><col 
+id="TBL-360-2" /><col 
+id="TBL-360-3" /><col 
+id="TBL-360-4" /><col 
+id="TBL-360-5" /><col 
+id="TBL-360-6" /></colgroup><tr  
+ style="vertical-align:baseline;" id="TBL-360-1-"><td  style="text-align:center; white-space:nowrap;" id="TBL-360-1-1"  
+class="td11">                              Contract                                                </td><td  style="text-align:center; white-space:nowrap;" id="TBL-360-1-2"  
+class="td11"> G  </td><td  style="text-align:center; white-space:nowrap;" id="TBL-360-1-3"  
+class="td11"> H  </td><td  style="text-align:center; white-space:nowrap;" id="TBL-360-1-4"  
+class="td11"> I  </td><td  style="text-align:center; white-space:nowrap;" id="TBL-360-1-5"  
+class="td11"> J  </td><td  style="text-align:center; white-space:nowrap;" id="TBL-360-1-6"  
+class="td11"> K  </td></tr><tr class="hline" style="border-top:1px solid #000"><td><hr /></td><td><hr /></td><td><hr /></td><td><hr /></td><td><hr /></td><td><hr /></td></tr><tr  
+ style="vertical-align:baseline;" id="TBL-360-2-"><td  style="text-align:center; white-space:nowrap;" id="TBL-360-2-1"  
+class="td11"> <!--l. 298--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+>
+<mn>1</mn></mrow></msub 
+></math>  </td><td  style="text-align:center; white-space:nowrap;" id="TBL-360-2-2"  
+class="td11"> 2  </td><td  style="text-align:center; white-space:nowrap;" id="TBL-360-2-3"  
+class="td11"> 4  </td><td  style="text-align:center; white-space:nowrap;" id="TBL-360-2-4"  
+class="td11"> 5  </td><td  style="text-align:center; white-space:nowrap;" id="TBL-360-2-5"  
+class="td11"> 7  </td><td  style="text-align:center; white-space:nowrap;" id="TBL-360-2-6"  
+class="td11"> 6  </td>
+</tr><tr  
+ style="vertical-align:baseline;" id="TBL-360-3-"><td  style="text-align:center; white-space:nowrap;" id="TBL-360-3-1"  
+class="td11"> <!--l. 299--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+></math>  </td><td  style="text-align:center; white-space:nowrap;" id="TBL-360-3-2"  
+class="td11"> 9  </td><td  style="text-align:center; white-space:nowrap;" id="TBL-360-3-3"  
+class="td11"> 7  </td><td  style="text-align:center; white-space:nowrap;" id="TBL-360-3-4"  
+class="td11"> 8  </td><td  style="text-align:center; white-space:nowrap;" id="TBL-360-3-5"  
+class="td11"> 3  </td><td  style="text-align:center; white-space:nowrap;" id="TBL-360-3-6"  
+class="td11"> 5  </td>
+</tr><tr  
+ style="vertical-align:baseline;" id="TBL-360-4-"><td  style="text-align:center; white-space:nowrap;" id="TBL-360-4-1"  
+class="td11">                                                                     </td></tr></table></div></div>
+<p class="indent">
+     </p> 
+<dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+  1. </dt><dd 
+class="enumerate-enumitem">Which contracts are dominated, and by which contract?
+     </dd><dt class="enumerate-enumitem">
+  2. </dt><dd 
+class="enumerate-enumitem">List the Pareto frontier in order of increasing <!--l. 305--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+></math>.
+     </dd><dt class="enumerate-enumitem">
+  3. </dt><dd 
+class="enumerate-enumitem">True or false: a contract that is the unique minimizer of <!--l. 306--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+></math>
+     can never be dominated. Explain.</dd></dl>
+                                                                  
+
+                                                                  
+<p class="indent">   <span 
+class="ecrm-0800">[Section</span><span 
+class="ecrm-0800"> </span><a 
+href="#x21-36300013.2"><span 
+class="ecrm-0800">13.2</span><!--tex4ht:ref: sec:pareto-frontier --></a><span 
+class="ecrm-0800">, Exercise</span><span 
+class="ecrm-0800"> </span><a 
+href="#x21-378010r5"><span 
+class="ecrm-0800">13.5</span><!--tex4ht:ref: ex:pareto-table --></a><span 
+class="ecrm-0800">]</span>
+<a 
+ id="x21-378006r4"></a>
+</p> 
+<p class="noindent"><span 
+class="ecbx-1000">Exercise 13.4: Computing Weighted-Sum Scores</span>
+</p> 
+<p class="indent">   <!--l. 312--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mo 
+class="MathClass-bin">⋆</mo></math> 
+Using the contract table from Exercise <a 
+href="#x21-378002r3">13.3<!--tex4ht:ref: ex:moo-dominance --></a>, form the weighted score <!--l. 313--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mi 
+>S</mi> <mo 
+class="MathClass-rel">=</mo> <msub><mrow 
+><mi 
+>w</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+><msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+> <mo 
+class="MathClass-bin">+</mo> <msub><mrow 
+><mi 
+>w</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+><msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+></math> (both
+objectives minimized, so the lowest score wins).
+     </p> 
+<dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+  1. </dt><dd 
+class="enumerate-enumitem">For <!--l. 315--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mo 
+class="MathClass-open" stretchy="false">(</mo><msub><mrow 
+><mi 
+>w</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+><mo 
+class="MathClass-punc">,</mo><msub><mrow 
+><mi 
+>w</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+><mo 
+class="MathClass-close" stretchy="false">)</mo> <mo 
+class="MathClass-rel">=</mo> <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>0</mn><mo 
+class="MathClass-punc">.</mo><mn>6</mn><mo 
+class="MathClass-punc">,</mo><mn>0</mn><mo 
+class="MathClass-punc">.</mo><mn>4</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math>,
+     compute all five scores and identify the winning contract.
+     </dd><dt class="enumerate-enumitem">
+  2. </dt><dd 
+class="enumerate-enumitem">Repeat for <!--l. 316--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mo 
+class="MathClass-open" stretchy="false">(</mo><msub><mrow 
+><mi 
+>w</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+><mo 
+class="MathClass-punc">,</mo><msub><mrow 
+><mi 
+>w</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+><mo 
+class="MathClass-close" stretchy="false">)</mo> <mo 
+class="MathClass-rel">=</mo> <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>0</mn><mo 
+class="MathClass-punc">.</mo><mn>2</mn><mo 
+class="MathClass-punc">,</mo><mn>0</mn><mo 
+class="MathClass-punc">.</mo><mn>8</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math>.
+     Why does the winner change?
+     </dd><dt class="enumerate-enumitem">
+  3. </dt><dd 
+class="enumerate-enumitem">Contract I is dominated by contract H. Show that for every choice of
+     weights <!--l. 317--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>w</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+><mo 
+class="MathClass-punc">,</mo><msub><mrow 
+><mi 
+>w</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+> <mo 
+class="MathClass-rel">&#x003E;</mo> <mn>0</mn></math>,
+     contract I scores strictly worse than H, so a dominated point can never
+     win a weighted sum with positive weights.</dd></dl>
+<p class="indent">   <span 
+class="ecrm-0800">[Section</span><span 
+class="ecrm-0800"> </span><a 
+href="#x21-36300013.2"><span 
+class="ecrm-0800">13.2</span><!--tex4ht:ref: sec:pareto-frontier --></a><span 
+class="ecrm-0800">]</span>
+</p> 
+<p class="noindent"><span 
+class="ecbx-1200">Core problems</span>
+<a 
+ id="x21-378010r5"></a>
+</p> 
+<p class="noindent"><span 
+class="ecbx-1000">Exercise 13.5: Pareto Frontier, Weighted Sum, and </span><!--l. 324--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mi 
+>𝜀</mi></math><span 
+class="ecbx-1000">-Constraint</span>
+</p> 
+<p class="indent">   <!--l. 325--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >  <mo 
+class="MathClass-bin">⋆</mo> <mo 
+class="MathClass-bin">⋆</mo></math> 
+Consider the following feasible set of designs with two objectives to minimize: <!--l. 326--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+></math> (cost)
+and <!--l. 326--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+></math>
+(emissions). The table lists six <span 
+class="ecti-1000">candidates </span>from a design study; some may be
+dominated among this set.
+   </p> 
+
+<div class="center" 
+>
+<p class="indent">
+</p> 
+<div class="tabular"> <table id="TBL-361" class="tabular" 
+rules="groups" 
+><colgroup id="TBL-361-1g"><col 
+id="TBL-361-1" /></colgroup><colgroup id="TBL-361-2g"><col 
+id="TBL-361-2" /><col 
+id="TBL-361-3" /><col 
+id="TBL-361-4" /><col 
+id="TBL-361-5" /><col 
+id="TBL-361-6" /><col 
+id="TBL-361-7" /></colgroup><tr  
+ style="vertical-align:baseline;" id="TBL-361-1-"><td  style="text-align:center; white-space:nowrap;" id="TBL-361-1-1"  
+class="td11">                               Design                                                 </td><td  style="text-align:center; white-space:nowrap;" id="TBL-361-1-2"  
+class="td11"> A  </td><td  style="text-align:center; white-space:nowrap;" id="TBL-361-1-3"  
+class="td11"> B  </td><td  style="text-align:center; white-space:nowrap;" id="TBL-361-1-4"  
+class="td11"> C  </td><td  style="text-align:center; white-space:nowrap;" id="TBL-361-1-5"  
+class="td11"> D  </td><td  style="text-align:center; white-space:nowrap;" id="TBL-361-1-6"  
+class="td11"> E  </td><td  style="text-align:center; white-space:nowrap;" id="TBL-361-1-7"  
+class="td11"> F  </td>
+</tr><tr class="hline" style="border-top:1px solid #000"><td><hr /></td><td><hr /></td><td><hr /></td><td><hr /></td><td><hr /></td><td><hr /></td><td><hr /></td></tr><tr  
+ style="vertical-align:baseline;" id="TBL-361-2-"><td  style="text-align:center; white-space:nowrap;" id="TBL-361-2-1"  
+class="td11"> <!--l. 332--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+></math>  </td><td  style="text-align:center; white-space:nowrap;" id="TBL-361-2-2"  
+class="td11"> 6  </td><td  style="text-align:center; white-space:nowrap;" id="TBL-361-2-3"  
+class="td11"> 4  </td><td  style="text-align:center; white-space:nowrap;" id="TBL-361-2-4"  
+class="td11"> 7  </td><td  style="text-align:center; white-space:nowrap;" id="TBL-361-2-5"  
+class="td11"> 3  </td><td  style="text-align:center; white-space:nowrap;" id="TBL-361-2-6"  
+class="td11"> 5  </td><td  style="text-align:center; white-space:nowrap;" id="TBL-361-2-7"  
+class="td11"> 10  </td>
+</tr><tr  
+ style="vertical-align:baseline;" id="TBL-361-3-"><td  style="text-align:center; white-space:nowrap;" id="TBL-361-3-1"  
+class="td11"> <!--l. 333--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+></math>  </td><td  style="text-align:center; white-space:nowrap;" id="TBL-361-3-2"  
+class="td11"> 5  </td><td  style="text-align:center; white-space:nowrap;" id="TBL-361-3-3"  
+class="td11"> 8  </td><td  style="text-align:center; white-space:nowrap;" id="TBL-361-3-4"  
+class="td11"> 4  </td><td  style="text-align:center; white-space:nowrap;" id="TBL-361-3-5"  
+class="td11"> 6  </td><td  style="text-align:center; white-space:nowrap;" id="TBL-361-3-6"  
+class="td11"> 6  </td><td  style="text-align:center; white-space:nowrap;" id="TBL-361-3-7"  
+class="td11">  3   </td>
+</tr><tr  
+ style="vertical-align:baseline;" id="TBL-361-4-"><td  style="text-align:center; white-space:nowrap;" id="TBL-361-4-1"  
+class="td11">                                                                     </td></tr></table>
+</div></div>
+<p class="indent">
+                                                                  
+
+                                                                  
+     </p> 
+<dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+  1. </dt><dd 
+class="enumerate-enumitem">Identify all <span 
+class="ecbx-1000">Pareto optimal </span>designs from <!--l. 338--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mo 
+class="MathClass-open" stretchy="false">{</mo><mi 
+>A</mi><mo 
+class="MathClass-punc">,</mo><mi 
+class="MathClass-op">…</mi><mo> ⁡<!--FUNCTION APPLICATION--></mo><mo 
+class="MathClass-punc">,</mo><mi 
+>F</mi><mo 
+class="MathClass-close" stretchy="false">}</mo></math>
+     and list the Pareto frontier.
+     </dd><dt class="enumerate-enumitem">
+  2. </dt><dd 
+class="enumerate-enumitem">Suppose we use a <span 
+class="ecti-1000">weighted-sum </span>with weights <!--l. 341--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mo 
+class="MathClass-open" stretchy="false">(</mo><mi 
+>α</mi><mo 
+class="MathClass-punc">,</mo><mn>1</mn> <mo 
+class="MathClass-bin">−</mo> <mi 
+>α</mi><mo 
+class="MathClass-close" stretchy="false">)</mo></math>,
+     <!--l. 341--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>α</mi> <mo 
+class="MathClass-rel">∈</mo> <mo 
+class="MathClass-open" stretchy="false">[</mo><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>1</mn><mo 
+class="MathClass-close" stretchy="false">]</mo></math>.
+     Which designs can be obtained as optimal for some <!--l. 341--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>α</mi></math>?
+     Briefly justify.
+     </dd><dt class="enumerate-enumitem">
+  3. </dt><dd 
+class="enumerate-enumitem">Using the <!--l. 345--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>𝜀</mi></math>-constraint
+     method minimizing <!--l. 345--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+></math>
+     subject to <!--l. 345--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+> <mo 
+class="MathClass-rel">≤</mo> <mi 
+>𝜀</mi></math>,
+     give a value of <!--l. 345--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>𝜀</mi></math>
+     that  attains  a  design  on  the  frontier  <span 
+class="ecti-1000">that  cannot  be  obtained  </span>by  any
+     weighted sum (if any), or explain why all frontier points are reachable by
+     weighted sums.
+     </dd><dt class="enumerate-enumitem">
+  4. </dt><dd 
+class="enumerate-enumitem">Sketch (by hand) the points in the <!--l. 349--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mo 
+class="MathClass-open" stretchy="false">(</mo><msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+><mo 
+class="MathClass-punc">,</mo><msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+><mo 
+class="MathClass-close" stretchy="false">)</mo></math>
+     plane, indicate dominated points, and draw the Pareto frontier with arrows
+     showing the direction of improvement.
+                                                                  
+
+                                                                  
+     </dd></dl>
+<p class="indent">   <span 
+class="ecrm-0800">[Section</span><span 
+class="ecrm-0800"> </span><a 
+href="#x21-36300013.2"><span 
+class="ecrm-0800">13.2</span><!--tex4ht:ref: sec:pareto-frontier --></a><span 
+class="ecrm-0800">, Table</span><span 
+class="ecrm-0800"> </span><a 
+href="#x21-366001r1"><span 
+class="ecrm-0800">13.1</span><!--tex4ht:ref: tab:moo-methods --></a><span 
+class="ecrm-0800">]</span>
+<a 
+ id="x21-378015r6"></a>
+</p> 
+<p class="noindent"><span 
+class="ecbx-1000">Exercise 13.6: Weighted Sum Method</span>
+</p> 
+<p class="indent">   <!--l. 357--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >  <mo 
+class="MathClass-bin">⋆</mo> <mo 
+class="MathClass-bin">⋆</mo></math> 
+A city planner is evaluating three road improvement projects. Each project has a cost
+(to minimize) and an accessibility score (to maximize):
+   </p> 
+
+<div class="center" 
+>
+<p class="indent">
+</p> 
+<div class="tabular"> <table id="TBL-362" class="tabular" 
+rules="groups" 
+><colgroup id="TBL-362-1g"><col 
+id="TBL-362-1" /></colgroup><colgroup id="TBL-362-2g"><col 
+id="TBL-362-2" /></colgroup><colgroup id="TBL-362-3g"><col 
+id="TBL-362-3" /></colgroup><tr  
+ style="vertical-align:baseline;" id="TBL-362-1-"><td  style="text-align:center; white-space:nowrap;" id="TBL-362-1-1"  
+class="td11"> <span 
+class="ecbx-1000">Project  </span></td><td  style="text-align:center; white-space:nowrap;" id="TBL-362-1-2"  
+class="td11"> <span 
+class="ecbx-1000">Cost ($M)  </span></td><td  style="text-align:center; white-space:nowrap;" id="TBL-362-1-3"  
+class="td11"> <span 
+class="ecbx-1000">Accessibility Score  </span></td>
+</tr><tr class="hline" style="border-top:1px solid #000"><td><hr /></td><td><hr /></td><td><hr /></td></tr><tr  
+ style="vertical-align:baseline;" id="TBL-362-2-"><td  style="text-align:center; white-space:nowrap;" id="TBL-362-2-1"  
+class="td11">    P1      </td><td  style="text-align:center; white-space:nowrap;" id="TBL-362-2-2"  
+class="td11">      2         </td><td  style="text-align:center; white-space:nowrap;" id="TBL-362-2-3"  
+class="td11">          7               </td>
+</tr><tr  
+ style="vertical-align:baseline;" id="TBL-362-3-"><td  style="text-align:center; white-space:nowrap;" id="TBL-362-3-1"  
+class="td11">    P2      </td><td  style="text-align:center; white-space:nowrap;" id="TBL-362-3-2"  
+class="td11">      5         </td><td  style="text-align:center; white-space:nowrap;" id="TBL-362-3-3"  
+class="td11">          9               </td>
+</tr><tr  
+ style="vertical-align:baseline;" id="TBL-362-4-"><td  style="text-align:center; white-space:nowrap;" id="TBL-362-4-1"  
+class="td11">    P3      </td><td  style="text-align:center; white-space:nowrap;" id="TBL-362-4-2"  
+class="td11">      3         </td><td  style="text-align:center; white-space:nowrap;" id="TBL-362-4-3"  
+class="td11">          6               </td>
+</tr><tr  
+ style="vertical-align:baseline;" id="TBL-362-5-"><td  style="text-align:center; white-space:nowrap;" id="TBL-362-5-1"  
+class="td11">          </td></tr></table></div></div>
+<p class="indent">   We reformulate as a minimization problem with objectives <!--l. 370--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+> <mo 
+class="MathClass-rel">=</mo> <mstyle 
+class="text"><mtext  >cost</mtext></mstyle></math> and <!--l. 370--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+> <mo 
+class="MathClass-rel">=</mo> <mo 
+class="MathClass-bin">−</mo><mstyle 
+class="text"><mtext  >accessibility</mtext></mstyle></math> (so
+both are minimized).
+</p> 
+<p class="indent">
+     </p> 
+<dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+  1. </dt><dd 
+class="enumerate-enumitem">Which projects are Pareto optimal? Justify your answer.
+     </dd><dt class="enumerate-enumitem">
+  2. </dt><dd 
+class="enumerate-enumitem">Using the weighted-sum method with weights <!--l. 374--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>w</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+> <mo 
+class="MathClass-rel">=</mo> <mn>0</mn><mo 
+class="MathClass-punc">.</mo><mn>5</mn></math>
+     for cost and <!--l. 374--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>w</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+> <mo 
+class="MathClass-rel">=</mo> <mn>0</mn><mo 
+class="MathClass-punc">.</mo><mn>5</mn></math>
+     for negative accessibility, which project is selected?
+     </dd><dt class="enumerate-enumitem">
+  3. </dt><dd 
+class="enumerate-enumitem">Is there a set of weights that would select project P3? Explain.</dd></dl>
+<p class="indent">   <span 
+class="ecrm-0800">[Section</span><span 
+class="ecrm-0800"> </span><a 
+href="#x21-36300013.2"><span 
+class="ecrm-0800">13.2</span><!--tex4ht:ref: sec:pareto-frontier --></a><span 
+class="ecrm-0800">]</span>
+<a 
+ id="x21-378019r7"></a>
+</p> 
+<p class="noindent"><span 
+class="ecbx-1000">Exercise 13.7: Epsilon-Constraint Method</span>
+</p> 
+<p class="indent">   <!--l. 381--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >  <mo 
+class="MathClass-bin">⋆</mo> <mo 
+class="MathClass-bin">⋆</mo></math> 
+Consider a bi-objective linear program: </p> 
+<table class="equation-star"><tr><td>
+                                                                  
+
+                                                                  
+<!--l. 383--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="block" class="equation"> 
+                         <mi class="qopname">min</mi><mo> ⁡<!--FUNCTION APPLICATION--> </mo><mspace width="0.28em" class="thickpace"/><mo 
+class="MathClass-open" stretchy="false">(</mo><msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+><mo 
+class="MathClass-open" stretchy="false">(</mo><mstyle mathvariant="bold"><mi 
+>x</mi></mstyle><mo 
+class="MathClass-close" stretchy="false">)</mo><mo 
+class="MathClass-punc">,</mo><mspace width="0.28em" class="thickpace"/><msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+><mo 
+class="MathClass-open" stretchy="false">(</mo><mstyle mathvariant="bold"><mi 
+>x</mi></mstyle><mo 
+class="MathClass-close" stretchy="false">)</mo><mo 
+class="MathClass-close" stretchy="false">)</mo> <mo 
+class="MathClass-rel">=</mo> <mo 
+class="MathClass-open" stretchy="false">(</mo><msub><mrow 
+><mi 
+>x</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+> <mo 
+class="MathClass-bin">+</mo> <mn>2</mn><msub><mrow 
+><mi 
+>x</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+><mo 
+class="MathClass-punc">,</mo><mspace width="0.28em" class="thickpace"/><mn>3</mn><msub><mrow 
+><mi 
+>x</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+> <mo 
+class="MathClass-bin">+</mo> <msub><mrow 
+><mi 
+>x</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+><mo 
+class="MathClass-close" stretchy="false">)</mo>
+</math></td></tr></table>
+<p class="indent">   subject to <!--l. 386--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>x</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+> <mo 
+class="MathClass-bin">+</mo> <msub><mrow 
+><mi 
+>x</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+> <mo 
+class="MathClass-rel">≥</mo> <mn>4</mn></math>, <!--l. 386--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<msub><mrow 
+><mi 
+>x</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+> <mo 
+class="MathClass-rel">≤</mo> <mn>5</mn></math>, <!--l. 386--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<msub><mrow 
+><mi 
+>x</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+> <mo 
+class="MathClass-rel">≤</mo> <mn>5</mn></math>, and <!--l. 386--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<msub><mrow 
+><mi 
+>x</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+><mo 
+class="MathClass-punc">,</mo><msub><mrow 
+><mi 
+>x</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+> <mo 
+class="MathClass-rel">≥</mo> <mn>0</mn></math>.
+</p> 
+<p class="indent">
+     </p> 
+<dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+  1. </dt><dd 
+class="enumerate-enumitem">Apply the <!--l. 389--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>𝜀</mi></math>-constraint
+     method: minimize <!--l. 389--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+></math>
+     subject to <!--l. 389--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+> <mo 
+class="MathClass-rel">≤</mo> <mi 
+>𝜀</mi></math>.
+     Write out the resulting single-objective LP.
+     </dd><dt class="enumerate-enumitem">
+  2. </dt><dd 
+class="enumerate-enumitem">Find the optimal solution for <!--l. 390--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>𝜀</mi> <mo 
+class="MathClass-rel">=</mo> <mn>1</mn><mn>0</mn></math>
+     and for <!--l. 390--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>𝜀</mi> <mo 
+class="MathClass-rel">=</mo> <mn>6</mn></math>.
+     Are both solutions Pareto optimal?
+     </dd><dt class="enumerate-enumitem">
+  3. </dt><dd 
+class="enumerate-enumitem">Describe what happens as <!--l. 391--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>𝜀</mi></math>
+     decreases from a large value toward <!--l. 391--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msubsup><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow><mrow 
+><mo 
+class="MathClass-bin">∗</mo></mrow></msubsup 
+></math>
+     (the minimum of <!--l. 391--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+></math>
+     alone).</dd></dl>
+<p class="indent">   <span 
+class="ecrm-0800">[Section</span><span 
+class="ecrm-0800"> </span><a 
+href="#x21-36300013.2"><span 
+class="ecrm-0800">13.2</span><!--tex4ht:ref: sec:pareto-frontier --></a><span 
+class="ecrm-0800">, Section</span><span 
+class="ecrm-0800"> </span><a 
+href="#x21-37700013.3"><span 
+class="ecrm-0800">13.3</span><!--tex4ht:ref: sec:moo-tools --></a><span 
+class="ecrm-0800">]</span>
+<a 
+ id="x21-378023r8"></a>
+</p> 
+<p class="noindent"><span 
+class="ecbx-1000">Exercise 13.8: Epsilon-Constraint by Hand</span>
+</p> 
+<p class="indent">   <!--l. 397--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >  <mo 
+class="MathClass-bin">⋆</mo> <mo 
+class="MathClass-bin">⋆</mo></math>  Consider two
+objectives to <span 
+class="ecti-1000">maximize</span>, <!--l. 398--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+> <mo 
+class="MathClass-rel">=</mo> <mn>3</mn><msub><mrow 
+><mi 
+>x</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+> <mo 
+class="MathClass-bin">+</mo> <msub><mrow 
+><mi 
+>x</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+></math>
+and <!--l. 398--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+> <mo 
+class="MathClass-rel">=</mo> <msub><mrow 
+><mi 
+>x</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+> <mo 
+class="MathClass-bin">+</mo> <mn>3</mn><msub><mrow 
+><mi 
+>x</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+></math>,
+over the triangle </p> 
+<table class="equation-star"><tr><td>
+                                                                  
+
+                                                                  
+<!--l. 399--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="block" class="equation"> 
+                              <mi 
+>X</mi> <mo 
+class="MathClass-rel">=</mo> <mo 
+class="MathClass-open" stretchy="false">{</mo><mo 
+class="MathClass-open" stretchy="false">(</mo><msub><mrow 
+><mi 
+>x</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+><mo 
+class="MathClass-punc">,</mo><msub><mrow 
+><mi 
+>x</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+><mo 
+class="MathClass-close" stretchy="false">)</mo> <mo 
+class="MathClass-rel">≥</mo> <mn>0</mn> <mo 
+class="MathClass-punc">:</mo> <msub><mrow 
+><mi 
+>x</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+> <mo 
+class="MathClass-bin">+</mo> <msub><mrow 
+><mi 
+>x</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+> <mo 
+class="MathClass-rel">≤</mo> <mn>6</mn><mo 
+class="MathClass-close" stretchy="false">}</mo><mo 
+class="MathClass-punc">.</mo>
+</math></td></tr></table>
+<p class="indent">
+     </p> 
+<dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+  1. </dt><dd 
+class="enumerate-enumitem">Evaluate both objectives at the three vertices of <!--l. 403--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>X</mi></math>.
+     Which vertex maximizes <!--l. 403--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+></math>
+     alone? Which maximizes <!--l. 403--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+></math>
+     alone?
+     </dd><dt class="enumerate-enumitem">
+  2. </dt><dd 
+class="enumerate-enumitem">Apply the <!--l. 404--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>𝜀</mi></math>-constraint
+     method: maximize <!--l. 404--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+></math>
+     subject to <!--l. 404--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+> <mo 
+class="MathClass-rel">≥</mo> <mi 
+>𝜀</mi></math>
+     and <!--l. 404--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>x</mi> <mo 
+class="MathClass-rel">∈</mo> <mi 
+>X</mi></math>,
+     for each <!--l. 404--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>𝜀</mi> <mo 
+class="MathClass-rel">∈</mo><mo 
+class="MathClass-open" stretchy="false">{</mo><mn>6</mn><mo 
+class="MathClass-punc">,</mo><mn>1</mn><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>1</mn><mn>4</mn><mo 
+class="MathClass-punc">,</mo><mn>1</mn><mn>8</mn><mo 
+class="MathClass-close" stretchy="false">}</mo></math>.
+     Solve each LP by hand (graphically, or by checking the vertices of the sliced
+     region) and tabulate <!--l. 404--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mo 
+class="MathClass-open" stretchy="false">(</mo><msub><mrow 
+><mi 
+>x</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+><mo 
+class="MathClass-punc">,</mo><msub><mrow 
+><mi 
+>x</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+><mo 
+class="MathClass-punc">,</mo><msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+><mo 
+class="MathClass-punc">,</mo><msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+><mo 
+class="MathClass-close" stretchy="false">)</mo></math>.
+     </dd><dt class="enumerate-enumitem">
+  3. </dt><dd 
+class="enumerate-enumitem">Which part of the boundary of <!--l. 405--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>X</mi></math>
+     is the Pareto frontier in decision space? What is the trade-off rate between <!--l. 405--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+     <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+></math>
+     and <!--l. 405--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+></math>
+     along it?
+     </dd><dt class="enumerate-enumitem">
+  4. </dt><dd 
+class="enumerate-enumitem">What happens if <!--l. 406--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>𝜀</mi> <mo 
+class="MathClass-rel">&#x003E;</mo> <mn>1</mn><mn>8</mn></math>?</dd></dl>
+<p class="indent">   <span 
+class="ecrm-0800">[Section</span><span 
+class="ecrm-0800"> </span><a 
+href="#x21-36300013.2"><span 
+class="ecrm-0800">13.2</span><!--tex4ht:ref: sec:pareto-frontier --></a><span 
+class="ecrm-0800">, Section</span><span 
+class="ecrm-0800"> </span><a 
+href="#x21-37700013.3"><span 
+class="ecrm-0800">13.3</span><!--tex4ht:ref: sec:moo-tools --></a><span 
+class="ecrm-0800">]</span>
+<a 
+ id="x21-378028r9"></a>
+</p> 
+<p class="noindent"><span 
+class="ecbx-1000">Exercise 13.9: Trade-Off Analysis</span>
+</p> 
+<p class="indent">   <!--l. 412--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >  <mo 
+class="MathClass-bin">⋆</mo> <mo 
+class="MathClass-bin">⋆</mo></math> 
+A manufacturing firm faces two conflicting objectives: minimizing production cost (<!--l. 413--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+></math>) and minimizing
+environmental emissions (<!--l. 413--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+></math>).
+After solving a series of weighted-sum problems, the following Pareto optimal
+solutions are found:
+   </p> 
+
+                                                                  
+
+                                                                  
+<div class="center" 
+>
+<p class="indent">
+</p> 
+<div class="tabular"> <table id="TBL-363" class="tabular" 
+rules="groups" 
+><colgroup id="TBL-363-1g"><col 
+id="TBL-363-1" /></colgroup><colgroup id="TBL-363-2g"><col 
+id="TBL-363-2" /></colgroup><colgroup id="TBL-363-3g"><col 
+id="TBL-363-3" /></colgroup><tr  
+ style="vertical-align:baseline;" id="TBL-363-1-"><td  style="text-align:center; white-space:nowrap;" id="TBL-363-1-1"  
+class="td11"> <span 
+class="ecbx-1000">Solution  </span></td><td  style="text-align:center; white-space:nowrap;" id="TBL-363-1-2"  
+class="td11"> <!--l. 417--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+></math> <span 
+class="ecbx-1000">(Cost, $1000s)  </span></td><td  style="text-align:center; white-space:nowrap;" id="TBL-363-1-3"  
+class="td11"> <!--l. 417--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+></math> <span 
+class="ecbx-1000">(Emissions, tons)  </span></td>
+</tr><tr class="hline" style="border-top:1px solid #000"><td><hr /></td><td><hr /></td><td><hr /></td></tr><tr  
+ style="vertical-align:baseline;" id="TBL-363-2-"><td  style="text-align:center; white-space:nowrap;" id="TBL-363-2-1"  
+class="td11">    S1       </td><td  style="text-align:center; white-space:nowrap;" id="TBL-363-2-2"  
+class="td11">                                         40                                                                </td><td  style="text-align:center; white-space:nowrap;" id="TBL-363-2-3"  
+class="td11">                                          20                                                                  </td></tr><tr  
+ style="vertical-align:baseline;" id="TBL-363-3-"><td  style="text-align:center; white-space:nowrap;" id="TBL-363-3-1"  
+class="td11"> S2 </td><td  style="text-align:center; white-space:nowrap;" id="TBL-363-3-2"  
+class="td11"> 45 </td><td  style="text-align:center; white-space:nowrap;" id="TBL-363-3-3"  
+class="td11"> 14</td>
+</tr><tr  
+ style="vertical-align:baseline;" id="TBL-363-4-"><td  style="text-align:center; white-space:nowrap;" id="TBL-363-4-1"  
+class="td11">    S3       </td><td  style="text-align:center; white-space:nowrap;" id="TBL-363-4-2"  
+class="td11">                                         55                                                                </td><td  style="text-align:center; white-space:nowrap;" id="TBL-363-4-3"  
+class="td11">                                          10                                                                  </td>
+</tr><tr  
+ style="vertical-align:baseline;" id="TBL-363-5-"><td  style="text-align:center; white-space:nowrap;" id="TBL-363-5-1"  
+class="td11">    S4       </td><td  style="text-align:center; white-space:nowrap;" id="TBL-363-5-2"  
+class="td11">                                         70                                                                </td><td  style="text-align:center; white-space:nowrap;" id="TBL-363-5-3"  
+class="td11">                                          8                                                                   </td>
+</tr><tr  
+ style="vertical-align:baseline;" id="TBL-363-6-"><td  style="text-align:center; white-space:nowrap;" id="TBL-363-6-1"  
+class="td11">           </td></tr></table>
+</div></div>
+<p class="indent">
+     </p> 
+<dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+  1. </dt><dd 
+class="enumerate-enumitem">Plot these points in the objective space. Draw the Pareto frontier.
+     </dd><dt class="enumerate-enumitem">
+  2. </dt><dd 
+class="enumerate-enumitem">Compute  the  marginal  rate  of  substitution  (trade-off  ratio)  between
+     each consecutive pair of solutions. Which jump in cost gives the largest
+     reduction in emissions per dollar?
+     </dd><dt class="enumerate-enumitem">
+  3. </dt><dd 
+class="enumerate-enumitem">If the firm is willing to spend at most $50,000, which Pareto optimal
+     solution should it choose?</dd></dl>
+<p class="indent">   <span 
+class="ecrm-0800">[Section</span><span 
+class="ecrm-0800"> </span><a 
+href="#x21-36300013.2"><span 
+class="ecrm-0800">13.2</span><!--tex4ht:ref: sec:pareto-frontier --></a><span 
+class="ecrm-0800">]</span>
+</p> 
+<p class="noindent"><span 
+class="ecbx-1200">Concepts and connections</span>
+<a 
+ id="x21-378032r10"></a>
+</p> 
+<p class="noindent"><span 
+class="ecbx-1000">Exercise 13.10: What Weighted Sums Cannot See</span>
+</p> 
+<p class="indent">   <!--l. 437--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >  <mo 
+class="MathClass-bin">⋆</mo> <mo 
+class="MathClass-bin">⋆</mo></math> 
+A design study produces exactly three Pareto optimal outcomes in objective space,
+both objectives minimized: </p> 
+<table class="equation-star"><tr><td>
+<!--l. 439--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="block" class="equation"> 
+                              <mi 
+>P</mi> <mo 
+class="MathClass-rel">=</mo> <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>4</mn><mo 
+class="MathClass-close" stretchy="false">)</mo><mo 
+class="MathClass-punc">,</mo><mspace width="2em" class="qquad"/><mi 
+>Q</mi> <mo 
+class="MathClass-rel">=</mo> <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>3</mn><mo 
+class="MathClass-punc">,</mo><mn>3</mn><mo 
+class="MathClass-close" stretchy="false">)</mo><mo 
+class="MathClass-punc">,</mo><mspace width="2em" class="qquad"/><mi 
+>R</mi> <mo 
+class="MathClass-rel">=</mo> <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>4</mn><mo 
+class="MathClass-punc">,</mo><mn>0</mn><mo 
+class="MathClass-close" stretchy="false">)</mo><mo 
+class="MathClass-punc">.</mo>
+</math></td></tr></table>
+<p class="indent">
+                                                                  
+
+                                                                  
+     </p> 
+<dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+  1. </dt><dd 
+class="enumerate-enumitem">Verify that no one of these points dominates another.
+     </dd><dt class="enumerate-enumitem">
+  2. </dt><dd 
+class="enumerate-enumitem">For weights <!--l. 444--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mo 
+class="MathClass-open" stretchy="false">(</mo><mi 
+>α</mi><mo 
+class="MathClass-punc">,</mo><mn>1</mn> <mo 
+class="MathClass-bin">−</mo> <mi 
+>α</mi><mo 
+class="MathClass-close" stretchy="false">)</mo></math>
+     with <!--l. 444--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>α</mi> <mo 
+class="MathClass-rel">∈</mo> <mo 
+class="MathClass-open" stretchy="false">[</mo><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>1</mn><mo 
+class="MathClass-close" stretchy="false">]</mo></math>,
+     write the weighted score of each point as a function of <!--l. 444--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>α</mi></math>
+     and show that <!--l. 444--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi class="qopname"> min</mi><mo> ⁡<!--FUNCTION APPLICATION--> </mo><mo 
+class="MathClass-open" stretchy="false">{</mo><mn>4</mn><mi 
+>α</mi><mo 
+class="MathClass-punc">,</mo><mspace width="0.17em" class="thinspace"/><mn>4</mn> <mo 
+class="MathClass-bin">−</mo> <mn>4</mn><mi 
+>α</mi><mo 
+class="MathClass-close" stretchy="false">}</mo><mo 
+class="MathClass-rel">≤</mo> <mn>2</mn> <mo 
+class="MathClass-rel">&#x003C;</mo> <mn>3</mn></math>
+     for every <!--l. 444--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>α</mi></math>.
+     Conclude that <!--l. 444--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>Q</mi></math>
+     is never a weighted-sum optimum, not even tied.
+     </dd><dt class="enumerate-enumitem">
+  3. </dt><dd 
+class="enumerate-enumitem">Explain the result geometrically: which points lie on the lower convex hull
+     of <!--l. 445--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mo 
+class="MathClass-open" stretchy="false">{</mo><mi 
+>P</mi><mo 
+class="MathClass-punc">,</mo><mi 
+>Q</mi><mo 
+class="MathClass-punc">,</mo><mi 
+>R</mi><mo 
+class="MathClass-close" stretchy="false">}</mo></math>,
+     and why does every weighted sum correspond to a supporting line of that
+     hull? Relate your answer to the “Cons” entry for the weighted-sum method
+     in Table <a 
+href="#x21-366001r1">13.1<!--tex4ht:ref: tab:moo-methods --></a>.
+     </dd><dt class="enumerate-enumitem">
+  4. </dt><dd 
+class="enumerate-enumitem">Name a method from Table <a 
+href="#x21-366001r1">13.1<!--tex4ht:ref: tab:moo-methods --></a> that does recover <!--l. 446--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>Q</mi></math>,
+     and give a specific parameter value for it that works.</dd></dl>
+<p class="indent">   <span 
+class="ecrm-0800">[Section</span><span 
+class="ecrm-0800"> </span><a 
+href="#x21-36300013.2"><span 
+class="ecrm-0800">13.2</span><!--tex4ht:ref: sec:pareto-frontier --></a><span 
+class="ecrm-0800">, Table</span><span 
+class="ecrm-0800"> </span><a 
+href="#x21-366001r1"><span 
+class="ecrm-0800">13.1</span><!--tex4ht:ref: tab:moo-methods --></a><span 
+class="ecrm-0800">]</span>
+<a 
+ id="x21-378037r11"></a>
+</p> 
+<p class="noindent"><span 
+class="ecbx-1000">Exercise 13.11: Lexicographic versus Weighted Sum</span>
+</p> 
+<p class="indent">   <!--l. 452--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >  <mo 
+class="MathClass-bin">⋆</mo> <mo 
+class="MathClass-bin">⋆</mo></math> 
+In the furniture example of Section <a 
+href="#x21-36300013.2">13.2<!--tex4ht:ref: sec:pareto-frontier --></a>, the lexicographic method (maximize
+revenue first, then minimize waste among revenue-optimal plans) selects <!--l. 453--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mo 
+class="MathClass-open" stretchy="false">(</mo><mn>1</mn><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>8</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math>.
+     </p> 
+<dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+  1. </dt><dd 
+class="enumerate-enumitem">A weighted sum with all weight on revenue (<!--l. 455--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>α</mi> <mo 
+class="MathClass-rel">=</mo> <mn>1</mn></math>)
+     maximizes <!--l. 455--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mn>8</mn><mn>0</mn><mn>0</mn><mn>0</mn><mi 
+>x</mi> <mo 
+class="MathClass-bin">+</mo> <mn>2</mn><mn>0</mn><mn>0</mn><mn>0</mn><mi 
+>y</mi></math>
+     alone. Which plans are optimal then, and why does this not reproduce the
+     lexicographic answer?
+     </dd><dt class="enumerate-enumitem">
+  2. </dt><dd 
+class="enumerate-enumitem">Argue that any weight <!--l. 456--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>α</mi> <mo 
+class="MathClass-rel">&#x003C;</mo> <mn>1</mn></math>
+     close enough to <!--l. 456--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mn>1</mn></math>
+     selects exactly <!--l. 456--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>1</mn><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>8</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math>:
+     the small weight on waste acts as a tie-breaker among revenue-optimal
+     plans while being too small to justify giving up revenue. (Exercise <a 
+href="#x21-378041r12">13.12<!--tex4ht:ref: ex:furniture-weights --></a>
+     computes the exact threshold.)
+     </dd><dt class="enumerate-enumitem">
+  3. </dt><dd 
+class="enumerate-enumitem">When do the two methods agree in general? Explain why for a linear
+                                                                  
+
+                                                                  
+     program with finitely many vertices there is always a sufficiently extreme
+     weight that reproduces the lexicographic solution, and describe informally
+     what can go wrong if the weight on the secondary objective is not small
+     enough.</dd></dl>
+<p class="indent">   <span 
+class="ecrm-0800">[Section</span><span 
+class="ecrm-0800"> </span><a 
+href="#x21-36300013.2"><span 
+class="ecrm-0800">13.2</span><!--tex4ht:ref: sec:pareto-frontier --></a><span 
+class="ecrm-0800">, Table</span><span 
+class="ecrm-0800"> </span><a 
+href="#x21-366001r1"><span 
+class="ecrm-0800">13.1</span><!--tex4ht:ref: tab:moo-methods --></a><span 
+class="ecrm-0800">]</span>
+</p> 
+<p class="noindent"><span 
+class="ecbx-1200">Challenge problems</span>
+<a 
+ id="x21-378041r12"></a>
+</p> 
+<p class="noindent"><span 
+class="ecbx-1000">Exercise 13.12: Weights That Select Each Vertex</span>
+</p> 
+<p class="indent">   <!--l. 465--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >  <mo 
+class="MathClass-bin">⋆</mo> <mo 
+class="MathClass-bin">⋆</mo><mo 
+class="MathClass-bin">⋆</mo></math>  Return
+to the furniture example of Section <a 
+href="#x21-36300013.2">13.2<!--tex4ht:ref: sec:pareto-frontier --></a>. Measure revenue in thousands of dollars, so the
+objectives are <!--l. 466--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+> <mo 
+class="MathClass-rel">=</mo> <mn>8</mn><mi 
+>x</mi> <mo 
+class="MathClass-bin">+</mo> <mn>2</mn><mi 
+>y</mi></math>
+(maximize) and <!--l. 466--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+> <mo 
+class="MathClass-rel">=</mo> <mn>1</mn><mn>0</mn><mi 
+>x</mi> <mo 
+class="MathClass-bin">+</mo> <mn>2</mn><mi 
+>y</mi></math>
+(minimize, waste in bdft). The weighted-sum method solves </p> 
+<table class="equation-star"><tr><td>
+<!--l. 467--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="block" class="equation"> 
+                    <munder class="msub"><mrow 
+><mi class="qopname">max</mi><mo> ⁡<!--FUNCTION APPLICATION--> </mo></mrow><mrow 
+><mo 
+class="MathClass-open" stretchy="false">(</mo><mi 
+>x</mi><mo 
+class="MathClass-punc">,</mo><mi 
+>y</mi><mo 
+class="MathClass-close" stretchy="false">)</mo><mo 
+class="MathClass-rel">∈</mo><mi 
+>P</mi></mrow></munder 
+><mspace width="0.28em" class="thickpace"/><mi 
+>α</mi><msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+><mo 
+class="MathClass-open" stretchy="false">(</mo><mi 
+>x</mi><mo 
+class="MathClass-punc">,</mo><mi 
+>y</mi><mo 
+class="MathClass-close" stretchy="false">)</mo> <mo 
+class="MathClass-bin">−</mo> <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>1</mn> <mo 
+class="MathClass-bin">−</mo> <mi 
+>α</mi><mo 
+class="MathClass-close" stretchy="false">)</mo><msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+><mo 
+class="MathClass-open" stretchy="false">(</mo><mi 
+>x</mi><mo 
+class="MathClass-punc">,</mo><mi 
+>y</mi><mo 
+class="MathClass-close" stretchy="false">)</mo><mo 
+class="MathClass-punc">,</mo><mspace width="2em" class="qquad"/><mi 
+>α</mi> <mo 
+class="MathClass-rel">∈</mo> <mo 
+class="MathClass-open" stretchy="false">[</mo><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>1</mn><mo 
+class="MathClass-close" stretchy="false">]</mo><mo 
+class="MathClass-punc">.</mo>
+</math></td></tr></table>
+<p class="indent">
+     </p> 
+<dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+  1. </dt><dd 
+class="enumerate-enumitem">The optimum is always attained at a vertex of <!--l. 471--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>P</mi></math>:
+     <!--l. 471--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>0</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math>,
+     <!--l. 471--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>2</mn><mn>0</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math>,
+     <!--l. 471--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>1</mn><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>8</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math>,
+     or <!--l. 471--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>1</mn><mn>2</mn><mo 
+class="MathClass-punc">,</mo><mn>0</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math>.
+     Write the weighted objective value of each vertex as a linear function of <!--l. 471--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+     <mi 
+>α</mi></math>.
+     </dd><dt class="enumerate-enumitem">
+  2. </dt><dd 
+class="enumerate-enumitem">For each Pareto optimal vertex, find the exact interval of <!--l. 472--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>α</mi></math>
+     for which it is optimal, and give the breakpoint values of <!--l. 472--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>α</mi></math>.
+                                                                  
+
+                                                                  
+     </dd><dt class="enumerate-enumitem">
+  3. </dt><dd 
+class="enumerate-enumitem">What is optimal exactly at each breakpoint, and at <!--l. 473--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>α</mi> <mo 
+class="MathClass-rel">=</mo> <mn>1</mn></math>?
+     Explain why the dominated vertex <!--l. 473--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>1</mn><mn>2</mn><mo 
+class="MathClass-punc">,</mo><mn>0</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math>
+     shows up at <!--l. 473--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>α</mi> <mo 
+class="MathClass-rel">=</mo> <mn>1</mn></math>
+     and what this says about using zero weights.
+     </dd><dt class="enumerate-enumitem">
+  4. </dt><dd 
+class="enumerate-enumitem">Repeat part (2) with revenue in raw dollars (<!--l. 474--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+> <mo 
+class="MathClass-rel">=</mo> <mn>8</mn><mn>0</mn><mn>0</mn><mn>0</mn><mi 
+>x</mi> <mo 
+class="MathClass-bin">+</mo> <mn>2</mn><mn>0</mn><mn>0</mn><mn>0</mn><mi 
+>y</mi></math>).
+     Where are the breakpoints now? What does this tell you about normalizing
+     objectives before choosing weights?</dd></dl>
+<p class="indent">   <span 
+class="ecrm-0800">[Section</span><span 
+class="ecrm-0800"> </span><a 
+href="#x21-36300013.2"><span 
+class="ecrm-0800">13.2</span><!--tex4ht:ref: sec:pareto-frontier --></a><span 
+class="ecrm-0800">, Table</span><span 
+class="ecrm-0800"> </span><a 
+href="#x21-366001r1"><span 
+class="ecrm-0800">13.1</span><!--tex4ht:ref: tab:moo-methods --></a><span 
+class="ecrm-0800">]</span>
+</p> 
+<p class="noindent">
+   </p> 
+
+   <h5 class="likesubsubsectionHead"><a 
+ id="x21-37900013.4"></a>Selected Solutions </h5>
+<p class="noindent"><span 
+class="ecbx-1000">Solution</span>
+</p> 
+<p class="indent">   <span 
+class="ecti-1000">(Exercise</span><span 
+class="ecti-1000"> </span><a 
+href="#x21-378001r2"><span 
+class="ecti-1000">13.2</span><!--tex4ht:ref: ex:pareto-def --></a><span 
+class="ecti-1000">) For a problem minimizing </span><!--l. 482--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+></math> <span 
+class="ecti-1000">and </span><!--l. 482--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+></math> <span 
+class="ecti-1000">over a feasible</span>
+<span 
+class="ecti-1000">set </span><!--l. 482--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>P</mi></math><span 
+class="ecti-1000">, a point </span><!--l. 482--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mstyle mathvariant="bold"><mi 
+>x</mi></mstyle> <mo 
+class="MathClass-rel">∈</mo> <mi 
+>P</mi></math> <span 
+class="ecti-1000">is </span>Pareto optimal
+<span 
+class="ecti-1000">if there is no </span><!--l. 482--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mover accent="false" 
+class="mml-overline"><mrow><mstyle mathvariant="bold"><mi 
+>x</mi></mstyle></mrow><mo 
+accent="true">¯</mo></mover> <mo 
+class="MathClass-rel">∈</mo> <mi 
+>P</mi></math>
+<span 
+class="ecti-1000">with </span><!--l. 482--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mi 
+>i</mi></mrow></msub 
+><mo 
+class="MathClass-open" stretchy="false">(</mo><mover accent="false" 
+class="mml-overline"><mrow><mstyle mathvariant="bold"><mi 
+>x</mi></mstyle></mrow><mo 
+accent="true">¯</mo></mover><mo 
+class="MathClass-close" stretchy="false">)</mo> <mo 
+class="MathClass-rel">≤</mo> <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mi 
+>i</mi></mrow></msub 
+><mo 
+class="MathClass-open" stretchy="false">(</mo><mstyle mathvariant="bold"><mi 
+>x</mi></mstyle><mo 
+class="MathClass-close" stretchy="false">)</mo></math> <span 
+class="ecti-1000">for</span>
+<span 
+class="ecti-1000">both </span><!--l. 482--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>i</mi> <mo 
+class="MathClass-rel">=</mo> <mn>1</mn><mo 
+class="MathClass-punc">,</mo><mn>2</mn></math> <span 
+class="ecti-1000">and </span><!--l. 482--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mi 
+>i</mi></mrow></msub 
+><mo 
+class="MathClass-open" stretchy="false">(</mo><mover accent="false" 
+class="mml-overline"><mrow><mstyle mathvariant="bold"><mi 
+>x</mi></mstyle></mrow><mo 
+accent="true">¯</mo></mover><mo 
+class="MathClass-close" stretchy="false">)</mo> <mo 
+class="MathClass-rel">&#x003C;</mo> <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mi 
+>i</mi></mrow></msub 
+><mo 
+class="MathClass-open" stretchy="false">(</mo><mstyle mathvariant="bold"><mi 
+>x</mi></mstyle><mo 
+class="MathClass-close" stretchy="false">)</mo></math> <span 
+class="ecti-1000">for at least</span>
+<span 
+class="ecti-1000">one </span><!--l. 482--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>i</mi></math><span 
+class="ecti-1000">.</span>
+<span 
+class="ecti-1000">In words: no other feasible point is at least as good in both objectives and strictly</span>
+<span 
+class="ecti-1000">better in one.</span>
+</p> 
+<p class="noindent"><span 
+class="ecbx-1000">Solution</span>
+</p> 
+<p class="indent">   <span 
+class="ecti-1000">(Exercise</span><span 
+class="ecti-1000"> </span><a 
+href="#x21-378010r5"><span 
+class="ecti-1000">13.5</span><!--tex4ht:ref: ex:pareto-table --></a><span 
+class="ecti-1000">) (1) Compare pairs for domination (both objectives minimized). </span><!--l. 486--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mi 
+>D</mi> <mo 
+class="MathClass-rel">=</mo> <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>3</mn><mo 
+class="MathClass-punc">,</mo><mn>6</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math> <span 
+class="ecti-1000">dominates</span>
+<!--l. 486--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>B</mi> <mo 
+class="MathClass-rel">=</mo> <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>4</mn><mo 
+class="MathClass-punc">,</mo><mn>8</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math><span 
+class="ecti-1000">. </span><!--l. 486--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mi 
+>E</mi> <mo 
+class="MathClass-rel">=</mo> <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>5</mn><mo 
+class="MathClass-punc">,</mo><mn>6</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math> <span 
+class="ecti-1000">is dominated</span>
+<span 
+class="ecti-1000">by </span><!--l. 486--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>D</mi></math> <span 
+class="ecti-1000">(</span><!--l. 486--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mn>3</mn> <mo 
+class="MathClass-rel">≤</mo> <mn>5</mn></math><span 
+class="ecti-1000">, </span><!--l. 486--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mn>6</mn> <mo 
+class="MathClass-rel">≤</mo> <mn>6</mn></math><span 
+class="ecti-1000">). </span><!--l. 486--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mi 
+>A</mi> <mo 
+class="MathClass-rel">=</mo> <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>6</mn><mo 
+class="MathClass-punc">,</mo><mn>5</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math> <span 
+class="ecti-1000">is not dominated. </span><!--l. 486--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mi 
+>C</mi> <mo 
+class="MathClass-rel">=</mo> <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>7</mn><mo 
+class="MathClass-punc">,</mo><mn>4</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math> <span 
+class="ecti-1000">is not dominated. </span><!--l. 486--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mi 
+>F</mi> <mo 
+class="MathClass-rel">=</mo> <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>1</mn><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>3</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math> <span 
+class="ecti-1000">is not dominated. The</span>
+<span 
+class="ecti-1000">Pareto frontier is </span><!--l. 486--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mo 
+class="MathClass-open" stretchy="false">{</mo><mi 
+>D</mi><mo 
+class="MathClass-punc">,</mo><mi 
+>A</mi><mo 
+class="MathClass-punc">,</mo><mi 
+>C</mi><mo 
+class="MathClass-punc">,</mo><mi 
+>F</mi><mo 
+class="MathClass-close" stretchy="false">}</mo></math>
+<span 
+class="ecti-1000">with objective vectors </span><!--l. 486--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>3</mn><mo 
+class="MathClass-punc">,</mo><mn>6</mn><mo 
+class="MathClass-close" stretchy="false">)</mo><mo 
+class="MathClass-punc">,</mo><mo 
+class="MathClass-open" stretchy="false">(</mo><mn>6</mn><mo 
+class="MathClass-punc">,</mo><mn>5</mn><mo 
+class="MathClass-close" stretchy="false">)</mo><mo 
+class="MathClass-punc">,</mo><mo 
+class="MathClass-open" stretchy="false">(</mo><mn>7</mn><mo 
+class="MathClass-punc">,</mo><mn>4</mn><mo 
+class="MathClass-close" stretchy="false">)</mo><mo 
+class="MathClass-punc">,</mo><mo 
+class="MathClass-open" stretchy="false">(</mo><mn>1</mn><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>3</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math><span 
+class="ecti-1000">.</span>
+                                                                  
+
+                                                                  
+</p> 
+<p class="indent">   <span 
+class="ecti-1000">(2) A design is a weighted-sum optimum for some </span><!--l. 488--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mi 
+>α</mi></math>
+<span 
+class="ecti-1000">exactly when it lies on the lower-left convex hull of the frontier points. Plotting </span><!--l. 488--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mo 
+class="MathClass-open" stretchy="false">(</mo><mn>3</mn><mo 
+class="MathClass-punc">,</mo><mn>6</mn><mo 
+class="MathClass-close" stretchy="false">)</mo><mo 
+class="MathClass-punc">,</mo><mo 
+class="MathClass-open" stretchy="false">(</mo><mn>6</mn><mo 
+class="MathClass-punc">,</mo><mn>5</mn><mo 
+class="MathClass-close" stretchy="false">)</mo><mo 
+class="MathClass-punc">,</mo><mo 
+class="MathClass-open" stretchy="false">(</mo><mn>7</mn><mo 
+class="MathClass-punc">,</mo><mn>4</mn><mo 
+class="MathClass-close" stretchy="false">)</mo><mo 
+class="MathClass-punc">,</mo><mo 
+class="MathClass-open" stretchy="false">(</mo><mn>1</mn><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>3</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math><span 
+class="ecti-1000">, the lower convex</span>
+<span 
+class="ecti-1000">hull is formed by </span><!--l. 488--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>D</mi></math><span 
+class="ecti-1000">,</span>
+<!--l. 488--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>C</mi></math><span 
+class="ecti-1000">, and </span><!--l. 488--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mi 
+>F</mi></math><span 
+class="ecti-1000">, while</span>
+<!--l. 488--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>A</mi></math> <span 
+class="ecti-1000">lies above</span>
+<span 
+class="ecti-1000">it: </span><!--l. 488--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>D</mi></math> <span 
+class="ecti-1000">(best </span><!--l. 488--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+></math><span 
+class="ecti-1000">) and </span><!--l. 488--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mi 
+>F</mi></math> <span 
+class="ecti-1000">(best </span><!--l. 488--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+></math><span 
+class="ecti-1000">) are always obtainable,</span>
+<span 
+class="ecti-1000">and </span><!--l. 488--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>C</mi></math> <span 
+class="ecti-1000">lies on the hull</span>
+<span 
+class="ecti-1000">between them, but </span><!--l. 488--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>A</mi></math> <span 
+class="ecti-1000">sits</span>
+<span 
+class="ecti-1000">above the segment from </span><!--l. 488--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>D</mi></math>
+<span 
+class="ecti-1000">to </span><!--l. 488--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>C</mi></math> <span 
+class="ecti-1000">(slope</span>
+<span 
+class="ecti-1000">check: from </span><!--l. 488--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>D</mi></math>
+<span 
+class="ecti-1000">to </span><!--l. 488--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>C</mi></math><span 
+class="ecti-1000">, </span><!--l. 488--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mi mathvariant="normal">Δ</mi> <mo 
+class="MathClass-rel">=</mo> <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>4</mn><mo 
+class="MathClass-punc">,</mo><mo 
+class="MathClass-bin">−</mo><mn>2</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math><span 
+class="ecti-1000">; </span><!--l. 488--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mi 
+>A</mi></math> <span 
+class="ecti-1000">at </span><!--l. 488--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mo 
+class="MathClass-open" stretchy="false">(</mo><mn>6</mn><mo 
+class="MathClass-punc">,</mo><mn>5</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math> <span 
+class="ecti-1000">vs.</span><span 
+class="ecti-1000"> the segment</span>
+<span 
+class="ecti-1000">value </span><!--l. 488--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mn>6</mn> <mo 
+class="MathClass-bin">−</mo><mfrac><mrow> <mn>2</mn></mrow> 
+<mrow><mn>4</mn></mrow></mfrac><mo 
+class="MathClass-open" stretchy="false">(</mo><mn>6</mn> <mo 
+class="MathClass-bin">−</mo> <mn>3</mn><mo 
+class="MathClass-close" stretchy="false">)</mo> <mo 
+class="MathClass-rel">=</mo> <mn>4</mn><mo 
+class="MathClass-punc">.</mo><mn>5</mn> <mo 
+class="MathClass-rel">&#x003C;</mo> <mn>5</mn></math><span 
+class="ecti-1000">),</span>
+<span 
+class="ecti-1000">so </span><!--l. 488--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>A</mi></math>
+<span 
+class="ecti-1000">cannot be obtained by any weighted sum.</span>
+</p> 
+<p class="indent">   <span 
+class="ecti-1000">(3) Choose </span><!--l. 490--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>𝜀</mi> <mo 
+class="MathClass-rel">=</mo> <mn>5</mn></math><span 
+class="ecti-1000">:</span>
+<span 
+class="ecti-1000">minimizing </span><!--l. 490--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+></math>
+<span 
+class="ecti-1000">subject to </span><!--l. 490--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+> <mo 
+class="MathClass-rel">≤</mo> <mn>5</mn></math>
+<span 
+class="ecti-1000">selects </span><!--l. 490--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>A</mi> <mo 
+class="MathClass-rel">=</mo> <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>6</mn><mo 
+class="MathClass-punc">,</mo><mn>5</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math><span 
+class="ecti-1000">,</span>
+<span 
+class="ecti-1000">the frontier point unreachable by weighted sums.</span>
+</p> 
+<p class="noindent"><span 
+class="ecbx-1000">Solution</span>
+</p> 
+<p class="indent">   <span 
+class="ecti-1000">(Exercise</span><span 
+class="ecti-1000"> </span><a 
+href="#x21-378023r8"><span 
+class="ecti-1000">13.8</span><!--tex4ht:ref: ex:eps-triangle --></a><span 
+class="ecti-1000">) (1) At </span><!--l. 494--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>0</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math><span 
+class="ecti-1000">:</span>
+<!--l. 494--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mo 
+class="MathClass-open" stretchy="false">(</mo><msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+><mo 
+class="MathClass-punc">,</mo><msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+><mo 
+class="MathClass-close" stretchy="false">)</mo> <mo 
+class="MathClass-rel">=</mo> <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>0</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math><span 
+class="ecti-1000">. At </span><!--l. 494--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mo 
+class="MathClass-open" stretchy="false">(</mo><mn>6</mn><mo 
+class="MathClass-punc">,</mo><mn>0</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math><span 
+class="ecti-1000">: </span><!--l. 494--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mo 
+class="MathClass-open" stretchy="false">(</mo><mn>1</mn><mn>8</mn><mo 
+class="MathClass-punc">,</mo><mn>6</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math><span 
+class="ecti-1000">. At </span><!--l. 494--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mo 
+class="MathClass-open" stretchy="false">(</mo><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>6</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math><span 
+class="ecti-1000">: </span><!--l. 494--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mo 
+class="MathClass-open" stretchy="false">(</mo><mn>6</mn><mo 
+class="MathClass-punc">,</mo><mn>1</mn><mn>8</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math><span 
+class="ecti-1000">. So </span><!--l. 494--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mo 
+class="MathClass-open" stretchy="false">(</mo><mn>6</mn><mo 
+class="MathClass-punc">,</mo><mn>0</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math> <span 
+class="ecti-1000">maximizes</span>
+<!--l. 494--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+></math> <span 
+class="ecti-1000">alone</span>
+<span 
+class="ecti-1000">and </span><!--l. 494--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>6</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math>
+<span 
+class="ecti-1000">maximizes </span><!--l. 494--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+></math>
+<span 
+class="ecti-1000">alone.</span>
+</p> 
+<p class="indent">   <span 
+class="ecti-1000">(2) For </span><!--l. 496--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>𝜀</mi> <mo 
+class="MathClass-rel">&#x003E;</mo> <mn>6</mn></math> <span 
+class="ecti-1000">the</span>
+<span 
+class="ecti-1000">constraint </span><!--l. 496--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>x</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+> <mo 
+class="MathClass-bin">+</mo> <mn>3</mn><msub><mrow 
+><mi 
+>x</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+> <mo 
+class="MathClass-rel">≥</mo> <mi 
+>𝜀</mi></math>
+<span 
+class="ecti-1000">is binding at the optimum, and the solution lies where it meets the edge </span><!--l. 496--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<msub><mrow 
+><mi 
+>x</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+> <mo 
+class="MathClass-bin">+</mo> <msub><mrow 
+><mi 
+>x</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+> <mo 
+class="MathClass-rel">=</mo> <mn>6</mn></math><span 
+class="ecti-1000">: solving the two</span>
+                                                                  
+
+                                                                  
+<span 
+class="ecti-1000">equations gives </span><!--l. 496--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>x</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+> <mo 
+class="MathClass-rel">=</mo> <mo 
+class="MathClass-open" stretchy="false">(</mo><mi 
+>𝜀</mi> <mo 
+class="MathClass-bin">−</mo> <mn>6</mn><mo 
+class="MathClass-close" stretchy="false">)</mo><mo 
+class="MathClass-bin">∕</mo><mn>2</mn></math><span 
+class="ecti-1000">,</span>
+<!--l. 496--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>x</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+> <mo 
+class="MathClass-rel">=</mo> <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>1</mn><mn>8</mn> <mo 
+class="MathClass-bin">−</mo> <mi 
+>𝜀</mi><mo 
+class="MathClass-close" stretchy="false">)</mo><mo 
+class="MathClass-bin">∕</mo><mn>2</mn></math><span 
+class="ecti-1000">.</span>
+</p> 
+
+<div class="center" 
+>
+<p class="indent">
+</p> 
+<div class="tabular"> <table id="TBL-364" class="tabular" 
+rules="groups" 
+><colgroup id="TBL-364-1g"><col 
+id="TBL-364-1" /></colgroup><colgroup id="TBL-364-2g"><col 
+id="TBL-364-2" /><col 
+id="TBL-364-3" /><col 
+id="TBL-364-4" /><col 
+id="TBL-364-5" /></colgroup><tr  
+ style="vertical-align:baseline;" id="TBL-364-1-"><td  style="text-align:center; white-space:nowrap;" id="TBL-364-1-1"  
+class="td11"> <!--l. 499--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>𝜀</mi></math>  </td><td  style="text-align:center; white-space:nowrap;" id="TBL-364-1-2"  
+class="td11"> <!--l. 499--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>x</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+></math>  </td><td  style="text-align:center; white-space:nowrap;" id="TBL-364-1-3"  
+class="td11"> <!--l. 499--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>x</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+></math>  </td><td  style="text-align:center; white-space:nowrap;" id="TBL-364-1-4"  
+class="td11"> <!--l. 499--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+></math>  </td><td  style="text-align:center; white-space:nowrap;" id="TBL-364-1-5"  
+class="td11"> <!--l. 499--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+></math>  </td>
+</tr><tr class="hline" style="border-top:1px solid #000"><td><hr /></td><td><hr /></td><td><hr /></td><td><hr /></td><td><hr /></td></tr><tr  
+ style="vertical-align:baseline;" id="TBL-364-2-"><td  style="text-align:center; white-space:nowrap;" id="TBL-364-2-1"  
+class="td11">                                  <span 
+class="ecti-1000">6                                                  </span></td><td  style="text-align:center; white-space:nowrap;" id="TBL-364-2-2"  
+class="td11">                                  <span 
+class="ecti-1000">6                                                  </span></td><td  style="text-align:center; white-space:nowrap;" id="TBL-364-2-3"  
+class="td11">                                  <span 
+class="ecti-1000">0                                                  </span></td><td  style="text-align:center; white-space:nowrap;" id="TBL-364-2-4"  
+class="td11">                                 <span 
+class="ecti-1000">18                                                 </span></td><td  style="text-align:center; white-space:nowrap;" id="TBL-364-2-5"  
+class="td11">                                  <span 
+class="ecti-1000">6                                                  </span></td></tr><tr  
+ style="vertical-align:baseline;" id="TBL-364-3-"><td  style="text-align:center; white-space:nowrap;" id="TBL-364-3-1"  
+class="td11"> <span 
+class="ecti-1000">10 </span></td><td  style="text-align:center; white-space:nowrap;" id="TBL-364-3-2"  
+class="td11"> <span 
+class="ecti-1000">4 </span></td><td  style="text-align:center; white-space:nowrap;" id="TBL-364-3-3"  
+class="td11"> <span 
+class="ecti-1000">2 </span></td><td  style="text-align:center; white-space:nowrap;" id="TBL-364-3-4"  
+class="td11"> <span 
+class="ecti-1000">14 </span></td><td  style="text-align:center; white-space:nowrap;" id="TBL-364-3-5"  
+class="td11"> <span 
+class="ecti-1000">10</span></td>
+</tr><tr  
+ style="vertical-align:baseline;" id="TBL-364-4-"><td  style="text-align:center; white-space:nowrap;" id="TBL-364-4-1"  
+class="td11">                                  <span 
+class="ecti-1000">14                                                 </span></td><td  style="text-align:center; white-space:nowrap;" id="TBL-364-4-2"  
+class="td11">                                  <span 
+class="ecti-1000">2                                                  </span></td><td  style="text-align:center; white-space:nowrap;" id="TBL-364-4-3"  
+class="td11">                                  <span 
+class="ecti-1000">4                                                  </span></td><td  style="text-align:center; white-space:nowrap;" id="TBL-364-4-4"  
+class="td11">                                 <span 
+class="ecti-1000">10                                                 </span></td><td  style="text-align:center; white-space:nowrap;" id="TBL-364-4-5"  
+class="td11">                                 <span 
+class="ecti-1000">14                                                 </span></td>
+</tr><tr  
+ style="vertical-align:baseline;" id="TBL-364-5-"><td  style="text-align:center; white-space:nowrap;" id="TBL-364-5-1"  
+class="td11">                                  <span 
+class="ecti-1000">18                                                 </span></td><td  style="text-align:center; white-space:nowrap;" id="TBL-364-5-2"  
+class="td11">                                  <span 
+class="ecti-1000">0                                                  </span></td><td  style="text-align:center; white-space:nowrap;" id="TBL-364-5-3"  
+class="td11">                                  <span 
+class="ecti-1000">6                                                  </span></td><td  style="text-align:center; white-space:nowrap;" id="TBL-364-5-4"  
+class="td11">                                  <span 
+class="ecti-1000">6                                                  </span></td><td  style="text-align:center; white-space:nowrap;" id="TBL-364-5-5"  
+class="td11">                                 <span 
+class="ecti-1000">18                                                 </span></td>
+</tr><tr  
+ style="vertical-align:baseline;" id="TBL-364-6-"><td  style="text-align:center; white-space:nowrap;" id="TBL-364-6-1"  
+class="td11">                                                                     </td></tr></table>
+</div></div>
+<p class="indent">   <span 
+class="ecti-1000">(3) Each solution has </span><!--l. 507--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+> <mo 
+class="MathClass-rel">=</mo> <mi 
+>𝜀</mi></math>
+<span 
+class="ecti-1000">exactly and the largest possible </span><!--l. 507--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+></math>
+<span 
+class="ecti-1000">given that, so each is Pareto optimal. The frontier is the edge </span><!--l. 507--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<msub><mrow 
+><mi 
+>x</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+> <mo 
+class="MathClass-bin">+</mo> <msub><mrow 
+><mi 
+>x</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+> <mo 
+class="MathClass-rel">=</mo> <mn>6</mn></math> <span 
+class="ecti-1000">from </span><!--l. 507--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mo 
+class="MathClass-open" stretchy="false">(</mo><mn>6</mn><mo 
+class="MathClass-punc">,</mo><mn>0</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math> <span 
+class="ecti-1000">to </span><!--l. 507--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mo 
+class="MathClass-open" stretchy="false">(</mo><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>6</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math><span 
+class="ecti-1000">: parametrizing</span>
+<span 
+class="ecti-1000">by </span><!--l. 507--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>x</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+> <mo 
+class="MathClass-rel">=</mo> <mi 
+>t</mi></math>
+<span 
+class="ecti-1000">gives </span><!--l. 507--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+> <mo 
+class="MathClass-rel">=</mo> <mn>1</mn><mn>8</mn> <mo 
+class="MathClass-bin">−</mo> <mn>2</mn><mi 
+>t</mi></math>
+<span 
+class="ecti-1000">and </span><!--l. 507--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+> <mo 
+class="MathClass-rel">=</mo> <mn>6</mn> <mo 
+class="MathClass-bin">+</mo> <mn>2</mn><mi 
+>t</mi></math><span 
+class="ecti-1000">,</span>
+<span 
+class="ecti-1000">a one-for-one trade-off between the objectives.</span>
+</p> 
+<p class="indent">   <span 
+class="ecti-1000">(4) The maximum of </span><!--l. 509--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>2</mn></mrow></msub 
+></math>
+<span 
+class="ecti-1000">over </span><!--l. 509--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>X</mi></math> <span 
+class="ecti-1000">is </span><!--l. 509--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mn>1</mn><mn>8</mn></math><span 
+class="ecti-1000">, so</span>
+<span 
+class="ecti-1000">for </span><!--l. 509--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>𝜀</mi> <mo 
+class="MathClass-rel">&#x003E;</mo> <mn>1</mn><mn>8</mn></math>
+<span 
+class="ecti-1000">the constrained LP is infeasible; the sweep should stop there.</span>
+</p> 
+<p class="noindent"><span 
+class="ecbx-1000">Solution</span>
+</p> 
+<p class="indent">   <span 
+class="ecti-1000">(Exercise</span><span 
+class="ecti-1000"> </span><a 
+href="#x21-378041r12"><span 
+class="ecti-1000">13.12</span><!--tex4ht:ref: ex:furniture-weights --></a><span 
+class="ecti-1000">) (1) The weighted objective </span><!--l. 513--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mi 
+>α</mi><mo 
+class="MathClass-open" stretchy="false">(</mo><mn>8</mn><mi 
+>x</mi> <mo 
+class="MathClass-bin">+</mo> <mn>2</mn><mi 
+>y</mi><mo 
+class="MathClass-close" stretchy="false">)</mo> <mo 
+class="MathClass-bin">−</mo> <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>1</mn> <mo 
+class="MathClass-bin">−</mo> <mi 
+>α</mi><mo 
+class="MathClass-close" stretchy="false">)</mo><mo 
+class="MathClass-open" stretchy="false">(</mo><mn>1</mn><mn>0</mn><mi 
+>x</mi> <mo 
+class="MathClass-bin">+</mo> <mn>2</mn><mi 
+>y</mi><mo 
+class="MathClass-close" stretchy="false">)</mo></math> <span 
+class="ecti-1000">at</span>
+<span 
+class="ecti-1000">each vertex: </span></p> 
+<table class="equation-star"><tr><td>
+<!--l. 514--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="block" class="equation"> 
+       <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>0</mn><mo 
+class="MathClass-close" stretchy="false">)</mo> <mo 
+class="MathClass-punc">:</mo> <mn>0</mn><mo 
+class="MathClass-punc">,</mo><mspace width="2em" class="qquad"/><mo 
+class="MathClass-open" stretchy="false">(</mo><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>2</mn><mn>0</mn><mo 
+class="MathClass-close" stretchy="false">)</mo> <mo 
+class="MathClass-punc">:</mo> <mn>8</mn><mn>0</mn><mi 
+>α</mi> <mo 
+class="MathClass-bin">−</mo> <mn>4</mn><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mspace width="2em" class="qquad"/><mo 
+class="MathClass-open" stretchy="false">(</mo><mn>1</mn><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>8</mn><mo 
+class="MathClass-close" stretchy="false">)</mo> <mo 
+class="MathClass-punc">:</mo> <mn>2</mn><mn>1</mn><mn>2</mn><mi 
+>α</mi> <mo 
+class="MathClass-bin">−</mo> <mn>1</mn><mn>1</mn><mn>6</mn><mo 
+class="MathClass-punc">,</mo><mspace width="2em" class="qquad"/><mo 
+class="MathClass-open" stretchy="false">(</mo><mn>1</mn><mn>2</mn><mo 
+class="MathClass-punc">,</mo><mn>0</mn><mo 
+class="MathClass-close" stretchy="false">)</mo> <mo 
+class="MathClass-punc">:</mo> <mn>2</mn><mn>1</mn><mn>6</mn><mi 
+>α</mi> <mo 
+class="MathClass-bin">−</mo> <mn>1</mn><mn>2</mn><mn>0</mn><mo 
+class="MathClass-punc">.</mo>
+</math></td></tr></table>
+                                                                  
+
+                                                                  
+<p class="indent">   <span 
+class="ecti-1000">(2) The optimal value is the upper envelope of these four linear functions of </span><!--l. 521--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mi 
+>α</mi></math><span 
+class="ecti-1000">. Comparing</span>
+<span 
+class="ecti-1000">pairs: </span><!--l. 521--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>2</mn><mn>0</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math>
+<span 
+class="ecti-1000">beats </span><!--l. 521--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>0</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math>
+<span 
+class="ecti-1000">iff </span><!--l. 521--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mn>8</mn><mn>0</mn><mi 
+>α</mi> <mo 
+class="MathClass-bin">−</mo> <mn>4</mn><mn>0</mn> <mo 
+class="MathClass-rel">≥</mo> <mn>0</mn></math><span 
+class="ecti-1000">,</span>
+<span 
+class="ecti-1000">i.e., </span><!--l. 521--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>α</mi> <mo 
+class="MathClass-rel">≥</mo><mfrac><mrow> <mn>1</mn></mrow> 
+<mrow><mn>2</mn></mrow></mfrac></math><span 
+class="ecti-1000">;</span>
+<!--l. 521--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>1</mn><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>8</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math> <span 
+class="ecti-1000">beats</span>
+<!--l. 521--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>2</mn><mn>0</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math> <span 
+class="ecti-1000">iff </span><!--l. 521--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mn>2</mn><mn>1</mn><mn>2</mn><mi 
+>α</mi> <mo 
+class="MathClass-bin">−</mo> <mn>1</mn><mn>1</mn><mn>6</mn> <mo 
+class="MathClass-rel">≥</mo> <mn>8</mn><mn>0</mn><mi 
+>α</mi> <mo 
+class="MathClass-bin">−</mo> <mn>4</mn><mn>0</mn></math><span 
+class="ecti-1000">, i.e., </span><!--l. 521--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mn>1</mn><mn>3</mn><mn>2</mn><mi 
+>α</mi> <mo 
+class="MathClass-rel">≥</mo> <mn>7</mn><mn>6</mn></math><span 
+class="ecti-1000">, i.e., </span><!--l. 521--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mi 
+>α</mi> <mo 
+class="MathClass-rel">≥</mo><mfrac><mrow> <mn>1</mn><mn>9</mn></mrow> 
+<mrow><mn>3</mn><mn>3</mn></mrow></mfrac> <mo 
+class="MathClass-rel">≈</mo> <mn>0</mn><mo 
+class="MathClass-punc">.</mo><mn>5</mn><mn>7</mn><mn>6</mn></math><span 
+class="ecti-1000">; and </span><!--l. 521--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mo 
+class="MathClass-open" stretchy="false">(</mo><mn>1</mn><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>8</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math> <span 
+class="ecti-1000">beats </span><!--l. 521--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mo 
+class="MathClass-open" stretchy="false">(</mo><mn>1</mn><mn>2</mn><mo 
+class="MathClass-punc">,</mo><mn>0</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math> <span 
+class="ecti-1000">iff </span><!--l. 521--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mn>4</mn> <mo 
+class="MathClass-rel">≥</mo> <mn>4</mn><mi 
+>α</mi></math><span 
+class="ecti-1000">, which holds</span>
+<span 
+class="ecti-1000">for all </span><!--l. 521--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>α</mi> <mo 
+class="MathClass-rel">≤</mo> <mn>1</mn></math><span 
+class="ecti-1000">.</span>
+<span 
+class="ecti-1000">Hence </span></p> 
+<table class="equation-star"><tr><td>
+<!--l. 522--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="block" class="equation"> 
+     <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>0</mn><mo 
+class="MathClass-close" stretchy="false">)</mo><mstyle 
+class="text"><mtext  > optimal for </mtext></mstyle><mi 
+>α</mi> <mo 
+class="MathClass-rel">∈</mo> <mo 
+class="MathClass-open" stretchy="false">[</mo><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mfrac><mrow> <mn>1</mn></mrow> 
+<mrow><mn>2</mn></mrow></mfrac><mo 
+class="MathClass-close" stretchy="false">]</mo><mo 
+class="MathClass-punc">,</mo><mspace width="2em" class="qquad"/><mo 
+class="MathClass-open" stretchy="false">(</mo><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>2</mn><mn>0</mn><mo 
+class="MathClass-close" stretchy="false">)</mo><mstyle 
+class="text"><mtext  > for </mtext></mstyle><mi 
+>α</mi> <mo 
+class="MathClass-rel">∈</mo> <mo 
+class="MathClass-open" stretchy="false">[</mo><mfrac><mrow><mn>1</mn></mrow>
+<mrow><mn>2</mn></mrow></mfrac><mo 
+class="MathClass-punc">,</mo><mfrac><mrow> <mn>1</mn><mn>9</mn></mrow> 
+<mrow><mn>3</mn><mn>3</mn></mrow></mfrac><mo 
+class="MathClass-close" stretchy="false">]</mo><mo 
+class="MathClass-punc">,</mo><mspace width="2em" class="qquad"/><mo 
+class="MathClass-open" stretchy="false">(</mo><mn>1</mn><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>8</mn><mo 
+class="MathClass-close" stretchy="false">)</mo><mstyle 
+class="text"><mtext  > for </mtext></mstyle><mi 
+>α</mi> <mo 
+class="MathClass-rel">∈</mo> <mo 
+class="MathClass-open" stretchy="false">[</mo><mfrac><mrow><mn>1</mn><mn>9</mn></mrow>
+<mrow><mn>3</mn><mn>3</mn></mrow></mfrac><mo 
+class="MathClass-punc">,</mo><mn>1</mn><mo 
+class="MathClass-close" stretchy="false">]</mo><mo 
+class="MathClass-punc">.</mo>
+</math></td></tr></table>
+<p class="indent">   <span 
+class="ecti-1000">A numerical sweep confirms the switch: </span><!--l. 527--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mi 
+>α</mi> <mo 
+class="MathClass-rel">=</mo> <mn>0</mn><mo 
+class="MathClass-punc">.</mo><mn>5</mn><mn>7</mn><mn>5</mn><mn>7</mn></math> <span 
+class="ecti-1000">returns </span><!--l. 527--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mo 
+class="MathClass-open" stretchy="false">(</mo><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>2</mn><mn>0</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math> <span 
+class="ecti-1000">and </span><!--l. 527--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mi 
+>α</mi> <mo 
+class="MathClass-rel">=</mo> <mn>0</mn><mo 
+class="MathClass-punc">.</mo><mn>5</mn><mn>7</mn><mn>5</mn><mn>8</mn></math> <span 
+class="ecti-1000">returns </span><!--l. 527--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mo 
+class="MathClass-open" stretchy="false">(</mo><mn>1</mn><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>8</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math><span 
+class="ecti-1000">.</span>
+</p> 
+<p class="indent">   <span 
+class="ecti-1000">(3) At </span><!--l. 529--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>α</mi> <mo 
+class="MathClass-rel">=</mo><mfrac><mrow> <mn>1</mn></mrow> 
+<mrow><mn>2</mn></mrow></mfrac></math> <span 
+class="ecti-1000">the</span>
+<span 
+class="ecti-1000">entire edge </span><!--l. 529--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>x</mi> <mo 
+class="MathClass-rel">=</mo> <mn>0</mn></math> <span 
+class="ecti-1000">is</span>
+<span 
+class="ecti-1000">optimal (every plan </span><!--l. 529--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mi 
+>y</mi><mo 
+class="MathClass-close" stretchy="false">)</mo></math>
+<span 
+class="ecti-1000">scores </span><!--l. 529--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mn>0</mn></math> <span 
+class="ecti-1000">there); at </span><!--l. 529--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mi 
+>α</mi> <mo 
+class="MathClass-rel">=</mo><mfrac><mrow> <mn>1</mn><mn>9</mn></mrow> 
+<mrow><mn>3</mn><mn>3</mn></mrow></mfrac></math> <span 
+class="ecti-1000">the whole rosewood</span>
+<span 
+class="ecti-1000">edge from </span><!--l. 529--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>2</mn><mn>0</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math>
+<span 
+class="ecti-1000">to </span><!--l. 529--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>1</mn><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>8</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math> <span 
+class="ecti-1000">is</span>
+<span 
+class="ecti-1000">optimal. At </span><!--l. 529--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>α</mi> <mo 
+class="MathClass-rel">=</mo> <mn>1</mn></math>
+<span 
+class="ecti-1000">waste is ignored, so all revenue-optimal plans, the edge from </span><!--l. 529--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mo 
+class="MathClass-open" stretchy="false">(</mo><mn>1</mn><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>8</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math> <span 
+class="ecti-1000">to </span><!--l. 529--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mo 
+class="MathClass-open" stretchy="false">(</mo><mn>1</mn><mn>2</mn><mo 
+class="MathClass-punc">,</mo><mn>0</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math><span 
+class="ecti-1000">, are optimal, including</span>
+                                                                  
+
+                                                                  
+<span 
+class="ecti-1000">the dominated plan </span><!--l. 529--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>1</mn><mn>2</mn><mo 
+class="MathClass-punc">,</mo><mn>0</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math><span 
+class="ecti-1000">.</span>
+<span 
+class="ecti-1000">A weighted sum with a zero weight can return points that are not</span>
+<span 
+class="ecti-1000">Pareto optimal; any positive weight on waste breaks the tie in favor of </span><!--l. 529--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" >
+<mo 
+class="MathClass-open" stretchy="false">(</mo><mn>1</mn><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>8</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math><span 
+class="ecti-1000">.</span>
+</p> 
+<p class="indent">   <span 
+class="ecti-1000">(4) With </span><!--l. 531--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <msub><mrow 
+><mi 
+>f</mi></mrow><mrow 
+><mn>1</mn></mrow></msub 
+> <mo 
+class="MathClass-rel">=</mo> <mn>8</mn><mn>0</mn><mn>0</mn><mn>0</mn><mi 
+>x</mi> <mo 
+class="MathClass-bin">+</mo> <mn>2</mn><mn>0</mn><mn>0</mn><mn>0</mn><mi 
+>y</mi></math><span 
+class="ecti-1000">, the same</span>
+<span 
+class="ecti-1000">comparisons give breakpoints </span><!--l. 531--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>α</mi> <mo 
+class="MathClass-rel">=</mo><mfrac><mrow>   <mn>1</mn></mrow> 
+<mrow><mn>1</mn><mn>0</mn><mn>0</mn><mn>1</mn></mrow></mfrac> <mo 
+class="MathClass-rel">≈</mo> <mn>0</mn><mo 
+class="MathClass-punc">.</mo><mn>0</mn><mn>0</mn><mn>1</mn></math>
+<span 
+class="ecti-1000">and </span><!--l. 531--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mi 
+>α</mi> <mo 
+class="MathClass-rel">=</mo><mfrac><mrow>   <mn>1</mn><mn>9</mn></mrow> 
+<mrow><mn>1</mn><mn>4</mn><mn>0</mn><mn>1</mn><mn>9</mn></mrow></mfrac> <mo 
+class="MathClass-rel">≈</mo> <mn>0</mn><mo 
+class="MathClass-punc">.</mo><mn>0</mn><mn>0</mn><mn>1</mn><mn>3</mn><mn>6</mn></math><span 
+class="ecti-1000">: virtually every</span>
+<span 
+class="ecti-1000">weight selects </span><!--l. 531--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" > <mo 
+class="MathClass-open" stretchy="false">(</mo><mn>1</mn><mn>0</mn><mo 
+class="MathClass-punc">,</mo><mn>8</mn><mo 
+class="MathClass-close" stretchy="false">)</mo></math><span 
+class="ecti-1000">.</span>
+<span 
+class="ecti-1000">When objectives live on wildly different scales, the weights lose their intended</span>
+<span 
+class="ecti-1000">meaning, which is why objectives should be normalized before weighting</span>
+<span 
+class="ecti-1000">(Section</span><span 
+class="ecti-1000"> </span><a 
+href="#x21-36300013.2"><span 
+class="ecti-1000">13.2</span><!--tex4ht:ref: sec:pareto-frontier --></a><span 
+class="ecti-1000">).</span>
+                                                                  
+
+                                                                  
+   </p> 
+<!--l. 45--><div class="crosslinks"><p class="noindent"></p></div>
+    
+</body> 
+</html>

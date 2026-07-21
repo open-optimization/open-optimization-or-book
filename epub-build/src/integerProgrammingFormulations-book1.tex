@@ -1,0 +1,2378 @@
+% Copyright 2020 by Robert Hildebrand
+%This work is licensed under a
+%Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0)
+%See http://creativecommons.org/licenses/by-sa/4.0/% 
+
+
+
+%\documentclass[../open-optimization/open-optimization.tex]{subfiles}
+% 
+%\begin{document}
+
+\chapter{Introduction to Integer Programming Formulations}
+\label{sec:IP-formulations} 
+\begin{outcome}
+\begin{enumerate}
+\item[A.] Learn classic integer programming formulations.
+\item[B.] Demonstrate different uses of binary and integer variables.
+\item[C.]  Demonstrate the format for modeling an optimization problem with sets, parameters, variables, and the model.
+\end{enumerate}
+\end{outcome}
+
+\begin{quote}
+\itshape Your linear program says to build 2.7 warehouses and route 3.4 trucks. Rounding up to 3 warehouses might blow the budget; rounding down to 2 might leave demand unmet; and neither rounded plan is necessarily anywhere near the best whole-number plan. Worse, many decisions are not quantities at all but choices (open this facility or don't, assign this job to that machine or not) where ``0.7 of a yes'' means nothing. Requiring variables to take integer values looks like a small change to a linear program. It is not: it buys enormous modeling power, and this chapter is a tour of what that power can express.
+\end{quote}
+
+%\begin{comment}
+%We will learn about complexity theory in a subsequent section.  But take note of the complexity classification of each problem ( \polynomial,\npcomplete, \nphard) to get a sense of how difficult the problem is.  We will define these terms later.
+%\end{comment}
+
+
+
+
+In this section, we will describe classical integer programming formulations.     These formulations may reflect  a real world problem exactly, or may be part of the setup of a real world problem.   
+
+\section{Knapsack Problem}
+The \emph{knapsack problem} can take different forms depending on if the variables are binary or integer.  The binary version means that there is only one item of each item type that can be taken.  This is typically illustrated as a backpack (knapsack) and some items to put into it (see  \autoref{fig:wiki-File-knapsack}), but has applications in many contexts.  
+
+
+
+ \includefigurestatic[Knapsack Problem: which items should we choose to take in the knapsack that maximizes the value while respecting the 15kg weight limit?][width=.4\linewidth][h]{wiki-File-knapsack}
+
+\begin{general}{Binary Knapsack Problem}{\npcomplete}
+Given a non-negative weight vector $\a \in \Q^n_+$, a capacity $b \in \Q_+$, and objective coefficients $\c \in \Q^n$, 
+\begin{equation}
+\begin{split}
+\max \ \ & \c^\top \x\\
+\st \ \ & \a^\top \x \leq b\\
+& \x \in \{0,1\}^n
+\end{split}
+\end{equation}
+\end{general}
+ 
+
+
+ 
+%\begin{figure}[H]
+%\begin{center}
+%\includegraphics[scale = 0.2]{knapsack}\footnotemark 
+%\end{center}
+%\label{fig:knapsack}
+%\caption{Knapsack Problem: which items should we choose take in the knapsack that maximizes the value while respecting the 15kg weight limit?}
+%\end{figure}
+%\footnotetext{\url{https://en.wikipedia.org/wiki/Knapsack_problem}}
+
+\begin{examplewithallcode}{Knapsack}
+{}
+{https://github.com/open-optimization/open-optimization-or-book/tree/master/Intro-Math-Programming/baseText/optimization/optimization-examples/knapsack_pulp.ipynb}
+{https://github.com/open-optimization/open-optimization-or-book/tree/master/Intro-Math-Programming/baseText/optimization/optimization-examples/knapsack_gurobi.ipynb}
+\label{example:knapsack}
+You have a knapsack (bag) that can only hold W = 15 kgs.  There are 5 items that you could possibly put into your knapsack.  The items (weight, value) are given as:
+(12 kg, $\$$4), (2 kg, $\$$2), (1kg, $\$$2), (1kg, $\$$1), (4kg, $\$$10).  Which items should you take to maximize your value in the knapsack? See \autoref{fig:wiki-File-knapsack}.\\
+
+\modelhead{Variables}
+\begin{itemize}
+\item let $x_i = 1$ if item $i$ is in the bag
+\item let $x_i = 0$ if item $i$ is not in the bag
+\end{itemize}
+\modelhead{Model}
+\begin{align}
+\max \quad & 4 x_1 + 2 x_2 + 2 x_3 + 1 x_4 + 10 x_5   \tag{Total value} \\
+\st        & 12 x_1 + 2 x_2 + 1 x_3 + 1 x_4 + 4 x_5 \leq 15   \tag{Capacity bound} \\
+& x_i \in \{0,1\} &&\quad \text{for all } i=1, \dots, 5   \tag{Item taken or not}
+\end{align}
+\end{examplewithallcode}
+In the integer case, we typically require the variables to be non-negative integers, hence we use the notation $\x \in \Z^n_+$.  This setting reflects the fact that instead of single individual items, you have item types of which you can take as many of each type as you like that meets the constraint.
+\begin{general}{Integer Knapsack Problem}{\npcomplete}
+Given a non-negative weight vector $\a \in \Q^n_+$, a capacity $b \in \Q_+$, and objective coefficients $c \in \Q^n$, 
+\begin{equation}
+\begin{split}
+\max \ \ & \c^\top \x\\
+\st \ \ & \a^\top \x \leq b\\
+& \x \in \Z^n_+
+\end{split}
+\end{equation}
+\end{general}
+We can also consider an equality constrained version
+\begin{general}{Equality Constrained Integer Knapsack Problem}{\nphard}
+Given a non-negative weight vector $\a \in \Q^n_+$, a capacity $b \in \Q_+$, and objective coefficients $c \in \Q^n$, 
+\begin{align}
+\max \quad & \c^\top \x \\
+\st        & \a^\top \x = b \\
+& \x \in \Z^n_+
+\end{align}
+\end{general}
+
+
+
+\begin{examplewithallcode}{Min Coins}
+{}
+{https://github.com/open-optimization/open-optimization-or-book/tree/master/Intro-Math-Programming/baseText/optimization/optimization-examples/min_coins_pulp.ipynb}
+{https://github.com/open-optimization/open-optimization-or-book/tree/master/Intro-Math-Programming/baseText/optimization/optimization-examples/min_coins_gurobi.ipynb}
+\label{ex:min-coins}
+Using pennies, nickels, dimes, and quarters, how can you minimize the number of coins you need to make up a sum of $83\cent$? 
+
+\modelhead{Variables}
+\begin{itemize}
+\item Let $p$ be the number of pennies used
+\item Let $n$ be the number of nickels used
+\item Let $d$ be the number of dimes used
+\item Let $q$ be the number of quarters used
+\end{itemize}
+\modelhead{Model}
+\begin{align*}
+\min \quad & p + n + d + q   \tag{total number of coins used} \\
+\st        & p + 5n + 10d + 25 q = 83 & \text{sums to } 83 \cent \\
+& p,d,n,q \in \Z_+   \tag{each is a non-negative integer}
+\end{align*}
+\end{examplewithallcode}
+
+\section{Capital Budgeting}
+\label{sec:capital-budgeting}
+
+\input{src/example-capital-budgeting}
+
+\section{Capacitated Lot Sizing Problem (CLSP)}
+
+The \textit{Capacitated Lot Sizing Problem (CLSP)} is a fundamental optimization problem in production planning, where the goal is to determine an optimal production schedule that minimizes total costs while adhering to capacity constraints. The objective function accounts for production costs, setup costs, and inventory holding costs over a given planning horizon.
+
+Let \( T \) denote the number of discrete time periods, indexed by \( t \in \{1,2,\dots,T\} \). The problem parameters are defined as follows:
+\begin{itemize}
+    \item \( d_t \) is the demand in period \( t \),
+    \item \( p_t \) represents the unit production cost,
+    \item \( f_t \) is the fixed setup cost incurred if production takes place,
+    \item \( h_t \) denotes the unit inventory holding cost, and
+    \item \( c_t \) represents the maximum production capacity in period \( t \).
+\end{itemize}
+
+The decision variables are:
+\begin{itemize}
+    \item \( x_t \) denotes the quantity produced in period \( t \),
+    \item \( s_t \) is the inventory level at the end of period \( t \), and
+    \item \( y_t \) is a binary variable that takes value 1 if production occurs in period \( t \), and 0 otherwise.
+\end{itemize}
+
+The CLSP can be formulated as the following mixed-integer linear program:
+\begin{align}
+\min \quad & \sum_{t=1}^{T} \left( p_t x_t + f_t y_t + h_t s_t \right)   \tag{Minimize total cost}\label{eq:clsp-objective} \\
+\st        & s_{t-1} + x_t - d_t = s_t &&\quad \text{for all } t = 1,2,\dots,T   \tag{Inventory balance}\label{eq:clsp-inventory} \\
+    & x_t \leq y_t c_t &&\quad \text{for all } t = 1,2,\dots,T   \tag{Capacity and setup constraint}\label{eq:clsp-capacity} \\
+    & x_t, s_t \geq 0 &&\quad \text{for all } t = 1,2,\dots,T   \tag{Non-negativity constraints}\label{eq:clsp-nonnegativity} \\
+    & y_t \in \{0,1\} &&\quad \text{for all } t = 1,2,\dots,T   \tag{Binary production decision}\label{eq:clsp-binary}
+\end{align}
+
+The objective function \eqref{eq:clsp-objective} minimizes the total cost over the planning horizon, incorporating production, setup, and inventory holding costs. The inventory balance constraint \eqref{eq:clsp-inventory} ensures that demand in each period is met using either inventory from the previous period or newly produced units. The constraint \eqref{eq:clsp-capacity} enforces production capacity limits and ensures that a setup cost is incurred when production occurs. Constraints \eqref{eq:clsp-nonnegativity} enforce non-negativity on production and inventory levels, while \eqref{eq:clsp-binary} ensures that the setup decision is binary.
+
+For simplicity, we assume an initial inventory level of zero.
+
+\section{Facility Location}
+\label{sec:facility-location}
+The basic model of the facility location problem is to determine where to place your stores or facilities in order to be close to all of your customers and hence reduce the costs of transportation to your customers.  Each customer is known to have a certain demand for a product, and each facility has a capacity on how much of that demand it can satisfy.  We also need to consider the cost of building the facility in a given location.
+
+This basic framework can be applied in many types of problems and there are a number of variants to this problem. Here we present the \emph{capacitated facility location problem}. Additional variants and alternative formulations are covered in Book 2.
+
+
+
+\subsection{Capacitated Facility Location}
+
+\begin{general}{Capacitated Facility Location 1}{\npcomplete}
+Given connection costs \( c_{ij} \), fixed building costs \( f_i \), demands \( d_j \), and facility capacities \( u_i \), the \textbf{capacitated facility location} problem is formulated as follows:
+
+\modelhead{Sets}
+\begin{itemize}
+\item Let \( I = \{1,\dots, n\} \) be the set of facilities.
+\item Let \( J = \{1, \dots, m\} \) be the set of customers.
+\end{itemize}
+
+\modelhead{Parameters}
+\begin{itemize}
+\item \( f_i \) — the cost of opening facility \( i \).
+\item \( c_{ij} \) — the cost of serving one unit of demand of customer \( j \) from facility \( i \).
+\item \( u_i \) — the capacity (in units) of facility \( i \).
+\item \( d_j \) — the total demand (in units) of customer \( j \).
+\end{itemize}
+
+\modelhead{Variables}
+\begin{itemize}
+\item \( y_i \in \{0,1\} \) — equals 1 if facility \( i \) is opened; 0 otherwise.
+\item \( x_{ij} \geq 0 \) — the number of units of customer \( j \)'s demand served by facility \( i \).
+\end{itemize}
+
+\modelhead{Model}
+\begin{align}
+\min \quad & \sum_{i=1}^n \sum_{j=1}^m c_{ij} x_{ij} + \sum_{i=1}^n f_i y_i   \tag{Total cost} \\
+\st        & \sum_{i=1}^n x_{ij} = d_j &&\quad \text{for all } j = 1,\dots,m   \tag{Meet demand} \\
+& \sum_{j=1}^m x_{ij} \leq u_i y_i &&\quad \text{for all } i = 1,\dots,n   \tag{Facility capacity} \\
+& x_{ij} \geq 0 &&\quad \text{for all } i = 1,\dots,n,\; j = 1,\dots,m   \tag{Nonnegativity} \\
+& y_i \in \{0,1\} &&\quad \text{for all } i = 1,\dots,n   \tag{Open facility}
+\end{align}
+
+\end{general}
+
+% ============================================================================
+% Additional facility location formulations are covered in Book 2
+% ============================================================================
+% NOTE: the Generalized Assignment Problem text inside the \iffalse block below
+% is adapted from Wikipedia (CC BY-SA). Before re-enabling it, add proper
+% attribution (article name, license, changes made) or rewrite it fresh.
+\iffalse  % BEGIN BOOK 2 ONLY - Alternative Formulations
+Next we present a method that models it tracking the fraction of demand served.
+\begin{general}{Capacitated Facility Location 2}{\npcomplete}
+Given costs connections $c_{ij}$ and fixed building costs $f_i$, demands $d_j$ and capacities $u_i$, the capacitated facility location problem is 
+
+\modelhead{Sets}
+\begin{itemize}
+\item Let $I = \{1,\dots, n\}$ be the set of facilities.
+\item Let $J = \{1, \dots, m\}$ be the set of customers.
+\end{itemize}
+
+\modelhead{Parameters}
+\begin{itemize}
+\item $f_i$ - the cost of opening facility $i$.
+\item $c_{ij}$ - the cost of fulfilling the complete demand of customer $j$ from facility $i$.
+\item $u_{i}$ - the capacity of facility $i$.
+\item $d_{j}$ - the demand by customer $j$.
+%\item $c_j$ is given in column "$\mathbb{E}$[Revenue]".
+%\item $b_i$ is given in row "Resources available".
+%\item $a_{ij}$ given in row $j$, and column for week $i$.
+\end{itemize}
+
+\modelhead{Variables}
+\begin{itemize}
+\item Let 
+\begin{equation*}
+y_{i} = \begin{cases}
+1 & \text{if we open facility $i$,}\\
+0 & \text{otherwise.}
+\end{cases}
+\end{equation*}
+\item Let $x_{ij} \geq 0$ be the fraction of demand of customer $j$ satisfied by facility $i$.
+%\item let $x_i = 1$ if investment $i$ is not chosen
+\end{itemize}
+
+\modelhead{Model}
+\begin{align}
+\min \quad & \displaystyle\sum_{i=1}^n\sum_{j=1}^mc_{ij}x_{ij}+\sum_{i=1}^nf_iy_i   \tag{total cost} \\
+\st        & \displaystyle\sum_{i=1}^nx_{ij}=1 &&\quad \text{for all } j=1,\dots,m   \tag{assign demand to facility} \\
+& \displaystyle \sum_{j=1}^md_jx_{ij}\leq u_iy_i &&\quad \text{for all } i=1\dots,n   \tag{capacity of facility $i$} \\
+& x_{ij}\geqslant0 &&\quad \text{for all } i=1,\dots,n \text{ and }j=1,\dots,m   \tag{nonnegative fraction of demand satisfied} \\
+& y_i\in\{0,1\} &&\quad \text{for all } i=1,\dots,n   \tag{open/not open facility}
+\end{align}
+
+\end{general}
+
+Finally, we present a version that has the same variables, but the constraints model the feasible solutions in a slightly different way.
+
+\begin{align*}
+\min \quad & \sum_{i = 1}^m\sum_{j=1}^n c_{ij}x_{ij}+\sum_{i = 1}^mf_iy_i \\
+\st        & \sum_{i = 1}^mx_{ij} = 1,~~~~~j =1,\ldots n \\
+& \displaystyle \sum_{j=1}^md_jx_{ij}\leq u_i &&\quad \text{for all } i=1\dots,n   \tag{capacity of facility $i$} \\
+& x_{ij}\leq y_i,~~~~~ i = 1,\ldots m,~~~ j = 1,\ldots,n \\
+& x_{ij} \geq 0~~~~~ i = 1,\ldots,m, ~~~j = 1,\ldots,n \\
+& y_i\in \{0,1\}, \  \  i = 1,\ldots,m
+\end{align*}
+\fi  % END BOOK 2 ONLY - Alternative Formulations
+
+\begin{examplewithcode}{Capacitated Facility Location: Retail Distribution Example}{\href{https://github.com/open-optimization/open-optimization-or-examples/blob/master/integer-programming/facility-location-capacitated.ipynb}{Gurobipy}}
+
+\textbf{Context:} A retail company plans to establish distribution centers across a country to serve its stores efficiently. The company faces decisions on which distribution centers to open and which stores each center should serve. Costs associated with opening each center and serving stores from them are known, and each center has a maximum capacity. Each store also has a known demand.
+
+\textbf{Given Data:} (\href{https://github.com/open-optimization/open-optimization-or-examples/blob/master/integer-programming/distribution-data.xlsx}{distribution-data.xlsx})
+
+\begin{itemize}
+    \item Number of potential distribution centers ($n$): 3
+    \item Number of stores ($m$): 4
+\end{itemize}
+
+
+\begin{table}[ht]
+\centering
+\caption{Combined Data for Distribution Centers and Stores}
+\begin{tabular}{lcc|cccc}
+\toprule
+ & \(\mathbf{f_i}\) & \(\mathbf{u_i}\) & \multicolumn{4}{c}{\(\mathbf{c_{ij}}\) (Cost to Serve a Store)} \\
+\cmidrule(lr){4-7}
+\textbf{Center} & (\$) & (units) & Store 1 & Store 2 & Store 3 & Store 4 \\
+\midrule
+Center 1 & 150,000 & 100 & \$50 & \$60 & \$70 & \$85 \\
+Center 2 & 100,000 & 80  & \$75 & \$45 & \$55 & \$50 \\
+Center 3 & 180,000 & 90  & \$65 & \$80 & \$40 & \$60 \\
+\midrule
+\textbf{Store Demand \(d_j\)} & & & 400 & 300 & 200 & 250 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Model Formulation:}
+The capacitated facility location model described earlier can be applied to this scenario with the given data to determine the optimal number and location of distribution centers to open, and which stores each center should serve.
+\begin{center}
+\includegraphicbook[scale = 0.75]{facility-location}
+\end{center}
+\end{examplewithcode}
+
+If you build and solve this instance, you will discover that it is infeasible: the stores demand $1150$ units in total, while the three centers combined can supply at most $270$. This is on purpose. Not every problem has a nice solution, and discovering infeasibility is itself useful information a model gives you. As an exercise, decide how you would repair the instance: reduce demand or add capacity.
+
+% ============================================================================
+% Uncapacitated Facility Location is covered in Book 2
+% ============================================================================
+\iffalse  % BEGIN BOOK 2 ONLY - Uncapacitated Facility Location
+\subsection{Uncapacitated Facility Location}
+\begin{general}{Uncapacitated Facility Location}{\npcomplete}
+Given costs connections $c_{ij}$ and fixed building costs $f_i$, the uncapacitated facility location problem is 
+\begin{equation}
+\begin{array}{rl}
+\min & \displaystyle\sum_{i=1}^n\sum_{j=1}^mc_{ij}z_{ij}+\sum_{i=1}^nf_ix_i \\
+\st & \displaystyle\sum_{i=1}^nz_{ij}=1 \text{ for all }j=1,\dots,m \\
+& \displaystyle \sum_{j=1}^mz_{ij}\leq Mx_i\text{ for all }i=1\dots,n \\
+&z_{ij}\in\{0,1\}\text{ for all }i=1,\dots,n \text{ and }j=1,\dots,m\\
+&x_i\in\{0,1\}\text{ for all } i=1,\dots,n
+\end{array}
+\end{equation}
+Here $M$ is a large number and can be chosen as $M = m$, but could be refined smaller if more context is known.
+\end{general}
+
+Alternative model!
+
+\begin{equation}
+\begin{array}{rl}
+\min & \displaystyle\sum_{i=1}^n\sum_{j=1}^mc_{ij}z_{ij}+\sum_{i=1}^nf_ix_i \\
+\st & \displaystyle\sum_{i=1}^nz_{ij}=1 \text{ for all }j=1,\dots,m \\
+& z_{ij}\leq x_i\text{ for all }i=1\dots,n \text{ for all } j = 1, \dots, m \\
+&z_{ij}\in\{0,1\}\text{ for all }i=1,\dots,n \text{ and }j=1,\dots,m\\
+&x_i\in\{0,1\}\text{ for all } i=1,\dots,n
+\end{array}
+\end{equation}
+\newpage
+\fi  % END BOOK 2 ONLY - Uncapacitated Facility Location
+
+
+\begin{casestudybox}{Where Should the Water Bombers Sleep? Airtanker Basing in Ontario}
+\label{case:wildfire-airtankers}
+
+Ontario fights forest fires with a fleet of airtankers (water bombers).  A fire caught within the first few hours is usually a small story; a fire missed grows into a big one.  So the province's ability to hit new fires quickly depends on where the airtankers are based each morning.  In the early 1990s the Ontario Ministry of Natural Resources asked operations researchers to help decide the home bases, and the resulting mathematical programming model informed the province's actual basing strategy from the 1993 fire season onward.
+
+\subsection*{The Challenge}
+Fires do not announce where they will start.  What is known is the historical pattern: some fire management zones see far more fire starts than others, and an airtanker can only provide effective \emph{initial attack} on fires within a limited flying range of its base.  With a fixed fleet, where should the aircraft be based so that as much expected fire activity as possible is within reach?
+
+\subsection*{The Solution: A Coverage Location Model}
+\textbf{Model type: integer program (facility location / coverage).  No machine learning; the fire-frequency inputs are historical averages.}
+
+\modelhead{Sets and Parameters}
+\begin{itemize}
+\item Let $I$ be the set of fire management zones and $J$ the set of candidate bases.
+\item Let $n_i$ be the expected number of fires in zone $i$ (from historical records).
+\item Let $t_{ij} = 1$ if an airtanker based at $j$ can reach zone $i$ within the initial-attack time standard, and $0$ otherwise.
+\item Let $N$ be the number of airtankers in the fleet.
+\end{itemize}
+
+\modelhead{Variables}
+\begin{itemize}
+\item Let $y_j \in \mathbb{Z}_{\geq 0}$ be the number of airtankers based at $j$.
+\item Let $z_i = 1$ if zone $i$ is covered by at least one base within reach.
+\end{itemize}
+
+\modelhead{Model}
+\begin{align*}
+\max \quad & \sum_{i \in I} n_i \, z_i   \tag{expected fires within reach} \\
+\st        & z_i \leq \sum_{j \in J} t_{ij}\, y_j &&\quad \text{for all } i \in I   \tag{coverage requires a nearby base} \\
+             & \sum_{j \in J} y_j = N   \tag{fleet size} \\
+             & y_j \in \mathbb{Z}_{\geq 0}, \quad z_i \in \{0,1\}.
+\end{align*}
+
+\subsection*{Assumptions and Simplifications}
+\begin{itemize}
+\item The version above counts a zone as covered or not; the published model is finer-grained, accounting for how \emph{many} aircraft can respond and for daily fire-weather variation.
+\item Expected fire counts stand in for actual (random) fire occurrence: the model optimizes the average day, not the worst day.
+\item Airtankers can be re-deployed between bases day to day; the published work treats home-basing (seasonal) and daily deployment as linked decisions.
+\end{itemize}
+
+\subsection*{Implementation and Results}
+The Ontario Ministry of Natural Resources used the model to inform its airtanker home-basing strategy beginning with the 1993 fire season, and Ontario's fire management program has continued to work with operations researchers for decades since, on deployment, dispatch, and detection-patrol planning.
+
+\subsection*{References}
+\begin{itemize}
+\item J.I. MacLellan, D.L. Martell. ``Basing Airtankers for Forest Fire Control in Ontario.'' \emph{Operations Research} 44(5), 677--686, 1996. \url{https://doi.org/10.1287/opre.44.5.677}
+\item D.L. Martell. ``The Development and Implementation of Forest Fire Management Decision Support Systems in Ontario, Canada.'' \emph{Forest Ecology and Management} / retrospective account, 2015.
+\item D.L. Martell, R.J. Drysdale, G.E. Doan, D. Boychuk. ``An Evaluation of Forest Fire Initial Attack Resources.'' \emph{Interfaces} 14(5), 20--32, 1984.
+\end{itemize}
+\end{casestudybox}
+
+\section{Set Covering}
+
+The \emph{set covering} problem can be used for a wide array of problems.    We will see several examples in this section.
+
+\begin{general}{Set Covering}{\npcomplete}
+\label{general:set-covering}
+Given a set $V$ with subsets $V_1, \dots, V_l$, determine the smallest subset $S \subseteq V$ such that 
+$S \cap V_i \neq \emptyset$ for all $i=1, \dots, l$.
+
+The set cover problem can be modeled as
+\begin{equation}
+\begin{split}
+\min \ \ & \one^\top x\\
+\st \ \ & \sum_{v \in V_i} x_v \geq 1 \text{ for all } i =1, \dots, l \\ 
+& x_v \in \{0,1\} \text{ for all } v \in V
+\end{split}
+\end{equation}
+where $x_v$ is a 0/1 variable that takes the value $1$ if we include item $v$ in set $S$ and $0$ if we do not include it in the set $S$.  
+\end{general}
+
+%
+%\begin{examplewithcode}{Capital Budgeting}{https://github.com/open-optimization/open-optimization-or-examples/blob/master/integer-programming/capital-budgeting.ipynb}
+%\noindent \textbf{Sets:}
+%\begin{itemize}
+%\item Let $I = \{1,2\}$ be the set of time periods.
+%\item Let $J = \{1, 2,3\}$ be the set of possible investments.
+%\end{itemize}
+%
+%\noindent \textbf{Parameters:}
+%\begin{itemize}
+%\item $c_j$ is given in column "$\mathbb{E}$[Revenue]".
+%\item $b_i$ is given in row "Resources available".
+%\item $a_{ij}$ given in row $j$, and column for week $i$.
+%\end{itemize}
+%
+%\noindent \textbf{Variables:}
+%\begin{itemize}
+%\item let $x_i = 0$ if investment $i$ is chosen
+%\item let $x_i = 1$ if investment $i$ is not chosen
+%\end{itemize}
+%
+%The explict model is given by\\
+%\noindent  \textbf{Model:}
+%\begin{align*}
+%	\max\ \ \  & 10x_1+8x_2+6x_3 \tag{Total Expected Revenue}\\
+%	s.t. \ \ & 
+%	3x_1+1x_2+2x_3\leq5 \tag{ Resource constraint week 1}\\
+%	&4x_1+2x_2+1x_3\leq6 \tag{ Resource constraint week 2}\\
+%&x_j \in \{0,1\},\  j = 1,2,3
+%\end{align*}
+%
+%\end{examplewithcode}
+%
+
+
+
+One specific type of set cover problem is the \emph{vertex cover} problem.
+\begin{general}{Example: Vertex Cover}{\npcomplete}
+\label{ex:vertex-cover}
+Given a graph $G = (V,E)$ of vertices and edges, we want to find a smallest size subset $S \subseteq V$ such that for every $e = (v,u) \in E$, either $u$ or $v$ is in $S$.   
+
+We can write this as a mathematical program in the form:
+\begin{equation}
+\begin{split}
+\min \ \ & \one^\top x\\
+\st \ \ & x_u + x_v \geq 1 \text{ for all } (u,v) \in E \\ 
+& x_v \in \{0,1\} \text{ for all } v \in V.
+\end{split}
+\end{equation}
+\end{general}
+
+
+
+
+\begin{examplewithcode}{Set cover: Fire station placement}{https://github.com/open-optimization/open-optimization-or-examples/blob/master/integer-programming/fire-station-covering.ipynb}
+\label{example:fire-station}
+
+In the fire station problem, we seek to choose locations for fire stations such that any district either contains a fire station, or neighbors a district that contains a fire station.  Figure~\ref{fig:tikz-Illustration1.pdf} depicts the set of districts and an example placement of locations of fire stations.  How can we minimize the total number of fire stations that we need?
+
+
+\modelhead{Sets}
+\begin{itemize}
+\item Let $V$ be the set of districts ($V = \{1, \dots, 16\}$)
+\item Let $V_i$ be the set of districts that neighbor district $i$ (e.g. $V_1 = \{2,4,5\}$).
+\end{itemize}
+
+\modelhead{Variables}
+\begin{itemize}
+\item let $x_i = 1$ if district $i$ is chosen to have a fire station.
+\item let $x_i = 0$ otherwise.
+\end{itemize}
+\modelhead{Model}
+\begin{align}
+\min \quad & \sum_{i \in V} x_i \tag{ \# \text{ open fire stations}} \\
+\st        & x_i + \sum_{j \in V_i} x_j \geq 1 &&\quad \text{for all } {i \in V}   \tag{Station proximity requirement} \\
+& x_i \in \{0,1\} &&\quad \text{for all } i\in V   \tag{station either open or closed}
+\end{align}
+\end{examplewithcode}
+
+\includefigurebooksource[Layout of districts and possible locations of fire stations.][][h]{tikz-Illustration1.pdf}
+\includefigurebooksource[Set cover representation of fire station problem.  For example, choosing district 16 to have a fire station covers districts 13, 15, and 16.]{tikz-Illustration2.pdf}
+\includefigurebooksource[Graph representation of fire station problem.  Every node is connected to a chosen node by an edge.]{tikz-Illustration3.pdf}
+
+Figure~\ref{fig:tikz-Illustration2.pdf} shows how the neighborhood structure translates into a set cover instance, and Figure~\ref{fig:tikz-Illustration3.pdf} gives an equivalent graph view of the same solution.
+
+
+\input{src/example-set-covering}
+
+
+
+
+\subsection{Covering (Generalizing Set Cover)}
+We could also allow for a more general type of set covering where we have non-negative integer variables and a right hand side that has values other than $1$.
+\begin{general}{Covering}{\npcomplete}
+\label{general:covering}
+Given a non-negative matrix $A \in \Z_+^{m \times n}$, a non-negative vector $b \in \Z^m$, and an objective vector $c \in \R^n$, the covering problem is
+\begin{equation}
+\begin{split}
+\min \ \ & c^\top x\\
+\st \ \ & Ax \geq b \\
+& x \in\Z^n_+.
+\end{split}
+\end{equation}
+\end{general}
+
+
+
+
+
+
+\begin{casestudybox}{Kidney Exchange: Integer Programming that Saves Lives}
+\label{case:kidney-exchange}
+
+Thousands of kidney patients have a friend or family member willing to donate a kidney, but with the wrong blood or tissue type.  Kidney exchange programs fix this with a swap: donor A gives to patient B while donor B gives to patient A.  With three pairs, a three-way cycle works the same way.  National programs, including the United States' kidney paired donation program (UNOS) and the United Kingdom's Living Kidney Sharing Scheme, decide who swaps with whom by solving an \textbf{integer program}.  In the UK, that integer program runs on a fixed schedule several times a year: the solver's output is literally the list of surgeries to schedule.
+
+\subsection*{The Challenge}
+Given a pool of incompatible patient--donor pairs, find a set of swap cycles that gives as many patients as possible a compatible kidney.  Two hard rules shape the problem.  First, a pair can appear in at most one cycle (each donor has one kidney to give).  Second, all surgeries in a cycle must happen simultaneously, so that no donor can back out after their loved one has received a kidney; operating-room logistics therefore cap cycles at two or three pairs.
+
+\subsection*{The Solution: A Cycle-Selection Integer Program}
+\textbf{Model type: pure binary integer program.  No machine learning; compatibility is determined by medical testing.}
+
+\modelhead{Sets}
+\begin{itemize}
+\item Let $P$ be the set of incompatible patient--donor pairs.
+\item Let $C$ be the set of feasible swap cycles of length at most 3: subsets of pairs where each donor is compatible with the next patient around the cycle.
+\end{itemize}
+
+\modelhead{Variables}
+\begin{itemize}
+\item Let $x_c = 1$ if cycle $c$ is selected for surgery, and $0$ otherwise.
+\end{itemize}
+
+\modelhead{Model}
+\begin{align*}
+\max \quad & \sum_{c \in C} |c| \, x_c   \tag{total transplants} \\
+\st        & \sum_{c \in C :\, i \in c} x_c \leq 1 &&\quad \text{for all } i \in P   \tag{each pair in at most one cycle} \\
+             & x_c \in \{0,1\} &&\quad \text{for all } c \in C.
+\end{align*}
+
+Here $|c|$ is the number of pairs in cycle $c$, which equals the number of transplants the cycle produces.  Real programs also include \emph{chains} started by altruistic donors (someone who donates without a paired patient) and weight cycles by medical priority rather than just counting transplants; both are small extensions of the same model.
+
+\subsection*{Assumptions and Simplifications}
+\begin{itemize}
+\item Compatibility is treated as a yes/no input from blood typing and tissue crossmatching, computed before the optimization.
+\item The model shown maximizes the \emph{number} of transplants; deployed programs maximize a weighted sum reflecting waiting time, sensitization, and pediatric status.
+\item Enumerating all cycles is feasible for cycle length $\le 3$; national-scale pools with long chains need column generation (a Book 2 topic).
+\end{itemize}
+
+\subsection*{Implementation and Results}
+Cycle- and chain-based integer programs are the clearing engines of the US and UK national programs, and the published models have been benchmarked directly on real UNOS and UK datasets.  The UK scheme's matching runs are performed with algorithms developed by the University of Glasgow.  Economist Alvin Roth shared the 2012 Nobel Prize in part for the market design behind kidney exchange.
+
+\subsection*{References}
+\begin{itemize}
+\item D.J. Abraham, A. Blum, T. Sandholm. ``Clearing Algorithms for Barter Exchange Markets: Enabling Nationwide Kidney Exchanges.'' \emph{Proceedings of ACM EC}, 2007. \url{https://doi.org/10.1145/1250910.1250954}
+\item D.F. Manlove, G. O'Malley. ``Paired and Altruistic Kidney Donation in the UK: Algorithms and Experimentation.'' \emph{ACM Journal of Experimental Algorithmics} 19, 2015. \url{https://doi.org/10.1145/2670129}
+\item R. Anderson, I. Ashlagi, D. Gamarnik, A.E. Roth. ``Finding Long Chains in Kidney Exchange Using the Traveling Salesman Problem.'' \emph{PNAS} 112(3), 2015. \url{https://doi.org/10.1073/pnas.1421853112}
+\end{itemize}
+\end{casestudybox}
+
+\section{Graph Coloring}
+\label{sec:graph-coloring}
+
+Graph coloring \refincludefigurestatic{wiki-File-Petersen-graph-3-coloring.png} is
+the problem of finding a minimum coloring in a graph, and it can be formulated in many ways. Each vertex is assigned a color and two vertices cannot share the same color if they are connected by an edge.
+
+Since a graph on $n$ vertices never needs more than $n$ colors, we may fix the palette to be $\{1, \ldots, n\}$.
+For every vertex $i \in V$ and every color $j$ in the palette, introduce a binary variable $x_{ij}$ that equals $1$ exactly when vertex $i$ receives color $j$.
+A second family of binaries records which colors actually get used: $w_j = 1$ signals that color $j$ appears on at least one vertex.
+Minimizing the number of colors used then gives a classical integer programming formulation:
+$$
+\begin{aligned}
+\min & \sum_{j=1}^n w_j \\
+& \sum_{j=1}^n x_{i j}=1 \quad \forall i \in V, \\
+& x_{i j}+x_{k j} \leq w_j \quad \forall\{i, k\} \in E, \quad 1 \leq j \leq n, \\
+& x_{i j} \in\{0,1\} \quad \forall i \in V, 1 \leq j \leq n\\
+& w_j \in\{0,1\} \quad 1 \leq j \leq n .
+\end{aligned}
+$$
+
+
+This basic model is highly symmetric: relabeling the colors in any feasible coloring produces a different solution with the same objective value, and a branch-and-bound solver may waste effort exploring all of these copies.  We present two strengthened formulations from~\cite{MENDEZDIAZ2008159} that attack this symmetry; their paper goes further, adding several families of cutting planes.
+
+\textbf{ Color order model:}
+A coloring that uses $k$ colors can be encoded in many interchangeable ways---any $k$ labels chosen from $\{1, \ldots, n\}$ will do.  To keep a single representative from each such family, we force the labels to be consumed in numerical order: color $j$ is available only once color $j-1$ appears somewhere in the graph.  Every coloring that skips a label, or that uses a label larger than the number of colors it needs, is thereby cut off.  Two extra constraint families accomplish this:
+$$
+\begin{aligned}
+& w_j \leq \sum_{i \in V} x_{i j} \quad \forall 1 \leq j \leq n, \\
+& w_j \geq w_{j+1} \quad \forall 1 \leq j \leq n-1 .
+\end{aligned}
+$$
+The first ties $w_j$ to actual use of color $j$; the second forbids gaps in the label sequence.  The number of feasible solutions drops dramatically.
+
+\textbf{ Independent set order model:}
+Even when labels are used in order, the color classes of a $k$-coloring can still be shuffled among the labels $1, \ldots, k$, so symmetric copies remain.  A more aggressive fix sorts the color classes by size: the vertices receiving color $j$ must be at least as numerous as those receiving color $j+1$.  This yields the constraints
+$$
+\begin{aligned}
+& w_j \leq \sum_{i \in V} x_{i j} \quad \forall 1 \leq j \leq n \\
+& \sum_{i=1}^n x_{i j} \geq \sum_{i=1}^n x_{i j+1} \quad \forall 1 \leq j \leq n-1 ,
+\end{aligned}
+$$
+which are more restrictive than those of the color order model.
+
+As an exercise, try implementing these different models and compare the solve times.
+
+\newpage
+\section{Basic Modeling Tricks - Using Binary Variables}
+\label{sec:modeling-tricks}
+In this section, we describe ways to model a variety of constraints that commonly appear in practice.  The goal is changing constraints described in words to constraints defined by math.
+
+Binary variables can allow you to model many types of constraints.  We discuss here various logical constraints where we assume that $x_i \in \{0,1\}$ for $i=1, \dots, n$.  We will take the meaning of the variable to be selecting an item.
+
+\begin{enumerate}
+ \item If item $i$ is selected, then item $j$ is also selected.
+ \begin{equation}
+ x_i \leq x_j
+ \end{equation}
+ \begin{enumerate}
+ \item If any of items $1, \dots, 5$ are selected, then item $6$ is selected.
+ \begin{equation}
+ x_1 + x_2 + \dots + x_5 \leq 5 \cdot x_6
+ \end{equation}
+ Alternatively!
+ \begin{equation}
+ x_i \leq x_6 \ \ \ \ \text{ for all } i=1, \dots, 5
+ \end{equation}
+ \end{enumerate}
+ \item If item $j$ is not selected, then item $i$ is not selected.  This is the contrapositive of the implication above, so the same inequality models it.
+ \begin{equation}
+x_i \leq x_j
+ \end{equation}
+  \begin{enumerate}
+ \item If item $j$ is not selected, then none of the items $1, \dots, i$ are selected.
+ \begin{equation}
+ x_1 + x_2 + \dots + x_i \leq i \cdot x_j
+ \end{equation}
+ \end{enumerate}
+\item Either item $i$ is selected or item $j$ is selected, but not both.
+ \begin{equation}
+ x_i + x_j = 1
+ \end{equation}
+\item Item $i$ is selected or item $j$ is selected or both.
+ \begin{equation}
+ x_i + x_j \geq 1
+ \end{equation}
+\item If item $i$ is selected, then item $j$ is not selected.
+ \begin{equation}
+x_j \leq (1-x_i)
+ \end{equation}
+
+\item At most one of items $i$, $j$, and $k$ is selected.
+ \begin{equation}
+ x_i + x_j + x_k \leq 1
+ \end{equation}
+\item At most two of items $i,j,$ and $k$ are selected.
+ \begin{equation}
+ x_i + x_j + x_k \leq 2
+ \end{equation}
+\item Exactly one of items $i,j,$ and $k$ is selected.
+ \begin{equation}
+  x_i + x_j + x_k = 1
+ \end{equation}
+\end{enumerate}
+
+These tricks can be connected to create different function values.  
+
+\begin{example}{Variable takes one of three values}{}
+Suppose that the variable $x$ should take one of the three values $\{4, 8, 13\}$. This can be modeled using three binary variables as
+\begin{align*}
+x=4z_1 +8z_2 +13z_3\\
+ z_1 +z_2 +z_3 =1\\
+z_i \in \{0, 1\} \text{ for } i = 1, 2,3.
+\end{align*}
+As a convenient addition, if we want to add the possibility that it takes the value $0$, then we can model this as 
+\begin{align*}
+x=4z_1 +8z_2 +13z_3\\
+ z_1 +z_2 +z_3 \leq 1\\
+z_i \in \{0, 1\} \text{ for } i = 1, 2,3.
+\end{align*}
+\end{example}
+
+
+We can also model variable increases at different amounts.  \begin{example}{Discount for buying more}{}
+Suppose you can choose to buy 1, 2, or 3 units of a product, each with a decreasing cost.  The first unit is \$10, the second is \$5, and the third unit is \$3.
+\begin{align*}
+x=10z_1 +5z_2 +3z_3\\
+ z_1\geq z_2 \geq z_3\\
+z_i \in \{0, 1\} \text{ for } i = 1, 2,3.
+\end{align*}
+Here, $z_i$ represents if we buy the $i$th unit.  The inequality constraints impose that if we buy unit $j$, then we must buy all units $i$ with $i < j$.
+\end{example}
+
+
+\subsection{Big M constraints - Activating/Deactivating Inequalities}
+\label{subsec:big-M-activation}
+Big M comes again!   It's extremely useful when trying to activate constraints based on a binary variable.
+
+For instance, if we don't rent a bus, then we can have at most 3 passengers join us on our trip.   Consider passengers $A,B,C,D,E$ and let $x_i \in \{0,1\}$ be 1 if we take passenger $i$ and 0 otherwise.
+We can model the constraint that we can have at most 3 passengers as
+$$
+x_A + x_B + x_C + x_D + x_E \leq 3.
+$$
+
+We want to be able to activate this constraint in the event that we don't rent a bus.
+
+Let $\delta \in \{0,1\}$ be 1 if we rent a bus, and 0 otherwise.  
+
+Then we want to say
+\begin{quote}
+If $\delta = 0$ , then 
+$$
+x_A + x_B + x_C + x_D + x_E \leq 3.
+$$
+\end{quote}
+
+We can formulate this using a big-M constraint as
+
+\begin{equation}
+x_A + x_B + x_C + x_D + x_E \leq 3 + M \delta.
+\end{equation}
+
+Notice the two cases
+$$
+\begin{cases}
+x_A + x_B + x_C + x_D + x_E \leq 3  & \text{ if } \delta = 0\\
+x_A + x_B + x_C + x_D + x_E \leq 3 +M & \text{ if } \delta = 1
+\end{cases}
+$$
+In the second case, we choose $M$ to be so large that the second case inequality is vacuous.    That said, choosing smaller $M$ values (that are still valid) will help the computer program solve the problem faster.  In this case, it suffices to let $M = 2$.
+
+We can speak about this technique more generally as
+\begin{general}{Big-M: If then}{}{}
+We aim to model the relationship
+\begin{equation}
+\text{ If } \ \ \   \delta = 0, \ \ \  \text{then  } \ \ \ a^\top x \leq b.
+\end{equation}
+By letting $M$ be an upper bound on the quantity $a^\top x - b$, we can model this condition as 
+\begin{equation}
+\begin{split}
+a^\top x - b& \leq M\delta\\
+\delta & \in \{0,1\}
+\end{split}
+\end{equation}
+\end{general}
+
+Below are several applications of this modeling technique:
+
+\begin{itemize}
+  \item \textbf{Facility Location with Fixed Costs:}\\
+  To ensure that a facility \(i\) must be open in order to serve customer \(j\), we write
+  \[
+  x_{ij} \le M \delta_i,
+  \]
+  where \(x_{ij}\) is the quantity shipped and \(\delta_i = 1\) if facility \(i\) is open.
+
+%  \item \textbf{Piecewise Linear or Step Costs:}\\
+%  Suppose a cost function is composed of linear segments. We can activate the constraints of the \(k\)-th segment only if binary \(\delta_k = 1\) via:
+%  \[
+%  y - (m_k x + b_k) \le M(1 - \delta_k).
+%  \]
+
+  \item \textbf{Power Plant Operation Constraints:}\\
+  A generator can only produce power when it is turned on. Letting \(\delta_t = 1\) indicate that the generator is on at time \(t\), we write:
+  \[
+  P_{\min} \delta_t \le P_t \le P_{\max} \delta_t.
+  \]
+
+  \item \textbf{Task Scheduling with Precedence Constraints:}\\
+  To ensure task \(B\) starts only after task \(A\) ends, if a binary \(\delta = 1\) indicates the precedence relation is active, we write:
+  \[
+  \text{Start}_B \ge \text{End}_A - M(1 - \delta).
+  \]
+
+  \item \textbf{Routing and Time Windows:}\\
+  In vehicle routing problems, to model time consistency across arcs, we use:
+  \[
+  t_j \ge t_i + s_i - M(1 - \delta_{ij}),
+  \]
+  where \(\delta_{ij} = 1\) indicates travel from node \(i\) to node \(j\), and \(s_i\) is service time at node \(i\).
+
+  \item \textbf{Production Planning and Setup Costs:}\\
+  To ensure production \(x_t\) is positive only if a setup decision \(\delta_t = 1\) is made:
+  \[
+  x_t \le M \delta_t.
+  \]
+\end{itemize}
+\newpage
+\begin{example}{Network Flow with Toll Charges Using Big-M Constraints}{}
+Consider a transportation network where some arcs incur a toll cost if used. Let:
+\begin{itemize}
+  \item \( G = (V, A) \) be a directed graph with nodes \(V\) and arcs \(A\).
+  \item \( x_{ij} \geq 0 \) be the flow on arc \((i,j) \in A\).
+  \item \( \delta_{ij} \in \{0,1\} \) indicate whether arc \((i,j)\) is used.
+  \item \( c_{ij} \) be the per-unit flow cost on arc \((i,j)\).
+  \item \( t_{ij} \) be the fixed toll incurred if arc \((i,j)\) is used.
+  \item \( M_{ij} \) be a large constant upper bound on possible flow through arc \((i,j)\).
+\end{itemize}
+
+The objective is to route flow from a source node \(s\) to a sink node \(t\) at minimum total cost, including tolls when applicable:
+\[
+\min \sum_{(i,j) \in A} \left( c_{ij} x_{ij} + t_{ij} \delta_{ij} \right)
+\]
+
+\noindent Subject to:
+\begin{align*}
+  &\sum_{j: (i,j) \in A} x_{ij} - \sum_{j: (j,i) \in A} x_{ji} =
+  \begin{cases}
+    1 & \text{if } i = s \\
+    -1 & \text{if } i = t \\
+    0 & \text{otherwise}
+  \end{cases} &&\text{(Flow conservation)} \\
+  &x_{ij} \le M_{ij} \delta_{ij} &&\text{(Big-M: toll applies only if arc is used)} \\
+  &x_{ij} \ge 0, \quad \delta_{ij} \in \{0,1\} &&\text{for all } (i,j) \in A
+\end{align*}
+
+\end{example}
+
+\subsubsection{Application: NYC Transportation Network with Tolls}
+
+Figure~\ref{fig:nyc_network} illustrates a simplified transportation network over the five boroughs of New York City, with selected connections to model bridges and tunnels. Each node represents a borough, and directed arcs represent feasible travel routes. Some of these arcs include tolls, which are incurred only in one direction, mimicking real-world tolling policies.
+
+\paragraph{Nodes.}
+The nodes in the graph correspond to the following boroughs:
+\begin{itemize}
+    \item Manhattan
+    \item Brooklyn
+    \item Queens
+    \item Bronx
+    \item Staten Island
+\end{itemize}
+
+\paragraph{Arcs.}
+The directed arcs model travel between boroughs, with an optional toll charge. These arcs represent crossings such as bridges or tunnels, and are defined as follows:
+
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+\textbf{From} & \textbf{To} & \textbf{Toll} \\
+\midrule
+Manhattan & Brooklyn       & Yes (e.g., Brooklyn-Battery Tunnel) \\
+Manhattan & Queens         & Yes (e.g., Queens-Midtown Tunnel) \\
+Brooklyn  & Queens         & No  \\
+Manhattan & Bronx          & Yes (e.g., RFK/Triborough Bridge) \\
+Bronx     & Queens         & Yes \\
+Manhattan & Staten Island  & Yes (e.g., Verrazzano-Narrows Bridge) \\
+Staten Island & Brooklyn   & No  \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Toll Modeling.}
+Each arc \((i, j)\) in the network has an associated binary toll flag. If a toll applies, the arc is subject to a fixed toll cost only if it is used. This can be modeled in a mixed-integer program using a binary variable \(\delta_{ij} \in \{0,1\}\) that indicates whether the arc is selected. A Big-\(M\) constraint of the form:
+\[
+x_{ij} \le M \cdot \delta_{ij}
+\]
+can be used to enforce toll cost and flow constraints, where \(x_{ij}\) is the flow over arc \((i,j)\), and \(M\) is a suitably large upper bound on the possible flow.
+
+\paragraph{Legend.}
+In the figure, solid green arrows represent toll-free travel, while dashed red arrows indicate that a toll is applied in the direction of the arc.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale = 0.4]{new-york-tolls}
+\caption{Simplified NYC Transportation Network with Directional Tolls}
+\label{fig:nyc_network}
+\end{figure}
+
+
+
+
+\begin{casestudybox}{108{,}
+\label{case:walmart-loads}000 Fewer Truck Routes: Walmart's Load Planning}
+
+Walmart moves goods from distribution centers to about 4{,}700 US stores on one of the largest private trucking fleets in the world.  For the 2023 Franz Edelman Award (which it won), Walmart described an end-to-end optimization framework, from long-term network design down to daily routing and trailer load planning.  In fiscal year 2023 the system eliminated 108{,}000 truck routes and 33 million driving miles, saving \$91.5 million and preventing 98.6 million pounds of CO$_2$ emissions.
+
+\subsection*{The Challenge}
+Every day, each store needs a set of orders delivered.  Orders take up trailer space; trucks have capacity; stores have delivery windows; and every truck dispatched costs money and emissions.  The daily question at the heart of load planning: pack the orders into as few trailer-loads as possible while respecting capacities and delivery requirements.
+
+\subsection*{The Solution: A Packing/Consolidation Integer Program}
+\textbf{Model type: integer programming for load consolidation and routing, inside a framework whose strategic layers are also optimization models.  Forecasts feed the models as data.}
+
+The consolidation core, simplified:
+
+\modelhead{Sets and Parameters}
+\begin{itemize}
+\item Let $O$ be the set of orders for a delivery region, with sizes $q_o$ (trailer cube).
+\item Let $T$ be the set of available trailer-loads (trucks), each with capacity $Q$.
+\item Compatibility data: $s_{ot} = 1$ if order $o$ can ride on truck $t$ (same route corridor, feasible delivery window).
+\end{itemize}
+
+\modelhead{Variables}
+\begin{itemize}
+\item Let $x_{ot} = 1$ if order $o$ is loaded on truck $t$.
+\item Let $y_t = 1$ if truck $t$ is dispatched.
+\end{itemize}
+
+\modelhead{Model}
+\begin{align*}
+\min \quad & \sum_{t \in T} y_t   \tag{trucks dispatched} \\
+\st        & \sum_{t \in T} s_{ot}\, x_{ot} = 1 &&\quad \text{for all } o \in O   \tag{every order ships} \\
+           & \sum_{o \in O} q_o\, x_{ot} \leq Q\, y_t &&\quad \text{for all } t \in T   \tag{capacity; ride only dispatched trucks} \\
+           & x_{ot} \leq s_{ot}, \quad x_{ot}, y_t \in \{0,1\}.
+\end{align*}
+
+The capacity constraint again uses the big-$M$ linking pattern with $M = Q$.  The deployed system couples this packing decision with routing (which stores share a route) and with strategic network design; the Edelman paper describes the full architecture.
+
+\subsection*{Assumptions and Simplifications}
+\begin{itemize}
+\item Order sizes and delivery windows are data; in practice they come from demand forecasts.
+\item The simplified model minimizes truck count; Walmart's objective also prices miles, so consolidating onto fewer, fuller, shorter routes is what produced the 33-million-mile reduction.
+\item Routing (the order in which a truck visits stores) is a separate, harder layer, in Book 2 territory; this box shows the consolidation layer.
+\end{itemize}
+
+\subsection*{Implementation and Results}
+Deployed across Walmart's US supply chain: 108{,}000 routes and 33 million miles eliminated in FY2023, \$91.5 million saved, 98.6 million pounds of CO$_2$ avoided.  2023 INFORMS Franz Edelman Award winner.
+
+\subsection*{References}
+\begin{itemize}
+\item ``Optimizing Walmart's Supply Chain from Strategy to Execution.'' \emph{INFORMS Journal on Applied Analytics} 54(1), 5--19, 2024. \url{https://doi.org/10.1287/inte.2023.0093}
+\end{itemize}
+\end{casestudybox}
+
+\subsection{Either Or Constraints}
+\label{subsec:either-or}
+The Big-M technique from the previous subsection activated a single constraint.  A closely related situation is when we have two constraints and we need \emph{at least one} of them to hold: an \emph{inclusive or}.  For example, a delivery might need to arrive either before a morning deadline or after an afternoon opening, or a budget must be satisfied in at least one of two currencies.  The trick is to use one binary variable to decide \emph{which} constraint is enforced, and a pair of Big-M constraints to relax whichever one is not selected.
+\begin{general}{Either Or}{}{}
+
+\begin{equation}
+\text{Either} \ \ \ a^\top x \leq b\ \  \text{  or  } \ \  c^\top x \leq d \ \ \text{holds}
+\end{equation}
+can be modeled as
+\begin{equation}
+\begin{split}
+a^\top x - b &\leq M_1 \delta\\
+c^\top x - d &\leq M_2 (1-\delta)\\
+\delta &\in \{0,1\},
+\end{split}
+\end{equation}
+where $M_1$ is an upper bound on $a^\top x - b$ and $M_2$ is an upper bound on $c^\top x - d$.
+\end{general}
+
+\paragraph{Interpretation.}
+\begin{itemize}
+    \item If \(\delta = 0\), then the first constraint becomes \(a^\top x \leq b\), and the second becomes \(c^\top x \leq d + M_2\), which is trivially satisfied if \(M_2\) is large enough.
+    \item If \(\delta = 1\), then the second constraint becomes \(c^\top x \leq d\), while the first is relaxed as \(a^\top x \leq b + M_1\).
+\end{itemize}
+Either way, at least one of the two original constraints is enforced; the binary variable $\delta$ simply selects which one.
+
+We now apply this recipe to a small example.
+
+\begin{example}{Buses or Cars}{}
+To shuttle students to the football game, we need either at least $2$ buses or at least $10$ cars.
+\begin{itemize}
+\item Let $x$ be the number of buses we have and
+\item let $y$ be the number of cars that we have.
+\end{itemize}
+We want to enforce that $x \geq 2$ or $y \geq 10$.  Writing these in the form used above, we need $-x \leq -2$ or $-y \leq -10$.  Since $x, y \geq 0$, we may take $M_1 = 2$ as an upper bound on $-x - (-2) = 2 - x$ and $M_2 = 10$ as an upper bound on $10 - y$.  The recipe gives
+\begin{equation}
+\begin{split}
+2 - x &\leq 2\delta\\
+10 - y &\leq 10 (1-\delta)\\
+\delta &\in \{0,1\},
+\end{split}
+\end{equation}
+which simplifies to $x \geq 2(1-\delta)$ and $y \geq 10\delta$.  If $\delta = 0$ we must have at least $2$ buses; if $\delta = 1$ we must have at least $10$ cars.
+\end{example}
+
+\paragraph{Choosing Big-M Values.}
+\label{par:choosing-big-M}
+The constants \(M_1\) and \(M_2\) should be chosen as valid upper bounds on the expressions \(a^\top x - b\) and \(c^\top x - d\), respectively, over the feasible region. Overly large values may weaken the LP relaxation and cause numerical instability, so careful bounding is recommended whenever possible.  In the example above, the bounds $M_1 = 2$ and $M_2 = 10$ are as tight as possible.
+
+\paragraph{Use Cases.}
+Either-or constraints naturally arise in problems with conditional decisions, such as:
+\begin{itemize}
+    \item If a machine is used, then either a certain energy constraint or a safety constraint must be met.
+    \item In facility planning, either a site must be built with one configuration or another.
+    \item In piecewise models where a variable must fall into one of two feasible regions.
+\end{itemize}
+We will see a substantial application of this idea, with more than two constraints in the disjunction, when we study 2D packing problems in Section~\ref{subsec:multi-term-disjunction}.
+\subsection{If then implications - opposite direction}
+Suppose that we want to model the fact that if we have at most 10 students attending this course, then we must switch to a smaller classroom.   
+
+Let $x_i \in \{0,1\}$ be 1 if student $i$ is in the course or not.   Let $\delta \in \{0,1\}$ be 1 if we need to switch to a smaller classroom.  
+
+Thus, we want to model 
+\begin{quote}
+If $$
+\sum_{i \in I} x_i \leq 10
+$$
+then 
+$$
+\delta = 1.
+$$
+\end{quote}
+
+Using the recipe below with $b = 10$, $\epsilon = 1$ (the data are integer), and lower bound $m = -10$ on $\sum_{i \in I} x_i - 10$, we can model this as
+\begin{equation}
+\sum_{i \in I} x_i \geq 10 + 1(1-\delta) + (-10)\delta = 11(1 - \delta).
+\end{equation}
+If $\delta = 0$, the constraint forces at least $11$ students; equivalently (by the contrapositive), whenever $10$ or fewer students attend, the model must set $\delta = 1$.
+
+
+\begin{general}{If inequality, then indicator}{}
+We let $m$ be a lower bound on the quantity $a^\top x - b$ and we let $\epsilon$ be a tiny number that is an error bound in verifying if an inequality is violated.  \textbf{If the data $a,b$ are integer and $x$ is an integer, then we can take $\epsilon = 1$.}
+
+Now
+\begin{equation}
+\text{If } \ \ a^\top x \leq b  \ \ \text{then}\ \ \delta = 1
+\end{equation}
+can be modeled as 
+\begin{equation}
+a^\top x -b  \geq  \epsilon(1-\delta) + m \delta.
+\end{equation}
+\end{general}
+
+
+
+\begin{proof}We now justify the statement above.
+
+A simple way to understand this constraint is to consider the \emph{contrapositive} of the if then statement that we want to model.  The contrapositive says that 
+\begin{equation}
+\text{If $\delta = 0$, then $a^\top x - b > 0$.}
+\end{equation}
+To show the contrapositive, we set $\delta = 0$.  Then the inequality becomes 
+$$
+a^\top x - b \geq \epsilon(1-0) + m0 = \epsilon > 0.
+$$
+Thus, the contrapositive holds.
+
+\textbf{If instead we wanted a direct proof:}
+
+Case 1: Suppose $a^\top x \leq b$.  Then $0 \geq a^\top x - b$, which implies that 
+$$
+\delta(a^\top x - b) \geq a^\top x - b
+$$
+Therefore
+$$
+\delta(a^\top x - b) \geq \epsilon(1-\delta) + m \delta
+$$
+After rearranging
+$$
+\delta(a^\top x - b - m) \geq \epsilon(1-\delta)
+$$
+Since $a^\top x - b - m \geq 0$ and $\epsilon > 0$, the only feasible choice is $\delta = 1$.
+
+
+Case 2:  Suppose $a^\top x > b$.  By the choice of $\epsilon$, this implies $a^\top x - b \geq \epsilon$, so the inequality holds with $\delta = 0$.  Since also $a^\top x - b \geq m$, it holds with $\delta = 1$ as well.  Thus both choices of $\delta$ are feasible, as they should be.
+\end{proof}
+
+Many other combinations of if then statements are summarized in the following table:
+\begin{table}
+\begin{center}
+\begin{tabular}{|c|c|}
+\hline
+\textbf{Implication} & \textbf{Constraint}\\
+\hline
+If $\delta = 0$, then $a^\top x \leq b$ & $a^\top x \leq b + M \delta$\\
+If $a^\top x \leq b$, then $\delta = 1$ & $a^\top x \geq m \delta + \epsilon(1-\delta)$\\
+\hline
+\end{tabular}
+\end{center}
+\caption{Short list: If/then models with a constraint and a binary variable.  Here $M$ and $m$ are upper and lower bounds on $a^\top x - b$ and $\epsilon$ is a small number such that if $a^\top x > b$, then $a^\top x \geq b + \epsilon$.}
+\end{table}
+These two implications can be used to derive the following longer list of implications.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{|c|c|}
+\hline
+\textbf{Implication} & \textbf{Constraint}\\
+\hline
+If $\delta = 0$, then $a^\top x \leq b$ & $a^\top x \leq b + M \delta$\\
+If $\delta = 0$, then $a^\top x \geq b$ & $a^\top x \geq b + m \delta$\\
+If $\delta = 1$, then $a^\top x \leq b$ & $a^\top x \leq b + M (1-\delta)$\\
+If $\delta = 1$, then $a^\top x \geq b$ & $a^\top x \geq b + m (1-\delta)$\\
+If $a^\top x \leq b$, then $\delta = 1$ & $a^\top x \geq b + m \delta + \epsilon(1-\delta)$\\
+If $a^\top x \geq b$, then $\delta = 1$ & $a^\top x \leq b + M \delta - \epsilon(1-\delta)$\\
+If $a^\top x \leq b$, then $\delta = 0$ & $a^\top x \geq b + m (1-\delta) + \epsilon \delta$\\
+If $a^\top x \geq b$, then $\delta = 0$ & $a^\top x \leq b + M (1-\delta) - \epsilon \delta$\\
+\hline
+\end{tabular}
+\end{center}
+\caption{Long list: If/then models with a constraint and a binary variable.  Here $M$ and $m$ are upper and lower bounds on $a^\top x - b$ and $\epsilon$ is a small number such that if $a^\top x > b$, then $a^\top x \geq b + \epsilon$.}
+\end{table}
+Lastly, if you insist on having exact correspondence, that is, ``$\delta = 0 $ if and only if $a^\top x \leq b$'' you can simply include both constraints for ``if $\delta = 0 $, then $a^\top x \leq b$'' and ``if $a^\top x \leq b$, then $\delta = 0 $''.  Although many problems may be phrased in a way that suggests you need ``if and only if'', it is often not necessary to use both constraints due to the objectives in the problem that naturally prevent one of these from happening.  
+
+For example, if we want to add a binary variable $\delta$ that means
+$$
+\begin{cases}
+\delta = 0 \text{ implies }  a^\top x \leq b\\
+\delta = 1  \text{ Otherwise}
+\end{cases}
+$$
+If $\delta = 1$ does not affect the rest of the optimization problem, then adding the constraint regarding $\delta = 1$ is not necessary.  Hence, typically, in this scenario, we only need to add the constraint $a^\top x \leq b + M \delta$.
+
+\subsection{Multi Term Disjunction with application to 2D packing}
+\label{subsec:multi-term-disjunction}
+
+%\section{Generalized $k$-of-$n$ Disjunction}
+A disjunction is a generalization of an ``or'' statement. Suppose that we have $n$ constraints 
+	$$
+	\mathbf{a}_1^\top\mathbf{x} \leq b_1, \quad \mathbf{a}_2^\top\mathbf{x} \leq b_2, \quad\dots, \quad \mathbf{a}_n^\top\mathbf{x} \leq b_n
+	$$
+and we want to enforce at least $k$ of them. This can be accomplished linearly by introducing a new binary indicator variable $\delta_i$ for each of the disjunctive constraints $i \in \{1,\dots,n\}$:
+	\begin{align*}
+	\mathbf{a}_1^\top\mathbf{x} &\leq b_1+M(1-\delta_1) \\
+	\mathbf{a}_2^\top\mathbf{x} &\leq b_2+M(1-\delta_2) \\
+								&\vdots 				\\
+	\mathbf{a}_n^\top\mathbf{x} &\leq b_n+M(1-\delta_n) \\
+	\sum_{i=1}^n\delta_i &\geq k
+	\end{align*}
+If $\delta_i = 1$, then the $i^\text{th}$ disjunctive constraint is actively enforced. The last constraint $\left(\sum_{i=1}^n\delta_i \geq k\right)$ ensures that at least $k$ of the constraints are active.
+
+\subsubsection{Strip Packing Problem}
+Suppose we have a collection of rectangles $I$ and a 2-dimensional strip with width $W$ and infinite height. Each rectangle $i \in I$ has width $w_i$ and
+height $h_i$ and we want to pack the rectangles into the strip so that \eqref{mod:StripPackingObj-simple} overall height is minimized, \eqref{mod:StripPackingWidth-simple} overall width is less than $W$, and \eqref{mod:StripPackingOverlap-simple} none of the rectangles overlap. See Figure \ref{fig:StripPacking} for an example: Figure \ref{fig:StripPacking-PackStrip} shows the rectangles to be packed, and Figure \ref{fig:StripPacking-MinHeight} shows a packing whose overall height $H$ we wish to minimize.
+	\begin{figure}[h!]
+	\begin{subfigure}[b]{.6\textwidth}
+	\centering
+	\includegraphics[height=.4\textheight]{StripPacking0}
+	\caption{Pack the rectangles into the strip}
+	\label{fig:StripPacking-PackStrip}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{.3\textwidth}
+	\centering
+	\includegraphics[height=.4\textheight]{StripPacking1}
+	\caption{Minimize overall height $H$.}
+	\label{fig:StripPacking-MinHeight}
+	\end{subfigure}
+	\caption{An Example of the Strip Packing Problem}
+	\label{fig:StripPacking}
+	\end{figure}
+
+Let $(x_i,y_i)$ denote the position of the lower-left-hand corner of each rectangle $i \in I$. The overlapping constraint \eqref{mod:StripPackingOverlap-simple} is the trickiest part. Consider a pair of rectangles $i$ and $j$: rectangle $j$ is located entirely to the left of rectangle $i$ if $x_i$ has a value larger than $x_j+w_j$. That is, if $x_j + w_j \leq x_i$. On the other hand, if $y_j \geq y_i+h_i$, then rectangle $j$ is located entirely above rectangle $i$. If either of these constraints is satisfied then rectangles $i$ and $j$ do not overlap. We could also place $i$ above or to the right of $j$. This gives four constraints that we need to satisfy at least one of. The model can be thought of as follows:
+
+	\begin{subequations}
+	\begin{alignat}{4}
+	\text{Minimize}& \quad & \mathclap{\hspace{-69pt} \max_{i\in I}\{y_i+h_i\}} 	\label{mod:StripPackingObj-simple}\\
+		\st & 	   & \max_{i\in I}\{x_i+w_i\} &\leq W 						\label{mod:StripPackingWidth-simple}\\
+				   &	   & \mathclap{\hspace{111pt} \left.\begin{aligned}
+				   		x_i+w_i &\leq x_j \\
+				   		x_j+w_j &\leq x_i \\
+				   		y_i+h_i &\leq y_j \\
+				   		y_j+h_j &\leq y_i
+				   		\end{aligned}\right\} \parbox{110pt}{At least one of these for every distinct pair of rectangles $i,j \in I$}} \label{mod:StripPackingOverlap-simple} \\
+			   	   &	   & x_i,y_i &\geq 0		&\qquad& & &\forall\ i\in I
+	\end{alignat}
+	\end{subequations}
+Constraint \eqref{mod:StripPackingOverlap-simple} is a set of four \textit{disjunctive} constraints. This can be expressed linearly by introducing a new binary indicator variable $\delta_{ijk}$ for each of the disjunctive constraints in \eqref{mod:StripPackingOverlap-simple}:
+	\begin{alignat}{4}
+	\text{Minimize}& \quad & \mathclap{\hspace{-53pt} H}	\nonumber\\
+		\st & 	   & y_i+h_i &\leq H						&\qquad& & &\forall\ i\in I		\tag{\ref{mod:StripPackingObj-simple}}	\\
+				   & 	   & x_i+w_i &\leq W						&\qquad& & &\forall\ i\in I		\tag{\ref{mod:StripPackingWidth-simple}}\\
+				   &	   & x_i+w_i &\leq x_j+M(1-\delta_{ij1}) 	&\qquad& & &\forall\ i,j\in I:\ i>j	\nonumber \\
+				   &	   & x_j+w_j &\leq x_i+M(1-\delta_{ij2}) 	&\qquad& & &\forall\ i,j\in I:\ i>j	\nonumber \\
+				   &	   & y_i+h_i &\leq y_j+M(1-\delta_{ij3}) 	&\qquad& & &\forall\ i,j\in I:\ i>j	\tag{\ref{mod:StripPackingOverlap-simple}}\\
+				   &	   & y_j+h_j &\leq y_i+M(1-\delta_{ij4}) 	&\qquad& & &\forall\ i,j\in I:\ i>j	\nonumber \\
+				   &	   & \sum_{k=1}^4\delta_{ijk} & \geq 1	 	&\qquad& & &\forall\ i,j\in I:\ i>j	\nonumber \\
+				   &	   & x_i,y_i &\geq 0		&\qquad& & &\forall\ i\in I							\nonumber \\
+				   &	   & \boldsymbol{\delta}_{ij} &\in\{0,1\}^4	&\qquad& & &\forall\ i,j\in I:\ i>j	\nonumber 
+	\end{alignat}
+If $\delta_{ijk} = 1$, then the $k^\text{th}$ disjunctive constraint is actively enforced. The last constraint $\left(\sum_{k=1}^4\delta_{ijk} \geq 1\right)$ ensures that at least one of the constraints is active. An optimal solution to the example is given in Figure \ref{fig:StripPacking-Opt}; it was found via GurobiPy.
+	\begin{figure}[h!]
+	\centering
+	\includegraphics[height=.4\textheight]{StripPacking2}
+	\caption{An optimal solution to the strip packing example.}
+	\label{fig:StripPacking-Opt}
+	\end{figure}
+
+This problem is considered strongly NP-Hard.
+
+
+
+
+
+
+\subsection{SOS1 Constraints}
+The modeling tricks so far in this section were built by hand out of binary variables and Big-M constraints.  Certain logical structures come up so often, however, that modern solvers accept them directly as \emph{special ordered sets} (SOS).  Declaring an SOS constraint tells the solver about the structure explicitly, which both simplifies the model you write and lets the solver use specialized branching rules.
+\begin{definition}{Special Ordered Sets of Type 1 (SOS1)}
+A Special Ordered Set of type 1 (SOS1) constraint on a vector indicates that \emph{at most one element of the vector can be non-zero}.
+\end{definition}
+SOS1 constraints arise whenever a set of options is mutually exclusive: choosing one supplier out of several, operating a machine in one of several modes, or assigning a shipment to one of several routes.  If each $x_i$ has an upper bound $U_i$, we could model this ourselves by introducing a binary variable $z_i$ for each $x_i$ and writing $x_i \leq U_i z_i$ together with $\sum_i z_i \leq 1$.  Declaring an SOS1 constraint achieves the same effect with a single line of code and no extra variables.
+
+The following small example is deliberately simple: the point is not the optimization problem itself, but seeing both modeling styles side by side in code.
+
+\begin{examplewithcode}{SOS1 Constraints}{\href{https://github.com/open-optimization/open-optimization-or-examples/blob/master/nonlinear-programming/Gurobi-SOS-Examples.ipynb}{Gurobipy}}
+\label{example:sos1}
+Solve the following optimization problem: \[\begin{aligned}
+\text{maximize}\quad & 3x_1 + 4x_2 + x_3 + 5x_4 \\
+\st \quad & 0 \le x_i \le 5 \\
+& \text{at most one of the $x_i$ can be nonzero}
+\end{aligned}\]
+Since only one variable may be nonzero, the best choice is to push the variable with the largest objective coefficient, $x_4$, to its upper bound: the optimal solution is $x_4 = 5$ with value $25$.
+\end{examplewithcode}
+\subsection{SOS2 Constraints}
+\begin{definition}{Special Ordered Sets of Type 2 (SOS2)}{}
+A \emph{Special Ordered Set of Type 2 (SOS2)} constraint on a vector indicates that \emph{at most two elements of the vector can be non-zero AND the non-zero elements must appear consecutively}.
+\end{definition}
+At first glance this looks like a strange condition to single out, but it is exactly what is needed to model \emph{piecewise linear functions}: a point on a piecewise linear curve lies on one segment, and can therefore be written as a weighted average of the two \emph{consecutive} breakpoints at the ends of that segment.  We develop that application in the next subsection; here we first get comfortable with the constraint itself.
+
+The example below modifies the SOS1 example in only one way (two consecutive nonzeros are now allowed), so the two examples are easy to compare.  As before, the accompanying code shows both a binary-variable formulation and the one-line SOS2 declaration.
+
+\begin{examplewithcode}{SOS2}{\href{https://github.com/open-optimization/open-optimization-or-examples/blob/master/nonlinear-programming/Gurobi-SOS-Examples.ipynb}{Gurobipy}}
+\label{example:SOS2}
+Solve the following optimization problem: \[\begin{aligned}
+\text{maximize}\quad & 3x_1 + 4x_2 + x_3 + 5x_4 \\
+\st \quad & 0 \le x_i \le 5 \\
+& \text{at most two of the $x_i$ can be nonzero} \\
+& \text{and the nonzero $x_i$ must be consecutive}
+\end{aligned}\]
+The pairs of consecutive variables are $(x_1,x_2)$, $(x_2,x_3)$, and $(x_3,x_4)$.  Comparing the objective coefficients, the best pair is $(x_1, x_2)$ at $x_1 = x_2 = 5$, giving value $(3+4)\cdot 5 = 35$.  Note that the SOS1 solution $x_4=5$ alone would give only $25$.
+\end{examplewithcode}
+
+\subsection{Piecewise linear functions with SOS2 constraint}
+\label{subsec:pwl-sos2}
+\begin{examplewithcode}{Piecewise Linear Function}{\href{https://github.com/open-optimization/open-optimization-or-examples/blob/master/nonlinear-programming/Gurobi-SOS-Examples.ipynb}{Gurobipy}}
+\label{example:pwl}
+Consider the piecewise linear function 
+ $c(x)$ given by
+$$
+c(x) = 
+\begin{cases}
+25x  & \text{ if } 0 \leq x \leq 5\\
+20x + 25 & \text{ if } 5 \leq x \leq 10\\
+15x + 75 & \text{ if } 10 \leq x \leq 15
+\end{cases}
+$$
+\begin{center}
+\includegraphicbook[scale = 1]{pwl-plot}
+\end{center}
+%See \refincludefigurestatic[scale = 0.35]{pwl-plot.png}.
+
+We will use integer programming to describe this function.  We will fix $x = a$ and then the integer program will set the value $y$ to $c(a)$.
+\begin{align*}
+\min \quad & 0 \\
+\st        & x = 5 z_{2} +10 z_{3} + 15 z_{4} \\
+ & y = 125 z_{2} + 225 z_{3} + 300 z_{4} \\
+ & z_{1} + z_{2} + z_{3} + z_{4} = 1 \\
+ & SOS2: \{z_1, z_2, z_3, z_4\} \\
+ & 0 \leq z_{i} \leq 1 &&\quad \text{for all } i \in \{1,2,3,4\} \\
+ & x = a \\
+\end{align*}
+
+\end{examplewithcode}
+
+\begin{examplewithcode}{Piecewise Linear Function Application}{\href{https://github.com/open-optimization/open-optimization-or-examples/blob/master/nonlinear-programming/Gurobi-SOS-Examples.ipynb}{Gurobipy}}
+\label{example:pwl-application}
+Consider the following optimization problem where the objective function includes the term $c(x)$, where $c(x)$ is the piecewise linear function described in \nameref{example:pwl}:
+\begin{align}
+\max \quad & z = 12x_{11} + 12x_{21} + 14x_{12} + 14x_{22} - c(x) \\
+\st        & x_{11} + x_{12} \leq x + 5 \\
+& x_{21} + x_{22} \leq 10 \\
+& 0.5 x_{11} - 0.5x_{21} \geq 0 \\
+& 0.4 x_{12} - 0.6 x_{22} \geq 0 \\
+& x_{ij} \geq 0 \\
+& 0 \leq x \leq 15
+\end{align}
+
+Given the piecewise linear function, we can model the whole problem explicitly as a mixed-integer linear program.
+
+ \begin{equation}
+ \begin{array}{rrlr}
+ \max\quad & 12 X_{1,1} + 12 X_{2,1} + 14 X_{1,2} + 14 X_{2,2} - y\\
+\st \quad & x - 5 z_{2} - 10 z_{3} - 15 z_{4} &= 0\\
+ & y - 125 z_{2} - 225 z_{3} - 300 z_{4} &= 0\\
+ & z_{1} + z_{2} + z_{3} + z_{4} &= 1\\
+ & X_{1,1} + X_{1,2} - x &\leq 5\\
+ & X_{2,1} + X_{2,2} &\leq 10\\
+ & 0.5 X_{1,1} - 0.5 X_{2,1} &\geq 0\\
+ & 0.4 X_{1,2} - 0.6 X_{2,2} &\geq 0\\
+ & SOS2: \{z_1, z_2, z_3, z_4\}\\
+ & X_{i,j} &\geq 0 &\quad\forall i \in \{1,2\}, j \in \{1,2\}\\
+ & 0 \leq z_{i} &\leq 1 &\quad\forall i \in \{1,2,3,4\}\\
+ & 0 \leq x &\leq 15\\
+ & y & \text{ free} \\
+\end{array}
+\end{equation}
+\end{examplewithcode}
+
+
+\subsubsection{SOS2 with binary variables}
+
+If the solver does not support SOS2 constraints directly, we can enforce the same condition with binary variables.  The recipe for a piecewise linear function $f$ with breakpoints $a_1 < a_2 < \dots < a_k$ is:
+\begin{itemize}
+\item Write down pairs of breakpoints and functions values $(a_i, f(a_i))$.
+\item Define a binary variable $z_i$ indicating if $x$ is in the interval $[a_i, a_{i+1}]$.
+\item Define multipliers $\lambda_i$ such that $x$ is a combination of the $a_i$'s and therefore the output $y = f(x)$ is a combination of the $f(a_i)$'s.
+\item Restrict that at most 2 $\lambda_i$'s are non-zero and that those 2 are consecutive.
+
+\end{itemize}
+
+\begin{align*}
+\min \quad & \sum_{i=1}^k \lambda_i f(a_i) \\
+\st        & \sum_{i=1}^k \lambda_i = 1 \\
+& x = \sum_{i=1}^k \lambda_i a_i \\
+& \sum_{i=1}^{k-1} z_i = 1 \\
+& \lambda_1 \leq z_1 \\
+& \lambda_i \leq z_{i-1} + z_{i} &&\quad \text{for all } i=2, \dots, k-1, \\
+& \lambda_k \leq z_{k-1} \\
+& \lambda_i \geq 0, z_i \in \{0,1\}.
+\end{align*}
+
+Here the binary variable $z_i$ selects segment $i$: the constraint $\sum_{i=1}^{k-1} z_i = 1$ picks exactly one interval $[a_i, a_{i+1}]$, and the constraints $\lambda_j \leq z_{j-1} + z_j$ then force $\lambda_j = 0$ for every index $j$ outside $\{i, i+1\}$.  Only $\lambda_i$ and $\lambda_{i+1}$ can be nonzero, which is exactly the SOS2 condition.
+
+\subsection{Maximizing a minimum}
+When the constraints could be general, we will write $x \in X$ to define general constraints.  For instance, we could have $X = \{ x \in \R^n : Ax \leq b\}$ or $X  = \{ x \in \R^n : Ax \leq b, x \in \Z^n\}$ or many other possibilities.  
+
+
+Consider the problem 
+
+\begin{align*}
+\max   \quad & \min \{x_1, \dots, x_n\}\\
+\text{ such that } \quad &  x \in X
+\end{align*}
+Having the minimum on the inside is inconvenient.  To remove this, we just define a new variable $y$ and enforce that $y \leq x_i$ and then we maximize $y$.  Since we are maximizing $y$, it will take the value of the smallest $x_i$.  Thus, we can recast the problem as
+
+\begin{align*}
+\max\quad    & y\\
+\text{ such that } \quad  & y \leq x_i \ \text{ for }\  i=1, \dots, n \\
+&  x \in X
+\end{align*}
+
+
+\subsection{Relaxing (nonlinear) equality constraints}
+
+There are a number of scenarios where the constraints can be relaxed without sacrificing optimal solutions to your problem.   In a similar vein to maximizing a minimum, if because of the objective we know that certain constraints will be tight at optimal solutions, we can relax the equality to an inequality.   For example, 
+\begin{align*}
+\max   \quad &x_1 + x_2 +  \dots + x_n\\
+\text{ such that } \quad &  x_i = y_i^2 + z_i^2 \text{ for } i=1, \dots, n
+\end{align*}
+Since the objective pushes each $x_i$ upward, we can relax the equality to
+\begin{align*}
+\max   \quad &x_1 + x_2 +  \dots + x_n\\
+\text{ such that } \quad &  x_i \leq y_i^2 + z_i^2 \text{ for } i=1, \dots, n
+\end{align*}
+At any optimal solution of the relaxed problem, each $x_i$ is as large as its constraint allows, so $x_i = y_i^2 + z_i^2$ holds and the optimal solutions are unchanged.  This trick is valid whenever the objective pressure forces the relaxed inequality to be tight at optimality.  Note that the direction matters: relaxing to $x_i \geq y_i^2 + z_i^2$ instead would let the $x_i$ grow without bound.
+
+
+
+
+
+
+%
+%\subsection{Connecting to continuous variables}
+%
+%Let $x_i \geq 0$ and $y_i \in \{0,1\}$ for all $i=1, \dots, n$.
+%
+%\begin{enumerate}
+%\item If $x_i > 0$, then $y_i = 1$.
+%\begin{equation}
+%x_i \leq M y_i
+%\end{equation}
+%where $M$ is a suffiently large upper bound on the variable $x_i$.
+%\item If $x_i = 0$, then $y_i = 0$.\\
+%This is harder to model!  Alternatively, we try modeling "if $x_i$ is sufficiently small, then $y_i = 0$.   For instance, if $x_i \leq 0.0000001$, then $y_i = 0$.
+%This can be modeled as
+%\begin{equation}
+%x_i - 0.0000001 \geq y_i -1.
+%\end{equation}
+%\item If $y_i = 1$, then $x_i \geq 5$
+%\begin{equation}
+%5y_i \leq x_i.
+%\end{equation}
+%\end{enumerate}
+
+\subsection{Modeling the Exact Absolute Value}
+In many formulations we need to enforce the constraint $|x| = t$ where $t \geq 0$.
+Note that the inequality version $|x| \leq t$ is equivalent to the pair of linear constraints $-t \leq x \leq t$ and requires no integer variables.
+However, the \emph{equality} $|x| = t$ defines a non-convex set (the union of $x = t$ and $x = -t$), and so it cannot be modeled with linear constraints alone.
+
+To handle this, decompose $x$ into its positive and negative parts: write $x = x^+ - x^-$ with $x^+, x^- \geq 0$.
+Then $|x| = x^+ + x^-$ provided that $x^+$ and $x^-$ are not simultaneously positive.
+We enforce this complementarity condition using a binary variable $z \in \{0,1\}$ and a sufficiently large constant $M$ (an upper bound on $|x|$ in the context of the problem):
+\begin{align}
+x &= x^+ - x^-, \notag\\
+t &= x^+ + x^-, \notag\\
+x^+ &\leq Mz, \label{eq:abs-pos-bound}\\
+x^- &\leq M(1-z), \label{eq:abs-neg-bound}\\
+x^+, x^- &\geq 0, \quad z \in \{0,1\}. \notag
+\end{align}
+When $z=1$, constraint~\eqref{eq:abs-neg-bound} forces $x^- = 0$, so $x = x^+ \geq 0$.
+When $z=0$, constraint~\eqref{eq:abs-pos-bound} forces $x^+ = 0$, so $x = -x^- \leq 0$.
+In either case, $t = |x|$ as required.
+
+\subsubsection{Exact $\ell_1$-norm}
+The technique above extends naturally to model the exact $\ell_1$-norm constraint
+$\|x\|_1 = \sum_{i=1}^{n} |x_i| = c$,
+where $x \in \R^n$ is a vector of decision variables and $c > 0$ is a given constant.
+Such constraints appear, for example, in portfolio optimization where a budget constraint requires that long and short positions sum to a fixed investment level.
+
+We introduce variables $x_i^+, x_i^- \geq 0$ and binary variables $z_i \in \{0,1\}$ for each component $i = 1, \ldots, n$:
+\begin{align*}
+x_i &= x_i^+ - x_i^-, \quad &i = 1, \ldots, n,\\
+x_i^+ &\leq c\, z_i, \quad &i = 1, \ldots, n,\\
+x_i^- &\leq c\,(1 - z_i), \quad &i = 1, \ldots, n,\\
+\sum_{i=1}^n (x_i^+ + x_i^-) &= c,\\
+x_i^+, x_i^- &\geq 0, \quad z_i \in \{0,1\}.
+\end{align*}
+The bound $c$ is used here because no individual $|x_i|$ can exceed $c$ when the total $\ell_1$-norm equals $c$.
+
+\subsubsection{Modeling the Exact Maximum}
+Suppose we need to model $t = \max\{x_1, \ldots, x_n\}$ exactly.
+The inequality version $t \geq \max\{x_1, \ldots, x_n\}$ can be modeled simply as $t \geq x_i$ for all $i$, and if the objective is minimizing $t$, the optimizer will push $t$ down to the true maximum.
+However, when the equality $t = \max\{x_1, \ldots, x_n\}$ is required as a general constraint, we need to ensure that $t$ also satisfies $t \leq x_i$ for \emph{some} $i$.
+
+Introduce binary indicator variables $z_1, \ldots, z_n$ where $z_i = 1$ indicates that $x_i$ achieves the maximum.
+With a sufficiently large constant $M$:
+\begin{align*}
+x_i &\leq t, \quad &i = 1, \ldots, n, \\
+t &\leq x_i + M(1 - z_i), \quad &i = 1, \ldots, n, \\
+\sum_{i=1}^n z_i &= 1,\\
+z_i &\in \{0,1\}, \quad &i = 1, \ldots, n.
+\end{align*}
+The first set of constraints ensures $t \geq x_i$ for all $i$.
+For the index $i^*$ where $z_{i^*} = 1$, the second constraint becomes $t \leq x_{i^*}$, forcing $t = x_{i^*}$.
+Together with the first constraints, this gives $t = \max_i x_i$.
+
+\newpage
+
+
+
+
+
+\section{Job Shop Scheduling}
+\label{sec:job-shop}
+
+\begin{tryit}
+\vizlink{gantt-jobshop}{Job-Shop Schedule (Gantt)}: this chapter's scheduling problem, solved and animated.
+\end{tryit}
+
+
+The Job Shop Scheduling Problem (JSSP) is a classical combinatorial optimization problem that is NP-hard.
+A set of jobs must be processed on a set of machines, where each job follows a prescribed sequence of operations across the machines.
+Each operation has a fixed processing time, each machine can handle only one job at a time, and once a machine begins processing an operation it must finish without interruption.
+The objective is to minimize the \emph{makespan}, the time at which the last job completes.
+
+Consider a small workshop with three machines ($m_1$, $m_2$, $m_3$) and four jobs.
+Each job must visit each machine exactly once, in a job-specific order, with the following processing times (in hours):
+
+\begin{itemize}
+  \item Job $j_1$: $m_1(3) \to m_2(2) \to m_3(4)$.
+  \item Job $j_2$: $m_2(2) \to m_1(4) \to m_3(1)$.
+  \item Job $j_3$: $m_3(3) \to m_1(1) \to m_2(3)$.
+  \item Job $j_4$: $m_1(2) \to m_3(3) \to m_2(2)$.
+\end{itemize}
+
+Processing jobs one after another (sequentially) yields a makespan of $9+7+7+7 = 30$ hours.
+By allowing jobs to run concurrently on different machines, the makespan can be significantly reduced.
+
+\subsection{JSSP Components}
+Two pieces of data specify an instance.
+First, we collect the $n$ jobs in a set $J = \{1, \ldots, n\}$ and the $m$ machines in a set $I = \{1, \ldots, m\}$.
+Second, each job carries its own route through the shop together with the time it needs at each stop: we write $o_r^j$ for the machine on which job $j$ runs its $r$-th operation, so that the route of job $j$ is the sequence $O^j = (o_1^j, \ldots, o_m^j)$, and we write $p_{ij} \geq 0$ for the time job $j$ occupies machine $i$.
+
+A \emph{schedule} assigns a start time to every operation.
+Three rules separate the feasible schedules from the infeasible ones: the operations of a job may not start out of order---each waits for its predecessor on the route $O^j$ to finish; a machine hosts at most one job at any moment; and processing cannot be paused, so an operation that starts at time $t$ on machine $i$ blocks that machine until time $t + p_{ij}$.
+Among all feasible schedules we want one whose makespan---the time when the final operation ends---is as small as possible.
+
+
+
+\textbf{Example: Job Shop Scheduling Problem Input Data}
+
+\textbf{Basic Parameters.}
+Consider $n = 4$ jobs and $m = 3$ machines, using the workshop data introduced above.
+
+\textbf{Processing Times.}
+The matrix of processing times (one row per job, one column per machine) is:
+
+\[
+P =
+\begin{bmatrix}
+3 & 2 & 4 \\
+4 & 2 & 1 \\
+1 & 3 & 3 \\
+2 & 2 & 3 \\
+\end{bmatrix}
+\]
+
+The entry in row~$j$, column~$i$ gives the processing time $p_{ij}$ of job~$j$ on machine~$i$.
+
+\textbf{Machine Sequences.}
+The order in which each job visits the machines is:
+
+\[
+O =
+\begin{bmatrix}
+1 & 2 & 3 \\
+2 & 1 & 3 \\
+3 & 1 & 2 \\
+1 & 3 & 2 \\
+\end{bmatrix}
+\]
+
+Each row gives the machine sequence for a job.
+For instance, job~1 is processed first on machine~1, then machine~2, then machine~3,
+while job~3 starts on machine~3, then visits machine~1, and finishes on machine~2.
+
+\textbf{Big \(M\) Calculation.}
+A large constant $M$ is used in the big-$M$ formulation to enforce disjunctive constraints.
+A valid choice is the sum of all processing times:
+\[
+M = \sum_{i=1}^{m} \sum_{j=1}^{n} p_{ij} = (3+2+4)+(4+2+1)+(1+3+3)+(2+2+3) = 30.
+\]
+
+\begin{figure}
+% Will use file.tikz if it exists, else file.pdf
+\includetikz[width=0.8\textwidth]{jssp}
+\end{figure}
+%\refincludefigurestatic[scale = 1.5]{jssp.png}
+
+
+
+\paragraph{Applications of JSSP}
+The JSSP has numerous practical applications, including:
+\begin{itemize}
+  \item Manufacturing: Scheduling tasks in a production line to optimize throughput.
+  \item Computer Science: Allocating tasks to processors in parallel computing environments.
+  \item Healthcare: Scheduling surgeries and other treatments in hospitals.
+  \item Transportation: Optimizing maintenance tasks for vehicles or aircraft in a maintenance facility.
+\end{itemize}
+
+
+\subsection{Mathematical Model}
+
+We now build a mixed-integer program from the ingredients above.
+This \emph{disjunctive} formulation is classical and is due to Manne\footnote{A.~S.~Manne, ``On the Job-Shop Scheduling Problem,'' \emph{Operations Research} 8(2):219--223, 1960.}.
+
+\modelhead{Sets}
+\begin{itemize}
+  \item $J = \{1, \ldots, n\}$, the jobs.
+  \item $I = \{1, \ldots, m\}$, the machines.
+\end{itemize}
+\modelhead{Parameters}
+\begin{itemize}
+  \item $o_r^j$, the machine hosting the $r$-th operation of job $j$; row $j$ of the matrix $O$ from the example lists these machines in order.
+  \item $p_{ij}$, the processing time of job $j$ on machine $i$.
+  \item $M$, a big-$M$ constant; the total processing time $\sum_{i \in I} \sum_{j \in J} p_{ij}$ is always a valid choice, as computed for the example above.
+\end{itemize}
+\modelhead{Variables}
+The main decisions are continuous start times
+$$
+s_{ij} = \text{ start time of job $j$ on machine $i$},
+$$
+together with a variable $C_{\max}$ for the makespan.
+Start times alone cannot express ``one of these two jobs must wait for the other,'' so for each machine $i$ and each pair of jobs $j < k$ we add a binary variable that records which job goes first:
+$$
+z_{ijk} = \begin{cases} 1, & \text{when machine } i \text{ processes job } j \text{ before job } k,\\ 0, & \text{when job } k \text{ takes its turn on machine } i \text{ first,} \end{cases}
+\qquad i \in I, \ j,k \in J, \ j < k.
+$$
+
+\modelhead{Constraints}
+\emph{Precedence within a job.}
+Each job must follow its route: operation $r$ of job $j$ cannot begin until operation $r-1$ has finished, that is,
+$$
+s_{o^{j}_{r} j} \geq s_{o^{j}_{r-1} j} + p_{o^{j}_{r-1} j} \qquad \forall j \in J, \ r \in \{2, \dots, m\}.
+$$
+
+\emph{One job at a time per machine.}
+Fix a machine $i$ and two jobs $j < k$.
+Feasibility demands that either job $j$ clears the machine before job $k$ arrives, $s_{ij} + p_{ij} \leq s_{ik}$, or the reverse, $s_{ik} + p_{ik} \leq s_{ij}$.
+This is precisely the either-or situation of Section~\ref{subsec:either-or}, and applying that recipe with $z_{ijk}$ in the role of the selector variable $\delta$ yields the big-$M$ pair
+$$
+\begin{aligned}
+s_{ij} + p_{ij} &\leq s_{ik} + M(1 - z_{ijk}) \qquad \forall i \in I, \ j,k \in J, \ j < k,\\
+s_{ik} + p_{ik} &\leq s_{ij} + M z_{ijk} \qquad \forall i \in I, \ j,k \in J, \ j < k.
+\end{aligned}
+$$
+When $z_{ijk} = 1$ the first inequality forces job $j$ ahead of job $k$ while the second is switched off; when $z_{ijk} = 0$ the roles swap.
+
+\emph{Makespan.}
+The makespan must sit above the completion time of every job's last operation:
+$$
+C_{\max} \geq s_{o^{j}_{m} j} + p_{o^{j}_{m} j} \qquad \forall j \in J.
+$$
+
+\modelhead{Model}
+\begin{subequations}
+\begin{equation}
+\begin{array}{rrlrr}
+\min
+               & C_{\max} \\
+\st
+&            s_{o^{j}_{r}j} &  \geq s_{o^{j}_{r-1}j} +p_{o^{j}_{r-1}j} & \forall j \in {J}, r \in \{2,\dots,m\} & \text{follow the route of job $j$} \\
+             &      s_{ij} + p_{ij}     & \leq s_{ik} + M (1-z_{ijk}) & \forall i \in {I}, j,k \in {J}, j < k & \text{$j$ first when $z_{ijk} = 1$} \\
+              &     s_{ik} + p_{ik}     & \leq s_{ij} + M z_{ijk} & \forall i \in {I}, j,k \in {J}, j < k & \text{$k$ first when $z_{ijk} = 0$}\\
+            &       C_{\max}          & \geq s_{o^{j}_{m}j} + p_{o^{j}_{m}j} & \forall j \in {J} & \text{makespan covers every job}\\
+            &      s_{ij}      & \geq 0 & \forall i \in {I}, j \in {J} \\
+           &       z_{ijk}     & \in \{0,1\} & \forall i \in {I}, j,k \in {J}, j < k \\
+          &        C_{\max} & \geq 0
+              \end{array}
+              \end{equation}
+\end{subequations}
+Solving this model on the four-job, three-machine instance above gives an optimal makespan of $12$ hours---a substantial improvement over the $30$ hours needed to run the jobs one at a time.
+\begin{examplewithallcode}{Duplo Scheduling}{}{}{https://github.com/open-optimization/open-optimization-or-examples/blob/master/integer-programming/job-shop-scheduling.ipynb}
+
+The Duplo in-class exercise is solved with Gurobi in the link.
+
+The optimal value is 11.
+
+\begin{center}
+\includetikz[width = 0.8\textwidth]{jssp-duplo}
+%\includegraphicstatic[scale = 0.5]{jssp-duplo}
+
+\includegraphicbook[scale=0.07, angle=180]{jssp-duplo-actual}
+\end{center}
+\end{examplewithallcode}
+
+\subsection{Job Shop Scheduling Variations}
+
+Makespan minimization of assigning jobs to machines.
+
+In this variation, each machine can handle a number of different types of jobs.  Some machines can do certain jobs faster than others. 
+
+We want to minimize the completion time of all of the jobs.  
+
+In this variation, each job visits its listed machines in sequence: most jobs require processing on two machines, in the order given, while a few need only one.
+
+
+%
+%
+%Let there be $n$ jobs and $m$ machines.
+%
+%Let $x_{ij}$ be a binary variable that is 1 if job $i$ is assigned to machine $j$, and 0 otherwise.
+%
+%Subject to:
+%
+%Each job can be assigned to only one machine: $\sum\limits_{j=1}^{m} x_{ij} = 1$ for $i=1$ to $n$
+%
+%Each machine can process only one job at a time: $\sum\limits_{i=1}^{n} x_{ij} \leq 1$ for $j=1$ to $m$
+%
+%Start time of a job is based on the completion time of its predecessor: $y_i \geq y_j + p_j$ for $(i,j) \in E$
+%
+%$y_i \geq 0$ for $i=1$ to $n$
+%
+%$x_{ij} \in {0,1}$ for $i=1$ to $n$ and $j=1$ to $m$
+%
+%$y_i \in \mathbb{N}$ for $i=1$ to $n$
+%
+%Where, $p_i$ is the processing time of job $i$, $E$ is the set of edges that represent the precedence constraints between the jobs.
+%
+%The model can be implemented using python with Gurobi library as follows:
+%
+%\begin{verbatim}
+%from gurobipy import *
+%
+%def job_shop_scheduling(n,m,p,E):
+%    # Create a new model
+%    model = Model()
+%
+%    # Create variables
+%    x = {}
+%    y = {}
+%    for i in range(n):
+%        y[i] = model.addVar(vtype=GRB.INTEGER, name="y_"+str(i))
+%        for j in range(m):
+%            x[i,j] = model.addVar(vtype=GRB.BINARY, name="x_"+str(i)+"_"+str(j))
+%
+%    # Set objective
+%    obj = quicksum([y[i]+p[i] for i in range(n)])
+%    model.setObjective(obj,GRB.MINIMIZE)
+%
+%    # Add constraints
+%    for i in range(n):
+%        model.addConstr(quicksum([x[i,j] for j in range(m)]) == 1)
+%
+%    for j in range(m):
+%        model.addConstr(quicksum([x[i,j] for i in range(n)]) <= 1)
+%
+%    for (i,j) in E:
+%        model.addConstr(y[i] >= y[j]+p[j])
+%
+%    for i in range(n):
+%        model.addConstr(y[i] >= 0)
+%
+%    # Optimize model
+%    model.optimize()
+%
+%    return
+%\end{verbatim}
+
+%Here is an example:
+%Here is an example job shop scheduling problem with 5 machines and 15 jobs:
+%
+%Machine 1: Can perform jobs 1, 2, 3, 4, and 5
+%Machine 2: Can perform jobs 6, 7, 8, 9, and 10
+%Machine 3: Can perform jobs 11, 12, 13, 14, and 15
+%Machine 4: Can perform jobs 1, 6, 11, 2, and 7
+%Machine 5: Can perform jobs 3, 8, 13, 4, and 9
+%Jobs:
+%
+%Job 1: Machine 1 (processing time = 2 hours), Machine 4 (processing time = 1 hour)
+%Job 2: Machine 1 (processing time = 3 hours), Machine 4 (processing time = 2 hours)
+%Job 3: Machine 1 (processing time = 2 hours), Machine 5 (processing time = 1 hour)
+%Job 4: Machine 1 (processing time = 4 hours), Machine 5 (processing time = 2 hours)
+%Job 5: Machine 1 (processing time = 1 hour)
+%Job 6: Machine 2 (processing time = 3 hours), Machine 4 (processing time = 2 hours)
+%Job 7: Machine 2 (processing time = 2 hours), Machine 4 (processing time = 1 hour)
+%Job 8: Machine 2 (processing time = 4 hours), Machine 5 (processing time = 2 hours)
+%Job 9: Machine 2 (processing time = 1 hour), Machine 5 (processing time = 1 hour)
+%Job 10: Machine 2 (processing time = 2 hours)
+%Job 11: Machine 3 (processing time = 3 hours), Machine 4 (processing time = 2 hours)
+%Job 12: Machine 3 (processing time = 2 hours), Machine 4 (processing time = 1 hour)
+%Job 13: Machine 3 (processing time = 4 hours), Machine 5 (processing time = 2 hours)
+%Job 14: Machine 3 (processing time = 1 hour), Machine 5 (processing time = 1 hour)
+%Job 15: Machine 3 (processing time = 2 hours)
+%Objective: Minimize the makespan (i.e. the total time it takes to complete all the jobs)
+%
+%Constraints:
+%
+%Each job can only be performed on the specified machines in the order listed
+%A machine can only work on one job at a time
+%There are no precedence constraints between jobs.
+%
+
+\textbf{Machines:}
+\begin{itemize}
+    \item Machine 1: Can perform jobs 1, 2, 3, 4, and 5
+    \item Machine 2: Can perform jobs 6, 7, 8, 9, and 10
+    \item Machine 3: Can perform jobs 11, 12, 13, 14, and 15
+    \item Machine 4: Can perform jobs 1, 6, 11, 2, and 7
+    \item Machine 5: Can perform jobs 3, 8, 13, 4, and 9
+\end{itemize}
+
+\textbf{Jobs:}
+\begin{itemize}
+    \item Job 1: Machine 1 (processing time = 2 hours), Machine 4 (processing time = 1 hour)
+    \item Job 2: Machine 1 (processing time = 3 hours), Machine 4 (processing time = 2 hours)
+    \item Job 3: Machine 1 (processing time = 2 hours), Machine 5 (processing time = 1 hour)
+    \item Job 4: Machine 1 (processing time = 4 hours), Machine 5 (processing time = 2 hours)
+    \item Job 5: Machine 1 (processing time = 1 hour)
+    \item Job 6: Machine 2 (processing time = 3 hours), Machine 4 (processing time = 2 hours)
+    \item Job 7: Machine 2 (processing time = 2 hours), Machine 4 (processing time = 1 hour)
+    \item Job 8: Machine 2 (processing time = 4 hours), Machine 5 (processing time = 2 hours)
+    \item Job 9: Machine 2 (processing time = 1 hour), Machine 5 (processing time = 1 hour)
+    \item Job 10: Machine 2 (processing time = 2 hours)
+    \item Job 11: Machine 3 (processing time = 3 hours), Machine 4 (processing time = 2 hours)
+    \item Job 12: Machine 3 (processing time = 2 hours), Machine 4 (processing time = 1 hour)
+    \item Job 13: Machine 3 (processing time = 4 hours), Machine 5 (processing time = 2 hours)
+    \item Job 14: Machine 3 (processing time = 1 hour), Machine 5 (processing time = 1 hour)
+    \item Job 15: Machine 3 (processing time = 2 hours)
+\end{itemize}
+
+\textbf{Objective:} Minimize the makespan (i.e. the total time it takes to complete all the jobs)
+
+\modelhead{Constraints}
+\begin{itemize}
+    \item Each job can only be performed on the specified machines in the order listed
+    \item A machine can only work on one job at a time
+    \item There are no precedence constraints between jobs.
+\end{itemize}
+%
+%\begin{verbatim}
+%job_shop_data = {
+%    'machines': {
+%        1: {'jobs': [1, 2, 3, 4, 5]},
+%        2: {'jobs': [6, 7, 8, 9, 10]},
+%        3: {'jobs': [11, 12, 13, 14, 15]},
+%        4: {'jobs': [1, 6, 11, 2, 7]},
+%        5: {'jobs': [3, 8, 13, 4, 9]}
+%    },
+%    'jobs': {
+%        1: {'machine_times': {1: 2, 4: 1}},
+%        2: {'machine_times': {1: 3, 4: 2}},
+%        3: {'machine_times': {1: 2, 5: 1}},
+%        4: {'machine_times': {1: 4, 5: 2}},
+%        5: {'machine_times': {1: 1}},
+%        6: {'machine_times': {2: 3, 4: 2}},
+%        7: {'machine_times': {2: 2, 4: 1}},
+%        8: {'machine_times': {2: 4, 5: 2}},
+%        9: {'machine_times': {2: 1, 5: 1}},
+%        10: {'machine_times': {2: 2}},
+%        11: {'machine_times': {3: 3, 4: 2}},
+%        12: {'machine_times': {3: 2, 4: 1}},
+%        13: {'machine_times': {3: 4, 5: 2}},
+%        14: {'machine_times': {3: 1, 5: 1}},
+%        15: {'machine_times': {3: 2}}
+%    },
+%    'objective': 'minimize_makespan',
+%    'constraints': ['job_machine_mapping', 'single_job_single_machine', 'no_job_precedence']
+%}
+%\end{verbatim}
+
+We leave this as an exercise for the reader to model and solve.
+
+% ============================================================================
+% The following sections (QAP, GAP, Other material) are covered in Book 2.
+% Book 1 focuses on introductory IP formulations.
+% ============================================================================
+
+% QAP and GAP sections moved to Book 2
+\iffalse  % BEGIN BOOK 2 ONLY CONTENT
+\section{Quadratic Assignment Problem (QAP)}
+\begin{resource}{}{}
+\begin{itemize}
+\item \href{https://ieeexplore-ieee-org.ezproxy.lib.vt.edu/stamp/stamp.jsp?tp=&arnumber=7170278}{An applied case of quadratic assignment problem in hospital department layout}
+\item See \href{https://www.semanticscholar.org/paper/Quadratic-Assignment-Problem%3A-A-survey-and-Shawky-Metwally/247b45613d6d3b6961fdad44f9e7fefb70fd3e82}{Quadratic Assignment Problem: A survey and Applications}.
+\item \href{https://vtechworks.lib.vt.edu/server/api/core/bitstreams/06b13a4f-d1a9-452c-957f-b0bdd1619c76/content}{Quadratic Assignment Problem in Airline Gate Assignment to minimize walking distance}
+\end{itemize}
+\end{resource}
+The quadratic assignment problem must choose the assignment of $n$ facilities to $n$ locations.  Each facility sends some flow to each other facility, and there is a distance to consider between locations.   
+The objective is to minimize to distance times the flow of the assignment.
+
+
+\textbf{Example:  Hospital Layout}
+On any given day in the hospital, there will be patients that move from various locations in the hospital to various other locations in the hospital.  For example, patients move from the operating room to a recovery room, or from the emergency room to the operating room, etc.
+
+We would like to chose the locations of these places in the hospital to minimize the amount of total distance traveled by all the patients. 
+
+
+
+
+
+
+\begin{general}{Quadratic Assignment Problem}{\npcomplete}
+Given flow $f_{ij}$  connections $c_{ij}$ and fixed building costs $f_i$, demands $d_j$ and capacities $u_i$, the capacitated facility location problem is 
+
+\modelhead{Sets}
+\begin{itemize}
+\item Let $I = \{1,\dots, n\}$ be the set of facilities.
+\item Let $K = \{1, \dots, n\}$ be the set of locations.
+\end{itemize}
+
+\modelhead{Parameters}
+\begin{itemize}
+\item $f_{ij}$ - flow from facility $i$ to facility $j$.
+\item $d_{kl}$ - distance from location $k$ to location $l$.
+\item $c_{ik}$ - cost to setup facility $i$ at location $k$.
+\end{itemize}
+
+\modelhead{Variables}
+\begin{itemize}
+\item Let 
+\begin{equation*}
+x_{ik} = \begin{cases}
+1 & \text{if we place facility $i$ in location $k$,}\\
+0 & \text{otherwise.}
+\end{cases}
+\end{equation*}
+\end{itemize}
+
+\modelhead{Model}
+\begin{align}
+\min \quad & \displaystyle\sum_{i=1}^n\sum_{j=1}^n \sum_{k=1}^n \sum_{l = 1}^n f_{ij}d_{kl}x_{ik}x_{jl} + \sum_{i=1}^n \sum_{k = 1}^n c_{ik} x_{ik}   \tag{total cost} \\
+\st        & \displaystyle\sum_{i=1}^n x_{ik}=1 &&\quad \text{for all } k=1,\dots,n   \tag{assign facility to location $k$} \\
+& \displaystyle \sum_{k=1}^n x_{ik}=1 &&\quad \text{for all } i=1\dots,n   \tag{assign one location to facility $i$} \\
+& x_{ik}\in\{0,1\} &&\quad \text{for all } i=1,\dots,n, \text{ and } k = 1, \dots, n   \tag{binary decisions}
+\end{align}
+\end{general}
+
+\section{Generalized Assignment Problem (GAP)}
+\url{https://en.wikipedia.org/wiki/Generalized_assignment_problem}
+In \href{applied_mathematics}{applied mathematics}, the maximum
+\textbf{generalized assignment problem} is a problem in
+\href{combinatorial_optimization}{combinatorial optimization}. This
+problem is a \url{generalization} of the
+\href{assignment_problem}{assignment problem} in which both tasks and
+\href{Agent-based_model}{agents} have a size. Moreover, the size of each
+task might vary from one agent to the other.
+
+This problem in its most general form is as follows: There are a number
+of agents and a number of tasks. Any agent can be assigned to perform
+any task, incurring some cost and profit that may vary depending on the
+agent-task assignment. Moreover, each agent has a budget and the sum of
+the costs of tasks assigned to it cannot exceed this budget. It is
+required to find an assignment in which all agents do not exceed their
+budget and total profit of the assignment is maximized.
+
+\hypertarget{in-special-cases}{%
+\subsection{In special cases}\label{in-special-cases}}
+
+In the special case in which all the agents' budgets and all tasks'
+costs are equal to 1, this problem reduces to the
+\href{assignment_problem}{assignment problem}. When the costs and
+profits of all tasks do not vary between different agents, this problem
+reduces to the multiple knapsack problem. If there is a single agent,
+then, this problem reduces to the \href{knapsack_problem}{knapsack
+problem}.
+
+\hypertarget{explanation-of-definition}{%
+\subsection{Explanation of definition}\label{explanation-of-definition}}
+
+In the following, we have \emph{n} kinds of items, \(a_1\) through
+\(a_n\) and \emph{m} kinds of bins \(b_1\) through \(b_m\). Each bin
+\(b_i\) is associated with a budget \(t_i\). For a bin \(b_i\), each
+item \(a_j\) has a profit \(p_{ij}\) and a weight \(w_{ij}\). A solution
+is an assignment from items to bins. A feasible solution is a solution
+in which for each bin \(b_i\) the total weight of assigned items is at
+most \(t_i\). The solution's profit is the sum of profits for each
+item-bin assignment. The goal is to find a maximum profit feasible
+solution.
+
+Mathematically the generalized assignment problem can be formulated as
+an \href{Integer_programming}{integer program}:
+\begin{align} \text{maximize } &
+\sum_{i=1}^m\sum_{j=1}^n
+p_{ij} x_{ij}. \\
+\text{subject to } & \sum_{j=1}^n
+w_{ij} x_{ij} \le t_i & & i=1,
+\ldots, m; \\ &
+\sum_{i=1}^m x_{ij} = 1 & & j=1,
+\ldots, n; \\ & x_{ij}
+\in \{0,1\} & & i=1,
+\ldots, m, \quad j=1,
+\ldots, n; \end{align}
+
+\section{Other material}
+
+\subsection{Binary reformulation of integer variables}
+If an integer variable has small upper and lower bounds, it can sometimes be advantageous to recast it as a sequence of binary variables - for either modeling, the solver, or both.   Although there are technically many ways to do this, here are the two most common ways.
+
+\begin{general}{Full reformulation}{\textcolor{blue}{$u$ many binary variables}}
+\label{general:full-reformulation}
+For a non-negative integer variable $x$ with upper bound $u$, modeled as 
+\begin{equation}
+0 \leq x \leq u, \ \ \ \ x \in \Z,
+\end{equation}
+this can be reformulated with $u$ binary variables $z_1, \dots, z_u$ as 
+\begin{equation}
+\begin{split}
+x & = \sum_{i=1}^u i z_i = z_1 + 2 z_2 + \dots + u z_u\\
+1 & \geq \sum_{i=1}^u z_i = z_1 + z_2 + \dots + z_u\\
+z_i & \in \{0,1\} \ \ \text{ for } i=1, \dots, u
+\end{split}
+\end{equation}
+\end{general}
+We call this the \emph{full reformulation} because there is a binary variable $z_i$ associated with every value $i$ that $x$ could take.  That is, if $z_3 = 1$, then the second constraint forces $z_i = 0$ for all $i \neq 3$ (that is, $z_3$ is the only non-zero binary variable), and hence by the first constraint, $x = 3$.
+
+\begin{general}{Binary reformulation}{\textcolor{blue}{$O(\log u)$ many binary variables}}
+\label{general:log-reformulation}
+For a non-negative integer variable $x$ with upper bound $u$, modeled as 
+\begin{equation}
+0 \leq x \leq u, \ \ \ \ x \in \Z,
+\end{equation}
+this can be reformulated with $u$ binary variables $z_1, \dots, z_{\lfloor\log( u )\rfloor}$ as 
+\begin{equation}
+\begin{split}
+x & = \sum_{i=0}^{\lfloor\log( u )\rfloor}2^i z_i = z_0 + 2 z_1 +  4 z_2 + 8 z_3 + \dots + 2^{\lfloor\log( u )\rfloor} z_{\lfloor\log( u )\rfloor}\\
+z_i & \in \{0,1\} \ \ \text{ for } i=1, \dots, \lfloor\log( u )\rfloor
+\end{split}
+\end{equation}
+\end{general}
+We call this the \emph{log reformulation} because this requires only logarithmically many binary variables in terms of the upper bound $u$.   This reformulation is particularly better than the full reformulation when the upper bound $u$ is a ``larger" number, although we will leave it ambiguous as to how larger a number need to be in order to be described as a ``larger" number.
+\fi  % END BOOK 2 ONLY CONTENT
+
+\section{Exercises}
+
+\exgroup{Warm-ups}
+
+\begin{ex}{Knapsack Problem}{}
+\label{ex:knapsack-hiker}
+\stars{1} A hiker is packing a backpack with a weight capacity of 15\,kg. The available items are:
+
+\begin{center}
+\begin{tabular}{c|c|c}
+\textbf{Item} & \textbf{Weight (kg)} & \textbf{Value} \\
+\hline
+Tent & 5 & 8 \\
+Sleeping Bag & 3 & 6 \\
+Stove & 4 & 5 \\
+Food & 7 & 10 \\
+Camera & 2 & 4 \\
+\end{tabular}
+\end{center}
+
+\begin{enumerate}
+\item Formulate a binary integer program to maximize the total value of items packed without exceeding the weight capacity.
+\item Suppose the hiker also requires that if the stove is packed, then the food must also be packed (you cannot cook without food). Add this logical constraint to your formulation.
+\end{enumerate}
+\exrefs{Example~\ref{example:knapsack}, \S\ref{sec:modeling-tricks}}
+\end{ex}
+
+\begin{ex}{Courier Van Knapsack}{}
+\label{ex:knapsack-warmup}
+\stars{1} A courier van can carry at most 15\,kg on its last run of the day.  Five packages are waiting, with weights and payouts:
+
+\begin{center}
+\begin{tabular}{c|c|c|c|c|c}
+\textbf{Package} & 1 & 2 & 3 & 4 & 5 \\
+\hline
+\textbf{Weight (kg)} & 11 & 3 & 2 & 5 & 4 \\
+\textbf{Payout (\$)} & 5 & 3 & 3 & 7 & 4 \\
+\end{tabular}
+\end{center}
+
+\begin{enumerate}
+\item Formulate a binary knapsack problem for choosing which packages to load.
+\item Solve it, by hand or with a solver.  Which packages ride along, and what is the total payout?
+\end{enumerate}
+\exrefs{Example~\ref{example:knapsack}}
+\end{ex}
+
+\begin{ex}{Covering a Small Town}{}
+\label{ex:fire-warmup}
+\stars{1} A town has six districts arranged in a $2 \times 3$ grid:
+\begin{center}
+\begin{tabular}{|c|c|c|}
+\hline
+1 & 2 & 3 \\
+\hline
+4 & 5 & 6 \\
+\hline
+\end{tabular}
+\end{center}
+Two districts are neighbors when their cells share a side.  A fire station placed in a district covers that district and all of its neighbors.
+\begin{enumerate}
+\item Write out the neighbor sets $V_i$ for each district $i$.
+\item Formulate the set covering integer program that minimizes the number of fire stations so that every district is covered.
+\item Solve the instance.  How many stations are needed, and where can they go?
+\end{enumerate}
+\exrefs{Example~\ref{example:fire-station}, \ref{general:set-covering}}
+\end{ex}
+
+\begin{ex}{Big-M Activation Drill}{}
+\label{ex:bigM-drill}
+\stars{1} A tour company runs three excursions with sign-up counts $x_1, x_2, x_3$, where each excursion can take at most 30 tourists ($0 \leq x_i \leq 30$).  Let $\delta \in \{0,1\}$ equal $1$ if the company hires a second guide.  Company policy: \emph{if no second guide is hired, then the three excursions can take at most 40 tourists in total.}
+\begin{enumerate}
+\item Write this if-then requirement as a single linear constraint using a big-$M$ parameter.
+\item What is the smallest valid value of $M$?  Justify it using the bounds on the $x_i$.
+\end{enumerate}
+\exrefs{\S\ref{subsec:big-M-activation}, \S\ref{sec:modeling-tricks}}
+\end{ex}
+
+\exgroup{Core problems}
+
+\begin{ex}{Locating Distribution Terminals}{}
+\label{ex:terminals}
+\stars{2}
+Suppose that a company based in St. John's is considering adding distribution terminals in (1) Halifax, (2) Moncton, (3) Montréal, (4) Ottawa, and (5) Toronto.\\
+
+The cost of building the five terminals in millions of dollars would be 10 in Halifax, 12 in Moncton, 20 in Montréal, 18 in Ottawa, and 25 in Toronto. 
+\begin{enumerate}
+\item No more than two terminals may be built. 
+\item If no terminal is built in Halifax, then one must be built in Moncton. 
+\item At least one terminal must be built in central Canada (i.e. at locations (3), (4), or (5)).
+\end{enumerate}
+
+Define the variables:
+$y_{i}= \begin{cases}1 & \text { if a terminal is built in city } i(i=1, \ldots, 5) \\ 0 & \text { otherwise }\end{cases}$
+
+Using these variables, write a (binary) integer program that models the problem of determining which terminals to build subject to the constraints above that minimizes cost.
+\exrefs{\S\ref{sec:capital-budgeting}, \S\ref{sec:modeling-tricks}}
+\end{ex}
+
+\begin{ex}{Warehouse Location}{}
+\label{ex:warehouse-cover}
+\stars{2} A retail company must decide which of four potential warehouse sites to open. Each warehouse has a fixed opening cost and can serve a subset of five customer regions.  The data are as follows:
+
+\begin{center}
+\begin{tabular}{c|c|l}
+\textbf{Warehouse} & \textbf{Fixed Cost (\$1000s)} & \textbf{Regions Served} \\
+\hline
+A & 150 & 1, 2, 3 \\
+B & 200 & 2, 3, 4, 5 \\
+C & 120 & 1, 4 \\
+D & 180 & 3, 4, 5 \\
+\end{tabular}
+\end{center}
+
+Every customer region must be served by at least one open warehouse.
+
+\begin{enumerate}
+\item Define binary decision variables and formulate an integer program that minimizes the total fixed cost while ensuring every region is served.
+\item What type of classic IP problem does this resemble?
+\end{enumerate}
+\exrefs{\ref{general:set-covering}, Example~\ref{example:fire-station}}
+\end{ex}
+
+\begin{ex}{Capital Budgeting with Dependencies}{}
+\label{ex:capital-dependencies}
+\stars{2} A firm is screening five projects over a two-year horizon.  The net present values and the cash outlays (all in \$1000s) are:
+
+\begin{center}
+\begin{tabular}{l|c|c|c|c|c}
+\textbf{Project} & 1 & 2 & 3 & 4 & 5 \\
+\hline
+\textbf{NPV} & 20 & 40 & 20 & 15 & 30 \\
+\textbf{Year 1 outlay} & 5 & 4 & 3 & 7 & 8 \\
+\textbf{Year 2 outlay} & 1 & 7 & 9 & 4 & 6 \\
+\end{tabular}
+\end{center}
+
+The budget is 20 in each year.  In addition: project 3 is an expansion of project 1, so it can only be undertaken if project 1 is; and projects 2 and 5 would serve the same market, so at most one of them may be chosen.
+\begin{enumerate}
+\item Formulate a binary integer program that maximizes total NPV subject to both budgets and both logical conditions.
+\item Solve the instance.  Which projects are funded, and what is the optimal NPV?
+\end{enumerate}
+\exrefs{\S\ref{sec:capital-budgeting}, \S\ref{sec:modeling-tricks}}
+\end{ex}
+
+\begin{ex}{Facility Location: Two Distribution Centers}{}
+\label{ex:facility-small}
+\stars{2} A company can open distribution centers at two sites to serve three stores.  Opening costs, capacities, per-unit serving costs, and demands are:
+
+\begin{center}
+\begin{tabular}{lcc|ccc}
+\toprule
+ & \(\mathbf{f_i}\) (\$) & \(\mathbf{u_i}\) (units) & Store 1 & Store 2 & Store 3 \\
+\midrule
+Center 1 & 80 & 40 & \$2 & \$3 & \$1 \\
+Center 2 & 60 & 25 & \$4 & \$1 & \$2 \\
+\midrule
+\textbf{Demand \(d_j\)} & & & 10 & 12 & 15 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{enumerate}
+\item Check that this instance, unlike the retail distribution example in the text, has enough capacity to be feasible.
+\item Formulate the capacitated facility location model for this data.
+\item Solve the instance.  Which centers open, how is demand assigned, and what is the total cost?  In particular, is it worth opening the cheaper center?
+\end{enumerate}
+\exrefs{\S\ref{sec:facility-location}}
+\end{ex}
+
+\begin{ex}{Coloring a Five-Node Graph}{}
+\label{ex:graph-coloring-5}
+\stars{2} Consider the graph on vertices $\{A, B, C, D, E\}$ with edges
+\[
+\{A,B\},\ \{B,C\},\ \{C,D\},\ \{D,E\},\ \{E,A\},\ \{A,C\},
+\]
+a five-cycle together with the chord $\{A,C\}$.
+\begin{enumerate}
+\item Write the classical integer programming formulation for coloring this graph with variables $x_{ij}$ and $w_j$.
+\item Solve the instance to find the chromatic number, and exhibit an optimal coloring.
+\item Explain how the triangle $A, B, C$ gives a quick lower bound that matches your answer.
+\end{enumerate}
+\exrefs{\S\ref{sec:graph-coloring}}
+\end{ex}
+
+\begin{ex}{Either-Or Constraints}{}
+\label{ex:either-or-modes}
+\stars{2} A company produces two products, $x_1$ and $x_2$. Production of product~1 requires a special machine that can either run in mode~A or mode~B, but not both simultaneously.  The constraints are:
+\begin{itemize}
+\item Mode A: $2x_1 + x_2 \leq 10$
+\item Mode B: $x_1 + 3x_2 \leq 12$
+\end{itemize}
+Exactly one of these two constraints must hold (the machine operates in exactly one mode). The objective is to maximize $5x_1 + 4x_2$ with $x_1, x_2 \geq 0$.
+
+Introduce a binary variable and a big-$M$ parameter to formulate this either-or constraint as a mixed-integer program.
+\exrefs{\S\ref{subsec:either-or}}
+\end{ex}
+
+\begin{ex}{Fixed-Charge Production}{}
+\label{ex:fixed-charge}
+\stars{2} A factory can produce a product in any quantity $x \geq 0$, but starting up production incurs a fixed cost of $\$500$.  The variable production cost is $\$8$ per unit, and each unit sells for $\$15$.  The factory has capacity to produce at most 200 units.
+
+\begin{enumerate}
+\item Define a binary variable $y$ that indicates whether the factory produces any units at all. Write a mixed-integer program that maximizes profit (revenue minus variable cost minus fixed cost).
+\item Explain the role of the constraint that links $x$ and $y$.
+\end{enumerate}
+\exrefs{\S\ref{subsec:big-M-activation}}
+\end{ex}
+
+\exgroup{Concepts and connections}
+
+\begin{ex}{Why Rounding the Relaxation Fails}{}
+\label{ex:lp-rounding}
+\stars{2} Return to the knapsack instance of Example~\ref{example:knapsack} and replace $x_i \in \{0,1\}$ by $0 \leq x_i \leq 1$ (the LP relaxation).
+\begin{enumerate}
+\item Solve the LP relaxation.  (For a single knapsack constraint the relaxation can be solved greedily: sort items by value per kilogram and fill the bag in that order, taking a fraction of the last item.)  You should find value $52/3 \approx 17.33$ with $x_1 = 7/12$ and all other variables equal to $1$.
+\item Round the fractional variable up.  Is the result feasible?  Round it down.  What value do you get, and how does it compare to the true integer optimum of $15$?
+\item Rounding down happened to give an optimal integer solution here.  Explain why rounding cannot be trusted in general.  In particular, describe what rounding does to a model with equality constraints such as Example~\ref{ex:min-coins}, and to binary choice variables such as those in Exercise~\ref{ex:terminals}, where a value like $y_i = 0.5$ has no meaning.
+\end{enumerate}
+\exrefs{Example~\ref{example:knapsack}, Example~\ref{ex:min-coins}, \S\ref{sec:IP-formulations}}
+\end{ex}
+
+\begin{ex}{When is Big-M Too Big?}{}
+\label{ex:bigM-size}
+\stars{2} In Exercise~\ref{ex:either-or-modes}, the value $M = 10^6$ is perfectly valid: the resulting mixed-integer program has the same optimal solution as with $M = 20$.
+\begin{enumerate}
+\item Explain what such a huge $M$ does to the LP relaxation: how much does a tiny fractional value of $\delta$, say $\delta = 10^{-5}$, relax each mode constraint?  Why does this weaken the bounds a solver gets from the relaxation?
+\item Derive the tightest valid constants for that exercise.  When mode B is active, the constraint $x_1 + 3x_2 \leq 12$ bounds $2x_1 + x_2$; when mode A is active, $2x_1 + x_2 \leq 10$ bounds $x_1 + 3x_2$.  Show that $M_1 = 14$ and $M_2 = 18$ suffice.
+\item Name one numerical (floating-point) hazard of very large $M$ values mentioned in the text.
+\end{enumerate}
+\exrefs{Choosing Big-M Values paragraph in \S\ref{par:choosing-big-M}, Exercise~\ref{ex:either-or-modes}}
+\end{ex}
+
+\begin{ex}{Reading the Kidney Exchange Model}{}
+\label{ex:kidney-model}
+\stars{2} Consider the cycle-selection integer program in the kidney exchange case study.
+\begin{enumerate}
+\item Explain in plain language what the constraint $\sum_{c \in C:\, i \in c} x_c \leq 1$ enforces, and what could go wrong medically if it were dropped.
+\item The objective uses coefficients $|c|$.  Why does $\sum_{c} |c| x_c$ equal the number of transplants performed?
+\item The set $C$ only contains cycles of length at most 3.  Give the operational reason for this cap, and describe what happens to the size of $C$ if the cap is raised.
+\item An altruistic donor donates a kidney without a paired patient, starting a chain rather than a cycle.  Describe how you would extend the sets and variables of the model to include chains of bounded length.
+\end{enumerate}
+\exrefs{Kidney exchange case study in \S\ref{case:kidney-exchange}}
+\end{ex}
+
+\exgroup{Challenge problems}
+
+\begin{ex}{Piecewise-Linear Production Cost}{}
+\label{ex:pwl-challenge}
+\stars{3} A plant can produce up to 30 tons of product, sold at \$6 per ton.  Production cost is piecewise linear in the quantity $x$: the first 10 tons cost \$5 per ton, the next 10 tons cost \$3 per ton (a bulk discount on inputs), and the final 10 tons cost \$8 per ton (overtime).
+\begin{enumerate}
+\item Write the total cost $C(x)$ at the breakpoints $x = 0, 10, 20, 30$ and explain why $C$ is not convex, so the standard LP tricks for convex piecewise-linear costs do not apply.
+\item Formulate profit maximization using breakpoint weights $\lambda_1, \dots, \lambda_4$ with an SOS2 condition, and also write the equivalent binary-variable formulation from the text.
+\item Solve the model.  You should find that producing 20 tons is optimal with profit \$40.  Why does the plant stop exactly at the end of the discounted segment?
+\end{enumerate}
+\exrefs{\S\ref{subsec:pwl-sos2}, Example~\ref{example:pwl}, Example~\ref{example:SOS2}}
+\end{ex}
+
+\begin{ex}{Two Jobs, Three Machines}{}
+\label{ex:flowshop}
+\stars{3} Two jobs must each pass through machines $M_1 \to M_2 \to M_3$ in that order.  Processing times are:
+
+\begin{center}
+\begin{tabular}{l|c|c|c}
+ & $M_1$ & $M_2$ & $M_3$ \\
+\hline
+Job 1 & 3 & 2 & 4 \\
+Job 2 & 2 & 4 & 3 \\
+\end{tabular}
+\end{center}
+
+Each machine can process only one job at a time, and jobs cannot be interrupted.
+\begin{enumerate}
+\item Introduce start-time variables $s_{jk}$ for job $j$ on machine $k$ and write the precedence constraints within each job.
+\item For each machine $k$, introduce a binary variable $\delta_k$ and write the disjunctive pair of big-$M$ constraints stating that either job 1 precedes job 2 on machine $k$ or vice versa.  Propose a valid value of $M$ from the data.
+\item Minimize the makespan and solve the model.  You should find an optimal makespan of 12; report which job goes first on each machine and the full schedule.
+\end{enumerate}
+\exrefs{\S\ref{sec:job-shop}, \S\ref{subsec:multi-term-disjunction}, \S\ref{subsec:big-M-activation}}
+\end{ex}
+
+\subsubsection*{Selected Solutions}
+
+\begin{solution}(Exercise~\ref{ex:knapsack-warmup})
+With $x_i = 1$ if package $i$ is loaded, the model is
+\[
+\max\ 5x_1 + 3x_2 + 3x_3 + 7x_4 + 4x_5
+\quad \text{s.t.} \quad
+11x_1 + 3x_2 + 2x_3 + 5x_4 + 4x_5 \leq 15,\ x_i \in \{0,1\}.
+\]
+The optimal load is packages $2, 3, 4, 5$ with weight $3+2+5+4 = 14 \leq 15$ and payout $3+3+7+4 = \$17$.  The heavy package 1 never pays: taking it leaves only 4\,kg of room, and the best it can then achieve is $5 + 3 = \$8$.
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:fire-warmup})
+The neighbor sets (including the district itself, as in the fire station example) are $V_1 = \{1,2,4\}$, $V_2 = \{1,2,3,5\}$, $V_3 = \{2,3,6\}$, $V_4 = \{1,4,5\}$, $V_5 = \{2,4,5,6\}$, $V_6 = \{3,5,6\}$.  One station cannot cover all six districts since no set $V_i$ has more than four elements.  Two stations suffice: districts $2$ and $5$ cover $V_2 \cup V_5 = \{1,\dots,6\}$, and so do districts $3$ and $4$, and districts $1$ and $6$.  The optimal value is $2$, and these three placements are the only optimal ones.
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:facility-small})
+Total capacity is $40 + 25 = 65 \geq 37 = 10 + 12 + 15$, so the instance is feasible; in fact center 1 alone has capacity $40 \geq 37$, while center 2 alone ($25 < 37$) does not suffice.  Solving the model, the optimum opens center 1 only and serves all three stores from it: cost $80 + 2(10) + 3(12) + 1(15) = 80 + 71 = \$151$.  Opening both centers costs $140$ in fixed charges plus $47$ in best-case serving costs, a total of $\$187$, so the cheaper center is not worth its \$60 opening cost.
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:graph-coloring-5})
+The chromatic number is $3$.  Lower bound: vertices $A$, $B$, $C$ are pairwise adjacent (a triangle), so they need three distinct colors.  Upper bound: the coloring $A \to 1$, $B \to 2$, $C \to 3$, $D \to 1$, $E \to 2$ is proper, as can be checked edge by edge.  Solving the integer program confirms $\sum_j w_j = 3$.
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:either-or-modes})
+Introduce $\delta \in \{0,1\}$, where $\delta = 0$ selects mode~A and $\delta = 1$ selects mode~B.  Valid big-$M$ values can be read from the problem: relaxing each constraint by $M = 20$ (any upper bound on the left-hand sides over reasonable production levels works).  The formulation is
+\[
+\begin{aligned}
+\max\quad & 5x_1 + 4x_2\\
+\text{s.t.}\quad & 2x_1 + x_2 \leq 10 + M\delta\\
+& x_1 + 3x_2 \leq 12 + M(1-\delta)\\
+& x_1, x_2 \geq 0, \quad \delta \in \{0,1\}.
+\end{aligned}
+\]
+If $\delta = 0$, mode~A's constraint is enforced and mode~B's is relaxed; if $\delta = 1$, the roles are reversed.
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:fixed-charge})
+Let $x \geq 0$ be the production quantity and $y \in \{0,1\}$ indicate whether production is started:
+\[
+\begin{aligned}
+\max\quad & 15x - 8x - 500y = 7x - 500y\\
+\text{s.t.}\quad & x \leq 200\,y\\
+& x \geq 0, \quad y \in \{0,1\}.
+\end{aligned}
+\]
+The linking constraint $x \leq 200y$ plays two roles: if $y = 0$ it forces $x = 0$ (no production without paying the startup cost), and if $y = 1$ it enforces the capacity limit of $200$ units.  Since producing at capacity earns $7(200) - 500 = 900 > 0$, the optimal solution is $y = 1$, $x = 200$.
+\end{solution}
+
+\begin{tryit}
+\vizlink{branch-bound}{Branch-and-Bound Tree Explorer}: how solvers actually solve the integer programs in this chapter; watch branching, bounding, and fathoming on small examples.
+
+\vizlink{concept-quiz}{Concept Quiz}: twenty quick self-check questions spanning the whole book.
+\end{tryit}
+
+\section{Literature and Resources}
+
+\begin{resource}
+
+
+
+\begin{itemize}
+\item The AIMMS modeling book has many great examples.  It can be found here: \href{https://www.aimms.com/english/developers/resources/manuals/optimization-modeling}{AIMMS Modeling Book}.
+\item \href{http://web.mit.edu/15.053/www/AMP-Chapter-09.pdf}{MIT Open Courseware}
+\item  For many real world examples, see this book \href{https://link-springer-com.ezproxy.lib.vt.edu/book/10.1007/978-1-4939-1007-6}{
+Case Studies in Operations Research
+Applications of Optimal Decision Making, edited by  Murty, Katta G}.
+Or find it \href{https://www.springer.com/gp/book/9781493910069}{here}.
+\item \href{https://github.com/Gurobi/modeling-examples}{GUROBI modeling examples by GUROBI}
+\item \href{https://github.com/open-optimization/open-optimization-or-examples/tree/master/integer-programming}{GUROBI modeling examples by Open Optimization that are linked in this book}
+\end{itemize}
+
+Knapsack Problem
+\begin{itemize}
+\item \href{https://www.youtube.com/watch?v=GteOoMGUOdY}{Video! - Michel Bierlaire (EPFL) teaching knapsack problem}
+\end{itemize}
+
+Set Cover
+\begin{itemize}
+\item \href{https://www.youtube.com/watch?v=cjSeHSjPmsk}{Video! - Michel Bierlaire (EPFL) explaining set covering problem}
+\item See \href{https://download.aimms.com/aimms/download/manuals/AIMMS3OM_MediaSelection.pdf}{AIMMS - Media Selection} for an example of set covering applied to media selection.
+\end{itemize}
+
+Facility Location
+\begin{itemize}
+\item \href{https://en.wikipedia.org/wiki/Facility_location_problem}{Wikipedia - Facility Location Problem}
+\item See \href{https://github.com/Gurobi/modeling-examples/tree/master/facility_location}{GUROBI Modeling Examples - Facility Location}.
+\end{itemize}
+
+
+{Other examples}
+\begin{itemize}
+\item \href{https://www.juliaopt.org/notebooks/JuMP-Sudoku.html}{Sudoku}
+\item \href{https://download.aimms.com/aimms/download/manuals/AIMMS3OM_EmployeeTraining.pdf}{AIMMS - Employee Training}
+
+\item \href{https://download.aimms.com/aimms/download/manuals/AIMMS3OM_MediaSelection.pdf}{AIMMS - Media Selection}
+
+\item \href{https://download.aimms.com/aimms/download/manuals/AIMMS3OM_Diet.pdf}{AIMMS - Diet Problem}
+
+\item \href{https://download.aimms.com/aimms/download/manuals/AIMMS3OM_FarmPlanning.pdf}{AIMMS - Farm Planning Problem}
+
+\item \href{https://download.aimms.com/aimms/download/manuals/AIMMS3OM_Pooling.pdf}{AIMMS - Pooling Problem}
+
+\item \href{https://www.informs.org/Impact}{INFORMS - Impact}
+\item \href{https://www.informs.org/Impact/O.R.-Analytics-Success-Stories/Optimized-school-bus-routing-helps-school-districts-design-better-policies}{INFORMS - Success Story - Bus Routing}
+\end{itemize}
+
+{Notes from AIMMS modeling book.}
+\begin{itemize}
+
+\item \href{http://inside.mines.edu/~anewman/MIP_practice120212.pdf}{AIMMS - Practical guidelines for solving difficult MILPs}
+
+\item \href{https://download.aimms.com/aimms/download/manuals/AIMMS3OM_LinearProgrammingTricks.pdf}{AIMMS - Linear Programming Tricks}
+
+
+\item  \href{https://download.aimms.com/aimms/download/manuals/AIMMS3OM_FormulatingOptimizationModels.pdf}{AIMMS - Formulating Optimization Models}
+
+
+\item \href{https://pdfs.semanticscholar.org/b01f/ad44c20c372fdda95cbfb980c0d37302de07.pdf}{AIMMS - Practical guidelines for solving difficult linear programs}
+\end{itemize}
+
+Modeling Tricks
+\begin{itemize}
+\item \href{https://jump.dev/JuMP.jl/stable/tutorials/linear/tips_and_tricks/}{JuMP tips and tricks}
+\item \href{https://docs.mosek.com/modeling-cookbook/mio.html}{Mosek Modeling Cookbook}
+\end{itemize}
+
+
+{Further Topics}
+\begin{itemize}
+\item \href{https://or.stackexchange.com/questions/1319/best-model-for-precedence-constraints-within-scheduling-problem}{Precedence Constraints}
+\end{itemize}
+\end{resource}
+
+%\end{document}

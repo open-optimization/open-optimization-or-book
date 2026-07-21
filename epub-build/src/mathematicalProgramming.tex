@@ -1,0 +1,623 @@
+
+% Copyright 2020 by Robert Hildebrand
+%This work is licensed under a
+%Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0)
+%See http://creativecommons.org/licenses/by-sa/4.0/
+
+%\documentclass[../open-optimization/open-optimization.tex]{subfiles}
+%\begin{document}
+
+\chapter{Mathematical Programming}
+
+\begin{outcome}
+\begin{itemize}
+\item Consider an introductory problem
+\item Identify reasons for studying operations research
+\item Define ``Mathematical Programming''
+\item Learn about different applications of the tools in this book
+\item Explore the different types of optimization models and what types we will see in this book
+\end{itemize}
+\end{outcome}
+\section{Warm-Up Scenario}
+\label{sec:shirt-warmup}
+
+Imagine you’re starting a new clothing company and decide to sell shirts. You’ve opened a store in Roanoke and, based on market research, you estimate the demand for the upcoming weekend:
+
+\begin{itemize}
+    \item \textbf{Friday}: 5 shirts  
+    \item \textbf{Saturday}: 10 shirts  
+    \item \textbf{Sunday}: 7 shirts  
+\end{itemize}
+
+Your supplier can deliver shirts in one day, meaning an order placed on Thursday will arrive on Friday, and so on. As a business owner, you need to decide how many shirts to order and when to place each order to ensure you meet the daily demand without overstocking.  Figure~\ref{fig:shirt-timeline} shows the timing: each order arrives one day after it is placed, so Thursday's order covers Friday's customers.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\linewidth]{figs/mathematicalProgramming-tikz01.png}
+\caption{Orders placed one day arrive the next, so ordering decisions and demands are linked across the weekend.}
+\label{fig:shirt-timeline}
+\end{figure}
+
+\textbf{Defining the Problem}
+
+To tackle this challenge, you’ll need to think strategically about two main factors:
+
+\begin{itemize}
+    \item \textbf{Ordering Quantities}: How many shirts to order on each day.
+    \item \textbf{Inventory Levels}: How many shirts to keep in stock at the end of each day.
+\end{itemize}
+
+You can define these decisions using variables:
+\begin{itemize}
+    \item Let the number of shirts you order on a specific day be a decision variable. For example, you could track the number of shirts ordered on Thursday, Friday, and Saturday.
+    \item Define variables to represent the number of shirts you have in stock at the end of each day.
+\end{itemize}
+
+Your goal is to meet the projected demand while managing costs. Costs could include:
+\begin{itemize}
+    \item The expense of ordering shirts.
+    \item The cost of holding inventory.
+    \item Penalties for running out of stock.
+\end{itemize}
+
+\textbf{Refining the Scenario}
+
+As your business grows, additional complexities may arise. For instance:
+\begin{itemize}
+    \item The cost of ordering shirts might vary by day due to supplier pricing.
+    \item Holding inventory could incur storage costs.
+    \item A budget might limit how much you can spend on orders.
+    \item You might expand your product line to include pants and socks, each with its own demand and costs.
+\end{itemize}
+
+By clearly defining variables and constraints for these decisions, you can systematically approach the problem and develop an optimal strategy. This step-by-step process of defining the problem, incorporating real-world details, and refining the solution is a fundamental aspect of optimization.
+
+\subsection*{Model Development Cycle}
+
+This multi-stage example illustrates the iterative cycle of modeling:
+
+\begin{enumerate}
+    \item \textbf{Initial Problem}: Determine ordering quantities to meet demand.
+    \item \textbf{Modeling}: Formulate an optimization model based on available information.
+    \item \textbf{Solution}: Solve the model to find the optimal ordering plan.
+    \item \textbf{New Information}: Incorporate additional real-world complexities (varying costs, inventory costs, budget constraints, additional products, fixed ordering costs).
+    \item \textbf{Refinement}: Update the model to reflect new information and solve again.
+\end{enumerate}
+
+\subsection*{Further Extensions}
+
+Looking ahead, there are several ways to expand this scenario:
+
+\begin{itemize}
+    \item \textbf{Expanding to New Stores}: Opening additional stores introduces location-based demand, transportation costs, and coordination of inventory across multiple sites.
+    \item \textbf{Hiring New Staff}: Incorporate labor costs, scheduling constraints, and productivity rates into the model.
+    \item \textbf{Producing Clothing In-House}: Transitioning to manufacturing involves modeling production processes, including purchasing raw materials, machine capacities, and processing times.
+    \item \textbf{Uncertain Demand}: In reality, demand may be uncertain. Advanced models can incorporate stochastic elements or use probabilistic methods to handle randomness.
+\end{itemize}
+
+In this book, we will focus on deterministic models where all data is known and fixed. Building a strong foundation with these models will prepare us to tackle more complex problems involving uncertainty and randomness in future studies.
+
+\section{Why Study Operations Research?}
+\label{sec:why-OR}
+
+You already interact with optimization many times a day without noticing.  The route your phone suggests, the price of your plane ticket, the fact that the store had what you wanted in stock, the schedule of your favorite sports league, and which kidney patients get matched with which donors: behind each one is an optimization model of the kind this book teaches.  Even the AI assistants making headlines are trained by optimization; fitting a large language model is a nonlinear programming problem with billions of variables.
+
+Operations Research (OR) is, in the words of the professional society INFORMS, a discipline that applies advanced analytical methods to help make better decisions. In a world where resources are limited and organizations face complex challenges, OR provides the tools and methodologies to model, analyze, and solve problems involving the optimal allocation of scarce resources. Studying OR equips individuals with a systematic and quantitative approach to decision-making, which is invaluable in industries such as logistics, finance, healthcare, and manufacturing.
+
+By understanding OR, you gain the ability to construct mathematical models of real-world systems, allowing for the simulation and optimization of different scenarios. This leads to improved efficiency, reduced costs, and enhanced performance. The skills developed through studying OR, such as critical thinking, problem-solving, and data analysis, are highly transferable and sought after in today's data-driven economy.
+
+Operations Research also bridges the gap between theory and practice. It transforms abstract mathematical concepts into actionable strategies that can have a tangible impact on organizational success. Whether it's optimizing supply chains, scheduling flights, or managing portfolios, the applications of OR are vast.
+
+\begin{tcolorbox}[colback=green!4!white, colframe=green!45!black,
+  title=\textbf{What is optimization worth?}]
+These are not hypothetical savings.  A few documented examples:
+\begin{itemize}
+\item Finalist projects for the INFORMS Franz Edelman Award, the field's top prize for applied work, have documented cumulative benefits exceeding \$446 billion since 1972~\cite{informs2026edelman}.
+\item UPS's ORION system optimizes delivery routes for tens of thousands of drivers; it cuts roughly 100 million miles of driving per year, worth \$300--400 million annually, and about 100{,}000 metric tons of CO$_2$~\cite{holland2017ups}.
+\item American Airlines' yield-management system, an early large-scale optimization success, generated an estimated \$1.4 billion over three years in the early 1990s~\cite{smith1992yield}.
+\item Netherlands Railways rebuilt its national timetable with optimization, with a projected additional annual profit of about 40 million euros, and won the 2008 Edelman Award for it~\cite{kroon2009dutch}.
+\end{itemize}
+Every one of these is, at its mathematical center, the kind of model you will learn to build in this book.
+\end{tcolorbox}
+
+\section{What is Mathematical Programming?}
+\label{sec:what-is-MP}
+
+Mathematical Programming is a core area within Operations Research that focuses on the formulation and solution of optimization problems. It involves creating mathematical models that represent the decision-making process of a system, where the goal is to find the best possible outcome under given constraints. The term ``programming'' in this context refers to planning or scheduling, not computer programming.
+
+\begin{wrapfigure}{r}{0.34\textwidth}
+\centering
+\includegraphics[width=0.85\linewidth]{figs/mathematicalProgramming-tikz02.png}
+\caption{The mathematical programming workflow.}
+\label{fig:mp-pipeline}
+\end{wrapfigure}
+At the heart of Mathematical Programming is the objective function: a mathematical expression that defines the criterion to be optimized, such as minimizing costs or maximizing profits. The decision variables represent the choices available, and the constraints reflect the limitations or requirements of the problem, such as resource capacities or regulatory conditions.
+
+There are various types of mathematical programming, each suited to different kinds of problems:
+
+\begin{itemize}
+    \item \textbf{Linear Programming (LP)}: Deals with problems where both the objective function and constraints are linear.
+    \item \textbf{Integer Programming (IP)}: Involves decision variables that must take on integer values.
+    \item \textbf{Nonlinear Programming (NLP)}: Handles problems with nonlinear objective functions or constraints.
+    \item \textbf{Dynamic Programming (DP)}: Breaks down problems into simpler subproblems and is particularly useful for multistage decision processes.
+\end{itemize}
+
+Mathematical Programming provides a powerful framework for optimizing complex systems and making informed decisions. It combines elements of mathematics, economics, and computer science to develop solutions that are both efficient and effective.
+
+\section{Applications}
+
+Operations Research and Mathematical Programming have a wide range of applications across various industries and sectors:
+
+\begin{itemize}
+    \item \textbf{Transportation and Logistics}: Optimizing routing and scheduling for delivery vehicles, reducing transportation costs, and improving supply chain efficiency.
+    \item \textbf{Manufacturing}: Streamlining production processes, managing inventory levels, and scheduling machinery to maximize productivity and minimize waste.
+    \item \textbf{Finance}: Portfolio optimization, risk assessment, and capital budgeting to enhance financial performance and manage uncertainties.
+    \item \textbf{Healthcare}: Allocating resources such as staff and equipment, scheduling surgeries, and managing patient flow to improve service quality and reduce wait times.
+    \item \textbf{Energy Sector}: Optimizing power generation and distribution, planning for renewable energy integration, and managing energy consumption.
+    \item \textbf{Telecommunications}: Network design and optimization, bandwidth allocation, and improving the reliability and efficiency of communication systems.
+    \item \textbf{Agriculture}: Planning crop rotations, optimizing the use of fertilizers and water, and managing supply chains for agricultural products.
+    \item \textbf{Public Sector}: Urban planning, emergency response logistics, and policy analysis to enhance public services and resource utilization.
+    \item \textbf{Artificial Intelligence}: Training machine learning models, including the large language models behind ChatGPT and Claude, by minimizing loss functions with nonlinear programming techniques.
+\end{itemize}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\linewidth]{figs/mathematicalProgramming-tikz03.png}
+\caption{The same modeling toolkit shows up across sectors; only the words in the story change.}
+\label{fig:or-sectors}
+\end{figure}
+
+\begin{tcolorbox}[colback=blue!4!white, colframe=blue!55!black,
+  title=\textbf{Case studies in this book}]
+Throughout the book, case-study boxes tell the stories of real deployed
+optimization models, each with the published model and its citation:
+\begin{itemize}
+\item Preference-based housing assignment in Uruguayan cooperatives (assignment MIP), page~\pageref{case:housing-uruguay}.
+\item The UN World Food Programme's food baskets (diet LP + network MILP), page~\pageref{case:wfp}.
+\item Amazon's fulfillment-network regionalization (network design MIP), page~\pageref{case:amazon-regionalization}.
+\item Wildfire airtanker basing in Ontario (coverage location IP), page~\pageref{case:wildfire-airtankers}.
+\item Kidney exchange in the US and UK national programs (cycle-selection IP), page~\pageref{case:kidney-exchange}.
+\item Walmart's truck load planning (packing IP; 2023 Edelman Award), page~\pageref{case:walmart-loads}.
+\end{itemize}
+Each box states what kind of model was used, what was assumed, and where to
+read the original paper.
+\end{tcolorbox}
+
+These applications demonstrate the versatility and impact of OR and Mathematical Programming. Using these tools, organizations can make data-driven decisions that lead to significant improvements in performance, cost savings, and competitive advantage. As global challenges become more complex, the importance of skilled professionals in Operations Research continues to grow.
+
+\section{Types of Optimization Problems}
+\label{sec:types-of-optimization}
+We will state the main general problem classes to be associated with in these notes.  These are Linear Programming (LP), Mixed-Integer Linear Programming (MILP), Non-Linear Programming (NLP), and Mixed-Integer Non-Linear Programming (MINLP).  
+
+\begin{center}
+\altincludegraphics[width=\linewidth]{Figures/tree-diagram-types}{Tree diagram classifying optimization models. The root 'Optimization Models' splits into Linear and Nonlinear branches, which each split by variable type (continuous vs integer) into four leaves: LP (polynomial time), MILP (NP-hard), NLP (varies), and MINLP (NP-hard).}
+\end{center}
+
+Along with each problem class, we will associate a complexity class for the general version of the problem.  Complexity classes are discussed in a later portion of the book.  Although we will often state that input data for a problem comes from $\R$ (as a real number), when we discuss complexity of such a problem, we actually mean that the data is rational, i.e., from $\Q$ (rational numbers that are encoded in the computer typically), and is given in binary encoding.
+
+\begin{warn}
+In the following subsections, we will use advanced notation that may be unfamiliar at this point.  These mathematical notations will be developed throughout the book.
+
+Also, don't be too concerned about the specific definitions of the complexity classes at this point.  For now, you can read that \polynomial\ means it should be relatively easy to solve, while the other classes might be much more difficult to solve.
+\end{warn}
+
+\section{Linear Programming (LP)}
+\label{sec:intro-LP}
+
+Some linear programming background, theory, and examples will be provided in Part~I of this book.
+\begin{general}{Linear Programming (LP)}{\polynomial}
+\label{general:LP}
+Given a matrix $A \in \R^{m\times n}$, vector $\b \in \R^m$ and vector $\c \in \R^n$, the \emph{linear programming} problem is
+\begin{equation}
+\label{eq:LP}
+\begin{split}
+\max \quad & \c^\top \x\\
+\st  \quad & A\x \leq \b\\
+& \x \geq 0
+\end{split}
+\end{equation}
+\end{general}
+
+Linear programming can come in several forms, whether we are maximizing or minimizing, or if the constraints are $\leq, =$ or $\geq$.   One form commonly used is \emph{Standard Form} given as 
+\begin{general}{Linear Programming (LP) Standard Form}{\polynomial}
+Given a matrix $A \in \R^{m\times n}$, vector $b \in \R^m$ and vector $c \in \R^n$, the \emph{linear programming} problem in \emph{standard form} is
+\begin{equation}
+\label{eq:standardLP}
+\begin{split}
+\max \quad & \c^\top \x\\
+\st  \quad & A\x = b\\
+& x \geq 0
+\end{split}
+\end{equation}
+\end{general}
+
+\begin{figure}
+\includetikz[scale = 0.9]{Figures/LP-figure}
+\caption{Linear programming constraints and objective.}
+\end{figure}
+%\refincludefigurestatic[Linear programming constraints and objective.][scale = 0.2][h]{wiki/File/linear-programming.png}
+% Removed: TikZ version (LP-figure) is used above. Wiki image (CC0, Ylloh 2012) no longer needed.
+
+\section{Mixed-Integer Linear Programming (MILP)}
+\label{sec:intro-MILP}
+Mixed-integer linear programming will be introduced in \autoref{sec:IP-formulations}, with additional topics covered in Book~2.
+Recall that the notation $\Z$ means the set of integers and the set $\R$ means the set of real numbers.  The first problem of interest here is a \emph{binary integer program} (BIP) where all $n$ variables are binary (either 0 or 1).
+
+\begin{general}{Binary Integer programming (BIP)}{\npcomplete}
+Given a matrix $A \in \R^{m\times n}$, vector $\b \in \R^m$ and vector $\c \in \R^n$, the \emph{binary integer programming} problem is
+\begin{equation}
+\label{eq:BIP}
+\begin{split}
+\max \quad & \c^\top \x\\
+\st  \quad & A\x \leq b\\
+& \x \in \{0,1\}^n
+\end{split}
+\end{equation}
+\end{general}
+A slightly more general class is the class of \emph{Integer Linear Programs} (ILP).  Often this is referred to as \emph{Integer Program} (IP), although this term could leave open the possibility of non-linear parts.
+
+%\refincludefigurestatic[Comparing the LP relaxation to the IP solutions.][scale = 0.3][h]{wiki/File/integer-programming.png}
+% Removed: TikZ version (integer-programming) is used below. Wiki image (CC BY-SA 4.0, Fanosta 2019) no longer needed.
+
+\begin{figure}
+\includetikz{Figures/integer-programming}
+\caption{Comparing the LP relaxation to the IP solutions}
+\end{figure}
+
+\begin{general}{Integer Linear Programming (ILP)}{\npcomplete}
+Given a matrix $A \in \R^{m\times n}$, vector $\b \in \R^m$ and vector $\c \in \R^n$, the \emph{integer linear programming} problem is
+\begin{equation}
+\label{eq:ILP}
+\begin{split}
+\max \quad & \c^\top \x\\
+\st  \quad & A\x \leq \b\\
+& \x \in \Z^n
+\end{split}
+\end{equation}
+\end{general}
+
+An even more general class is \emph{Mixed-Integer Linear Programming (MILP)}.  This is where we have $n$ integer variables $x_1, \dots, x_n \in \Z$ and $d$ continuous variables $x_{n+1}, \dots, x_{n+d} \in \R$.  Succinctly, we can write this as $\x \in \Z^n \times \R^d$, where $\times$ stands for the \emph{cross-product} between two spaces.   
+
+Below, the matrix $A$ now has $n+d$ columns, that is, $A \in \R^{m \times (n+d)}$.  Also note that we have not explicitly enforced non-negativity on the variables.  If there are non-negativity restrictions, this can be assumed to be a part of the inequality description $A\x \leq \b$.
+\begin{general}{Mixed-Integer Linear Programming (MILP)}{\npcomplete}
+Given a matrix $A \in \R^{m\times (n+d)}$, vector $\b \in \R^m$ and vector $\c \in \R^{n+d}$, the \emph{mixed-integer linear programming} problem is
+\begin{equation}
+\label{eq:MILP}
+\begin{split}
+\max \quad & c^\top x\\
+\st  \quad & Ax \leq b\\
+& x \in \Z^n \times \R^d
+\end{split}
+\end{equation}
+\end{general}
+
+\section{Non-Linear Programming (NLP)}
+\label{sec:intro-NLP}
+\begin{general}{NLP}{\nphard}
+Given a function $f(x)\colon \R^d \to \R$ and other functions $f_i(x)\colon \R^d \to \R$ for $i=1, \dots, m$,  the \emph{nonlinear programming} problem is
+\begin{equation}
+\label{eq:NLP}
+\begin{split}
+\min \quad & f(x)\\
+\st  \quad & f_i(x) \leq 0  \quad  \text{ for } i=1, \dots, m\\
+& x \in \R^d
+\end{split}
+\end{equation}
+\end{general}
+
+Nonlinear programming can be separated into convex programming and non-convex programming.  These two are very different beasts and it is important to distinguish between the two.
+\subsection{Convex Programming}
+Here the functions are all \textbf{convex!}
+\begin{general}{Convex Programming}{\polynomial\ \  (typically)}
+Given a convex function $f(x)\colon \R^d \to \R$ and convex functions $f_i(x)\colon \R^d \to \R$ for $i=1, \dots, m$,  the \emph{convex programming} problem is
+\begin{equation}
+\label{eq:convex-programming}
+\begin{split}
+\min \quad & f(x)\\
+\st  \quad & f_i(x) \leq 0  \quad  \text{ for } i=1, \dots, m\\
+& x \in \R^d
+\end{split}
+\end{equation}
+\end{general}
+
+Observe that convex programming is a generalization of linear programming.  This can be seen by letting $f(x) = c^\top x$ and $f_i(x) = A_i x - b_i$.  
+
+\subsection{Non-Convex Non-linear Programming}
+
+When the function $f$ or functions $f_i$ are non-convex, this becomes a non-convex nonlinear programming problem.  There are a few complexity issues with this.
+
+\paragraph{IP as NLP}
+As seen above, quadratic constraints can be used to create a feasible region with discrete solutions.  For example 
+$$
+x(1-x) = 0
+$$
+has exactly two solutions: $x = 0, x=1$.  
+Thus, quadratic constraints can be used to model binary constraints.
+\begin{general}{Binary Integer programming (BIP) as a NLP}{\nphard}
+Given a matrix $A \in \R^{m\times n}$, vector $b \in \R^m$ and vector $c \in \R^n$, the \emph{binary integer programming} problem is
+\begin{equation}
+\label{eq:BIP-NLP}
+\begin{split}
+\max \quad & c^\top x\\
+\st  \quad & Ax \leq b\\
+& \hcancel[1.5pt]{x \in \{0,1\}^n}\\
+& x_i(1-x_i) = 0 \quad \text{ for } i=1, \dots, n
+\end{split}
+\end{equation}
+\end{general}
+
+Alternatively, consider the transformation where $x_i \in \{-1,1\}$.
+$$
+\begin{aligned}
+\min & c^\top x \\
+\text { s.t. } & A x \leq b \\
+& x \in \{-1,1\}^n
+\end{aligned}
+$$
+This can be reformulated with a single nonconvex constraint as
+$$
+\begin{array}{cl}
+\min & c^\top x \\
+\text { s.t. } & A x \leq b \\
+& -1 \leq x_j \leq 1, \quad 1 \leq j \leq n, \\
+& \|x\|^2\geq n .
+\end{array}
+$$
+
+\subsection{Machine Learning}
+
+Machine learning is, at its mathematical center, learning functions from data.  Instead of a person writing down the rule, we choose a family of functions $f(x;\theta)$ with tunable parameters $\theta$ and let an optimization algorithm pick the parameters that fit the data best.  The learned function might categorize data (is this email spam? does this scan show a tumor?), predict a number (tomorrow's demand, a house price), or group similar things together without labels (customer segments, related news articles).
+
+This is why machine learning belongs in an optimization book: training a model \emph{is} solving an optimization problem, usually a continuous and often nonconvex one.  The same recipe runs everywhere:
+\begin{itemize}
+\item \textbf{Spam filtering and fraud detection}: classify a message or transaction as legitimate or not.
+\item \textbf{Demand forecasting}: predict next month's sales from history, weather, and promotions.
+\item \textbf{Image recognition}: label the content of a photo, from unlocking your phone to reading medical scans.
+\item \textbf{Recommendations}: predict which movie, song, or product a user will like next.
+\item \textbf{Large language models}: systems like ChatGPT and Claude are trained by minimizing a loss function over billions of parameters, using nonlinear programming techniques (variants of gradient descent) run at enormous scale.  The mathematics of training the most talked-about technology of the decade is the mathematics of this book's nonlinear programming chapters.
+\end{itemize}
+Below are the two most common mathematical shapes these problems take.  We will see both in greater detail later in the book.
+
+\subsubsection*{Loss Function Minimization}
+
+In supervised learning, this objective is typically a loss function \( L \) that quantifies the discrepancy between the predictions of a model and the true data labels. The aim is to adjust the parameters \( \theta \) of the model to minimize this loss. Mathematically, this can be represented as:
+\begin{equation}
+\min_{\theta} L(\theta) = \min_{\theta} \frac{1}{N} \sum_{i=1}^{N} l(y_i, f(x_i; \theta))
+\end{equation}
+where \( N \) is the number of data points, \( l \) is a per-data-point loss (e.g., squared error for regression or cross-entropy for classification), \( y_i \) is the true label for the i-th data point, and \( f(x_i; \theta) \) is the model's prediction for the i-th data point with parameters \( \theta \).
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\linewidth]{figs/mathematicalProgramming-tikz04.png}
+\caption{Supervised learning as loss minimization: the parameters $\theta$ slide and tilt the curve $f(x;\theta)$ until the total mismatch with the data (the red residuals) is as small as possible.}
+\label{fig:ml-loss}
+\end{figure}
+
+\subsubsection*{Clustering Formulation}
+
+Clustering, on the other hand, learns structure with no labels at all: group the data so that points in the same group are similar and points in different groups are not.  A retailer might cluster customers into segments for targeted offers; a biologist might cluster genes by expression pattern.  One popular method is the k-means clustering algorithm. The objective of k-means is to partition the data into \( k \) clusters by minimizing the within-cluster sum of squares (WCSS). The mathematical formulation can be given as:
+\begin{equation}
+\min_{\mathbf{c}_1, \ldots, \mathbf{c}_k} \sum_{j=1}^{k} \sum_{x_i \in C_j} \left\| x_i - \mathbf{c}_j \right\|^2
+\end{equation}
+where \( C_j \) represents the j-th cluster and \( \mathbf{c}_j \) is the centroid of that cluster.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\linewidth]{figs/mathematicalProgramming-tikz05.png}
+\caption{Clustering: with no labels given, the optimization chooses centroids (and the assignment of points to them) to make each group as tight as possible.}
+\label{fig:ml-clustering}
+\end{figure}
+
+This encapsulation presents a glimpse into how ML problems are framed mathematically. In practice, numerous algorithms, constraints, and regularizations add complexity to these basic formulations.
+
+\section{Mixed-Integer Non-Linear Programming (MINLP)}
+\label{sec:intro-MINLP}
+
+\begin{general}{MINLP}{\nphard}
+Mixed Integer Nonlinear Programming (MINLP) combines elements of integer programming and nonlinear programming. In MINLP, some or all of the decision variables are constrained to be integers, and the objective function or constraints are nonlinear. A general MINLP problem can be formulated as:
+\begin{equation}
+\label{eq:minlp}
+\begin{split}
+\min \quad & f(x, y)\\
+\st  \quad & g_i(x, y) \leq 0  \quad  \text{ for } i=1, \dots, m\\
+           & h_j(x, y) = 0    \quad  \text{ for } j=1, \dots, p\\
+           & x \in \R^n, y \in \Z^k
+\end{split}
+\end{equation}
+where $f$ is the objective function, $g_i$ and $h_j$ are constraint functions, $x$ is a vector of continuous variables, and $y$ is a vector of integer variables.
+\end{general}
+
+MINLP is particularly challenging due to the nonlinearity in the objective and/or constraints and the discrete nature of some decision variables. It finds applications in various fields such as industry for process optimization, computational geometry, and machine learning for hyperparameter tuning.
+
+\subsection{Convex MINLP}
+In the convex case, both the objective function and the constraints are convex functions. This subclass is easier to solve compared to its non-convex counterpart.
+\begin{general}{Convex MINLP}{\nphard, but \polynomial\ in fixed dimension\  (typically)}
+For a convex MINLP, the problem is defined as:
+\begin{equation}
+\label{eq:convex-minlp}
+\begin{split}
+\min \quad & f(x, y) \quad \text{(convex)}\\
+\st  \quad & g_i(x, y) \leq 0  \quad  \text{(convex constraints)}\\
+           & x \in \R^n, y \in \Z^k
+\end{split}
+\end{equation}
+\end{general}
+Convex MINLPs, while still challenging, are typically more tractable due to the properties of convexity, which allow for more efficient solution methods.
+
+\subsection{Non-Convex MINLP}
+Non-convex MINLPs are significantly harder due to the presence of non-convex functions, which can lead to multiple local minima.
+\begin{general}{Non-Convex MINLP}{\nphard (in fact, undecidable)}
+The non-convex MINLP problem is formulated as:
+\begin{equation}
+\label{eq:nonconvex-minlp}
+\begin{split}
+\min \quad & f(x, y) \quad
+\text{(non-convex)}\\
+\st \quad & g_i(x, y) \leq 0 \quad \text{(possibly non-convex constraints)}\\
+& x \in \R^n, y \in \Z^k
+\end{split}
+\end{equation}
+\end{general}
+Non-convex MINLPs pose significant computational challenges due to the possibility of multiple local optima and the inherent complexity of integer constraints. These problems are common in real-world applications where decisions are discrete, and the system behavior is non-linear and complex.
+
+\subsection*{Complexity and Applications}
+MINLP problems are known for their computational complexity, primarily due to the combination of non-linearity and integrality. The non-convex variants, in particular, are \nphard, making them some of the most challenging problems in optimization.
+
+In practice, MINLP models find extensive applications across various domains. In industry, they are used for complex decision-making processes like supply chain optimization and production planning. In computational geometry, MINLP techniques help in solving problems like optimal packing or layout design. In machine learning, MINLPs are used for tasks like feature selection and hyperparameter optimization where discrete choices and nonlinear relationships are involved.
+
+The versatility of MINLP models, combined with their inherent complexity, makes them an important area of study in optimization.
+
+A comprehensive list of optimization software organized by problem type (including free solvers, commercial solvers with academic licenses, and modeling interfaces) is provided in Appendix~\ref{app:software}.
+
+\section{Optimization Under Uncertainty}
+
+Optimization problems often involve uncertainty in their parameters, whether due to measurement errors, variability in input data, or unpredictable future events. Addressing uncertainty is crucial for developing solutions that are effective in real-world settings. Two primary approaches to optimization under uncertainty are stochastic optimization and robust optimization.
+
+\subsection{Stochastic Optimization}
+
+Stochastic optimization deals with problems where some parameters are uncertain but can be described probabilistically. In this framework, the optimization process incorporates the expected values, variances, or other statistical characteristics of uncertain parameters. Solutions are often evaluated based on their performance over a distribution of possible scenarios. 
+
+For example, in supply chain management, uncertain demand can be modeled using probability distributions. A company may aim to minimize costs while ensuring a high service level under varying demand conditions. Similarly, in finance, portfolio optimization often accounts for uncertain future returns by maximizing expected returns while managing risk.
+
+\subsection{Robust Optimization}
+
+Robust optimization, on the other hand, focuses on creating solutions that perform well across the worst-case realizations of uncertainty. Rather than assuming a specific probability distribution, robust optimization works with uncertainty sets, which define the range of possible values that uncertain parameters can take. The goal is to find solutions that are feasible and effective for all possible scenarios within the uncertainty set.
+
+Applications of robust optimization include power grid operations, where uncertainties in demand and renewable energy generation need to be managed, and scheduling problems, such as airline crew scheduling, where disruptions must be minimized under varying operational conditions.
+
+\subsection{Applications}
+
+Optimization under uncertainty has a wide array of applications across industries:
+\begin{itemize}
+    \item \textbf{Healthcare:} Designing vaccination strategies to minimize the spread of diseases while accounting for uncertain infection rates and patient behaviors.
+    \item \textbf{Transportation:} Managing traffic flow or public transit schedules under uncertain demand and travel times.
+    \item \textbf{Energy:} Planning renewable energy investments and operations under uncertain weather conditions and energy prices.
+    \item \textbf{Manufacturing:} Ensuring production schedules are resilient to supply chain disruptions and variability in raw material quality.
+\end{itemize}
+
+Addressing the complexity of uncertain data typically makes these problems much harder than their deterministic counterparts. While these methods are powerful and applicable to a wide range of real-world scenarios, we will not focus on optimization under uncertainty in this textbook.
+
+\section{Exercises}
+
+\exgroup{Warm-ups}
+
+\begin{ex}{Classify It: Production Plan}{}
+\stars{1} A juice company decides how many liters of apple juice $x_1$ and orange juice $x_2$ to produce.  Each liter of apple juice earns \$2 and each liter of orange juice earns \$3.  Pressing capacity gives $x_1 + 2x_2 \leq 800$, bottling capacity gives $x_1 + x_2 \leq 600$, and both quantities are non-negative.  The company maximizes earnings.  Classify this model as LP, ILP/BIP, MILP, NLP, or MINLP.  Point to the two features of the model (type of functions, type of variables) that justify your answer.
+\exrefs{\S\ref{sec:intro-LP}, Problem~\eqref{eq:LP}}
+\end{ex}
+
+\begin{ex}{Classify It: Choosing Projects}{}
+\label{ex:classify-projects}
+\stars{1} A city can fund any subset of five park projects.  Project $i$ costs $a_i$ dollars and benefits $c_i$ residents, and the budget is $b$ dollars.  Let $x_i = 1$ if project $i$ is funded and $x_i = 0$ otherwise, and consider
+\[
+\max \Big\{ \sum_{i=1}^5 c_i x_i \;:\; \sum_{i=1}^5 a_i x_i \leq b, \; x_i \in \{0,1\} \Big\}.
+\]
+Classify this model as LP, ILP/BIP, MILP, NLP, or MINLP, and justify your answer.  What changes about the classification if the city can also fund a fraction of a project?
+\exrefs{\S\ref{sec:intro-MILP}, Problem~\eqref{eq:BIP}}
+\end{ex}
+
+\begin{ex}{Classify It: Fitting a Line}{}
+\stars{1} Given data points $(t_1,y_1), \dots, (t_N,y_N)$, we choose slope $m$ and intercept $q$ to minimize
+\[
+\sum_{i=1}^N \big(y_i - (mt_i + q)\big)^2 ,
+\]
+with $m, q \in \R$ unrestricted.  Classify this model as LP, ILP/BIP, MILP, NLP, or MINLP, and justify your answer.  Is the objective function linear in the decision variables $m$ and $q$?
+\exrefs{\S\ref{sec:intro-NLP}, Problem~\eqref{eq:NLP}, \S\ref{sec:intro-LP}}
+\end{ex}
+
+\begin{ex}{Classify It: Warehouses with Congestion}{}
+\stars{1} A retailer decides which of $k$ candidate warehouses to open ($y_j \in \{0,1\}$) and how much product $x_j \geq 0$ to route through each open warehouse.  Handling cost at warehouse $j$ grows quadratically with volume, so the objective includes terms $x_j^2$, and product can flow through warehouse $j$ only if $y_j = 1$.  Classify this model as LP, ILP/BIP, MILP, NLP, or MINLP, and justify your answer by naming which ingredient rules out each simpler class.
+\exrefs{\S\ref{sec:intro-MINLP}, Problem~\eqref{eq:minlp}}
+\end{ex}
+
+\exgroup{Core problems}
+
+\begin{ex}{Shirt Store: Variables and One Constraint}{}
+\label{ex:shirt-friday-balance}
+\stars{2} Return to the shirt store of Section~\ref{sec:shirt-warmup}: demand is 5 shirts Friday, 10 Saturday, and 7 Sunday, orders arrive one day after they are placed, and the store starts Thursday with no shirts.
+\begin{enumerate}
+\item Define decision variables for the shirts ordered on Thursday, Friday, and Saturday, and for the inventory held at the end of Friday and Saturday.
+\item Using your variables, write one linear equation that relates Thursday's order, Friday's demand, and Friday's ending inventory.
+\item Which constraint in your model prevents the store from running out of shirts on Friday?
+\end{enumerate}
+\exrefs{\S\ref{sec:shirt-warmup}, Figure~\ref{fig:shirt-timeline}}
+\end{ex}
+
+\begin{ex}{Spot the Pieces: Food Truck}{}
+\stars{2} A food truck owner must decide how many tacos and how many burritos to prepare tomorrow.  Each taco uses 0.1 kg of meat and each burrito uses 0.25 kg, and only 30 kg of meat will be available.  Prep labor is limited to 10 hours.  Tacos earn \$2 profit and burritos \$3.50.  Without writing the full model, identify in words: the decision variables, the objective function, and each constraint.  State the units of every quantity you name.
+\exrefs{\S\ref{sec:what-is-MP}, Figure~\ref{fig:mp-pipeline}}
+\end{ex}
+
+\begin{ex}{Spot the Pieces: Tutoring Center}{}
+\stars{2} A tutoring center schedules tutors for next week.  It may hire each of 12 tutors for a whole number of one-hour sessions, at most 8 sessions per tutor.  The center needs at least 40 total sessions covered, and its weekly budget is \$900; tutor $i$ charges $p_i$ dollars per session.  The center wants maximum total sessions within budget.  Identify the decision variables, objective, and constraints in words.  Then explain which model class from Section~\ref{sec:types-of-optimization} fits this problem and why it is not simply an LP.
+\exrefs{\S\ref{sec:what-is-MP}, \S\ref{sec:types-of-optimization}}
+\end{ex}
+
+\exgroup{Concepts and connections}
+
+\begin{ex}{Half a Bus}{}
+\stars{2} A school district's model says the optimal fleet is 12.5 buses.  A shirt store's model says the optimal order is 2361.4 shirts.
+\begin{enumerate}
+\item In which of the two cases is rounding the LP answer to a nearby integer likely acceptable, and why?
+\item Explain what the divisibility issue means for choosing between the LP and MILP problem classes, and what price we pay (in computational difficulty) for insisting on integer variables.
+\end{enumerate}
+\exrefs{\S\ref{sec:types-of-optimization}, \S\ref{sec:intro-MILP}}
+\end{ex}
+
+\begin{ex}{Why ``Programming''?}{}
+\label{ex:programming-term}
+\stars{2} The word ``programming'' in mathematical programming predates modern software.  Explain in one or two sentences what the term refers to in this subject, and why ``linear programming'' does not mean writing computer code in a linear fashion.
+\exrefs{\S\ref{sec:what-is-MP}}
+\end{ex}
+
+\begin{ex}{Reading a Success Story}{}
+\stars{2} Pick one of the documented successes in the box ``What is optimization worth?'' in Section~\ref{sec:why-OR} (UPS ORION, American Airlines yield management, or the Netherlands Railways timetable).  For your chosen system, describe: (a) what the decision variables likely were, (b) what objective was likely optimized, and (c) one constraint the model must have respected.  You do not need to be exactly right; the goal is to translate a news-style claim into model components.
+\exrefs{\S\ref{sec:why-OR}, \S\ref{sec:what-is-MP}}
+\end{ex}
+
+\exgroup{Challenge problems}
+
+\begin{ex}{Shirt Store: The Full Model}{}
+\label{ex:shirt-full-lp}
+\stars{3} Formulate the complete shirt-ordering problem of Section~\ref{sec:shirt-warmup} as a linear program.  Demand is 5 shirts Friday, 10 Saturday, and 7 Sunday.  Orders placed Thursday, Friday, and Saturday arrive the next day and cost \$8, \$9, and \$10 per shirt respectively.  Every shirt still in the store at the end of Friday or Saturday incurs a \$0.50 holding cost for that night.  The store starts with no inventory, all demand must be met on time, and leftover shirts after Sunday are allowed but earn nothing.
+\begin{enumerate}
+\item Write the LP: decision variables, objective, inventory-balance equations for Friday, Saturday, and Sunday, and non-negativity.
+\item Solve it (software or by reasoning about the costs) and report the optimal ordering plan and total cost.
+\item The variables should really be integers.  Does that matter here?  Explain.
+\end{enumerate}
+\exrefs{\S\ref{sec:shirt-warmup}, \S\ref{sec:intro-LP}, Figure~\ref{fig:shirt-timeline}}
+\end{ex}
+
+\subsubsection*{Selected Solutions}
+
+\begin{solution}(Exercise~\ref{ex:classify-projects})
+This is a binary integer program (BIP): the objective and the budget constraint are linear, and every variable is restricted to $\{0,1\}$.  If fractions of projects may be funded, replace $x_i \in \{0,1\}$ with $0 \leq x_i \leq 1$; all constraints are then linear over continuous variables and the model becomes an LP.
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:shirt-friday-balance})
+Let $x_T, x_F, x_S$ be the shirts ordered on Thursday, Friday, and Saturday, and let $s_F, s_S$ be the inventory at the end of Friday and Saturday.  Thursday's order is all the store has on Friday, so Friday's balance is
+\[
+x_T = 5 + s_F .
+\]
+The constraint $s_F \geq 0$ (together with this balance equation) is what forbids a Friday stockout: it forces $x_T \geq 5$.
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:programming-term})
+Here ``programming'' means planning or scheduling: a ``program'' was a plan of activities, as in a military logistics program or a concert program.  Linear programming is the construction of an optimal plan using linear relationships, and the term was coined before computer programming was common.
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:shirt-full-lp})
+Let $x_T, x_F, x_S \geq 0$ be the orders placed Thursday, Friday, Saturday, and $s_F, s_S, s_{Sun} \geq 0$ the end-of-day inventories.  The LP is
+\begin{align*}
+\min \quad & 8x_T + 9x_F + 10x_S + 0.5s_F + 0.5s_S\\
+\st \quad & x_T = 5 + s_F && \text{(Friday)}\\
+& s_F + x_F = 10 + s_S && \text{(Saturday)}\\
+& s_S + x_S = 7 + s_{Sun} && \text{(Sunday)}\\
+& x_T, x_F, x_S, s_F, s_S, s_{Sun} \geq 0.
+\end{align*}
+Covering a Saturday shirt by ordering Thursday costs $8 + 0.5 = 8.50$, cheaper than the \$9 Friday order; covering a Sunday shirt from Thursday costs $8 + 0.5 + 0.5 = 9$, cheaper than \$9.50 (order Friday, hold one night) and \$10 (order Saturday).  So the optimal plan orders everything on Thursday: $x_T = 22$, $x_F = x_S = 0$, with $s_F = 17$, $s_S = 7$, $s_{Sun} = 0$ and total cost $22 \cdot 8 + 0.5(17 + 7) = \$188$.  Integrality is not a concern in this instance: the demands are integers and the optimal LP solution is already integer, so the LP and integer models agree.
+\end{solution}
+
+%
+%
+%\end{document}

@@ -71,7 +71,7 @@ def process(path_str):
         (FIGS / f"{name}.tex").write_text(
             SNIPPET_PREAMBLE + text[s:e] + "\n\\end{document}\n",
             encoding="utf-8")
-        if compile_snippet(name):
+        if (FIGS / f"{name}.png").exists() or compile_snippet(name):
             out.append("\\includegraphics[width=0.85\\linewidth]{figs/%s.png}"
                        % name)
         else:

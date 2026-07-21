@@ -1,0 +1,265 @@
+% ============================================================================
+% Whole-book additions to epub-preamble.tex (which covers the ch02 proof of
+% concept).  Loaded by book1-epub.tex AFTER epub-preamble.tex.
+% Everything here is a plain-LaTeX substitute for preamble machinery that
+% tex4ht cannot (or should not) process: tcolorbox layouts, biblatex,
+% tikz-based decorations, Lyryx styles.
+% ============================================================================
+
+% ---- packages available in the minimal TeX tree ----
+\usepackage{listings}
+\usepackage{multicol}
+\usepackage{amsthm}
+\usepackage[normalem]{ulem}
+\usepackage{pifont}
+\usepackage{subcaption}
+
+% ---- colors referenced by chapters/listings ----
+\definecolor{codebase}{RGB}{250,250,245}
+\definecolor{codekeyword}{RGB}{42,161,152}
+\definecolor{codecomment}{RGB}{108,153,8}
+\definecolor{codestring}{RGB}{189,78,98}
+\definecolor{ocre}{RGB}{243,102,25}
+\definecolor{sensbox}{RGB}{0,102,153}
+\definecolor{algslate}{RGB}{70,90,110}
+\definecolor{algcharcoal}{RGB}{40,44,52}
+\definecolor{algpivot}{RGB}{140,60,10}
+\definecolor{algenter}{RGB}{20,90,50}
+\definecolor{algopt}{RGB}{60,50,120}
+\definecolor{lscshdrboxcolour}{HTML}{E2AB0A}
+
+% ---- listings config (subset of packages-and-commands.tex) ----
+\lstset{
+  language=Python, tabsize=4, basicstyle=\small\ttfamily, upquote=true,
+  columns=fullflexible, breaklines=true, frame=single,
+  showstringspaces=false,
+  morestring=[s]{"""}{"""}, morestring=[s]{'''}{'''},
+  keywordstyle=\color{codekeyword}, commentstyle=\color{codecomment},
+  stringstyle=\color{codestring}, captionpos=b,
+  moredelim=[is][\color{black}]{<<}{>>},
+  morekeywords={assert, self, super, with, as, yield, True, False, None},
+}
+\lstdefinestyle{FromFile}{language=Python,frame=single,numbers=left,numberstyle=\tiny}
+\lstdefinestyle{ShellOutput}{language=}
+\lstdefinestyle{ShellInput}{language=}
+\lstdefinestyle{pseudo}{basicstyle=\rmfamily,upquote=true,keywordstyle=\color{black}\bfseries}
+\providecommand{\pseudoli}[1]{\lstinline[style=pseudo]!#1!}
+
+% ---- theorem-family environments not in epub-preamble ----
+\newtheorem{lemma}{Lemma}[chapter]
+\newtheorem{proposition}{Proposition}[chapter]
+\newtheorem{corollary}{Corollary}[chapter]
+\newtheorem*{remark}{Remark}
+
+% ---- math macros from the book preamble ----
+\renewcommand{\c}{\mathbf{c}}          % the book redefines \c !
+\providecommand{\y}{\mathbf{y}}
+\providecommand{\z}{\mathbf{z}}
+\providecommand{\e}{\mathbf{e}}
+\providecommand{\B}{\mathbf{B}}
+\providecommand{\N}{\mathbb{N}}
+\providecommand{\vect}{\vec}
+\providecommand{\leftB}{\left[}
+\providecommand{\rightB}{\right]}
+\providecommand{\ds}{\displaystyle}
+\providecommand{\longvect}{\overrightarrow}
+\providecommand{\npcomplete}{\textbf{NP-complete}}
+\providecommand{\nphard}{\textbf{NP-hard}}
+\providecommand{\true}{\text{TRUE}}
+\providecommand{\false}{\text{FALSE}}
+
+% ---- exercise-ladder helpers ----
+\providecommand{\exgroup}[1]{\par\bigskip\noindent{\large\bfseries #1}\par\medskip}
+\providecommand{\stars}[1]{{\ifcase#1\relax\or$\star$\or$\star\star$\or$\star\star\star$\fi}\ }
+\providecommand{\exrefs}[1]{\par{\footnotesize [#1]}}
+
+% ---- visualization links ----
+\providecommand{\vizlink}[2]{\href{https://open-optimization.github.io/open-optimization-or-book/visualizations/\##1}{\textbf{#2}}}
+
+% ---- citation shims (no biblatex in the EPUB build) ----
+\providecommand{\cite}[2][]{[ref]}
+\providecommand{\citep}[2][]{[ref]}
+\providecommand{\citet}[2][]{[ref]}
+\providecommand{\citeauthor}[1]{}
+\providecommand{\citetitle}[1]{}
+\providecommand{\citeurl}[1]{}
+\providecommand{\citedate}[1]{}
+\providecommand{\footfullcite}[1]{}
+\providecommand{\fullcite}[1]{[ref]}
+\providecommand{\autocite}[2][]{[ref]}
+\providecommand{\textcite}[1]{[ref]}
+\providecommand{\printbibliography}{}
+\providecommand{\nocite}[1]{}
+\providecommand{\footnotetextmetadata}[1]{}
+
+% ---- misc no-ops ----
+\providecommand{\todo}[2][]{}
+\providecommand{\todoChapter}[1]{}
+\providecommand{\todoSection}[1]{}
+\providecommand{\FloatBarrier}{}
+\providecommand{\cref}[1]{\ref{#1}}
+\providecommand{\Cref}[1]{\ref{#1}}
+\providecommand{\index}[1]{}
+
+% ============================================================================
+% FIGURE MACROS  (mirror the signatures in preamble0-biblatex.tex, but:
+%  - strip file extensions so .pdf figures resolve to converted .png
+%  - no biblatex credit lines; credits live in the metadata bib and the
+%    Sources & Attribution chapter)
+% ============================================================================
+\makeatletter
+\newcommand{\epubgraphic}[2][width=.6\linewidth]{%
+  \filename@parse{#2}%
+  \begin{center}\includegraphics[#1]{\filename@base}\end{center}}
+\newcommand{\epubfigure}[4][\relax]{%
+  % #1 caption or \relax, #2 opts, #3 float pos (ignored), #4 name
+  \filename@parse{#4}%
+  \begin{figure}[htbp]\centering
+    \includegraphics[#2]{\filename@base}%
+    \ifx#1\relax\else\caption{#1}\fi
+    \label{fig:#4}%
+  \end{figure}}
+\makeatother
+
+\usepackage{xargs}
+\newcommandx{\includegraphicstatic}[2][1={width=.6\linewidth}, usedefault]{\epubgraphic[#1]{#2}}
+\newcommandx{\includegraphicsource}[2][1={width=.6\linewidth}, usedefault]{\epubgraphic[#1]{#2}}
+\newcommandx{\includegraphicbook}[2][1={width=.6\linewidth}, usedefault]{\epubgraphic[#1]{#2}}
+\newcommandx{\includegraphicbooksource}[2][1={width=.6\linewidth}, usedefault]{\epubgraphic[#1]{#2}}
+\newcommandx{\refincludefigurestatic}[4][1=\relax,2={width=.6\linewidth},3=t, usedefault]{%
+  \epubfigure[#1]{#2}{#3}{#4}\autoref{fig:#4}}
+\newcommandx{\includefigurestatic}[4][1=\relax,2={width=.6\linewidth},3=t, usedefault]{%
+  \epubfigure[#1]{#2}{#3}{#4}}
+\newcommandx{\includefiguresource}[4][1=\relax,2={width=.6\linewidth},3=t, usedefault]{%
+  \epubfigure[#1]{#2}{#3}{#4}}
+\newcommandx{\includefigurebook}[4][1=\relax,2={width=.6\linewidth},3=t, usedefault]{%
+  \epubfigure[#1]{#2}{#3}{#4}}
+\newcommandx{\includefigurebooksource}[4][1=\relax,2={width=.6\linewidth},3=t, usedefault]{%
+  \epubfigure[#1]{#2}{#3}{#4}}
+% accessibility wrapper: 2nd mandatory arg is the long description
+\makeatletter
+\renewcommand{\altincludegraphics}[3][]{%
+  \filename@parse{#2}\includegraphics[#1]{\filename@base}}
+\makeatother
+
+\graphicspath{{figs-conv/}{figs/}}
+\DeclareGraphicsExtensions{.png,.jpg,.jpeg,.JPG}
+
+% ============================================================================
+% ENVIRONMENT SHIMS for tcolorbox/Lyryx environments used beyond ch02
+% ============================================================================
+% raw tcolorbox with key=val options -> plain indented block
+\NewDocumentEnvironment{tcolorbox}{O{}}{\par\medskip\begin{quote}}{\end{quote}\par\medskip}
+\NewDocumentEnvironment{steppanel}{m}{\par\medskip\begin{quote}}{\end{quote}\par\medskip}
+\NewDocumentEnvironment{stepbox}{m m}{\epubblockhead{#2}}{\par\medskip}
+\NewDocumentEnvironment{algocard}{m}{\epubblockhead{#1}}{\par\medskip}
+\NewDocumentEnvironment{sensdisplay}{m}{\epubblockhead{#1}}{\par\medskip}
+\NewDocumentEnvironment{dict}{}{\par\medskip\begin{quote}\ttfamily}{\end{quote}\par\medskip}
+\NewDocumentEnvironment{dictopt}{}{\par\medskip\begin{quote}\ttfamily}{\end{quote}\par\medskip}
+\NewDocumentEnvironment{tryit}{}{\epubblockhead{Try it out visually!}}{\par\medskip}
+\NewDocumentEnvironment{info}{}{\epubblockhead{Info}}{\par\medskip}
+\NewDocumentEnvironment{warn}{}{\epubblockhead{Warning}}{\par\medskip}
+\NewDocumentEnvironment{lscshdrbox}{}{\par\medskip\noindent}{\par\medskip}
+\NewDocumentEnvironment{pioneerspotlight}{m}{\epubblockhead{Pioneer Spotlight}{#1}}{\par\medskip}
+\NewDocumentEnvironment{qaflag}{}{\epubblockhead{Note}}{\par\medskip}
+% tabu -> tabular (usage: \begin{tabu} to \linewidth {spec})
+\NewDocumentEnvironment{tabu}{s}{\IfBooleanTF{#1}{}{}\tabushim}{\endtabular}
+\makeatletter
+\def\tabushim{\@ifnextchar t{\tabuskipto}{\tabular}}
+\def\tabuskipto to #1#{\tabular}
+\makeatother
+% algorithmic (minimal): render \State etc. as lines
+\NewDocumentEnvironment{algorithmic}{O{}}
+  {\par\begin{quote}\ttfamily
+   \providecommand{\State}{\par\hspace*{1em}}%
+   \providecommand{\While}[1]{\par\textbf{while} ##1 \textbf{do}}%
+   \providecommand{\EndWhile}{\par\textbf{end while}}%
+   \providecommand{\For}[1]{\par\textbf{for} ##1 \textbf{do}}%
+   \providecommand{\ForAll}[1]{\par\textbf{for all} ##1 \textbf{do}}%
+   \providecommand{\EndFor}{\par\textbf{end for}}%
+   \providecommand{\If}[1]{\par\textbf{if} ##1 \textbf{then}}%
+   \providecommand{\ElsIf}[1]{\par\textbf{else if} ##1 \textbf{then}}%
+   \providecommand{\Else}{\par\textbf{else}}%
+   \providecommand{\EndIf}{\par\textbf{end if}}%
+   \providecommand{\Return}{\textbf{return} }%
+   \providecommand{\Comment}[1]{\hfill$\triangleright$ ##1}%
+   \providecommand{\Require}{\par\textbf{Require:} }%
+   \providecommand{\Ensure}{\par\textbf{Ensure:} }}
+  {\end{quote}\par}
+
+% ---- second shakeout round: chapter-level helper macros ----
+\usepackage[T1]{fontenc}
+\definecolor{algleave}{RGB}{150,40,40}
+\definecolor{ansi-green}{RGB}{0,150,0}
+\providecommand{\tikzmark}[1]{}
+\providecommand{\algostep}[4]{\par\smallskip\noindent{\bfseries #2 #3}\enspace #4\par\smallskip}
+\providecommand{\cstep}[2]{{\bfseries Step #1 --- #2.}\ }
+\providecommand{\slab}[3]{{\ding{#2}\ \bfseries #3.}\ }
+\providecommand{\sslab}[1]{{\ding{228}\ \bfseries #1.}\ }
+\providecommand{\pivotstrip}[3]{\par\smallskip\noindent\textbf{Pivot: $#1$ enters, $#2$ leaves.}\ #3\par\smallskip}
+\providecommand{\polynomial}{\textit{Polynomial time (P)}}
+\providecommand{\hcancel}[1]{\sout{#1}}
+\providecommand{\includetikz}[1]{}
+\providecommand{\subimport}[2]{}
+\providecommand{\dom}{\operatorname{dom}}
+\providecommand{\conv}{\operatorname{conv}}
+\providecommand{\Repeat}{\par\textbf{repeat}}
+\providecommand{\Until}[1]{\par\textbf{until} #1}
+\NewDocumentEnvironment{rotate}{m}{}{}
+
+% ---- single-letter bold vectors and array helpers (packages-and-commands) ----
+\def\0{\mathbf{0}}
+\def\a{\mathbf{a}}
+\def\e{\mathbf{e}}
+\def\f{\mathbf{f}}
+\def\g{\mathbf{g}}
+\def\p{\mathbf{p}}
+\def\q{\mathbf{q}}
+\def\u{\mathbf{u}}
+\def\v{\mathbf{v}}
+\def\w{\mathbf{w}}
+\def\y{\mathbf{y}}
+\def\z{\mathbf{z}}
+\providecommand{\Q}{\mathbb{Q}}
+\providecommand{\F}{\mathcal{F}}
+\providecommand{\T}{\mathsf{T}}
+\def\lvl#1{\multicolumn{1}{|c}{#1}}
+\def\rvl#1{\multicolumn{1}{c|}{#1}}
+\providecommand{\indicator}{\boldsymbol{1}}
+\providecommand{\subspace}{\lhd}
+\definecolor{titletextcolour}{HTML}{840125}
+
+% ---- wrapfigure -> plain figure block (wrapping is meaningless in EPUB) ----
+\usepackage{wrapfig}
+\providecommand{\cent}{\text{\textcent}}
+
+% ---- Lyryx linear algebra macros (LyryxLinAlgStyle.sty subset) ----
+\providecommand{\dotprod}{\bullet}
+\providecommand{\vectlength}{\|}
+\providecommand{\RREF}{ Reduced Row-Echelon Form }
+\providecommand{\rref}{reduced row-echelon form}
+\providecommand{\EF}{Row-Echelon Form }
+\providecommand{\ef}{row-echelon form}
+\providecommand{\eigenVar}{x}
+\providecommand{\dist}{\operatorname{dist}}
+
+% ---- contributors + Lyryx frontmatter helpers ----
+\NewDocumentEnvironment{contributors}{}{\par\textbf{List of Contributors}\par\begin{multicols}{2}}{\end{multicols}\par}
+\providecommand{\contributor}[2]{\noindent #1\\ {\itshape #2}\par\smallskip}
+
+% ---- final stragglers ----
+\providecommand{\one}{\mathbf{1}}
+\definecolor{titlemainbgcolour}{HTML}{E2AB0A}
+\providecommand{\booktitle}{Mathematical Programming and Operations Research}
+\providecommand{\booksubtitle}{Linear and Integer Programming:}
+\providecommand{\bookauthor}{Edited by Robert Hildebrand}
+\providecommand{\func}[2]{#1\left(#2\right)}
+\renewcommand{\includetikz}[2][]{\epubgraphic{#2}}
+
+% tex4ht re-installs accent kludges at \begin{document}; re-assert the book's
+% single-letter math macros after that.
+\AtBeginDocument{%
+  \def\0{\mathbf{0}}\def\a{\mathbf{a}}\def\b{\mathbf{b}}\def\c{\mathbf{c}}%
+  \def\e{\mathbf{e}}\def\f{\mathbf{f}}\def\g{\mathbf{g}}\def\p{\mathbf{p}}%
+  \def\q{\mathbf{q}}\def\u{\mathbf{u}}\def\v{\mathbf{v}}\def\w{\mathbf{w}}%
+  \def\x{\mathbf{x}}\def\y{\mathbf{y}}\def\z{\mathbf{z}}}
