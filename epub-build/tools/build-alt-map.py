@@ -52,12 +52,19 @@ mpath = BUILD / "alt-text-manual.json"
 if mpath.exists():
     manual = json.load(open(mpath))
 
-FILES = ["modeling-linear-programming", "modeling-sums",
-         "modeling-sums-continued", "Section2"]
+import sys
+listfile = sys.argv[1] if len(sys.argv) > 1 else None
+if listfile:
+    SOURCES = [Path(l) for l in open(listfile).read().split()]
+else:
+    SOURCES = [CH02 / f"{s}.tex" for s in
+               ["modeling-linear-programming", "modeling-sums",
+                "modeling-sums-continued", "Section2"]]
 
 alt_map, missing = {}, []
-for stem in FILES:
-    text = (CH02 / f"{stem}.tex").read_text()
+for srcpath in SOURCES:
+    stem = srcpath.stem
+    text = srcpath.read_text()
     for n, b in enumerate(blocks(text), 1):
         name = f"figs/{stem}-tikz{n:02d}.png"
         h = hashlib.md5(b.encode()).hexdigest()[:8]
@@ -67,6 +74,34 @@ for stem in FILES:
             alt_map[name] = manual[name]
         else:
             missing.append(name)
+
+# figs-conv images: alt text from the two metadata bibs (abstract fields)
+import re
+def parse_bib(path):
+    txt = "\n".join(l for l in open(path).read().splitlines()
+                     if not l.lstrip().startswith("%"))
+    out = {}
+    for m in re.finditer(r"@\w+\{([^,]+),", txt):
+        key = m.group(1).strip(); start = m.end(); d = 1; i = start
+        while i < len(txt) and d > 0:
+            if txt[i] == "{": d += 1
+            elif txt[i] == "}": d -= 1
+            i += 1
+        a = re.search(r"abstract\s*=\s*\{(.*?)\},", txt[start:i-1], re.S)
+        if a: out[key] = " ".join(a.group(1).split())
+    return out
+BIBS = {}
+for bp in ["optimization/figures/figures-static/00_METADATA.bib",
+           "optimization/figures/figures-source/00_METADATA.bib"]:
+    BIBS.update(parse_bib(REPO / "Intro-Math-Programming/baseText" / bp))
+for img in glob.glob(str(BUILD / "figs-conv/*")):
+    base = os.path.basename(img)
+    stem0 = os.path.splitext(base)[0]
+    for cand in (base, stem0, stem0 + ".png", stem0 + ".jpg", stem0 + ".pdf",
+                 stem0 + ".JPG", "tikz/" + stem0, "tikz/" + stem0 + ".pdf"):
+        if cand in BIBS:
+            alt_map["figs-conv/" + base] = BIBS[cand]
+            break
 
 json.dump(alt_map, open(BUILD / "alt-map.json", "w"), indent=1)
 print(f"mapped: {len(alt_map)}, missing: {len(missing)}")

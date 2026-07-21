@@ -1,0 +1,2762 @@
+% Copyright 2025 by Robert Hildebrand
+%This work is licensed under a
+%Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0)
+%See http://creativecommons.org/licenses/by-sa/4.0/
+\chapter{Simplex Method}
+\label{ch:simplex-dictionary}
+\begin{outcome}
+\begin{itemize}
+\item Convert linear programs to standard form
+\item Reformulate linear programs from the perspective of different bases
+\item Define \emph{basic solutions} and \emph{basic feasible solutions}
+\item Describe optimality condition from the perspective of a reformulation
+\item Develop the \emph{Simplex Method} that \emph{pivots} through basic feasible solutions
+\end{itemize}
+\end{outcome}
+
+\begin{quote}
+\itshape Picture hiking to the highest point of a fenced field on a moonless night. Your flashlight shows only the ground at your feet: the corner you are standing on and the fence lines leading away from it. A sensible strategy suggests itself: shine the light along each fence line; if one leads uphill, follow it to the next corner and look again; if none does, stop. The remarkable fact of this chapter is that for linear programs this nearsighted strategy is guaranteed to end at the highest point of the entire field. The algebra of ``shining the flashlight'' is a reformulation of the linear program called a \emph{dictionary}.
+\end{quote}
+
+In this section, we will develop the \emph{Simplex Method}.  This algorithm has been lauded as one of the most important algorithms of the 20th century.  It will iteratively find better vertex solutions to a linear program until it can prove optimality.
+
+To implement the simplex algorithm, we must first discuss a \emph{Standard Form} with which to represent linear programs.   After, we will discuss structure of linear programs in this form using matrix notation and demonstrate how a linear program can be transformed to new representations.  These new representations will be the backbone of the simplex algorithm.  We will \emph{pivot} between vertices, and each vertex will have a new representation of the linear program that will help us understand how to choose a new vertex to move to.
+
+The whole algorithm runs very fast in practice.  Here, we will teach you a basic version of the algorithm, but note that state-of-the-art solvers will employ a number of tricks to make this process very fast.  Linear programs can be solved with millions of variables!
+
+\section{Standard Form}
+\label{sec:standard-form}
+
+To solve a linear program using methods such as the simplex algorithm, the problem must first be converted to a standard form. This ensures the problem adheres to a uniform structure, making it easier to analyze and solve algorithmically.
+
+A linear program is in \emph{standard form} if it satisfies all of the following:
+\begin{itemize}
+    \item The objective is a maximization.
+    \item All constraints are equalities (i.e., of the form \( = \)).
+    \item All variables are bounded below by zero (i.e., \( x_i \geq 0 \)).
+\end{itemize}
+
+\begin{definition}{Standard Form}\label{def:standardform}
+A linear program is in \emph{standard form} if it is written as
+\begin{align*}
+\max \ \ &\c^\top \x \\
+s.t. \ \ & A\x = \b\\
+& \x \geq 0.
+\end{align*}
+\end{definition}
+
+\subsection{Converting to Standard Form}
+We now describe how to handle each of these aspects step-by-step, including common subcases and examples.
+
+\subsubsection*{1. Objective: Convert Minimization to Maximization}
+
+If the linear program is given as a minimization, we convert it into a maximization by multiplying the objective function by \( -1 \). This transformation does not affect the feasible region, and the maximizer of the new function will be the minimizer of the original.
+
+\begin{example}{Convert Min to Max}
+Consider the following objective:
+\[
+\min \; 3x_1 + 4x_2.
+\]
+To convert this to a maximization, we multiply the entire expression by \( -1 \):
+\[
+\max \; (-3x_1 - 4x_2).
+\]
+Now the problem can be treated using standard methods that assume a maximization objective.
+\end{example}
+\newpage
+\subsubsection*{2. Constraints: Convert Inequalities to Equalities}
+
+All inequality constraints must be transformed into equalities using slack or surplus variables, which represent the difference between the left- and right-hand sides of the constraint.
+
+\begin{itemize}
+    \item[(a)] \textbf{Convert \( \leq \) to \( = \) using a slack variable.}
+
+    A slack variable is added to "fill the gap" in a \( \leq \) constraint and must be nonnegative.
+
+    \begin{example}{Slack Variable for \(\leq\)}
+    Suppose we have the constraint:
+    \[
+    x_1 + 2x_2 \leq 5.
+    \]
+    We introduce a new variable \( s_1 \geq 0 \), called a slack variable, and rewrite the constraint as:
+    \[
+    x_1 + 2x_2 + s_1 = 5.
+    \]
+    Here, \( s_1 \) represents the unused portion of the right-hand side (i.e., how far the left-hand side is from 5).
+    \end{example}
+
+    \item[(b)] \textbf{Convert \( \geq \) to \( = \) using a surplus variable.}
+
+    A surplus variable is subtracted from the left-hand side of a \( \geq \) constraint to convert it into an equality. This variable also must be nonnegative.
+
+    \begin{example}{Surplus Variable for \(\geq\)}
+    Consider the constraint:
+    \[
+    x_1 - x_2 \geq 3.
+    \]
+    We introduce a new variable \( s_2 \geq 0 \), called a surplus variable, and rewrite the constraint as:
+    \[
+    x_1 - x_2 - s_2 = 3.
+    \]
+    In this case, \( s_2 \) accounts for the extra amount by which the left-hand side exceeds 3.
+    \end{example}
+\end{itemize}
+
+\subsubsection*{3. Variable Bounds: Ensure All Variables Are Nonnegative}
+
+The standard form requires all variables to satisfy \( x_i \geq 0 \). If any variable is unbounded below or is restricted in another way, we perform a variable substitution to enforce this condition.
+
+\begin{itemize}
+    \item[(a)] \textbf{Convert \( x_i \leq 0 \) to \( x_i' \geq 0 \) by renaming and negating.}
+
+    If a variable is constrained to be nonpositive, we can define a new nonnegative variable as its negation.
+
+    \begin{example}{Rename and Negate for \(\leq 0\)}
+    Suppose \( x_3 \leq 0 \). Define \( x_3' = -x_3 \), which implies \( x_3' \geq 0 \). Then substitute:
+    \[
+    x_3 = -x_3', \quad \text{where } x_3' \geq 0.
+    \]
+    This transformation allows us to enforce nonnegativity in the standard form.
+    \end{example}
+
+    \item[(b)] \textbf{Convert unrestricted variables into the difference of two nonnegative variables.}
+
+    If a variable is unrestricted in sign (i.e., it can be positive or negative), we express it as the difference of two new nonnegative variables.
+
+    \begin{example}{Unrestricted Variable to Two Variables}
+    Suppose \( x_4 \) is unrestricted. We define:
+    \[
+    x_4 = x_4^+ - x_4^-, \quad \text{with } x_4^+, x_4^- \geq 0.
+    \]
+    Here, \( x_4^+ \) captures the positive part and \( x_4^- \) captures the negative part. At most one of them will be nonzero in a basic feasible solution.
+    \end{example}
+\end{itemize}
+
+\medskip
+
+After performing these transformations, the resulting linear program will be in standard form and ready for solution via the simplex method or other standard techniques.
+
+\begin{example}{Complete Conversion to Standard Form}
+Consider the following linear program:
+
+\[
+\begin{aligned}
+\min \quad & 2x_1 - 3x_2 + x_3 \\
+\st \quad 
+& x_1 - x_2 \leq 4, \\
+& 2x_1 + x_3 = 7, \\
+& x_2 - x_3 \geq 2, \\
+& x_1 \text{ is unrestricted}, \quad x_2 \geq 0, \quad x_3 \text{ is unrestricted}.
+\end{aligned}
+\]
+
+We will now convert this problem into standard form.
+
+\medskip
+\textbf{Step 1: Convert the objective to maximization.}
+
+Since the problem is a minimization, we multiply the objective by \( -1 \):
+\[
+\max \; (-2x_1 + 3x_2 - x_3).
+\]
+
+\medskip
+\textbf{Step 2: Replace unrestricted variables.}
+
+Both \( x_1 \) and \( x_3 \) are unrestricted. We express them as the difference of two nonnegative variables:
+\[
+x_1 = x_1^+ - x_1^-, \quad x_3 = x_3^+ - x_3^-, \quad \text{with } x_1^+, x_1^-, x_3^+, x_3^- \geq 0.
+\]
+
+Substitute these into the objective and constraints.
+
+\smallskip
+\textbf{New objective:}
+\[
+\max \; [-2(x_1^+ - x_1^-) + 3x_2 - (x_3^+ - x_3^-)] = \max \; (-2x_1^+ + 2x_1^- + 3x_2 - x_3^+ + x_3^-).
+\]
+
+\smallskip
+\textbf{New constraints:}
+\begin{align*}
+(x_1^+ - x_1^-) - x_2 &\leq 4 \quad &\text{(original 1st constraint)} \\
+2(x_1^+ - x_1^-) + (x_3^+ - x_3^-) &= 7 \quad &\text{(original 2nd constraint)} \\
+x_2 - (x_3^+ - x_3^-) &\geq 2 \quad &\text{(original 3rd constraint)}
+\end{align*}
+
+\medskip
+\textbf{Step 3: Convert inequalities to equalities.}
+
+\begin{itemize}
+    \item Add a slack variable \( s_1 \geq 0 \) to the first constraint:
+    \[
+    x_1^+ - x_1^- - x_2 + s_1 = 4
+    \]
+
+    \item The second constraint is already an equality:
+    \[
+    2x_1^+ - 2x_1^- + x_3^+ - x_3^- = 7
+    \]
+
+    \item Subtract a surplus variable \( s_2 \geq 0 \) from the third constraint:
+    \[
+    x_2 - x_3^+ + x_3^- - s_2 = 2
+    \]
+\end{itemize}
+
+\medskip
+\textbf{Final standard form:}
+
+\[
+\begin{aligned}
+\max \quad & -2x_1^+ + 2x_1^- + 3x_2 - x_3^+ + x_3^- \\
+\st \quad 
+& x_1^+ - x_1^- - x_2 + s_1 = 4 \\
+& 2x_1^+ - 2x_1^- + x_3^+ - x_3^- = 7 \\
+& x_2 - x_3^+ + x_3^- - s_2 = 2 \\
+& x_1^+, x_1^-, x_2, x_3^+, x_3^-, s_1, s_2 \geq 0.
+\end{aligned}
+\]
+
+This is now in standard form: a maximization problem with equality constraints and all variables nonnegative.
+\end{example}
+
+\begin{remark}{Variable Transformations Preserve Solution Meaning}{}
+To convert a linear program into standard form, we often introduce new variables:
+\begin{itemize}
+    \item Slack variables to convert \( \leq \) constraints to equalities,
+    \item Surplus variables for \( \geq \) constraints,
+    \item Split unrestricted variables as \( x_j = x_j^+ - x_j^- \),
+    \item Negate variables with \( x_j \leq 0 \).
+\end{itemize}
+
+These transformations may change the number of variables and the way solutions are expressed, but:
+\begin{enumerate}
+    \item Every feasible solution to the transformed problem corresponds to a feasible solution of the original problem.
+    \item Every optimal solution of the transformed problem yields an optimal solution to the original.
+\end{enumerate}
+
+Thus, while the \emph{form} of the solution may look different, the \emph{meaning} and the \emph{value} of the solution are preserved.
+\end{remark}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\linewidth]{figs/simplex-basis-driven-tikz01.png}
+\caption{Correspondence between original and canonical form solutions.}
+\end{figure}
+
+\begin{example}{Transformation Preserves Solution Meaning}\label{exa:canonical-map-example}
+Consider the following linear program:
+\[
+\begin{aligned}
+\min \quad & -x_1 + 2x_2 - 3x_3 \\
+\st \quad
+& x_1 - x_2 + x_3 \geq 2, \\
+& x_2 \leq 0, \\
+& x_3 \text{ unrestricted}.
+\end{aligned}
+\]
+
+\textbf{Step 1: Convert to maximization.}
+
+Multiply the objective by \( -1 \):
+\[
+\max \quad x_1 - 2x_2 + 3x_3.
+\]
+
+\textbf{Step 2: Convert variables to be nonnegative.}
+
+\begin{itemize}
+    \item \( x_2 \leq 0 \) \( \leadsto \) define \( x_2 = -x_2' \), with \( x_2' \geq 0 \).
+    \item \( x_3 \) unrestricted \( \leadsto \) write \( x_3 = x_3^+ - x_3^- \), with \( x_3^+, x_3^- \geq 0 \).
+\end{itemize}
+
+Substitute into the objective and constraint:
+\[
+\max \; x_1 - 2(-x_2') + 3(x_3^+ - x_3^-) = x_1 + 2x_2' + 3x_3^+ - 3x_3^-.
+\]
+
+\[
+\text{Constraint: } x_1 + x_2' + x_3^+ - x_3^- \geq 2.
+\]
+
+\textbf{Step 3: Convert constraint to equality using a surplus variable.}
+
+Introduce surplus variable \( s_1 \geq 0 \):
+\[
+x_1 + x_2' + x_3^+ - x_3^- - s_1 = 2.
+\]
+
+\textbf{Now the problem is in standard form:}
+\[
+\begin{aligned}
+\max \quad & x_1 + 2x_2' + 3x_3^+ - 3x_3^- \\
+\st \quad & x_1 + x_2' + x_3^+ - x_3^- - s_1 = 2, \\
+& x_1, x_2', x_3^+, x_3^-, s_1 \geq 0.
+\end{aligned}
+\]
+\end{example}
+
+\begin{example}{Example Continued}
+\medskip
+
+\textbf{Step 4: Example solution in standard form.}
+
+Consider a solution of the canonical form
+\[
+x_1 = 1, \quad x_2' = 0, \quad x_3^+ = 1, \quad x_3^- = 0, \quad s_1 = 0.
+\]
+
+\textbf{Step 5: Map solution back to original variables.}
+\[
+x_2 = -x_2' = 0, \quad x_3 = x_3^+ - x_3^- = 1.
+\]
+
+So the solution to the original problem is:
+\[
+x_1 = 1, \quad x_2 = 0, \quad x_3 = 1,
+\]
+and the original objective value is:
+\[
+-1(1) + 2(0) - 3(1) = -4.
+\]
+
+\medskip
+
+\textbf{Conclusion:} The transformation allowed us to solve the LP using standard techniques, and we were able to directly interpret the solution in the space of the original variables. The solution meaning is preserved.
+\end{example}
+
+\subsection{Basic Feasible Solutions for Standard Form}
+
+Consider a linear program in standard form:
+\[
+\begin{aligned}
+\max \quad & \mathbf{c}^\top \mathbf{x} \\
+\st \quad & A \mathbf{x} = \mathbf{b}, \\
+& \mathbf{x} \geq 0,
+\end{aligned}
+\]
+where \( A \in \mathbb{R}^{m \times n} \), \( \mathbf{b} \in \mathbb{R}^m \), and \( \mathbf{c} \in \mathbb{R}^n \).
+
+\smallskip
+
+We assume throughout that:
+\begin{itemize}
+    \item The matrix \( A \) has full row rank, i.e., \( \text{rank}(A) = m \),
+    \item The feasible region \( \{ \mathbf{x} \in \mathbb{R}^n : A\mathbf{x} = \mathbf{b}, \; \mathbf{x} \geq 0 \} \) is nonempty.
+\end{itemize}
+
+\smallskip
+
+\begin{definition}{Basic Feasible Solution} A vector \( \mathbf{x} \in \mathbb{R}^n \) is called a \emph{basic feasible solution} (BFS) if:
+\begin{enumerate}
+    \item It satisfies all the constraints of the LP (i.e., it is feasible),
+    \item It has at most \( m \) positive components (i.e., \( n - m \) components are set to zero),
+    \item These positive components correspond to a set of linearly independent columns of \( A \).
+\end{enumerate}
+
+\smallskip
+
+Let \( B \subseteq \{1, \dots, n\} \) be an index set of size \( m \) such that the submatrix \( A_B \) (formed from the columns of \( A \) indexed by \( B \)) is nonsingular. Then the corresponding basic solution is given by:
+\[
+\mathbf{x}_B = A_B^{-1} \mathbf{b}, \qquad \mathbf{x}_N = \mathbf{0},
+\]
+where \( N = \{1, \dots, n\} \setminus B \). If \( \mathbf{x}_B \geq 0 \), the basic solution is feasible, and hence a basic feasible solution.
+\end{definition}
+\smallskip
+
+\noindent Basic feasible solutions play a central role in the simplex method, which moves from one BFS to another while improving the objective function value.
+
+\begin{example}{Basic Feasible Solution}\label{exa:bfs-2d-example}
+Consider the linear program:
+\[
+\begin{aligned}
+\max \quad & 3x_1 + 2x_2 \\
+\st \quad
+& x_1 + x_2 \leq 4, \\
+& 2x_1 + x_2 \leq 5, \\
+& x_1, x_2 \geq 0.
+\end{aligned}
+\]
+
+We first convert the inequalities to equalities by introducing slack variables \( s_1 \) and \( s_2 \):
+\[
+\begin{aligned}
+x_1 + x_2 + s_1 &= 4, \\
+2x_1 + x_2 + s_2 &= 5, \\
+x_1, x_2, s_1, s_2 &\geq 0.
+\end{aligned}
+\]
+
+This system has 4 variables and 2 equality constraints. A basic feasible solution corresponds to choosing any 2 variables (equal to the number of constraints) as basic and solving for them.
+
+Choose \( s_1 \) and \( s_2 \) as the basic variables (so \( x_1 = x_2 = 0 \)). Substituting into the equations:
+\[
+\begin{aligned}
+s_1 &= 4, \\
+s_2 &= 5.
+\end{aligned}
+\]
+
+This gives the solution:
+\[
+(x_1, x_2, s_1, s_2) = (0, 0, 4, 5),
+\]
+which is a basic feasible solution. It is feasible because all variables are nonnegative, and basic because we set two variables (equal to the number of constraints) to nonzero values.
+
+\smallskip
+
+Geometrically, this solution corresponds to the intersection of the two axes (i.e., the origin) in the \( (x_1, x_2) \) plane, a corner point of the feasible region.
+\end{example}
+
+\begin{learningcheckpoint}[label={lc:bfs-nonzero}]
+In a basic feasible solution (BFS) to a linear program in standard form, how many components of the decision vector \(\x\) can be nonzero?
+
+\emph{[Hint: Relate your answer to the number of linearly independent constraints in the system.]}
+\end{learningcheckpoint}
+
+\begin{proposition}{Vertices and BFS}
+Let \( P = \{ \mathbf{x} \in \mathbb{R}^n : A\mathbf{x} = \mathbf{b},\; \mathbf{x} \geq 0 \} \) be the feasible region of a linear program in standard form, where \( A \in \mathbb{R}^{m \times n} \) has full row rank \( m \leq n \). Then every \emph{vertex} of \( P \) is a \emph{basic feasible solution}.
+\end{proposition}
+
+\begin{proof}
+Let \( \mathbf{x}^* \in P \) be a vertex of the feasible region \( P \). By definition, this means that \( \mathbf{x}^* \) cannot be expressed as a strict convex combination of two distinct points in \( P \). We will show that \( \mathbf{x}^* \) is a basic feasible solution.
+
+Let \( I := \{ j \in \{1, \dots, n\} : x^*_j > 0 \} \) be the support of \( \mathbf{x}^* \), and let \( A_I \) denote the submatrix of \( A \) consisting of the columns indexed by \( I \). Since \( A\mathbf{x}^* = \mathbf{b} \), and \( x^*_j = 0 \) for \( j \notin I \), the vector \( \mathbf{x}^*_I \in \mathbb{R}^{|I|} \) satisfies:
+\[
+A_I \mathbf{x}^*_I = \mathbf{b}.
+\]
+
+If the columns of \( A_I \) were linearly dependent, then there would exist a nonzero vector \( \mathbf{d} \in \mathbb{R}^n \) with support in \( I \) such that \( A\mathbf{d} = \mathbf{0} \), and for small enough \( \varepsilon > 0 \), both \( \mathbf{x}^* + \varepsilon \mathbf{d} \) and \( \mathbf{x}^* - \varepsilon \mathbf{d} \) would remain in \( P \), contradicting the fact that \( \mathbf{x}^* \) is a vertex.
+
+Therefore, the columns of \( A_I \) must be linearly independent, and since \( A \) has rank \( m \), it follows that \( |I| \leq m \). We can now construct a basic solution by selecting any set \( B \subseteq \{1, \dots, n\} \) of indices such that:
+\begin{itemize}
+    \item \( B \supseteq I \),
+    \item \( |B| = m \),
+    \item The columns \( A_B \) are linearly independent.
+\end{itemize}
+
+Let \( \mathbf{x}_B = A_B^{-1} \mathbf{b} \), and set \( \mathbf{x}_N = \mathbf{0} \), where \( N = \{1, \dots, n\} \setminus B \). Then \( \mathbf{x} \) is a basic solution. Since \( \mathbf{x}^*_j = 0 \) for \( j \notin I \subseteq B \), and \( \mathbf{x}^*_j > 0 \) for \( j \in I \), it follows that \( \mathbf{x}^* \) coincides with this basic solution and is nonnegative; hence it is a basic feasible solution.
+\end{proof}
+
+\section{Canonical Form}
+For our purposes, it's not quite enough to have a problem in standard form.  We also want to have easy access to a basic feasible solution.  Thus, we like to convert linear programs to \emph{canonical form}.
+
+\begin{definition}{Canonical Form of a Linear Program}\label{def:canonical-form}
+A linear program is in \emph{canonical form} if:
+\begin{itemize}
+    \item it is in standard form:
+    \[
+    \begin{aligned}
+    \max \quad & \mathbf{c}^\top \mathbf{x} \\
+    \st \quad & A \mathbf{x} = \mathbf{b}, \\
+    & \mathbf{x} \geq 0,
+    \end{aligned}
+    \]
+    \item the constraint matrix \( A \) contains the identity matrix \( I_m \) as a submatrix corresponding to some set of basic variables \( B \subseteq \{1, \dots, n\} \),
+    \item and the right-hand side \( \mathbf{b} \geq 0 \).
+\end{itemize}
+In this case, a basic feasible solution is immediately evident: set the basic variables \( \mathbf{x}_B = \mathbf{b} \), and nonbasic variables to zero.
+\end{definition}
+
+\begin{example}{Canonical Form from Slack Variables}\label{exa:canonical-slack}
+Consider the linear program:
+\[
+\begin{aligned}
+\max \quad & 2x_1 + 3x_2 \\
+\st \quad 
+& x_1 + x_2 \leq 4, \\
+& x_1 + 2x_2 \leq 6, \\
+& x_1, x_2 \geq 0.
+\end{aligned}
+\]
+
+We convert the \( \leq \) constraints to equalities by introducing slack variables \( s_1 \) and \( s_2 \):
+\[
+\begin{aligned}
+x_1 + x_2 + s_1 &= 4, \\
+x_1 + 2x_2 + s_2 &= 6, \\
+s_1, s_2 &\geq 0.
+\end{aligned}
+\]
+
+Now the LP is in standard form with 4 variables \( x_1, x_2, s_1, s_2 \). The constraint matrix is:
+\[
+A = \begin{bmatrix}
+1 & 1 & 1 & 0 \\
+1 & 2 & 0 & 1
+\end{bmatrix}
+\]
+
+The columns corresponding to \( s_1 \) and \( s_2 \) form the identity matrix:
+\[
+A_B = \begin{bmatrix}
+1 & 0 \\
+0 & 1
+\end{bmatrix}
+= I_2,
+\quad \text{and} \quad
+\mathbf{b} = \begin{bmatrix} 4 \\ 6 \end{bmatrix} \geq 0.
+\]
+
+Hence, this LP is now in \textbf{canonical form}. The evident basic feasible solution is:
+\[
+x_1 = 0, \quad x_2 = 0, \quad s_1 = 4, \quad s_2 = 6.
+\]
+\end{example}
+
+\begin{center}
+\includegraphics[width=0.85\linewidth]{figs/simplex-basis-driven-tikz02.png}
+\end{center}
+
+\subsection{Augmenting system and Phase 1}
+
+We can summarize these tricks in the following table.
+\begin{table}[h!]
+\centering
+\renewcommand{\arraystretch}{1.3}
+\setlength{\tabcolsep}{4.5pt}
+\small
+\begin{tabular}{l|l|l|l|l}
+\hline
+\textbf{\shortstack[l]{Type of\\Constraint}}
+  & \textbf{\shortstack[l]{Form of\\Constraint}}
+  & \textbf{\shortstack[l]{Constraint in\\Augmented Form}}
+  & \textbf{\shortstack[l]{Constraint\\Boundary Eq.}}
+  & \textbf{\shortstack[l]{Indicating\\Variable(s)}} \\
+\hline
+\textbf{Nonnegativity}
+  & $x_j \ge 0$
+  & $x_j \ge 0$
+  & $x_j = 0$
+  & $x_j$ \\
+\hline
+\textbf{Nonpositivity}
+  & $x_j \le 0$
+  & $x_j = -x_j',\; x_j' \ge 0$
+  & $x_j' = 0$
+  & $x_j'$ \\
+\hline
+\textbf{Unrestricted}
+  & $x_j \in \mathbb{R}$
+  & $x_j = x_j^+ - x_j^-,\; x_j^+, x_j^- \ge 0$
+  & $x_j^+ = x_j^-$
+  & $x_j^+, x_j^-$ \\
+\hline
+\textbf{Functional ($\le$)}
+  & $\textstyle \sum_{j=1}^n a_{ij}\,x_j \le b_i$
+  & $\textstyle \sum_{j=1}^n a_{ij}\,x_j + s_i = b_i$
+  & $\textstyle \sum a_{ij} x_j = b_i$
+  & $s_i$ \\
+\hline
+\textbf{Functional ($=$)}
+  & $\textstyle \sum_{j=1}^n a_{ij}\,x_j = b_i$
+  & $\textstyle \sum_{j=1}^n a_{ij}\,x_j + a_i = b_i$
+  & $\textstyle \sum a_{ij} x_j = b_i$
+  & $a_i$ \\
+\hline
+\textbf{Functional ($\ge$)}
+  & $\textstyle \sum_{j=1}^n a_{ij}\,x_j \ge b_i$
+  & $\textstyle \sum_{j=1}^n a_{ij}\,x_j - s_i + a_i = b_i$
+  & $\textstyle \sum a_{ij} x_j = b_i$
+  & $a_i - s_i$ \\
+\hline
+\end{tabular}
+
+\vspace{5pt}
+\footnotesize{
+\emph{*Indicating variable} = 0 $\Longrightarrow$ constraint boundary is satisfied;
+\emph{indicating variable} $\neq 0$ $\Longrightarrow$ constraint boundary is not satisfied.
+}
+\caption{Summary of constraint and domain transformations used to convert to standard/canonical form.}
+\end{table}
+
+We end this subsection with a motivating result.
+
+\begin{proposition}{Existence of Canonical Form for Feasible LPs}\label{prop:canonical-exists}
+Let \( P \) be a linear program in standard form:
+\[
+\begin{aligned}
+\max \quad & \mathbf{c}^\top \mathbf{x} \\
+\st \quad & A\mathbf{x} = \mathbf{b}, \\
+& \mathbf{x} \geq 0.
+\end{aligned}
+\]
+If \( P \) is feasible (i.e., \( \exists \mathbf{x} \geq 0 \) such that \( A\mathbf{x} = \mathbf{b} \)), then there exists an equivalent linear program in \emph{canonical form}, that is, a reformulation where:
+\begin{itemize}
+    \item \( A \) contains the identity matrix \( I_m \) as a submatrix,
+    \item The corresponding basic variables yield a basic feasible solution with \( \mathbf{b} \geq 0 \),
+    \item The objective function is unchanged in value on feasible solutions.
+\end{itemize}
+\end{proposition}
+
+\begin{proof}[Idea of Proof]
+Start from any feasible solution \( \mathbf{x} \in \mathbb{R}^n \) with \( \mathbf{x} \geq 0 \) and \( A\mathbf{x} = \mathbf{b} \).  
+Use the simplex method (or a pivoting method) to move to a basic feasible solution \( \mathbf{x}^* \).  
+Since \( A \) has full rank over the feasible region, the basis matrix \( A_B \) will be invertible.  
+By reordering variables (i.e., choosing a new basis where \( A_B = I_m \)), we can express the LP in canonical form.
+
+If no feasible solution exists, then Phase I must be used to find one (or certify infeasibility).
+\end{proof}
+
+\section{Pivoting and the Simplex Algorithm}
+\label{sec:pivoting}
+\begin{outcome}
+\begin{itemize}
+\item See an example of the simplex method in action
+\item Formally state the simplex algorithm
+\item See that changing the pivot rule can change the path to the optimal solution
+\end{itemize}
+\end{outcome}
+\begin{resource}
+Video
+\begin{itemize}
+\item \href{https://youtu.be/E72DWgKP_1Y?si=LTPKmJpNy4zRX-7q&t=216}{Youtube! - Simplex Method - Watch 3:40 to 11:40} 
+\end{itemize}
+Interactive Simplex Method
+\begin{itemize}
+\item \href{https://gilp.henryrobbins.com/en/latest/examples/2d/ALL_INTEGER_2D_LP.html}{GILP: Interactive Simplex Pivoting with Dictionary - 2D example}
+\item \href{https://gilp.henryrobbins.com/en/latest/examples/3d/ALL_INTEGER_3D_LP.html}{GILP: Interactive Simplex Pivoting with Dictionary - 3D example}
+\end{itemize}
+Simplex Dictionary Calculator Using Python + Jupyter
+\begin{itemize}
+\item \href{https://colab.research.google.com/drive/1kUWeNOVZByIoSWWUEUEFwwdFhAQvGcsG?usp=sharing}{Colab Version (online)}
+\item \href{https://github.com/open-optimization/open-optimization-or-examples/blob/master/linear-programming/Simplex_Tableaus_From_Basis.ipynb}{Jupyter Notebook for Download}
+\end{itemize}
+\end{resource}
+\begin{tryit}
+\vizlink{simplex-dictionary}{Simplex Pivoter in Dictionary Form}: pivot this chapter's bakery example (or your own LP) step by step, with a practice mode that checks your entering and leaving choices.
+\end{tryit}
+
+The Simplex Algorithm jumps among the vertices of the feasible region searching for an optimal point.
+It does this by moving along the edges of the feasible region in such a way that the objective function is always increased after each move.
+
+\begin{figure}[H]
+\captionsetup[subfigure]{justification=centering}
+\centering
+\begin{subfigure}{.5\textwidth} % 2-d feasible polytope.
+    \centering
+    \altincludegraphics[width=\linewidth]{foundationsAppliedMathematicsLabs/Volume2/Simplex/figures/feasiblePolytope.pdf}{A 2D feasible polytope shaded as a convex polygon with several vertices marked; illustrates that the simplex method walks along edges from vertex to vertex of such a region in search of an optimum.}
+    \caption{The feasible region for a linear program with 2-dimensional constraints.}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth} % 3-d feasible polytope.
+    \begin{center}
+    \includegraphics[width=0.85\linewidth]{figs/simplex-basis-driven-tikz03.png}
+    \end{center}
+    \caption{The feasible region for a linear program with 3-dimensional constraints.}
+\end{subfigure}
+\caption{If an optimal point exists, it is one of the vertices of the polyhedron.
+The simplex algorithm searches for optimal points by moving between adjacent vertices in a direction that increases the value of the objective function until it finds an optimal vertex.}
+\label{fig:polytope}
+\end{figure}
+
+To improve the solution, we:
+\begin{enumerate}
+    \item Select an entering variable with a negative reduced cost.
+    \item Determine the leaving variable using the minimum ratio test.
+    \item Perform a pivot operation to update the basis.
+\end{enumerate}
+
+This process continues until no negative reduced costs remain, indicating an optimal solution.
+
+\subsection{Transforming the LP to Standard Form}
+
+We start with the following linear program:
+\begin{tcolorbox}[colback=orange!5!white, colframe=orange!75!black,    
+    width=0.6\textwidth, % adjust width as desired
+    box align=center, 
+    title=\textbf{Linear Program to Solve}]
+
+\[
+\begin{aligned}
+\max\quad & 2x + 3y \\
+\st\quad & x + y \;\;\;\;\;\;\;\;\;\;\; &&\leq 9, \\
+& 2x + y \;\;\;\;\;\;\;\;\;\; &&\leq 16, \\
+& x + 2y \;\;\;\;\;\;\;\;\; &&\leq 14, \\
+& x, y \geq 0.
+\end{aligned}
+\]
+\end{tcolorbox}
+\begin{center}
+% Feasible region for max 2x+3y s.t. x+y<=9, 2x+y<=16, x+2y<=14, x,y>=0.
+% Vertices (counterclockwise): (0,0), (8,0), (7,2), (4,5), (0,7).
+\includegraphics[width=0.85\linewidth]{figs/simplex-basis-driven-tikz04.png}
+\end{center}
+To convert these inequalities to equalities, we introduce slack variables \(s_1\), \(s_2\), and \(s_3\). Specifically, we rewrite each constraint as follows:
+
+\[
+\begin{aligned}
+x + y + s_1 &= 9, \\
+2x + y + s_2 &= 16, \\
+x + 2y + s_3 &= 14,
+\end{aligned}
+\]
+with the additional nonnegativity constraints \(s_1, s_2, s_3 \ge 0\). 
+
+Hence, the linear program in standard form becomes:
+\begin{tcolorbox}[
+    colback=gray!5!white,
+    colframe=gray!75!black,
+    title=\textbf{Standard Form},
+    width=0.6\textwidth, % adjust width as desired
+    box align=center
+]
+\[
+\begin{aligned}
+\max\quad 
+& 2x + 3y \\
+\st\quad 
+& x + y + s_1 = 9, \\
+& 2x + y + s_2 = 16, \\
+& x + 2y + s_3 = 14, \\
+& x, y, s_1, s_2, s_3 \ge 0.
+\end{aligned}
+\]
+\end{tcolorbox}
+
+\subsection*{Rewriting the System with \(\{s_1,s_2,s_3\}\) as the Basis}
+
+When we say \(\{s_1,s_2,s_3\}\) is the basis, we solve each equation for the corresponding slack variable:
+\[
+\begin{aligned}
+s_1 &= 9 \;-\; x \;-\; y, \\[6pt]
+s_2 &= 16 \;-\; 2x \;-\; y,\\[6pt]
+s_3 &= 14 \;-\; x \;-\; 2y.
+\end{aligned}
+\]
+ Our initial non-basic variables are $x$ and $y$. 
+We will call this representation of the linear program a \emph{dictionary}. 
+\begin{tcolorbox}[colback=blue!5!white, colframe=blue!75!black,     width=0.6\textwidth, % adjust width as desired
+    box align=center, title=\textbf{Initial Dictionary}]
+\[
+\begin{aligned}
+\max\quad 
+& z = 0 + 2x + 3y \\
+\st\quad 
+& s_1 = 9 - x - y, \\
+& s_2 = 16 - 2x - y, \\
+& s_3 = 14 - x - 2y , \\
+& x, y, s_1, s_2, s_3 \ge 0.
+\end{aligned}
+\]
+From here we can read off a \emph{basic solution} that is 
+$$
+\text{Basic variables: } \ \ (s_1, s_2, s_3) = (9, 16,14),$$
+$$
+ \text{Non-basic variables:  } \ \ (x,y) = (0,0)
+$$
+with 
+$$
+\text{Objective value: } z = 0.
+$$
+Since the basic variables are all non-negative $(\geq 0)$, we call this a \emph{basic feasible solution}.
+\end{tcolorbox}
+
+\begin{remark}{Reading the Dictionary}{}
+From the dictionary below, we can read off the corresponding \textbf{basic solution} and the \textbf{objective value}. The basic solution is obtained by:
+\begin{itemize}
+    \item Setting all \textbf{nonbasic variables} (those on the right-hand side of the equations, i.e., \(x\) and \(y\)) equal to zero.
+    \item Reading off the values of the \textbf{basic variables} (\(s_1, s_2, s_3\)) from the right-hand side constants.
+\end{itemize}
+
+The dictionary is said to be \textbf{feasible} if all basic variables have nonnegative values (which is true here). Thus, this corresponds to a basic \emph{feasible} solution:
+\[
+x = 0, \quad y = 0, \quad s_1 = 9, \quad s_2 = 16, \quad s_3 = 14, \quad z = 0.
+\]
+\vspace{1cm}
+
+\[
+\begin{aligned}
+\max \quad 
+& \tikzmark{zstart} \text{\colorbox{green!20!white}{$z = 0$\phantom{$1_1$}}} ~ \text{\colorbox{gray!20!white}{$+ 2\tikzmark{x1}x + 3\tikzmark{y1}y \tikzmark{zend}$}} \\
+\st \quad 
+& \tikzmark{s1start} \text{\colorbox{yellow}{$s_1 = 9$\phantom{1}}} ~ \tikzmark{s1rhs}\text{\colorbox{gray!20!white}{$- x - y$}} \tikzmark{s1end}, \\
+& \tikzmark{s2start} \text{\colorbox{yellow}{$s_2 = 16$}} ~ \tikzmark{s2rhs} \text{\colorbox{gray!20!white}{$- 2x - y$}} \tikzmark{s2end}, \\
+& \tikzmark{s3start} \text{\colorbox{yellow}{$s_3 = 14$}} ~ \tikzmark{s3rhs} \text{\colorbox{gray!20!white}{$- x - 2y$}} \tikzmark{s3end}, \\
+& x, y, s_1, s_2, s_3 \ge 0.
+\end{aligned}
+\]
+
+\includegraphics[width=0.85\linewidth]{figs/simplex-basis-driven-tikz05.png}
+\end{remark}
+
+ 
+
+\subsection{Simplex Assuming Feasible Start}
+
+In this subsection we assume that the slack basis \(\{s_1, s_2, s_3\}\) gives a
+feasible starting dictionary; that is, setting the original variables
+\(x,y\) to zero produces nonnegative values for every slack.  Under this
+assumption, the simplex method proceeds by repeatedly choosing an
+\emph{entering variable} whose objective-row coefficient is positive,
+performing the \emph{ratio test} to decide which basic variable leaves, and
+\emph{pivoting} to obtain a new dictionary.  The remainder of this section
+walks through these three steps on the running example above.
+
+We take as our \emph{initial} basic variables the three slack variables \(s_1, s_2, s_3\).  Geometrically, this corresponds to the point \(\,(x,y)=(0,0)\).  Indeed, if \(x=0\) and \(y=0\), then from the original constraints
+\[
+\begin{aligned}
+  x + y + s_1 &= 9,\\
+  2x + y + s_2 &= 16,\\
+  x + 2y + s_3 &= 14,
+\end{aligned}
+\]
+it follows that
+\[
+s_1 = 9,
+\quad
+s_2 = 16,
+\quad
+s_3 = 14.
+\]
+All are nonnegative, so \(\,(s_1,s_2,s_3)\) is indeed a feasible basis, and \((0,0,9,16,14)\) is the \emph{basic feasible solution} (BFS).
+
+Thus, in ``basic-variable \(=\) constant \(-\) (nonbasic terms)'' form, our system becomes
+\[
+\begin{cases}
+s_1 + x + y \;=\; 9,\\
+s_2 + 2x + y \;=\; 16,\\
+s_3 + x + 2y \;=\; 14.
+\end{cases}
+\]
+Since \(s_1, s_2, s_3\) are taken to be the \emph{basic} variables, the \emph{nonbasic} variables in this setup are \(x\) and \(y\).  Setting \(x=0,\,y=0\) immediately gives the BFS
+\[
+\bigl(x,y,s_1,s_2,s_3\bigr)
+\;=\;
+(0,\,0,\,9,\,16,\,14).
+\]
+
+\subsection*{The Objective Function in this Basis}
+%
+%Our objective is:
+\[
+\max\quad z \;=\; 2x \;+\; 3y.
+\]
+%Notice that in the current basis, the slack variables do not appear in the objective row (their cost coefficients are zero), so no extra terms involving \(s_1\), \(s_2\), or \(s_3\) appear in the \((z)\)-equation.
+%
+%Hence, gathering all equations together in a simple ``dictionary-friendly'' format:
+%
+%\[
+%\begin{aligned}
+%&z = 0 \;+\; 2x \;+\; 3y,
+%&s_1 \;+\; x \;+\; y \quad\;=\quad 9,\\
+%&s_2 \;+\; 2x \;+\; y \quad=\quad 16,\\
+%&s_3 \;+\; x \;+\; 2y \;=\; 14,\\
+%\end{aligned}
+%\]
+%with the nonnegativity constraints
+%\[
+%x,\,y,\,s_1,\,s_2,\,s_3 \;\ge\;0.
+%\]
+%
+\paragraph{Value of \(\,z\) at the BFS \(\,(0,0,9,16,14)\).}
+%At \(\,(x,y)=(0,0)\), we see \(z=2\cdot 0 + 3\cdot 0=0\).  So the initial objective value is
+%\[
+%z=0.
+%\]
+At \((x,y)=(0,0)\), we see \(z=2\cdot 0 + 3\cdot 0=0\), so the initial
+objective value is \(z=0\).  From here, one would normally proceed with the
+\emph{simplex pivots} to drive the objective upwards (since this is a
+maximization problem).  We handle those pivot steps next.
+%
+%We begin from the initial BFS where \(\{s_1,s_2,s_3\}\) are basic and \(\{x,y\}\) are nonbasic.
+%The system at that stage (with \(\,z = 2x + 3y\)) is:
+%
+%\[
+%\begin{cases}
+%s_1 = 9 \;-\; x \;-\; y,\\[4pt]
+%s_2 = 16 \;-\; 2x \;-\; y,\\[4pt]
+%s_3 = 14 \;-\; x \;-\; 2y,\\[4pt]
+%z \;-\; 2x \;-\; 3y = 0.
+%\end{cases}
+%\]
+
+\subsection*{Choosing the Entering Variable}
+\begin{tcolorbox}[colback=algenter!6, colframe=algenter, coltitle=white, fonttitle=\bfseries, sharp corners, title={\ding{43}\ Entering Variable}]
+
+We examine the \emph{objective row} to determine which nonbasic variable should enter the basis. At this point, the objective is:
+\[
+z = 2x + 3y.
+\]
+
+\begin{itemize}
+  \item The nonbasic variables are \(x\) and \(y\).
+  \item Both have \textbf{positive} coefficients, which means that increasing either variable (while staying feasible) will increase the objective value \(z\).
+  \item To decide between them, we apply a \textbf{pivot rule}, a strategy for selecting among eligible entering variables.
+  
+  \textbf{In this example, we use the \emph{Steepest Ascent} rule: we choose the nonbasic variable with the largest positive coefficient in the objective row.}
+  
+  \item Between \(x\) and \(y\), the coefficient of \(y\) is larger (\(3 > 2\)).
+\end{itemize}
+
+Therefore, we choose \(\boxed{y}\) to \textbf{enter} the basis.
+
+\end{tcolorbox}
+
+\subsubsection*{First Iteration. Ratio Test to Determine Who Leaves}
+
+\begin{tcolorbox}[colback=algleave!6, colframe=algleave, coltitle=white, fonttitle=\bfseries, sharp corners, title={\ding{47}\ First Iteration: Ratio Test}]
+
+We hold \(x = 0\) fixed and allow \(y\) to increase from \(0\).  
+Then from the initial dictionary, the basic variables become (substituting \(x = 0\)):
+
+\[
+\begin{aligned}
+s_1 &= 9 - y, \\
+s_2 &= 16 - y, \\
+s_3 &= 14 - 2y.
+\end{aligned}
+\]
+
+To maintain feasibility, we require all basic variables to remain nonnegative:
+\[
+\begin{aligned}
+s_1 \ge 0 &\;\implies\; 9 - y \ge 0 \;\implies\; y \le 9, \\
+s_2 \ge 0 &\;\implies\; 16 - y \ge 0 \;\implies\; y \le 16, \\
+s_3 \ge 0 &\;\implies\; 14 - 2y \ge 0 \;\implies\; y \le 14/2 = 7.
+\end{aligned}
+\]
+
+The \emph{tightest constraint} is \(y \le 7\), which means \(s_3\) reaches zero first as \(y\) increases.  
+Therefore, \(\boxed{s_3}\) will \textbf{leave the basis} in this pivot.
+
+\end{tcolorbox}
+
+This is called the \emph{Ratio Test} because we can compute these numbers as 
+$$
+9 - y = 0 \quad \Rightarrow y = 9 / 1 = 9
+$$
+
+$$
+16 - y = 0 \quad \Rightarrow y = 16 / 1 = 16
+$$
+
+$$
+14 - 2y = 0 \quad \Rightarrow y = 14 / 2 = 7
+$$
+
+If a coefficient on $y$ was positive, we would ignore that constraint as increasing $y$ would never violate the corresponding inequality.
+
+The ratio test can also be thought of as changing the solution via a vector.  In particular, we are at the basic feasible solution $(s_1, s_2, s_3, x,y) = (9,16,14,0,0)$.  Now, as we increase $y$, we change the solution as 
+
+\begin{align*}
+ (s_1, s_2, s_3, x,y) &= (9,16,14,0,0) + \Delta y \cdot (-1, -1, -2, 0,1)\\
+ &= (9,16,14,0,0) + 7\cdot (-1, -1, -2, 0,1)  = (2,9,0,0,7).
+\end{align*}
+We will see these numbers appear as we pivot the dictionary to the new basis.
+
+\subsection*{Pivoting on the \(s_3\)-Equation Solved for \(y\)}
+
+Originally, \(s_3 + x + 2y = 14\).  Solve for \(y\):
+\[
+y \;=\; 7 \;-\; \tfrac{x}{2} \;-\; \tfrac{s_3}{2}.
+\]
+Substitute into the other rows (and the objective row), isolating each \emph{basic} variable on the left and all others on the right:
+\[
+\begin{aligned}
+\max\quad 
+& z = 0+ 2x + 3y \quad && = 21 + \frac{1}{2}x - \frac{3}{2}s_3 \\
+\st\quad 
+& s_1 = 9 - x - y \quad && = 2 - \frac{1}{2}x + \frac{1}{2}s_3, \\
+& s_2 = 16 - 2x - y \quad &&= 9 - \frac{3}{2}x + \frac{1}{2}s_3, \\
+& s_3 = 14 - x - 2y \quad \Rightarrow y &&= 7 - \frac{1}{2}x - \frac{1}{2}s_3, \\
+& x, y, s_1, s_2, s_3 \ge 0.
+\end{aligned}
+\]
+
+\noindent
+Hence the new \emph{basic variables} are \(\{z,\,y,\,s_1,\,s_2\}\) if we were to place \(z\) in the dictionary as well.  Typically, in a standard simplex dictionary, \(z\) is displayed in its own row, but it is not counted as a “basic variable” in the same sense as the constraints.  The nonbasic variables are now \(\{x,\,s_3\}\).
+
+\subsection*{Updated Dictionary and Basic Feasible Solution}
+
+\begin{tcolorbox}[colback=algpivot!6, colframe=algpivot, coltitle=white, fonttitle=\bfseries, sharp corners, title={\ding{114}\ Pivot: Second Dictionary}]
+
+\[
+\begin{aligned}
+\max\quad 
+& z =  21 + \frac{1}{2}x - \frac{3}{2}s_3 \\
+\st\quad 
+& s_1  = 2 - \frac{1}{2}x + \frac{1}{2}s_3, \\
+& s_2  = 9 - \frac{3}{2}x + \frac{1}{2}s_3, \\
+& y = 7 - \frac{1}{2}x - \frac{1}{2}s_3, \\
+& x, y, s_1, s_2, s_3 \ge 0.
+\end{aligned}
+\]
+
+\begin{itemize}
+  \item Set \(\,x=0\) and \(\,s_3=0\) (the new nonbasic variables). 
+  \item Then \(\,(y,s_1,s_2)\) become:
+  \[
+  y = 7, 
+  \quad
+  s_1 = 2,
+  \quad
+  s_2 = 9.
+  \]
+  \item Substitute in the objective row:
+  \[
+  z = 21 + \tfrac12\cdot 0 - \tfrac32\cdot 0 \;=\; 21.
+  \]
+\end{itemize}
+Thus the new BFS after the pivot is 
+\(\bigl(x,y,s_1,s_2,s_3\bigr) = \bigl(0,7,2,9,0\bigr)\) 
+with \(z=21\).
+\end{tcolorbox}
+
+\subsection*{Second Iteration}
+Since the objective function still has variables with positive coefficients in it, we will seek to pivot again to increase the objective.
+
+\subsubsection*{Second Iteration. Identify the Entering Variable}
+\begin{tcolorbox}[colback=algenter!6, colframe=algenter, coltitle=white, fonttitle=\bfseries, sharp corners, title={\ding{43}\ Second Iteration: Entering Variable}]
+We look at the coefficients of the nonbasic variables in the \emph{objective} row,
+\[
+z = 21 \;+\; \tfrac12\,x \;-\;\tfrac32\,s_3.
+\]
+\begin{itemize}
+  \item \(x\) has a \(\tfrac12\) coefficient (which is \textbf{positive}), 
+  \item \(s_3\) has a \(-\tfrac32\) coefficient (negative).
+\end{itemize}
+Since this is a \emph{maximization} problem, increasing a variable with a \textbf{negative} objective coefficient would \emph{decrease} \(z\).  
+Hence we choose \(x\), the only nonbasic variable with a positive coefficient, to \emph{enter} the basis.
+\end{tcolorbox}
+\subsubsection*{Second Iteration. Ratio Test to Determine Who Leaves}
+
+\begin{tcolorbox}[colback=algleave!6, colframe=algleave, coltitle=white, fonttitle=\bfseries, sharp corners, title={\ding{47}\ Second Iteration: Ratio Test}]
+
+We hold \(s_3=0\) for the moment and let \(x\) increase from \(0\).  
+Then from the above system, the three basic variables become (substituting \(s_3=0\)):
+
+\[
+\begin{aligned}
+y   &= 7 - \tfrac12\,x,\\
+s_1 &= 2 - \tfrac12\,x,\\
+s_2 &= 9 - \tfrac32\,x.
+\end{aligned}
+\]
+We require these to remain nonnegative:
+\[
+\begin{aligned}
+y \ge 0 \;&\implies\; 7 - \tfrac12\,x \;\ge\; 0 \;\implies\; x \;\le\; 7/\tfrac{1}{2} = 14,\\
+s_1 \ge 0 \;&\implies\; 2 - \tfrac12\,x \;\ge\; 0 \;\implies\; x \;\le\; 2/\tfrac{1}{2} = 4,\\
+s_2 \ge 0 \;&\implies\; 9 - \tfrac32\,x \;\ge\; 0 \;\implies\; x \;\le\; 9/\tfrac{3}{2} = 6.
+\end{aligned}
+\]
+The \emph{smallest} upper bound is \(x \le 4\), which means \(\,s_1\) will reach zero first when \(x=4\).  
+Hence \(\,s_1\) must \emph{leave} the basis.
+\end{tcolorbox}
+\subsubsection*{The Pivot: Solve the \(s_1\) Equation for \(x\)}
+
+From
+\[
+s_1 = 2 \;-\;\tfrac12\,x \;+\;\tfrac12\,s_3,
+\]
+we isolate \(x\):
+\[
+s_1 - 2 - \tfrac12\,s_3 = -\,\tfrac12\,x
+\quad\Longrightarrow\quad
+x = -2\Bigl(s_1 - 2 - \tfrac12\,s_3\Bigr)
+\;=\;
+4 \;+\; s_3 \;-\; 2\,s_1.
+\]
+Rewriting,
+\[
+x \;+\; 2\,s_1 \;-\; s_3 
+\;=\;
+4.
+\]
+This \emph{becomes the new pivot row}, with \(x\) on the left side as a basic variable.
+
+\subsubsection*{Eliminate \(x\) from the Other Rows}
+
+Next, we substitute 
+\(\;x = 4 + s_3 - 2\,s_1\;\)
+into the rows for \(\{y,\,s_2,\,z\}\) to remove \(x\).  
+(In each row, replace \(x\) by \(\,4 + s_3 - 2\,s_1\).)
+
+\paragraph{Updating \(y\):}
+
+Originally 
+\[
+y = 7 - \tfrac12\,x - \tfrac12\,s_3.
+\]
+Substitute \(x\):
+\[
+y
+= 7 
+- \tfrac12\bigl(4 + s_3 - 2s_1\bigr)
+- \tfrac12\,s_3
+=
+7 - 2 - \tfrac12\,s_3 + s_1 - \tfrac12\,s_3
+=
+5 + s_1 - s_3.
+\]
+%Thus
+%\[
+%y
+%\;-\;
+%s_1
+%\;+\;
+%s_3
+%\;=\;
+%5.
+%\]
+
+\paragraph{Updating \(s_2\):}
+
+Originally
+\[
+s_2 = 9 - \tfrac32\,x + \tfrac12\,s_3.
+\]
+Substitute \(x\):
+\[
+s_2
+= 9 
+- \tfrac32\bigl(4 + s_3 - 2s_1\bigr)
++ \tfrac12\,s_3
+= 
+9 - 6 - \tfrac32\,s_3 + 3\,s_1 + \tfrac12\,s_3
+=
+3 + 3\,s_1 - s_3.
+\]
+%Hence
+%\[
+%s_2
+%\;-\;
+%3\,s_1
+%\;+\;
+%s_3
+%\;=\;
+%3.
+%\]
+
+\paragraph{Updating the Objective Row \(\,z\):}
+
+Originally
+\[
+z = 21 + \tfrac12\,x - \tfrac32\,s_3.
+\]
+Substitute \(x\):
+\[
+z
+= 
+21 
++ \tfrac12\bigl(4 + s_3 - 2s_1\bigr)
+- \tfrac32\,s_3
+=
+21 + 2 + \tfrac12\,s_3 - s_1 - \tfrac32\,s_3
+=
+23 - s_1 - s_3.
+\]
+%Or
+%\[
+%z
+%\;+\;
+%s_1
+%\;+\;
+%s_3
+%\;=\;
+%23.
+%\]
+
+\subsection*{The Third Dictionary}
+
+\begin{tcolorbox}[colback=algopt!6, colframe=algopt, coltitle=white, fonttitle=\bfseries, sharp corners, title={\ding{52}\ Optimal: Final Dictionary}]
+
+After the pivot, the basic variables are now
+\(\,\{\,x,\,y,\,s_2\}\), 
+and the nonbasic variables are 
+\(\,\{\,s_1,\,s_3\}\).  
+Our updated equations, in a clean dictionary form (basic on the left) are:
+
+\[
+\begin{aligned}
+\max\quad 
+& z = 23 - s_1 - s_3 \\
+\st\quad 
+& x = 4 - 2s_1 + s_3, \\
+& y = 5 + s_1 - s_3, \\
+& s_2 = 3 + 3s_1 - s_3, \\
+& x, y, s_1, s_2, s_3 \geq 0.
+\end{aligned}
+\]
+
+\begin{itemize}
+  \item Setting the new nonbasic variables \(\,s_1=0\) and \(\,s_3=0\) gives
+  \[
+  x=4, \quad y=5,\quad s_2=3,\quad z=23.
+  \]
+  \item Thus our new BFS is 
+  \(\bigl(x,y,s_1,s_2,s_3\bigr)=\bigl(4,\,5,\,0,\,3,\,0\bigr)\) 
+  with objective value \(z=23\).
+\end{itemize}
+\end{tcolorbox}
+
+\begin{remark}{Reading the Final Dictionary}{}
+From the final dictionary below, we read the solution using the same process:
+\begin{itemize}
+    \item Set all \textbf{nonbasic variables} equal to zero. Here, the nonbasic variables are \(s_1\) and \(s_3\).
+    \item Evaluate the values of the basic variables \(x, y, s_2\) and the objective \(z\).
+\end{itemize}
+
+This yields the final basic feasible solution:
+\[
+s_1 = 0, \quad s_3 = 0, \quad x = 4, \quad y = 5, \quad s_2 = 3, \quad z = 23.
+\]
+
+\vspace{1cm}
+
+\[
+\begin{aligned}
+\max \quad 
+& \tikzmark{zstart2} \text{\colorbox{green!20!white}{$z = 23$}} ~ \text{\colorbox{gray!20!white}{$- s_1 - s_3$}} \tikzmark{zend2} \\
+\st \quad 
+& \tikzmark{x2} \text{\colorbox{yellow}{$x = 4$}} ~ \text{\colorbox{gray!20!white}{$- 2s_1 + s_3$}}, \\
+& \tikzmark{y2} \text{\colorbox{yellow}{$y = 5$}} ~ \text{\colorbox{gray!20!white}{$+ s_1 - s_3$}}, \\
+& \tikzmark{s22} \text{\colorbox{yellow}{$s_2 = 3$}} ~ \text{\colorbox{gray!20!white}{$+ 3s_1 - s_3$}}, \\
+& x, y, s_1, s_2, s_3 \ge 0.
+\end{aligned}
+\]
+
+\includegraphics[width=0.85\linewidth]{figs/simplex-basis-driven-tikz06.png}
+
+\vspace{1em}
+
+\textbf{Why is this optimal?}  
+This is a maximization problem, and the final dictionary expresses the objective as:
+\[
+z = 23 - s_1 - s_3.
+\]
+Both \(s_1\) and \(s_3\) are nonbasic and currently zero. Since increasing either would \emph{decrease} the value of \(z\), we cannot improve the objective by pivoting.  
+\\[0.5em]
+\textbf{Hence, this solution is optimal.}
+\end{remark}
+
+\subsection{Summarizing the steps taken}
+We now summarize the whole process:
+
+\begin{enumerate}
+    \item \textbf{Original LP}  
+    \begin{tcolorbox}[colback=orange!5!white, colframe=orange!75!black,    
+    width=0.6\textwidth, % adjust width as desired
+    box align=center, 
+    title=\textbf{Linear Program to Solve}]
+    \[
+    \begin{aligned}
+    \max \quad & 2x + 3y \\
+    \st \quad 
+    & x + y \leq 9, \\
+    & 2x + y \leq 16, \\
+    & x + 2y \leq 14, \\
+    & x, y \geq 0.
+    \end{aligned}
+    \]
+    \end{tcolorbox}
+
+    \item \textbf{Standard Form with Feasible Basis $\{s_1, s_2, s_3\}$}  
+    \begin{tcolorbox}[colback=gray!5!white, colframe=gray!75!black,    
+    width=0.6\textwidth, % adjust width as desired
+    box align=center, 
+    title=\textbf{Standard Form}]
+    \[
+    \begin{aligned}
+    \max \quad & 2x + 3y \\
+    \st \quad 
+    & x + y + s_1 = 9, \\
+    & 2x + y + s_2 = 16, \\
+    & x + 2y + s_3 = 14, \\
+    & x, y, s_1, s_2, s_3 \geq 0.
+    \end{aligned}
+    \]
+    \end{tcolorbox}
+
+    \item \textbf{Initial Dictionary with Basis \( (s_1, s_2, s_3) \)}
+    \begin{tcolorbox}[colback=blue!5!white, colframe=blue!75!black,    
+    width=0.6\textwidth, % adjust width as desired
+    box align=center, 
+    title=\textbf{Initial Dictionary}]
+    \[
+    \begin{aligned}
+    \max \quad & z = 0 + 2x + 3y \\
+    \st \quad 
+    & s_1 = 9 - x - y, \\
+    & s_2 = 16 - 2x - y, \\
+    & s_3 = 14 - x - 2y.\\
+    & x,y,s_1, s_2, s_3 \geq 0
+    \end{aligned}
+    \]
+    \end{tcolorbox}
+    Basic Feasible Solution: \( (s_1, s_2, s_3) = (9,16,14), (x,y) = (0,0) \)  
+    Objective Value: \( z = 0 \).\\  
+    Since the objective row has a positive coefficient, it is not optimal.
+    
+    \item \textbf{First Iteration:}
+\begin{enumerate}
+    \item \textbf{Ratio Test:} \( y \) enters, \( s_3 \) leaves.
+
+    \item \textbf{Dictionary after Pivoting \( y \) in, \( s_3 \) out}  
+    \begin{tcolorbox}[colback=blue!5!white, colframe=blue!75!black,    
+    width=0.6\textwidth, % adjust width as desired
+    box align=center, 
+    title=\textbf{Second Dictionary}]
+    \[
+    \begin{aligned}
+    \max \quad & z = 21 + \frac{1}{2}x - \frac{3}{2}s_3 \\
+    \st \quad 
+    & s_1 = 2 - \frac{1}{2}x + \frac{1}{2}s_3, \\
+    & s_2 = 9 - \frac{3}{2}x + \frac{1}{2}s_3, \\
+    & y = 7 - \frac{1}{2}x - \frac{1}{2}s_3.
+    \end{aligned}
+    \]
+    \end{tcolorbox}
+    Basic Feasible Solution: \( (s_1, s_2, y) = (2,9,7), (x,s_3) = (0,0) \)  
+    Objective Value: \( z = 21 \).\\ 
+    Since the objective row has a positive coefficient, it is not optimal.  
+    \end{enumerate}
+    \item \textbf{Second Iteration}
+    \begin{enumerate}
+    \item \textbf{Ratio Test:} \( x \) enters, \( s_1 \) leaves.
+
+    \item \textbf{Final Dictionary (Optimal) after pivoting $x$ in, $s_1$ out.} 
+    \begin{tcolorbox}[colback=green!5!white, colframe=green!75!black,    
+    width=0.6\textwidth, % adjust width as desired
+    box align=center, 
+    title=\textbf{Final Dictionary}] 
+    \[
+    \begin{aligned}
+    \max \quad & z = 23 - s_1 - s_3 \\
+    \st \quad
+    & x = 4 - 2s_1 + s_3, \\
+    & y = 5 + s_1 - s_3, \\
+    & s_2 = 3 + 3s_1 - s_3.
+    \end{aligned}
+    \]
+    \end{tcolorbox}
+    Basic Feasible Solution: \( (x,y,s_2) = (4,5,3), (s_1,s_3) = (0,0) \)  
+    Objective Value: \( z = 23 \).\\ 
+    Since all coefficients in the objective row are non-positive, this is the optimal solution.
+    \end{enumerate}
+\end{enumerate}
+
+\begin{resource}
+You  can review these calculations using the code available here in Jupyter Notebook Format.
+\begin{itemize}
+\item \href{https://colab.research.google.com/drive/1kUWeNOVZByIoSWWUEUEFwwdFhAQvGcsG?usp=sharing}{Colab Version (online)}
+\item \href{https://github.com/open-optimization/open-optimization-or-examples/blob/master/linear-programming/Simplex_Tableaus_From_Basis.ipynb}{Jupyter Notebook for Download}
+\end{itemize}
+\end{resource}
+
+A useful way to internalize what just happened: \emph{every vertex of the feasible region has its own dictionary}, the same linear program rewritten from that vertex's point of view.  Figure~\ref{fig:bfs-perspectives} shows all five dictionaries for our example.  The simplex method simply walks from dictionary to dictionary along edges of the region, and the signs of the objective-row coefficients at each vertex tell it where to go next.  At $(4,5)$ both coefficients are negative, so the walk stops: no neighboring vertex is better.
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=0.85\linewidth]{figs/simplex-basis-driven-tikz07.png}
+\end{center}
+\caption{The same linear program seen from every vertex: each basic feasible solution has its own dictionary, whose objective row reveals whether a better neighbor exists.  The orange arrows trace the pivots taken in the text, $(0,0) \to (0,7) \to (4,5)$; at $(4,5)$ all objective coefficients are negative, certifying optimality.}
+\label{fig:bfs-perspectives}
+\end{figure}
+
+\section{The Simplex Algorithm!}
+\label{sec:simplex-algorithm}
+Here we formally describe the simplex algorithm.
+\begin{algocard}{Algorithm: Simplex Method}
+\textbf{Input.} A linear program in standard form with a feasible starting basis (typically the slack variables).\\
+\textbf{Initialization.} Write the system in dictionary form (basic variables on the left, nonbasic variables on the right) and substitute the basic variables into the objective function.
+\algostep{algenter}{\ding{43}}{Choose the entering variable}{Select a nonbasic variable with a positive coefficient in the objective row. (If no coefficient is positive, the current solution is already optimal.)}
+\algostep{algleave}{\ding{47}}{Determine the leaving variable}{For each basic variable with a positive entering-variable coefficient, compute the ratio $\dfrac{\text{current value of basic variable}}{\text{coefficient of entering variable}}$. The basic variable with the \emph{smallest} ratio reaches zero first and leaves the basis.}
+\algostep{algpivot}{\ding{114}}{Pivot}{Rewrite the leaving variable's equation so it is expressed in terms of the entering variable, then substitute this expression into all other equations and the objective function.}
+\algostep{algopt}{\ding{52}}{Repeat until optimal}{Repeat the three steps above until every objective-row coefficient of a nonbasic variable is non-positive. The current basic solution is then \textbf{optimal}.}
+\end{algocard}
+
+We dive a little deeper into what the ratio test is here:
+\begin{itemize}
+    \item \textbf{The Ratio Test (Formal Definition)}  
+
+    The Ratio Test is used to determine which basic variable should leave the basis when a nonbasic variable enters. It ensures that we maintain feasibility by preventing any basic variables from becoming negative.
+
+    Given a \emph{pivot column} corresponding to the entering variable (say, \( x_e \)), the Ratio Test is defined as follows:
+
+    \begin{itemize}
+        \item Identify all constraints of the form:
+        \[
+        s_i = b_i - a_{i,e} x_e
+        \]
+        where \( b_i \) is the right-hand side value, and \( a_{i,e} \) is the coefficient of the entering variable in row \( i \).
+        \item Compute the ratio for all constraints where \( a_{i,e} > 0 \):
+        \[
+        \frac{b_i}{a_{i,e}}
+        \]
+        \item The \emph{leaving variable} corresponds to the row that gives the \emph{smallest positive ratio}. This ensures that the increase in \( x_e \) does not cause any basic variable to become negative.
+    \end{itemize}
+
+    \textbf{Special Cases:}
+    \begin{itemize}
+        \item If all \( a_{i,e} \leq 0 \), then the problem is \emph{unbounded}, meaning the objective function can be increased indefinitely.
+        \item If multiple rows attain the same minimum ratio, a \emph{tie-breaking rule} is needed (e.g., Bland’s Rule to avoid cycling).
+    \end{itemize}
+
+    The Ratio Test guarantees that we always select the proper constraint to maintain feasibility while pivoting towards an improved solution.
+\end{itemize}
+
+\begin{learningcheckpoint}[label={lc:ratio-test}]
+When applying the simplex method, why might choosing the wrong leaving variable during the ratio test lead you to an \emph{infeasible} basic solution?
+
+\emph{Hint: Think about what the ratio test is meant to guarantee for the nonnegativity of variables after the pivot.}
+\end{learningcheckpoint}
+
+We will see another example of this, and then modify it to handle LPs that don't have a simple initial basic feasible solution.
+
+\subsection{Simplex Algorithm Execution}
+
+Here is the same computation from Section~\ref{sec:pivoting} again, this time in compact form, so you can see the whole run at a glance now that each step has a name. Each computation is colour-coded to match the algorithm card above: {\color{algenter}\textbf{entering}} (green), {\color{algleave}\textbf{ratio test / leaving}} (orange), {\color{algpivot}\textbf{pivot}} (blue), and {\color{algopt}\textbf{optimal}} (purple).
+
+\noindent\textbf{Initial dictionary} (basis \(\{s_1,s_2,s_3\}\); nonbasic \(x=y=0\)):
+\[
+\begin{aligned}
+\max\quad & z = 2x + 3y \\
+\st\quad  & s_1 = 9 - x - y \\
+          & s_2 = 16 - 2x - y \\
+          & s_3 = 14 - x - 2y
+\end{aligned}
+\]
+
+\noindent\textbf{Iteration 1.}
+\begin{steppanel}{algenter}
+\slab{algenter}{43}{Entering} Both \(x\) and \(y\) have positive coefficients in \(z = 2x + 3y\). By steepest ascent we increase the one with the larger coefficient, \(y\) (coefficient \(3\)), so \(y\) \textbf{enters}.
+\end{steppanel}
+\begin{steppanel}{algleave}
+\slab{algleave}{47}{Ratio test} As \(y\) increases (with \(x=0\)), each basic variable stays nonnegative only up to its ratio:
+\[
+\begin{aligned}
+s_1 = 9 - y   &\ge 0 \iff y \le 9/1  = 9,\\
+s_2 = 16 - y  &\ge 0 \iff y \le 16/1 = 16,\\
+s_3 = 14 - 2y &\ge 0 \iff y \le 14/2 = 7 \quad(\text{smallest}).
+\end{aligned}
+\]
+The smallest ratio is \(7\), attained by \(s_3\), so \(s_3\) \textbf{leaves}.
+\end{steppanel}
+\begin{steppanel}{algpivot}
+\slab{algpivot}{114}{Pivot} Solve the \(s_3\) row for \(y\): \(y = 7 - 0.5x - 0.5s_3\). Substituting into the objective and the other rows gives
+\[
+\begin{aligned}
+\max\quad & z = 21 + 0.5x - 1.5s_3 \\
+\st\quad  & s_1 = 2 - 0.5x + 0.5s_3 \\
+          & s_2 = 9 - 1.5x + 0.5s_3 \\
+          & y = 7 - 0.5x - 0.5s_3
+\end{aligned}
+\]
+\end{steppanel}
+
+\noindent\textbf{Iteration 2.}
+\begin{steppanel}{algenter}
+\slab{algenter}{43}{Entering} Only \(x\) has a positive objective coefficient (\(0.5\)), so \(x\) \textbf{enters}.
+\end{steppanel}
+\begin{steppanel}{algleave}
+\slab{algleave}{47}{Ratio test} As \(x\) increases (with \(s_3=0\)):
+\[
+\begin{aligned}
+s_1 = 2 - 0.5x &\ge 0 \iff x \le 2/0.5 = 4 \quad(\text{smallest}),\\
+s_2 = 9 - 1.5x &\ge 0 \iff x \le 9/1.5 = 6,\\
+y   = 7 - 0.5x &\ge 0 \iff x \le 7/0.5 = 14.
+\end{aligned}
+\]
+The smallest ratio is \(4\), attained by \(s_1\), so \(s_1\) \textbf{leaves}.
+\end{steppanel}
+\begin{steppanel}{algpivot}
+\slab{algpivot}{114}{Pivot} Solve the \(s_1\) row for \(x\): \(x = 4 - 2s_1 + s_3\). Substituting gives
+\[
+\begin{aligned}
+\max\quad & z = 23 - s_1 - s_3 \\
+\st\quad  & x = 4 - 2s_1 + s_3 \\
+          & s_2 = 3 + 3s_1 - s_3 \\
+          & y = 5 + s_1 - s_3
+\end{aligned}
+\]
+\end{steppanel}
+\begin{steppanel}{algopt}
+\slab{algopt}{52}{Optimal} Every nonbasic objective coefficient is \(\le 0\), so no further improvement is possible: \(x=4,\ y=5,\ z=23\).
+\end{steppanel}
+%
+%
+
+In the example worked out in the prior section, we used the \emph{steepest ascent} pivot rule, which means that we always used the variable in the objective with the largest positive coefficient to enter the basis.  However, we could make other choices instead.  The choice of how to pivot is left a little ambiguous in the simplex method and many different pivot rules have been proposed.
+See Exercise~\ref{ex:alternative-pivot} to see how the simplex method plays out when pivoting in a different direction first.  
+
+In fact, in the figure below, we show the simplex dictionary at every single vertex.  You can see that from any vertex, you can pivot along an edge of the feasible region to another vertex.
+\begin{center}
+% Feasible region for max 2x+3y s.t. x+y<=9, 2x+y<=16, x+2y<=14, x,y>=0,
+% with each vertex annotated by its basis (basic / nonbasic variables) and
+% objective value, and arrows showing pivot transitions along the edges.
+\includegraphics[width=0.85\linewidth]{figs/simplex-basis-driven-tikz08.png}
+\end{center}
+
+\begin{remark}{Reduced Costs}{def:reduced-cost}
+The coefficients of the nonbasic variables in the objective row are their \emph{reduced costs}:
+\[
+\text{Reduced cost of } s_1 = -1, \quad \text{Reduced cost of } s_3 = -1.
+\]
+
+\[
+\begin{aligned}
+\max \quad 
+& z = 23~ \text{\colorbox{purple!20!white}{$- s_1 - s_3$}} \tikzmark{zend2} \\
+\st \quad 
+& \tikzmark{x2} x = 4 ~ - 2s_1 + s_3, \\
+& \tikzmark{y2} y = 5 ~ + s_1 - s_3, \\
+& \tikzmark{s22} s_2 = 3~ + 3s_1 - s_3, \\
+& x, y, s_1, s_2, s_3 \ge 0.
+\end{aligned}
+\]
+
+% TikZ overlay arrows (paths commented out — uncomment when ready)
+%% [overlay annotation omitted in EPUB]
+
+\bigskip
+
+\begin{itemize}
+    \item These values indicate how much the objective \( z \) would change per unit increase in the corresponding variable, assuming all others are held fixed and feasibility is maintained.
+    \item Because this is a maximization problem, a \emph{negative} reduced cost implies that increasing the variable would \emph{decrease} the objective.
+\end{itemize}
+
+\medskip
+
+\noindent\textbf{Optimality Condition:}  
+A basic feasible solution is optimal if and only if all reduced costs of nonbasic variables satisfy:
+\[
+\text{(for maximization):} \quad \text{reduced cost} \le 0.
+\]
+
+\medskip
+
+In this dictionary:
+\[
+\text{Reduced costs of } s_1, s_3 < 0 \quad \Rightarrow \quad \text{no nonbasic variable can enter to improve } z.
+\]
+
+\textbf{Therefore, the current solution is optimal.}
+\end{remark}
+
+\begin{definition}{Reduced Costs in an Arbitrary Dictionary}\label{def:reduced-cost-general}
+
+Let a linear program in standard form be given by
+\[
+\max \quad \mathbf{c}^\top \mathbf{x} \quad \st \quad A\mathbf{x} = \mathbf{b}, \quad \mathbf{x} \geq 0,
+\]
+and let \( B \subseteq \{1, \dots, n\} \) be a basis of linearly independent columns of \( A \). The corresponding \emph{dictionary} expresses the basic and objective variables in terms of the nonbasic variables \( N = \{1, \dots, n\} \setminus B \):
+
+\[
+\begin{aligned}
+z &= z_0 + \sum_{j \in N} \bar{c}_j x_j \\
+x_i &= \bar{b}_i + \sum_{j \in N} \bar{a}_{ij} x_j \quad \text{for } i \in B
+\end{aligned}
+\]
+
+Here:
+\begin{itemize}
+    \item \( x_i \) are the basic variables,
+    \item \( x_j \) for \( j \in N \) are the nonbasic variables,
+    \item \( z_0 \) is the current value of the objective,
+    \item \( \bar{c}_j \) is the \emph{reduced cost} of variable \( x_j \), and
+    \item \( \bar{b}_i \) is the value of basic variable \( x_i \) when \( x_j = 0 \) for all \( j \in N \).
+\end{itemize}
+\end{definition}
+
+\section{No Feasible Initial Basis and the Big-M Method}
+\label{sec:big-m-dictionary}
+
+\begin{tryit}
+\vizlink{two-phase-simplex}{Two-Phase Simplex}: watch artificial variables enter, Phase 1 drive them out, and the handoff to Phase 2.
+\end{tryit}
+
+
+
+\begin{outcome}
+\begin{itemize}
+\item Address case where initial basis is infeasible
+\item Modify the simplex algorithm using the Big-M method to find a feasible starting basis
+\begin{itemize}
+\item Introduce artificial variables to rows that violate initial feasibility
+\item Add large penalty (Big-M) to the objective on these artificial variables
+\item Run Simplex and pivot until can remove artificial variables
+\item Drop the auxiliary variables and proceed with the simplex algorithm
+\end{itemize}
+\end{itemize}
+\end{outcome}
+
+
+Every worked example so far started from the origin $x=y=0$, where the slack variables handed us an obvious basic feasible solution. That convenience disappears the moment the problem has a ``$\ge$'' constraint: at the origin the corresponding slack is negative, so the natural starting dictionary is \emph{infeasible} and there is no basis from which to launch the simplex method. This section shows how to manufacture a feasible starting basis with an \emph{artificial variable} penalized by a large constant $M$ (the \emph{Big-M method}), and how the same device reveals when a problem has no feasible solution at all.
+
+Consider
+\[
+\begin{aligned}
+\max\quad & 2x + 3y \\
+\st\quad & 2x + y \geq 5, \\
+& 2x + y \leq 16, \\
+& x + 2y \leq 14, \\
+& x, y \geq 0.
+\end{aligned}
+\]
+The first constraint points the wrong way for an easy start, so the origin is infeasible and we cannot simply read off a starting basis.
+
+\noindent Geometrically, the origin lies outside the feasible region, so it cannot serve as a starting vertex:
+\begin{center}
+% Feasible region for the Big-M example: max 2x+3y subject to
+% 2x+y>=5, 2x+y<=16, x+2y<=14, x,y>=0.
+% Vertices (counterclockwise): (5/2,0), (8,0), (6,4), (0,7), (0,5).
+% Notice the origin lies outside the shaded region: 2(0)+0 = 0 < 5.
+\includegraphics[width=0.85\linewidth]{figs/simplex-basis-driven-tikz10.png}
+\end{center}
+
+
+\begin{steppanel}{algslate}
+\cstep{1}{Put every constraint in ``$\le$'' form} Multiplying the $\ge$ constraint by $-1$ turns it into a $\le$ constraint:
+\[
+\begin{aligned}
+\max\quad & 2x + 3y \\
+\st\quad & -2x - y \leq -5, \\
+& 2x + y \leq 16, \\
+& x + 2y \leq 14, \\
+& x, y \geq 0.
+\end{aligned}
+\]
+\end{steppanel}
+
+\begin{steppanel}{algslate}
+\cstep{2}{Form the slack dictionary and spot the infeasibility} Introducing slack variables gives
+\[
+\begin{aligned}
+\max\quad & 2x + 3y \\
+\st\quad & s_1 = -5 + 2x + y,\\
+& s_2 = 16 - 2x - y,\\
+& s_3 = 14 - x - 2y,\\
+& x, y, s_1, s_2, s_3 \ge 0.
+\end{aligned}
+\]
+At $x=y=0$ this gives $s_1=-5<0$, so the dictionary is infeasible and the usual simplex start is unavailable.
+\end{steppanel}
+
+\begin{steppanel}{algslate}
+\cstep{3}{Introduce an artificial variable} Add a nonnegative artificial variable $a_1$ to the offending equation and penalize it heavily in the objective (here $M=1000$), so the simplex method is driven to push it back to zero:
+\[
+\begin{aligned}
+\max\quad & 2x + 3y - 1000a_1 \\
+\st\quad & s_1 = -5 + 2x + y + a_1,\\
+& s_2 = 16 - 2x - y,\\
+& s_3 = 14 - x - 2y,\\
+& x, y, s_1, s_2, s_3, a_1 \ge 0.
+\end{aligned}
+\]
+\end{steppanel}
+
+\begin{steppanel}{algslate}
+\cstep{4}{Pivot to a feasible basis} Swapping $a_1$ into the basis in place of $s_1$ makes every right-hand side nonnegative at $x=y=0$, giving a genuine starting point:
+\[
+\begin{aligned}
+\max\quad & -5000 + 2002x + 1003y - 1000s_1 \\
+\st\quad & a_1 = 5 - 2x - y + s_1,\\
+& s_2 = 16 - 2x - y,\\
+& s_3 = 14 - x - 2y,\\
+& x, y, s_1, s_2, s_3, a_1 \ge 0.
+\end{aligned}
+\]
+\end{steppanel}
+
+With a feasible basis in hand, we run the simplex method as usual. Letting $x$ enter drives the artificial variable back out of the basis:
+\[
+\begin{aligned}
+\max\quad & 5 + 2y + s_1 - 1001a_1 \\
+\st\quad & x = 2.50 - 0.50y + 0.50s_1 - 0.50a_1,\\
+& s_2 = 11 - s_1 + a_1,\\
+& s_3 = 11.50 - 1.50y - 0.50s_1 + 0.50a_1,\\
+& x, y, s_1, s_2, s_3, a_1 \ge 0.
+\end{aligned}
+\]
+
+\noindent The structure of this feasible dictionary is worth pausing on.
+\begin{remark}{Artificial Variable Can Be Removed: Feasible Start for Phase II}{}
+This is the second artificial dictionary from \textbf{Phase I} of the two-phase simplex method. Our goal was to eliminate the artificial variable \(a_1\) while finding a feasible solution to the original problem.
+
+Consider this dictionary:
+\begin{itemize}
+    \item The artificial variable \(a_1\) appears in the system, but it is \textbf{not basic}.
+    \item Because \(a_1\) is a nonbasic variable and its value is currently zero, it can be \textbf{removed} from the dictionary without violating feasibility.
+    \item All basic variables (\(x, s_2, s_3\)) have nonnegative values when \(a_1 = 0\), and all coefficients of \(a_1\) can simply be deleted.
+\end{itemize}
+
+\textbf{Conclusion:} We now have a basic feasible solution to the original problem (with no artificial variables present), so we can begin \textbf{Phase II of the simplex method} using this dictionary as the starting point.
+
+\vspace{1cm}
+
+\[
+\begin{aligned}
+\max \quad 
+& \tikzmark{zstart4} \text{\colorbox{green!20!white}{$5$}} ~ \text{\colorbox{gray!20!white}{$+ 2y + s_1 - 1001a_1$}} \tikzmark{zend4} \\
+\st \quad 
+& \tikzmark{xx4} \text{\colorbox{yellow}{$x = 2.50$}} ~ \text{\colorbox{gray!20!white}{$- 0.50y + 0.50s_1 - 0.50a_1$}},\\[1mm]
+& \tikzmark{s24} \text{\colorbox{yellow}{$s_2 = 11$}} ~ \text{\colorbox{gray!20!white}{$- s_1 + a_1$}},\\[1mm]
+& \tikzmark{s34} \text{\colorbox{yellow}{$s_3 = 11.50$}} ~ \text{\colorbox{gray!20!white}{$- 1.50y - 0.50s_1 + 0.50a_1$}},\\[1mm]
+& x,\, y,\, s_1,\, s_2,\, s_3,\, a_1 \ge 0.
+\end{aligned}
+\]
+
+\includegraphics[width=0.85\linewidth]{figs/simplex-basis-driven-tikz11.png}
+\end{remark}
+
+\begin{learningcheckpoint}[label={lc:artificial-removal}]
+Why can the artificial variable be removed from this system?
+\end{learningcheckpoint}
+
+Now $a_1$ is nonbasic, so the basis is feasible for the \emph{original} problem. We may discard the artificial variable and continue from the feasible dictionary
+\[
+\begin{aligned}
+\max\quad & 5 + 2y + s_1 \\
+\st\quad & x = 2.50 - 0.50y + 0.50s_1,\\
+& s_2 = 11 - s_1,\\
+& s_3 = 11.50 - 1.50y - 0.50s_1,\\
+& x, y, s_1, s_2, s_3 \ge 0.
+\end{aligned}
+\]
+
+\subsection{Big-M Method Algorithm}
+
+\begin{algocard}{Algorithm: Big-M Method}
+\textbf{Input.} A linear program in standard form (maximize), possibly with an infeasible initial basic solution.
+\algostep{algenter}{\ding{43}}{Add artificial variables}{For each constraint with a negative right-hand side, multiply the constraint by $-1$ so the RHS becomes positive. For each constraint without an obvious feasible basic variable, add an artificial variable $a_i \ge 0$.}
+\algostep{algleave}{\ding{47}}{Penalize the artificials}{Add a penalty term $-M a_i$ (with $M$ a very large constant) for each artificial variable to the objective. Form the initial dictionary (including slack/surplus and artificial variables) using this modified objective, with the artificials in the starting basis.}
+\algostep{algpivot}{\ding{114}}{Drive the artificials out}{While an artificial variable is in the basis (or the basic solution is infeasible), perform a simplex pivot, using the modified objective, that moves at least one artificial variable out of the basis.}
+\algostep{algenter}{\ding{43}}{Restore and continue}{Once all artificial variables are zero, remove their columns and continue the standard simplex iterations using the \emph{original} objective function.}
+\algostep{algopt}{\ding{52}}{Output}{The optimal solution to the original problem, or a declaration of infeasibility if any artificial variable remains positive.}
+\end{algocard}
+
+%
+%
+\subsection{Detecting Infeasibility via the Big-M Method}
+
+Consider the linear program
+\[
+\begin{aligned}
+\max\quad & 2x + 3y \\
+\st\quad & 2x + y \geq 22,\quad 2x + y \leq 16,\quad x + 2y \leq 14,\quad x,y \geq 0.
+\end{aligned}
+\]
+The first two constraints demand that $2x+y$ be simultaneously at least $22$ and at most $16$, so we should expect trouble. Rewriting the $\ge$ constraint as $-2x-y\le-22$ and adding a slack gives $s_1 = -22 + 2x + y$, which is negative at the origin. Exactly as before, we add an artificial variable $a_1$ (penalty $M=1000$) and pivot it into the basis to obtain a feasible starting dictionary:
+\begin{center}\begin{dict}
+\[
+\begin{aligned}
+\max\quad & -22000 + 2002x + 1003y - 1000s_1 \\
+\st\quad & a_1 = 22 - 2x - y + s_1,\\
+& s_2 = 16 - 2x - y,\\
+& s_3 = 14 - x - 2y.
+\end{aligned}
+\]
+\end{dict}\end{center}
+\pivotstrip{x}{s_2}{}
+\begin{center}\begin{dict}
+\[
+\begin{aligned}
+\max\quad & -5984 + 2y - 1000s_1 - 1001s_2 \\
+\st\quad & a_1 = 6 + s_1 + s_2,\\
+& x = 8 - 0.50y - 0.50s_2,\\
+& s_3 = 6 - 1.50y + 0.50s_2.
+\end{aligned}
+\]
+\end{dict}\end{center}
+\pivotstrip{y}{s_3}{}
+\begin{center}
+\begin{tcolorbox}[enhanced,width=0.6\linewidth,box align=center,colback=red!4,colframe=red!65!black,
+  boxrule=0.8pt,sharp corners,coltitle=white,fonttitle=\bfseries,
+  title={\ding{56}\ Optimal for Big-M: artificial stuck in basis},
+  left=6pt,right=6pt,top=3pt,bottom=3pt]
+\[
+\begin{aligned}
+\max\quad & -5976 - 1000s_1 - 1000.33s_2 - 1.33s_3 \\
+\st\quad & a_1 = 6 + s_1 + s_2,\\
+& x = 6 - 0.67s_2 + 0.33s_3,\\
+& y = 4 + 0.33s_2 - 0.67s_3.
+\end{aligned}
+\]
+\end{tcolorbox}
+\end{center}
+Every objective-row coefficient is now nonpositive, so this dictionary is optimal for the penalized (Big-M) problem, yet the artificial variable is still basic.
+
+\subsection*{Interpreting the Final Dictionary}
+
+In the final dictionary, the artificial variable \(a_1\) appears in the equation
+\[
+a_1 = 6 + s_1 + s_2.
+\]
+When the nonbasic variables \(s_1\) and \(s_2\) are set to zero (which is typical in a basic solution), we find
+\[
+a_1 = 6.
+\]
+Because \(a_1 > 0\) in the optimal dictionary, this indicates that the original linear program has no feasible solution. The presence of a positive artificial variable in the final optimal dictionary is the standard signal in the Big‑M method that the original problem is infeasible.
+
+\bigskip
+
+\noindent In summary, the contradictory constraints (requiring \(2x+y\) to be both at least 22 and at most 16) force the artificial variable \(a_1\) to remain positive. Thus, the Big‑M method confirms that the problem is infeasible.
+
+\begin{remark}{Final Artificial Dictionary Indicates Infeasibility}{}
+This is the final dictionary at the end of \textbf{Phase I} of the two-phase simplex method, where the goal was to eliminate the artificial variable \(a_1\) and reach a feasible solution to the original problem.
+
+To interpret this:
+\begin{itemize}
+    \item The artificial variable \(a_1\) is still in the basis.
+    \item Its value is expressed as \(a_1 = 6 + s_1 + s_2\), and since all variables on the right-hand side are constrained to be nonnegative, we have \(a_1 \ge 6\).
+    \item Therefore, we cannot make \(a_1 = 0\), which is required to reach feasibility in Phase I.
+\end{itemize}
+
+Thus, there is no feasible solution to the original problem.  \\
+\textbf{Conclusion: The original linear program is \emph{infeasible}.}
+
+\vspace{1cm}
+
+\[
+\begin{aligned}
+\max \quad 
+& \tikzmark{zstart3} \text{\colorbox{green!20!white}{$-5976$}} ~ \text{\colorbox{red!50!white}{$- 1000s_1 - 1000.33s_2 - 1.33s_3$}} \tikzmark{zend3} \\
+\st \quad 
+& \tikzmark{a1} \text{\colorbox{red!50!white}{$a_1 = 6$}} ~ \text{\colorbox{gray!20!white}{$+ s_1 + s_2$}},\\[1mm]
+& \tikzmark{x3} \text{\colorbox{yellow}{$x = 6$}} ~ \text{\colorbox{gray!20!white}{$- 0.67s_2 + 0.33s_3$}},\\[1mm]
+& \tikzmark{y3} \text{\colorbox{yellow}{$y = 4$}} ~ \text{\colorbox{gray!20!white}{$+ 0.33s_2 - 0.67s_3$}},\\[1mm]
+& x, y, s_1, s_2, s_3, a_1 \geq 0.
+\end{aligned}
+\]
+
+\includegraphics[width=0.85\linewidth]{figs/simplex-basis-driven-tikz12.png}
+\end{remark}
+
+\begin{theorem}{Infeasibility Detection via the Big‑M Method}{}
+Consider the linear programming problem
+\[
+\begin{aligned}
+\max\quad & \mathbf{c}^\top \mathbf{x} \\
+\st\quad & A\mathbf{x} \le \mathbf{b}, \\
+& \mathbf{x} \ge \mathbf{0}.
+\end{aligned}
+\]
+After converting inequalities to equalities by introducing slack, surplus, and, if needed, artificial variables, the system takes the form
+\[
+A\mathbf{x} - I_a \mathbf{a} = \mathbf{b},\quad \mathbf{x},\, \mathbf{a} \ge \mathbf{0},
+\]
+where \( I_a \) is a submatrix of the identity matrix, with each column corresponding to an artificial variable introduced to enforce equality in a constraint that initially lacked a basic variable with a nonnegative right-hand side. The Big‑M formulation is then given by
+\[
+\max\quad \mathbf{c}^\top \mathbf{x} - M\sum_{i\in I} a_i.
+\]
+If, in any optimal solution of the Big‑M problem, there exists an artificial variable \(a_i > 0\) for some \(i\in I\), then the original linear programming problem is infeasible.
+\end{theorem}
+
+\begin{proof}
+Assume that an optimal solution \((\mathbf{x}^*,\mathbf{a}^*)\) of the Big‑M problem satisfies \(a_i^* > 0\) for some \(i\in I\).
+
+Suppose, for contradiction, that the original linear programming problem is feasible. Then there exists some \(\mathbf{x}'\ge \mathbf{0}\) such that \(A\mathbf{x}' \le \mathbf{b}\). In the reformulation process, if a constraint lacked a basic variable with a nonnegative right-hand side, an artificial variable \(a_i\) was introduced, rewriting the constraint as
+\[
+\text{(original constraint)} - a_i = b_i.
+\]
+For any feasible \(\mathbf{x}'\) of the original problem, we can set \(\mathbf{a}' = \mathbf{0}\) for all artificial variables, and the equality constraints will still be satisfied.
+
+Thus, the solution \((\mathbf{x}',\mathbf{0})\) is feasible for the Big‑M formulation, and its objective value is exactly \(\mathbf{c}^\top \mathbf{x}'\). On the other hand, the optimal solution \((\mathbf{x}^*,\mathbf{a}^*)\) yields an objective value of 
+\[
+\mathbf{c}^\top \mathbf{x}^* - M\sum_{i\in I}a_i^*.
+\]
+Since \(M\) is chosen to be a very large positive constant, any positive contribution from \(\sum_{i\in I}a_i^*\) imposes a severe penalty. Consequently, the objective value of \((\mathbf{x}',\mathbf{0})\) would be strictly greater than that of \((\mathbf{x}^*,\mathbf{a}^*)\) provided that \(M\) is sufficiently large.
+
+This contradiction implies that no feasible solution \((\mathbf{x}',\mathbf{0})\) exists for the original problem. In other words, the assumption that the original problem is feasible is false.
+
+Hence, if in the optimal solution of the Big‑M problem any artificial variable remains positive, the original linear programming problem must be infeasible.
+\end{proof}
+
+\subsection{A second example: two artificial variables}
+
+When several constraints point the ``wrong'' way, we simply add one artificial variable per offending constraint. Consider
+\[
+\begin{aligned}
+\max\quad & 3x + y \\
+\st\quad & 2x + y \geq 5,\quad 2x + y \leq 16,\quad x + 2y \geq 3,\quad x,y \geq 0.
+\end{aligned}
+\]
+Two constraints are of ``$\ge$'' type, so the origin violates both. Flipping them to $-2x-y\le-5$ and $-x-2y\le-3$ and adding slacks gives $s_1 = -5 + 2x + y$ and $s_3 = -3 + x + 2y$, both negative at the origin. We introduce \emph{two} artificial variables $a_1,a_3$ (each penalized by $M=1000$) and pivot them into the basis, producing a feasible starting dictionary whose objective row carries the Big-M penalty:
+\begin{center}\begin{dict}
+\[
+\begin{aligned}
+\max\quad & -8000 + 3003x + 3001y - 1000s_1 - 1000s_3 \\
+\st\quad & a_1 = 5 - 2x - y + s_1,\\
+& s_2 = 16 - 2x - y,\\
+& a_3 = 3 - x - 2y + s_3.
+\end{aligned}
+\]
+\end{dict}\end{center}
+The large penalties make $x$ and $y$ attractive to increase, and successive pivots drive both artificial variables out of the basis. Once $a_1=a_3=0$ the basis is feasible for the original problem; we drop the artificials and continue on the true objective $3x+y$ until every reduced cost is nonpositive:
+\begin{center}\begin{dictopt}
+\[
+\begin{aligned}
+\max\quad & 24 - 0.5\,y - 1.5\,s_2 \\
+\st\quad & x = 8 - 0.5\,y - 0.5\,s_2,\\
+& s_1 = 11 - s_2,\\
+& s_3 = 5 + 1.5\,y - 0.5\,s_2.
+\end{aligned}
+\]
+\end{dictopt}\end{center}
+Reading the optimal dictionary gives $x = 8$, $y = 0$, and $z = 3x + y = 24$, with the first and third constraints slack ($s_1=11$, $s_3=5$) and the second constraint tight ($s_2=0$).
+
+\section{Degeneracy, Cycling, and Bland's Rule}
+\label{sec:degeneracy}
+
+\begin{definition}{Degeneracy}{}
+A basic feasible solution (BFS) in the Simplex Method is said to be \textbf{degenerate} if one or more of its basic variables take a value of zero. Mathematically, a BFS corresponding to a basis \( B \) is degenerate if there exists at least one basic variable \( \x_B \) such that \( \x_B = 0 \).
+\end{definition}
+
+\begin{remark}{Degenerate Dictionary}{}
+The dictionary below represents a feasible solution, but one of the basic variables is equal to zero. This situation is called \textbf{degeneracy}.
+
+\textbf{What is degeneracy?}  
+A dictionary is called \emph{degenerate} if \textbf{any basic variable is equal to zero}. This is important because:
+\begin{itemize}
+    \item It can cause the simplex method to perform a pivot without changing the objective value.
+    \item It can potentially lead to \textbf{cycling}, revisiting the same basic solution more than once.
+\end{itemize}
+
+\textbf{In this dictionary:}
+\begin{itemize}
+    \item The basic variables are \(x_3, x_4, x_5, x_6\).
+    \item When we set the nonbasic variables \(x_1 = 0\), \(x_2 = 0\), we find:
+    \[
+    x_3 = 4,\quad x_4 = 2,\quad x_5 = 3,\quad x_6 = \boxed{0},\quad z = 0.
+    \]
+    \item Since \(x_6 = 0\) and it is in the basis, this is a \textbf{degenerate basic feasible solution}.
+\end{itemize}
+
+\vspace{1cm}
+
+\[
+\begin{aligned}
+\max \quad 
+& \tikzmark{zstart5} \text{\colorbox{green!20!white}{$z = 0$}} ~ \text{\colorbox{gray!20!white}{$+ x_1 + 2x_2$}} \tikzmark{zend5} \\
+\st \quad 
+& \tikzmark{x3} \text{\colorbox{yellow}{$x_3 = 4$}} ~ \text{\colorbox{gray!20!white}{$- x_2$}}, \\
+& \tikzmark{x4} \text{\colorbox{yellow}{$x_4 = 2$}} ~ \text{\colorbox{gray!20!white}{$- x_1 + x_2$}}, \\
+& \tikzmark{x5} \text{\colorbox{yellow}{$x_5 = 3$}} ~ \text{\colorbox{gray!20!white}{$- x_1$}}, \\
+& \tikzmark{x6} \text{\colorbox{orange}{$x_6 = 0$}} ~ \text{\colorbox{gray!20!white}{$+ 2x_1 - x_2$}}, \\
+& x_1, x_2, x_3, x_4, x_5, x_6 \geq 0.
+\end{aligned}
+\]
+
+\includegraphics[width=0.85\linewidth]{figs/simplex-basis-driven-tikz13.png}
+\end{remark}
+
+In this case, the basic feasible solution is (basic variables) $(x_3,x_4, x_5,x_6) = (4,2,3,0)$ and (non-basic variables) $(x_1, x_2) = (0,0)$.
+
+\subsection{Degeneracy and Unchanged BFS after Pivoting}
+Degeneracy can lead to cases where pivoting in the Simplex Method does not change the basic feasible solution. When a pivot is performed, the entering variable is increased until one of the current basic variables reaches zero, at which point that variable leaves the basis. However, if multiple constraints yield the same minimum ratio in the ratio test, then a tie-breaking rule must be applied. If the variable that leaves the basis was already zero, the BFS remains unchanged. 
+
+Notice in the prior example, we can try to let $x_2$ enter the basis.  What happens?  By the ratio test, we see that $x_6$ leaves the basis.  This results in the following new dictionary:
+
+\begin{remark}{Degenerate Pivot: No Change in BFS}{}
+After pivoting \(x_2\) into the basis and \(x_6\) out, we arrive at the dictionary below. 
+
+Here is what happened:
+
+\begin{itemize}
+    \item Before the pivot, the basic variables were \(x_3, x_4, x_5, x_6\), and the nonbasic variables were \(x_1 = 0, x_2 = 0\).
+    \item After the pivot, \(x_2\) enters and \(x_6\) leaves. The new basic variables are \(x_3, x_4, x_5, x_2\).
+    \item However, when we plug in the nonbasic values \(x_1 = 0, x_6 = 0\), we get:
+    \[
+    x_3 = 4, \quad x_4 = 2, \quad x_5 = 3, \quad x_2 = 0, \quad z = 0.
+    \]
+    \item This is \textbf{identical to the previous basic feasible solution}.
+\end{itemize}
+
+\textbf{Conclusion:}  
+This is a case of a \textbf{degenerate pivot}: we performed a pivot step, but the resulting basic feasible solution did not change. The simplex algorithm moved to a new dictionary (i.e., a new basis), but the point in solution space stayed the same.
+
+\vspace{1cm}
+
+\[
+\begin{aligned}
+\max \quad 
+& \tikzmark{zstart6} \text{\colorbox{green!20!white}{$z = 0$}} ~ \text{\colorbox{gray!20!white}{$+ 5x_1 - 2x_6$}} \tikzmark{zend6} \\
+\st \quad 
+& \tikzmark{x3b} \text{\colorbox{yellow}{$x_3 = 4$}} ~ \text{\colorbox{gray!20!white}{$- 2x_1 + x_6$}},\\ 
+& \tikzmark{x4b} \text{\colorbox{yellow}{$x_4 = 2$}} ~ \text{\colorbox{gray!20!white}{$+ x_1 - x_6$}},\\ 
+& \tikzmark{x5b} \text{\colorbox{yellow}{$x_5 = 3$}} ~ \text{\colorbox{gray!20!white}{$- x_1$}},\\ 
+& \tikzmark{x2b} \text{\colorbox{orange}{$x_2 = 0$}} ~ \text{\colorbox{gray!20!white}{$+ 2x_1 - x_6$}},\\
+& x_1, x_2, x_3, x_4, x_5, x_6 \ge 0.
+\end{aligned}
+\]
+
+\includegraphics[width=0.85\linewidth]{figs/simplex-basis-driven-tikz14.png}
+\end{remark}
+
+But!  The basic feasible solution is the same!!!
+
+Fortunately, the next pivot leads to a new solution.
+
+However, this phenomenon can cause the algorithm to visit the same BFS multiple times, potentially leading to cycling.
+
+See \url{https://gilp.henryrobbins.com/en/latest/examples/3d/SQUARE_PYRAMID_3D_LP.html} for a highly degenerate case where the first two pivots do not change the solution.
+
+\section{Cycling in the Simplex Method}
+
+In the Simplex Method, a pivot operation normally improves the objective function by moving from one basic feasible solution (BFS) to another. However, in rare cases, the method can revisit the \emph{same BFS multiple times} without progress. This phenomenon is called \textbf{cycling}.
+
+Cycling occurs due to:
+\begin{itemize}
+  \item \textbf{Degeneracy}: when one or more basic variables are zero.
+  \item \textbf{Unlucky pivot rules}: which cause the algorithm to rotate through different bases that correspond to the same BFS.
+\end{itemize}
+
+The following example demonstrates cycling. The entering variable is chosen by the \textbf{largest-coefficient rule}, and ties in the minimum ratio test are broken naively, by taking the tied row whose basic variable is listed first. This combination cycles on the example below. Anti-cycling pivot rules, such as the lexicographic rule or Bland's rule (described later in this section), prevent this behavior.
+
+\subsection{Cycling in the Simplex Method}
+Cycling occurs when the Simplex Method revisits the same set of basic variables repeatedly without making progress in improving the objective function. This happens when degeneracy is present and the choice of entering and leaving variables results in looping between a set of degenerate BFSs.
+
+The following example demonstrates cycling in the Simplex Method.  It is a rescaled version of the classic cycling example constructed by E.~M.~L.~Beale (1955), the first published instance of an LP on which the simplex method cycles; only the units of two variables have been changed, which preserves the cycle.
+
+\textbf{Initial Dictionary}
+\[
+\begin{aligned}
+\max \quad & z = 0 + 0.75x_1 - 20x_2 + 0.50x_3 - 6x_4 \\
+\st \quad 
+& s_1 = 0 - 0.25x_1 + 8x_2 + x_3 - 9x_4, \\
+& s_2 = 0 - 0.50x_1 + 12x_2 + 0.50x_3 - 3x_4, \\
+& s_3 = 1 - x_3, \\
+& x_1, x_2, x_3, x_4, s_1, s_2, s_3 \geq 0.
+\end{aligned}
+\]
+
+\pivotstrip{x_1}{s_1}{}
+\[
+\begin{aligned}
+\max \quad & z = 0 + 4x_2 + 3.50x_3 - 33x_4 - 3s_1 \\
+\st \quad 
+& x_1 = 0 + 32x_2 + 4x_3 - 36x_4 - 4s_1, \\
+& s_2 = 0 - 4x_2 - 1.50x_3 + 15x_4 + 2s_1, \\
+& s_3 = 1 - x_3, \\
+& x_1, x_2, x_3, x_4, s_1, s_2, s_3 \geq 0.
+\end{aligned}
+\]
+
+\pivotstrip{x_2}{s_2}{}
+\[
+\begin{aligned}
+\max \quad & z = 0 + 2x_3 - 18x_4 - s_1 - s_2 \\
+\st \quad 
+& x_1 = 0 - 8x_3 + 84x_4 + 12s_1 - 8s_2, \\
+& x_2 = 0 - 0.38x_3 + 3.75x_4 + 0.50s_1 - 0.25s_2, \\
+& s_3 = 1 - x_3, \\
+& x_1, x_2, x_3, x_4, s_1, s_2, s_3 \geq 0.
+\end{aligned}
+\]
+
+\pivotstrip{x_3}{x_1}{}
+\[
+\begin{aligned}
+\max \quad & z = 0 - 0.25x_1 + 3x_4 + 2s_1 - 3s_2 \\
+\st \quad 
+& x_3 = 0 - 0.12x_1 + 10.50x_4 + 1.50s_1 - s_2, \\
+& x_2 = 0 + 0.05x_1 - 0.19x_4 - 0.06s_1 + 0.12s_2, \\
+& s_3 = 1 + 0.12x_1 - 10.50x_4 - 1.50s_1 + s_2, \\
+& x_1, x_2, x_3, x_4, s_1, s_2, s_3 \geq 0.
+\end{aligned}
+\]
+\pivotstrip{x_4}{x_2}{}
+\[
+\begin{aligned}
+\max \quad & z = +0.50x_1 - 16x_2 + s_1 - s_2 \\
+\st \quad 
+& x_3 = 0 + 2.50x_1 - 56x_2 - 2s_1 + 6s_2, \\
+& x_4 = 0 + 0.25x_1 - 5.33x_2 - 0.33s_1 + 0.67s_2, \\
+& s_3 = 1 - 2.50x_1 + 56x_2 + 2s_1 - 6s_2, \\
+& x_1, x_2, x_3, x_4, s_1, s_2, s_3 \geq 0.
+\end{aligned}
+\]
+\pivotstrip{s_1}{s_3}{}
+
+\[
+\begin{aligned}
+\max \quad & z = +1.75x_1 - 44x_2 - 0.50x_3 + 2s_2 \\
+\st \quad 
+& s_1 = 0 + 1.25x_1 - 28x_2 - 0.50x_3 + 3s_2, \\
+& x_4 = 0 - 0.17x_1 + 4x_2 + 0.17x_3 - 0.33s_2, \\
+& s_3 = 1 - x_3, \\
+& x_1, x_2, x_3, x_4, s_1, s_2, s_3 \geq 0.
+\end{aligned}
+\]
+\pivotstrip{s_2}{x_4}{}
+\[
+\begin{aligned}
+\max \quad & z = +0.75x_1 - 20x_2 + 0.50x_3 - 6x_4 \\
+\st \quad 
+& s_1 = 0 - 0.25x_1 + 8x_2 + x_3 - 9x_4, \\
+& s_2 = 0 - 0.50x_1 + 12x_2 + 0.50x_3 - 3x_4, \\
+& s_3 = 1 - x_3, \\
+& x_1, x_2, x_3, x_4, s_1, s_2, s_3 \geq 0.
+\end{aligned}
+\]
+
+\noindent This last dictionary is \emph{identical} to the initial one: after six pivots the method has returned to its starting basis with the objective still at $z=0$. The simplex method is \textbf{cycling}, and without an anti-cycling safeguard it will loop forever.
+
+\subsection{Bland's Rule}
+Bland's Rule is a tie-breaking strategy used to prevent cycling in the Simplex Method. The rule ensures that:
+\begin{enumerate}
+    \item The variable with the \textbf{smallest index} enters the basis when multiple choices exist.
+    \item The variable with the \textbf{smallest index} leaves the basis when multiple choices exist.
+\end{enumerate}
+By enforcing this lexicographic ordering, the method guarantees progress and prevents the algorithm from revisiting the same basis indefinitely.
+
+\begin{theorem}{Bland's Rule Prevents Cycling}{}
+If Bland's Rule is used to select the entering and leaving variables in the Simplex Method, then the algorithm will terminate in a finite number of steps, either by reaching an optimal solution or by detecting an unbounded problem.
+\end{theorem}
+
+\begin{proof}[Proof sketch]
+Suppose, for contradiction, that the method cycles: a sequence of degenerate pivots returns to a basis visited before. During a cycle the basic feasible solution and the objective value never change, and some set of variables enters and leaves the basis over and over. Consider the \emph{largest-indexed} variable $x_t$ that takes part in the cycle. Comparing the dictionary at a step where $x_t$ enters with the dictionary at a step where $x_t$ leaves, a sign analysis of the two objective rows shows that at one of these steps some variable with index smaller than $t$ was also eligible, so Bland's rule could not have selected $x_t$ there, a contradiction. Hence no basis repeats; since there are finitely many bases, the algorithm terminates. The full argument is standard and can be found, for example, in Chv\'atal's \emph{Linear Programming}.
+\end{proof}
+
+From the example above, following the same sequence, we arrive at this dictionary.
+\[
+\begin{aligned}
+\max \quad & z = +0.50x_1 - 16x_2 + s_1 - s_2 \\
+\st \quad 
+& x_3 = 0 + 2.50x_1 - 56x_2 - 2s_1 + 6s_2, \\
+& x_4 = 0 + 0.25x_1 - 5.33x_2 - 0.33s_1 + 0.67s_2, \\
+& s_3 = 1 - 2.50x_1 + 56x_2 + 2s_1 - 6s_2, \\
+& x_1, x_2, x_3, x_4, s_1, s_2, s_3 \geq 0.
+\end{aligned}
+\]
+
+\pivotstrip{x_1}{s_3}{Bland's rule: choose the lowest-index eligible entering and leaving variables}
+\[
+\begin{aligned}
+\max \quad & z = 0.20 - 4.80x_2 + 1.40s_1 - 2.20s_2 - 0.20s_3 \\
+\st \quad 
+& x_3 = 1 - s_3, \\
+& x_4 = 0.10 + 0.27x_2 - 0.13s_1 + 0.07s_2 - 0.10s_3, \\
+& x_1 = 0.40 + 22.40x_2 + 0.80s_1 - 2.40s_2 - 0.40s_3, \\
+& x_1, x_2, x_3, x_4, s_1, s_2, s_3 \geq 0.
+\end{aligned}
+\]
+
+\noindent Bland's rule breaks the tie differently from before: the method moves to a genuinely new basis and the objective strictly increases to $z=0.20$. The cycle is broken, and the simplex method now makes progress toward optimality.
+
+\section{Simplex and Unbounded LPs}
+
+\begin{example}{Unbounded Linear Program}\label{exa:simplex-unbounded}{}
+\label{example:simplex-unbounded}
+Consider the linear program:
+
+\[
+\begin{aligned}
+\text{maximize} \quad & x_1 \\
+\st \quad
+& x_1 - x_2 \leq 1 \\
+& 2x_1 - x_2 \leq 3 \\
+& x_1, x_2 \geq 0
+\end{aligned}
+\]
+
+\begin{center}
+\altincludegraphics[scale = 0.5]{Figures/unbounded-desmos-simplex}{Desmos plot of the feasible region defined by x1-x2<=1, 2x1-x2<=3, x1,x2>=0: an unbounded region extending to the right in the first quadrant, illustrating the unbounded LP example.}
+\end{center}
+We convert the inequalities into equalities using slack variables \( s_1 \) and \( s_2 \):
+
+\[
+\begin{aligned}
+s_1 &= 1 - x_1 + x_2 \\
+s_2 &= 3 - 2x_1 + x_2 \\
+x_1, x_2, s_1, s_2 &\geq 0
+\end{aligned}
+\]
+
+\noindent\textbf{Initial dictionary.}
+\[
+\begin{aligned}
+\max\quad & z = x_1 \\
+\st\quad & s_1 = 1 - x_1 + x_2,\\
+& s_2 = 3 - 2x_1 + x_2.
+\end{aligned}
+\]
+\pivotstrip{x_1}{s_1}{ratio test: $1/1 < 3/2$, so $s_1$ leaves}
+\[
+\begin{aligned}
+\max\quad & z = 1 + x_2 - s_1 \\
+\st\quad & x_1 = 1 + x_2 - s_1,\\
+& s_2 = 1 - x_2 + 2s_1.
+\end{aligned}
+\]
+\pivotstrip{x_2}{s_2}{only $s_2$ limits $x_2$}
+\[
+\begin{aligned}
+\max\quad & z = 2 + s_1 - s_2 \\
+\st\quad & x_1 = 2 + s_1 - s_2,\\
+& x_2 = 1 + 2s_1 - s_2.
+\end{aligned}
+\]
+
+\noindent Now $s_1$ is eligible to enter (its objective coefficient $+1$ is positive), but its column is entirely nonnegative: in $x_1 = 2 + s_1 - s_2$ and $x_2 = 1 + 2s_1 - s_2$ the coefficients of $s_1$ are $+1$ and $+2$. Increasing $s_1$ raises both basic variables and never drives one to zero, so the ratio test finds no limiting row. The objective $z = 2 + s_1$ grows without bound, and the linear program is \textbf{unbounded}.
+
+\textbf{Conclusion:}  
+This linear program is unbounded. Once \( s_1 \) enters the basis, there is no constraint limiting how large it can grow while maintaining feasibility. Therefore, the objective function can increase without bound.
+\end{example}
+
+\begin{pioneerspotlight}{George Dantzig}
+George Dantzig, known for spearheading linear programming with the simplex algorithm, was born in Portland, Oregon on November 8, 1914.\footnote{Gass, S.\,I.\ (2008). \emph{Memorial Tributes}, Vol.~12, pp.~100--106. National Academies Press.}
+George received his Bachelor of Arts in Mathematics and Physics from the University of Maryland, College Park. After marrying his wife, Anne Shmuner, he completed his Master of Arts in Mathematics at the University of Michigan in 1938. Before graduating with his Master's degree, he began working at the United States Bureau of Labor Statistics as a junior statistician. George took interest in statistics through the work of Jerzy Neyman, which led him to earn a Ph.D.\ in Statistics with Neyman's guidance from the University of California, Berkeley in 1946. Before his dissertation, he began working with the Army Air Force Combat Analysis Branch of Statistical Control at the Pentagon, then transferred to the Department of the Air Force as a mathematical advisor. After his work at the Pentagon, he became a professor in operations research at the University of California, Berkeley, and Stanford. He went on to receive the National Medal of Science in 1975. He was also a member of the National Academy of Engineering, the National Academy of Sciences, and the American Association of Arts and Sciences.\footnote{UC Berkeley Engineering (2018). ``George Dantzig: Operations research phenom.'' \url{https://engineering.berkeley.edu/george-dantzig-operations-research-phenom/}}
+
+While in school at the University of California, Berkeley, George became widely known for solving two of the ``unsolved'' statistics problems, which he mistakenly thought were homework. In 1947, Dantzig proposed the simplex algorithm, which started the field of linear programming.\footnote{Cottle, R., Johnson, E., and Wets, R.\ (2007). ``George B.\ Dantzig (1914--2005).'' \emph{Notices of the AMS}, pp.~344--357. \url{https://www.ams.org/journals/notices/200703/fea-cottle.pdf}}
+Geometrically, the simplex method consists of traveling along the edges of a polyhedron from vertex to vertex. The feasible region of a linear program is always convex, and if the program has an optimal solution and its feasible region has a vertex, then some optimal solution occurs at a vertex. The linear program should be in the following standard form:
+\[
+\max \; \mathbf{c}^\top \mathbf{x} \quad \text{subject to} \quad A \mathbf{x} = \mathbf{b}, \quad \mathbf{x} \geq \mathbf{0}.
+\]
+
+The corresponding vertices of the feasible region are the basic feasible solutions. If a system is nondegenerate, the process of simplex pivoting can occur, where the previous solution is used to pivot towards a better feasible basis.
+
+After Dantzig's development of the simplex algorithm, he presented a talk geared toward the application of his linear programming model in the digital world, including games and computers. His algorithm was implemented in the animal feed industry and computing machines for the Air Force. It was also used to solve Stigler's ``diet problem,'' a simple question with modern technology, but a long computation process in 1947. Dantzig's procedure has been utilized in countless industries, such as communications, railroads, petroleum, airlines, and the economy. His utilization of linear algebra theory and the creation of pivoting will continue to be used when solving complex linear problems.
+
+Dantzig also studied network flow problems, which led to the duality theorem in the 1950s. The dual theorem utilizes the costs as integers to create a pair that highlights integer basic solutions, which was used in the application of the ``fleet assignment model.'' With a great understanding of real-world problems, Dantzig developed the recourse stochastic program, which accounted for uncertain constraints and utilized statistical tests to determine the likelihood of an optimal solution. Dantzig was responsible for the solution to countless military problems through his development of linear programming in the late-1940s.
+
+\noindent{\centering\small \textbf{This spotlight was contributed by Irma Adams}\par}
+\end{pioneerspotlight}
+\section{Exercises}
+
+\exgroup{Warm-ups}
+
+\begin{ex}{Standard form and the first dictionary}{}
+\label{ex:standard-form-warmup-dictionary}
+\stars{1} Consider the linear program
+\[
+\begin{aligned}
+\max \quad & 4x + 5y \\
+\st \quad
+& x + 2y \leq 12, \\
+& 3x + 2y \leq 24, \\
+& x, y \geq 0.
+\end{aligned}
+\]
+\begin{enumerate}
+    \item Convert the program to standard form by introducing slack variables $s_1, s_2$.
+    \item Write the initial dictionary for the slack basis $\{s_1, s_2\}$, exactly as in the Initial Dictionary of Section~\ref{sec:pivoting}.
+    \item Read off the basic feasible solution and its objective value.
+    \item Under the steepest ascent rule, which variable would enter the basis first?
+\end{enumerate}
+\exrefs{\S\ref{sec:pivoting}, Initial Dictionary; \S\ref{sec:standard-form}}
+\end{ex}
+
+\begin{ex}{Convert to Standard Form}{}
+\label{ex:standard-form-1}
+\stars{1} Convert the following linear program to standard form:
+
+\[
+\begin{aligned}
+    \max \quad & 3x_1 - 5x_2 \\
+    \st \quad
+    & 2x_1 + x_2 \leq 6, \\
+    & -x_1 + 3x_2 \geq 2, \\
+    & x_1, x_2 \geq 0.
+\end{aligned}
+\]
+\exrefs{\S\ref{sec:standard-form}, Example: Complete Conversion to Standard Form}
+\end{ex}
+
+\begin{ex}{Convert to Standard Form}{}
+\label{ex:standard-form-2}
+\stars{1} Convert the following linear program to standard form:
+
+\[
+\begin{aligned}
+    \min \quad & -x_1 + 2x_2 + x_3 \\
+    \st \quad
+    & x_1 - x_2 + 2x_3 = 4, \\
+    & -2x_1 + x_2 \leq 1, \\
+    & x_3 \text{ is unrestricted}, \quad x_1, x_2 \geq 0.
+\end{aligned}
+\]
+\exrefs{\S\ref{sec:standard-form}, Example: Complete Conversion to Standard Form}
+\end{ex}
+
+\begin{ex}{Convert to Standard Form}{}
+\label{ex:standard-form-3}
+\stars{1} Convert the following linear program to standard form:
+
+\[
+\begin{aligned}
+    \max \quad & 5x_1 + x_2 - 3x_3 \\
+    \st \quad
+    & x_1 + 2x_2 - x_3 \geq 7, \\
+    & x_2 - 4x_3 = 3, \\
+    & x_1 \text{ is unrestricted}, \quad x_2, x_3 \leq 0.
+\end{aligned}
+\]
+\exrefs{\S\ref{sec:standard-form}, Example: Complete Conversion to Standard Form}
+\end{ex}
+
+\begin{ex}{Convert to Standard Form}{}
+\label{ex:84}
+\stars{1} Convert the following linear program to standard form:
+
+\[
+\begin{aligned}
+    \min \quad & 2x_1 + 4x_2 \\
+    \st \quad
+    & x_1 + x_2 \geq 3, \\
+    & 2x_1 - x_2 \leq 5, \\
+    & x_1 \text{ is unrestricted}, \quad x_2 \geq 0.
+\end{aligned}
+\]
+\exrefs{\S\ref{sec:standard-form}, Example: Complete Conversion to Standard Form}
+\end{ex}
+
+\begin{ex}{Convert to Standard Form}{}
+\label{ex:85}
+\stars{1} Convert the following linear program to standard form:
+
+\[
+\begin{aligned}
+    \min \quad & 5y_1 - 3y_2 + y_3 \\
+    \st \quad
+    & 2y_1 - y_2 + 3y_3 = 7, \\
+    & -y_1 + 4y_2 \leq 5, \\
+    & y_3 \text{ is unrestricted}.
+\end{aligned}
+\]
+\exrefs{\S\ref{sec:standard-form}, Example: Complete Conversion to Standard Form}
+\end{ex}
+
+\exgroup{Core problems}
+
+\begin{ex}{Pivoting in a different direction}{}
+\label{ex:alternative-pivot}
+\stars{2} We consider the example from Section~\ref{sec:pivoting}.  In that example, we pivoted first on the $y$ variable.  This choice of pivot called the \emph{steepest ascent} rule since we chose the variable in the objective with the largest coefficient.  
+However, we can consider pivoting on any variable with a positive coefficient in the objective.  We will now pivot first on the $x$ variable.  
+
+\textbf{Starting Point}
+\[
+\begin{aligned}
+\max\quad &  2x + 3y \\
+\st\quad & s_1 = 9 - x - y, \\
+                        & s_2 = 16 - 2x - y, \\
+                        & s_3 = 14 - x - 2y, \\
+                        & x, y, s_1, s_2, s_3 \ge 0.
+\end{aligned}
+\]
+
+\begin{enumerate}
+    \item Let \(x\) increase first.
+    \item Determine which variable leaves the basis using the ratio test.
+    \item Pivot by rewriting the equation of the leaving variable in terms of \(x\) and substitute it into the other equations and the objective.
+    \item Write down the new dictionary.
+    \item Decide whether the resulting dictionary is optimal. If not, repeat the process.
+\end{enumerate}
+\exrefs{\S\ref{sec:pivoting}; \S\ref{sec:simplex-algorithm}}
+\end{ex}
+
+\begin{ex}{Simplex Method Practice}{}
+\label{ex:simplex-practice-5-3}
+\stars{2} Solve the following linear programming problem using the simplex method:
+\[
+\begin{aligned}
+\text{Maximize:}\quad & z = 5x_{1} + 3x_{2}\\
+\text{subject to:}\quad & x_{1} + x_{2} \le 12,\\
+& 2x_{1} + x_{2} \le 16,\\
+& x_{1},\, x_{2} \ge 0.
+\end{aligned}
+\]
+\exrefs{\S\ref{sec:pivoting}; \S\ref{sec:simplex-algorithm}}
+\end{ex}
+
+\begin{ex}{Simplex Method Practice}{}
+\label{ex:simplex-practice-5-8}
+\stars{2} Solve the following linear programming problem using the simplex method:
+\[
+\begin{aligned}
+\text{Maximize:}\quad & z = 5x_{1} + 8x_{2}\\
+\text{subject to:}\quad & x_{1} + 2x_{2} \le 30,\\
+& 3x_{1} + x_{2} \le 30,\\
+& x_{1},\, x_{2} \ge 0.
+\end{aligned}
+\]
+\exrefs{\S\ref{sec:pivoting}; \S\ref{sec:simplex-algorithm}}
+\end{ex}
+
+\begin{ex}{Simplex Method Practice}{}
+\label{ex:simplex-practice-3var-1}
+\stars{2} Solve the following linear programming problem using the simplex method:
+\[
+\begin{aligned}
+\text{Maximize:}\quad & z = 2x_{1} + 3x_{2} + x_{3} \\
+\text{subject to:}\quad & 4x_{1} + 2x_{2} + 5x_{3} \le 32,\\
+& 2x_{1} + 4x_{2} + 3x_{3} \le 28,\\
+& x_{1},\, x_{2},\, x_{3} \ge 0.
+\end{aligned}
+\]
+\exrefs{\S\ref{sec:pivoting}; \S\ref{sec:simplex-algorithm}}
+\end{ex}
+
+\begin{ex}{Simplex Method Practice}{}
+\label{ex:simplex-practice-3var-2}
+\stars{2} Solve the following linear programming problem using the simplex method:
+\[
+\begin{aligned}
+\text{Maximize:}\quad & z = 6x_{1} + 8x_{2} + 5x_{3},\\
+\text{subject to:}\quad & 4x_{1} + x_{2} + x_{3} \le 1800,\\
+& 2x_{1} + 2x_{2} + x_{3} \le 2000,\\
+& 4x_{1} + 2x_{2} + x_{3} \le 3200,\\
+& x_{1},\, x_{2},\, x_{3} \ge 0.
+\end{aligned}
+\]
+\exrefs{\S\ref{sec:pivoting}; \S\ref{sec:simplex-algorithm}}
+\end{ex}
+
+\begin{ex}{Simplex Method Practice}{}
+\label{ex:simplex-bigm-practice-1}
+\stars{2} Solve the following linear programming problem using the simplex method:
+\[
+\begin{aligned}
+\text{Minimize:}\quad & z = 4x_{1} + 6x_{2} + 7x_{3}, \\
+\text{subject to:}\quad & x_{1} + x_{2} + 2x_{3} \ge 20,\\
+& x_{1} + 2x_{2} + x_{3} \ge 30,\\
+& x_{1},\, x_{2},\, x_{3} \ge 0.
+\end{aligned}
+\]
+\exrefs{\S\ref{sec:big-m-dictionary}}
+\end{ex}
+
+\begin{ex}{Simplex Method Practice}{}
+\label{ex:simplex-bigm-practice-2}
+\stars{2} Solve the following linear programming problem using the simplex method:
+\[
+\begin{aligned}
+\text{Minimize:}\quad & z = 40x_{1} + 48x_{2} + 30x_{3}, \\
+\text{subject to:}\quad & 2x_{1} + 2x_{2} + x_{3} \ge 25,\\
+& x_{1} + 3x_{2} + 2x_{3} \ge 30,\\
+& x_{1},\, x_{2},\, x_{3} \ge 0.
+\end{aligned}
+\]
+\exrefs{\S\ref{sec:big-m-dictionary}}
+\end{ex}
+
+\exgroup{Concepts and connections}
+
+\begin{ex}{Dictionary Optimality}{}
+\label{ex:dictionary-optimality-conditions}
+\stars{2} {Conditions in the dictionary.} The following is a dictionary of a maximization problem. State conditions (i.e., the range of values) on $a_{1}, a_{2}, b, c_{1}, c_{5}, c_{6}$ that are required to make the following true.  Note: This does not require any simplex pivots.
+\begin{center}
+\begin{align*}
+\max \quad &0 + c_1 x_1 + c_5 x_5 + c_6 x_6 \\
+x_2 &= 1 + x_1 - a_1 x_5 \\
+x_4 &= 2 + x_1 + 2x_5 - x_6 \\
+x_3 &= b - a_2 x_1 - x_5 - x_6
+\end{align*}
+\end{center}
+
+\begin{enumerate}
+\item  The current solution is feasible and optimal.
+\item The current basic solution is not feasible.
+\item  The current basic solution is degenerate.
+\item  The current basic solution is feasible, and the LP is unbounded.
+\end{enumerate}
+\exrefs{\S\ref{sec:simplex-algorithm}; \S\ref{sec:degeneracy}}
+\end{ex}
+
+\begin{ex}{Basic Feasible Solutions}{}
+\label{ex:bfs-graphical-pivot}
+\stars{2} Consider the following linear programming feasible region in 2 variables that is depicted in the plot below.   
+$$
+\begin{array}{rrrrrl}
+\text{maximize} & 2x_{1} & + & x_{2} \\
+\text{subject to} & 2x_{1} & + & 3x_{2} & \geq & 7 \\
+& & & x_{2} & \geq & 1 \\
+& x_{1} & - & x_{2} & \leq & 4 \\
+& x_{1} & + & 3x_{2} & \leq & 16 \\
+& & x_{1},\; & x_{2} & \geq & 0.
+\end{array}
+$$
+
+Here is a graph of the feasible region:
+\begin{center}
+\altincludegraphics[width=0.6\textwidth]{Figures/desmos-graph-slacks}{Desmos graph of a 2-variable LP feasible region with vertices labeled A, B, C, D used to identify basic and nonbasic variables and to trace pivot moves between adjacent basic feasible solutions.}
+\end{center}
+
+The variables in the augmented linear program are $\{x_1, x_2, s_1, s_2, s_3, s_4\}$, where $s_1$ and $s_2$ are the surplus variables of the two $\geq$ constraints and $s_3$ and $s_4$ are the slack variables of the two $\leq$ constraints, in the order listed (matching the labels in the figure).
+In the context of  the simplex method, answer the following questions:
+
+(a)   At the basic feasible solution $D$, which variables are non-basic and which variables are basic?
+$$
+B = \big\{ \hspace{5cm} \big\}, \hspace{3cm}  N = \big\{ \hspace{3cm} \big\}. 
+$$
+
+(b) If we pivot from the basic feasible solution at $D$ to the basic feasible solution at $C$,
+\begin{itemize}
+\item Which variable enters the basis?\\
+\item Which variable leaves the basis?
+\end{itemize}
+\exrefs{\S\ref{sec:pivoting}, Figure~\ref{fig:bfs-perspectives}}
+\end{ex}
+
+\begin{ex}{What the ratio test protects}{}
+\label{ex:ratio-test-wrong-row}
+\stars{2} In the second dictionary of the running example of Section~\ref{sec:pivoting},
+\[
+\begin{aligned}
+\max\quad & z = 21 + \tfrac12 x - \tfrac32 s_3 \\
+\st\quad & s_1 = 2 - \tfrac12 x + \tfrac12 s_3, \\
+& s_2 = 9 - \tfrac32 x + \tfrac12 s_3, \\
+& y = 7 - \tfrac12 x - \tfrac12 s_3, \\
+& x, y, s_1, s_2, s_3 \geq 0,
+\end{aligned}
+\]
+the entering variable is $x$, and the ratio test selects $s_1$ (ratio $4$) to leave.
+\begin{enumerate}
+    \item Suppose you ignore the ratio test and instead pivot on the $s_2$ row (ratio $6$), so that $s_2$ leaves.  Compute the resulting basic solution and show that it is infeasible by finding the basic variable that becomes negative.
+    \item Explain in general terms what goes wrong when a row other than the minimum-ratio row is chosen: which variables does the minimum ratio protect, and why does overshooting it break feasibility?
+\end{enumerate}
+\exrefs{\S\ref{sec:simplex-algorithm}, Learning Checkpoint~\ref{lc:ratio-test}}
+\end{ex}
+
+\exgroup{Challenge problems}
+
+\begin{ex}{A tie in the ratio test forces degeneracy}{}
+\label{ex:degenerate-tie}
+\stars{3} Consider the linear program
+\[
+\begin{aligned}
+\max\quad & 2x + y \\
+\st\quad & x + y \leq 4, \\
+& 2x + y \leq 8, \\
+& x, y \geq 0.
+\end{aligned}
+\]
+\begin{enumerate}
+    \item Write the initial dictionary for the slack basis and let $x$ enter.  Show that the ratio test produces a \emph{tie}: both $s_1$ and $s_2$ reach zero at $x = 4$.
+    \item Pivot with $s_1$ leaving and write the next dictionary.  Show that it is \emph{degenerate}: a basic variable sits at value zero.
+    \item Repeat the pivot with $s_2$ leaving instead, and show that the resulting dictionary is also degenerate.  What do you notice about the reduced cost of $y$ in this dictionary, and what does it suggest about the set of optimal solutions?
+    \item Explain why this is a general phenomenon: whenever the minimum ratio is attained by two rows, the dictionary after the pivot must be degenerate.  Then construct your own linear program, different from the one above, whose first pivot has a tied ratio test.
+\end{enumerate}
+\exrefs{\S\ref{sec:degeneracy}; \S\ref{sec:simplex-algorithm}}
+\end{ex}
+
+\subsubsection*{Selected Solutions}
+
+\begin{solution}(Exercise~\ref{ex:84})
+
+1. Convert the minimization problem to a maximization problem by negating the objective function:
+   \[
+   \max \quad -2x_1 - 4x_2.
+   \]
+
+2. Convert the \( \geq \) constraint into an equality by introducing a surplus variable \( s_1 \geq 0 \):
+   \[
+   x_1 + x_2 - s_1 = 3.
+   \]
+
+3. Convert the \( \leq \) constraint into an equality by introducing a slack variable \( s_2 \geq 0 \):
+   \[
+   2x_1 - x_2 + s_2 = 5.
+   \]
+
+4. Since \( x_1 \) is unrestricted, replace it with \( x_1 = x_1' - x_1'' \), where \( x_1', x_1'' \geq 0 \).
+
+\textbf{Final Standard Form:}
+\[
+\begin{aligned}
+    \max \quad & -2(x_1' - x_1'') - 4x_2 \\
+    \st \quad
+    & (x_1' - x_1'') + x_2 - s_1 = 3, \\
+    & 2(x_1' - x_1'') - x_2 + s_2 = 5, \\
+    & x_1', x_1'', x_2, s_1, s_2 \geq 0.
+\end{aligned}
+\]
+\end{solution}
+\vspace{1cm}
+
+\begin{solution}(Exercise~\ref{ex:85})
+
+1. Convert the minimization problem to a maximization problem by negating the objective function:
+   \[
+   \max \quad -5y_1 + 3y_2 - y_3.
+   \]
+
+2. Convert the \( \leq \) constraint into an equality by introducing a slack variable \( s_1 \geq 0 \):
+   \[
+   -y_1 + 4y_2 + s_1 = 5.
+   \]
+
+3. Since \( y_3 \) is unrestricted, replace it with \( y_3 = y_3' - y_3'' \), where \( y_3', y_3'' \geq 0 \).
+
+\textbf{Final Standard Form:}
+\[
+\begin{aligned}
+    \max \quad & -5y_1 + 3y_2 - (y_3' - y_3'') \\
+    \st \quad
+    & 2y_1 - y_2 + 3(y_3' - y_3'') = 7, \\
+    & -y_1 + 4y_2 + s_1 = 5, \\
+    & y_1, y_2, y_3', y_3'', s_1 \geq 0.
+\end{aligned}
+\]
+\end{solution}
+\vspace{1cm}
+
+\begin{solution}[Solution for Exercise~\ref{ex:alternative-pivot}]
+We will have to do 3 pivots!
+
+We begin with the original linear program:
+\[
+\begin{aligned}
+\max\quad & 2x + 3y \\
+\st\quad & s_1 = 9 - x - y, \\
+                        & s_2 = 16 - 2x - y, \\
+                        & s_3 = 14 - x - 2y, \\
+                        & x, y, s_1, s_2, s_3 \ge 0.
+\end{aligned}
+\]
+
+\textbf{First Pivot: \(x\) Enters the Basis}
+
+Let \(x\) increase first. The ratio test gives \(9/1 = 9\) for \(s_1\), \(16/2 = 8\) for \(s_2\), and \(14/1 = 14\) for \(s_3\). The smallest ratio is \(8\), so \(s_2\) leaves the basis. Rewriting the \(s_2\) equation in terms of \(x\) and substituting into the other equations and the objective, we obtain:
+\[
+\begin{aligned}
+\max\quad & 16 + 2y - s_2 \\
+\st\quad & s_1 = 1 - 0.50y + 0.50s_2, \\
+                        & x = 8 - 0.50y - 0.50s_2, \\
+                        & s_3 = 6 - 1.50y + 0.50s_2, \\
+                        & x, y, s_1, s_2, s_3 \ge 0.
+\end{aligned}
+\]
+
+\textbf{Second Pivot: \(y\) Enters the Basis}
+
+Now \(y\) is the only variable with a positive objective coefficient, so \(y\) enters. The ratio test gives \(1/0.5 = 2\) for \(s_1\), \(8/0.5 = 16\) for \(x\), and \(6/1.5 = 4\) for \(s_3\), so \(s_1\) leaves. After rewriting the \(s_1\) equation in terms of \(y\) and substituting into the remaining equations and the objective function, the dictionary becomes:
+\[
+\begin{aligned}
+\max\quad & 20 - 4s_1 + s_2 \\
+\st\quad & y = 2 - 2s_1 + s_2, \\
+                        & x = 7 + s_1 - s_2, \\
+                        & s_3 = 3 + 3s_1 - s_2, \\
+                        & x, y, s_1, s_2, s_3 \ge 0.
+\end{aligned}
+\]
+\textbf{Third Pivot: \(s_2\) Enters the Basis}
+
+The coefficient of \(s_2\) in the objective is positive, so \(s_2\) enters. In the \(y\) row \(s_2\) appears with a positive coefficient, so that row imposes no limit; the ratio test gives \(7/1 = 7\) for \(x\) and \(3/1 = 3\) for \(s_3\), so \(s_3\) leaves. The new dictionary is
+\[
+\begin{aligned}
+\max\quad & 23 - s_1 - s_3 \\
+\st\quad & x = 4 - 2s_1 + s_3, \\
+                        & s_2 = 3 + 3s_1 - s_3, \\
+                        & y = 5 + s_1 - s_3, \\
+                        & x, y, s_1, s_2, s_3 \ge 0.
+\end{aligned}
+\]
+
+This is optimal!
+
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:simplex-practice-5-3})
+Add slacks $s_1, s_2$ to obtain the initial dictionary
+\[
+\begin{aligned}
+\max\quad & z = 5x_1 + 3x_2 \\
+\st\quad & s_1 = 12 - x_1 - x_2, \\
+         & s_2 = 16 - 2x_1 - x_2.
+\end{aligned}
+\]
+
+\textbf{First pivot:} $x_1$ enters (coefficient $5$).  Ratio test: $12/1 = 12$ and $16/2 = 8$, so $s_2$ leaves.  Solving the $s_2$ equation for $x_1$ and substituting gives
+\[
+\begin{aligned}
+\max\quad & z = 40 + \tfrac12 x_2 - \tfrac52 s_2 \\
+\st\quad & x_1 = 8 - \tfrac12 x_2 - \tfrac12 s_2, \\
+         & s_1 = 4 - \tfrac12 x_2 + \tfrac12 s_2.
+\end{aligned}
+\]
+
+\textbf{Second pivot:} $x_2$ enters.  Ratio test: $8/\tfrac12 = 16$ and $4/\tfrac12 = 8$, so $s_1$ leaves.  The new dictionary is
+\[
+\begin{aligned}
+\max\quad & z = 44 - s_1 - 2s_2 \\
+\st\quad & x_2 = 8 - 2s_1 + s_2, \\
+         & x_1 = 4 + s_1 - s_2.
+\end{aligned}
+\]
+Both objective coefficients are negative, so this dictionary is optimal: $(x_1, x_2) = (4, 8)$ with $z^* = 44$.
+\end{solution}
+\vspace{1cm}
+
+\begin{solution}(Exercise~\ref{ex:simplex-practice-5-8})
+The initial dictionary is
+\[
+\begin{aligned}
+\max\quad & z = 5x_1 + 8x_2 \\
+\st\quad & s_1 = 30 - x_1 - 2x_2, \\
+         & s_2 = 30 - 3x_1 - x_2.
+\end{aligned}
+\]
+
+\textbf{First pivot:} $x_2$ enters (coefficient $8 > 5$).  Ratio test: $30/2 = 15$ and $30/1 = 30$, so $s_1$ leaves.  Substituting $x_2 = 15 - \tfrac12 x_1 - \tfrac12 s_1$ gives
+\[
+\begin{aligned}
+\max\quad & z = 120 + x_1 - 4s_1 \\
+\st\quad & x_2 = 15 - \tfrac12 x_1 - \tfrac12 s_1, \\
+         & s_2 = 15 - \tfrac52 x_1 + \tfrac12 s_1.
+\end{aligned}
+\]
+
+\textbf{Second pivot:} $x_1$ enters.  Ratio test: $15/\tfrac12 = 30$ and $15/\tfrac52 = 6$, so $s_2$ leaves, and the dictionary becomes
+\[
+\begin{aligned}
+\max\quad & z = 126 - \tfrac{19}{5} s_1 - \tfrac{2}{5} s_2 \\
+\st\quad & x_1 = 6 + \tfrac15 s_1 - \tfrac25 s_2, \\
+         & x_2 = 12 - \tfrac35 s_1 + \tfrac15 s_2.
+\end{aligned}
+\]
+This dictionary is optimal: $(x_1, x_2) = (6, 12)$ with $z^* = 126$.
+\end{solution}
+\vspace{1cm}
+
+\begin{solution}(Exercise~\ref{ex:dictionary-optimality-conditions})
+The basic solution reads off the constant terms: $x_2 = 1$, $x_4 = 2$, $x_3 = b$, with $x_1 = x_5 = x_6 = 0$.
+
+\begin{enumerate}
+\item \textbf{Feasible and optimal:} feasibility requires every constant term nonnegative, so $b \geq 0$; optimality requires no improving direction, so $c_1 \leq 0$, $c_5 \leq 0$, $c_6 \leq 0$.  The values $a_1, a_2$ may be arbitrary.
+\item \textbf{Not feasible:} $b < 0$ (the constants $1$ and $2$ are already nonnegative, so only $x_3$ can fail).
+\item \textbf{Degenerate:} $b = 0$, so that the basic variable $x_3$ sits at value zero.
+\item \textbf{Feasible and unbounded:} we need $b \geq 0$ together with an entering variable whose objective coefficient is positive and whose column never decreases a basic variable.  The variable $x_5$ appears as $-x_5$ in the $x_3$ row and $x_6$ appears as $-x_6$ in the $x_4$ and $x_3$ rows, so the ratio test always stops them.  Only $x_1$ can certify unboundedness: its coefficients are $+1$, $+1$, and $-a_2$, so we need $c_1 > 0$ and $a_2 \leq 0$ (with $b \geq 0$ for feasibility).
+\end{enumerate}
+\end{solution}
+\vspace{1cm}
+
+\begin{solution}(Exercise~\ref{ex:degenerate-tie})
+\textbf{(a)} The initial dictionary is
+\[
+\begin{aligned}
+\max\quad & z = 2x + y \\
+\st\quad & s_1 = 4 - x - y, \\
+& s_2 = 8 - 2x - y, \\
+& x, y, s_1, s_2 \geq 0.
+\end{aligned}
+\]
+With $x$ entering (and $y = 0$), the ratio test gives $4/1 = 4$ for $s_1$ and $8/2 = 4$ for $s_2$: a tie at $x = 4$.
+
+\textbf{(b)} Let $s_1$ leave.  Solving the $s_1$ row for $x$ gives $x = 4 - y - s_1$, and substituting,
+\[
+\begin{aligned}
+\max\quad & z = 8 - y - 2s_1 \\
+\st\quad & x = 4 - y - s_1, \\
+& s_2 = 0 + y + 2s_1, \\
+& x, y, s_1, s_2 \geq 0.
+\end{aligned}
+\]
+The basic variable $s_2$ has value $0$, so the dictionary is degenerate.  (It is also optimal: both reduced costs are negative, and the solution is $(x, y) = (4, 0)$ with $z = 8$.)
+
+\textbf{(c)} Let $s_2$ leave instead.  Solving the $s_2$ row for $x$ gives $x = 4 - \tfrac12 y - \tfrac12 s_2$, and substituting,
+\[
+\begin{aligned}
+\max\quad & z = 8 + 0 \cdot y - s_2 \\
+\st\quad & x = 4 - \tfrac12 y - \tfrac12 s_2, \\
+& s_1 = 0 - \tfrac12 y + \tfrac12 s_2, \\
+& x, y, s_1, s_2 \geq 0.
+\end{aligned}
+\]
+Again a basic variable ($s_1$) equals zero, so this dictionary is degenerate as well.  The reduced cost of $y$ is exactly $0$: increasing $y$ does not change $z$, which signals that the optimum is not unique along that direction of the boundary (any point of the edge from $(4,0)$ toward the constraint $x + y = 4$ with $2x + y = 8$ held tight gives $z = 8$ only at $(4,0)$ itself here, since increasing $y$ is blocked at once by $s_1$; the zero reduced cost still flags the possibility of alternative optimal bases).
+
+\textbf{(d)} If two rows tie at the minimum ratio, the entering variable stops at a value where \emph{both} corresponding basic variables hit zero simultaneously.  Only one of them leaves the basis; the other remains basic at value zero, so the new dictionary necessarily has a basic variable equal to zero, which is the definition of degeneracy.  Any linear program in which two constraint boundaries pass through the same point of the entering edge works as a construction, for example $\max\ x + y$ subject to $x \leq 3$, $x + 2y \leq 3$, $x, y \geq 0$: entering $x$ gives ratios $3/1 = 3$ and $3/1 = 3$, a tie.
+\end{solution}
+
