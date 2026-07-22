@@ -149,6 +149,18 @@ Reader-reported issues and their fixes, now part of the pipeline:
 - **`\colorbox` with mixed colors inside math** produced garbled spans:
   stripped (decorative highlighting only) by `fix-src-epub.py`.
 
+### Third pass (equation rendering)
+
+- **Displayed models rendering blank** (e.g. the Screen Printing LP):
+  tex4ht emits invalid MathML for `equation`+`aligned` blocks and for
+  stretchy fences around arrays — token elements (`<mo>`) containing
+  `<mtable>` children, which readers silently render as nothing.
+  `fix-epub.py` now hoists element children out of MathML token elements
+  (mo/mi/mn/mtext) after recovery, restoring the content.
+- **Wide models cut off horizontally**: `book1-epub.cfg` CSS now makes the
+  equation/align tables `overflow-x: auto`, so wide models scroll instead
+  of clipping.
+
 ## Known limitations (whole-book edition)
 
 - Boxed environments render as titled plain blocks, not colored boxes
