@@ -29,6 +29,32 @@ def main(path):
                         new, etree.XMLParser(recover=True, resolve_entities=False))
                     new = etree.tostring(tree, xml_declaration=True,
                                          encoding='utf-8')
+                # MathML validity: token elements (mo/mi/mn/mtext) must not
+                # contain element children (tex4ht emits <mo>[<mtable>..</mo>
+                # for stretchy fences around arrays; readers render it blank).
+                # Hoist element children out, after the token element.
+                try:
+                    from lxml import etree
+                    xroot = etree.fromstring(new, etree.XMLParser(recover=True,
+                                            resolve_entities=False))
+                    M = '{http://www.w3.org/1998/Math/MathML}'
+                    changed = False
+                    for tag in ('mo', 'mi', 'mn', 'mtext'):
+                        for el in xroot.iter(M + tag):
+                            kids = list(el)
+                            if not kids:
+                                continue
+                            parent = el.getparent()
+                            idx = parent.index(el)
+                            for k, kid in enumerate(kids):
+                                el.remove(kid)
+                                parent.insert(idx + 1 + k, kid)
+                            changed = True
+                    if changed:
+                        new = etree.tostring(xroot, xml_declaration=True,
+                                             encoding='utf-8')
+                except Exception:
+                    pass
                 if new != data:
                     open(p, 'wb').write(new)
                     fixed += 1
