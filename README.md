@@ -24,7 +24,7 @@ An open textbook on linear programming, discrete algorithms, and integer
 programming, with worked examples in Excel and Python (Gurobi), graded
 exercise ladders with selected solutions, real-world case studies, and
 interactive visualizations. It was designed for the undergraduate courses
-ISE 3424/3434 — Deterministic Operations Research — at Virginia Tech and is
+ISE 2404/3434 — Deterministic Operations Research — at Virginia Tech and is
 being prepared for publication with Virginia Tech Publishing & Press.
 
 Feedback is welcome! Please open an issue on this repository or contact
