@@ -83,7 +83,9 @@ $FILTER_REPO \
   --path 'LICENSE-ISSUES.md' \
   --path 'book1-review-and-plan.docx' \
   --path 'figure-catalog.pdf' \
-  --path 'Intro-Math-Programming/baseText/kruskal-video.jpg'
+  --path 'Intro-Math-Programming/baseText/kruskal-video.jpg' \
+  --path 'install-tl-20260116/' \
+  --path 'Intro-Math-Programming/baseText/scripts/figure-catalog.pdf'
 
 echo
 echo "Done. Verify with:"
