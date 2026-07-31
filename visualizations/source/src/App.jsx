@@ -101,18 +101,19 @@ export default function App() {
       <div>
         <div
           style={{
-            position: 'sticky', top: 0, zIndex: 50, background: '#111', color: '#fff',
+            position: 'sticky', top: 0, zIndex: 50, background: '#840125', color: '#fff',
             padding: '8px 16px', display: 'flex', alignItems: 'center', gap: 16,
-            borderBottom: '1px solid #333',
+            borderBottom: '1px solid #5c0019', fontFamily: 'Georgia, serif',
           }}
         >
           <button
             onClick={goHome}
-            style={{ background: '#fff', color: '#111', border: 'none', padding: '6px 12px', borderRadius: 6, cursor: 'pointer', fontWeight: 600 }}
+            style={{ background: '#fff', color: '#840125', border: 'none', padding: '6px 12px', borderRadius: 6, cursor: 'pointer', fontWeight: 600, fontFamily: 'Georgia, serif' }}
           >
             &larr; All visualizations
           </button>
-          <span style={{ fontWeight: 600 }}>{demo.title}</span>
+          <span style={{ fontWeight: 600, flex: 1 }}>{demo.title}</span>
+          <a href="../" style={{ color: '#fff', fontSize: 14 }}>Book home</a>
         </div>
         <Component />
       </div>
@@ -120,50 +121,69 @@ export default function App() {
   }
 
   return (
-    <div style={{ maxWidth: 1080, margin: '0 auto', padding: '48px 24px 80px' }}>
-      <h1 style={{ fontSize: 34, fontWeight: 800, marginBottom: 6 }}>
-        Interactive Visualizations
-      </h1>
-      <p style={{ color: '#555', marginBottom: 8, maxWidth: 760 }}>
-        Companions to <i>Mathematical Programming and Operations Research</i> (Book 1:
-        Linear and Integer Programming). Each demo is referenced from the matching
-        chapter of the book. Click a card to launch; use your browser's back button
-        or the header to return.
-      </p>
-      <p style={{ color: '#888', fontSize: 14, marginBottom: 36 }}>
-        Direct links: add <code>#demo-id</code> to this page's URL, e.g.{' '}
-        <code>#simplex-dictionary</code>.
-      </p>
+    <div style={{ fontFamily: 'Georgia, serif', color: '#222' }}>
+      <header
+        style={{
+          background: '#840125', color: '#fff', textAlign: 'center',
+          padding: '2.6rem 1rem 2rem',
+        }}
+      >
+        <h1 style={{ fontSize: '1.9rem', fontWeight: 'normal', margin: '0 0 .4rem' }}>
+          Interactive Visualizations
+        </h1>
+        <p style={{ margin: '.2rem 0', opacity: 0.9 }}>
+          Mathematical Programming and Operations Research — Book 1
+        </p>
+        <p style={{ margin: '.6rem 0 0' }}>
+          <a href="../" style={{ color: '#fff' }}>&larr; Book home</a>
+        </p>
+      </header>
 
-      {GROUPS.map((g) => (
-        <div key={g.heading} style={{ marginBottom: 34 }}>
-          <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12, borderBottom: '2px solid #eee', paddingBottom: 6 }}>
-            {g.heading}
-          </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 14 }}>
-            {g.demos.map((d) => (
-              <button
-                key={d.id}
-                onClick={() => open(d.id)}
-                style={{
-                  display: 'block', textAlign: 'left', padding: 18, border: '1px solid #ddd',
-                  borderRadius: 12, background: '#fff', cursor: 'pointer', color: 'inherit',
-                  boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-                }}
-              >
-                <div style={{ fontSize: 16.5, fontWeight: 700, marginBottom: 5 }}>{d.title}</div>
-                <div style={{ fontSize: 13.5, color: '#666' }}>{d.description}</div>
-              </button>
-            ))}
+      <div style={{ maxWidth: 1080, margin: '0 auto', padding: '32px 24px 60px' }}>
+        <p style={{ color: '#555', marginBottom: 8, maxWidth: 760, lineHeight: 1.55 }}>
+          Companions to <i>Mathematical Programming and Operations Research</i> (Book 1:
+          Linear and Integer Programming). Each demo is referenced from the matching
+          chapter of the book. Click a card to launch; use your browser's back button
+          or the header to return.
+        </p>
+        <p style={{ color: '#888', fontSize: 14, marginBottom: 36 }}>
+          Direct links: add <code>#demo-id</code> to this page's URL, e.g.{' '}
+          <code>#simplex-dictionary</code>.
+        </p>
+
+        {GROUPS.map((g) => (
+          <div key={g.heading} style={{ marginBottom: 34 }}>
+            <h2 style={{ fontSize: 20, fontWeight: 700, color: '#840125', marginBottom: 12, borderBottom: '2px solid #eee', paddingBottom: 6 }}>
+              {g.heading}
+            </h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 14 }}>
+              {g.demos.map((d) => (
+                <button
+                  key={d.id}
+                  onClick={() => open(d.id)}
+                  style={{
+                    display: 'block', textAlign: 'left', padding: '18px 19px', border: '1px solid #ddd',
+                    borderRadius: 8, background: '#fff', cursor: 'pointer', color: 'inherit',
+                    fontFamily: 'Georgia, serif', transition: 'box-shadow .15s',
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 2px 10px rgba(0,0,0,.12)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'none'; }}
+                >
+                  <div style={{ fontSize: 16.5, fontWeight: 700, color: '#840125', marginBottom: 5 }}>{d.title}</div>
+                  <div style={{ fontSize: 13.5, color: '#555', lineHeight: 1.45 }}>{d.description}</div>
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
 
-      <p style={{ color: '#999', fontSize: 13, marginTop: 20 }}>
-        Source and license: these visualizations are part of the open-optimization
-        project (CC BY-SA 4.0 / MIT for code). Sources live in the{' '}
-        <code>visualizations/source</code> folder of the book repository.
-      </p>
+        <p style={{ color: '#777', fontSize: 13, marginTop: 20, textAlign: 'center' }}>
+          &copy; 2026 Robert Hildebrand and contributors &middot; Text{' '}
+          <a href="https://creativecommons.org/licenses/by-sa/4.0/" style={{ color: '#840125' }}>CC BY-SA 4.0</a>, code MIT
+          &middot; Part of the open-optimization project; sources live in the{' '}
+          <code>visualizations/source</code> folder of the book repository.
+        </p>
+      </div>
     </div>
   );
 }

@@ -44,12 +44,27 @@
 <script>
   // Unpacked EPUB: chapters load on demand instead of downloading the
   // whole 22 MB zip up front. The .epub link above is still the download.
+  document.getElementById("status").textContent = "Loading…";
   var book = ePub("../epub-unpacked/content.opf");
   var rendition = book.renderTo("viewer", {
     width: "100%", height: "100%", flow: "scrolled-doc"
   });
   var saved = localStorage.getItem("book1-epub-loc");
-  rendition.display(saved || undefined);
+  rendition.display(saved || undefined).then(function () {
+    document.getElementById("status").textContent = "";
+  }).catch(function () {
+    // stale saved position from an older build; start from the beginning
+    localStorage.removeItem("book1-epub-loc");
+    return rendition.display();
+  });
+  book.opened.catch(function (e) {
+    document.getElementById("viewer").innerHTML =
+      '<div style="padding:2rem;font-family:Georgia,serif;">Could not load the book ' +
+      '(' + (e && e.message ? e.message : "network error") + "). " +
+      'Try a hard refresh (Cmd/Ctrl+Shift+R), or use the ' +
+      '<a href="../html/">HTML edition</a> or the ' +
+      '<a href="../epub-build/book1-epub.epub">EPUB download</a>.</div>';
+  });
 
   var tocSel = document.getElementById("toc");
   book.loaded.navigation.then(function (nav) {
