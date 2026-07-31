@@ -61,6 +61,14 @@ NAV = ('<div style="font-family:Georgia,serif;font-size:0.9rem;'
        ' &#xA0;|&#xA0; <a href="../Intro-Math-Programming/baseText/book/book1-main.pdf">PDF</a>'
        '</div>')
 
+FOOT = ('<div style="font-family:Georgia,serif;font-size:0.85rem;color:#666;'
+        'border-top:1px solid #ccc;margin-top:24px;padding:10px 0;">'
+        '&#xA9; 2026 Robert Hildebrand and contributors &#xB7; Licensed '
+        '<a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>'
+        ' &#xB7; <a href="book1-epubli2.xhtml">Sources and attribution</a>'
+        ' &#xB7; <a href="../">Book home</a>'
+        '</div>')
+
 for i, f in enumerate(spine):
     p = OUT / f
     t = p.read_text(errors="ignore")
@@ -68,6 +76,8 @@ for i, f in enumerate(spine):
     next_l = (' &#xA0;|&#xA0; <a href="%s">Next &#8250;</a>' % spine[i+1]) if i < len(spine)-1 else ""
     nav = NAV.format(prev=prev_l, next=next_l)
     t2, n = re.subn(r"(<body[^>]*>)", r"\1" + nav.replace("\\", "\\\\"), t, count=1)
+    t2 = t2.replace("</body>", FOOT + "</body>", 1)
+    t2 = t2.replace("Edited by Robert Hildebrand", "By Robert Hildebrand")
     if n:
         p.write_text(t2)
 
