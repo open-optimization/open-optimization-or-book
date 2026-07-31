@@ -1,14 +1,11 @@
+# External source: Optimization Notes (Bish)
 
+This directory contains lecture notes originally written by Dr. Douglas
+Bish for a course on linear programming at Virginia Tech, contributed
+under the Creative Commons Attribution-ShareAlike 4.0 International
+license (stated in the source file headers).
 
-# Optimization Notes
-## Modeling, Algorithms, and Complexity with Examples in Python and Excel
-
-These notes were originally written by Dr. Douglas Bish for a course on linear programing at Virginia Tech.
-
-These notes are licenced under the creative commons licnese CC BY SA 4.0.
-See [http://creativecommons.org/licenses/by-sa/4.0/] for details on this liense.
-
-
-These notes have been modified by Robert Hildebrand.
-
-The modification maintains the CC BY SA License.
+The book *Mathematical Programming and Operations Research* (this
+repository) adapts LP formulation, theory, algorithm, and sensitivity
+analysis material from these notes. Attribution appears in the front
+matter of the book.
