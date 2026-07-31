@@ -287,7 +287,7 @@ Some examples of convex sets are:
     \item \emph{Halfspace}   $H = \{ \x \in \R^n : \a^\top \x \leq b\}$
     \item \emph{Polyhedron}  $P = \{\x \in \R^n : A\x \leq \b\}$
     \item \emph{Ball} $B = \{ \x \in \R^n : \sum_{i=1}^n x_i^2 \leq 1\}$
-    \item \emph{Second Order Cone} $S = \{ (\x,t) \in \R^n \times \R : \sum_{i=1}^n x_i^2 \leq t^2 \}$
+    \item \emph{Second Order Cone} $S = \{ (\x,t) \in \R^n \times \R : \|\x\| \leq t \}$, i.e., $\sum_{i=1}^n x_i^2 \leq t^2$ with $t \geq 0$
 \end{enumerate}
 
 \begin{figure}[h!]
@@ -331,14 +331,32 @@ Some examples of convex sets are:
     \draw[->,thick] (0,-2) -- (0,2) node[above] {$x_2$};
 \end{tikzpicture}
 \hfill
-\begin{tikzpicture}[scale=1.5]
-%    % Second Order Cone
-\draw[orange, thick] (-1,0) -- (0,2) -- (1,0);
-\fill[orange!30,opacity=0.5] (-1,0) -- (0,2) -- (1,0) -- cycle;
-\node[orange] at (0,-1.4) {\small Second Order Cone: $\{(\mathbf{x}, t) \in \mathbb{R}^n \times \mathbb{R} : \|\mathbf{x}\|^2 \leq t^2\}$};
-%    % Axes
-\draw[->,thick] (-2,0) -- (2,0) node[right] {$x_1$};
-\draw[->,thick] (0,-2) -- (0,2) node[above] {$x_2$};
+\begin{tikzpicture}
+% Second Order Cone in R^3: ||(x1,x2)|| <= t
+\begin{axis}[
+    width=6.2cm, height=5.6cm,
+    view={120}{20},
+    axis lines=center,
+    ticks=none,
+    xlabel={$x_1$}, ylabel={$x_2$}, zlabel={$t$},
+    xlabel style={anchor=north east},
+    ylabel style={anchor=north west},
+    zlabel style={anchor=south},
+    zmin=0, zmax=1.2,
+    xmin=-1.2, xmax=1.2, ymin=-1.2, ymax=1.2,
+    clip=false]
+  % lateral surface of the cone t = ||(x1,x2)||
+  \addplot3[surf, shader=interp,
+      colormap={soc}{color=(orange!20) color=(orange!80!black)},
+      opacity=0.75, domain=0:1, y domain=0:360,
+      samples=14, samples y=40, z buffer=sort]
+      ({x*cos(y)}, {x*sin(y)}, {x});
+  % rim of the cone at t = 1
+  \addplot3[orange!80!black, thick, domain=0:360, samples=60]
+      ({cos(x)}, {sin(x)}, {1});
+\end{axis}
+\node[orange!80!black, below=1pt] at (current bounding box.south)
+    {\small Second Order Cone: $\{(\x, t) : \|\x\| \leq t\}$};
 \end{tikzpicture}
 
 \caption{Examples of convex sets: a hyperplane, a halfspace, a polyhedron, a ball, and a second-order cone.}\label{fig:convex-set-examples}% fig-num-auto
