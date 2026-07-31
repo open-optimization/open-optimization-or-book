@@ -14,23 +14,17 @@ from lxml import etree
 BUILD = Path(__file__).resolve().parent.parent
 REPO = BUILD.parent
 OUT = REPO / "html"
-UNPACK = REPO / "epub-unpacked"   # verbatim OEBPS for the epub.js reader
 EPUB = BUILD / "book1-epub.epub"
 
-for d in (OUT, UNPACK):
-    if d.exists():
-        shutil.rmtree(d)
-    d.mkdir()
+if OUT.exists():
+    shutil.rmtree(OUT)
+OUT.mkdir()
 
 with zipfile.ZipFile(EPUB) as z:
     for name in z.namelist():
         if name.startswith("OEBPS/") and not name.endswith("/"):
             rel = name[len("OEBPS/"):]
             data = z.read(name)
-            # verbatim copy for the reader (progressive chapter loading)
-            udest = UNPACK / rel
-            udest.parent.mkdir(parents=True, exist_ok=True)
-            udest.write_bytes(data)
             if rel in ("content.opf",):
                 continue
             dest = OUT / rel
@@ -57,7 +51,7 @@ titles = {f: title_of(f) for f in spine}
 NAV = ('<div style="font-family:Georgia,serif;font-size:0.9rem;'
        'border-bottom:1px solid #ccc;padding:6px 0;margin-bottom:12px;">'
        '<a href="index.html">Contents</a>{prev}{next}'
-       ' &#xA0;|&#xA0; <a href="../read/">EPUB reader</a>'
+       ' &#xA0;|&#xA0; <a href="../epub-build/book1-epub.epub">Download EPUB</a>'
        ' &#xA0;|&#xA0; <a href="../Intro-Math-Programming/baseText/book/book1-main.pdf">PDF</a>'
        '</div>')
 
@@ -98,11 +92,11 @@ items = "\n".join(
 <small>Book 1: Linear and Integer Programming</small></h1>
 <p class="meta">By Robert Hildebrand, adapted in part from open resources · CC BY-SA 4.0 ·
 <a href="../">Book home</a> ·
-<a href="../read/">EPUB reader</a> ·
+<a href="../epub-build/book1-epub.epub">Download EPUB</a> ·
 <a href="../Intro-Math-Programming/baseText/book/book1-main.pdf">PDF</a></p>
 <ol>
 {items}
 </ol>
 </body></html>
 """)
-print(f"html/ built: {len(spine)} chapters; epub-unpacked/ refreshed for the reader")
+print(f"html/ built: {len(spine)} chapters")
