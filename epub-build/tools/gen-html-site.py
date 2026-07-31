@@ -51,15 +51,15 @@ titles = {f: title_of(f) for f in spine}
 NAV = ('<div style="font-family:Georgia,serif;font-size:0.9rem;'
        'border-bottom:1px solid #ccc;padding:6px 0;margin-bottom:12px;">'
        '<a href="index.html">Contents</a>{prev}{next}'
-       ' &nbsp;|&nbsp; <a href="../read/">EPUB reader</a>'
-       ' &nbsp;|&nbsp; <a href="../Intro-Math-Programming/baseText/book/book1-main.pdf">PDF</a>'
+       ' &#xA0;|&#xA0; <a href="../read/">EPUB reader</a>'
+       ' &#xA0;|&#xA0; <a href="../Intro-Math-Programming/baseText/book/book1-main.pdf">PDF</a>'
        '</div>')
 
 for i, f in enumerate(spine):
     p = OUT / f
     t = p.read_text(errors="ignore")
-    prev_l = (' &nbsp;|&nbsp; <a href="%s">&#8249; Previous</a>' % spine[i-1]) if i > 0 else ""
-    next_l = (' &nbsp;|&nbsp; <a href="%s">Next &#8250;</a>' % spine[i+1]) if i < len(spine)-1 else ""
+    prev_l = (' &#xA0;|&#xA0; <a href="%s">&#8249; Previous</a>' % spine[i-1]) if i > 0 else ""
+    next_l = (' &#xA0;|&#xA0; <a href="%s">Next &#8250;</a>' % spine[i+1]) if i < len(spine)-1 else ""
     nav = NAV.format(prev=prev_l, next=next_l)
     t2, n = re.subn(r"(<body[^>]*>)", r"\1" + nav.replace("\\", "\\\\"), t, count=1)
     if n:
