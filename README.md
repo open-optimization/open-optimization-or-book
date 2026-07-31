@@ -2,7 +2,7 @@
 
 ## Book 1: Linear and Integer Programming — Modeling, Algorithms, and Complexity, with Examples in Python and Excel
 
-Edited by Robert Hildebrand
+By Robert Hildebrand, adapted in part from open resources
 
 <img src="epub-build/cover/cover.png" alt="Book cover" width="300">
 
