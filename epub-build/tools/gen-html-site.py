@@ -14,22 +14,28 @@ from lxml import etree
 BUILD = Path(__file__).resolve().parent.parent
 REPO = BUILD.parent
 OUT = REPO / "html"
+UNPACK = REPO / "epub-unpacked"   # verbatim OEBPS for the epub.js reader
 EPUB = BUILD / "book1-epub.epub"
 
-if OUT.exists():
-    shutil.rmtree(OUT)
-OUT.mkdir()
+for d in (OUT, UNPACK):
+    if d.exists():
+        shutil.rmtree(d)
+    d.mkdir()
 
 with zipfile.ZipFile(EPUB) as z:
     for name in z.namelist():
         if name.startswith("OEBPS/") and not name.endswith("/"):
             rel = name[len("OEBPS/"):]
+            data = z.read(name)
+            # verbatim copy for the reader (progressive chapter loading)
+            udest = UNPACK / rel
+            udest.parent.mkdir(parents=True, exist_ok=True)
+            udest.write_bytes(data)
             if rel in ("content.opf",):
-                data = z.read(name)
                 continue
             dest = OUT / rel
             dest.parent.mkdir(parents=True, exist_ok=True)
-            dest.write_bytes(z.read(name))
+            dest.write_bytes(data)
     opf = z.read("OEBPS/content.opf")
 
 # spine order + titles
@@ -89,4 +95,4 @@ items = "\n".join(
 </ol>
 </body></html>
 """)
-print(f"html/ built: {len(spine)} chapters")
+print(f"html/ built: {len(spine)} chapters; epub-unpacked/ refreshed for the reader")
