@@ -36,8 +36,10 @@ python3 tools/extract-tikz-all.py placeholders   # gray boxes for any failures
 echo "== 2/8 fix nested inputs + strip figure path prefixes in src/ =="
 sed -i 's|\\input{../optimization/open-optimization-examples/example-capital-budgeting.tex}|\\input{src/example-capital-budgeting}|; s|\\input{../optimization/open-optimization-examples/example-set-covering.tex}|\\input{src/example-set-covering}|' src/integerProgrammingFormulations-book1.tex
 sed -i 's|{optimization/figures/figures-static/|{|g; s|{optimization/figures/figures-source/|{|g; s|{figures/cc-by.eps}|{cc-by}|g; s|{figures/LyryxLogo.eps}|{LyryxLogo}|g; s|{figures/component-assess.eps}|{component-assess}|g; s|{figures/component-book.eps}|{component-book}|g; s|{figures/component-supplement.eps}|{component-supplement}|g; s|{figures/component-support.eps}|{component-support}|g' src/*.tex
-# drop the tikzmark-overlay annotation (cannot work in EPUB)
+# drop the tikzmark-overlay annotations (cannot work in EPUB): the page
+# overlay (tikz09) and the four blank tikzmark anchors (tikz11-14)
 sed -i 's|\\includegraphics\[width=0.85\\linewidth\]{figs/simplex-basis-driven-tikz09.png}|% [overlay annotation omitted in EPUB]|' src/simplex-basis-driven.tex
+sed -i 's|\\includegraphics\[width=0.11in\]{figs/simplex-basis-driven-tikz1[1-4].png}|% [tikzmark overlay omitted in EPUB]|' src/simplex-basis-driven.tex
 # strip \colorbox in math, natural-size small figures, checkpoint-answer refs
 python3 tools/fix-src-epub.py
 # per-figure credit lines for third-party images (from the metadata bibs)
