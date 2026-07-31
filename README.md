@@ -12,11 +12,10 @@ Read or download the book at the project site:
 
 **https://open-optimization.github.io/open-optimization-or-book/**
 
-- [Read online (EPUB reader)](https://open-optimization.github.io/open-optimization-or-book/read/)
-- [HTML edition](https://open-optimization.github.io/open-optimization-or-book/html/)
-- [Download the PDF](https://open-optimization.github.io/open-optimization-or-book/Intro-Math-Programming/baseText/book/book1-main.pdf)
-- [Download the EPUB](https://open-optimization.github.io/open-optimization-or-book/epub-build/book1-epub.epub)
+- [Read the PDF](https://open-optimization.github.io/open-optimization-or-book/Intro-Math-Programming/baseText/book/book1-main.pdf) — the definitive print-layout edition
+- [Download the EPUB](https://open-optimization.github.io/open-optimization-or-book/epub-build/book1-epub.epub) — for Apple Books, calibre, Thorium, and Send-to-Kindle
 - [Interactive visualizations](https://open-optimization.github.io/open-optimization-or-book/visualizations/)
+- [Basic HTML preview](https://open-optimization.github.io/open-optimization-or-book/html/) of the chapters
 
 ## About the book
 
