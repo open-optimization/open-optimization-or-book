@@ -3,7 +3,7 @@
 **Date:** May 5, 2026
 **Target reviewer cycle:** mid-August (per Anita Walz, VTech Publishing)
 **Book:** "Mathematical Programming and Operations Research:
-Modeling, Algorithms, and Complexity with Examples in Python and Julia"
+Modeling, Algorithms, and Complexity with Examples in Python and Excel"
 (Book 1 of 2)
 **Source entry point:** `Intro-Math-Programming/baseText/book/book1-main.tex`
 **Distribution license:** CC BY-SA 4.0

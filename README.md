@@ -1,30 +1,48 @@
-
-![](content/intro-mathprog-or/open-optimization/titlecard.png)
-
 # Mathematical Programming and Operations Research
-## Modeling, Algorithms, and Complexity with Examples in Python and Julia
-Edited by: Robert Hildebrand
 
-The current release of this book can be found at [here]([https://github.com/open-optimization/open-optimization-or-book/blob/master/Intro-Math-Programming/baseText/LinearProgramming.pdf](https://github.com/open-optimization/open-optimization-or-book/blob/master/Intro-Math-Programming/baseText/book/book1-main.pdf)).
+## Book 1: Linear and Integer Programming — Modeling, Algorithms, and Complexity, with Examples in Python and Excel
 
-https://github.com/open-optimization/open-optimization-or-book/blob/master/Intro-Math-Programming/baseText/book/book1-main.pdf
+Edited by Robert Hildebrand
 
-This book was desigend originally for the undergraduete course ISE 3434 - "Deterministic Operations Research II" taught at Virginia Tech.  I will cover topics in linear programming, integer programming, and nonlinear programming along with basic understanding of complexity theory, many code examples, and various methods of solving problems.
+<img src="epub-build/cover/cover.png" alt="Book cover" width="300">
 
-### Topics to be worked on: 
-- Throughout the book, it needs more examples, figures, and associated code.   
-- Needs several sections on Linear Optimization (modeling, algorithms, and polyhedral theory)
-- Needs more topics on heuristics (genetic algorithms, particle swarm optimization, tabu search, etc.)
-- Editing, rewriting, and improving content.
-- Properly formatted citations of resued material.
+## 📖 The first complete draft is available now!
 
-You are encouraged to write and contribute to this endeavor by adding content to the Open Optimization organization, or by making pull requests directly to this repository.  Please contact Robert Hildebrand [rhl@vt.edu](rhil@vt.edu) if you would like to take a larger role in this production.
+Read or download the book at the project site:
 
-# Open Optimization
-This is part of the Open Optimization project - an ecosystem for open-source materials for teaching optimization and operations research.  This ecosystem is being formed to host open-source lecture notes, lecture slides, examples, code, figures, and textbooks on material and courses related to optimization.
+**https://open-optimization.github.io/open-optimization-or-book/**
 
-All material other than code will be licensed under Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0) that permits free reuse and alteration of the material provided the proper attribution is given.  All material posted will be not just open-source, but open-source code as well - including LaTeX, tikz, and other means of generating content.  This allows those interested in reusing material an easy way to change and adapt the material as needed.
+- [Read online (EPUB reader)](https://open-optimization.github.io/open-optimization-or-book/read/)
+- [HTML edition](https://open-optimization.github.io/open-optimization-or-book/html/)
+- [Download the PDF](https://open-optimization.github.io/open-optimization-or-book/Intro-Math-Programming/baseText/book/book1-main.pdf)
+- [Download the EPUB](https://open-optimization.github.io/open-optimization-or-book/epub-build/book1-epub.epub)
+- [Interactive visualizations](https://open-optimization.github.io/open-optimization-or-book/visualizations/)
 
-All code (e.g., Julia, Python, AMPL, GAMS, MatLab, etc.) on this repository will be licensed freely under the MIT License.  This is in an effort to make code simple and easy to reuse.
+## About the book
 
-[More information about the Open Optimization project and how you can contribute](https://github.com/open-optimization/open-optimization-common/blob/master/README.md)
+An open textbook on linear programming, discrete algorithms, and integer
+programming, with worked examples in Excel and Python (Gurobi), graded
+exercise ladders with selected solutions, real-world case studies, and
+interactive visualizations. It was designed for the undergraduate courses
+ISE 3424/3434 — Deterministic Operations Research — at Virginia Tech and is
+being prepared for publication with Virginia Tech Publishing & Press.
+
+Feedback is welcome! Please open an issue on this repository or contact
+Robert Hildebrand at [rhil@vt.edu](mailto:rhil@vt.edu) if you find errors or
+would like to contribute to future editions or to Book 2 (Nonlinear and
+Advanced Optimization, in progress).
+
+## Open Optimization
+
+This book is part of the [Open Optimization](https://github.com/open-optimization)
+project — an ecosystem of open-source materials for teaching optimization
+and operations research: lecture notes, slides, examples, code, figures, and
+textbooks. All source material (LaTeX, TikZ, figures) is available in this
+repository so the book is easy to adapt and reuse.
+
+## Licenses
+
+- **Text and figures:** [Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)](https://creativecommons.org/licenses/by-sa/4.0/) — free to reuse, adapt, and share with attribution.
+- **Code** (Python, Excel models, build tooling): [MIT License](https://opensource.org/licenses/MIT).
+
+[More about the Open Optimization project and how to contribute](https://github.com/open-optimization/open-optimization-common/blob/master/README.md)

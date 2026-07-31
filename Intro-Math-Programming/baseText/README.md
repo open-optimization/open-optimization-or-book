@@ -2,7 +2,7 @@
 ![](content/intro-mathprog-or/open-optimization/titlecard.png)
 
 # Mathematical Programming and Operations Research
-## Modeling, Algorithms, and Complexity with Examples in Python and Julia
+## Modeling, Algorithms, and Complexity with Examples in Python and Excel
 Edited by: Robert Hildebrand
 
 The current release of this book can be found at [here](https://github.com/open-optimization/open-optimization-or-book/releases/download/v0.0.7/open-optimization.pdf).
