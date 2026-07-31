@@ -1,7 +1,7 @@
 
 
 # Optimization Notes
-## Modeling, Algorithms, and Complexity with Examples in Python and Julia
+## Modeling, Algorithms, and Complexity with Examples in Python and Excel
 
 These notes were originally written by Dr. Douglas Bish for a course on linear programing at Virginia Tech.
 

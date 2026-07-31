@@ -78,7 +78,11 @@ $FILTER_REPO \
   --path 'Intro-Math-Programming/baseText/book/PLAGIARISM-SWEEP-REPORT.md' \
   --path 'Intro-Math-Programming/baseText/book/fair-use-fix-log.md' \
   --path 'Intro-Math-Programming/baseText/book/section-6.3-fair-use-review.md' \
-  --path 'book1-license-audit.docx'
+  --path 'book1-license-audit.docx' \
+  --path 'Math484_V1.pdf' \
+  --path 'LICENSE-ISSUES.md' \
+  --path 'book1-review-and-plan.docx' \
+  --path 'figure-catalog.pdf'
 
 echo
 echo "Done. Verify with:"
