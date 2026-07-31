@@ -82,7 +82,8 @@ $FILTER_REPO \
   --path 'Math484_V1.pdf' \
   --path 'LICENSE-ISSUES.md' \
   --path 'book1-review-and-plan.docx' \
-  --path 'figure-catalog.pdf'
+  --path 'figure-catalog.pdf' \
+  --path 'Intro-Math-Programming/baseText/kruskal-video.jpg'
 
 echo
 echo "Done. Verify with:"
