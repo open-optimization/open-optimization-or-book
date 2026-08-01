@@ -11,6 +11,11 @@
 
 \label{sec:IP-algorithms}
 
+% Fixed-width centred column for evenly spaced tableau entries (same
+% convention as Book 1, ch. Simplex Method: The Tableau).
+% (Z is unused by array/tabularx/siunitx, so this is safe book-wide.)
+\newcolumntype{Z}{>{\centering\arraybackslash}p{0.95cm}}
+
 \begin{outcome}
 \begin{enumerate}
 \item Understand misconceptions in difficulty of integer programs
@@ -745,29 +750,37 @@ We will solve the following problem using only Gomory Cuts.
 
 We can apply the simplex method to solve the LP relaxation.
 
+As in Book 1, the $z$-row stores the objective equation with all variables
+moved to the left-hand side; here the problem is a \emph{minimization}, so
+$z = x_1 - 2x_2$ is stored as $z - x_1 + 2x_2 = 0$, and the basis is optimal
+once every nonbasic entry of the $z$-row is nonpositive (equivalently, every
+reduced cost is nonnegative).
+
 \begin{center}
-Initial basis:\\[3pt]
-\begin{tabular}{|lr|rrrr|}
-\hline
- Basis & RHS & $x_1$ & $x_2$ & $s_1$ & $s_2$ \\
- \hline
- $z$     & 0.0 & 1.0   & -2.0  & 0.0   & 0.0   \\
- \hline
- $s_1$ & 9.0 & -4.0  & 6.0   & 1.0   & 0.0   \\
- $s_2$ & 4.0 & 1.0   & 1.0   & 0.0   & 1.0   \\
-\hline
+Initial tableau (basis $\{s_1, s_2\}$):\\[3pt]
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{c|ZZZZ|Z}
+\toprule
+Basis & $x_1$ & $x_2$ & $s_1$ & $s_2$ & RHS\\
+\midrule
+$z$   & $-1$ & $2$ & $0$ & $0$ & $0$\\
+\midrule
+$s_1$ & $-4$ & $6$ & $1$ & $0$ & $9$\\
+$s_2$ & $1$  & $1$ & $0$ & $1$ & $4$\\
+\bottomrule
 \end{tabular}\\[8pt]
 $\vdots$\\[8pt]
-Optimal basis:\\[3pt]
-\begin{tabular}{|lr|rrrr|}
-\hline
- Basis & RHS  & $x_1$ & $x_2$ & $s_1$ & $s_2$ \\
- \hline
- $z$     & -3.5 & 0.0   & 0.0   & 0.3   & 0.2   \\
- \hline
- $x_1$ & 1.5  & 1.0   & 0.0   & -0.1  & 0.6   \\
- $x_2$ & 2.5  & 0.0   & 1.0   & 0.1   & 0.4   \\
-\hline
+Optimal tableau (basis $\{x_1, x_2\}$):\\[3pt]
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{c|ZZZZ|Z}
+\toprule
+Basis & $x_1$ & $x_2$ & $s_1$ & $s_2$ & RHS\\
+\midrule
+\rowcolor{algopt!12}$z$ & $0$ & $0$ & $-0.3$ & $-0.2$ & $-3.5$\\
+\midrule
+$x_1$ & $1$ & $0$ & $-0.1$ & $0.6$ & $1.5$\\
+$x_2$ & $0$ & $1$ & $0.1$  & $0.4$ & $2.5$\\
+\bottomrule
 \end{tabular}
 \end{center}
 
@@ -776,15 +789,15 @@ This LP relaxation produces the fractional basic solution $x_{LP} = (1.5, 2.5)$.
 \begin{example}{}{}\textbf{(Gomory cut  removes LP solution)}{}
  We now identify an integer variable $x_i$ that has a fractional basic solution.  Since both variables have fractional values, we can choose either row to make a cut.  Let's focus on the row corresponding to $x_1$.
 
-The row from the tableau expresses the equation 
+The row from the tableau expresses the equation
 \begin{equation}
-x_1 - 0.1 s_1 + -0.6 s_2 = 1.5.
+x_1 - 0.1\, s_1 + 0.6\, s_2 = 1.5.
 \end{equation}
 
-Applying the Gomory Cut~\eqref{eq:gomory-cut}, we have the inequality 
+Applying the Gomory Cut~\eqref{eq:gomory-cut} (the fractional parts are $-0.1 - \lfloor -0.1 \rfloor = 0.9$, $0.6 - \lfloor 0.6 \rfloor = 0.6$, and $1.5 - \lfloor 1.5 \rfloor = 0.5$), we have the inequality
 \begin{equation}
 \label{eq:gomory-cut-ex1}
-0.9 s_1 + 0.4 s_2 \geq 0.5.
+0.9\, s_1 + 0.6\, s_2 \geq 0.5.
 \end{equation}
 
 The current LP solution is $(x_{LP}, s_{LP}) = (1.5, 2.5,0,0)$.  Trivially, since $s_1, s_2 = 0$, the inequality is violated.
@@ -802,24 +815,18 @@ The Gomory Cut~\eqref{eq:gomory-cut-ex1} can be rewritten in the original variab
 \end{equation}
 which transforms the Gomory cut into the original variables to create the inequality
 \begin{equation*}
-\label{eq:gomory-cut-ex1-original}
-0.9 (9 + 4x_1 - 6x_2) + 0.4(4 - x_1 - x_2) \geq 0.5.
+0.9 (9 + 4x_1 - 6x_2) + 0.6(4 - x_1 - x_2) \geq 0.5,
 \end{equation*}
 or equivalently
 \begin{equation}
 \label{eq:gomory-cut-ex1-original}
-- 3.2 x_1 + 5.8 x_2 \leq 9.2.
+- 3 x_1 + 6 x_2 \leq 10.
 \end{equation}
-\textbf{Check!} We can now check if this inequality cuts off the current LP optimal solution.
-%To see this, let's plug in $(x_{LP}, s_{LP}) = (1.5, 2.5,0,0)$.
-%
-\begin{equation}
-\label{eq:gomory-cut-ex1-original}
-%- 3.2 x_1 + 5.8 x_2 = - 3.2 (1.5) + 5.8 (2.5) = 9.7 > 9.2
-\end{equation}
-%Thus, this LP solution is violated by the new Gomory Cut.
-
-As you can see, this inequality does cut off the current LP relaxation.
+\textbf{Check!} We can now check if this inequality cuts off the current LP optimal solution. Plugging in $x_{LP} = (1.5, 2.5)$ gives
+\begin{equation*}
+- 3 (1.5) + 6 (2.5) = 10.5 > 10.
+\end{equation*}
+Thus, this inequality does cut off the current LP relaxation.
 % TODO missing image, disabled 2026-07-31: \includegraphics[scale = 0.5]{this-graphic.}
 
 \end{example}
@@ -827,7 +834,7 @@ As you can see, this inequality does cut off the current LP relaxation.
 \begin{example}{\textbf{(Gomory  cuts plus new tableau)}}{}
 Now we add the slack variable $s_3 \geq 0$ to make the equation
 \begin{equation}
-0.9 s_1 + 0.4 s_2 - s_3 = 0.5.
+0.9\, s_1 + 0.6\, s_2 - s_3 = 0.5.
 \end{equation}
 
 \end{example}
