@@ -184,6 +184,17 @@ STATIC_CAPTIONS = {
     "pwl-plot": "Piecewise linear function.",
     "jssp-duplo": "Gantt chart of the Duplo job shop scheduling solution with three machines and four color-coded jobs.",
     "jssp-duplo-actual": "Photograph of Duplo building blocks arranged as a physical demonstration of the job shop schedule.",
+    # Book 2 (captions derived from 00_METADATA.bib abstracts + surrounding text)
+    "branch-and-bound1": "Feasible region of the LP relaxation with integer lattice points shown as dots; a red X marks the fractional LP optimal solution.",
+    "branch-and-bound2": "Branch and bound after branching: the relaxation is split into two subregions by the branching constraint, each with its own LP optimum.",
+    "branch-and-bound3": "A later stage of branch and bound: a green star marks an integer feasible solution and a red X marks a fractional solution being pruned.",
+    "knapsack-fig": "The pattern polytope P: each integer point in the blue triangle represents a feasible cut pattern.",
+    "knapsack-fig-opt": "Maximal cut patterns in the pattern polytope: only the highlighted integer points are needed.",
+    "m-tsp_solution": "Solution of a multiple traveling salesman problem on a street map: colored routes assign customer sites to vehicles starting from a common depot.",
+    "local-min": "A function with several critical points, illustrating the difference between local minimizers and the global minimizer.",
+    "kkt-optimal": "A constrained minimum where both constraints are active: the negative objective gradient lies in the cone of the active constraint gradients, so the KKT conditions hold.",
+    "kkt-non-optimal1": "A boundary point where only the halfspace constraint is active and the KKT conditions fail: sliding along the boundary improves the objective.",
+    "kkt-non-optimal2": "A point on the disk boundary where the negative objective gradient is not a nonnegative multiple of the active constraint gradient, so the point is not optimal.",
 }
 
 # tikz pictures living in tabular cells get ONE caption after the tabular
@@ -210,7 +221,8 @@ def tabular_spans(text):
 def macro_sites(text):
     """Yield (start, end, kind, path, desc) for display-image macro calls."""
     pat = re.compile(r"\\(altincludegraphics|includegraphicstatic|"
-                     r"includegraphicbook|includetikz)\b")
+                     r"includegraphicbooksource|includegraphicbook|"
+                     r"includetikz|includegraphics)\b")
     for m in pat.finditer(text):
         kind = m.group(1)
         j = m.end()
@@ -277,12 +289,13 @@ for stem, path in sorted(by_stem.items()):
     text = path.read_text(encoding="utf-8")
     spans = protected_spans(text)
     tspans = tabular_spans(text)
+    tikzspans = list(find_tikz_blocks(text))
     inserts = []   # (pos, string)
     groups = {}    # tabular span -> [tikz idx]
     n = 0
 
     # 1. tikzpictures
-    for idx, (s, e) in enumerate(find_tikz_blocks(text), start=1):
+    for idx, (s, e) in enumerate(tikzspans, start=1):
         if idx not in tikz_targets.get(stem, set()):
             continue
         name = f"{stem}-tikz{idx:02d}"
@@ -323,6 +336,10 @@ for stem, path in sorted(by_stem.items()):
     # 2/3. macro calls
     for s, e, kind, mpath, desc in macro_sites(text):
         if is_commented(text, s) or in_spans(s, spans):
+            continue
+        # graphics used inside tikz nodes or as table-of-images cells never
+        # get individual numbers (one caption per group, added by hand)
+        if in_spans(s, tikzspans) or in_spans(s, tspans):
             continue
         base = os.path.splitext(os.path.basename(mpath))[0]
         if MARK in text[e:e + 400]:

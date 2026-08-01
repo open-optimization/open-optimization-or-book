@@ -171,6 +171,27 @@ SITES = {
   ("tab", 29, "&A&B&C&D&E&F",
    "Distances between the six computers in the office network.", "tab07"),
  ],
+ # ---------------------------------------------------------------- Book 2
+ "integerProgrammingFormulations-LP-notes": [
+  ("tab", 2, "Brooklyn-Battery",
+   "Directed arcs between the boroughs and whether each crossing charges a toll.", "tab01"),
+ ],
+ "integerProgrammingExponentialFormulations": [
+  ("tab", 2, "4m &0 &0 &1",
+   "All possible cut patterns for the pipe cutting example.", "tab01"),
+  ("tab", 3, "4m &4 & 0 & 0",
+   "Initial choice of columns (patterns) for the column generation example.", "tab02"),
+  ("tab", 4, "MTZ model for TSP with 4 nodes",
+   "Distance matrix for the four-city TSP instance solved with the MTZ model.", "tab03"),
+  ("tab", 5, "DFJ Model for $n=4$ nodes",
+   "Distance matrix for the four-city TSP instance solved with the DFJ model.", "tab04"),
+ ],
+ "complexity": [
+  ("float", 1, "f(n)=n^2 + n",
+   "Growth of $f(n)=n^2+n$ compared with the upper bounds $g(n)=2n^2$ and $h(n)=2n^3$.", "tab01"),
+  ("tab", 2, "Logarithmic",
+   "Common classes of functions in Big-O notation.", "tab02"),
+ ],
  "integerProgrammingFormulations-book1": [
   ("tab", 2, "Toll",
    "Directed arcs between the boroughs and whether each crossing charges a toll.", "tab01"),
@@ -228,12 +249,14 @@ def main():
         inserts = []
         n = 0
         for kind, occ, sig, cap, labsuf in sites:
+            lab = labsuf if labsuf == "pillContent" else f"{stem}-{labsuf}"
+            if f"\\label{{tab:{lab}}}{MARK}" in text:
+                continue          # already numbered (robust to line drift)
             m = (arrs if kind == "arr" else tabs)[occ - 1]
             window = text[max(0, m.start() - 300):m.start() + 500]
             if sig not in window:
                 sys.exit(f"{stem}: sig {sig!r} not found near "
                          f"{kind} #{occ} -- source drifted, aborting")
-            lab = labsuf if labsuf == "pillContent" else f"{stem}-{labsuf}"
             if kind == "arr":
                 e = env_end(text, m.start(), "array")
                 close = text.find("\\]", e)
