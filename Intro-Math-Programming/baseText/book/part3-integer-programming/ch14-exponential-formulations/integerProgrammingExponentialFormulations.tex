@@ -853,6 +853,7 @@ We will see in the next section
 \end{enumerate}
 
 \subsection{Traveling Salesman Problem Variants}
+\label{sec:tsp-variants}
 
 \subsubsection{Many salespersons (m-TSP)}
 \begin{general}{m-Traveling Salesman Problem - DFJ Model}{}
@@ -987,85 +988,46 @@ Integer Constraints
 x_{ij} \in \{0,1\} \quad \forall (i,j) \in A
 \end{equation}
 
-\section{Case study - Traveling Salesman Problem Applications for Supply Chain Optimization}
+\section{Application: Routing a Product Through a Supply Chain as a TSP}
 
-While the traveling salesman problem was built predominantly for applications of a salesman going to distinct locations, a problem that I believe the TSP could be applied to would be supply chain optimization. We could consider the ‘salesman’ in this situation to be a specific product which has to have numerous components appended to the product for the product to be valuable. The iPhone has to go through numerous manufacturing facilities and have numerous components (including antennas, chips and microprocessors) for the phone to be valuable. This problem could be formulated to be a traveling salesman problem. The supply chain manager in this situation would want to ensure that the product gets to each manufacturing facility for the components to be attached to the product. However, we would want to minimize geographic distance traveled. We would furthermore have to consider aspects including whether the manufacturing facility is reliable (would be quantified by some sort of quality score), the amount of product that the manufacturing facility could supply (sometimes special components including materials could be difficult to obtain) and the cost of the manufacturing process (some manufacturing processes would be expensive compared to others). 
-There are a couple of interesting features of this supply chain optimization problem which distinguish this against a normal traveling salesman problem. To start, we have to consider numerous factors other than the geographic distance that the product travels. We have to consider factors including cost of process, time to ship (shipping by boat requires time compared to shipping by air) and quality of the manufacturing process. For a phone, electronic robot manufacturing would be reliable compared to human manufacturing, however the cost of human manufacturing in poorer countries would be lower. Phones manufactured in Asia would be cheaper than phones manufactured in the USA, however shipping times would be longer. These features would mathematically have to be built into the model through constraints. Each manufacturing facility could have a specific group of features assigned to the facility. Some electronic manufacturing facilities in the USA could have a quality (Q) = 8, cost (C) = 9 and shipment time (S) = 3. A human manufacturing facility in India could have a quality (Q) = 4, cost (C) = 3 and shipment time (S) = 8. The shipment time scores could be built into the objective function of the model and the quality and cost scores could be built into the constraints. We could have constraints which would decide if a location would be selected if the cost and quality score are there inside a specific target number. I would mathematically incorporate a DFJ model. 
-Some other feature that would have to be considered would be if we could have numerous ‘salesmen’ for the supply chain. For highly complex supply chains including cars, there are numerous supply chains for each component of the car. For this supply chain, we could disassemble the car into numerous components (including engines, wheels and electronic components) and build out traveling salesmen algorithms for each of those components. This could be considered a vehicle routing algorithm because of the fact that we are allowed to have numerous supply chains. Furthermore, I could consider the situation if numerous supply chains each require a specific manufacturing facility. We would have to combine the traveling salesman problem and the network flow problem to create a method for managing this. The network flow could figure out if the manufacturing facility has the capacity to create the product. 
+Although the traveling salesman problem is usually told as the story of a salesman visiting cities, the same structure appears in supply-chain settings. Consider a product that must visit a sequence of manufacturing facilities, each of which attaches a component before the product is complete --- a smartphone, for example, passes through facilities that add antennas, chips, and microprocessors. The ``salesman'' is the product itself, the ``cities'' are the facilities, and the planner wants a route through all required facilities that minimizes total transport distance.
 
-\modelhead{Data}
-I have attached to this paper a Excel data that would be good for building a supply chain optimization model through the TSP. The data includes data of shipment times, expense and throughput rates for manufacturing facilities and which things could be produced by which manufacturing facility. I would build the traveling salesman model to start by figuring out which manufacturing facility is required before the others. I would create the model for the product to go through each manufacturing facility while minimizing cost through shipments and manufacturing cost. I have attached some simple code for the supply chain that includes the cost and capacity constraints, however this model could be extended for other features. We could include that a certain quality score has to be maintained for a facility to be selected. 
-The code demonstrates that two subtours could be generated. One subtour is going to be Singapore to Thailand to Mumbai. The other subtour is NY to Chicago to LA. We could then attach a route for LA to Singapore to attach the subtours together. This would lead to a total distance of around 15000 kilometers. I built constraints to this model to ensure that shipment time, cost and quality satisfied constraints.
+The supply-chain version differs from the classical TSP in that distance is not the only concern. Each leg of the route also carries a manufacturing or shipping cost, a shipping time (sea freight is slow and cheap; air freight is fast and expensive), and a process-quality score (an automated line may be more reliable but more expensive than manual assembly). These considerations can be attached to the model as side constraints: each leg $(i,j)$ receives cost, time, and quality scores, the objective minimizes distance, and budget constraints keep total cost, total shipping time, and total quality within acceptable limits.
 
-This supply chain optimization problem differs from a standard TSP in several ways. It involves factors beyond geographic distance, including manufacturing cost, shipping time (e.g., air vs. sea transport), and manufacturing process quality. For instance, electronic robot manufacturing may offer higher reliability but at a greater cost compared to human manufacturing in lower-wage countries. These factors must be incorporated mathematically through constraints. Each manufacturing facility can be assigned specific quality (Q), cost (C), and shipment time (S) scores, which influence the model's objective function and constraints.
+For more complex products such as automobiles, each major component (engine, wheels, electronics) has a supply chain of its own, so several ``salesmen'' operate at once; this is the multiple-TSP / vehicle-routing territory of Section~\ref{sec:tsp-variants}. When several supply chains compete for the capacity of shared facilities, the routing model can be combined with a network-flow model that tracks facility throughput.
 
-\paragraph{Mathematical Model}
-The model can incorporate a Decision, Features, and Juxtaposition (DFJ) approach. Constraints determine if a location is selected based on target quality and cost scores. Additional considerations include the possibility of multiple 'salesmen' for complex supply chains, such as in the automotive industry. Each component (e.g., engines, wheels, electronics) can have its TSP algorithm, resembling a vehicle routing problem. Combining TSP and network flow problem techniques can manage these scenarios, with network flow determining manufacturing facility capacity.
-
-\paragraph{Data}
-
-Attached to this paper is Excel data suitable for building a TSP-based supply chain optimization model. The data includes shipment times, expenses, throughput rates, and manufacturing facility-product compatibility. The TSP model starts by identifying the required manufacturing facility and then routes the product through each facility, minimizing costs and considering quality constraints.
-
-\paragraph{Model}
-
-\paragraph{Sets}
+\modelhead{Sets}
 \begin{itemize}
-    \item $i, j \in$ Facilities: Set of facilities to visit, indexed by $i$ and $j$.
+    \item $F$: set of facilities the product must visit, indexed by $i$ and $j$.
 \end{itemize}
 
-\paragraph{Parameters}
+\modelhead{Parameters}
 \begin{itemize}
-    \item $x_{ij} \in \{0, 1\}$: Binary decision variable representing whether to travel from facility $i$ to facility $j$.
-    \item $d_{ij}$: Haversine distance between facility $i$ and facility $j$ (calculated based on latitude and longitude).
-    \item $Q_{ij}$: Quality score associated with traveling from facility $i$ to facility $j$.
-    \item $C_{ij}$: Cost associated with traveling from facility $i$ to facility $j$.
-    \item $S_{ij}$: Shipment time associated with traveling from facility $i$ to facility $j$.
+    \item $d_{ij}$: distance from facility $i$ to facility $j$ (e.g., great-circle distance computed from latitude and longitude).
+    \item $C_{ij}$, $S_{ij}$, $Q_{ij}$: cost, shipping time, and quality score associated with traveling leg $(i,j)$.
+    \item $C^{\max}$, $S^{\max}$, $Q^{\max}$: budgets on total cost, total shipping time, and total quality score.
 \end{itemize}
 
-\paragraph{Objective}
-The objective is to minimize the total distance traveled while considering the quality, cost, and shipment time associated with each facility visit:
-\begin{equation}
-\text{Minimize} \quad \sum_{i \in \text{Facilities}} \sum_{j \in \text{Facilities}, i \neq j} d_{ij} \cdot x_{ij}
-\end{equation}
-
-\paragraph{Constraints}
+\modelhead{Variables}
 \begin{itemize}
-    \item Facility Visit Constraints:
-    \begin{equation}
-    \sum_{j \in \text{Facilities}, j \neq i} x_{ij} = 1, \quad \forall i \in \text{Facilities}
-    \end{equation}
-    
-    \item Facility Leave Constraints:
-    \begin{equation}
-    \sum_{i \in \text{Facilities}, i \neq j} x_{ij} = 1, \quad \forall j \in \text{Facilities}
-    \end{equation}
-    
-    \item Quality Score Constraint (Sum of quality scores for selected routes):
-    \begin{equation}
-    \sum_{i \in \text{Facilities}} \sum_{j \in \text{Facilities}, i \neq j} Q_{ij} \cdot x_{ij} \leq 150
-    \end{equation}
-    
-    \item Cost Constraint (Sum of costs for selected routes):
-    \begin{equation}
-    \sum_{i \in \text{Facilities}} \sum_{j \in \text{Facilities}, i \neq j} C_{ij} \cdot x_{ij} \leq 250
-    \end{equation}
-    
-    \item Shipment Time Constraint (Sum of shipment times for selected routes):
-    \begin{equation}
-    \sum_{i \in \text{Facilities}} \sum_{j \in \text{Facilities}, i \neq j} S_{ij} \cdot x_{ij} \leq 100
-    \end{equation}
+    \item $x_{ij} \in \{0,1\}$: equals $1$ if the product travels directly from facility $i$ to facility $j$.
 \end{itemize}
 
-\paragraph{Solution}
-The Gurobi optimizer is used to solve the TSP model. The optimal solution provides the sequence of facility visits that minimizes the total distance traveled, while meeting quality, cost, and shipment time constraints.
+\modelhead{Model}
+\begin{align*}
+\min \quad & \sum_{i \in F} \sum_{\substack{j \in F \\ j \neq i}} d_{ij} x_{ij} \\
+\st \quad  & \sum_{\substack{j \in F \\ j \neq i}} x_{ij} = 1 && \text{for all } i \in F \tag{leave each facility once} \\
+           & \sum_{\substack{i \in F \\ i \neq j}} x_{ij} = 1 && \text{for all } j \in F \tag{enter each facility once} \\
+           & \sum_{i \in S}\sum_{j \in S, j \neq i} x_{ij} \leq |S| - 1 && \text{for all } S \subsetneq F,\ |S| \geq 2 \tag{DFJ subtour elimination} \\
+           & \sum_{i \in F} \sum_{\substack{j \in F \\ j \neq i}} C_{ij} x_{ij} \leq C^{\max} \tag{cost budget} \\
+           & \sum_{i \in F} \sum_{\substack{j \in F \\ j \neq i}} S_{ij} x_{ij} \leq S^{\max} \tag{shipping-time budget} \\
+           & \sum_{i \in F} \sum_{\substack{j \in F \\ j \neq i}} Q_{ij} x_{ij} \leq Q^{\max} \tag{quality budget} \\
+           & x_{ij} \in \{0,1\} && \text{for all } i \neq j.
+\end{align*}
 
-\paragraph{Code}
+The subtour-elimination constraints are the Dantzig--Fulkerson--Johnson (DFJ) family from this chapter, and in practice they are added as needed: solving the model with only the degree and budget constraints typically produces disconnected subtours (say, one loop through Singapore--Bangkok--Mumbai and another through New York--Chicago--Los Angeles), and each violated DFJ constraint is then added and the model re-solved until the route is a single tour. This is exactly the row-generation workflow described with the DFJ model in Section~\ref{sec:tsp-models}, applied to an industrial routing problem.
 
-A simple code sample for the supply chain, incorporating cost and capacity constraints, is provided. This code can be extended to include other features, such as maintaining a specific quality score for facility selection. The code generates two subtours: Singapore to Thailand to Mumbai and NY to Chicago to LA. To connect these subtours, an additional route from LA to Singapore is added, resulting in a total distance of approximately 15,000 kilometers. Constraints ensure that shipment time, cost, and quality meet specified criteria.
-
-\paragraph{Enhancements}
-
-To improve this implementation, the TSP should account for international travel by increasing shipment time constraints.
+Natural extensions include requiring a minimum (rather than maximum) total quality score, precedence constraints when some components must be attached before others, and per-facility capacity limits when several products share the network.
 
 \section{Vehicle Routing Problem (VRP)}
 
