@@ -234,3 +234,49 @@ decide); GradientMethods is an unintegrated Foundations lab; exercises are
 essentially absent outside ch11; zero fig-num-auto numbering in Book 2
 chapters; book2-main prints \listoftodos (fine while drafting, remove for
 release); subfiles preambles still live in ch11-15 files.
+
+---
+
+## Update 2026-08-01
+
+**Formatting parity with Book 1 (task #43): DONE** (commits `0ecd186`..`5caf803`):
+
+- **Tableaus** (ch13): Book 1 conventions (booktabs, Z columns, arraystretch
+  1.3, z-row on top storing z - obj; min-problem sign convention noted in
+  text). Fixed the propagated Gomory arithmetic error: x1-row is
+  x1 - 0.1 s1 + 0.6 s2 = 1.5, cut 0.9 s1 + 0.6 s2 >= 0.5, original-space
+  cut -3x1 + 6x2 <= 10 (verified via B^-1).
+- **Models** (ch11-18, ~80 displays): small numeric models -> ScreenPrint
+  array layout (Book 1 eq 2.1); symbolic models -> align idiom; all
+  "Subject to"/"such that" -> \st; duplicate labels fixed
+  (eq:tsp-DFJ-model-mtsp, eq:convex-programming-{barrier-initial,comp}).
+- **Case study**: ch14's student-essay TSP section demoted to a cleaned
+  Application section (author decision); casestudybox reserved for the
+  Tier-1 published-paper case studies (still to write).
+- **Structure**: book2-main now mirrors book1-main front/back matter
+  (book2-preface NEW, sources-attribution moved to front, ai-usage-
+  disclosure + notation + software-resources + further-reading added,
+  preamble-accessibility loaded, full title/license page,
+  backmatter/book2-checkpoint-answers.tex staged commented). ch18 split
+  one-chapter-per-file (NLP-algorithms / computational-issues.tex /
+  fairness.tex); **Fairness KEPT** per author - content to come from lit
+  review of Swati Gupta's work. GradientMethods integrated as proper
+  chapter (\chapter, outcome box, unstarred sections, ACME figure credits -
+  md5-confirmed Foundations copies). ch12 got a \chapter (still a content
+  stub); Cheung ILP file moved into ch11; discreteOptimization now a
+  section of Complexity. Boyd 11.5.3 pasted text replaced with original
+  prose + citation.
+- **Numbering**: number-figures.py/number-tables.py extended to Book 2
+  (content-files.txt re-pathed + 14 files appended; 16 figures + 7 tables
+  numbered; tableaus excluded by policy; scripts idempotent).
+
+**Exercise ladders (task #44): STARTED.** ch13 done: 12-exercise \exgroup
+ladder + 5 Selected Solutions, all data computationally verified (exact
+rational arithmetic; original instances). Remaining: ch11 (top-up), ch12,
+ch14, ch15, ch16, ch17, ch18 chapters, GradientMethods (convert lab
+problems), projects.
+
+**Still pending elsewhere**: Book 1 history-purge force-push (remote master
+f895572... still carries Griffin history - verified 2026-08-01); Tier-1
+case studies; ch12 real content; Fairness lit review; solutions manual
+ch12-18.
