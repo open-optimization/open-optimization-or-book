@@ -1,13 +1,25 @@
-\lab{Gradient Descent Methods}{Gradient Descent Methods}
-\todoChapter{ Todo: Adapt and incorporate this material. }
-\objective{Iterative optimization methods choose a search direction and a step size at each iteration.
+% Adapted from the "Gradient Descent Methods" lab of Foundations of Applied
+% Mathematics (Humpherys, Jarvis, et al.), CC BY 3.0 US. See
+% external-sources/foundationsAppliedMathematicsLabs/Volume2/GradientMethods.
+\chapter{Gradient Descent Methods}
+\label{ch:gradient-methods}
+
+\begin{outcome}
+\begin{enumerate}
+\item Understand line-search methods: choosing a search direction and a step size at each iteration
+\item Implement the method of steepest descent, with exact and backtracking step sizes
+\item Implement the conjugate gradient method for linear systems and its non-linear extension
+\item Apply these methods to regression problems
+\end{enumerate}
+\end{outcome}
+
+Iterative optimization methods choose a search direction and a step size at each iteration.
 One simple choice for the search direction is the negative gradient, resulting in the method of steepest descent.
 While theoretically foundational, in practice this method is often slow to converge.
 An alternative method, the conjugate gradient algorithm, uses a similar idea that results in much faster convergence in some situations.
-In this lab we implement a method of steepest descent and two conjugate gradient methods, then apply them to regression problems.
-}
+In this chapter we implement a method of steepest descent and two conjugate gradient methods, then apply them to regression problems.\footnote{This chapter is adapted from the \emph{Gradient Descent Methods} lab of \emph{Foundations of Applied Mathematics} by Humpherys, Jarvis, et al., licensed CC BY 3.0 US.}
 
-\section*{The Method of Steepest Descent} % ===================================
+\section{The Method of Steepest Descent} % ===================================
 
 Let $f:\mathbb{R}^n \rightarrow \mathbb{R}$ with first derivative $Df:\mathbb{R}^n \rightarrow \mathbb{R}^n$.
 % (by convention, $Df(\x)$ is a row vector).
@@ -57,7 +69,7 @@ It should take many iterations to minimize the Rosenbrock function, but it shoul
 \label{prob:gradientmethods-steepest-descent}
 \end{problem}
 
-\section*{The Conjugate Gradient Method} % ====================================
+\section{The Conjugate Gradient Method} % ====================================
 
 Unfortunately, the method of steepest descent can be very inefficient for certain problems.
 Depending on the nature of the objective function, the sequence of points can zig-zag back and forth or get stuck on flat areas without making significant progress toward the true minimizer.
@@ -65,7 +77,8 @@ Depending on the nature of the objective function, the sequence of points can zi
 \begin{figure}[H]
 \centering
 \includegraphics[width=.7\textwidth]{figures/steepest.pdf}
-\caption{On this surface, gradient descent takes an extreme number of iterations to converge to the minimum because it gets stuck in the flat basins of the surface.}
+\caption{On this surface, gradient descent takes an extreme number of iterations to converge to the minimum because it gets stuck in the flat basins of the surface.
+Figure from \emph{Foundations of Applied Mathematics, Volume 2} by Humpherys, Jarvis, et al., CC BY 3.0 US.}
 \label{basis:steepest}
 \end{figure}
 
@@ -104,7 +117,8 @@ Additionally, because the method utilizes a basis of conjugate vectors, the prev
 \centering
 \includegraphics[width=.7\textwidth]{figures/steepVsConj.pdf}
 \caption{Paths traced by Gradient Descent (orange) and Conjugate Gradient (red) on a quadratic surface.
-Notice the zig-zagging nature of the Gradient Descent path, as opposed to the Conjugate Gradient path, which finds the minimizer in 2 steps.}
+Notice the zig-zagging nature of the Gradient Descent path, as opposed to the Conjugate Gradient path, which finds the minimizer in 2 steps.
+Figure from \emph{Foundations of Applied Mathematics, Volume 2} by Humpherys, Jarvis, et al., CC BY 3.0 US.}
 \label{basis:steepVsConj}
 \end{figure}
 
@@ -128,7 +142,7 @@ Notice the zig-zagging nature of the Gradient Descent path, as opposed to the Co
     \pseudoli{return} $\x_{k+1}$
 \EndProcedure
 \end{algorithmic}
-\caption{}
+\caption{The Conjugate Gradient method for solving the positive definite linear system $Q\x = \b$.}
 \label{Alg:linear-conjugate-gradient}
 \end{algorithm}
 
@@ -168,7 +182,7 @@ More generally, you can generate a random positive definite matrix $Q$ for testi
 \label{prob:gradientmethods-linear-cg}
 \end{problem}
 
-\subsection*{Non-linear Conjugate Gradient}
+\subsection{Non-linear Conjugate Gradient}
 The algorithm presented above is only valid for certain linear systems and quadratic functions, but the basic strategy may be adapted to minimize more general convex or non-linear functions.
 Though the non-linear version does not have guaranteed convergence as the linear formulation does, it can still converge in less iterations than the method of steepest descent.
 Modifying the algorithm for more general functions requires new formulas for $\alpha_k$, $\mathbf{r}_k$, and $\beta_k$.
@@ -200,12 +214,12 @@ A well-known formula, attributed to Fletcher and Reeves, is $\beta_{k} = Df(\x_k
     \EndWhile
 \EndProcedure
 \end{algorithmic}
-\caption{}
+\caption{The Non-Linear Conjugate Gradient method (Fletcher--Reeves variant).}
 \label{Alg:nonlinear-conjugate-gradient}
 \end{algorithm}
 
-\begin{problem}{}{}
-Write a function that accepts a convex objective function $f$, its derivative $Df$, an initial guess $\x_0$, a convergence tolerance defaultin to $1e^{-5}$, and a maximum number of iterations defaultin to $100$.
+\begin{problem}{Non-linear conjugate gradient}{}
+Write a function that accepts a convex objective function $f$, its derivative $Df$, an initial guess $\x_0$, a convergence tolerance defaulting to $1e^{-5}$, and a maximum number of iterations defaulting to $100$.
 Use Algorithm \ref{Alg:nonlinear-conjugate-gradient} to compute the minimizer $\x^*$ of $f$.
 Return the approximate minimizer, whether or not the algorithm converged, and the number of iterations computed.
 

@@ -10,6 +10,9 @@
 % Load shared preamble
 \input{../packages-and-commands}
 
+% Accessibility wrapper for \includegraphics (defines \altincludegraphics).
+\input{preamble/preamble-accessibility}
+
 \usetikzlibrary{tikzmark,decorations.pathreplacing,calc}
 \usetikzlibrary{graphs,graphs.standard}
 \tcbset{colback=purple!3,colframe=purple!30,boxrule=0.6pt,arc=2pt}
@@ -17,6 +20,7 @@
 \newtcolorbox[auto counter,number within=section]{learningcheckpoint}[1][]{%
   title=Learning Checkpoint~\thetcbcounter, #1,
   fonttitle=\bfseries,
+  label type=learningcheckpoint,
   coltitle=black
 }
 
@@ -45,10 +49,19 @@
 \begin{document}
 
 %=============================================================================
-% FRONT MATTER
+% FRONT MATTER  (mirrors book1-main.tex)
 %=============================================================================
 \input{frontmatter/book2-cover.tex}
 \input{frontmatter/book2-front-matter.tex}
+\input{frontmatter/book2-preface.tex}
+
+\cleardoublepage
+
+\input{frontmatter/sources-attribution.tex}
+
+\cleardoublepage
+
+\input{frontmatter/ai-usage-disclosure.tex}
 
 \cleardoublepage
 
@@ -61,9 +74,14 @@
   \addtocontents{toc}{\protect\hypertarget{toc}{}}
   \tableofcontents
   \cleardoublepage
-  \listoftodos{}
+  \listoftodos{}% drafting aid; remove for release
 }
 \cleardoublepage
+
+% Notation: unnumbered front-matter chapter (appears before Part I)
+\input{frontmatter/notation.tex}
+\cleardoublepage
+
 \mainmatter
 
 %=============================================================================
@@ -79,6 +97,9 @@
 
 % Chapter: IP Formulations (Book 2 version - refresher + complete)
 \input{part3-integer-programming/ch11-ip-formulations/integerProgrammingFormulations-LP-notes.tex}
+% Additional ILP material (Cheung-derived); sections continue the
+% IP Formulations chapter.
+\input{part3-integer-programming/ch11-ip-formulations/linearProgrammingIntegerLinearProgramming.tex}
 
 % Chapter: Solvers
 \input{part3-integer-programming/ch12-solvers/solvers.tex}
@@ -89,9 +110,8 @@
 % Chapter: Exponential Formulations
 \input{part3-integer-programming/ch14-exponential-formulations/integerProgrammingExponentialFormulations.tex}
 
-% Chapter: Complexity
+% Chapter: Complexity (+ other discrete problems as a closing section)
 \input{part3-integer-programming/ch15-complexity/complexity.tex}
-\input{part3-integer-programming/ch11-ip-formulations/linearProgrammingIntegerLinearProgramming.tex}
 \input{part3-integer-programming/ch15-complexity/discreteOptimization.tex}
 
 % Chapter: Heuristics
@@ -106,21 +126,30 @@
 % Chapter: NLP Introduction and Theory
 \input{part4-nonlinear-programming/ch17-nlp-intro/NLP.tex}
 
-% Chapter: NLP Algorithms
+% Chapter: NLP Algorithms (split into one chapter per file, 2026-08-01)
 \input{part4-nonlinear-programming/ch18-nlp-algorithms/NLP-algorithms.tex}
+
+% Chapter: Gradient Descent Methods (adapted Foundations of Applied Math lab;
+% subimport so the file's relative figures/ paths resolve)
+\subimport{part4-nonlinear-programming/GradientMethods/}{GradientMethods}
+
+% Chapter: Computational Issues with NLP
+\input{part4-nonlinear-programming/ch18-nlp-algorithms/computational-issues.tex}
+
+% Chapter: Fairness in Algorithms (kept 2026-08-01; content from lit review
+% of Swati Gupta's work pending)
+\input{part4-nonlinear-programming/ch18-nlp-algorithms/fairness.tex}
 
 % Note: OneD_Optimization content has been merged into NLP-algorithms.tex
 % Note: ch19-nlp-algorithms is a near-duplicate of ch18 and was not included
 
-% Chapter: Gradient Methods
-\subimport{part4-nonlinear-programming/GradientMethods/}{GradientMethods}
-
 %=============================================================================
-% PART V: INTEGRATIVE PROJECTS (added 2026-07-31; skeletons)
+% PART III: INTEGRATIVE PROJECTS (added 2026-07-31; skeletons)
 % Capstone chapters: large data, complex problems, heuristics + ML +
 % advanced techniques (column generation, Lagrangian relaxation).
 %=============================================================================
 \part{Integrative Projects}
+\label{part:IntegrativeProjects}
 \input{part5-projects/project-delivery-network.tex}
 \input{part5-projects/project-crew-scheduling.tex}
 \input{part5-projects/project-ml-optimization.tex}
@@ -161,14 +190,26 @@
 \cleardoublepage
 
 %=============================================================================
-% BACK MATTER
+% BACK MATTER  (mirrors book1-main.tex; sources-attribution moved to the
+% front matter 2026-08-01, matching Book 1)
 %=============================================================================
 % Lyryx marketing page removed 2026-07-31 (mirrors book1); attribution is in
 % the Sources and Attribution chapter and appendices/linear-algebra/license.tex
 \cleardoublepage
 
-% License
-\input{frontmatter/sources-attribution.tex}
+% Appendix: Optimization Software Resources
+\input{appendices/software-resources.tex}
+
+% Appendix: Answers to Learning Checkpoints
+% (file staged at backmatter/book2-checkpoint-answers.tex; enable once the
+% first Book 2 learningcheckpoint boxes land - exercise/pedagogy task)
+%\input{backmatter/book2-checkpoint-answers.tex}
+
+% Appendix: Further Reading and Resources
+\input{backmatter/further-reading-and-resources.tex}
+
+% Source-text acknowledgments (compact; full details in the front-matter
+% Sources and Attribution chapter).
 \input{appendices/linear-algebra/license.tex}
 \input{frontmatter/contributors-foundations.tex}
 
