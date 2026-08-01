@@ -28,19 +28,19 @@ We will first look at these algorithms and their convergence rates in the 1-dime
 \section{1-Dimensional Algorithms}
 We suppose that we solve the problem 
 
-\begin{align}
-\min f(x)\\
-x \in [a,b].
-\end{align}
+\begin{align*}
+\min \quad & f(x)\\
+& x \in [a,b].
+\end{align*}
 
 That is, we minimize the univariate function $f(x)$ on the interval $[l,u]$.  
 
 For example, 
 
-\begin{align}
-\min (x^2 - 2)^2\\
- 0 \leq x \leq 10.
-\end{align}
+\begin{align*}
+\min \quad & (x^2 - 2)^2\\
+& 0 \leq x \leq 10.
+\end{align*}
 
 Note, the optimal solution lies at $x^* = \sqrt{2}$, which is an irrational number.  Since we will consider algorithms using floating point precision, we will look to return a solution $\bar x$ such that $\|x^* - \bar x\| < \epsilon$ for some small $\epsilon > 0$, for instance, $\epsilon = 10^{-6}$.
 
@@ -530,11 +530,9 @@ There can be many variations on how to decide which functions $f_i$ to evaluate 
 
 \begin{example}{Linear Regression with SGD}{}
 Given data points $x^1, \dots, x^N \in \R^d$ and output $y^1, \dots, y^N \in \R$, find $a \in \R^d$ and $b \in \R$ such that $a^\top x^i + b \approx y^i$.   This can be written as the optimization problem 
-\begin{equation}
-\begin{array}{rl}
+\begin{align*}
 \min_{a,b} \quad & \sum_{i=1}^N g_i(a,b)
-\end{array}
-\end{equation}
+\end{align*}
 where $g_i(a,b) = (a^\top x^i + b)^2$.   
 
 Notice that the objective function $G(a,b) = \sum_{i=1}^N g_i(a,b)$  is a convex quadratic function.  The gradient of the objective function is 
@@ -594,11 +592,11 @@ This serves as an approximation of the hessian and can be efficiently computed. 
 Given a convex function $f(x)\colon \R^d \to \R$ and convex functions $f_i(x)\colon \R^d \to \R$ for $i=1, \dots, m$,  the \emph{convex programming} problem is
 \begin{equation}
 \label{eq:convex-programming-for-example}
-\begin{split}
+\begin{aligned}
 \min \quad & f(x)\\
-\st  \quad & f_i(x) \leq 0  \quad  \text{ for } i=1, \dots, m\\
+\st \quad  & f_i(x) \leq 0 & \text{for } i=1, \dots, m\\
 & x \in \R^d
-\end{split}
+\end{aligned}
 \end{equation}
 
 \subsection{Barrier Method}
@@ -606,10 +604,10 @@ Given a convex function $f(x)\colon \R^d \to \R$ and convex functions $f_i(x)\co
 We convert~\ref{eq:convex-programming-for-example} into the unconstrained minimization problem:
 \begin{equation}
 \label{eq:convex-programming-barrier}
-\begin{split}
+\begin{aligned}
 \min \quad & f(x) - \phi \sum_{i=1}^m \log(-f_i(x)) \\
 & x \in \R^d
-\end{split}
+\end{aligned}
 \end{equation}
 Here $\phi > 0$ is some number that we choose.  As $\phi \to 0$, the optimal solution $x(\phi)$ to \eqref{eq:convex-programming-barrier} tends to the optimal solution of \eqref{eq:convex-programming-for-example}.  That is $x(\phi) \to x^*$ as $\phi \to 0$.
 \end{general}
@@ -618,22 +616,22 @@ Here $\phi > 0$ is some number that we choose.  As $\phi \to 0$, the optimal sol
 Define a variable $s \in \R$ and add that to the right hand side of the inequalities and then minimize it in the objective function.
 \begin{equation}
 \label{eq:convex-programming}
-\begin{split}
+\begin{aligned}
 \min \quad & s\\
-\st  \quad & f_i(x) \leq s \quad  \text{ for } i=1, \dots, m\\
+\st \quad  & f_i(x) \leq s & \text{for } i=1, \dots, m\\
 & x \in \R^d, s \in \R
-\end{split}
+\end{aligned}
 \end{equation}
 Note that this problem is feasible for all $x$ values since $s$ can always be made larger.  
 If there exists a solution with $s \leq 0$, then we can use the corresponding $x$ solution as an initial feasible solution.  Otherwise, the problem is infeasible.
 
 Now, convert this problem into the unconstrained minimization problem:
 \begin{equation}
-\label{eq:convex-programming}
-\begin{split}
+\label{eq:convex-programming-barrier-initial}
+\begin{aligned}
 \min \quad & f(x) - \phi \sum_{i=1}^m \log(-(f_i(x)-s)) \\
 & x \in \R^d, s \in \R
-\end{split}
+\end{aligned}
 \end{equation}
 This problem has an easy time of finding an initial feasible solution.  For instance, let $x = 0$, and then $s = \max_i f_i(x) +1 $.  
 \end{general}
@@ -686,22 +684,18 @@ Notes: }
 We mention a few computational issues to consider with nonlinear programs.  
 \section{Irrational Solutions}
 Consider nonlinear problem (this  is even convex)
-\begin{equation}
-\begin{array}{rl}
+\begin{align*}
 \min \quad & -x\\
-\st \quad & x^2 \leq 2.
-\end{array}
-\end{equation}
+\st \quad  & x^2 \leq 2.
+\end{align*}
 The optimal solution is $x^* = \sqrt{2}$, which cannot be easily represented.  Hence, we would settle for an \textbf{approximate solution} such as $\bar x = 1.41421$, which is feasible since $\bar x^2 \leq 2$, and it is close to optimal.
 
 \section{Discrete Solutions}
 Consider nonlinear problem (not convex)
-\begin{equation}
-\begin{array}{rl}
+\begin{align*}
 \min \quad & -x\\
-\st \quad & x^2 = 2.
-\end{array}
-\end{equation}
+\st \quad  & x^2 = 2.
+\end{align*}
 Just as before, the optimal solution is $x^* = \sqrt{2}$, which cannot be easily represented.  Furthermore, the only two feasible solutions are $\sqrt{2}$ and $-\sqrt{2}$.  Thus, there is no chance to write down a feasible rational approximation.
 
 \section{Convex NLP Harder than LP}
@@ -709,12 +703,12 @@ Convex NLP is typically polynomially solvable.  It is a generalization of linear
 \begin{general}{Convex Programming}{\polynomial\ \  (typically)}
 Given a convex function $f(x)\colon \R^d \to \R$ and convex functions $f_i(x)\colon \R^d \to \R$ for $i=1, \dots, m$,  the \emph{convex programming} problem is
 \begin{equation}
-\label{eq:convex-programming}
-\begin{split}
+\label{eq:convex-programming-comp}
+\begin{aligned}
 \min \quad & f(x)\\
-\st  \quad & f_i(x) \leq 0  \quad  \text{ for } i=1, \dots, m\\
+\st \quad  & f_i(x) \leq 0 & \text{for } i=1, \dots, m\\
 & x \in \R^d
-\end{split}
+\end{aligned}
 \end{equation}
 \end{general}
 \begin{example}
@@ -733,12 +727,12 @@ Thus, quadratic constraints can be used to model binary constraints.
 Given a matrix $A \in \R^{m\times n}$, vector $b \in \R^m$ and vector $c \in \R^n$, the \emph{binary integer programming} problem is
 \begin{equation}
 \label{eq:BIP}
-\begin{split}
+\begin{aligned}
 \max \quad & c^\top x\\
-\st  \quad & Ax \leq b\\
+\st \quad  & Ax \leq b\\
 & \hcancel[1.5pt]{x \in \{0,1\}^n}\\
-& x_i(1-x_i) = 0 \quad \text{ for } i=1, \dots, n
-\end{split}
+& x_i(1-x_i) = 0 & \text{for } i=1, \dots, n
+\end{aligned}
 \end{equation}
 \end{general}
 
