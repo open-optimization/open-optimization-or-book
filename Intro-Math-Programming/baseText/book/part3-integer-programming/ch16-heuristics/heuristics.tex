@@ -88,14 +88,53 @@ Thus, we reverse the order of $ i \to x_1 \to \dots \to x_k \to j$.
 \end{itemize}
 \end{enumerate}
 \end{general}
-Pictorially, this looks like the following 
+Pictorially, this looks like the following.
+% Original TikZ figures (2026-07-31) replacing a borrowed image of unknown
+% provenance (removed 2026-07-16) and an earlier five-panel sequence.
 
-\refincludefigurestatic{wiki/File/2-opt_wiki.png}
-% Removed 2026-07-16: a five-panel 2-opt figure sequence (2-opt-1 ... 2-opt-5)
-% was included here with the footnote "Figures borrowed from unknown source."
-% The image files no longer exist in the repository, and unknown provenance is
-% incompatible with the book's CC BY-SA 4.0 license. TODO (Book 2): recreate
-% the step-by-step 2-opt swap sequence as original TikZ figures.
+\begin{center}
+\begin{tikzpicture}[
+  scale=0.9,
+  node/.style={circle, draw, fill=white, inner sep=1.6pt, font=\scriptsize},
+  tour/.style={thick},
+  cut/.style={thick, red, dashed},
+  new/.style={very thick, blue}]
+% ---- Panel 1: tour with crossing edges (s,i) and (j,t) ----
+\begin{scope}
+  \node[node] (s)  at (0,2)     {$s$};
+  \node[node] (t)  at (0,0)     {$t$};
+  \node[node] (i)  at (2.6,0)   {$i$};
+  \node[node] (j)  at (2.6,2)   {$j$};
+  \node[node] (x1) at (3.8,0.5)  {$x_1$};
+  \node[node] (x2) at (3.7,1.55) {$x_2$};
+  \draw[cut]  (s) -- (i);
+  \draw[tour] (i) -- (x1) -- (x2) -- (j);
+  \draw[cut]  (j) -- (t);
+  \draw[tour, dotted] (t) to[bend left=25] (s);
+  \node at (1.9,-0.8) {\small (a) edges $(s,i)$ and $(j,t)$ cross};
+\end{scope}
+% ---- Panel 2: reconnected tour with reversed segment ----
+\begin{scope}[xshift=6.6cm]
+  \node[node] (s)  at (0,2)     {$s$};
+  \node[node] (t)  at (0,0)     {$t$};
+  \node[node] (i)  at (2.6,0)   {$i$};
+  \node[node] (j)  at (2.6,2)   {$j$};
+  \node[node] (x1) at (3.8,0.5)  {$x_1$};
+  \node[node] (x2) at (3.7,1.55) {$x_2$};
+  \draw[new]  (s) -- (j);
+  \draw[tour] (j) -- (x2);
+  \draw[tour] (x2) -- (x1);
+  \draw[tour] (x1) -- (i);
+  \draw[new]  (i) -- (t);
+  \draw[tour, dotted] (t) to[bend left=25] (s);
+  \node at (1.9,-0.8) {\small (b) add $(s,j)$, $(i,t)$; reverse $i \to x_1 \to x_2 \to j$};
+\end{scope}
+\end{tikzpicture}
+\par\captionof{figure}{A 2-opt move. Deleting the two crossing edges
+$(s,i)$ and $(j,t)$, reconnecting with $(s,j)$ and $(i,t)$, and reversing
+the intermediate segment produces a strictly shorter tour whenever the
+original edges crossed.}\label{fig:two-opt-move}% fig-num-auto
+\end{center}
 
 Computationally, we need to consider the costs on the edges of a graph.....
 

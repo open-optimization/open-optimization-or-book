@@ -1150,7 +1150,8 @@ There are a number of scenarios where the constraints can be relaxed without sac
 % from Mosek Cookbook" comment). The cookbook is plain "(c) MOSEK ApS" - NOT
 % confirmed under an open license. The prose below is a rewrite; the
 % formulations themselves are standard (methods are not copyrightable).
-% TODO (Book 2): cite the MOSEK Modeling Cookbook as further reading here.
+% Resolved 2026-07-31: cookbook cited as further reading at the end of the
+% exact-maximum subsection below.
 \subsection{Modeling the Exact Absolute Value}
 
 In many optimization models, we need to enforce an exact equality of the form $|x| = t$, where $x$ is a decision variable and $t \geq 0$.  Unlike the relaxation $|x| \leq t$ (which is convex and can be handled with two linear inequalities), the exact equality $|x| = t$ describes a \emph{non-convex} set and cannot be represented using linear constraints alone.
@@ -1206,100 +1207,100 @@ z_i &\in \{0,1\}, \quad i = 1, \ldots, n.
 \]
 The first set of constraints ensures $t \geq x_i$ for all $i$.  The second set, combined with exactly one $z_i = 1$, ensures that for the index $i$ with $z_i = 1$, we have $t \leq x_i$, which together with $t \geq x_i$ gives $t = x_i$.  For all other indices $j \neq i$, the big-$M$ term relaxes the upper bound constraint.
 
+For further reading on these and many related mixed-integer modeling patterns, see the MOSEK Modeling Cookbook\footnote{MOSEK ApS, \emph{MOSEK Modeling Cookbook}, \url{https://docs.mosek.com/modeling-cookbook/}.}, which surveys conic and integer reformulations of nonsmooth functions.
+
 \newpage
 
 \section{Job Shop Scheduling}
+\label{sec:job-shop}
 
-Example borrowed from: \href{https://python-mip.readthedocs.io/en/latest/examples.html#job-shop-scheduling-problem}{Pyhton MIP example}
+\begin{tryit}
+\vizlink{gantt-jobshop}{Job-Shop Schedule (Gantt)}: this chapter's scheduling problem, solved and animated.
+\end{tryit}
 
-The Job Shop Scheduling Problem, abbreviated as JSSP, is a classical combinatorial optimization problem that is classified as NP-hard. It is characterized by a collection of jobs that are to be processed on a specific group of machines. Each job has a predetermined processing sequence across the machines, with a fixed processing duration for each machine. A job can only visit a machine once, and machines can only accommodate one job at a time. Once a machine starts a job, it must finish it without any interruptions. The primary goal is to reduce the makespan, which is the total time taken to complete all jobs.
 
-Consider the case of having three jobs and three machines. The jobs have the following processing sequences and times:
+The Job Shop Scheduling Problem (JSSP) is a classical combinatorial optimization problem that is NP-hard.
+A set of jobs must be processed on a set of machines, where each job follows a prescribed sequence of operations across the machines.
+Each operation has a fixed processing time, each machine can handle only one job at a time, and once a machine begins processing an operation it must finish without interruption.
+The objective is to minimize the \emph{makespan}, the time at which the last job completes.
+
+Consider a small workshop with three machines ($m_1$, $m_2$, $m_3$) and four jobs.
+Each job must visit each machine exactly once, in a job-specific order, with the following processing times (in hours):
 
 \begin{itemize}
-  \item Job \( j_1 \): \( m_3(2) \) followed by \( m_1(1) \) and then \( m_2(2) \).
-  \item Job \( j_2 \): \( m_2(1) \) followed by \( m_3(2) \) and then \( m_1(2) \).
-  \item Job \( j_3 \): \( m_3(1) \) followed by \( m_2(2) \) and then \( m_1(1) \).
+  \item Job $j_1$: $m_1(3) \to m_2(2) \to m_3(4)$.
+  \item Job $j_2$: $m_2(2) \to m_1(4) \to m_3(1)$.
+  \item Job $j_3$: $m_3(3) \to m_1(1) \to m_2(3)$.
+  \item Job $j_4$: $m_1(2) \to m_3(3) \to m_2(2)$.
 \end{itemize}
 
-Below, we present two potential schedules. The first one is a straightforward approach where jobs are processed sequentially, leading to machines having idle periods. The second approach is optimal, where jobs are executed concurrently.
+Processing jobs one after another (sequentially) yields a makespan of $9+7+7+7 = 30$ hours.
+By allowing jobs to run concurrently on different machines, the makespan can be significantly reduced.
 
 \subsection{JSSP Components}
-The JSSP can be formally described by the following parameters:
+Two pieces of data specify an instance.
+First, we collect the $n$ jobs in a set $J = \{1, \ldots, n\}$ and the $m$ machines in a set $I = \{1, \ldots, m\}$.
+Second, each job carries its own route through the shop together with the time it needs at each stop: we write $o_r^j$ for the machine on which job $j$ runs its $r$-th operation, so that the route of job $j$ is the sequence $O^j = (o_1^j, \ldots, o_m^j)$, and we write $p_{ij} \geq 0$ for the time job $j$ occupies machine $i$.
 
-\begin{itemize}
-  \item \( J\): Represents the set of jobs, indexed as \( \{1, \ldots, n\} \).
-  \item \( I\): Represents the set of machines, indexed as \( \{1, \ldots, m\} \).
-  \item \( o_r^j \): Specifies the machine that handles the \( r \)-th operation of job \( j \). The sequence \( O^j=\left(o_1^j, o_2^j, \ldots, o_m^j\right) \) illustrates the processing order for job \( j \).
-  \item \( p_{i j} \): Represents the non-negative processing time of job \( j \) on machine \( i \).
-\end{itemize}
+A \emph{schedule} assigns a start time to every operation.
+Three rules separate the feasible schedules from the infeasible ones: the operations of a job may not start out of order---each waits for its predecessor on the route $O^j$ to finish; a machine hosts at most one job at any moment; and processing cannot be paused, so an operation that starts at time $t$ on machine $i$ blocks that machine until time $t + p_{ij}$.
+Among all feasible schedules we want one whose makespan---the time when the final operation ends---is as small as possible.
 
-The solution to the JSSP must satisfy:
 
-\begin{enumerate}
-  \item Every job \( j \) should be processed according to the machine sequence \( O^j \).
-  \item At any given time, a machine can only process one job.
-  \item A job, once started on a machine, must run to completion without any breaks.
-\end{enumerate}
 
-The objective is to minimize the makespan, or the finishing time of the last job. The problem remains NP-hard even if \( n \geq 3 \) or \( m \geq 3 \).
+\begin{example}{Job Shop Scheduling Problem Input Data}{}
 
-Decision variables include:
-\begin{itemize}
-  \item \( x_{i j} \): Starting time of job \( j \) on machine \( i \).
-  \item \( y_{i j k} \): A binary variable. It's 1 if job \( j \) precedes job \( k \) on machine \( i \) and 0 otherwise.
-  \item \( C \): The makespan or the maximum completion time.
-\end{itemize}
+\textbf{Basic Parameters.}
+Consider $n = 4$ jobs and $m = 3$ machines, using the workshop data introduced above.
 
-\textbf{Example: Job Shop Scheduling Problem Input Data}
-
-\textbf{Basic Parameters}
-The number of jobs, \( n \), is 5 and the number of machines, \( m \), is 3. 
-
-\textbf{Processing Times}
-The matrix of processing times for each job on each machine is given by:
+\textbf{Processing Times.}
+The matrix of processing times (one row per job, one column per machine) is:
 
 \[
-\text{times} = 
+P =
 \begin{bmatrix}
-2 & 1 & 2 \\
-1 & 2 & 2 \\
-1 & 2 & 1 \\
-1 & 1 & 1 \\
-3 & 4 & 5 \\
+3 & 2 & 4 \\
+4 & 2 & 1 \\
+1 & 3 & 3 \\
+2 & 2 & 3 \\
 \end{bmatrix}
 \]
 
-Where the element in the \(i\)-th row and \(j\)-th column represents the time required to process job \(i\) on machine \(j\).
+The entry in row~$j$, column~$i$ gives the processing time $p_{ij}$ of job~$j$ on machine~$i$.
 
-\textbf{Machine Sequences}
-The order in which each job needs to be processed on the machines is described by:
+\textbf{Machine Sequences.}
+The order in which each job visits the machines is:
 
 \[
-\text{machines} = 
+O =
 \begin{bmatrix}
-2 & 0 & 1 \\
-1 & 2 & 0 \\
-2 & 1 & 0 \\
-1 & 2 & 0 \\
-0 & 1 & 2 \\
+1 & 2 & 3 \\
+2 & 1 & 3 \\
+3 & 1 & 2 \\
+1 & 3 & 2 \\
 \end{bmatrix}
 \]
 
-Here, the sequence of machines for each job is given by the rows of the matrix. For instance, job 1 is processed first on machine 2, then on machine 0, and finally on machine 1.
+Each row gives the machine sequence for a job.
+For instance, job~1 is processed first on machine~1, then machine~2, then machine~3,
+while job~3 starts on machine~3, then visits machine~1, and finishes on machine~2.
 
-\textbf{Big \(M\) Calculation}
-A large constant, \( M \), is used in the model formulation. It is computed as the sum of all processing times, given by:
-
+\textbf{Big \(M\) Calculation.}
+A large constant $M$ is used in the big-$M$ formulation to enforce disjunctive constraints.
+A valid choice is the sum of all processing times:
 \[
-M = \sum_{i=1}^{n} \sum_{j=1}^{m} \text{times}[i][j]
+M = \sum_{i=1}^{m} \sum_{j=1}^{n} p_{ij} = (3+2+4)+(4+2+1)+(1+3+3)+(2+2+3) = 30.
 \]
+\end{example}
 
 \begin{figure}
 % Will use file.tikz if it exists, else file.pdf
-\includetikz[width=0.8\textwidth]{Figures/jssp}
+\includetikz[width=0.8\textwidth]{optimization/figures/figures-static/jssp}
+\caption{Job shop scheduling solution shown as a Gantt chart.}\label{fig:jssp}% fig-num-auto
 \end{figure}
-\refincludefigurestatic[scale = 1.5]{jssp.png}
+%\refincludefigurestatic[scale = 1.5]{jssp.png}
+
+
 
 \paragraph{Applications of JSSP}
 The JSSP has numerous practical applications, including:
@@ -1310,72 +1311,104 @@ The JSSP has numerous practical applications, including:
   \item Transportation: Optimizing maintenance tasks for vehicles or aircraft in a maintenance facility.
 \end{itemize}
 
+
 \subsection{Mathematical Model}
+
+We now build a mixed-integer program from the ingredients above.
+This \emph{disjunctive} formulation is classical and is due to Manne\footnote{A.~S.~Manne, ``On the Job-Shop Scheduling Problem,'' \emph{Operations Research} 8(2):219--223, 1960.}.
 
 \modelhead{Sets}
 \begin{itemize}
-  \item \( J\): Represents the set of jobs, indexed as \( \{1, \ldots, n\} \).
-  \item \( I \): Represents the set of machines, indexed as \( \{1, \ldots, m\} \).
-  \end{itemize}
+  \item $J = \{1, \ldots, n\}$, the jobs.
+  \item $I = \{1, \ldots, m\}$, the machines.
+\end{itemize}
 \modelhead{Parameters}
 \begin{itemize}
- \item \( o_r^j \): Specifies the machine that handles the \( r \)-th operation of job \( j \). The sequence \( O^j=\left(o_1^j, o_2^j, \ldots, o_m^j\right) \) illustrates the processing order for job \( j \).
-  \item \( p_{i j} \): Represents the non-negative processing time of job \( j \) on machine \( i \).
+  \item $o_r^j$, the machine hosting the $r$-th operation of job $j$; row $j$ of the matrix $O$ from the example lists these machines in order.
+  \item $p_{ij}$, the processing time of job $j$ on machine $i$.
+  \item $M$, a big-$M$ constant; the total processing time $\sum_{i \in I} \sum_{j \in J} p_{ij}$ is always a valid choice, as computed for the example above.
 \end{itemize}
 \modelhead{Variables}
+The main decisions are continuous start times
 $$
-x_{ij} = \text{ start time of job $j$ on machine $i$}.
+s_{ij} = \text{ start time of job $j$ on machine $i$},
+$$
+together with a variable $C_{\max}$ for the makespan.
+Start times alone cannot express ``one of these two jobs must wait for the other,'' so for each machine $i$ and each pair of jobs $j < k$ we add a binary variable that records which job goes first:
+$$
+z_{ijk} = \begin{cases} 1, & \text{when machine } i \text{ processes job } j \text{ before job } k,\\ 0, & \text{when job } k \text{ takes its turn on machine } i \text{ first,} \end{cases}
+\qquad i \in I, \ j,k \in J, \ j < k.
 $$
 
+\modelhead{Constraints}
+\emph{Precedence within a job.}
+Each job must follow its route: operation $r$ of job $j$ cannot begin until operation $r-1$ has finished, that is,
 $$
-y_{ijk} = \begin{cases} 1, & \text{if job } j \text{ precedes job } k \text{ on machine } i \text{,}\\ & i \in I \text{, } j, k  \in J \text{, } j \neq k \\ 0, & \text{otherwise} \end{cases}
+s_{o^{j}_{r} j} \geq s_{o^{j}_{r-1} j} + p_{o^{j}_{r-1} j} \qquad \forall j \in J, \ r \in \{2, \dots, m\}.
+$$
+
+\emph{One job at a time per machine.}
+Fix a machine $i$ and two jobs $j < k$.
+Feasibility demands that either job $j$ clears the machine before job $k$ arrives, $s_{ij} + p_{ij} \leq s_{ik}$, or the reverse, $s_{ik} + p_{ik} \leq s_{ij}$.
+This is precisely the either-or situation of Section~\ref{subsec:either-or}, and applying that recipe with $z_{ijk}$ in the role of the selector variable $\delta$ yields the big-$M$ pair
+$$
+\begin{aligned}
+s_{ij} + p_{ij} &\leq s_{ik} + M(1 - z_{ijk}) \qquad \forall i \in I, \ j,k \in J, \ j < k,\\
+s_{ik} + p_{ik} &\leq s_{ij} + M z_{ijk} \qquad \forall i \in I, \ j,k \in J, \ j < k.
+\end{aligned}
+$$
+When $z_{ijk} = 1$ the first inequality forces job $j$ ahead of job $k$ while the second is switched off; when $z_{ijk} = 0$ the roles swap.
+
+\emph{Makespan.}
+The makespan must sit above the completion time of every job's last operation:
+$$
+C_{\max} \geq s_{o^{j}_{m} j} + p_{o^{j}_{m} j} \qquad \forall j \in J.
 $$
 
 \modelhead{Model}
 \begin{subequations}
 \begin{equation}
 \begin{array}{rrlrr}
-\min 
+\min
                & C_{\max} \\
-\st \\
-&& \text{Overlapping constraints}\\
-&            x_{o^{j}_{r}j} &  \geq x_{o^{j}_{r-1}j} +p_{o^{j}_{r-1}j} & \forall r \in \{2,..,m\}, j \in {J} & \text{Order tasks for job $j$} \\
-             &      x_{ij}     & \geq x_{ik} + p_{ik} - M \cdot y_{ijk} & \forall j,k \in {J}, j \neq k, i \in {I} & \text{Ordering on machine $i$} \\
-              &     x_{ik}     & \geq x_{ij} + p_{ij} - M \cdot (1-y_{ijk}) & \forall j,k \in {J}, j \neq k,i \in {I} & \text{Reverse ordering on machine $i$}\\
-              \\
-           &   & \text{ Bounding objective}\\
-            &       C_{\max}          & \geq x_{o^{j}_{m}j} + p_{o^{j}_{m}j} & \forall j \in {J} & \text{last task of job $j$ completed before end}\\
-            \\
-            && \text{ Domain of variables}\\
-            &      x_{ij}      & \geq 0 & \forall i \in {J}, i \in {I} \\
-           &       y_{ijk}     & \in \{0,1\} & \forall j,k \in {J}, i \in {I} \\
+\st
+&            s_{o^{j}_{r}j} &  \geq s_{o^{j}_{r-1}j} +p_{o^{j}_{r-1}j} & \forall j \in {J}, r \in \{2,\dots,m\} & \text{follow the route of job $j$} \\
+             &      s_{ij} + p_{ij}     & \leq s_{ik} + M (1-z_{ijk}) & \forall i \in {I}, j,k \in {J}, j < k & \text{$j$ first when $z_{ijk} = 1$} \\
+              &     s_{ik} + p_{ik}     & \leq s_{ij} + M z_{ijk} & \forall i \in {I}, j,k \in {J}, j < k & \text{$k$ first when $z_{ijk} = 0$}\\
+            &       C_{\max}          & \geq s_{o^{j}_{m}j} + p_{o^{j}_{m}j} & \forall j \in {J} & \text{makespan covers every job}\\
+            &      s_{ij}      & \geq 0 & \forall i \in {I}, j \in {J} \\
+           &       z_{ijk}     & \in \{0,1\} & \forall i \in {I}, j,k \in {J}, j < k \\
           &        C_{\max} & \geq 0
               \end{array}
               \end{equation}
 \end{subequations}
+Solving this model on the four-job, three-machine instance above gives an optimal makespan of $12$ hours---a substantial improvement over the $30$ hours needed to run the jobs one at a time.
 \begin{examplewithallcode}{Duplo Scheduling}{}{}{https://github.com/open-optimization/open-optimization-or-examples/blob/master/integer-programming/job-shop-scheduling.ipynb}
 
-The Duplo in class exercise is solved with Gurobi in the link.
+The Duplo in-class exercise is solved with Gurobi in the link.
 
 The optimal value is 11.
 
 \begin{center}
-\includetikz[width = 0.8\textwidth]{Figures/jssp-duplo}
-\includegraphics[scale = 0.5]{optimization/figures/figures-static/jssp-duplo}
+\includetikz[width = 0.8\textwidth]{optimization/figures/figures-static/jssp-duplo}\par\captionof{figure}{Gantt chart of the Duplo job shop scheduling solution with three machines and four color-coded jobs.}\label{fig:jssp-duplo}% fig-num-auto
 
-\includegraphics[scale=0.07, angle=180]{optimization/figures/figures-static/jssp-duplo-actual}
+%\includegraphicstatic[scale = 0.5]{jssp-duplo}
+
+\includegraphicbook[scale=0.07, angle=180]{jssp-duplo-actual}\par\captionof{figure}{Photograph of Duplo building blocks arranged as a physical demonstration of the job shop schedule.}\label{fig:jssp-duplo-actual}% fig-num-auto
+
 \end{center}
 \end{examplewithallcode}
 
 \subsection{Job Shop Scheduling Variations}
 
-Makespan minimization of assining jobs to machines.
+Makespan minimization of assigning jobs to machines.
 
-In this variation, each machine can handle a number of of different types of jobs.  Some machines can do certain jobs faster than others. 
+In this variation, each machine can handle a number of different types of jobs.  Some machines can do certain jobs faster than others. 
 
 We want to minimize the completion time of all of the jobs.  
 
-In this simple variation, each job only needs to be processed on a single machine, but that choice of machine might vary dependent on which machine can do that job faster and which one is available.
+In this variation, each job visits its listed machines in sequence: most jobs require processing on two machines, in the order given, while a few need only one.
+
 
 %
 %
@@ -1401,7 +1434,7 @@ In this simple variation, each job only needs to be processed on a single machin
 %
 %The model can be implemented using python with Gurobi library as follows:
 %
-\begin{verbatim}
+%\begin{verbatim}
 %from gurobipy import *
 %
 %def job_shop_scheduling(n,m,p,E):
@@ -1437,7 +1470,7 @@ In this simple variation, each job only needs to be processed on a single machin
 %    model.optimize()
 %
 %    return
-\end{verbatim}
+%\end{verbatim}
 
 %Here is an example:
 %Here is an example job shop scheduling problem with 5 machines and 15 jobs:
@@ -1510,7 +1543,7 @@ In this simple variation, each job only needs to be processed on a single machin
     \item There are no precedence constraints between jobs.
 \end{itemize}
 %
-\begin{verbatim}
+%\begin{verbatim}
 %job_shop_data = {
 %    'machines': {
 %        1: {'jobs': [1, 2, 3, 4, 5]},
@@ -1539,7 +1572,7 @@ In this simple variation, each job only needs to be processed on a single machin
 %    'objective': 'minimize_makespan',
 %    'constraints': ['job_machine_mapping', 'single_job_single_machine', 'no_job_precedence']
 %}
-\end{verbatim}
+%\end{verbatim}
 
 We leave this as an exercise for the reader to model and solve.
 
@@ -1595,15 +1628,15 @@ x_{ik} = \begin{cases}
 \end{align}
 \end{general}
 
-\section{Genaralized Assignment Problem (GAP)}
+\section{Generalized Assignment Problem (GAP)}
 
-\url{https://en.wikipedia.org/wiki/Generalized_assignment_problem}
-In \href{applied_mathematics}{applied mathematics}, the maximum
+This section is adapted from the Wikipedia article \emph{Generalized assignment problem}\footnote{Wikipedia contributors, ``Generalized assignment problem,'' \url{https://en.wikipedia.org/wiki/Generalized_assignment_problem}, licensed CC~BY-SA; text edited and reformatted for this book.}.
+In applied mathematics, the maximum
 \textbf{generalized assignment problem} is a problem in
-\href{combinatorial_optimization}{combinatorial optimization}. This
-problem is a \url{generalization} of the
-\href{assignment_problem}{assignment problem} in which both tasks and
-\href{Agent-based_model}{agents} have a size. Moreover, the size of each
+combinatorial optimization. This
+problem is a generalization of the
+assignment problem in which both tasks and
+agents have a size. Moreover, the size of each
 task might vary from one agent to the other.
 
 This problem in its most general form is as follows: There are a number
@@ -1619,11 +1652,10 @@ budget and total profit of the assignment is maximized.
 
 In the special case in which all the agents' budgets and all tasks'
 costs are equal to 1, this problem reduces to the
-\href{assignment_problem}{assignment problem}. When the costs and
+assignment problem. When the costs and
 profits of all tasks do not vary between different agents, this problem
 reduces to the multiple knapsack problem. If there is a single agent,
-then, this problem reduces to the \href{knapsack_problem}{knapsack
-problem}.
+then, this problem reduces to the knapsack problem.
 
 \hypertarget{explanation-of-definition}{%
 \subsection{Explanation of definition}\label{explanation-of-definition}}
@@ -1639,7 +1671,7 @@ item-bin assignment. The goal is to find a maximum profit feasible
 solution.
 
 Mathematically the generalized assignment problem can be formulated as
-an \href{Integer_programming}{integer program}:
+an integer program:
 \begin{align} \text{maximize } &
 \sum_{i=1}^m\sum_{j=1}^n
 p_{ij} x_{ij}. \\
