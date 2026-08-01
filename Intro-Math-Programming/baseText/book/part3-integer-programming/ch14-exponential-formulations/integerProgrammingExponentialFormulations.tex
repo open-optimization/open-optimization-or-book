@@ -80,32 +80,28 @@ An initial model for this problem could be constructed as follows:
 \item Let $x_{ij}$ be the number of cuts of length $L_i$ in pipe $j$ that we use.
 \end{itemize}
 Then we have the following model
-\begin{equation}
-\begin{split}
-\min\ \  & \sum_{j=1}^N z_j\\
-\st \ \  & \sum_{i=1}^k  L_i x_{ij} \leq Lz_j \ \text{ for } j=1,\dots, N\\
-& \sum_{j=1}^N x_{ij} \geq d_i \ \text{ for } i=1, \dots, k\\
-& z_j \in \{0,1\} \text{ for } j=1, \dots, N\\
-& x_{ij} \in \Z_+ \text{ for } i=1, \dots, k,\, j=1, \dots, N
-\end{split}
-\end{equation}
+\begin{align*}
+\min \quad & \sum_{j=1}^N z_j\\
+\st \quad  & \sum_{i=1}^k  L_i x_{ij} \leq Lz_j & \text{for } j=1,\dots, N\\
+& \sum_{j=1}^N x_{ij} \geq d_i & \text{for } i=1, \dots, k\\
+& z_j \in \{0,1\} & \text{for } j=1, \dots, N\\
+& x_{ij} \in \Z_+ & \text{for } i=1, \dots, k,\, j=1, \dots, N
+\end{align*}
 \begin{exercise}{Show Bound}{}
 In the example above, show that we can choose $N=16$.
 \end{exercise}
 \begin{examplewithcode}{}{\href{https://github.com/open-optimization/open-optimization-or-examples/blob/master/integer-programming/cutting-stock.ipynb}{Gurobi}}{}{}
 
 For our example above, using $N=16$, we have
-\begin{equation}
-\begin{split}
-\min\ \  & \sum_{j=1}^{16} z_j\\
-\st \ \  &  4 x_{1j} + 5 x_{2j} + 6 x_{3j} \leq 19 z_j\\
+\begin{align*}
+\min \quad & \sum_{j=1}^{16} z_j\\
+\st \quad  & 4 x_{1j} + 5 x_{2j} + 6 x_{3j} \leq 19 z_j\\
 & \sum_{j=1}^{16} x_{1j} \geq 12\\
 & \sum_{j=1}^{16} x_{2j} \geq 15\\
 & \sum_{j=1}^{16} x_{3j} \geq 22\\
-& z_j \in \{0,1\} \text{ for } j=1, \dots, 16\\
-& x_{ij} \in \Z_+ \text{ for } i=1, \dots, 3,\, j=1, \dots, 16
-\end{split}
-\end{equation}
+& z_j \in \{0,1\} & \text{for } j=1, \dots, 16\\
+& x_{ij} \in \Z_+ & \text{for } i=1, \dots, 3,\, j=1, \dots, 16
+\end{align*}
 Additionally, we could break the symmetry in the problem.  That is, suppose the solution uses 10 of the 16 pipes.  The current formulation does not restrict which 10 pipes are used.  Thus, there are many possible solutions.  To reduce this complexity, we can state that we only use the first 10 pipes.  We can write a constraint that says \emph{if we don't use pipe $j$, then we also will not use any subsequent pipes}.  Hence, by not using pipe 11, we enforce that pipes $11, 12, 13, 14,15,16$ are not used.  This can be done by adding the constraints
 \begin{equation}
 z_1 \geq z_2 \geq z_3 \geq \dots \geq z_N.
@@ -137,19 +133,15 @@ pattern model time (s) & 0.0269&
 
 \subsection{Pattern formulation}
 We could instead list all patterns that are possible to cut each pipe.   A pattern is an vector $a \in \Z^k_+$ such that for each $i$, $a_i$ lengths of $L_i$ can be cut from a pipe of length $L$.  That is
-\begin{equation}
-\begin{split}
-\sum_{i=1}^k &L_i a_i \leq L\\
-a_i &\in \Z_+ \ \text{for all } i=1, \dots, k
-\end{split}
-\end{equation}
+\begin{align*}
+& \sum_{i=1}^k L_i a_i \leq L\\
+& a_i \in \Z_+ & \text{for all } i=1, \dots, k
+\end{align*}
 In our running example, we have 
-\begin{equation}
-\begin{split}
-4 &a_1 + 5 a_2 + 6 a_3 \leq 19\\
-&a_i \in \Z_+ \ \text{for all } i=1, \dots, 3
-\end{split}
-\end{equation}
+\begin{align*}
+& 4 a_1 + 5 a_2 + 6 a_3 \leq 19\\
+& a_i \in \Z_+ & \text{for all } i=1, \dots, 3
+\end{align*}
 
 For visualization purposes, consider the patterns where $a_3 = 0$.  That is, only patterns with cuts of length 4m or 5m.  All patterns of this type are represented by an integer point in the polytope 
 \begin{equation}
@@ -193,11 +185,11 @@ A =
 
 Now, we can recast the optimization problem as
 
-\begin{align}
-\min \ \ & \sum_{i=1}^p x_i \\
-\text{such that} \ \ & Ax \geq \begin{bmatrix} 12 \\ 15 \\ 22\end{bmatrix}\\
+\begin{align*}
+\min \quad & \sum_{i=1}^p x_i \\
+\st \quad  & Ax \geq \begin{bmatrix} 12 \\ 15 \\ 22\end{bmatrix}\\
 & x \in \Z^p_+
-\end{align}
+\end{align*}
  
 \end{example}
 
@@ -207,20 +199,20 @@ Consider the linear program\eqref{LP:basis-solution}, but in this case we are in
 Thus we can write it as 
  \begin{equation}
  \label{LP:basis-solution2}
-\begin{split}
+\begin{aligned}
 \min \quad & (c_N  - c_B A_B^{-1} A_N) x_N + c_B A_B^{-1} b  \\
-\st  \quad &x_B +  A_B^{-1} A_N x_N = A_B^{-1}b\\
+\st \quad  & x_B +  A_B^{-1} A_N x_N = A_B^{-1}b\\
 & x \geq 0
-\end{split}
+\end{aligned}
 \end{equation}
 In our LP we have $c = \one$, that is, $c_i =1$ for all $i=1, \dots, k$.  Hence, we can write it as 
  \begin{equation}
  \label{LP:basis-solution3}
-\begin{split}
+\begin{aligned}
 \min \quad & (\one_N  - \one_B A_B^{-1} N) x_N + \one_B A_B^{-1} b  \\
-\st  \quad &x_B +  A_B^{-1} A_N x_N = A_B^{-1}b\\
+\st \quad  & x_B +  A_B^{-1} A_N x_N = A_B^{-1}b\\
 & x \geq 0
-\end{split}
+\end{aligned}
 \end{equation}
 Now, if there exists a non-basic variable that could enter the basis and improve the objective, then there is one with a reduced cost that is negative.  For a particular non-basic variable, the coefficient on it is
 \begin{equation}
@@ -232,13 +224,11 @@ where $A_N^i$ is the $i$-th column of the matrix $A_N$.  Thus, we want to look f
 \end{equation}
 \begin{general}{Pricing Problem}{(knapsack problem!)}
 Given a current basis $B$ of the \emph{master} linear program, there exists a new column to add to the basis that improves the LP objective if and only if the following problem has an objective value strictly larger than 1.
-\begin{equation}
-\begin{split}
-\max\quad  &\one_B A_B^{-1} a\\
-\st \quad & \sum_{i=1}^k L_i a_i \leq L\\
-& a_i \in \Z_+ \text{ for } i=1, \dots, k
-\end{split}
-\end{equation}
+\begin{align*}
+\max \quad & \one_B A_B^{-1} a\\
+\st \quad  & \sum_{i=1}^k L_i a_i \leq L\\
+& a_i \in \Z_+ & \text{for } i=1, \dots, k
+\end{align*}
 \end{general}
 
 \begin{example}{Pricing Problem}{(knapsack problem!)}
@@ -286,13 +276,11 @@ A =
 
  
 
-\begin{equation}
-\begin{split}
-\max\quad  & \tfrac14 a_1 + \tfrac 13 a_2 + \tfrac 13 a_3\\
-\st \quad & 4 a_1 + 5 a_2 + 6 a_3 \leq 19\\
-& a_i \in \Z_+ \text{ for } i=1, \dots, k
-\end{split}
-\end{equation}
+\begin{align*}
+\max \quad & \tfrac14 a_1 + \tfrac 13 a_2 + \tfrac 13 a_3\\
+\st \quad  & 4 a_1 + 5 a_2 + 6 a_3 \leq 19\\
+& a_i \in \Z_+ & \text{for } i=1, \dots, k
+\end{align*}
 We then add optimal solution to the master problem as a new column and repeat the procedure.
 \end{example}
 
@@ -523,17 +511,17 @@ As stated above, if there is a subtour containing the node $1$, then there is al
 
 This is summarized in the following model:
 \begin{general}{Traveling Salesman Problem - MTZ Model}{}
-\begin{align}
-\min \sum_{i,j \in N} c_{ij} x_{ij}\\
-\sum_{j\in N} x_{ij} &= 1 & \text{ for all } i \in N \ \ \text{ [outgoing arc]}\\
-\sum_{i \in N} x_{ij} &= 1 & \text{ for all } j \in N \ \ \text{ [incoming arc]}\\
-x_{ii} &= 0 & \text{ for all } i \in N \ \ \text{ [no self loops]} \\
-u_i + 1 & \leq u_j + n(1-x_{ij})  & \text{ for all } i,j \in N, i,j \neq 1 \ \ \text{[prevents subtours]}\\
-u_1 &= 1\\
-2 \leq & u_i \leq n & \text{ for all } i \in N, i \neq 1\\
+\begin{align*}
+\min \quad & \sum_{i,j \in N} c_{ij} x_{ij}\\
+\st \quad  & \sum_{j\in N} x_{ij} = 1 & \text{ for all } i \in N \ \ \text{ [outgoing arc]}\\
+& \sum_{i \in N} x_{ij} = 1 & \text{ for all } j \in N \ \ \text{ [incoming arc]}\\
+& x_{ii} = 0 & \text{ for all } i \in N \ \ \text{ [no self loops]} \\
+& u_i + 1 \leq u_j + n(1-x_{ij})  & \text{ for all } i,j \in N, i,j \neq 1 \ \ \text{[prevents subtours]}\\
+& u_1 = 1\\
+& 2 \leq u_i \leq n & \text{ for all } i \in N, i \neq 1\\
 & u_i \in \Z & \text{ for all } i \in N\\
 & x_{ij} \in \{0,1\} & \text{ for all } i,j \in N
-\end{align}
+\end{align*}
 \end{general}
 
 \begin{example}{MTZ model for TSP with 4 nodes}{}
@@ -558,8 +546,7 @@ Here is the full MTZ model:
 \begin{align*}\min\quad & x_{1,2} + 2 x_{1,3} + 3 x_{1,4} + x_{2,1} + x_{2,3} + 2 x_{2,4} + \\ &2 x_{3,1} + x_{3,2} + 4 x_{3,4} + 3 x_{4,1} + 2 x_{4,2} + 4 x_{4,3}
 \end{align*}
 \begin{align*}
-\text{Subject to} \quad \\
- & x_{1,1} + x_{1,2} + x_{1,3} + x_{1,4} = 1& \text{ outgoing from node 1}\\
+\st \quad & x_{1,1} + x_{1,2} + x_{1,3} + x_{1,4} = 1& \text{ outgoing from node 1}\\
   & x_{2,1} + x_{2,2} + x_{2,3} + x_{2,4} = 1& \text{ outgoing from node 2}\\
  & x_{3,1} + x_{3,2} + x_{3,3} + x_{3,4} = 1& \text{ outgoing from node 3}\\
  & x_{4,1} + x_{4,2} + x_{4,3} + x_{4,4} = 1& \text{ outgoing from node 4}\\
@@ -583,7 +570,7 @@ Here is the full MTZ model:
  & u_{4} +1 \leq u_{2} + 4 (1-x_{4,2}) \leq 3\\
  & u_{4} +1 \leq u_{3} + 4 (1-x_{4,3}) \leq 3\\
  & x_{i,j} \in \{0,1\} \quad\forall i\in \{1,2,3,4\}, j \in \{1,2,3,4\}\\
- & u_{i} \in \mathbb{Z}, \quad\forall i \in \{1,2,3,4\}\\
+ & u_{i} \in \mathbb{Z}, \quad\forall i \in \{1,2,3,4\}
 \end{align*}
 \end{example}
 
@@ -592,7 +579,7 @@ Here is the full MTZ model:
 \begin{align*}\min\quad & x_{1,2} + 2 x_{1,3} + 3 x_{1,4} + 4 x_{1,5} + x_{2,1} + x_{2,3} + 2 x_{2,4} + 2 x_{2,5} + 2 x_{3,1} + \\&x_{3,2} + 4 x_{3,4} + x_{3,5} + 3 x_{4,1} + 2 x_{4,2} + 4 x_{4,3} + 2 x_{4,5} + \\&4 x_{5,1} + 2 x_{5,2} + x_{5,3} + 2 x_{5,4}
 \end{align*}
 \begin{align*}
-\text{Subject to} \quad  
+\st \quad
  & x_{1,1} + x_{1,2} + x_{1,3} + x_{1,4} + x_{1,5} = 1\\
  & x_{2,1} + x_{2,2} + x_{2,3} + x_{2,4} + x_{2,5} = 1\\
  & x_{3,1} + x_{3,2} + x_{3,3} + x_{3,4} + x_{3,5} = 1\\
@@ -733,9 +720,9 @@ We can prevent this subtour by adding the constraint
 x_{25} + x_{53} + x_{32}  \leq 2
 \end{equation}
 meaning that at most 2 of those arcs are allowed to happen at the same time.  In general, for any subtour $S$, we can have the \emph{subtour elimination constraint}
-\begin{align}
+\begin{align*}
 \sum_{(i,j) \in S} x_{ij} &\leq |S| - 1  & \text{ Subtour Elimination Constraint}.
-\end{align}
+\end{align*}
 In the previous example with $S = \{(2,5), (5,3), (3,2)\}$ we have $|S| = 3$, where $|S|$ denotes the size of the set $S$.
 
 This model suggests that we just add all of these subtour elimination constraints.
@@ -743,11 +730,11 @@ This model suggests that we just add all of these subtour elimination constraint
 \begin{general}{Traveling Salesman Problem - DFJ Model}{}
 \begin{align}
 \label{eq:tsp-DFJ-model}
-\min \sum_{i,j \in N} c_{ij} x_{ij}\\
-\sum_{j\in N} x_{ij} &= 1 & \text{ for all } i \in N \ \ \text{ [outgoing arc]}\\
-\sum_{i \in N} x_{ij} &= 1 & \text{ for all } j \in N \ \ \text{ [incoming arc]}\\
-x_{ii} &= 0 & \text{ for all } i \in N \ \ \text{ [no self loops]} \\
-\sum_{(i,j) \in S} x_{ij} &\leq |S| -1  & \text{ for all subtours } S \ \ \text{[prevents subtours]}\\
+\min \quad & \sum_{i,j \in N} c_{ij} x_{ij}\\
+\st \quad  & \sum_{j\in N} x_{ij} = 1 & \text{ for all } i \in N \ \ \text{ [outgoing arc]}\\
+& \sum_{i \in N} x_{ij} = 1 & \text{ for all } j \in N \ \ \text{ [incoming arc]}\\
+& x_{ii} = 0 & \text{ for all } i \in N \ \ \text{ [no self loops]} \\
+& \sum_{(i,j) \in S} x_{ij} \leq |S| -1  & \text{ for all subtours } S \ \ \text{[prevents subtours]}\\
 & x_{ij} \in \{0,1\} & \text{ for all } i,j \in N
 \end{align}
 \end{general}
@@ -775,8 +762,9 @@ Consider the distance matrix:
 \graph { subgraph K_n [n=4,clockwise,radius=3cm] };
 \end{center}
 
-\begin{align}\min\quad & x_{1,2} + 2 x_{1,3} + 3 x_{1,4} + x_{2,1} + x_{2,3} + 2 x_{2,4} + 2 x_{3,1} + x_{3,2} + 4 x_{3,4} + 3 x_{4,1} + 2 x_{4,2} + 4 x_{4,3}\\
-\text{Subject to} \quad & x_{1,1} + x_{2,1} + x_{3,1} + x_{4,1} = 1\\
+\begin{align*}
+\min \quad & x_{1,2} + 2 x_{1,3} + 3 x_{1,4} + x_{2,1} + x_{2,3} + 2 x_{2,4} + 2 x_{3,1} + x_{3,2} + 4 x_{3,4} + 3 x_{4,1} + 2 x_{4,2} + 4 x_{4,3}\\
+\st \quad & x_{1,1} + x_{2,1} + x_{3,1} + x_{4,1} = 1
 % & x_{1,2} + x_{2,2} + x_{3,2} + x_{4,2} = 1\\
 % & x_{1,3} + x_{2,3} + x_{3,3} + x_{4,3} = 1\\
 % & x_{1,4} + x_{2,4} + x_{3,4} + x_{4,4} = 1\\
@@ -789,12 +777,11 @@ Consider the distance matrix:
 % & x_{3,3} = 0\\
 % & x_{4,4} = 0\\
 % & x_{i,j} \in \{0,1\} \quad\forall i \in \{1,2,3,4\}, j \in \{1,2,3,4\}\\
-\end{align}
+\end{align*}
 
-\begin{align*}\min\quad & x_{1,2} + 2 x_{1,3} + 3 x_{1,4} + x_{2,1} + x_{2,3} + 2 x_{2,4} \\& + 2 x_{3,1} + x_{3,2} + 4 x_{3,4} + 3 x_{4,1} + 2 x_{4,2} + 4 x_{4,3}\\
-\\
-\text{Subject to} \quad \\
- & x_{1,1} + x_{1,2} + x_{1,3} + x_{1,4} = 1& \text{ outgoing from node 1}\\
+\begin{align*}
+\min \quad & x_{1,2} + 2 x_{1,3} + 3 x_{1,4} + x_{2,1} + x_{2,3} + 2 x_{2,4} \\& + 2 x_{3,1} + x_{3,2} + 4 x_{3,4} + 3 x_{4,1} + 2 x_{4,2} + 4 x_{4,3}\\
+\st \quad & x_{1,1} + x_{1,2} + x_{1,3} + x_{1,4} = 1& \text{ outgoing from node 1}\\
   & x_{2,1} + x_{2,2} + x_{2,3} + x_{2,4} = 1& \text{ outgoing from node 2}\\
  & x_{3,1} + x_{3,2} + x_{3,3} + x_{3,4} = 1& \text{ outgoing from node 3}\\
  & x_{4,1} + x_{4,2} + x_{4,3} + x_{4,4} = 1& \text{ outgoing from node 4}\\
@@ -824,7 +811,7 @@ Consider the distance matrix:
  & x_{3,2} + x_{2,4} + x_{4,3} \leq 2& S = [(3,2), (2,4), (4,3)]\\
  & x_{2,3} + x_{3,4} + x_{4,2} \leq 2& S = [(2,3), (3,4), (4,2)]\\
  \\
- & x_{i,j} \in \{0,1\} \quad\forall i \in \{1,2,3,4\}, j \in \{1,2,3,4\}\\
+ & x_{i,j} \in \{0,1\} \quad\forall i \in \{1,2,3,4\}, j \in \{1,2,3,4\}
 \end{align*}
 % TODO missing image, disabled 2026-07-31: \includegraphics[scale = 0.5]{CompleteGraph4Nodes}
 
@@ -856,7 +843,7 @@ Hence, there are many subtours to consider.
 \item Exponentially many subtours $S$ possible, hence this model is too large to write down.
 \end{itemize}
 
-\paragraph{Solution: Add subtour elimination constraints as needed}. This is a similar concept as \emph{cutting planes}}.
+\paragraph{Solution: Add subtour elimination constraints as needed}. This is a similar concept as \emph{cutting planes}.
 
 \subsection{Traveling Salesman Problem - Branching Solution}
 We will see in the next section
@@ -870,14 +857,14 @@ We will see in the next section
 \subsubsection{Many salespersons (m-TSP)}
 \begin{general}{m-Traveling Salesman Problem - DFJ Model}{}
 \begin{align}
-\label{eq:tsp-DFJ-model}
-\min \sum_{i,j \in N} c_{ij} x_{ij}\\
-\sum_{j\in N} x_{ij} &= 1 & \text{ for all } i \in N \ \ \text{ [outgoing arc]}\\
-\sum_{i \in N} x_{ij} &= 1 & \text{ for all } j \in N \ \ \text{ [incoming arc]}\\
-\sum_{j\in N} x_{Dj} &= m & \text{ for all } i \in N \ \ \text{ [outgoing arc]}\\
-\sum_{i \in N} x_{iD} &= m & \text{ for all } j \in N \ \ \text{ [incoming arc]}\\
-x_{ii} &= 0 & \text{ for all } i \in N\cup\{D\} \ \ \text{ [no self loops]} \\
-\sum_{(i,j) \in S} x_{ij} &\leq |S| -1  & \text{ for all subtours } S\subseteq N \ \ \text{[prevents subtours]}\\
+\label{eq:tsp-DFJ-model-mtsp}
+\min \quad & \sum_{i,j \in N} c_{ij} x_{ij}\\
+\st \quad  & \sum_{j\in N} x_{ij} = 1 & \text{ for all } i \in N \ \ \text{ [outgoing arc]}\\
+& \sum_{i \in N} x_{ij} = 1 & \text{ for all } j \in N \ \ \text{ [incoming arc]}\\
+& \sum_{j\in N} x_{Dj} = m & \text{ for all } i \in N \ \ \text{ [outgoing arc]}\\
+& \sum_{i \in N} x_{iD} = m & \text{ for all } j \in N \ \ \text{ [incoming arc]}\\
+& x_{ii} = 0 & \text{ for all } i \in N\cup\{D\} \ \ \text{ [no self loops]} \\
+& \sum_{(i,j) \in S} x_{ij} \leq |S| -1  & \text{ for all subtours } S\subseteq N \ \ \text{[prevents subtours]}\\
 & x_{ij} \in \{0,1\} & \text{ for all } i,j \in N\cup\{D\}
 \end{align}
 \end{general}
@@ -887,19 +874,19 @@ This could also be done in the DFJ model above, but the algorithm for subtour el
 
 \begin{general}{m-Traveling Salesman Problem - MTZ Model - }{}
 \href{https://github.com/open-optimization/open-optimization-or-examples/blob/master/integer-programming/tsp-mtz/m_TSP_with_MTZ_Model.ipynb}{Python Code}
-\begin{align}
-\min \sum_{i,j \in N} c_{ij} x_{ij}\\
-\sum_{j\in N} x_{ij} &= 1 & \text{ for all } i \in N \ \ \text{ [outgoing arc]}\\
-\sum_{i \in N} x_{ij} &= 1 & \text{ for all } j \in N \ \ \text{ [incoming arc]}\\
-\sum_{j\in N} x_{Dj} &= m & \text{ for all } i \in N \ \ \text{ [outgoing arc]}\\
-\sum_{i \in N} x_{iD} &= m & \text{ for all } j \in N \ \ \text{ [incoming arc]}\\
-x_{ii} &= 0 & \text{ for all } i \in N\cup\{D\} \ \ \text{ [no self loops]} \\
-u_i + 1 & \leq u_j + n(1-x_{ij})  & \text{ for all } i,j \in N, i,j \neq 1 \ \ \text{[prevents subtours]}\\
-u_1 &= 1\\
-2 \leq & u_i \leq T & \text{ for all } i \in N, i \neq 1\\
+\begin{align*}
+\min \quad & \sum_{i,j \in N} c_{ij} x_{ij}\\
+\st \quad  & \sum_{j\in N} x_{ij} = 1 & \text{ for all } i \in N \ \ \text{ [outgoing arc]}\\
+& \sum_{i \in N} x_{ij} = 1 & \text{ for all } j \in N \ \ \text{ [incoming arc]}\\
+& \sum_{j\in N} x_{Dj} = m & \text{ for all } i \in N \ \ \text{ [outgoing arc]}\\
+& \sum_{i \in N} x_{iD} = m & \text{ for all } j \in N \ \ \text{ [incoming arc]}\\
+& x_{ii} = 0 & \text{ for all } i \in N\cup\{D\} \ \ \text{ [no self loops]} \\
+& u_i + 1 \leq u_j + n(1-x_{ij})  & \text{ for all } i,j \in N, i,j \neq 1 \ \ \text{[prevents subtours]}\\
+& u_1 = 1\\
+& 2 \leq u_i \leq T & \text{ for all } i \in N, i \neq 1\\
 & u_i \in \Z & \text{ for all } i \in N\\
 & x_{ij} \in \{0,1\} & \text{ for all } i,j \in N\cup\{D\}
-\end{align}
+\end{align*}
 \end{general}
 
 \includegraphicstatic{m-tsp_solution}
@@ -935,14 +922,14 @@ x_{ijk} & :
 \end{equation}
 
 \textbf{Subject to:}
-\begin{align}
+\begin{align*}
 \sum_{i} \sum_{k} x_{ijk} &= 1 & \forall j \neq \text{depot} & \quad \text{(Exactly one vehicle in)} \\
 \sum_{j} \sum_{k} x_{ijk} &= 1 & \forall i \neq \text{depot} & \quad \text{(Exactly one vehicle out)} \\
 \sum_{i} \sum_{k} x_{ihk} - \sum_{j} \sum_{k} x_{hjk} &= 0 & \forall k, h & \quad \text{(It's the same vehicle)} \\
 \sum_{i} q_i \sum_{j} x_{ijk} &\leq Q_k & \forall k & \quad \text{(Capacity constraint)} \\
 \sum_{ijk} x_{ijk} &= |S| - 1 & \forall S \subseteq P(N), \ 0 \notin S & \quad \text{(Subtour elimination)} \\
 x_{ijk} &\in \{0,1\}
-\end{align}
+\end{align*}
 
 \section{TSP with Time Windows}
 Let $G = (V, A)$ be a directed graph where $V$ is the set of nodes (including the depot) and $A$ is the set of arcs. Each arc $(i,j) \in A$ has a cost $c_{ij}$ associated with it which represents the cost of traveling from node $i$ to node $j$. The problem is to find a minimum-cost tour that visits each node within its time window.
@@ -1185,22 +1172,21 @@ This heuristic is valued for its simplicity, speed, and ease of implementation. 
 %
 %Model 1
 \begin{align*}
-\min \ \ \ & \sum_{(u,v) \in E} w_{uv} x_{uv}\\
-\text{ such that }  \ \ \ \\
+\min \quad & \sum_{(u,v) \in E} w_{uv} x_{uv}\\
 %x_t & = 1 & \forall t \in T \\
 %2x_{uv} - x_u - x_v &\leq 0 &   \forall (u,v) \in E\\
 %x_v - \sum_{(u,v) \in E} x_{uv} \leq 0 \forall v \in V\\
-\sum_{(u,v) \in \delta(S)} x_{uv} \geq x_w \forall S \subseteq V, \forall w \in S\\
+\st \quad  & \sum_{(u,v) \in \delta(S)} x_{uv} \geq x_w & \forall S \subseteq V, \forall w \in S
 \end{align*}
 %
 %Model 2
 \begin{align*}
-\min &\sum_{(u,v) \in E} w_{uv} x_{uv}\\
+\min \quad & \sum_{(u,v) \in E} w_{uv} x_{uv}\\
 %x_t &= 1 &\forall t \in T\\
 %2x_{uv} - x_u - x_v &\leq 0 & \forall (u,v) \in E\\
 %x_v - \sum_{(u,v) \in E} x_{uv} &\leq 0 &\forall v \in V\\
 %x_{uv} + x_{vu} &\leq 1\\
-\sum_{v \in V} x_v - \sum_{(u,v) \in E} x_{uv} &=1&\\
+\st \quad  & \sum_{v \in V} x_v - \sum_{(u,v) \in E} x_{uv} = 1
 %n x_{uv} + l_v - l_u &\geq 1 - n(1-x_{vu}) &\forall (u,v) \in E\\
 %n x_{vu} + l_u - l_v &\geq 1 - n(1-x_{uv}) &\forall (u,v) \in E
 \end{align*}

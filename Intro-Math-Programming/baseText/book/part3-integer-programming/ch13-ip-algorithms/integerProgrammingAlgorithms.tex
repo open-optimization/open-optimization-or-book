@@ -48,14 +48,21 @@ This section decribes the foundational princple about relaxations that will be u
 \end{outcome}
 
 Recall that the linear relaxation of an integer program is the linear programming problem after removing the integrality constraints
-$$
-\begin{array}{rlclr}
-\text{ Integer Program:} & & & \text{Linear Relaxation:}\\
-\max \ & z_{IP} = c^\top x & \hspace{3cm} & & \max \  z_{LP} = c^\top x \\
-& Ax \leq b & & & Ax \leq b\\
-& \tred{x \in \Z^n} & & & \tblue{x \in \R^n}
+\[
+\begin{array}{ll}
+\multicolumn{2}{l}{\text{Integer Program:}}\\[2pt]
+\max & z_{IP} = c^\top x \\
+     & Ax \leq b \\
+     & \tred{x \in \Z^n}
 \end{array}
-$$
+\qquad\qquad
+\begin{array}{ll}
+\multicolumn{2}{l}{\text{Linear Relaxation:}}\\[2pt]
+\max & z_{LP} = c^\top x \\
+     & Ax \leq b \\
+     & \tblue{x \in \R^n}
+\end{array}
+\]
 
 \begin{theorem}{LP Bounds}{}
 It always holds that 
@@ -79,11 +86,15 @@ x^*_{LP} = x^*_{IP} \ \ \text{ and } z^*_{LP} = z^*_{IP}.
 % first column
 \begin{minipage}[t]{0.5\textwidth}
 Consider the problem 
-\begin{align*}
-\max z = & 3x_1 + 2x_1\\
-& 2x_1 + x_2 \leq 6\\
-& x_1, x_2 \geq 0; x_1, x_2 \text{ integer}
-\end{align*}
+\[
+\begin{array}{l r@{\;}c@{\;}r@{\;}c@{\;}r}
+\max & z = 3x_1 + 2x_2 & & & & \\[2pt]
+\st  & 2x_1 & + & x_2 & \leq & 6 \\
+     & x_1  &   &     & \geq & 0 \\
+     &      &   & x_2 & \geq & 0 \\
+     & \multicolumn{5}{r}{x_1, x_2 \text{ integer}}
+\end{array}
+\]
 \end{minipage}
 %
 %second column
@@ -98,11 +109,13 @@ Consider the problem
   \subsection{Rounding LP Solution can be bad!}
 
   Consider the two variable knapsack problem
-  \begin{align}
-  \max   3x_1 + 100 x_2\\
-              x_1  + 100 x_2 \leq 100\\
-              x_i \in \{0,1\} \text{ for } i=1,2.
-  \end{align}
+  \[
+  \begin{array}{l r@{\;}c@{\;}r@{\;}c@{\;}r}
+  \max & 3x_1 + 100 x_2 & & & & \\[2pt]
+  \st  & x_1 & + & 100 x_2 & \leq & 100 \\
+       & \multicolumn{5}{r}{x_i \in \{0,1\} \text{ for } i=1,2.}
+  \end{array}
+  \]
   
   Then $x^*_{LP} = (1, 0.99)$ and $z^*_{LP} = 1\cdot 3 + 0.99\cdot 100 = 3 + 99 = 102.$
   
@@ -118,11 +131,13 @@ Consider the problem
   \subsection{Rounding LP solution can be infeasible!}
   Now only could it produce a poor solution, it is not always clear how to round to a feasible solution.  
     Consider the two variable knapsack problem
-  \begin{align}
-  \min   x_1 + 200 x_2\\
-              x_1  + 100 x_2 \geq 100\\
-              x_i \in \{0,1\} \text{ for } i=1,2.
-  \end{align}
+  \[
+  \begin{array}{l r@{\;}c@{\;}r@{\;}c@{\;}r}
+  \min & x_1 + 200 x_2 & & & & \\[2pt]
+  \st  & x_1 & + & 100 x_2 & \geq & 100 \\
+       & \multicolumn{5}{r}{x_i \in \{0,1\} \text{ for } i=1,2.}
+  \end{array}
+  \]
   Again, we return  $x^*_{LP} = (1, 0.99)$.  But in this case, rounding down to $(1,0)$ is not feasible!
   
   In $n$-dimensions, there are potentially $2^n$ integer points to round to, making rounding very complicated in some cases.
@@ -182,7 +197,7 @@ We will use the result from Subsection~\ref{subsection:fractional-knapsack} that
 Solve the following problem with branch and bound.
 \begin{align*}
 \max \quad & 11x_1+15x_2+6x_3+2x_4 + x_5   \tag{Total value}\\
-\st        & 5x_1+7x_2+4x_3+3x_4 + 15x_5 \leq 15   \tag{Capacity}\\
+\st \quad  & 5x_1+7x_2+4x_3+3x_4 + 15x_5 \leq 15   \tag{Capacity}\\
            & x_i \text{ binary} &&\quad \text{for all } i=1,\dots,5
 \end{align*}
 
@@ -267,14 +282,16 @@ Here is an example of branching on general integer variables.
 \textbf{Example: Branching on general integer variables}
 Consider the two variable example with
  
- \begin{align*}
- \max & -3x_1 + 4x_2\\
- & 2x_1 + 2 x_2 \leq 13\\
- & -8 x_1 + 10x_2 \leq 41\\
- & 9x_1 + 5x_2 \leq 45\\
- & 0 \leq x_1 \leq 10, \text{ integer }\\
- & 0 \leq x_2 \leq 10, \text{ integer }
- \end{align*}
+ \[
+ \begin{array}{l r@{\;}c@{\;}r@{\;}c@{\;}r}
+ \max & -3x_1 + 4x_2 & & & & \\[2pt]
+ \st  & 2x_1  & + & 2 x_2 & \leq & 13 \\
+      & -8 x_1 & + & 10x_2 & \leq & 41 \\
+      & 9x_1  & + & 5x_2  & \leq & 45 \\
+      & \multicolumn{5}{r}{0 \leq x_1 \leq 10, \text{ integer }} \\
+      & \multicolumn{5}{r}{0 \leq x_2 \leq 10, \text{ integer }}
+ \end{array}
+ \]
  
  
  
@@ -422,7 +439,7 @@ An optimal solution is concluded to be $x^* = (0,4)$ with objective value $z^* =
 %
 \begin{align*}
 \max \quad & 16x_1 + 22x_2 + 12x_3 + 8 x_4 \\
-\st        & 5x_1 + 7x_2 + 4x_3 + 3x_4 \leq 14 \\
+\st \quad  & 5x_1 + 7x_2 + 4x_3 + 3x_4 \leq 14
 %& 0 \leq x_i \leq 1 \ \ i=1,2,3,4\\
 %& x_i \in \{0,1\} \ \ i=1,2,3,4
 \end{align*}
@@ -431,7 +448,7 @@ An optimal solution is concluded to be $x^* = (0,4)$ with objective value $z^* =
 
 \begin{align*}
 \max \quad & c_1 x_1 + c_2 x_2 + c_3 x_3 + c_4 x_4 \\
-\st        & a_1 x_1 + a_2 x_2 + a_3 x_3 + a_4 x_4 \leq b \\
+\st \quad  & a_1 x_1 + a_2 x_2 + a_3 x_3 + a_4 x_4 \leq b
 %& 0 \leq x_i \leq 1 \ \ i=1,2,3,4\\
 \end{align*}
 %
@@ -440,7 +457,7 @@ An optimal solution is concluded to be $x^* = (0,4)$ with objective value $z^* =
 %
 \begin{align*}
 \max \quad & c_1 x_1 + c_2 x_2 + c_3 x_3 + c_4 x_4 \\
-\st        & (a_1 - A)x_1 + (a_2-A) x_2 + (a_3-A) x_3 + (a_4-A) x_4 \leq 0 \\
+\st \quad  & (a_1 - A)x_1 + (a_2-A) x_2 + (a_3-A) x_3 + (a_4-A) x_4 \leq 0
 %& 0 \leq x_i \leq m_i \ \ i=1,2,3,4\\
 \end{align*}
 
@@ -452,7 +469,7 @@ An optimal solution is concluded to be $x^* = (0,4)$ with objective value $z^* =
 %
 \begin{align*}
 \max \quad & 16x_1 + 22x_2 + 12x_3 + 8 x_4 \\
-\st        & 5x_1 + 7x_2 + 4x_3 + 3x_4 \leq 14 \\
+\st \quad  & 5x_1 + 7x_2 + 4x_3 + 3x_4 \leq 14
 %& 0 \leq x_i \leq 1 \ \ i=1,2,3,4\\
 %& x_i \in \{0,1\} \ \ i=1,2,3,4
 \end{align*}
@@ -473,7 +490,7 @@ We begin with an example of problem specific inequalites that apply only to cert
 Consider the binary knapsack problem
 \begin{align*}
 \max \quad & x_1 + 2x_2 + x_3 + 7 x_4 \\
-\st        & 100 x_1 + 70x_2 + 50 x_3 + 60 x_4 \leq 150 \\
+\st \quad  & 100 x_1 + 70x_2 + 50 x_3 + 60 x_4 \leq 150 \\
 & x_i  \text{ binary  for } i =1, \dots, 4
 \end{align*}
 
@@ -529,7 +546,7 @@ Recall example~\ref{ex:min-coins}.  The model was\\
 \modelhead{Model}
 \begin{align*}
 \min \quad & p + n + d + q   \tag{total number of coins used} \\
-\st        & p + 5n + 10d + 25 q = 83 & \text{sums to } 83 \cent \\
+\st \quad  & p + 5n + 10d + 25 q = 83 & \text{sums to } 83 \cent \\
 & p,d,n,q \in \Z_+   \tag{each is a non-negative integer}
 \end{align*}
 
@@ -557,7 +574,7 @@ These new inequalities are all valid for the integer solutions.  Consider the ne
 \textbf{New Model}
 \begin{align*}
 \min \quad & p + n + d + q   \tag{total number of coins used} \\
-\st        & p + 5n + 10d + 25 q = 83 & \text{sums to } 83 \cent \\
+\st \quad  & p + 5n + 10d + 25 q = 83 & \text{sums to } 83 \cent \\
 & q \leq 3 \\
 & d + 2q \leq 8 \\
 & n + 2d  + 5q \leq 16 \\
@@ -625,15 +642,15 @@ Here is a concrete example of how this could play out.
  \hline
 \textbf{Model} & \textbf{LP Solution} \\\hline \hline
 
-$$
+\[
 \begin{array}{lrl}
-\max \ & x_1 + x_2\\
-\text{subject to  } &  -2x_1 + x_2 &\leq 0.5\\
-& x_1 + 2x_2 &\leq 10.5\\
-& x_1 - x_2 &\leq 0.5\\
-& - 2x_1 - x_2 &\leq -2
-\end{array} 
-$$
+\max & x_1 + x_2\\
+\st  & -2x_1 + x_2 &\leq 0.5\\
+     & x_1 + 2x_2 &\leq 10.5\\
+     & x_1 - x_2 &\leq 0.5\\
+     & - 2x_1 - x_2 &\leq -2
+\end{array}
+\]
 &
 \begin{tikzpicture}[scale=0.8]
   \draw[gray!30] (0,0) grid (5,5);
@@ -648,16 +665,16 @@ $$
   \fill[red] (3.8333,3.3333) circle (2.6pt);
   \node[red,right,font=\scriptsize] at (3.95,3.5) {LP opt $(3.83,3.33)$};
 \end{tikzpicture}\\
-$$
+\[
 \begin{array}{lrl}
-\max \ & x_1 + x_2\\
-\text{subject to  } &  -2x_1 + x_2 &\leq 0.5\\
-& x_1 + 2x_2 &\leq 10.5\\
-& x_1 - x_2 &\leq 0.5\\
-& - 2x_1 - x_2 &\leq -2\\
-& \tred{x_1} &\tred{\leq 3}
-\end{array} 
-$$
+\max & x_1 + x_2\\
+\st  & -2x_1 + x_2 &\leq 0.5\\
+     & x_1 + 2x_2 &\leq 10.5\\
+     & x_1 - x_2 &\leq 0.5\\
+     & - 2x_1 - x_2 &\leq -2\\
+     & \tred{x_1} &\tred{\leq 3}
+\end{array}
+\]
 &
 \begin{tikzpicture}[scale=0.8]
   \draw[gray!30] (0,0) grid (5,5);
@@ -676,17 +693,17 @@ $$
   \fill[red] (3,3.75) circle (2.6pt);
   \node[red,above right,font=\scriptsize] at (3.02,3.85) {LP opt $(3,3.75)$};
 \end{tikzpicture}\\
-$$
+\[
 \begin{array}{lrl}
-\max \ & x_1 + x_2\\
-\text{subject to  } &  -2x_1 + x_2 &\leq 0.5\\
-& x_1 + 2x_2 &\leq 10.5\\
-& x_1 - x_2 &\leq 0.5\\
-& - 2x_1 - x_2 &\leq -2\\
-& \tred{x_1} & \tred{\leq 3}\\
-& \tred{x_1 + x_2} & \tred{\leq 6}
-\end{array} 
-$$
+\max & x_1 + x_2\\
+\st  & -2x_1 + x_2 &\leq 0.5\\
+     & x_1 + 2x_2 &\leq 10.5\\
+     & x_1 - x_2 &\leq 0.5\\
+     & - 2x_1 - x_2 &\leq -2\\
+     & \tred{x_1} & \tred{\leq 3}\\
+     & \tred{x_1 + x_2} & \tred{\leq 6}
+\end{array}
+\]
 &
 \begin{tikzpicture}[scale=0.8]
   \draw[gray!30] (0,0) grid (5,5);
@@ -728,23 +745,23 @@ The Gomory cut corresponding to the tableau row ~\eqref{eq:tableau-row} is
 \end{general}
 
 We will solve the following problem using only Gomory Cuts.
-\begin{equation*}
-\begin{array}{lrcl}
-\min & x_1 - 2x_2\\
-\st & -4x_1 + 6x_2  & \leq & 9\\
-& x_1 + x_2   & \leq & 4\\
-& x \geq 0 & , & x_1,x_2 \in \Z
+\[
+\begin{array}{l r@{\;}c@{\;}r@{\;}c@{\;}r}
+\min & x_1 - 2x_2 & & & & \\[2pt]
+\st  & -4x_1 & + & 6x_2 & \leq & 9 \\
+     & x_1   & + & x_2  & \leq & 4 \\
+     & \multicolumn{5}{r}{x \geq 0, \quad x_1,x_2 \in \Z}
 \end{array}
-\end{equation*}
+\]
 
 \textbf{Step 1:} The first thing to do is to put this into standard from by appending slack variables.
 \begin{equation}
 \label{eq:gomory-standard-form}
-\begin{array}{lrcl}
-\min & x_1 - 2x_2\\
-\st & -4x_1 + 6x_2 + s_1 & = & 9\\
-& x_1 + x_2 + s_2  & = & 4\\
-& x \geq 0 & , & x_1,x_2 \in \Z
+\begin{array}{l r@{\;}c@{\;}r@{\;}c@{\;}r@{\;}c@{\;}r@{\;}c@{\;}r}
+\min & x_1 - 2x_2 & & & & & & & & \\[2pt]
+\st  & -4x_1 & + & 6x_2 & + & s_1 &   &     & = & 9 \\
+     & x_1   & + & x_2  &   &     & + & s_2 & = & 4 \\
+     & \multicolumn{9}{r}{x \geq 0, \quad x_1,x_2 \in \Z}
 \end{array}
 \end{equation}
 
