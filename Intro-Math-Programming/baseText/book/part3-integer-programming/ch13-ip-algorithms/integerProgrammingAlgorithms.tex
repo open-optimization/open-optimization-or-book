@@ -43,6 +43,7 @@ We will being this chapter with a comparison of solving the linear programming r
 We will end this section with an example of output from GUROBI and explain how to interpret this information.
 
 \section{Foundational Principle - LP is a relaxation for IP}
+\label{sec:lp-relaxation-ip}
 \begin{outcome}
 This section decribes the foundational princple about relaxations that will be used in our main algorithmic techniques.
 \end{outcome}
@@ -107,6 +108,7 @@ Consider the problem
   
   
   \subsection{Rounding LP Solution can be bad!}
+  \label{subsec:rounding-bad}
 
   Consider the two variable knapsack problem
   \[
@@ -129,6 +131,7 @@ Consider the problem
   How can we avoid this issue?  We will use two main techniques - (1) decomposing the problem via \emph{Branch and Bound} and (2) improve the LP relaxation via cutting planes.
     
   \subsection{Rounding LP solution can be infeasible!}
+  \label{subsec:rounding-infeasible}
   Now only could it produce a poor solution, it is not always clear how to round to a feasible solution.  
     Consider the two variable knapsack problem
   \[
@@ -144,6 +147,7 @@ Consider the problem
  
 
 \section{Branch and Bound}
+\label{sec:branch-and-bound}
 \subsection{Binary Integer Programming}
 Our goal is to decompose the problem until one of three things happens:
 \begin{enumerate}
@@ -207,6 +211,7 @@ An optimal solution is concluded to be $x^* = (1,1,0,1,0)$ with objective value 
 
 \end{example}
 \subsection{Branch and bound on general integer variables}
+\label{subsec:bb-general-integers}
 
 We can apply this concept of branch and bound thinking about general integer variables.  Instead of branching to specific values, we restrict to upper and lower bounds on a variable.  This cuts the feasible region of a problem (or sub problem) into two smaller regions.  All of the same concepts apply here.
 
@@ -486,11 +491,13 @@ An optimal solution is concluded to be $x^* = (0,4)$ with objective value $z^* =
 %
 
 \section{Cutting Planes}
+\label{sec:cutting-planes}
 Cutting planes are additional inequalities that are valid for the feasible integer solutions that  cut off part of the LP relaxation.  Cutting planes can create a tighter description of the feasible region that allows for the optimal solution to be obtained by simply solving a strengthened linear relaxation. 
 
 We begin with an example of problem specific inequalites that apply only to certain structured constraints.
 
 \subsection{Cover Inequalities}
+\label{subsec:cover-inequalities}
 Consider the binary knapsack problem
 \begin{align*}
 \max \quad & x_1 + 2x_2 + x_3 + 7 x_4 \\
@@ -527,6 +534,7 @@ S = \{2,3,4\} \ \ \Rightarrow \ \ \ x_2 + x_3 + x_4 \leq 2
 \end{solution}
 
 \subsection{Chv\'atal Cuts}
+\label{subsec:chvatal-cuts}
 
 Chv\'atal Cuts are a general technique to produce new inequalities that are valid for feasible integer points.  
 
@@ -590,6 +598,7 @@ The solution to the LP relaxation is exactly $q = 3, d = 0, n = 1, p = 3$, which
 \end{example}
 
 \subsection{Cutting Planes Procedure}
+\label{subsec:cutting-plane-procedure}
 Cutting planes can be constructed dynamically so that we only look for cuts that are critical to proving optimality of the problem.
 
 This is done by iteratively solving a relaxation, adding a cut to improve the relaxation, and then resolving the relaxation.   
@@ -729,6 +738,7 @@ Here is a concrete example of how this could play out.
  \end{tabular}
 \end{table}
 \subsection{Gomory Cuts}
+\label{subsec:gomory-cuts}
 Gomory cuts are a type of Chv\'atal cut that is derived from the simplex tableau and can be generated dynamically, and thus is a viable candidate to implement the cutting plane procedure.
 
 Specifically, suppose that 
@@ -880,12 +890,14 @@ Egon began working at Carnegie Mellon University as a professor in 1987 \parenci
 \end{refsection} 
 
 \section{Interpreting Output Information and Progress}
+\label{sec:solver-output}
 
 \includefigurebook[This shows the progress of the solver over time.][width=0.90\linewidth][h]{solve_progress1.png}
 
 \includefigurebook[This shows the progress of the solver over time.][width=0.90\linewidth][h]{solve_progress2.png}
 
 \section{Branching Decision Rules in Integer Programming}
+\label{sec:branching-rules}
 \begin{outcome}
 A thorough study of branching decision rults is not necessary at this point, but we add some high level discussion here to demonstrate that this is an important part of solving integer programs effeciently.
 \end{outcome}
@@ -1022,5 +1034,443 @@ Benders Decomposition
 \item \href{https://www.youtube.com/watch?v=8vUNXHwVnC8}{Youtube!  SCIP lecture}
 \end{itemize}
 \end{resource}
+
+\section{Exercises}
+
+\exgroup{Warm-ups}
+
+\begin{ex}{Bounds from a relaxation}{}
+\stars{1}\label{ex:ch13-lp-bounds}
+A solver is working on a \emph{maximization} integer program.  Its log currently
+shows an incumbent (best feasible integer solution found so far) with value
+$39$ and a best bound (largest LP relaxation value over all open nodes) of
+$41.25$.
+\begin{enumerate}
+\item Between which two numbers must the optimal value $z^*_{IP}$ lie?
+\item A node's LP relaxation is solved and has value $38.6$.  Can this node be
+pruned?  Why?
+\item Another node's LP relaxation has value $40.2$.  Can this node be pruned?
+\item Suppose every objective coefficient is an integer, so every feasible
+integer solution has an integer objective value.  What better upper bound on
+$z^*_{IP}$ can you state, and why?
+\end{enumerate}
+\exrefs{\S\ref{sec:lp-relaxation-ip}; \S\ref{sec:solver-output}}
+\end{ex}
+
+\begin{ex}{Rounding goes wrong}{}
+\stars{1}\label{ex:ch13-rounding}
+Consider the binary knapsack problem
+\[
+\begin{array}{l r@{\;}c@{\;}r@{\;}c@{\;}r}
+\max & z = 5x_1 + 80x_2 & & & & \\[2pt]
+\st  & 2x_1 & + & 50x_2 & \leq & 50 \\
+     & \multicolumn{5}{r}{x_1, x_2 \in \{0,1\}}
+\end{array}
+\]
+\begin{enumerate}
+\item Verify that the LP relaxation optimum is $x^*_{LP} = (1, \tfrac{24}{25})$
+with $z^*_{LP} = 81.8$.  (Hint: compare the value-per-unit-weight ratios of
+the two items.)
+\item Round the LP solution down to the nearest feasible binary point and
+compute its objective value.
+\item Find $x^*_{IP}$ and $z^*_{IP}$ by checking all four binary points.
+\item How much objective value did rounding lose compared to the true integer
+optimum?
+\end{enumerate}
+\exrefs{\S\ref{subsec:rounding-bad}; \S\ref{subsec:rounding-infeasible}}
+\end{ex}
+
+\begin{ex}{First Chv\'atal--Gomory cuts}{}
+\stars{1}\label{ex:ch13-cg-warmup}
+Suppose $x_1, x_2 \geq 0$ are integers.
+\begin{enumerate}
+\item Starting from the valid inequality $2x_1 + 4x_2 \leq 11$, divide by $2$
+and round to derive a Chv\'atal cut.
+\item Starting from the valid inequality $3x_1 + 5x_2 \leq 17$, multiply by
+$\tfrac{1}{3}$ and round to derive a Chv\'atal cut.
+\item In the rounding step, we round the left-hand-side coefficients
+\emph{down} first and only then round the right-hand side down.  Explain why
+$x \geq 0$ is needed for the first rounding, and why integrality of $x$ is
+needed for the second.
+\end{enumerate}
+\exrefs{\S\ref{subsec:chvatal-cuts}}
+\end{ex}
+
+\exgroup{Core problems}
+
+\begin{ex}{Branch and bound by hand}{}
+\stars{2}\label{ex:ch13-bb-hand}
+Solve the following integer program with branch and bound:
+\[
+\begin{array}{l r@{\;}c@{\;}r@{\;}c@{\;}r}
+\max & z = 5x_1 + 4x_2 & & & & \\[2pt]
+\st  & 2x_1 & + & 3x_2 & \leq & 12 \\
+     & 4x_1 & + & x_2  & \leq & 10 \\
+     & \multicolumn{5}{r}{x_1, x_2 \geq 0 \text{ integer}}
+\end{array}
+\]
+\begin{enumerate}
+\item Verify (graphically or with the simplex method) that the LP relaxation
+optimum is $x^*_{LP} = (1.8,\, 2.8)$ with $z^*_{LP} = 20.2$.
+\item Branch on $x_1$, exploring the subproblem $x_1 \geq 2$ first.  Solve the
+LP relaxation at every node, and draw the branch-and-bound tree in the style
+of Figure~\ref{fig:branch-and-bound-tree-example}, labeling each pruned leaf
+as \textbf{Integer}, \textbf{Suboptimal}, or \textbf{Infeasible}.
+\item Report the optimal solution and optimal value, and state the value of
+the lower bound $LB$ at each moment it was updated.
+\end{enumerate}
+\exrefs{\S\ref{subsec:bb-general-integers}; Figure~\ref{fig:branch-and-bound-tree-example}}
+\end{ex}
+
+\begin{ex}{A Gomory cut from the optimal tableau}{}
+\stars{2}\label{ex:ch13-gomory-tableau}
+Consider the integer program
+\[
+\begin{array}{l r@{\;}c@{\;}r@{\;}c@{\;}r}
+\max & z = x_1 + x_2 & & & & \\[2pt]
+\st  & 2x_1 & + & 3x_2 & \leq & 8 \\
+     & 3x_1 & + & 2x_2 & \leq & 8 \\
+     & \multicolumn{5}{r}{x_1, x_2 \geq 0 \text{ integer}}
+\end{array}
+\]
+After adding slack variables $s_1, s_2$ and applying the simplex method, the
+optimal tableau (basis $\{x_1, x_2\}$) is
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{c|ZZZZ|Z}
+\toprule
+Basis & $x_1$ & $x_2$ & $s_1$ & $s_2$ & RHS\\
+\midrule
+$z$   & $0$ & $0$ & $\tfrac15$ & $\tfrac15$ & $\tfrac{16}{5}$\\
+\midrule
+$x_1$ & $1$ & $0$ & $-\tfrac25$ & $\tfrac35$ & $\tfrac85$\\
+$x_2$ & $0$ & $1$ & $\tfrac35$  & $-\tfrac25$ & $\tfrac85$\\
+\bottomrule
+\end{tabular}
+\end{center}
+\begin{enumerate}
+\item Read off the LP relaxation optimum and its objective value.
+\item Derive the Gomory cut from the $x_1$ row and simplify it.  (You should
+obtain $s_1 + s_2 \geq 1$.)
+\item Substitute $s_1 = 8 - 2x_1 - 3x_2$ and $s_2 = 8 - 3x_1 - 2x_2$ to
+express the cut in the original variables.  (You should obtain
+$x_1 + x_2 \leq 3$.)
+\item Check that the cut is violated by $x^*_{LP}$ but satisfied by every
+feasible integer point.
+\item Add the cut and re-solve the LP relaxation (a picture suffices).  What
+are $x^*_{IP}$ and $z^*_{IP}$?
+\end{enumerate}
+\exrefs{\S\ref{subsec:gomory-cuts}; \S\ref{subsec:cutting-plane-procedure}}
+\end{ex}
+
+\begin{ex}{Knapsack branch and bound with all three prunes}{}
+\stars{2}\label{ex:ch13-knapsack-bb}
+Solve the binary knapsack problem
+\[
+\begin{array}{l r@{\;}c@{\;}r@{\;}c@{\;}r@{\;}c@{\;}r@{\;}c@{\;}r}
+\max & \multicolumn{7}{l}{z = 10x_1 + 12x_2 + 7x_3 + 3x_4} & & \\[2pt]
+\st  & 4x_1 & + & 5x_2 & + & 3x_3 & + & 2x_4 & \leq & 8 \\
+     & \multicolumn{9}{r}{x_i \in \{0,1\} \text{ for } i = 1,\dots,4}
+\end{array}
+\]
+with branch and bound, solving each node's LP relaxation with the fractional
+knapsack rule of Subsection~\ref{subsection:fractional-knapsack} (fill items
+in decreasing value-to-weight order, taking a fraction of the last item that
+fits).  At the root you should find $x^*_{LP} = (1, \tfrac45, 0, 0)$ with
+$z^*_{LP} = 19.6$.  Branch on the fractional variable $x_2$, exploring
+$x_2 = 1$ first, and inside that branch explore $x_1 = 1$ before $x_1 = 0$.
+Draw the tree, and point out one node pruned as \textbf{Infeasible}, one
+pruned as \textbf{Integer}, and one pruned as \textbf{Suboptimal}.  Report
+$x^*_{IP}$ and $z^*_{IP}$.
+\exrefs{\S\ref{sec:branch-and-bound}; \S\ref{subsection:fractional-knapsack}}
+\end{ex}
+
+\begin{ex}{Closing the gap with one Chv\'atal--Gomory cut}{}
+\stars{2}\label{ex:ch13-cg-multipliers}
+Consider the integer program
+\[
+\begin{array}{l r@{\;}c@{\;}r@{\;}c@{\;}r}
+\max & z = x_1 + x_2 & & & & \\[2pt]
+\st  & 4x_1 & + & x_2  & \leq & 6 \\
+     & x_1  & + & 4x_2 & \leq & 6 \\
+     & \multicolumn{5}{r}{x_1, x_2 \geq 0 \text{ integer}}
+\end{array}
+\]
+\begin{enumerate}
+\item Show (graphically, or using the symmetry of the two constraints) that
+the LP relaxation optimum is $x^*_{LP} = (1.2,\, 1.2)$ with
+$z^*_{LP} = 2.4$.
+\item Add $\tfrac15$ times the first constraint to $\tfrac15$ times the
+second constraint, and round to derive the Chv\'atal cut
+$x_1 + x_2 \leq 2$.
+\item Verify that this cut removes $x^*_{LP}$ but no feasible integer point.
+\item Using the cut as an upper bound together with a feasible integer point
+that attains it, conclude the values of $x^*_{IP}$ and $z^*_{IP}$ without any
+branching.
+\end{enumerate}
+\exrefs{\S\ref{subsec:chvatal-cuts}; \S\ref{subsec:cutting-plane-procedure}}
+\end{ex}
+
+\exgroup{Concepts and connections}
+
+\begin{ex}{Which direction do the bounds go?}{}
+\stars{2}\label{ex:ch13-bounds-direction}
+The chapter states that $z^*_{IP} \leq z^*_{LP}$ for a maximization problem.
+\begin{enumerate}
+\item Explain in one or two sentences \emph{why} this inequality holds.
+\item State and justify the corresponding inequality for a
+\emph{minimization} problem.
+\item Explain why the whole algorithm can stop immediately whenever the LP
+relaxation optimum happens to be integral.
+\item In branch and bound for a maximization problem, the incumbent value
+$LB$ is a lower bound and each node's LP value is an upper bound for that
+node.  Which bound plays which role in a minimization problem, and what is
+the pruning test ``$z^* < LB$'' replaced by?
+\end{enumerate}
+\exrefs{\S\ref{sec:lp-relaxation-ip}; \S\ref{sec:branch-and-bound}}
+\end{ex}
+
+\begin{ex}{Why Gomory cuts are safe}{}
+\stars{2}\label{ex:ch13-gomory-safe}
+Let
+\[
+x_j + \sum_{i \in N} \tilde a_i x_i = \tilde b_j
+\]
+be a row of the optimal simplex tableau, where all variables (including
+slacks, assuming integer problem data) take integer values in every feasible
+integer solution.
+\begin{enumerate}
+\item Explain why every feasible integer solution satisfies
+$x_j + \sum_{i \in N} \lfloor \tilde a_i \rfloor x_i \leq
+\lfloor \tilde b_j \rfloor$.  Where do you use $x_i \geq 0$, and where do you
+use integrality?
+\item Subtract this inequality from the tableau row to conclude the Gomory
+cut $\sum_{i \in N} (\tilde a_i - \lfloor \tilde a_i \rfloor)\, x_i \geq
+\tilde b_j - \lfloor \tilde b_j \rfloor$.
+\item Explain why the current LP optimal basic solution \emph{always}
+violates this cut whenever $\tilde b_j$ is fractional.  (What are the values
+of the nonbasic variables $x_i$, $i \in N$, at that solution?)
+\end{enumerate}
+\exrefs{\S\ref{subsec:gomory-cuts}; \S\ref{subsec:chvatal-cuts}}
+\end{ex}
+
+\begin{ex}{Reading a solver log}{}
+\stars{2}\label{ex:ch13-solver-log}
+A solver working on a \emph{maximization} integer program prints the
+following progress lines:
+\begin{center}
+\begin{tabular}{cccc}
+\toprule
+Time (s) & Incumbent & Best bound & Gap\\
+\midrule
+0  & ---   & $158.4$ & ---\\
+5  & $141$ & $154.0$ & $9.2\%$\\
+20 & $148$ & $151.0$ & $2.0\%$\\
+40 & $149$ & $150.2$ & $0.8\%$\\
+60 & $149$ & $149.0$ & $0.0\%$\\
+\bottomrule
+\end{tabular}
+\end{center}
+\begin{enumerate}
+\item Which parts of the algorithm improve the incumbent column, and which
+improve the best-bound column?
+\item Why can the best bound only decrease (never increase) over time in a
+maximization problem?
+\item Verify the reported gap at time $20$, using
+$\text{gap} = (\text{bound} - \text{incumbent})/\text{incumbent}$.
+\item True or false, with justification: ``the solver first found the optimal
+solution at time $60$.''
+\item What exactly happened between times $40$ and $60$ that allowed the
+solver to declare optimality, even though the incumbent did not change?
+\end{enumerate}
+\exrefs{\S\ref{sec:solver-output}; \S\ref{sec:branch-and-bound}}
+\end{ex}
+
+\exgroup{Challenge problems}
+
+\begin{ex}{Finishing the chapter's Gomory example}{}
+\stars{3}\label{ex:ch13-gomory-finish}
+Return to the chapter's worked example
+\[
+\begin{array}{l r@{\;}c@{\;}r@{\;}c@{\;}r}
+\min & z = x_1 - 2x_2 & & & & \\[2pt]
+\st  & -4x_1 & + & 6x_2 & \leq & 9 \\
+     & x_1   & + & x_2  & \leq & 4 \\
+     & \multicolumn{5}{r}{x \geq 0, \quad x_1, x_2 \in \Z}
+\end{array}
+\]
+whose LP relaxation optimum is $(1.5, 2.5)$ with optimal tableau given in
+Section~\ref{subsec:gomory-cuts}.  The chapter derived a cut from the $x_1$
+row; here, work with the $x_2$ row instead.
+\begin{enumerate}
+\item The $x_2$ row reads $x_2 + 0.1\,s_1 + 0.4\,s_2 = 2.5$.  Derive its
+Gomory cut and show that, rewritten in the original variables, it is simply
+$x_2 \leq 2$.
+\item Add $x_2 \leq 2$ and re-solve the LP relaxation.  (You should find the
+new optimum $(0.75,\, 2)$ with value $-3.25$.)
+\item At the new optimum the tight constraints are $-4x_1 + 6x_2 \leq 9$ and
+$x_2 \leq 2$.  Writing $s_3 \geq 0$ for the slack of the new cut, express the
+basic variable $x_1$ in terms of the nonbasic variables $s_1$ and $s_3$, and
+derive a second Gomory cut from this row.  Show that in the original
+variables it reads $-3x_1 + 5x_2 \leq 7$.
+\item Add the second cut and re-solve.  Verify that the LP optimum is now the
+integer point $(1, 2)$ with $z^*_{IP} = -3$, so the cutting plane procedure
+terminates.
+\item Double-check $z^*_{IP} = -3$ by enumerating the feasible integer
+points.
+\end{enumerate}
+\exrefs{\S\ref{subsec:gomory-cuts}; \S\ref{subsec:cutting-plane-procedure}}
+\end{ex}
+
+\begin{ex}{When branching struggles and a cut does not}{}
+\stars{3}\label{ex:ch13-weak-relaxation}
+Consider the integer program
+\[
+\begin{array}{l r@{\;}c@{\;}r@{\;}c@{\;}r}
+\max & z = x_1 + x_2 & & & & \\[2pt]
+\st  & 6x_1 & + & 6x_2 & \leq & 21 \\
+     & \multicolumn{5}{r}{0 \leq x_1, x_2 \leq 5 \text{ integer}}
+\end{array}
+\]
+\begin{enumerate}
+\item Show that $z^*_{LP} = 3.5$ (attained along a whole edge, for instance
+at $(3.5, 0)$) and that $z^*_{IP} = 3$.
+\item Start branch and bound, branching on a fractional variable at each
+node.  Show that every subproblem that still contains a piece of the line
+$x_1 + x_2 = 3.5$ again has LP value exactly $3.5$, so the pure pruning test
+``$z^* < LB$'' with $LB = 3$ never fires at such nodes, and the tree keeps
+growing until the variable bounds pin the region down.
+\item Now use the fact that the objective takes integer values at every
+feasible integer point: a node with LP value $3.5$ proves that the best
+integer solution below it is at most $\lfloor 3.5 \rfloor = 3$.  Explain why
+this rounding argument prunes every open node as soon as an incumbent with
+value $3$ is known.
+\item Finally, derive the Chv\'atal cut obtained by multiplying the knapsack
+constraint by $\tfrac16$ and rounding, and show that adding it makes the LP
+relaxation optimum equal to $3$, solving the problem at the root node with no
+branching at all.
+\end{enumerate}
+\exrefs{\S\ref{sec:branch-and-bound}; \S\ref{subsec:chvatal-cuts}; \S\ref{sec:branching-rules}}
+\end{ex}
+
+\subsubsection*{Selected Solutions}
+
+\begin{solution}(Exercise~\ref{ex:ch13-rounding})
+(1) Item 1 is worth $5/2 = 2.5$ per unit of weight and item 2 is worth
+$80/50 = 1.6$ per unit, so the LP fills item 1 completely ($x_1 = 1$, using
+weight $2$) and then fills item 2 with the remaining capacity:
+$x_2 = 48/50 = \tfrac{24}{25}$.  This gives
+$z^*_{LP} = 5 + 80 \cdot \tfrac{24}{25} = 5 + 76.8 = 81.8$.
+
+(2) Rounding down gives $(1, 0)$ with value $5$.
+
+(3) Checking all four binary points: $(0,0)$ gives $0$; $(1,0)$ gives $5$;
+$(0,1)$ has weight $50 \leq 50$ and gives $80$; $(1,1)$ has weight
+$52 > 50$ and is infeasible.  So $x^*_{IP} = (0,1)$ with $z^*_{IP} = 80$.
+
+(4) Rounding produced $5$ instead of $80$: it lost $75$, almost the entire
+optimal value, because it kept the ``wrong'' item.
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:ch13-bb-hand})
+The root LP optimum is at the intersection of the two constraints:
+$x^*_{LP} = (1.8, 2.8)$, $z^*_{LP} = 20.2$, with $LB = -\infty$.  Branch on
+$x_1$.
+
+\textbf{Node $x_1 \geq 2$:} the LP optimum is $(2, 2)$ with $z^* = 18$.
+This is integer, so the node is pruned as \textbf{Integer} and
+$LB = \max(-\infty, 18) = 18$.
+
+\textbf{Node $x_1 \leq 1$:} the LP optimum is $(1, \tfrac{10}{3})$ with
+$z^* = \tfrac{55}{3} \approx 18.33 > LB$, and $x_2$ is fractional, so we
+branch on $x_2$.
+
+\textbf{Node $x_1 \leq 1,\ x_2 \leq 3$:} the LP optimum is $(1, 3)$ with
+$z^* = 17 < LB = 18$, so the node is pruned as \textbf{Suboptimal}.
+
+\textbf{Node $x_1 \leq 1,\ x_2 \geq 4$:} the LP optimum is $(0, 4)$ with
+$z^* = 16 < 18$, pruned as \textbf{Suboptimal}.
+
+All nodes are pruned, so the optimal solution is $x^* = (2, 2)$ with
+$z^*_{IP} = 18$.
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:ch13-gomory-tableau})
+(1) $x^*_{LP} = (\tfrac85, \tfrac85) = (1.6, 1.6)$ with
+$z^*_{LP} = \tfrac{16}{5} = 3.2$.
+
+(2) The $x_1$ row states $x_1 - \tfrac25 s_1 + \tfrac35 s_2 = \tfrac85$.
+The fractional parts are $-\tfrac25 - \lfloor -\tfrac25 \rfloor = \tfrac35$,
+$\tfrac35 - \lfloor \tfrac35 \rfloor = \tfrac35$, and
+$\tfrac85 - \lfloor \tfrac85 \rfloor = \tfrac35$, so the Gomory cut is
+$\tfrac35 s_1 + \tfrac35 s_2 \geq \tfrac35$, i.e.\ $s_1 + s_2 \geq 1$.
+
+(3) Substituting the slack definitions,
+$(8 - 2x_1 - 3x_2) + (8 - 3x_1 - 2x_2) \geq 1$, which simplifies to
+$5x_1 + 5x_2 \leq 15$, i.e.\ $x_1 + x_2 \leq 3$.
+
+(4) At $x^*_{LP}$ we get $1.6 + 1.6 = 3.2 > 3$, so the cut removes the LP
+optimum.  Direct enumeration of the feasible integer points (all have
+$x_1 + x_2 \leq 3$; e.g.\ $(1,2)$ and $(2,1)$ attain equality) shows none is
+cut off.
+
+(5) With the cut added, the LP optimum is $z = 3$, attained at the integer
+points $(1,2)$ and $(2,1)$.  Hence $z^*_{IP} = 3$ with
+$x^*_{IP} = (1,2)$ (or $(2,1)$): a single Gomory cut solved the problem.
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:ch13-gomory-safe})
+(1) Since $\lfloor \tilde a_i \rfloor \leq \tilde a_i$ and $x_i \geq 0$, we
+have $x_j + \sum_i \lfloor \tilde a_i \rfloor x_i \leq
+x_j + \sum_i \tilde a_i x_i = \tilde b_j$ (nonnegativity is used to keep the
+inequality direction when shrinking coefficients).  For a feasible
+\emph{integer} solution the left-hand side is an integer, and an integer that
+is at most $\tilde b_j$ is at most $\lfloor \tilde b_j \rfloor$ (this is
+where integrality is used).
+
+(2) Subtracting
+$x_j + \sum_i \lfloor \tilde a_i \rfloor x_i \leq \lfloor \tilde b_j \rfloor$
+from the equation $x_j + \sum_i \tilde a_i x_i = \tilde b_j$ cancels $x_j$
+and yields
+$\sum_i (\tilde a_i - \lfloor \tilde a_i \rfloor) x_i \geq
+\tilde b_j - \lfloor \tilde b_j \rfloor$, which is the Gomory cut.  It is
+therefore valid for every feasible integer solution.
+
+(3) At the current LP optimum every nonbasic variable satisfies $x_i = 0$,
+so the left-hand side of the cut equals $0$, while the right-hand side
+$\tilde b_j - \lfloor \tilde b_j \rfloor$ is strictly positive whenever
+$\tilde b_j$ is fractional.  Hence the cut always separates the current
+fractional vertex from the integer feasible region.
+\end{solution}
+
+\begin{solution}(Exercise~\ref{ex:ch13-weak-relaxation})
+(1) The LP relaxation maximizes $x_1 + x_2$ subject to
+$x_1 + x_2 \leq \tfrac{21}{6} = 3.5$, so $z^*_{LP} = 3.5$, attained along the
+whole segment of $x_1 + x_2 = 3.5$ inside the box.  Integer points must have
+$x_1 + x_2$ integer and $\leq 3.5$, so $z^*_{IP} = 3$, attained for example
+at $(3, 0)$ or $(0, 3)$.
+
+(2) Branching, say, $x_1 \leq 3$ versus $x_1 \geq 4$: the right child is
+infeasible ($24 > 21$), while the left child still contains part of the line
+$x_1 + x_2 = 3.5$ (e.g.\ the point $(3, 0.5)$) and hence again has LP value
+exactly $3.5$.  The same happens after branching on $x_2$, and so on: every
+node whose box still meets the line reports $3.5$, and since
+$3.5 > LB = 3$, the test $z^* < LB$ never prunes it.  The tree only closes
+when the accumulated bounds exclude the line entirely.
+
+(3) All objective coefficients are integers, so every integer solution in a
+node has value at most $\lfloor 3.5 \rfloor = 3$.  Once an incumbent with
+value $3$ is found, no node with LP value $3.5$ can contain a solution with
+value $\geq 4$, so all such nodes can be pruned immediately: rounding the
+bound turns the useless comparison $3.5 > 3$ into the decisive
+$\lfloor 3.5 \rfloor \leq 3$.
+
+(4) Multiplying $6x_1 + 6x_2 \leq 21$ by $\tfrac16$ gives
+$x_1 + x_2 \leq 3.5$; rounding down both sides (the coefficients are already
+integers) gives the Chv\'atal cut $x_1 + x_2 \leq 3$.  Adding it, the LP
+relaxation now has optimal value exactly $3$, attained at an integer point
+such as $(0, 3)$, so the problem is solved at the root node with no
+branching.
+\end{solution}
 
 % [subfiles residue, disabled 2026-07-31] \end{document}
