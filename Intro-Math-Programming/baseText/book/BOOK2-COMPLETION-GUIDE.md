@@ -207,3 +207,30 @@ filter-repo, force-push, GitHub Support GC).
 | Parked ideas (quizzes, games) | `book/FUTURE-IDEAS.md` |
 | History purge script | `scripts/purge-history.sh` |
 | Audit reports (local only) | `NON-DISTRIBUTABLE/audit-reports/` |
+
+---
+
+## Update 2026-07-31
+
+**Phase 0 debts: RESOLVED** (commit `f6c72ad`): JSSP ported with original
+data + Manne citation; Mosek cookbook cited as further reading; GAP section
+attributed to Wikipedia (CC BY-SA) with link stubs repaired; original 2-opt
+TikZ figure replaces the borrowed/broken images; LyryxOpenTexts removed from
+book2-main and sources-attribution added to its back matter; Cheung license
+header comment fixed.
+
+**New Part V: Integrative Projects** (`part5-projects/`, skeletons):
+capstone chapters on (1) last-mile delivery at scale (heuristics + LP/
+Lagrangian bounds + column generation), (2) crew/shift scheduling by column
+generation, (3) optimization in machine learning (SGD/Adam as Ch.18 methods,
+hyperparameter search as heuristics, predict-then-optimize, scale of
+LLM training). Each needs: data generators, starter notebooks, rubrics.
+
+**Full content inventory** (2026-07-31) lives in
+`NON-DISTRIBUTABLE/internal-docs/BOOK2-INVENTORY-2026-07-31.md`. Highlights:
+ch12 solvers is a stub; ch14 has a pasted "2.2" heading; ch17-18 are ~50%
+drafts (ch18 holds three chapters incl. an EMPTY Fairness chapter -
+decide); GradientMethods is an unintegrated Foundations lab; exercises are
+essentially absent outside ch11; zero fig-num-auto numbering in Book 2
+chapters; book2-main prints \listoftodos (fine while drafting, remove for
+release); subfiles preambles still live in ch11-15 files.
