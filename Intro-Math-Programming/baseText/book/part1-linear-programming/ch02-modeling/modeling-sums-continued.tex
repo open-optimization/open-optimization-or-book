@@ -276,7 +276,7 @@ V = \{ a, b, c, d, e, f, g, h \}
 \]
 The set of directed arcs is:
 \[
-A = \{ (b,a), (a,c), (b,d), (b,e), (c,e), (c,f), (h,d), (g,e), (e,h), (g,f) \}
+A = \{ (b,a), (a,c), (d,b), (b,e), (c,e), (c,f), (h,d), (g,e), (e,h), (g,f) \}
 \]
 \begin{center}
 \begin{tikzpicture}[>=stealth, node distance=3cm]
@@ -459,7 +459,7 @@ The network includes:
 \smallskip \modelhead{Sets and Parameters}
 \begin{itemize}
     \item \( V = \{s, a, b, c, d, e, t\} \): set of airports.
-    \item \( A = \{(s,a), (s,b), (s,c), (a,c), (a,d), (b,c), (b,e), (c,d), (c,e), (c,t), (d,e), (e,t)\} \): set of flight legs.
+    \item \( A = \{(s,a), (s,b), (s,c), (a,c), (a,d), (b,c), (b,e), (c,d), (c,e), (c,t), (d,t), (e,t)\} \): set of flight legs.
     \item \( u_{ij} \): number of available seats on flight from airport \( i \) to \( j \) for all $(i,j) \in A$.
 \end{itemize}
 
@@ -473,12 +473,12 @@ The network includes:
 & x_{ac} + x_{ad} - x_{sa} = 0 & \text{(flow balance at \( a \))} \\
 & x_{bc} + x_{be} - x_{sb} = 0 & \text{(at \( b \))} \\
 & x_{cd} + x_{ce} + x_{ct} - x_{ac} - x_{bc} - x_{sc} = 0 & \text{(at \( c \))} \\
-& x_{de} - x_{ad} - x_{cd} = 0 & \text{(at \( d \))} \\
-& x_{et} - x_{be} - x_{ce} - x_{de} = 0 & \text{(at \( e \))} \\
+& x_{dt} - x_{ad} - x_{cd} = 0 & \text{(at \( d \))} \\
+& x_{et} - x_{be} - x_{ce} = 0 & \text{(at \( e \))} \\
 & 0 \leq x_{sa} \leq 4,\quad 0 \leq x_{sb} \leq 2,\quad 0 \leq x_{sc} \leq 8 & \text{(available seats on initial flights)} \\
 & 0 \leq x_{ac} \leq 5,\quad 0 \leq x_{ad} \leq 2,\quad 0 \leq x_{bc} \leq 6,\quad 0 \leq x_{be} \leq 9 \\
-& 0 \leq x_{cd} \leq 1,\quad 0 \leq x_{ce} \leq 3,\quad 0 \leq x_{ct} \leq 4 \\
-& 0 \leq x_{de} \leq 7,\quad 0 \leq x_{et} \leq 5
+& 0 \leq x_{cd} \leq 1,\quad 0 \leq x_{ce} \leq 6,\quad 0 \leq x_{ct} \leq 4 \\
+& 0 \leq x_{dt} \leq 7,\quad 0 \leq x_{et} \leq 5
 \end{align*}
 In compact summation notation form,  we have
 
@@ -745,7 +745,7 @@ The two figures below show the input network (left) and the optimal flow assignm
   \node[draw=black, fill=white, rectangle, font=\scriptsize, inner sep=2pt] at (3.5,-0.9) {$10,\,5$};
 
   % Arcs with shared capacities
-  \draw[->, thick] (n3) -- (n1) node[midway, sloped, above, font=\scriptsize, fill=none, draw=none, rectangle] {15};
+  \draw[->, thick] (n1) -- (n3) node[midway, sloped, above, font=\scriptsize, fill=none, draw=none, rectangle] {15};
   \draw[->, thick] (n1) -- (n2) node[midway, above, font=\scriptsize, fill=none, draw=none, rectangle] {20};
   \draw[->, thick] (n2) -- (n4) node[midway, sloped, above, font=\scriptsize, fill=none, draw=none, rectangle] {25};
   \draw[->, thick] (n3) -- (n4) node[midway, sloped, above, font=\scriptsize, fill=none, draw=none, rectangle] {20};
@@ -774,10 +774,10 @@ The two figures below show the input network (left) and the optimal flow assignm
   \node[draw=black, fill=white, rectangle, font=\scriptsize, inner sep=2pt] at (3.5,-0.9) {$[10,\,5]$};
 
   % Arcs with optimal commodity flows [f_{ij1}, f_{ij2}]
-  \draw[->, thick] (n3) -- (n1) node[midway, sloped, above, font=\scriptsize, fill=none, draw=none, rectangle] {$[5.0,\,5.0]$};
+  \draw[->, thick] (n1) -- (n3) node[midway, sloped, above, font=\scriptsize, fill=none, draw=none, rectangle] {$[0.0,\,5.0]$};
   \draw[->, thick] (n1) -- (n2) node[midway, above, font=\scriptsize, fill=none, draw=none, rectangle] {$[10.0,\,0.0]$};
   \draw[->, thick] (n2) -- (n4) node[midway, sloped, above, font=\scriptsize, fill=none, draw=none, rectangle] {$[10.0,\,0.0]$};
-  \draw[->, thick] (n3) -- (n4) node[midway, sloped, above, font=\scriptsize, fill=none, draw=none, rectangle] {$[-0.0,\,5.0]$};
+  \draw[->, thick] (n3) -- (n4) node[midway, sloped, above, font=\scriptsize, fill=none, draw=none, rectangle] {$[0.0,\,5.0]$};
 \end{tikzpicture}
 \captionof{figure}{Solution to multi-commodity network flow: each arc is labelled with the optimal flow of each commodity $[f_{ij1}, f_{ij2}]$.}
 \label{fig:multi-network-flow-solution.png}
