@@ -107,8 +107,8 @@ These variables could represent amounts of products to produce, resources to all
 Parameters are the given data in the problem, which are assumed to be known in advance:
 \begin{itemize}
     \item $c_i$: Cost coefficients for each decision variable, $\forall i = 1,\dots,n$. These values represent the contribution of each variable to the objective function.
-    \item $a_{ij}$: Constraint coefficients, $\forall i = 1,\dots,n$ and $j = 1,\dots,m$. These define the relationships between decision variables and the constraints.
-    \item $b_j$: Right-hand side values of the constraints, $\forall j = 1,\dots,m$. These represent limits or requirements for each constraint.
+    \item $a_{ij}$: Constraint coefficients, $\forall i = 1,\dots,m$ and $j = 1,\dots,n$. The first index $i$ identifies the constraint and the second index $j$ identifies the variable; $a_{ij}$ is the coefficient of $x_j$ in constraint $i$.
+    \item $b_i$: Right-hand side values of the constraints, $\forall i = 1,\dots,m$. These represent limits or requirements for each constraint.
 \end{itemize}
 
 The general form of a linear program can be written as follows:
@@ -143,8 +143,8 @@ $x_i$: Continuous variables ($x_i \in \mathbb{R}$, i.e., a real number), $\foral
 \smallskip \modelhead{Parameters}\\
 \begin{itemize}
     \item $c_i$: Cost coefficients, $\forall i = 1,\dots,3$.
-    \item $a_{ij}$: Constraint coefficients, $\forall i = 1,\dots,3$ and $j = 1,\dots,4$.
-    \item $b_j$: Right-hand side values for each constraint, $\forall j = 1,\dots,4$.
+    \item $a_{ij}$: Constraint coefficients, $\forall i = 1,\dots,4$ and $j = 1,\dots,3$ ($a_{ij}$ is the coefficient of $x_j$ in constraint $i$).
+    \item $b_i$: Right-hand side values for each constraint, $\forall i = 1,\dots,4$.
 \end{itemize}
 
 \smallskip \modelhead{Model}
@@ -175,9 +175,9 @@ Linear functions are characterized by their simplicity and additivity, making th
 When we wrote down the model in Example \ref{ex:ScreenPrint}, we quietly made four modeling assumptions.  They are worth stating out loud, because they tell you when a linear program is the right tool and when it is not.
 
 \begin{description}
-\item[Proportionality] Doubling a variable doubles its effect.  If one t-shirt earns \$8 and consumes 15 minutes of press time, then 50 shirts earn \$400 and consume 750 minutes.  No quantity discounts, no economies of scale, no setup costs: every unit behaves like the first one.
+\item[Proportionality] Doubling a variable doubles its effect.  If one t-shirt earns \$10 and consumes 2 hours of press time, then 50 shirts earn \$500 and consume 100 hours.  No quantity discounts, no economies of scale, no setup costs: every unit behaves like the first one.
 
-\item[Additivity] Effects add up across variables, with no interactions.  The press time used by t-shirts and the press time used by posters simply sum; producing one product does not make another product cheaper, more profitable, or harder to make.
+\item[Additivity] Effects add up across variables, with no interactions.  The press time used by t-shirts and the press time used by tote bags simply sum; producing one product does not make another product cheaper, more profitable, or harder to make.
 
 \item[Divisibility] Variables may take fractional values.  The model is allowed to recommend printing half a shirt, whether or not that makes physical sense.
 
@@ -495,7 +495,7 @@ In Iraq, the tool cut operating costs by 17 percent, and the resulting food bask
 
 \subsection*{References}
 \begin{itemize}
-\item K. Peters, S. Silva, R. Gon$\c{c}$alves, M. Kavelj, H. Fleuren, D. den Hertog, O. Ergun, M. Freeman. ``The Nutritious Supply Chain: Optimizing Humanitarian Food Assistance.'' \emph{INFORMS Journal on Optimization} 3(2), 200--226, 2021. \url{https://doi.org/10.1287/ijoo.2019.0047}
+\item K. Peters, S. Silva, R. Gon\origcedilla{c}alves, M. Kavelj, H. Fleuren, D. den Hertog, O. Ergun, M. Freeman. ``The Nutritious Supply Chain: Optimizing Humanitarian Food Assistance.'' \emph{INFORMS Journal on Optimization} 3(2), 200--226, 2021. \url{https://doi.org/10.1287/ijoo.2019.0047}
 \end{itemize}
 \end{casestudybox}
 
@@ -552,6 +552,8 @@ LP Burger has changed its policy, and allows, at most, two part-time workers, wh
 \modelhead{Variables} \\
 $x_i$ : the number of workers that start 5 consecutive days of work on day $i$, $ i = 1,\cdots,7$ \\
 $y_i$ : the number of workers that start 2 consecutive days of work on day $i$, $ i = 1,\cdots,7$.
+
+Unlike the original LP Burger model, which minimizes the number of workers hired, here we minimize total \emph{worker-days}: each full-time worker contributes 5 days and each part-time worker 2 days. (Minimizing the head count $\sum_i x_i + \sum_i y_i$ would be a reasonable alternative objective.)
 
 \smallskip \modelhead{Model}
 \begin{align*}

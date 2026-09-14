@@ -189,3 +189,19 @@ Reader-reported issues and their fixes, now part of the pipeline:
 | `tools/fix-epub.py`, `tools/add-cover.py`, `tools/add-alt-text.py`, `tools/build-alt-map.py` | post-processing |
 | `src/`, `figs/`, `figs-conv/` | generated (safe to delete and rebuild) |
 | `book1-epub.epub` | the product |
+
+
+## Rebuild gotchas (2026-09-14)
+
+- **Stale snippet PNGs:** `extract-tikz-all.py compile` skips any snippet
+  whose PNG already exists, even when `snippets` just rewrote its `.tex`
+  after source edits. After editing chapters, run
+  `git status epub-build/figs` and delete the PNG/PDF of every modified
+  snippet before running `compile`.
+- **gen-figure-spreadsheet.py** takes three arguments:
+  `<unzipped-epub-dir> <template.xlsx> <out.xlsx>`.
+- `dvipng` and `tidy` being absent is non-fatal: step 6 renders the
+  picture-environment images and `fix-epub.py` repacks the zip.
+- The `\dijkstra` macro-body tikzpicture (graphtheory tikz15) cannot
+  compile standalone (`#n` parameters) and gets a gray placeholder in the
+  EPUB; the PDF edition renders it normally.
